@@ -1,0 +1,32 @@
+/* Same backdrop language as the hero preview: misty grey field, light panel. Sized in em (1em = width / 48). */
+.stage {
+  container-type: inline-size;
+  position: relative; display: grid; place-items: center;
+  aspect-ratio: 1.3 / 1; border-radius: 4px; overflow: hidden;
+  background:
+    radial-gradient(70% 55% at 15% 105%, rgba(70, 72, 76, 0.5), transparent 70%),
+    radial-gradient(60% 50% at 95% 100%, rgba(80, 82, 86, 0.4), transparent 70%),
+    linear-gradient(180deg, #e2e2e2 0%, #d0d0d0 45%, #b5b5b5 100%);
+  font-family: "Inter", "Host Grotesk", sans-serif; color: #17181b;
+}
+.panel {
+  font-size: calc(100cqw / 48);
+  width: 84%; display: flex; flex-direction: column;
+  background: #f7f7f8; border-radius: 0.7em; padding: 1.1em 1.1em 0.9em;
+  box-shadow: 0 1.4em 3em rgba(0, 0, 0, 0.22);
+}
+.head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8em; }
+.title { font-size: 1.05em; font-weight: 600; }
+.tag { font-size: 0.7em; padding: 0.2em 0.65em; border-radius: 999px; background: #ececee; color: #6b6f76; }
+.row { display: flex; flex-direction: column; gap: 0.45em; padding: 0.75em 0.85em; margin-bottom: 0.5em; background: #fff; border: 0.06em solid #e6e7ea; border-radius: 0.5em; }
+.msg { display: flex; flex-direction: column; gap: 0.15em; }
+.subject { font-size: 0.9em; font-weight: 600; }
+.from { font-size: 0.7em; color: #8a8d93; }
+.verdict { display: flex; flex-direction: column; gap: 0.2em; padding-top: 0.45em; border-top: 0.06em solid #f0f0f2; }
+.code { align-self: flex-start; font-family: "JetBrains Mono", monospace; font-size: 0.68em; padding: 0.2em 0.55em; border-radius: 0.3em; }
+.refused { color: #c81e3a; background: #fdeef1; }
+.paid { color: #15803d; background: #ecfdf3; }
+.note { font-size: 0.72em; color: #55585e; }
+.foot { display: flex; justify-content: space-between; align-items: center; padding: 0.4em 0.2em 0; font-size: 0.75em; color: #6b6f76; }
+.foot code { font-family: "JetBrains Mono", monospace; color: #17181b; background: none; padding: 0; font-size: 1em; }
+@container (max-width: 420px) { .panel { font-size: calc(100cqw / 34); width: 90%; } .row:nth-child(3) { display: none; } }

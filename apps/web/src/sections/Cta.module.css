@@ -1,0 +1,165 @@
+/* CTA section wg1f6L0lW (desktop base; Tablet uX81zskxr…, Phone Ue6QXWSr_… overrides below) */
+.section {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: 72px 0px 48px 0px;
+  border-radius: 2px;
+  scroll-margin-top: 40px;
+}
+
+/* Dots UbeG5R_si: absolute, right 0, bottom 0, 920×780, overflow hidden, z-index 0 (loop opacity on this wrapper) */
+.dotsWrap {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 920px;
+  height: 780px;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+.section .dots {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+
+/* Container NNQSb_SQE: fill Elevation Strong, vertical, gap 32, padding 40, radius 4, overflow hidden, width 1fr, height 1fr */
+.container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 32px;
+  padding: 40px;
+  flex: 1 1 0px;
+  min-width: 0;
+  align-self: stretch;
+  height: auto;
+  background: var(--elevation-strong);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Content suJR2NcRR: vertical, gap 32, maxWidth 400, width 1fr */
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 32px;
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+}
+
+/* Text BRU8DvWwL: vertical, gap 16, overflow hidden, width 1fr */
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 16px;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+/* Tag Nn80ibhlK: dropped in the refill (doc A12 gives the band no eyebrow) */
+
+/* Title MaZw4lhc4: H2, width 1fr, balanced lines */
+.title {
+  width: 100%;
+  text-wrap: balance;
+}
+/* Description xIbU1OoBi: Body Large, width 1fr */
+.description {
+  width: 100%;
+}
+
+/* Button slot wLiY5ZCHM → Closing: two buttons in a row (gap 8, wrap) + the small line under them (always shown) */
+.doors {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+.actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+  width: auto;
+}
+.small {
+  width: 100%;
+  color: var(--text-weak);
+}
+
+/* Image fsOvCUx92: 480×360, radius 4, fill cta-image.png (cover, centered) */
+.image {
+  position: relative;
+  flex: 0 0 auto;
+  width: 480px;
+  height: 360px;
+  border-radius: 4px;
+  background-image: url("/assets/cta-image.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ---------- Tablet uX81zskxrwg1f6L0lW ---------- */
+@media (max-width: 1199.98px) {
+  .section {
+    padding: 72px 24px 48px 24px;
+  }
+  /* Container: height auto */
+  .container {
+    align-self: auto;
+    height: auto;
+  }
+  /* Image: width 1fr, height 1fr, aspectRatio removed */
+  .image {
+    flex: 1 1 0px;
+    min-width: 0;
+    width: auto;
+    height: auto;
+    align-self: stretch;
+    aspect-ratio: auto;
+  }
+}
+
+/* ---------- Phone Ue6QXWSr_wg1f6L0lW ---------- */
+@media (max-width: 809.98px) {
+  .section {
+    flex-direction: column;
+    padding: 72px 16px 48px 16px;
+  }
+  /* Image comes first on Phone (order Dots → Image → Container); width 1fr → height from aspectRatio 1.33 */
+  .image {
+    order: -1;
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    align-self: auto;
+    aspect-ratio: 1.33;
+  }
+  /* Container: height auto, padding 20, width 1fr */
+  .container {
+    flex: 0 0 auto;
+    width: 100%;
+    padding: 20px;
+  }
+  /* Description: hard line break removed on Phone */
+  .br {
+    display: none;
+  }
+}

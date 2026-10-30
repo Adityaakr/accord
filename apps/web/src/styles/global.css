@@ -1,0 +1,172 @@
+@import "./tokens.css";
+
+/* ---------- Reset (mirrors Framer's runtime defaults) ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; background: var(--background); }
+body {
+  background: var(--background);
+  color: var(--text-strong);
+  font-family: "Host Grotesk", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+h1, h2, h3, h4, h5, h6, p { margin: 0; font-weight: inherit; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+img { display: block; max-width: 100%; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+input, textarea, select { font: inherit; }
+
+/* ---------- Text style presets (ids = Framer TextStylePresetNode ids) ----------
+   H1 IXvLG8J6p · H2 V4a6qjpM2 · H3 cHgOnkB6N · H4 qtCKPWAzU · H5 AGwqkS8yv · H6 mc7iekM0c
+   Link fqtZzlFtC · Body Large nBG6kvhVn · Body Small pWARBbc57
+   Legacy duplicates: QUICzUzBW (H2 @32px) · wMUPiBwyH (H3 @24px) · voUer6kcu (H1 @38px) */
+.t-h1, .t-h2, .t-h3, .t-h4, .t-h5, .t-h6 {
+  font-family: "Host Grotesk", sans-serif;
+  line-height: 110%;
+  letter-spacing: -0.04em;
+  color: var(--text-strong);
+}
+.t-h1 { font-weight: 400; font-size: 48px; }
+.t-h2 { font-weight: 400; font-size: 38px; }
+.t-h3 { font-weight: 400; font-size: 32px; }
+.t-h4 { font-weight: 500; font-size: 24px; }
+.t-h5 { font-weight: 500; font-size: 18px; }
+.t-h6 { font-weight: 500; font-size: 16px; }
+.t-h2-32 { font-weight: 400; font-size: 32px; }  /* QUICzUzBW */
+.t-h3-24 { font-weight: 400; font-size: 24px; }  /* wMUPiBwyH */
+.t-h1-38 { font-weight: 400; font-size: 38px; }  /* voUer6kcu */
+.t-h2-32, .t-h3-24, .t-h1-38 { font-family: "Host Grotesk", sans-serif; line-height: 110%; letter-spacing: -0.04em; color: var(--text-strong); }
+
+.t-link {
+  font-family: "Host Grotesk", sans-serif;
+  font-weight: 500; font-size: 14px; line-height: 120%; letter-spacing: -0.02em;
+  color: var(--on-white);
+}
+.t-body-lg {
+  font-family: "Host Grotesk", sans-serif;
+  font-weight: 400; font-size: 16px; line-height: 150%; letter-spacing: -0.02em;
+  color: var(--text-medium);
+}
+.t-body-sm {
+  font-family: "Host Grotesk", sans-serif;
+  font-weight: 400; font-size: 14px; line-height: 150%; letter-spacing: -0.02em;
+  color: var(--text-medium);
+}
+/* Preset breakpoints (Framer "medium" slots) */
+@media (max-width: 1199.98px) {
+  .t-h2 { font-size: 32px; }
+  .t-h3 { font-size: 24px; }
+}
+@media (max-width: 809.98px) {
+  .t-h1 { font-size: 38px; }
+}
+
+/* ---------- Link style presets ----------
+   HNT3wvBos "Link": Text Medium → hover Text Strong
+   FTn6Ho50C "Link inline": same + underline */
+.ls-link { color: var(--text-medium); transition: color 0.2s ease; }
+.ls-link:hover { color: var(--text-strong); }
+.ls-link-inline { color: var(--text-medium); text-decoration: underline; transition: color 0.2s ease; }
+.ls-link-inline:hover { color: var(--text-strong); }
+
+/* ---------- Content additions (brief §6): monospace, refusal red, tables, footnotes ---------- */
+:root {
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --refusal: rgb(255, 34, 68);              /* only for a refusal, a canary trip, a revocation */
+  --refusal-bg: rgba(255, 34, 68, 0.15);
+  --hairline: rgba(255, 255, 255, 0.08);
+  /* Theme plumbing: --ink-rgb is the foreground channel for every translucent line or wash;
+     --on-white is text set on the inverse surface (var(--white)); --on-accent is text on an accent fill. */
+  --ink-rgb: 255, 255, 255;
+  --on-white: rgb(8, 9, 10);
+  --on-accent: rgb(8, 10, 9);
+  --h1-sheen-a: #ffffff;
+  --h1-sheen-b: #b9bec5;
+  color-scheme: dark;
+}
+/* ---------- Light theme (toggle in the nav; stored per visitor) ---------- */
+:root[data-theme="light"] {
+  --token-16f611a0-10c0-49b1-98b2-1a599986ff2e: rgb(246, 246, 244); /* Background */
+  --token-8c339a8e-efec-400b-a87f-40a292101076: rgb(255, 255, 255); /* Elevation Strong */
+  --token-ad0e5630-4fcd-4e6f-a643-3c63e11b8ed6: rgb(239, 239, 237); /* Elevation Medium */
+  --token-03d079c3-6dd0-4171-9717-4f5a9d769b77: rgb(224, 224, 221); /* Elevation Weak */
+  --token-1ef9e3a0-a7df-44ca-bec3-2c6070b20405: rgb(14, 15, 17);     /* Text Strong */
+  --token-7a4abf4f-f022-4317-96d1-4d64f8c7d124: rgba(14, 15, 17, 0.78); /* Text Medium */
+  --token-b2053b36-5d12-43b8-aed4-e0c7e448eba2: rgba(14, 15, 17, 0.62); /* Text Weak */
+  --token-cecf886f-35d1-4207-a045-acf7164ed7a9: rgb(17, 18, 20);     /* "White": the inverse surface */
+  --token-d3ad1a85-5cfb-4d75-889e-ca3d50af2039: rgb(36, 133, 102);   /* Teal, deepened for contrast on white */
+  --refusal: rgb(208, 20, 54);
+  --refusal-bg: rgba(208, 20, 54, 0.1);
+  --hairline: rgba(14, 15, 17, 0.1);
+  --ink-rgb: 14, 15, 17;
+  --on-white: #ffffff;
+  --on-accent: #ffffff;
+  --h1-sheen-a: rgb(14, 15, 17);
+  --h1-sheen-b: rgb(92, 98, 106);
+  color-scheme: light;
+}
+.mono {
+  font-family: var(--mono);
+  font-size: 0.92em;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+code.mono { padding: 1px 6px; border-radius: 4px; background: var(--elevation-medium); color: var(--text-strong); white-space: nowrap; }
+.mono-refusal, code.mono.mono-refusal, pre.mono.mono-refusal { color: var(--refusal); background: var(--refusal-bg); }
+.mono-block {
+  display: block; width: 100%; margin: 0; padding: 20px 24px;
+  border-radius: 4px; background: var(--elevation-strong); color: var(--text-strong);
+  font-size: 14px; line-height: 160%; white-space: pre; overflow-x: auto;
+}
+.ref { color: var(--text-weak); font-size: 0.75em; vertical-align: super; line-height: 0; margin-left: 2px; text-decoration: none; }
+.ref:hover { color: var(--text-strong); }
+
+/* Plain full-width tables with monospace numbers; scroll horizontally inside their container on phone */
+.table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table { width: 100%; border-collapse: collapse; text-align: left; }
+.table th, .table td { padding: 14px 16px; vertical-align: top; border-bottom: 1px solid var(--hairline); }
+.table th { font-family: "Host Grotesk", sans-serif; font-weight: 500; font-size: 14px; line-height: 120%; letter-spacing: -0.02em; color: var(--text-strong); white-space: nowrap; }
+.table td { font-family: "Host Grotesk", sans-serif; font-weight: 400; font-size: 14px; line-height: 150%; letter-spacing: -0.02em; color: var(--text-medium); }
+.table td:first-child { color: var(--text-strong); }
+.table-dense th, .table-dense td { padding: 10px 12px; font-size: 13px; }
+@media (max-width: 809.98px) { .table { min-width: 720px; } }
+
+/* ---------- Layout primitives (Framer stack semantics) ---------- */
+/* A page section: direct child of the breakpoint, width 1fr, max-width 1080, centered */
+.section {
+  position: relative;
+  width: 100%;
+  max-width: var(--content-max);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.stack-v { display: flex; flex-direction: column; }
+.stack-h { display: flex; flex-direction: row; }
+.fill { flex: 1 1 0px; min-width: 0; }      /* width/height: 1fr along the main axis */
+.w-full { width: 100%; }                     /* width: 1fr inside a vertical stack */
+
+/* ---------- Interaction (spec §1.7): hover rings, focus, reduced motion ---------- */
+/* Card surfaces take a 1px inset ring (White at 30%) over 120ms; the ring is an inset box-shadow so no layout shifts.
+   Each card's .module.css carries its own rule; this block holds what is global. */
+
+/* Keyboard focus: one visible ring on every focusable element (buttons, links, the stepper's steps) */
+:focus-visible {
+  outline: 2px solid rgba(var(--ink-rgb), 0.5);
+  outline-offset: 3px;
+}
+
+/* Reduced motion: no transforms or transitions move; content never depends on motion.
+   Appear-animated elements (motion/react, initial opacity 0 → whileInView 1) still reach opacity 1 because
+   the in-view animation completes regardless of these durations. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

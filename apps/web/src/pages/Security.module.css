@@ -1,0 +1,96 @@
+/* Security page (/security): PageHero (the 404 page Main shell) + one content section of stacked blocks in the
+   template's table style. Page gap 48 (Desktop) / 0; section padding 72px 0 (Tablet 72px 24px, Phone 72px 16px). */
+
+.page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+}
+
+/* Section (elementId "trust"): vertical stack of blocks, gap 48, padding 72px 0, width 1fr (max 1080 from .section) */
+.main {
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 48px;
+  padding: 72px 0px;
+  scroll-margin-top: 40px;
+}
+.block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+}
+.subheading {
+  width: 100%;
+  text-wrap: balance;
+}
+
+/* "What we do not claim": template bullet list (8px marker, 19px indent), at the lead width */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 720px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.item {
+  position: relative;
+  padding-left: 19px;
+}
+.item::before {
+  content: "\2022";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 8px;
+  text-align: center;
+  color: var(--text-strong);
+}
+
+/* Reporter limitation: H6 label over a Body Large paragraph, at the lead width */
+.note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 720px;
+}
+.label,
+.noteText {
+  width: 100%;
+}
+
+/* Closing button (Hero a7cb5w_zG): horizontal, gap 8, wraps */
+.actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+  width: auto;
+}
+
+/* Tablet */
+@media (max-width: 1199.98px) {
+  .page { gap: 0; }
+  .main {
+    gap: 40px;
+    padding: 72px 24px;
+  }
+}
+
+/* Phone: 16px gutters; tables scroll inside .table-wrap (global .table min-width 720) */
+@media (max-width: 809.98px) {
+  .main {
+    gap: 32px;
+    padding: 72px 16px;
+  }
+}

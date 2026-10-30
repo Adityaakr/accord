@@ -1,0 +1,74 @@
+/* Form Button LfcphVkGA: Default variant HNaGSL8BR */
+.button {
+  position: relative;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--white);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.button:disabled {
+  cursor: default;
+}
+
+/* Label Xz_H6Vb95: Link preset, user-select none */
+.label {
+  display: block;
+  width: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* Error variant G87fQHscc label override */
+.labelError {
+  color: rgb(255, 34, 68);
+}
+
+/* Spinner kE1HkNSa3: 20×20, overflow hidden, alpha mask (ring). The original "Spinner Mask.svg" is a private
+   asset; reproduced as a 2px ring (outer r 10, inner r 8) from the 2×2 "Rounding" cap. */
+.spinner {
+  position: relative;
+  display: block;
+  width: 20px;
+  height: 20px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  flex: 0 0 auto;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 7.5px, #000 8.25px, #000 9.75px, transparent 10.5px);
+  mask-image: radial-gradient(circle at 50% 50%, transparent 7.5px, #000 8.25px, #000 9.75px, transparent 10.5px);
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+/* Conic PBEZRcR1P: 20×20 pinned right 0 / bottom 0, conic fill, rotates 360° per 1s (linear, loop) */
+.conic {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: block;
+  width: 20px;
+  height: 20px;
+  background: conic-gradient(from 0deg at 50% 50%, rgb(0, 0, 0) 7.208614864864882deg, rgba(0, 0, 0, 0.7) 342deg);
+  will-change: transform;
+}
+/* Rounding H3ogQFFH2: 2×2, radius 1px, fill Text Strong (no pins → top-left) */
+.rounding {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 2px;
+  height: 2px;
+  aspect-ratio: 1;
+  border-radius: 1px;
+  background: var(--text-strong);
+}

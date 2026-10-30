@@ -1,0 +1,47 @@
+/* Showcase accordion (BLTyZCJu2): Open llbCLxNDL / Closed lHa8E18Lj / Closed hover uzCG_TomN */
+.root {
+  position: relative;
+  width: 100%;              /* component default 528px; every instance overrides width: 1fr */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 20px 32px 20px 20px;
+  border-radius: 4px;
+  background: var(--token-8c339a8e-efec-400b-a87f-40a292101076); /* Elevation Strong */
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  /* variant transition: tween 0.4s [0.12,0.23,0.5,1] */
+  transition: padding-top 0.4s cubic-bezier(0.12, 0.23, 0.5, 1);
+}
+.root:focus-visible { outline: 2px solid var(--token-bfafb4ac-ba8a-4bd0-a2da-5f8ec6eb534b); outline-offset: 2px; }
+.open { padding-top: 24px; }
+.closed { padding-top: 20px; }
+
+.heading {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.indicator {
+  flex: none;
+  width: 2px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--token-ad0e5630-4fcd-4e6f-a643-3c63e11b8ed6); /* Elevation Medium (Closed) */
+  transition: background-color 0.4s cubic-bezier(0.12, 0.23, 0.5, 1);
+}
+.closed:hover .indicator { background: var(--token-03d079c3-6dd0-4171-9717-4f5a9d769b77); } /* Elevation Weak (Closed hover) */
+.open .indicator { background: var(--token-bfafb4ac-ba8a-4bd0-a2da-5f8ec6eb534b); }          /* Green (Open) */
+
+.title { flex: 1 1 0px; min-width: 0; }
+
+.descriptionWrap { width: 100%; overflow: hidden; }
+.description { width: 100%; }
+/* Added: "What the other side sees" line under the description (Body Small, text-weak) */
+.aside { width: 100%; margin-top: 8px; color: var(--text-weak); }

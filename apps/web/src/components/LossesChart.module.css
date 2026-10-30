@@ -1,0 +1,33 @@
+.chart { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 100%; max-width: 480px; }
+.frame { position: relative; width: 100%; }
+.svg { display: block; width: 100%; height: auto; overflow: visible; font-family: var(--mono); }
+.grid { stroke: rgba(var(--ink-rgb), 0.12); stroke-width: 1; }
+.tick, .year { font-size: 10.5px; fill: rgba(var(--ink-rgb), 0.56); }
+.value { font-size: 11px; fill: rgba(var(--ink-rgb), 0.56); }
+.bar { fill: rgba(var(--ink-rgb), 0.32); transition: fill 120ms ease; }
+.latest .bar { fill: var(--text-strong); }
+.latest .year, .latest .value { fill: var(--text-strong); font-weight: 500; }
+.col { cursor: default; outline: none; }
+.col.on .bar { fill: rgba(var(--ink-rgb), 0.6); }
+.latest.on .bar { fill: var(--text-strong); }
+.col:focus-visible .bar { stroke: var(--teal); stroke-width: 1.5; }
+
+.tip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--elevation-weak);
+  color: var(--text-strong);
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.toggle { color: var(--text-weak); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(var(--ink-rgb), 0.3); transition: color 0.2s ease; }
+.toggle:hover { color: var(--text-strong); }
+.table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.table th { text-align: left; font-weight: 500; color: var(--text-strong); padding: 6px 0; border-bottom: 1px solid var(--hairline); }
+.table td { color: var(--text-medium); padding: 6px 0; border-bottom: 1px solid var(--hairline); }
+@media (prefers-reduced-motion: reduce) { .bar { transition: none; } }

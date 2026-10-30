@@ -1,0 +1,399 @@
+/* Security demonstration (#security-demo): About-style image row, then the demo-agent module (form card + the two record panels).
+   Template section rhythm; the row values are copied from About.module.css (Section y_CVc9JIP); form fields reuse the Contact page values. */
+.section {
+  position: relative;
+  gap: 64px;
+  padding: 72px 0;
+  justify-content: center;
+  scroll-margin-top: 40px;
+}
+
+.weak { color: var(--text-weak); }
+.sep { color: var(--text-weak); }
+
+/* ---------- The image row (About Section y_CVc9JIP: horizontal, gap 64, align+distribute center, overflow hidden, width 1fr) ---------- */
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 64px;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Image qn2QatAHO: width 1fr, aspect-ratio 1.3 (canvas height 390), radius 4, image fill cover */
+.image {
+  flex: 1 1 0px;
+  min-width: 0;
+  aspect-ratio: 1.3 / 1;
+  border-radius: 4px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.imageWrap { flex: 1 1 0px; min-width: 0; }
+
+/* Content Tq_ckVkQX: vertical, gap 24, align start, width 1fr */
+.content {
+  flex: 1 1 0px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+}
+
+/* Text mNIMgn_Xu: vertical, gap 12, width 1fr, max-width 400 */
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+.title, .description { width: 100%; }
+.title { text-wrap: balance; }
+
+/* ---------- The module: the form card, then the record ---------- */
+.module {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 32px;
+  width: 100%;
+}
+
+/* ---------- The form card ---------- */
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 32px;
+  width: 100%;
+  padding: 32px 24px 40px 24px;
+  border-radius: 4px;
+  background: var(--elevation-strong);
+  overflow: hidden;
+}
+
+/* Form: values from the Contact page template (Form EA0JgLfRv) */
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 20px;
+  width: 100%;
+  height: auto;
+}
+/* From / Subject on one line (two equal columns, gap 16); Message takes the full width below */
+.fields {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+  height: auto;
+}
+.fields .field {
+  flex: 1 1 0px;
+  min-width: 0;
+  width: auto;
+}
+.fieldLabel { width: auto; }
+/* FormPlainTextInputNode: fill Elevation Medium, Host Grotesk 16px 400, line-height 1.2em, Text Strong,
+   placeholder Text Weak, radius 12, padding 16, height 46. Transparent 1px border → Elevation Weak on focus. */
+.input {
+  display: block;
+  width: 100%;
+  height: 46px;
+  margin: 0;
+  padding: 15px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--elevation-medium);
+  color: var(--text-strong);
+  font-family: "Host Grotesk", sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.2em;
+  letter-spacing: 0em;
+  outline: none;
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.2s ease;
+}
+.input::placeholder {
+  color: var(--text-weak);
+  opacity: 1;
+}
+.input:focus,
+.input:focus-visible {
+  border-color: var(--elevation-weak);
+  outline: none;
+}
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.textarea {
+  height: auto;
+  min-height: 100px;
+  resize: vertical;
+}
+.submitRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+.submit { flex: 0 0 auto; }
+
+/* Result line: four mono chips (a polite live region) */
+.results {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.results code { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* ---------- The record: the D4 notice, then the two panels in template card style ---------- */
+.record {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+}
+.panels {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  width: 100%;
+  align-items: stretch;
+}
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  padding: 24px;
+  border-radius: 4px;
+  background: var(--elevation-strong);
+}
+.panelHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 37px; /* 21px Body Small line box + padding: both headers share one hairline height, hint or not */
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+.panelTitle { color: var(--text-strong); }
+.panelHint { color: var(--text-weak); line-height: 110%; } /* the H6 line box, so the baseline shift never grows the header */
+.panelId {
+  color: var(--text-weak);
+  line-height: 110%;
+  background: transparent;
+  padding: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 55%;
+}
+
+/* Four-state strip: mono; the current state in the template's white pill, the others text-weak */
+.states {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.panel .state {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--text-weak);
+  background: transparent;
+  border: 1px solid var(--hairline);
+}
+.panel .stateCurrent {
+  color: var(--on-white);
+  background: var(--white);
+  border-color: var(--white);
+}
+
+/* Rows with hairline dividers */
+.panelRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.panelRow:last-of-type { border-bottom: 0; padding-bottom: 0; }
+.rowLabel { color: var(--text-strong); font-weight: 500; }
+.terms, .lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.term {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+.panel .cell {
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
+  color: var(--text-medium);
+}
+.panel .wrapCell {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.empty { color: var(--text-weak); }
+.asOf { color: var(--text-weak); }
+
+/* Refusal log: newest first, live region */
+.log { padding-top: 16px; flex: 1 1 auto; }
+.logList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.logLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 13px;
+  line-height: 150%;
+}
+.logLine:last-child { border-bottom: 0; }
+.logTime { color: var(--text-weak); font-variant-numeric: tabular-nums; }
+.logFrom { color: var(--text-medium); overflow-wrap: anywhere; }
+.panel .logReason { white-space: normal; overflow-wrap: anywhere; }
+
+/* ---------- Form details: message footer, error, help lines ---------- */
+.textarea { height: 132px; min-height: 96px; resize: vertical; line-height: 150%; }
+.input:disabled { cursor: not-allowed; opacity: 0.55; }
+.form .input::placeholder { color: rgba(var(--ink-rgb), 0.36); }
+.fieldFoot { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; width: 100%; min-height: 21px; }
+.charCount { margin-left: auto; font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+.fieldError { color: var(--refusal); }
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+}
+
+/* ---------- Panel header meta (agreement id + time) ---------- */
+.panelMeta { display: flex; align-items: baseline; justify-content: flex-end; gap: 12px; min-width: 0; }
+.panelsSingle { grid-template-columns: 1fr; }
+
+/* ---------- Counters (spec §3.8): 12px muted labels above mono 20px values, side by side ---------- */
+.counters { padding: 16px 0; border-bottom: 1px solid var(--hairline); }
+.counterList { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0; }
+.counter {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 4px;
+  background: var(--elevation-medium);
+}
+.counterLabel { font-size: 12px; line-height: 130%; color: var(--text-weak); }
+.counterValue { margin: 0; }
+.panel .counterMono {
+  background: transparent;
+  padding: 0;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 120%;
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Refusal line parts ---------- */
+.panel .logCode { font-size: 12px; padding: 1px 6px; border-radius: 4px; }
+.logText { color: var(--text-medium); flex: 1 1 100%; }
+
+/* ---------- Tablet ---------- */
+@media (max-width: 1199.98px) {
+  .section {
+    gap: 48px;
+    padding: 72px 24px;
+  }
+}
+
+/* ---------- Phone ---------- */
+@media (max-width: 809.98px) {
+  .section {
+    gap: 32px;
+    padding: 72px 16px;
+  }
+  /* Phone row (Ue6QXWSr_y_CVc9JIP): vertical, gap 24; width 1fr inside a vertical stack → 100% */
+  .row {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .image,
+  .imageWrap,
+  .content {
+    flex: none;
+    width: 100%;
+  }
+  .module { gap: 24px; }
+  .card { padding: 24px 16px 32px 16px; gap: 24px; }
+  .form { gap: 16px; }
+  .fields { flex-direction: column; }
+  .fields .field {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+  /* Chips at the panel cells' 13px so the longest ("Last updated …") fits the card on one line */
+  .results code { font-size: 13px; }
+  .panels { grid-template-columns: 1fr; gap: 16px; }
+  .panel { padding: 20px; }
+  .panelId { max-width: 100%; }
+  .panelHead { flex-wrap: wrap; }
+  .panelMeta { width: 100%; justify-content: space-between; }
+  .counter { padding: 12px; }
+  .panel .counterMono { font-size: 18px; }
+}
+
+/* Honeypot: off-screen and out of the tab order, so no person sees or reaches it */
+.honeypot { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }

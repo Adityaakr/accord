@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 372" role="img" aria-label="What each party can read: the buyer and the vendor each read only their own mandate; the Sealed Table enclave reads both during the run and nothing persists; the public chain holds hashes of the mandates, the transcript and the terms document, and plaintext of the payment schedule, payments, refusals and the USDC transfers on NEAR." font-family="Satoshi, Manrope, system-ui, sans-serif" font-size="12" style="color:var(--fg,#e8edf2)">
+  <text x="40" y="30" font-size="11" letter-spacing="0.8" style="fill:var(--muted,#9aa7b4)">What each party can read</text>
+  <g font-weight="600" text-anchor="middle">
+    <text x="470" y="62" fill="currentColor">Buyer</text>
+    <text x="600" y="62" fill="currentColor">Vendor</text>
+    <text x="730" y="62" fill="currentColor">Sealed Table</text>
+    <text x="870" y="62" style="fill:var(--accent,#d8a84a)">Public chain</text>
+  </g>
+  <text x="730" y="78" text-anchor="middle" font-size="10.5" style="fill:var(--muted,#9aa7b4)">only during the run</text>
+  <text x="870" y="78" text-anchor="middle" font-size="10.5" style="fill:var(--muted,#9aa7b4)">NEAR, payments and transfers</text>
+  <line x1="40" y1="90" x2="960" y2="90" style="stroke:var(--line,#33404d)"/>
+
+  <!-- rows: y = 118 + 34*i ; marks: full = plaintext, half = hash only, empty = nothing -->
+  <g font-size="12" fill="currentColor">
+    <text x="40" y="122">Buyer mandate</text>
+    <text x="40" y="156">Vendor mandate</text>
+    <text x="40" y="190">Negotiation transcript</text>
+    <text x="40" y="224">Commercial terms document</text>
+    <text x="40" y="258">Payment schedule (amounts, dates)</text>
+    <text x="40" y="292">Payments, exceptions, refusals</text>
+    <text x="40" y="326">Transfers on NEAR</text>
+  </g>
+  <g style="stroke:var(--fg,#e8edf2)" stroke-width="1.4">
+    <!-- buyer mandate -->
+    <circle cx="470" cy="118" r="7" fill="currentColor"/>
+    <circle cx="600" cy="118" r="7" fill="none"/>
+    <circle cx="730" cy="118" r="7" fill="currentColor"/>
+    <path d="M870 111 a7 7 0 0 1 0 14 z" fill="currentColor"/><circle cx="870" cy="118" r="7" fill="none"/>
+    <!-- vendor mandate -->
+    <circle cx="470" cy="152" r="7" fill="none"/>
+    <circle cx="600" cy="152" r="7" fill="currentColor"/>
+    <circle cx="730" cy="152" r="7" fill="currentColor"/>
+    <path d="M870 145 a7 7 0 0 1 0 14 z" fill="currentColor"/><circle cx="870" cy="152" r="7" fill="none"/>
+    <!-- transcript -->
+    <circle cx="470" cy="186" r="7" fill="none"/>
+    <circle cx="600" cy="186" r="7" fill="none"/>
+    <circle cx="730" cy="186" r="7" fill="currentColor"/>
+    <path d="M870 179 a7 7 0 0 1 0 14 z" fill="currentColor"/><circle cx="870" cy="186" r="7" fill="none"/>
+    <!-- terms document -->
+    <circle cx="470" cy="220" r="7" fill="currentColor"/>
+    <circle cx="600" cy="220" r="7" fill="currentColor"/>
+    <circle cx="730" cy="220" r="7" fill="currentColor"/>
+    <path d="M870 213 a7 7 0 0 1 0 14 z" fill="currentColor"/><circle cx="870" cy="220" r="7" fill="none"/>
+    <!-- schedule -->
+    <circle cx="470" cy="254" r="7" fill="currentColor"/>
+    <circle cx="600" cy="254" r="7" fill="currentColor"/>
+    <circle cx="730" cy="254" r="7" fill="currentColor"/>
+    <circle cx="870" cy="254" r="7" fill="currentColor"/>
+    <!-- payments -->
+    <circle cx="470" cy="288" r="7" fill="currentColor"/>
+    <circle cx="600" cy="288" r="7" fill="currentColor"/>
+    <circle cx="730" cy="288" r="7" fill="none"/>
+    <circle cx="870" cy="288" r="7" fill="currentColor"/>
+    <!-- transfers -->
+    <circle cx="470" cy="322" r="7" fill="currentColor"/>
+    <circle cx="600" cy="322" r="7" fill="currentColor"/>
+    <circle cx="730" cy="322" r="7" fill="none"/>
+    <circle cx="870" cy="322" r="7" fill="currentColor"/>
+  </g>
+  <rect x="400" y="100" width="140" height="240" rx="8" fill="none" style="stroke:var(--line,#33404d)" stroke-dasharray="3 4"/>
+  <rect x="800" y="100" width="140" height="240" rx="8" fill="none" style="stroke:var(--accent,#d8a84a)" stroke-dasharray="3 4"/>
+
+  <g font-size="11" style="fill:var(--muted,#9aa7b4)">
+    <circle cx="48" cy="356" r="6" fill="currentColor" style="stroke:var(--fg,#e8edf2)" stroke-width="1.2"/>
+    <text x="62" y="360">plaintext</text>
+    <path d="M136 350 a6 6 0 0 1 0 12 z" fill="currentColor"/><circle cx="136" cy="356" r="6" fill="none" style="stroke:var(--fg,#e8edf2)" stroke-width="1.2"/>
+    <text x="150" y="360">hash only</text>
+    <circle cx="228" cy="356" r="6" fill="none" style="stroke:var(--fg,#e8edf2)" stroke-width="1.2"/>
+    <text x="242" y="360">nothing</text>
+    <text x="330" y="360">The enclave's plaintext exists only while the job runs. The public column is the honest boundary: positions private, settlement public.</text>
+  </g>
+</svg>

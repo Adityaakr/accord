@@ -1,0 +1,45 @@
+/* Action card (BE0Kc14HI / Default xcGV720w0) */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  height: auto;
+}
+
+/* Title row (j5R9YDVgS) */
+.title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  height: auto;
+}
+
+/* IconNode (DFCncuIt1): 16×16, Text Medium, stroke 1.8 */
+.icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  aspect-ratio: 1;
+  color: var(--text-medium);
+}
+
+/* Heading (AgnR7Putm): width 1fr in a horizontal stack */
+.heading {
+  flex: 1 1 0px;
+  min-width: 0;
+  height: auto;
+}
+
+/* Description (tEpmXWo0N): width 1fr in a vertical stack */
+.description {
+  width: 100%;
+  height: auto;
+}

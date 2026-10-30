@@ -1,0 +1,93 @@
+/* FAQ JCqP92VWu */
+.section {
+  gap: 64px;
+  padding: 72px 0px 48px 0px;
+  justify-content: center;
+  scroll-margin-top: 40px;
+}
+
+/* Heading sqXYl3Any */
+.heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 480px;
+}
+
+/* Tag b8ny8n4Q6 */
+.tag {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: auto;
+}
+/* Indicator TIJjwmEk0 */
+.indicator {
+  display: block;
+  width: 14px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 9999px;
+  background: var(--token-35240c30-baf2-4269-8805-70fb739fb8ad); /* Orange */
+}
+
+/* Text dwoFkqFTR */
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+}
+.title { width: 100%; text-wrap: balance; }
+
+/* FAQ Accordions xiM1bErgG → L8IXZDnoY "Default" htNqZRV_2: horizontal, gap 16, width 1fr */
+.accordions {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 16px;
+  width: 100%;
+}
+/* Column LjjlNqQud / dOcBK4qsU: vertical, gap 10, width 1fr, align center, overflow clip */
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex: 1 1 0px;
+  min-width: 0;
+  overflow: clip;
+}
+
+/* Tablet uX81zskxrJCqP92VWu: instance switches to variant "Mobile" BNGQUBhhD: vertical, gap 10 */
+@media (max-width: 1199.98px) {
+  .section {
+    gap: 48px;
+    padding: 72px 24px 48px 24px;
+  }
+  .accordions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .column {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+}
+
+/* Phone Ue6QXWSr_JCqP92VWu */
+@media (max-width: 809.98px) {
+  .section {
+    gap: 32px;
+    padding: 72px 16px 48px 16px;
+  }
+}

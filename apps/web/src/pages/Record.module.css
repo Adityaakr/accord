@@ -1,0 +1,159 @@
+/* /record: page shell (Home `.page`) + the two record panels (copied from sections/Proof.module.css). */
+
+.page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px; /* layout template gap between page sections on Desktop */
+}
+
+/* Section: template rhythm, padding 48px 0 under the hero */
+.section {
+  justify-content: center;
+  gap: 32px;
+  padding: 48px 0 72px 0;
+  scroll-margin-top: 40px;
+}
+
+.record {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+}
+.weak { color: var(--text-weak); }
+.sep { color: var(--text-weak); }
+
+/* ---------- Record panels: agreement page + refusal log, template card style ---------- */
+.panels {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  width: 100%;
+  align-items: stretch;
+  scroll-margin-top: 40px;
+}
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  padding: 24px;
+  border-radius: 4px;
+  background: var(--elevation-strong);
+}
+.panelHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+.panelTitle { color: var(--text-strong); }
+.panelHint { color: var(--text-weak); }
+.panelId {
+  color: var(--text-weak);
+  background: transparent;
+  padding: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 55%;
+}
+
+/* Four-state strip: mono; the current state in the template's white pill, the others text-weak */
+.states {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.panel .state {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--text-weak);
+  background: transparent;
+  border: 1px solid var(--hairline);
+}
+.panel .stateCurrent {
+  color: var(--on-white);
+  background: var(--white);
+  border-color: var(--white);
+}
+
+/* Rows with hairline dividers */
+.panelRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.panelRow:last-of-type { border-bottom: 0; padding-bottom: 0; }
+.rowLabel { color: var(--text-strong); font-weight: 500; }
+.terms, .lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.term {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+.panel .cell {
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
+  color: var(--text-medium);
+}
+.panel .wrapCell {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.empty { color: var(--text-weak); }
+.asOf { color: var(--text-weak); }
+
+/* Refusal log: newest first, live region */
+.log { padding-top: 16px; flex: 1 1 auto; }
+.logList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.logLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 13px;
+  line-height: 150%;
+}
+.logLine:last-child { border-bottom: 0; }
+.logTime { color: var(--text-weak); font-variant-numeric: tabular-nums; }
+.logFrom { color: var(--text-medium); overflow-wrap: anywhere; }
+.panel .logReason { white-space: normal; overflow-wrap: anywhere; }
+
+/* ---------- Tablet ---------- */
+@media (max-width: 1199.98px) {
+  .page { gap: 0; }
+  .section { padding: 48px 24px 72px 24px; }
+}
+
+/* ---------- Phone ---------- */
+@media (max-width: 809.98px) {
+  .section { padding: 48px 16px 72px 16px; }
+  .panels { grid-template-columns: 1fr; gap: 16px; }
+  .panel { padding: 20px; }
+  .panelId { max-width: 100%; }
+}

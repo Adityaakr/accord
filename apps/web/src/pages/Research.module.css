@@ -1,0 +1,179 @@
+/* Research page (/research): PageHero (the 404 page Main shell) + one content section of sub-sections, each an
+   H3 (`.t-h3`): five questions with a grid of source cards in the Testimonial card geometry, then
+   "Related approaches, and where each stops" and "Limits of this page" as prose.
+   Breakpoints: Tablet ≤1199.98, Phone ≤809.98. */
+
+.page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px; /* layout template gap between page sections on Desktop */
+}
+
+/* Main: vertical, align start, gap 64, padding 48px 0 72px, width 1fr (max 1080 from .section) */
+.main {
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 64px;
+  padding: 48px 0px 72px 0px;
+  scroll-margin-top: 40px;
+}
+
+/* Sub-section: heading (gap 12) + cards grid or prose, gap 24 */
+.question {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  width: 100%;
+  scroll-margin-top: 80px;
+}
+.questionHeading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  max-width: 720px;
+}
+.questionTitle { width: 100%; text-wrap: balance; }
+.questionLead { width: 100%; }
+
+/* Source cards: grid 2 columns, gap 16 (Testimonial Cards geometry) */
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: auto;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Card: Testimonial card geometry. Elevation Strong, padding 32, gap 16, radius 4, overflow hidden */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  align-self: stretch;
+  min-width: 0;
+  background: var(--elevation-strong);
+  border-radius: 4px;
+  overflow: hidden;
+  scroll-margin-top: 80px;
+}
+
+/* Blocks the copy gives for a pair of sources: one card across the row; its text at the lead width (720) */
+.pair { grid-column: 1 / -1; }
+.pair .blocks { max-width: 720px; }
+
+/* Head: title (H5) + the attribution sentence with its link */
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+.title { width: 100%; text-wrap: balance; }
+.who { width: 100%; margin: 0; color: var(--text-medium); overflow-wrap: anywhere; }
+
+/* Divider: hairline (the Testimonial card's Elevation Medium divider) */
+.divider {
+  width: 100%;
+  height: 1px;
+  flex: 0 0 1px;
+  background: var(--elevation-medium);
+  border-radius: 999px;
+}
+
+/* Labelled blocks: H6 label + Body Small text, gap 4 within, 14 between */
+.blocks {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+}
+.block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+}
+.blockLabel { width: 100%; }
+.blockText { width: 100%; margin: 0; }
+
+/* Prose sub-sections: paragraphs at the lead width, gap 16 */
+.prose {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+  max-width: 720px;
+}
+.paragraph { width: 100%; margin: 0; overflow-wrap: anywhere; }
+
+/* Tablet */
+@media (max-width: 1199.98px) {
+  .page { gap: 0; }
+  .main { gap: 48px; padding: 48px 24px 72px 24px; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Phone: 16px gutters, single column */
+@media (max-width: 809.98px) {
+  .main { gap: 32px; padding: 48px 16px 72px 16px; }
+  .question { gap: 20px; }
+  .grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+}
+
+/* ---------- redesign: stack hero, floor tags, screenshot cards ---------- */
+.stackSection { padding: 0 0 8px; }
+.floorTag { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal); }
+
+.card { border: 1px solid rgba(var(--ink-rgb), 0.08); border-radius: 10px; transition: border-color 0.25s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.card:hover { border-color: rgba(var(--ink-rgb), 0.2); }
+
+.shot {
+  position: relative; display: block; width: 100%; overflow: hidden;
+  background: #fff; border-bottom: 1px solid rgba(var(--ink-rgb), 0.08);
+  perspective: 900px; text-decoration: none;
+}
+.chrome { display: flex; align-items: center; gap: 8px; height: 24px; padding: 0 10px; background: #ececee; border-bottom: 1px solid #dcdce0; }
+.dots { display: flex; gap: 4px; }
+.dots i { width: 7px; height: 7px; border-radius: 999px; background: #c8c8cc; }
+.addr { flex: 1; text-align: center; font-size: 10.5px; color: #6b6f76; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 26px; }
+.shotImg { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: top left; transform-origin: 50% 0; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.card:hover .shotImg { transform: scale(1.04); }
+.cover { display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; aspect-ratio: 16 / 9; padding: 18px; background: linear-gradient(160deg, #f4f4f1, #e3e3de); }
+.coverKind { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; color: #6b6f76; }
+.coverTitle { font-size: 16px; line-height: 1.25; letter-spacing: -0.02em; color: #17181b; font-weight: 500; }
+
+.cardBody { display: flex; flex-direction: column; gap: 10px; padding: 18px 18px 16px; width: 100%; }
+.cardBody .who { font-size: 12.5px; line-height: 1.5; color: var(--text-weak); }
+.lead { display: flex; flex-direction: column; gap: 4px; padding-top: 10px; border-top: 1px solid var(--hairline); }
+.leadLabel { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal); }
+.more { width: 100%; }
+.more summary { cursor: pointer; list-style: none; font-size: 12.5px; color: var(--text-medium); padding-top: 4px; }
+.more summary::-webkit-details-marker { display: none; }
+.more summary::after { content: " +"; color: var(--teal); }
+.more[open] summary::after { content: " −"; }
+.more[open] summary { margin-bottom: 10px; }
+
+@media (max-width: 1199.98px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (max-width: 809.98px) { .grid { grid-template-columns: minmax(0, 1fr) !important; } }
+@media (prefers-reduced-motion: reduce) { .shotImg, .card { transition: none; } }
+.src { margin-right: 8px; white-space: nowrap; }
+.clamp { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.card:has(.more[open]) .clamp { -webkit-line-clamp: unset; display: block; }

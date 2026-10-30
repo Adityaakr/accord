@@ -1,0 +1,182 @@
+/* Features section ajb2sLiNW (desktop base; Tablet uX81zskxr…, Phone Ue6QXWSr_… overrides below) */
+.section {
+  justify-content: center;
+  gap: 64px;
+  padding: 72px 0px;
+  scroll-margin-top: 40px;
+}
+
+/* Dots lKYFMqfkn: absolute, right 0, top 0, 920×780, overflow hidden, z-index 0 */
+.dotsWrap {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 920px;
+  height: 780px;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+.dotsLoop {
+  position: absolute;
+  inset: 0;
+}
+
+/* Heading gIZp3mugo */
+.heading {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+}
+
+/* Tag Y4pbOtatQ */
+.tag {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: auto;
+  height: auto;
+}
+/* Indicator s9CFTMrSa */
+.tagIndicator {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--yellow);
+}
+.tagText {
+  width: auto;
+}
+
+/* Text SLBBWhTge */
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  height: auto;
+}
+.title,
+.description {
+  width: 100%;
+}
+.title {
+  text-wrap: balance;
+}
+
+/* Added: the card grid and its closing line as one block (gap 24, the grid's own gap) */
+.body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  width: 100%;
+}
+
+/* Content Cards FfCn55RGg */
+.cards {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch; /* equal card heights across the row */
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  height: auto;
+}
+/* instances hehXLuKvS / M5z5mWu0X / Dr9qLJnUh: width 1fr inside the horizontal stack */
+.card {
+  width: auto;
+  flex: 1 1 0px;
+  min-width: 0;
+}
+
+/* Added (no Framer slot): one Body Large closing line under the cards, on the grid's left edge, max-width 720 */
+.closing {
+  margin-top: 24px; /* 48px from the card row so the chain reads as its own figure */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 24px;
+  width: 100%;
+  height: auto;
+}
+.closingText { width: 100%; max-width: 720px; color: var(--text-medium); }
+
+/* The enforcement chain: four linked steps on one hairline, arrows in the gaps */
+.chain {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px;
+  border-radius: 4px;
+  background: var(--elevation-strong);
+}
+.link + .link::before {
+  content: "→";
+  position: absolute;
+  left: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-weak);
+  font-size: 16px;
+}
+.linkNo { color: var(--text-weak); font-size: 12px; padding: 0 !important; background: none !important; }
+.linkTitle { color: var(--text-strong); }
+.linkText { color: var(--text-medium); }
+@media (max-width: 1199.98px) {
+  .chain { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 32px; }
+  .link:nth-child(3)::before { display: none; }
+}
+@media (max-width: 809.98px) {
+  .chain { grid-template-columns: 1fr; gap: 24px; }
+  .link + .link::before { content: "↓"; left: 50%; top: -20px; transform: translateX(-50%); display: block; }
+}
+
+/* ---------- Tablet uX81zskxrajb2sLiNW ---------- */
+@media (max-width: 1199.98px) {
+  .section {
+    gap: 48px;
+    padding: 72px 24px;
+  }
+}
+
+/* ---------- Phone Ue6QXWSr_ajb2sLiNW ---------- */
+@media (max-width: 809.98px) {
+  .section {
+    gap: 32px;
+    padding: 72px 16px;
+  }
+  /* FfCn55RGg → vertical stack; cards become width 1fr of a vertical stack */
+  .cards {
+    flex-direction: column;
+  }
+  .card {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+}

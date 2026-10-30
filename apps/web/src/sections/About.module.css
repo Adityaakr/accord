@@ -1,0 +1,175 @@
+/* About: NX9mbZ4xB (Desktop). Values copied from the Framer tree. */
+
+/* Section: vertical stack, align start, distribute center, gap 64, padding 72px 0, scroll-margin-top 40 */
+.about {
+  justify-content: center;
+  gap: 64px;
+  padding: 72px 0;
+  scroll-margin-top: 40px;
+}
+
+/* Heading mubm_eTfC: vertical, gap 24, width 1fr, max-width 480 */
+.heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 480px;
+}
+
+/* Tag YgvgslwMF: horizontal, gap 8, align center, width auto */
+.tag {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: auto;
+}
+/* Indicator GmHehHtzP: 14×8, radius 9999, fill Blue */
+.indicator {
+  display: block;
+  width: 14px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--token-38ca9266-d595-49b1-9307-1ba7c47ddc4c);
+  flex: none;
+}
+.tagText { width: auto; }
+
+/* Text ZhNEexvfs: vertical, gap 20, width 1fr */
+.headingText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+}
+.h2 { width: 100%; text-wrap: balance; }
+
+/* Section rows YoIZRFTN2 / J3FA8OTKG / y_CVc9JIP: horizontal, gap 64, align+distribute center, overflow hidden, width 1fr */
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 64px;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Image (qoJ68mlH9 / tTccR6dpf / qn2QatAHO): width 1fr, aspect-ratio 1.3 (canvas height 390), radius 4, image fill cover */
+.image {
+  flex: 1 1 0px;
+  min-width: 0;
+  aspect-ratio: 1.3 / 1;
+  border-radius: 4px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Content (bb6PGfMEB / vEq13rCmi / Tq_ckVkQX): vertical, gap 24, align start, width 1fr */
+.content {
+  flex: 1 1 0px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+}
+
+/* Text (PMy4Spgmd / UD5nDc7xb / mNIMgn_Xu): vertical, gap 12, width 1fr, max-width 400 */
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+.title, .subline, .description { width: 100%; }
+
+/* Sub-line (doc A7 bold line under each row title): Heading 5 preset inside the Text stack (gap 12 above/below) */
+
+/* Spec §3.6: the Agreement controls text column carries a thin top rule (White at 40%) to mark the control plane */
+.textRuled {
+  border-top: 2px solid rgba(var(--ink-rgb), 0.4);
+  padding-top: 20px;
+}
+
+/* Spec §3.6 chip row at the foot of the text column: `make` targets in monospace, wrapping, gap 8; 16 under the body (stack gap 12 + 4) */
+.chips {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.chipLink {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--text-medium);
+}
+.chips code.chip {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.chipLink:hover,
+.chipLink:focus-visible { color: var(--text-strong); }
+.chipLink:hover code.chip,
+.chipLink:focus-visible code.chip { border-color: rgba(var(--ink-rgb), 0.2); }
+
+/* Actions: buttons in a row (Hero `.actions` geometry: horizontal, gap 8, wraps on narrow widths) */
+.actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  width: auto;
+}
+
+/* ---------- Tablet uX81zskxrNX9mbZ4xB: gap 48, padding 72px 24px ---------- */
+@media (max-width: 1199.98px) {
+  .about {
+    gap: 48px;
+    padding: 72px 24px;
+  }
+}
+
+/* ---------- Phone Ue6QXWSr_NX9mbZ4xB: padding 72px 16px; rows vertical gap 24.
+   Section gap 32 (the phone rhythm every neighbouring section uses; the tree's 48 broke the page's rhythm) ---------- */
+@media (max-width: 809.98px) {
+  .about {
+    gap: 32px;
+    padding: 72px 16px;
+  }
+  .row {
+    flex-direction: column;
+    gap: 24px;
+  }
+  /* width 1fr inside a vertical stack → 100% */
+  .image,
+  .content {
+    flex: none;
+    width: 100%;
+  }
+  /* Ue6QXWSr_J3FA8OTKG reorders its children: Image (tTccR6dpf) before Content (vEq13rCmi) */
+  .rowPhoneImageFirst .image { order: -1; }
+}

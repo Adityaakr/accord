@@ -1,0 +1,18 @@
+.dots {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 920px;
+  height: 780px;
+  max-width: 100%;
+  background-image: url("/assets/dots.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Light theme: the dot field is light-on-dark artwork; invert it and multiply it into the page so it reads as a soft
+   field of dark dots with no grey haze or hard edges */
+:global([data-theme="light"]) .dots { filter: invert(1) grayscale(1); mix-blend-mode: multiply; opacity: 0.55; }

@@ -1,0 +1,87 @@
+/* Content Card (h3PijSECn / Default jmO3Qg7ls) */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 350px;
+  height: auto;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Hover (spec §1.7): the surface's border shifts to White at 30% over 120ms. An inset ring, so no size change, no shadow. */
+.card {
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow 120ms ease;
+}
+.card:hover {
+  box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), 0.3);
+}
+
+/* Image ogFtqGf_s: width 1fr, aspectRatio 1.46, image fill (cover) */
+.image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.46;
+  overflow: hidden;
+}
+.image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+/* Container cq2X7rb2x */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  height: auto;
+  flex: 1 1 auto; /* fills the card so the dark panel matches its siblings' height */
+  padding: 32px 24px;
+  background: var(--elevation-strong);
+}
+
+/* Heading enrkI1SQ0 */
+.heading {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Indicator ZxCLBhhwi */
+.indicator {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--yellow);
+}
+
+.title {
+  flex: 1 1 0px;
+  min-width: 0;
+}
+
+.description {
+  width: 100%;
+}
+/* Multi-paragraph description (marked-up copy): same paragraph rhythm as SectionHeading `.lead` */
+.description p + p {
+  margin-top: 10px;
+}
+
+/* Spec §1.7: hover lifts the edge to White at 30%, 120ms, drawn inset so nothing shifts */
+.card { outline: 1px solid transparent; outline-offset: -1px; transition: outline-color 120ms ease; }
+.card:hover { outline-color: rgba(var(--ink-rgb), 0.3); }

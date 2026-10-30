@@ -1,0 +1,16 @@
+.toggle {
+  display: grid;
+  place-items: center;
+  width: 33px;
+  height: 33px;
+  flex: none;
+  border-radius: 8px;
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--text-medium);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.toggle:hover { color: var(--text-strong); border-color: rgba(var(--ink-rgb), 0.25); background: rgba(var(--ink-rgb), 0.04); }
+.icon { opacity: 0; transform: rotate(-60deg) scale(0.6); transform-origin: 10px 10px; transition: opacity 0.25s ease, transform 0.35s ease; }
+.show { opacity: 1; transform: none; }

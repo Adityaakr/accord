@@ -1,0 +1,28 @@
+.wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+.svg { display: block; width: 100%; max-width: 760px; height: auto; overflow: visible; font-family: "Host Grotesk", sans-serif; }
+.ground { fill: rgba(145, 207, 181, 0.05); }
+.floor { cursor: pointer; outline: none; }
+.floor polygon { stroke-width: 1; stroke-linejoin: round; transition: fill 0.3s ease, stroke 0.3s ease, transform 0.3s ease; }
+.ft { fill: rgb(36, 37, 40); stroke: rgba(var(--ink-rgb), 0.14); }
+.fl { fill: rgb(26, 27, 29); stroke: rgba(var(--ink-rgb), 0.12); }
+.fr { fill: rgb(19, 20, 22); stroke: rgba(var(--ink-rgb), 0.12); }
+.on .ft { fill: rgb(44, 70, 61); stroke: rgba(145, 207, 181, 0.9); }
+.on .fl { fill: rgb(30, 50, 43); stroke: rgba(145, 207, 181, 0.7); }
+.on .fr { fill: rgb(23, 38, 33); stroke: rgba(145, 207, 181, 0.7); }
+.floor:focus-visible .ft { stroke: var(--teal); stroke-width: 2; }
+.label { font-size: 12px; font-weight: 500; letter-spacing: 0.02em; fill: rgba(var(--ink-rgb), 0.72); pointer-events: none; white-space: pre; }
+.on .label { fill: rgb(220, 242, 233); }
+.count { font-family: var(--mono); font-size: 9.5px; fill: rgba(var(--ink-rgb), 0.4); pointer-events: none; }
+.on .count { fill: var(--teal); }
+.rt { fill: rgb(56, 58, 62); stroke: rgba(var(--ink-rgb), 0.25); }
+.rl { fill: rgb(40, 41, 45); stroke: rgba(var(--ink-rgb), 0.18); }
+.rr { fill: rgb(30, 31, 34); stroke: rgba(var(--ink-rgb), 0.18); }
+.roomLabelFo { overflow: visible; pointer-events: none; }
+.roomLabel { display: flex; align-items: center; justify-content: center; gap: 6px; height: 26px; font-size: 12px; font-weight: 500; color: var(--text-strong); }
+.caption { font-size: 13px; color: var(--text-weak); text-align: center; }
+
+:global([data-theme="light"]) .ft { fill: #ffffff; } :global([data-theme="light"]) .fl { fill: #ebebe8; } :global([data-theme="light"]) .fr { fill: #dcdcd8; }
+:global([data-theme="light"]) .rt { fill: #f7f7f5; } :global([data-theme="light"]) .rl { fill: #e3e3df; } :global([data-theme="light"]) .rr { fill: #d4d4cf; }
+:global([data-theme="light"]) .on .ft { fill: #e3f3ec; } :global([data-theme="light"]) .on .fl { fill: #cfe8de; } :global([data-theme="light"]) .on .fr { fill: #bcdccf; }
+:global([data-theme="light"]) .on .label { fill: rgb(22, 92, 70); }
+@media (prefers-reduced-motion: reduce) { .floor polygon { transition: none; } }

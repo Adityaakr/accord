@@ -1,0 +1,37 @@
+/* Logos ticker (xDC8qSvur / OKdp7nI7b): horizontal stack, gap 10, center, overflow clip */
+.root {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  overflow: clip;
+}
+/* Framer Ticker code component (ktrAbjmLh): 1fr × 112px, alignment center, overflow hidden (fadeOptions.overflow=false) */
+.ticker {
+  position: relative;
+  flex: 1 1 0px;
+  min-width: 0;
+  height: 112px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  width: 100%;
+}
+/* The moving track: copies laid out side by side; translateX driven by motion */
+.track {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: max-content;
+  will-change: transform;
+}
+/* One set of slots. Trailing gap lives in padding-right so one copy's width == the loop distance */
+.copy {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 0 0 auto;
+}

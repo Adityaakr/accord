@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 172" role="img" aria-label="Losses reported to the FBI&#x27;s Internet Crime Complaint Center: $6.9 billion in 2021, $10.3 billion in 2022, $12.5 billion in 2023, $16.6 billion in 2024 and $20.9 billion in 2025." font-family="Satoshi, Manrope, system-ui, sans-serif" font-size="11" style="color:var(--fg,#e8edf2)">
+  <line x1="44" y1="136.0" x2="344" y2="136.0" stroke-width="1" style="stroke:var(--line,#33404d)"/>
+  <text x="36" y="139.5" text-anchor="end" font-size="10.5" font-family="JetBrains Mono, ui-monospace, monospace" style="fill:var(--muted,#9aa7b4)">$0</text>
+  <line x1="44" y1="86.0" x2="344" y2="86.0" stroke-width="1" style="stroke:var(--line,#33404d)"/>
+  <text x="36" y="89.5" text-anchor="end" font-size="10.5" font-family="JetBrains Mono, ui-monospace, monospace" style="fill:var(--muted,#9aa7b4)">$10B</text>
+  <line x1="44" y1="36.0" x2="344" y2="36.0" stroke-width="1" style="stroke:var(--line,#33404d)"/>
+  <text x="36" y="39.5" text-anchor="end" font-size="10.5" font-family="JetBrains Mono, ui-monospace, monospace" style="fill:var(--muted,#9aa7b4)">$20B</text>
+  <g><title>2021: $6.9B reported</title><path d="M62.0,136 V105.5 Q62.0,101.5 66.0,101.5 H82.0 Q86.0,101.5 86.0,105.5 V136 Z" style="fill:var(--muted,#9aa7b4)"/></g>
+  <text x="74.0" y="154" text-anchor="middle" font-size="10.5" font-family="JetBrains Mono, ui-monospace, monospace" style="fill:var(--muted,#9aa7b4)">2021</text>
+  <text x="74.0" y="94.5" text-anchor="middle" font-size="11" font-family="JetBrains Mono, ui-monospace, monospace" style="fill:var(--muted,#9aa7b4)">$6.9B</text>
+  <g><title>2022: $10.3B reported</title><path d="M122.0,136 V88.5 Q122.0,84.5 126.0,84.5 H142.0 Q146.0,84.5 146.0,88.5 V136 Z" style="fill:var(--muted,#9aa7b4)"/></g>
+  <text x="134.0" y="154" text-anchor="middle" font-size="10.5" font-family="JetBrains Mono, ui-monospace, monospace" style="fill:var(--muted,#9aa7b4)">2022</text>
+  <g><title>2023: $12.5B reported</title><path d="M182.0,136 V77.5 Q182.0,73.5 186.0,73.5 H202.0 Q206.0,73.5 206.0,77.5 V136 Z" style="fill:var(--muted,#9aa7b4)"/></g>
+  <text x="194.0" y="154" text-anchor="middle" font-size="10.5" font-family="JetBrains Mono, ui-monospace, monospace" style="fill:var(--muted,#9aa7b4)">2023</text>
+  <g><title>2024: $16.6B reported</title><path d="M242.0,136 V57.0 Q242.0,53.0 246.0,53.0 H262.0 Q266.0,53.0 266.0,57.0 V136 Z" style="fill:var(--muted,#9aa7b4)"/></g>
+  <text x="254.0" y="154" text-anchor="middle" font-size="10.5" font-family="JetBrains Mono, ui-monospace, monospace" style="fill:var(--muted,#9aa7b4)">2024</text>
+  <g><title>2025: $20.9B reported</title><path d="M302.0,136 V35.6 Q302.0,31.6 306.0,31.6 H322.0 Q326.0,31.6 326.0,35.6 V136 Z" style="fill:var(--fg,#e8edf2)"/></g>
+  <text x="314.0" y="154" text-anchor="middle" font-size="10.5" font-weight="500" font-family="JetBrains Mono, ui-monospace, monospace" style="fill:var(--fg,#e8edf2)">2025</text>
+  <text x="314.0" y="24.6" text-anchor="middle" font-size="11" font-weight="500" font-family="JetBrains Mono, ui-monospace, monospace" style="fill:var(--fg,#e8edf2)">$20.9B</text>
+</svg>

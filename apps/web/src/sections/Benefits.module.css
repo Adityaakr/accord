@@ -1,0 +1,146 @@
+/* Benefits section R0XmrFPvy (desktop base; Tablet uX81zskxr…, Phone Ue6QXWSr_… overrides below) */
+.section {
+  justify-content: center;
+  gap: 64px;
+  padding: 72px 0px;
+  scroll-margin-top: 40px;
+}
+
+/* Dots oC813haZN: absolute, right 0, top 0, 920×780, overflow hidden, z-index 0 (loopEffect on the frame itself) */
+.dotsWrap {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 920px;
+  height: 780px;
+  max-width: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+.dots {
+  left: 0;
+  top: 0;
+}
+
+/* Heading nHHnBolMG */
+.heading {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+}
+
+/* Tag eDLobg3ZF */
+.tag {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: auto;
+  height: auto;
+}
+/* Indicator HA4_zmgCi: 14×8, radius 9999, fill Purple */
+.tagIndicator {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--purple);
+}
+.tagText {
+  width: auto;
+}
+
+/* Text jgvbNgVGq */
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  height: auto;
+}
+/* Title: balanced lines (wraps by width, never leaving one word on its last line) */
+.title {
+  width: 100%;
+  text-wrap: balance;
+}
+
+/* Icon Cards VC6Y4OxSB: grid, 3 columns, gap 16, rows fit content, gridAlignment center */
+.cards {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: auto;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  height: auto;
+}
+/* instances TFySiAbJr … dCmGlgkyB: width 1fr, height auto inside the grid (grid stretch → equal height per row) */
+.card {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Added (no Framer slot): the closing block under the grid: Body Large line + tertiary link, gap 16, lead width */
+.closing {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 16px;
+  width: 100%;
+  max-width: 720px;
+}
+.closingText {
+  width: 100%;
+}
+/* Tertiary link row, Body Small .ls-link (hero tertiary style) */
+.links {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+  width: 100%;
+}
+.tertiary {
+  text-decoration: underline;
+  text-decoration-color: var(--hairline);
+  text-underline-offset: 4px;
+}
+.tertiary:hover { text-decoration-color: currentColor; }
+
+/* ---------- Tablet uX81zskxrR0XmrFPvy ---------- */
+@media (max-width: 1199.98px) {
+  .section {
+    gap: 48px;
+    padding: 72px 24px;
+  }
+  /* uX81zskxrVC6Y4OxSB: gridColumnCount 2 (3 rows) */
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Phone Ue6QXWSr_R0XmrFPvy ---------- */
+@media (max-width: 809.98px) {
+  .section {
+    gap: 32px;
+    padding: 72px 16px;
+  }
+  /* Ue6QXWSr_VC6Y4OxSB: gridColumnCount 1 */
+  .cards {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}

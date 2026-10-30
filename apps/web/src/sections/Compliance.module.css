@@ -1,0 +1,208 @@
+/* Compliance xx_IlnaTQ */
+.section {
+  gap: 64px;
+  padding: 72px 0px 72px 0px; /* section rhythm: 72px 0 (the template's 48 bottom broke the rhythm) */
+  justify-content: center;
+  scroll-margin-top: 40px;
+}
+
+/* Heading ua_xHTB_9 */
+.heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 720px;
+}
+
+/* Tag EjKNufgsR */
+.tag {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: auto;
+}
+/* Indicator sQh3S5ACm */
+.indicator {
+  display: block;
+  width: 14px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 9999px;
+  background: var(--teal);
+}
+
+/* Text eyNj8EBaA */
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+}
+.title { width: 100%; text-wrap: balance; }
+.description { width: 100%; text-wrap: pretty; }
+
+/* Media Cards xztoSB5UX */
+.cards {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch; /* every card in the row shares the tallest height */
+  justify-content: flex-start;
+  gap: 16px;
+  width: 100%;
+  overflow: hidden;
+}
+/* Media card instances: width 1fr inside the horizontal stack */
+.card {
+  flex: 1 1 0px;
+  min-width: 0;
+  width: auto;
+}
+
+/* Refill v2 (doc A5) in the template's own presets: three text columns between the heading and the cards,
+   and a scope line + secondary button under the cards. */
+.items {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px 16px;
+  width: 100%;
+}
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+.itemTitle { width: 100%; text-wrap: balance; }
+.itemBody { width: 100%; text-wrap: pretty; }
+
+.scope {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  max-width: 640px;
+}
+.scopeLabel { width: 100%; }
+.scopeText {
+  width: 100%;
+  color: var(--text-weak);
+  text-wrap: pretty;
+  margin-bottom: 12px; /* 12 + gap 12 = 24 above the button */
+}
+/* spec §3.3: tertiary link as the section's last line, under the button */
+.join {
+  display: inline-block;
+  margin-top: 4px; /* 4 + gap 12 = 16 under the button */
+  text-decoration: none;
+}
+
+/* spec §3.3: compact slot panel under the cards, rendered only when the snapshot carries observation slots.
+   Chips `slot <n> · <pass|fail> · <spread> bps · <depth> · <uptime>%`; a fail chip takes the refusal tone. */
+.slots {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 20px 24px;
+  border-radius: 4px;
+  background: var(--elevation-strong);
+}
+.slotsHead {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  width: 100%;
+}
+.slotsTitle { width: auto; }
+/* Status pill: the template's white pill (Proof's four-state strip) */
+.slots code.pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--on-white);
+  background: var(--white);
+  white-space: nowrap;
+}
+.slotsAsOf {
+  color: var(--text-weak);
+  margin-left: auto;
+}
+.slotList {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.slots code.slotChip {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-strong);
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+.slots code.slotChip:global(.mono-refusal) {
+  color: var(--refusal);
+  background: var(--refusal-bg);
+  border-color: var(--refusal-bg);
+}
+
+/* Tablet uX81zskxrxx_IlnaTQ */
+@media (max-width: 1199.98px) {
+  .section {
+    gap: 48px;
+    padding: 72px 24px 72px 24px;
+  }
+}
+
+/* Phone Ue6QXWSr_xx_IlnaTQ */
+@media (max-width: 809.98px) {
+  .section {
+    gap: 32px;
+    padding: 72px 16px 72px 16px;
+  }
+  .cards { flex-direction: column; }
+  .card {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+  .items { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+}
+
+/* The five cards read as one period flow: a hairline through the icon centres shows in the gaps between cards
+   (48px top padding + 38px = icon centre). Hidden when the cards stack. */
+.cards { position: relative; }
+.cards::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 86px;
+  height: 1px;
+  background: var(--elevation-weak);
+  z-index: 0;
+}
+.cards > * { position: relative; z-index: 1; }
+@media (max-width: 809.98px) { .cards::before { display: none; } }
+

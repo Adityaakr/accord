@@ -1,0 +1,7 @@
+/* 404 page (Nvv2EHdv3, path /404): breakpoint content = vertical stack, centered; Main = PageHero. */
+.page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

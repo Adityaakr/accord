@@ -1,0 +1,37 @@
+/* Plate for an inlined kit figure: template card surface, radius 4, and the kit's colour variables mapped to our tokens.
+   Accent (where a term is enforced) is the template's teal; refusals keep the site's single refusal red. */
+.plate {
+  --fg: var(--text-strong);
+  --muted: rgba(var(--ink-rgb), 0.56);
+  --line: rgba(var(--ink-rgb), 0.14);
+  --surface-2: var(--elevation-medium);
+  --accent: var(--teal);
+  --refuse: var(--refusal);
+  --pass: var(--green);
+  --surface: var(--elevation-strong);
+  --edge: rgba(var(--ink-rgb), 0.22);
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border-radius: 4px;
+  background: var(--elevation-strong);
+  padding: 24px 16px;
+  scrollbar-width: thin;
+}
+.drawing { width: 100%; }
+.drawing :global(svg) { display: block; width: 100%; height: auto; }
+
+/* Lanes: hovering or focusing one dims the rest to 60 percent, with no movement */
+.lanes :global(.kit-lane) { transition: opacity 160ms ease; outline: none; }
+.lanes:has(:global(.kit-lane):hover) :global(.kit-lane):not(:hover),
+.lanes:has(:global(.kit-lane):focus-visible) :global(.kit-lane):not(:focus-visible) { opacity: 0.6; }
+.lanes :global(.kit-lane):focus-visible { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lanes :global(.kit-lane) { transition: none; }
+}
+@media (max-width: 809.98px) {
+  .plate { padding: 16px 12px; }
+  /* The drawing is wider than the phone: fade the right edge so the sideways scroll reads as intended */
+  .plate:has(.drawing[style]) { -webkit-mask-image: linear-gradient(90deg, #000 82%, transparent); mask-image: linear-gradient(90deg, #000 82%, transparent); }
+}

@@ -1,0 +1,22 @@
+.button {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  width: auto;
+  height: auto;
+  white-space: nowrap;
+  transition: background-color 0.4s cubic-bezier(0.2, 0.8, 0.3, 1), color 0.4s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.full { width: 100%; }
+.label { display: block; }
+
+.primary { background: var(--white); }
+.primary .label { color: var(--on-white); }
+
+.secondary { background: var(--elevation-medium); }
+.secondary .label { color: var(--text-medium); transition: color 0.4s cubic-bezier(0.2, 0.8, 0.3, 1); }
+.secondary:hover { background: var(--elevation-weak); }
+.secondary:hover .label { color: var(--text-strong); }

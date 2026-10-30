@@ -1,0 +1,152 @@
+/* Supporting-page hero = the 404 page's Main (hIwfdG7eE) shell. Values copied from the Framer tree
+   (Desktop HA67beE5U = base · Tablet B1YGR0tf7 · Phone MhxH5_TrV overrides below). */
+
+/* Main: vertical, align start, gap 32, padding 48px 0, width 1fr, max-width 1080 (page width), scrollMarginTop 40 */
+.main {
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 32px;
+  padding: 48px 0px;
+  scroll-margin-top: 40px;
+}
+
+/* Dots lrZBADRz7: absolute, left 0 / top 0, 920×780, overflow hidden, z-index 0, loopEffect opacity → 0.5.
+   .dotsClip clips the dots at the next section's top edge (Main bottom + the layout gap 48 desktop / 0 below). */
+.dotsClip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 920px;
+  max-width: 100%;
+  height: calc(100% + 48px);
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+.dots {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 920px;
+  height: 780px;
+  aspect-ratio: 1.18;
+  overflow: hidden;
+}
+.dots .dotsImg {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+
+/* Header SSeGtq_6G: vertical, gap 64, width 1fr, max-width 900 */
+.header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 64px;
+  width: 100%;
+  max-width: 900px;
+  height: auto;
+}
+
+/* Heading Egw0pPiIJ: vertical, align start, gap 40, width 1fr, max-width 800 */
+.heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 40px;
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+}
+
+/* Container skz69Oqv5: vertical, align start, gap 24, width 1fr, max-width 640 */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 24px;
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+}
+
+/* Tag xTobrTbFX: horizontal, align center, gap 8, width auto */
+.tag {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: auto;
+  height: auto;
+}
+/* Indicator FztK1oE_a: 14×8, radius 9999, fill White */
+.indicator {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--white);
+}
+.tagText { width: auto; }
+
+/* Text oh4XOfwzC: vertical, align start, gap 20, width 1fr */
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 20px;
+  width: 100%;
+  height: auto;
+}
+.title,
+.description {
+  width: 100%;
+}
+/* Balanced lines: the H1 wraps by width, never leaving one word on its last line */
+.title { text-wrap: balance; }
+/* One or more Body Large paragraphs; the preset's paragraph spacing (10px) between them */
+.lead {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+.description { color: var(--text-medium); }
+.word {
+  display: inline-block;
+  will-change: transform, opacity, filter;
+}
+
+/* Button row: Hero Actions (a7cb5w_zG) geometry: horizontal, align start, gap 8, width auto; wraps on narrow widths */
+.actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  width: auto;
+  height: auto;
+}
+
+/* ---------- Tablet B1YGR0tf7 ---------- */
+@media (max-width: 1199.98px) {
+  .main { padding: 48px 24px; }
+  .header { gap: 48px; }
+  .dotsClip { height: 100%; }
+}
+
+/* ---------- Phone MhxH5_TrV ---------- */
+@media (max-width: 809.98px) {
+  .main { padding: 48px 16px; }
+  .header { gap: 32px; }
+}

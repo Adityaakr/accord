@@ -1,0 +1,69 @@
+/* Research: heading, then list (left) + a 3D deck of the papers (right). Section rhythm as every homepage section. */
+.research { gap: 40px; padding: 72px 0; scroll-margin-top: 40px; align-items: flex-start; }
+.layout { width: 100%; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 40px; align-items: center; }
+
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border-top: 1px solid var(--hairline); }
+.item { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; padding: 20px 0; border-bottom: 1px solid var(--hairline); opacity: 0.5; transition: opacity 0.3s ease; cursor: default; }
+.itemOn { opacity: 1; }
+.num { font-family: var(--mono); font-size: 12px; color: var(--text-weak); padding-top: 3px; }
+.itemOn .num { color: var(--teal); }
+.itemBody { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.informs { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-weak); }
+.itemOn .informs { color: var(--teal); }
+.finding { font-size: 17px; line-height: 1.35; letter-spacing: -0.02em; color: var(--text-strong); text-wrap: balance; }
+.who { font-size: 13px; color: var(--text-weak); }
+
+/* the deck: three papers stacked straight, the selected one in front; the one leaving slides down and tucks behind */
+.deck { position: relative; height: 440px; }
+.paper {
+  position: absolute; left: 4%; right: 4%; top: 70px;
+  display: block; border-radius: 12px; overflow: hidden;
+  background: #fff; text-decoration: none;
+  border: 1px solid rgba(var(--ink-rgb), 0.14);
+  box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.7);
+  transform-origin: 50% 0;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease, filter 0.5s ease;
+}
+.k0 { z-index: 3; transform: none; }
+.k1 { z-index: 2; transform: translateY(-26px) scale(0.94); filter: brightness(0.6); }
+.k2 { z-index: 1; transform: translateY(-50px) scale(0.88); filter: brightness(0.4); }
+.k0:hover { transform: translateY(-4px); }
+.out { animation: tuck 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes tuck {
+  0% { z-index: 4; transform: none; opacity: 1; filter: none; }
+  45% { z-index: 4; transform: translateY(70px) scale(0.97); opacity: 0; }
+  46% { z-index: 1; transform: translateY(-80px) scale(0.86); opacity: 0; }
+  100% { z-index: 1; transform: translateY(-50px) scale(0.88); opacity: 1; filter: brightness(0.4); }
+}
+.chrome { display: flex; align-items: center; gap: 10px; height: 30px; padding: 0 12px; background: #ececee; border-bottom: 1px solid #dcdce0; }
+.dots { display: flex; gap: 5px; }
+.dots i { width: 8px; height: 8px; border-radius: 999px; background: #c8c8cc; }
+.url { flex: 1; text-align: center; font-size: 11px; color: #6b6f76; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 34px; }
+.shot { display: block; width: 100%; aspect-ratio: 1100 / 640; object-fit: cover; object-position: top; }
+.chip {
+  position: absolute; left: 14px; bottom: 14px;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 11px; border-radius: 999px;
+  background: rgba(10, 12, 11, 0.86); color: #fff; font-size: 12.5px; letter-spacing: -0.01em;
+  backdrop-filter: blur(6px);
+}
+.k1 .chip, .k2 .chip { opacity: 0; }
+
+.moreLink { color: var(--text-strong); }
+
+/* light theme: fade the back papers rather than darken them */
+:global([data-theme="light"]) .k1 { filter: none; opacity: 0.75; }
+:global([data-theme="light"]) .k2 { filter: none; opacity: 0.5; }
+@media (prefers-reduced-motion: reduce) { .item, .paper { transition: none; } .out { animation: none; } }
+@media (max-width: 1199.98px) {
+  .research { gap: 32px; padding: 72px 24px; }
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .deck { max-width: 620px; width: 100%; margin: 0 auto; height: 420px; }
+}
+@media (max-width: 809.98px) {
+  .research { gap: 24px; padding: 72px 16px; }
+  .finding { font-size: 16px; }
+  .deck { height: 290px; }
+  .paper { left: 0; right: 0; top: 50px; }
+  .k1 { transform: translateY(-18px) scale(0.94); } .k2 { transform: translateY(-34px) scale(0.88); }
+}

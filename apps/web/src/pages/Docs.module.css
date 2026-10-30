@@ -1,0 +1,145 @@
+/* Developers page (/docs): PageHero (the 404 page Main shell) + one content section: the NEAR table, the "not yet"
+   paragraph, the commands block and the references list. Page gap 48 (Desktop) / 0; section padding 72px 0
+   (Tablet 72px 24px, Phone 72px 16px). */
+
+.page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+}
+
+/* Section (elementId "near"): vertical stack of blocks, gap 48, padding 72px 0, width 1fr (max 1080 from .section) */
+.main {
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 48px;
+  padding: 72px 0px;
+  scroll-margin-top: 40px;
+}
+.block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+}
+.subheading,
+.label {
+  width: 100%;
+}
+.subheading { text-wrap: balance; }
+
+/* Column rhythm: the piece name is narrow, the two prose columns share the rest */
+.table th:first-child,
+.piece {
+  width: 18%;
+  min-width: 168px;
+}
+.protects {
+  width: 44%;
+}
+.check {
+  width: 38%;
+}
+/* Commands in a table cell may wrap at the cell edge, never overflow it */
+.check :global(code.mono),
+.protects :global(code.mono) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* What NEAR does not do here, yet: H6 label over a Body Large paragraph, at the lead width */
+.note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 720px;
+}
+.noteText {
+  width: 100%;
+}
+
+/* Commands block with a copy button at its top-right corner */
+.commandsWrap {
+  position: relative;
+  width: 100%;
+}
+.commandsBlock {
+  padding-right: 96px;
+}
+.copy {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--elevation-medium);
+  color: var(--text-medium);
+  line-height: 120%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.copy:hover {
+  background: var(--elevation-weak);
+  color: var(--text-strong);
+}
+.copy:focus-visible {
+  outline: 1px solid var(--text-weak);
+  outline-offset: 2px;
+}
+
+/* Official references: H6 label, Body Small link list, Body Small note, at the lead width */
+.references {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 720px;
+}
+.refList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.refNote {
+  width: 100%;
+  color: var(--text-weak);
+}
+
+/* Repository button (Hero a7cb5w_zG): horizontal, gap 8, wraps */
+.actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+  width: auto;
+}
+
+/* Tablet: the commands block scrolls horizontally, so the copy button sits above the first line instead of over it */
+@media (max-width: 1199.98px) {
+  .page { gap: 0; }
+  .main {
+    gap: 40px;
+    padding: 72px 24px;
+  }
+  .commandsBlock {
+    padding-right: 24px;
+    padding-top: 48px;
+  }
+}
+
+/* Phone: 16px gutters; the table scrolls inside .table-wrap (global min-width 720) */
+@media (max-width: 809.98px) {
+  .main {
+    gap: 32px;
+    padding: 72px 16px;
+  }
+}

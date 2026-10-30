@@ -1,0 +1,92 @@
+/* Why now (spec §3.7) in the template system: section rhythm gap 64 / 48 / 32, padding 72px 0 / 72px 24px / 72px 16px,
+   hairline rules top and bottom to mark the band, tiles on --elevation-strong at radius 4 (the template card). */
+.section {
+  align-items: flex-start;
+  gap: 48px;
+  padding: 72px 0;
+  scroll-margin-top: 40px;
+  position: relative;
+}
+
+/* Stat group: losses tile 7 of 12 spanning two rows, two tiles stacked on the right (5 of 12) */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-rows: auto;
+  gap: 16px;
+  width: 100%;
+}
+.tile {
+  grid-column: span 5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+  border-radius: 4px;
+  background: var(--elevation-strong);
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+  transition: outline-color 120ms ease;
+}
+.tile:hover { outline-color: rgba(var(--ink-rgb), 0.3); }
+.lossTile { grid-column: span 7; grid-row: span 2; }
+.label { color: var(--text-weak); }
+.value {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 40px;
+  line-height: 110%;
+  letter-spacing: -0.03em;
+  color: var(--text-strong);
+}
+.line { color: var(--text-weak); max-width: 46ch; }
+.line :global(code.mono) { color: var(--text-strong); background: none; padding: 0; font-size: 0.95em; }
+.chartWrap { margin-top: auto; padding-top: 24px; width: 100%; }
+
+.fn { font-size: 0.7em; line-height: 0; margin-left: 2px; vertical-align: super; }
+.fn a { font-family: var(--mono); color: var(--text-weak); text-decoration: none; padding: 0 1px; transition: color 0.2s ease; }
+.fn a:hover, .fn a:focus-visible { color: var(--text-strong); text-decoration: underline; }
+
+.source { margin-top: -32px; color: var(--text-weak); font-size: 12.5px; }
+.source a { color: var(--text-medium); text-decoration: underline; text-decoration-color: rgba(var(--ink-rgb), 0.3); text-underline-offset: 3px; }
+.source a:hover { color: var(--text-strong); }
+
+/* Body (65-character measure), then the worst-case statement */
+.copy { display: flex; flex-direction: column; gap: 32px; width: 100%; }
+.body { max-width: 65ch; color: var(--text-medium); }
+.worst { display: flex; flex-direction: column; gap: 10px; max-width: 720px; }
+.worstLabel { font-size: 12px; letter-spacing: 0.04em; color: var(--text-weak); background: none; padding: 0; }
+.worstText {
+  font-family: "Host Grotesk", sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 130%;
+  letter-spacing: -0.03em;
+  color: var(--text-strong);
+  text-wrap: balance;
+}
+
+.figure { margin: 0; width: 100%; display: flex; flex-direction: column; gap: 12px; }
+.caption { color: var(--text-weak); max-width: 72ch; }
+.captionLead { color: var(--text-strong); }
+.tryLink { color: var(--text-strong); }
+
+@media (max-width: 1199.98px) {
+  .section { padding: 72px 24px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lossTile { grid-column: 1 / -1; grid-row: auto; }
+  .tile { grid-column: span 1; }
+  .lossTile.tile { grid-column: 1 / -1; }
+  .lossTile { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr); grid-template-rows: auto auto 1fr; column-gap: 32px; }
+  .lossTile > .chartWrap { grid-column: 2; grid-row: 1 / span 3; margin: 0; padding-top: 0; }
+}
+@media (max-width: 809.98px) {
+  .section { gap: 32px; padding: 72px 16px; }
+  .stats { grid-template-columns: minmax(0, 1fr); }
+  .tile, .lossTile.tile { grid-column: 1 / -1; padding: 20px 16px; }
+  .lossTile { display: flex; }
+  .lossTile > .chartWrap { padding-top: 16px; }
+  .value { font-size: 32px; }
+  .source { margin-top: -16px; }
+  .worstText { font-size: 20px; }
+}

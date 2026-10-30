@@ -1,0 +1,19 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  background: var(--background);
+  overflow: clip;
+}
+.content {
+  flex: 1 0 auto; /* layout template stretches the page placeholder; footer pins to the bottom on short pages */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+@media (max-width: 1199.98px) {
+  .layout { gap: 0; }
+}

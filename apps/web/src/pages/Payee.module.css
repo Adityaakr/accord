@@ -1,0 +1,104 @@
+/* Payee page (/product/payee, /payee). Geometry copied from the template:
+   page shell = PageHero (the 404 page Main) · rows = About YoIZRFTN2 / J3FA8OTKG.
+   Desktop = base · Tablet (max 1199.98) · Phone (max 809.98) overrides below. */
+
+/* Page: the layout template's gap between page sections (48 on Desktop, 0 below) */
+.page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+}
+
+/* ---------- Content section: vertical, gap 64, padding 72px 0, max-width 1080 (.section) ---------- */
+.block {
+  justify-content: center;
+  gap: 64px;
+  padding: 72px 0;
+  scroll-margin-top: 40px;
+}
+
+/* Rows (About YoIZRFTN2 / J3FA8OTKG): horizontal, gap 64, align+distribute center, overflow hidden */
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 64px;
+  width: 100%;
+  overflow: hidden;
+}
+/* Image: width 1fr, aspect-ratio 1.3, radius 4, fill cover */
+.image {
+  flex: 1 1 0px;
+  min-width: 0;
+  aspect-ratio: 1.3 / 1;
+  border-radius: 4px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Content: vertical, gap 24, align start, width 1fr */
+.content {
+  flex: 1 1 0px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+}
+/* Text: vertical, gap 12, max-width 400 */
+.rowText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+.rowTitle,
+.rowBody { width: 100%; }
+.rowTitle { text-wrap: balance; }
+
+/* Closing button (Hero a7cb5w_zG): horizontal, align start, gap 8, wraps on narrow widths */
+.actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  width: auto;
+}
+
+/* ---------- Tablet ---------- */
+@media (max-width: 1199.98px) {
+  .page { gap: 0; }
+  .block {
+    gap: 48px;
+    padding: 72px 24px;
+  }
+}
+
+/* ---------- Phone ---------- */
+@media (max-width: 809.98px) {
+  .block {
+    gap: 48px;
+    padding: 72px 16px;
+  }
+  /* rows → vertical stack, gap 24 */
+  .row {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .image,
+  .content {
+    flex: none;
+    width: 100%;
+  }
+  /* right-image rows put the Image before the Content on Phone */
+  .rowPhoneImageFirst .image { order: -1; }
+}

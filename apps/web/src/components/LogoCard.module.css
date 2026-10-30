@@ -1,0 +1,34 @@
+/* Logo Card (pIEASCV9k / zxubIPaDB) */
+.card {
+  position: relative;
+  flex: 0 0 auto;
+  width: 146px;
+  height: 112px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--token-8c339a8e-efec-400b-a87f-40a292101076); /* Elevation Strong */
+  border-radius: 4px;
+  overflow: hidden;
+}
+.logo {
+  width: 64px;
+  height: 64px;
+  aspect-ratio: 1 / 1;
+  flex: 0 0 auto;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Text mark (refill): centred label in place of the 64×64 image; same card size, fill and radius */
+.label {
+  width: 100%;
+  padding: 0 8px;
+  margin: 0;
+  text-align: center;
+  color: var(--text-strong);
+  overflow-wrap: anywhere;
+}
+/* A command mark (`outlayer-verify`) in the mono face, sized to sit on one line inside the 146px card */
+.label:global(.mono) { font-size: 14px; white-space: nowrap; }

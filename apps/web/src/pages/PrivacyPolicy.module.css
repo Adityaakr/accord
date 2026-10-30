@@ -1,0 +1,150 @@
+/* Privacy Policy page (Ivq1YZFwy, path /privacy-policy)
+   Desktop breakpoint Zs7Hv4Vnw = base · Tablet clcriRn3Y (no overrides) · Phone WXwyzmg4Y.
+   The breakpoint uses layout template vLUWo2njy (Nav/Footer come from App). */
+
+/* Breakpoint content: vertical stack, centered */
+.page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Main R7DaFnuPM (elementId "hero"): vertical, align center, gap 64, padding 48px 0,
+   width 1fr, max-width 560, scrollMarginTop 200 */
+.main {
+  align-items: center;
+  justify-content: flex-start;
+  gap: 64px;
+  padding: 48px 0px;
+  max-width: 560px;
+  scroll-margin-top: 200px;
+}
+
+/* Title fQDNvHm7F: vertical, align start, gap 16, width 1fr, overflow hidden */
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 16px;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+/* Tag gxZFQKKDY: horizontal, align center, gap 8, width auto (appearEffect: default Appear) */
+.tag {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: auto;
+  height: auto;
+}
+/* Indicator equXr3MkO: 14×8, radius 9999, fill White */
+.indicator {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--white);
+}
+/* Text s0kJXU3_a: Body Small, width auto */
+.tagText {
+  width: auto;
+}
+
+/* Title cxHZaenz6: H1, Text Strong, width 1fr */
+.title {
+  width: 100%;
+  color: var(--text-strong);
+}
+/* Description SJ3HgRWEB: Body Large, Text Medium, align left, width 1fr */
+.description {
+  width: 100%;
+  color: var(--text-medium);
+  text-align: left;
+}
+.word {
+  display: inline-block;
+  will-change: transform, opacity, filter;
+}
+
+/* Sections ytF4ldnHg: vertical, align center, justify center, gap 32, width 1fr, overflow clip */
+.sections {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  width: 100%;
+  height: auto;
+  overflow: clip;
+}
+
+/* Section (oPzH_1zRb …): vertical, align center, justify center, gap 16, width 1fr,
+   max-width 560, overflow clip (appearEffect onMount handled in TSX) */
+.sectionBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  overflow: clip;
+}
+/* Section Title: H5 (AGwqkS8yv), width 1fr */
+.sectionTitle {
+  width: 100%;
+}
+
+/* Paragraph (T3DsQ_FFH, jRZukmTyJ): vertical, align center, justify center, gap 12, width 1fr, overflow clip */
+.paragraph {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  height: auto;
+  overflow: clip;
+}
+
+/* Rich text bodies: Body Small (pWARBbc57), width 1fr, paragraphSpacing 0 on the node.
+   Multi-block node GGd3bVymh (p + bullet list): the Body Small preset's paragraphSpacing
+   (10px) separates the paragraph from the list; list items have no extra spacing. */
+.rich {
+  width: 100%;
+}
+.rich p {
+  margin: 0;
+}
+.rich p + ul {
+  margin-top: 10px;
+}
+.rich ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rich li {
+  position: relative;
+  padding-left: 19px;
+}
+.rich li::before {
+  content: "\2022";
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* ---------- Tablet clcriRn3Y: no overrides ---------- */
+
+/* ---------- Phone WXwyzmg4Y ---------- */
+@media (max-width: 809.98px) {
+  .main { padding: 48px 16px; }        /* WXwyzmg4YR7DaFnuPM */
+}

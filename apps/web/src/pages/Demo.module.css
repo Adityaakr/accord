@@ -1,0 +1,131 @@
+/* /demo: page shell (Home `.page`) · player card · About row. Values copied from the Framer tree. */
+
+.page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px; /* layout template gap between page sections on Desktop */
+}
+
+/* Recorded demo section: vertical, gap 32, padding 48px 0 */
+.demo {
+  justify-content: center;
+  gap: 32px;
+  padding: 48px 0;
+  scroll-margin-top: 40px;
+}
+
+/* Player card: Media card style (Elevation Strong, radius 4), label above the 16:9 frame */
+.player {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+  padding: 20px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--elevation-strong);
+}
+.playerLabel { width: auto; color: var(--text-weak); }
+.frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--elevation-medium);
+}
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.placeholderText {
+  max-width: 480px;
+  text-align: center;
+  color: var(--text-weak);
+}
+
+/* ---------- About section (NX9mbZ4xB) geometry for the A8 row ---------- */
+.security {
+  justify-content: center;
+  gap: 64px;
+  padding: 72px 0;
+  scroll-margin-top: 40px;
+}
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 64px;
+  width: 100%;
+  overflow: hidden;
+}
+.image {
+  flex: 1 1 0px;
+  min-width: 0;
+  aspect-ratio: 1.3 / 1;
+  border-radius: 4px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.content {
+  flex: 1 1 0px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+.rowTitle, .rowBody { width: 100%; }
+.rowTitle { text-wrap: balance; }
+.actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  width: auto;
+}
+
+/* ---------- Tablet ---------- */
+@media (max-width: 1199.98px) {
+  .page { gap: 0; }
+  .demo { padding: 48px 24px; }
+  .security { gap: 48px; padding: 72px 24px; }
+}
+
+/* ---------- Phone ---------- */
+@media (max-width: 809.98px) {
+  .demo { padding: 48px 16px; }
+  .player { padding: 16px; }
+  .security { gap: 48px; padding: 72px 16px; }
+  .row { flex-direction: column; gap: 24px; }
+  .image, .content { flex: none; width: 100%; }
+}

@@ -1,0 +1,142 @@
+/* How it works (#how): template content-section rhythm (as Overview WaR1fWHPo) */
+.section {
+  gap: 64px;
+  padding: 72px 0px 72px 0px;
+  justify-content: center;
+  scroll-margin-top: 40px;
+}
+
+/* Steps row: the hero's Action-card row (mZ8KywPOa, gap 40), four equal columns on one hairline */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 40px;
+  row-gap: 40px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* One step: pill marker above the card, gap 20 */
+.step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 20px;
+  min-width: 0;
+  height: auto;
+}
+/* Each step draws its segment of the stepper line through the pill's centre; the line runs across the column gap
+   to the next step and stops at the row's end */
+.step::before {
+  content: "";
+  position: absolute;
+  top: 3.5px;
+  left: 0;
+  right: -40px;
+  height: 1px;
+  background: var(--hairline);
+}
+.step:last-child::before { right: 0; }
+
+/* Template indicator pill (14×8, radius 9999, White). At rest a step's pill sits at White 35%; the highlighted step
+   (hovered, keyboard-focused, or the pre-highlighted "03 · Executing") takes it to full White over 120ms. */
+.node {
+  position: relative;
+  z-index: 1;
+  display: block;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(var(--ink-rgb), 0.35);
+  transition: background-color 120ms ease;
+}
+.step:hover .node,
+.step:focus-visible .node,
+.active .node { background: var(--white); }
+
+/* Keyboard focus ring on a step (spec §1.7: focus does what hover does) */
+.step { outline: none; }
+.step:focus-visible {
+  outline: 2px solid rgba(var(--ink-rgb), 0.5);
+  outline-offset: 4px;
+}
+
+/* While another step is hovered or focused, the pre-highlighted step rests like the others */
+.steps:hover .active:not(:hover) .node,
+.steps:focus-within .active:not(:focus-visible) .node { background: rgba(var(--ink-rgb), 0.35); }
+.steps:hover .active:not(:hover) .heading,
+.steps:focus-within .active:not(:focus-visible) .heading { color: var(--text-medium); }
+.steps:hover .active:hover .node,
+.steps:focus-within .active:focus-visible .node { background: var(--white); }
+.steps:hover .active:hover .heading,
+.steps:focus-within .active:focus-visible .heading { color: var(--text-strong); }
+
+/* Action card (BE0Kc14HI / Default): vertical, gap 8, align start, width 1fr */
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  height: auto;
+}
+.heading {
+  width: 100%;
+  height: auto;
+  color: var(--text-medium);
+  transition: color 120ms ease;
+}
+.step:hover .heading,
+.step:focus-visible .heading,
+.active .heading { color: var(--text-strong); }
+.num { font-weight: 400; }
+.body {
+  width: 100%;
+  height: auto;
+}
+
+/* ---------- Tablet: gap 48, padding 72/24; two columns, card gap 32 ---------- */
+@media (max-width: 1199.98px) {
+  .section { gap: 48px; padding: 72px 24px 72px 24px; }
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 1fr; /* both rows the same height: the four cards stay equal */
+    column-gap: 32px;
+    row-gap: 40px;
+  }
+  .step::before { right: -32px; }
+  .step:nth-child(2n)::before { right: 0; }
+}
+
+/* ---------- Phone: gap 32, padding 72/16; one column, the stepper runs vertically ---------- */
+@media (max-width: 809.98px) {
+  .section { gap: 32px; padding: 72px 16px 72px 16px; }
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 24px;
+  }
+  .step {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  /* Pill centred on the H6's first line (16px × 110% = 17.6px) */
+  .node { margin-top: 5px; }
+  .step::before {
+    top: -12px;
+    bottom: -12px;
+    left: 6.5px;
+    right: auto;
+    width: 1px;
+    height: auto;
+  }
+  .step:first-child::before { top: 9px; }
+  .step:last-child::before { bottom: calc(100% - 9px); }
+  .step:nth-child(2n)::before { right: auto; }
+}

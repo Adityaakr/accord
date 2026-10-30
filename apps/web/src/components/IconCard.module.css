@@ -1,0 +1,72 @@
+/* Icon Card (dnTe1y1M6 / Default J1gFCUXFa) */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 24px;
+  width: 350px;
+  height: auto;
+  padding: 24px 20px;
+  background: var(--elevation-strong);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Hover (spec §1.7): the surface's border shifts to White at 30% over 120ms. An inset ring, so no size change, no shadow. */
+.card {
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow 120ms ease;
+}
+.card:hover {
+  box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), 0.3);
+}
+
+/* huFgiZMep: 64×64 circle, 1px Elevation Weak border */
+.iconCircle {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--elevation-weak);
+  border-radius: 999px;
+  overflow: clip;
+}
+
+/* ijQykoF4o: 24×24, opacity 0.9, color White, stroke width 1.4 (set on the <svg> paths) */
+.icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  aspect-ratio: 1;
+  color: var(--white);
+  opacity: 0.9;
+}
+.icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* hIf4D1WL9 */
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  height: auto;
+}
+.title,
+.description {
+  width: 100%;
+}
+
+/* Spec §1.7: hover lifts the edge to White at 30%, 120ms, drawn inset so nothing shifts */
+.card { outline: 1px solid transparent; outline-offset: -1px; transition: outline-color 120ms ease; }
+.card:hover { outline-color: rgba(var(--ink-rgb), 0.3); }
