@@ -7,6 +7,8 @@
 Two companies' agents negotiate in confidence. Both companies approve the terms.<br/>
 From then on, those terms are the only authority the buyer's agent has over money.
 
+**Best for** market-making retainers · vendor contracts and invoices · treasury payouts · selling to AI agents · agent-to-agent services
+
 </div>
 
 **Built for commerce in stablecoins**
