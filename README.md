@@ -72,9 +72,11 @@ From then on, those terms are the only authority the buyer's agent has over mone
 
 ## What Accord is
 
-Every deal tool today is one side's agent on that side's server. A seller's deal desk runs on the seller's infrastructure, a procurement bot on the buyer's. When both companies send an agent, the side with more information wins, so every company arms its agent and every vendor hides its floor.
+Companies are starting to let agents negotiate deals and move money. The tooling has not caught up. Every deal tool today is one side's agent on that side's server: the seller's deal desk runs on the seller's infrastructure, the procurement bot on the buyer's. When both companies bring an agent, nobody trusts the room. The side with more information wins, so every company arms its agent and every vendor hides its floor. And once a deal is done, the agent that negotiated it is usually the same agent that pays, steered by whatever lands in its inbox.
 
-**Accord is the room neither side owns.** It joins three stages that a business needs before it can let an agent spend money, and makes the output of each stage the input the next one enforces:
+**Accord is the room neither side owns, and the rules that follow the deal out of the room.** It is a deal room for the negotiation and a control plane for the money: the terms two companies approve become the policy a NEAR contract enforces on every payment the buyer's agent asks for.
+
+It joins the three stages a business needs before it can let an agent spend money, and makes the output of each stage the input the next one enforces:
 
 | Part | What it does | In one line |
 | --- | --- | --- |
@@ -84,6 +86,40 @@ Every deal tool today is one side's agent on that side's server. A seller's deal
 | **Accord Atlas** | The first application built on Accord | Liquidity agreements with measurable payment conditions, period by period |
 
 > The model never decides where money goes. The contract does. The worst a hijacked agent can do is make a payment you already approved, to the recipient you already accepted, when it falls due.
+
+### Accord is infrastructure, not just an app
+
+Accord is a primitive on NEAR that other products build on. Accord Atlas is the first; procurement is the reference deal type. A new deal type plugs in with three things, and inherits everything else:
+
+| A deal type supplies | Accord provides |
+| --- | --- |
+| A **mandate schema**: what each side may state in confidence | Sealed negotiation inside an attested enclave, with both hard limits checked in code |
+| A **terms validator** that runs inside the enclave | Attested terms, commitment hashes and a transcript hash on chain |
+| A **release rule**: on schedule, on acceptance, or on attested evidence | Agreement controls: one scoped agent key, `act` checks, refusals on the record, one-transaction revocation |
+| | Payee: recipient authorisation with versioning and a 24-hour change delay |
+| | Settlement in USDC on NEAR from contract-held escrow, and a public record anyone can check |
+
+```mermaid
+flowchart LR
+    subgraph Apps["Applications and deal types"]
+        A1["Accord Atlas<br/>market-making retainers"]
+        A2["Procurement<br/>reference deal type"]
+        A3["Your deal type<br/>schema · validator · release rule"]
+    end
+    subgraph Core["Accord"]
+        C1["Sealed Table"]
+        C2["Agreement controls"]
+        C3["Payee"]
+    end
+    subgraph Base["Runs on"]
+        B1["NEAR contracts<br/>accounts · scoped keys"]
+        B2["USDC on NEAR<br/>NEP-141"]
+        B3["OutLayer TDX enclaves<br/>NEAR AI Cloud"]
+    end
+    Apps --> Core --> Base
+```
+
+Any agent that can hold a NEAR function-call key can be a party: the agent never needs custody of funds or permission beyond `act`, so it can come from any framework. The humans keep the keys that approve, accept and revoke.
 
 ---
 
