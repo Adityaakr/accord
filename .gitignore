@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# builds
+dist/
+*.tsbuildinfo
+
+# environment (commit only .env.example)
+.env
+.env.*
+!.env.example
+
+# local tooling and OS
+.prism/
+.DS_Store
+*.log
+.vscode/*
+!.vscode/extensions.json
+.idea/
