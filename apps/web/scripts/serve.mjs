@@ -77,5 +77,16 @@ const server = createServer((req, res) => {
   createReadStream(f.path).on("error", () => res.destroy()).pipe(res)
 })
 
+/* Listen on $PORT, and also on the ports hosts most often target by default (8080, 3000, 5180), so a public domain
+   pinned to a fixed target port still reaches the app. Extra ports that are taken are skipped. */
+const handler = server.listeners("request")[0]
+const extra = [8080, 3000, 5180].filter((p) => p !== PORT)
+const servers = [server]
 server.listen(PORT, HOST, () => console.log(`accord web: serving ${DIST} on http://${HOST}:${PORT}`))
-for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => server.close(() => process.exit(0)))
+for (const p of extra) {
+  const s = createServer(handler)
+  s.on("error", (e) => console.log(`accord web: port ${p} skipped (${e.code})`))
+  s.listen(p, HOST, () => console.log(`accord web: also listening on ${p}`))
+  servers.push(s)
+}
+for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => { servers.forEach((s) => s.close()); setTimeout(() => process.exit(0), 500) })
