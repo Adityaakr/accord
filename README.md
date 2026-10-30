@@ -7,6 +7,22 @@
 Two companies' agents negotiate in confidence. Both companies approve the terms.<br/>
 From then on, those terms are the only authority the buyer's agent has over money.
 
+</div>
+
+**Built for commerce in stablecoins**
+
+| Use case | What the agreement enforces | Money moves when |
+| --- | --- | --- |
+| **Market-making retainers** | The spread, depth and uptime both sides agreed | Attested order-book observations pass (Accord Atlas) |
+| **Vendor contracts and invoices** | Invoices matched to approved orders; duplicates, overcharges and changed bank details refused | The buyer accepts the delivery |
+| **Treasury payouts** | Grants and recurring payouts, only to authorised recipients | Each milestone report is accepted |
+| **Selling to AI agents** | Deals with buyers' agents, funded before work starts | The agreement is funded, then on schedule |
+| **Agent-to-agent services** | Usage priced and settled between agents, within agreed caps | On schedule, until revoked |
+
+**In every deal room:** confidential negotiation · agent permissions · payment controls · recipient authorisation · conditional settlement
+
+<div align="center">
+
 [![CI](https://github.com/Adityaakr/accord/actions/workflows/ci.yml/badge.svg)](https://github.com/Adityaakr/accord/actions/workflows/ci.yml)
 ![Network](https://img.shields.io/badge/network-NEAR%20testnet-111?logo=near)
 ![Settlement](https://img.shields.io/badge/settlement-USDC%20on%20NEAR-2775CA)
