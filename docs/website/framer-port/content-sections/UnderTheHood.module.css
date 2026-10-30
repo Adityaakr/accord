@@ -1,0 +1,113 @@
+/* §4.12 Under the hood (#near): template section rhythm; plain full-width table, "not yet" paragraph, commands block */
+.section {
+  gap: 64px;
+  padding: 72px 0;
+  justify-content: center;
+  scroll-margin-top: 40px;
+}
+
+.tableAppear {
+  width: 100%;
+}
+
+/* Column rhythm: the piece name is narrow, the two prose columns share the rest */
+.table th:first-child,
+.piece {
+  width: 18%;
+  min-width: 168px;
+}
+.protects {
+  width: 44%;
+}
+.check {
+  width: 38%;
+}
+/* Commands in a table cell may wrap at the cell edge, never overflow it */
+.check :global(code.mono),
+.protects :global(code.mono) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* What NEAR does not do here, yet */
+.notYet {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 760px;
+}
+.label,
+.notYetText {
+  width: 100%;
+}
+
+/* Commands block with a copy button at its top-right corner */
+.commands {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+.commandsWrap {
+  position: relative;
+  width: 100%;
+}
+.commandsBlock {
+  padding-right: 96px;
+}
+.copy {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--elevation-medium);
+  color: var(--text-medium);
+  line-height: 120%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.copy:hover {
+  background: var(--elevation-weak);
+  color: var(--text-strong);
+}
+.copy:focus-visible {
+  outline: 1px solid var(--text-weak);
+  outline-offset: 2px;
+}
+
+.closing {
+  width: 100%;
+  max-width: 760px;
+  color: var(--text-strong);
+}
+.cited {
+  width: 100%;
+  color: var(--text-weak);
+}
+.cited a {
+  color: var(--text-weak);
+}
+.cited a:hover {
+  color: var(--text-strong);
+}
+
+/* Tablet */
+@media (max-width: 1199.98px) {
+  .section {
+    gap: 48px;
+    padding: 72px 24px;
+  }
+}
+
+/* Phone: table scrolls inside .table-wrap (global min-width 720); the block scrolls inside itself */
+@media (max-width: 809.98px) {
+  .section {
+    gap: 32px;
+    padding: 72px 16px;
+  }
+  .commandsBlock {
+    padding-right: 24px;
+    padding-top: 48px;
+  }
+}

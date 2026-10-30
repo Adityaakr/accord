@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" role="img" aria-label="A Glassbook period: six observation slots recorded by an attested observer from the venue's public order book, four passing and two failing the agreed spread, depth and uptime; the release rule of four of six is met, so the period pays; had fewer passed, the period would be withheld for people to decide. The venue's book shows market conditions, not the market maker's own orders." font-family="Satoshi, Manrope, system-ui, sans-serif" font-size="12" style="color:var(--fg,#e8edf2)">
+  <defs><marker id="arr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker></defs>
+  <text x="40" y="30" font-size="11" letter-spacing="0.8" style="fill:var(--muted,#9aa7b4)">Period 1 · six observation slots · agreed: spread ≤ 20 bps, depth ≥ 10,000 within 1% of mid, uptime ≥ 95%</text>
+  <line x1="60" y1="130" x2="700" y2="130" stroke="currentColor" stroke-width="1.2"/>
+  <g font-family="JetBrains Mono, ui-monospace, monospace" font-size="10.5">
+    <rect x="62" y="48" width="96" height="66" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--pass,#4fc48a)"/>
+    <text x="110" y="64" text-anchor="middle" font-family="Satoshi, Manrope, system-ui, sans-serif" font-weight="600" font-size="12" style="fill:var(--pass,#4fc48a)">slot 1 · pass</text>
+    <text x="110" y="82" text-anchor="middle" fill="currentColor">11 bps · 14,200</text>
+    <text x="110" y="98" text-anchor="middle" fill="currentColor">uptime 98%</text>
+    <line x1="110" y1="114" x2="110" y2="130" stroke="currentColor"/>
+
+    <rect x="172" y="48" width="96" height="66" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--pass,#4fc48a)"/>
+    <text x="220" y="64" text-anchor="middle" font-family="Satoshi, Manrope, system-ui, sans-serif" font-weight="600" font-size="12" style="fill:var(--pass,#4fc48a)">slot 2 · pass</text>
+    <text x="220" y="82" text-anchor="middle" fill="currentColor">13 bps · 12,900</text>
+    <text x="220" y="98" text-anchor="middle" fill="currentColor">uptime 97%</text>
+    <line x1="220" y1="114" x2="220" y2="130" stroke="currentColor"/>
+
+    <rect x="282" y="48" width="96" height="66" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--pass,#4fc48a)"/>
+    <text x="330" y="64" text-anchor="middle" font-family="Satoshi, Manrope, system-ui, sans-serif" font-weight="600" font-size="12" style="fill:var(--pass,#4fc48a)">slot 3 · pass</text>
+    <text x="330" y="82" text-anchor="middle" fill="currentColor">16 bps · 11,400</text>
+    <text x="330" y="98" text-anchor="middle" fill="currentColor">uptime 96%</text>
+    <line x1="330" y1="114" x2="330" y2="130" stroke="currentColor"/>
+
+    <rect x="392" y="48" width="96" height="66" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--refuse,#ef5a5a)"/>
+    <text x="440" y="64" text-anchor="middle" font-family="Satoshi, Manrope, system-ui, sans-serif" font-weight="600" font-size="12" style="fill:var(--refuse,#ef5a5a)">slot 4 · fail</text>
+    <text x="440" y="82" text-anchor="middle" fill="currentColor">48 bps · 9,800</text>
+    <text x="440" y="98" text-anchor="middle" fill="currentColor">uptime 71%</text>
+    <line x1="440" y1="114" x2="440" y2="130" stroke="currentColor"/>
+
+    <rect x="502" y="48" width="96" height="66" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--pass,#4fc48a)"/>
+    <text x="550" y="64" text-anchor="middle" font-family="Satoshi, Manrope, system-ui, sans-serif" font-weight="600" font-size="12" style="fill:var(--pass,#4fc48a)">slot 5 · pass</text>
+    <text x="550" y="82" text-anchor="middle" fill="currentColor">12 bps · 13,100</text>
+    <text x="550" y="98" text-anchor="middle" fill="currentColor">uptime 99%</text>
+    <line x1="550" y1="114" x2="550" y2="130" stroke="currentColor"/>
+
+    <rect x="612" y="48" width="96" height="66" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--refuse,#ef5a5a)"/>
+    <text x="660" y="64" text-anchor="middle" font-family="Satoshi, Manrope, system-ui, sans-serif" font-weight="600" font-size="12" style="fill:var(--refuse,#ef5a5a)">slot 6 · fail</text>
+    <text x="660" y="82" text-anchor="middle" fill="currentColor">venue error</text>
+    <text x="660" y="98" text-anchor="middle" fill="currentColor">recorded as fail</text>
+    <line x1="660" y1="114" x2="660" y2="130" stroke="currentColor"/>
+  </g>
+  <text x="380" y="152" text-anchor="middle" font-size="11" style="fill:var(--muted,#9aa7b4)">each slot: the observer, inside an attested enclave, samples the venue's public order book on the agreed schedule</text>
+
+  <line x1="700" y1="130" x2="760" y2="130" stroke="currentColor" stroke-width="1.2" marker-end="url(#arr4)"/>
+  <rect x="760" y="48" width="210" height="60" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--accent,#d8a84a)" stroke-width="1.4"/>
+  <text x="865" y="70" text-anchor="middle" font-weight="600" fill="currentColor">Release rule</text>
+  <text x="865" y="90" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11.5" fill="currentColor">pay if ≥ 4 of 6 slots pass</text>
+  <line x1="865" y1="108" x2="865" y2="130" stroke="currentColor" stroke-width="1.2"/>
+  <rect x="760" y="130" width="210" height="44" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--pass,#4fc48a)" stroke-width="1.4"/>
+  <text x="865" y="148" text-anchor="middle" font-weight="600" style="fill:var(--pass,#4fc48a)">4 of 6 passed: period pays</text>
+  <text x="865" y="165" text-anchor="middle" font-size="11" fill="currentColor">retainer to the bound recipient</text>
+  <rect x="760" y="186" width="210" height="44" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--refuse,#ef5a5a)" stroke-dasharray="5 4"/>
+  <text x="865" y="204" text-anchor="middle" font-weight="600" style="fill:var(--refuse,#ef5a5a)">fewer than 4: withheld</text>
+  <text x="865" y="221" text-anchor="middle" font-size="11" fill="currentColor">people on both sides decide</text>
+
+  <text x="40" y="262" font-size="11" fill="currentColor">Scope: the venue's book shows market conditions, not the market maker's own orders.</text>
+  <text x="40" y="280" font-size="11" style="fill:var(--muted,#9aa7b4)">Account-attributed verification needs the market maker's authenticated venue data inside the enclave; planned, not implemented.</text>
+</svg>

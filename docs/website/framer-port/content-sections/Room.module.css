@@ -1,0 +1,100 @@
+/* §4.4 What's in the room (#room): template section rhythm, four equal cards 2×2 → 1 column */
+.section {
+  gap: 64px;
+  padding: 72px 0;
+  justify-content: center;
+  scroll-margin-top: 40px;
+}
+
+/* Four equal cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+/* Grid cell carries the anchor id (nav links to #room-sealed-table and #room-payee) */
+.cell {
+  display: flex;
+  min-width: 0;
+  scroll-margin-top: 40px;
+}
+
+/* Card: Elevation Strong, radius 4, padding 24px 20px, gap 16 */
+.card {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 16px;
+  min-width: 0;
+  padding: 24px 20px;
+  background: var(--elevation-strong);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.name,
+.what,
+.label,
+.guarantees,
+.stops {
+  width: 100%;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+/* Guarantee reads as the main text of the card; the limit is set smaller and weaker (brief §6) */
+.guarantees {
+  color: var(--text-strong);
+}
+.stops {
+  font-size: 13px;
+  color: var(--text-weak);
+}
+
+/* Command foot: hairline divider above, pushed to the bottom so the four feet line up */
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+.after {
+  width: 100%;
+  max-width: 760px;
+}
+.afterText {
+  width: 100%;
+}
+
+/* Tablet */
+@media (max-width: 1199.98px) {
+  .section {
+    gap: 48px;
+    padding: 72px 24px;
+  }
+}
+
+/* Phone: one column */
+@media (max-width: 809.98px) {
+  .section {
+    gap: 32px;
+    padding: 72px 16px;
+  }
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

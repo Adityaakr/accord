@@ -1,0 +1,98 @@
+/* Security (#security): template section rhythm, heading + stacked blocks */
+.section {
+  gap: 64px;
+  padding: 72px 0;
+  scroll-margin-top: 40px;
+}
+
+.blocks {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 48px;
+  width: 100%;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+}
+
+.subheading {
+  width: 100%;
+}
+
+/* "What we do not claim": template bullet list (8px marker, 19px indent) */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 880px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.item {
+  position: relative;
+  padding-left: 19px;
+}
+.item::before {
+  content: "\2022";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 8px;
+  text-align: center;
+  color: var(--text-strong);
+}
+
+/* Pull line: quote card on Elevation Medium, H5 at weight 400, paraphrase label small */
+.quote {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+  margin: 0;
+  padding: 32px 24px;
+  border-radius: 4px;
+  background: var(--elevation-medium);
+}
+.quoteText {
+  font-weight: 400;
+  line-height: 130%;
+  max-width: 880px;
+}
+.quoteLabel {
+  color: var(--text-weak);
+}
+
+/* Tablet */
+@media (max-width: 1199.98px) {
+  .section {
+    gap: 48px;
+    padding: 72px 24px;
+  }
+  .blocks {
+    gap: 40px;
+  }
+}
+
+/* Phone: 16px gutters, tables scroll inside .table-wrap */
+@media (max-width: 809.98px) {
+  .section {
+    gap: 32px;
+    padding: 72px 16px;
+  }
+  .blocks {
+    gap: 32px;
+  }
+  .quote {
+    padding: 24px 20px;
+  }
+}

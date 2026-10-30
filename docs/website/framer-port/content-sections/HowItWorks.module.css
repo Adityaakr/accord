@@ -1,0 +1,109 @@
+/* How it works (#how): template section rhythm */
+.section {
+  gap: 64px;
+  padding: 72px 0;
+  justify-content: center;
+  scroll-margin-top: 40px;
+}
+
+/* Visual: stepper + caption */
+.visual {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+}
+
+/* Four nodes on one hairline: the line is the contract */
+.stepper {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+  padding: 8px 0;
+}
+.step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  flex: 1 1 0px;
+  min-width: 0;
+}
+/* Each step draws its segment of the contract line; the ends stop at their node */
+.step::before {
+  content: "";
+  position: absolute;
+  top: 3.5px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--hairline);
+}
+.step:first-child::before { left: 50%; }
+.step:last-child::before { right: 50%; }
+/* Template indicator pill, white */
+.node {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 14px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 9999px;
+  background: var(--white);
+}
+.label { font-size: 14px; }
+
+.caption { color: var(--text-weak); }
+
+/* Table and the line under it */
+.tableBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  width: 100%;
+}
+.closing { max-width: 720px; }
+
+/* Tablet */
+@media (max-width: 1199.98px) {
+  .section {
+    gap: 48px;
+    padding: 72px 24px;
+  }
+}
+
+/* Phone: the stepper runs vertically */
+@media (max-width: 809.98px) {
+  .section {
+    gap: 32px;
+    padding: 72px 16px;
+  }
+  .stepper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 0 0 0 4px;
+  }
+  .step {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    flex: 0 0 auto;
+    width: 100%;
+  }
+  .step::before {
+    top: -10px;
+    bottom: -10px;
+    left: 6.5px;
+    right: auto;
+    width: 1px;
+    height: auto;
+  }
+  .step:first-child::before { top: 50%; left: 6.5px; }
+  .step:last-child::before { bottom: 50%; right: auto; }
+}

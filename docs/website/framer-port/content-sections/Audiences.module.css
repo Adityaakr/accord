@@ -1,0 +1,112 @@
+/* Audiences (#audiences): brief §4.9, three columns #buyers #vendors #one-sided.
+   Section rhythm from the template: gap 64, padding 72px 0, scroll-margin-top 40. */
+.section {
+  gap: 64px;
+  padding: 72px 0px 72px 0px;
+  justify-content: center;
+  scroll-margin-top: 40px;
+}
+
+/* Three equal columns; grid stretch gives equal card heights on desktop. */
+.columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Content card: Elevation Strong, radius 4, padding 32px 24px, gap 24. */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 24px;
+  min-width: 0;
+  height: auto;
+  padding: 32px 24px;
+  background: var(--elevation-strong);
+  border-radius: 4px;
+  overflow: hidden;
+  scroll-margin-top: 40px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+.label {
+  color: var(--text-weak);
+}
+.headline,
+.body {
+  width: 100%;
+}
+.headline {
+  text-wrap: balance;
+}
+
+/* Bullets: template indicator dot in Text Weak, Body Small text; a hairline above separates them from the body. */
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+}
+.bullet {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+.dot {
+  display: block;
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 9999px;
+  background: var(--purple);
+  opacity: 0.9;
+}
+
+/* Button sits at the foot of every card regardless of text length. */
+.foot {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+/* Tablet: text length makes three columns too narrow; one column. */
+@media (max-width: 1199.98px) {
+  .section {
+    gap: 48px;
+    padding: 72px 24px 72px 24px;
+  }
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Phone: 16px gutters. */
+@media (max-width: 809.98px) {
+  .section {
+    gap: 32px;
+    padding: 72px 16px 72px 16px;
+  }
+  .card {
+    padding: 32px 20px;
+  }
+}

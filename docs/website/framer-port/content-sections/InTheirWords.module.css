@@ -1,0 +1,61 @@
+/* In their words (brief §4.3, #named): template section rhythm; four dense bibliography tables */
+.section {
+  gap: 64px;
+  padding: 72px 0px;
+  justify-content: center;
+  scroll-margin-top: 40px;
+}
+
+/* Groups: one label + one table each */
+.groups {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 40px;
+  width: 100%;
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+.label {
+  width: 100%;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* Bibliography columns: Who 22 · When 13 · What 43 · Piece 22 (of the table width) */
+.table { table-layout: fixed; }
+.colWho { width: 22%; }
+.colWhen { width: 13%; }
+.colWhat { width: 43%; }
+.colPiece { width: 22%; }
+.table td { overflow-wrap: anywhere; }
+.when { font-variant-numeric: tabular-nums; }
+.verbatim { color: var(--text-weak); }
+
+.closing {
+  width: 100%;
+  max-width: 720px;
+}
+
+/* Tablet */
+@media (max-width: 1199.98px) {
+  .section {
+    gap: 48px;
+    padding: 72px 24px;
+  }
+}
+
+/* Phone: tables scroll inside .table-wrap (min-width 720 from global.css); no horizontal page scroll */
+@media (max-width: 809.98px) {
+  .section {
+    gap: 32px;
+    padding: 72px 16px;
+  }
+  .groups { gap: 32px; }
+}

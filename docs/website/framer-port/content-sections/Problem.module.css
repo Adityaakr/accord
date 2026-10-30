@@ -1,0 +1,127 @@
+/* The problem (#problem): template section rhythm */
+.section {
+  gap: 64px;
+  padding: 72px 0px;
+  justify-content: center;
+  scroll-margin-top: 40px;
+}
+
+/* Three equal cards in a row (3 → 2 → 1) */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+/* IconCard surface: Elevation Strong, radius 4, padding 24px 20px, gap 16 */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 16px;
+  min-width: 0;
+  height: auto;
+  padding: 24px 20px;
+  background: var(--elevation-strong);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Card heading: ContentCard's indicator pill (8×14, radius 9999) in the section accent + H5 */
+.cardHeading {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.indicator {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--orange);
+}
+.cardTitle {
+  flex: 1 1 0px;
+  min-width: 0;
+}
+.cardBody {
+  width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Blockquote card: Elevation Medium surface */
+.quoteWrap,
+.transitionWrap {
+  width: 100%;
+}
+.quote {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+  margin: 0;
+  padding: 32px 24px;
+  background: var(--elevation-medium);
+  border-radius: 4px;
+  border-left: 2px solid var(--orange);
+}
+.quoteText {
+  margin: 0;
+  width: 100%;
+  max-width: 880px;
+  font-weight: 400;
+  text-wrap: pretty;
+}
+.attribution {
+  width: 100%;
+}
+.verbatim {
+  color: var(--text-weak);
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: lowercase;
+  margin-left: 6px;
+}
+
+.transition {
+  width: 100%;
+  max-width: 720px;
+  color: var(--text-strong);
+}
+
+/* Tablet: 2 columns, the third card spans the row */
+@media (max-width: 1199.98px) {
+  .section {
+    gap: 48px;
+    padding: 72px 24px;
+  }
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .card:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Phone: 1 column, 16px gutters */
+@media (max-width: 809.98px) {
+  .section {
+    gap: 32px;
+    padding: 72px 16px;
+  }
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .card:last-child {
+    grid-column: auto;
+  }
+  .quote {
+    padding: 24px 20px;
+  }
+}
