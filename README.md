@@ -19,7 +19,7 @@ From then on, those terms are the only authority the buyer's agent has over mone
 | **Selling to AI agents** | Deals with buyers' agents, funded before work starts | The agreement is funded, then on schedule |
 | **Agent-to-agent services** | Usage priced and settled between agents, within agreed caps | On schedule, until revoked |
 
-**In every deal room:** confidential negotiation · agent permissions · payment controls · recipient authorisation · conditional settlement
+**Accord Atlas, the first application on Accord:** liquidity agreements with measurable payment conditions. A market maker's retainer is released only when the agreed spread, depth and uptime are measured on the venue. [How Atlas works →](#accord-atlas)
 
 <div align="center">
 
