@@ -414,7 +414,8 @@ npm run dev          # http://localhost:5180
 | --- | --- |
 | `npm run dev` | Start the website with hot reload on port 5180 |
 | `npm run build` | Typecheck and build the static site into `apps/web/dist` |
-| `npm run preview` | Serve the production build locally |
+| `npm start` | Serve the production build on `$PORT` (default 5180), as in production |
+| `npm run preview` | Vite's preview of the production build |
 | `npm run check` | Typecheck, copy rules and reference integrity |
 | `npm run check:rendered` | Copy rules on the rendered pages (Playwright, running dev server) |
 
@@ -477,14 +478,16 @@ flowchart TB
 
 ## Deployment
 
-The website is a static build. Any static host works.
+The website is a static build served by a dependency-free Node server (`apps/web/scripts/serve.mjs`): it listens on `$PORT`, falls back to `index.html` for client routes, caches hashed assets for a year and answers `/healthz`. Any static host also works.
 
 ```sh
 npm run build                      # output: apps/web/dist
+PORT=8080 npm start                # serve it on one port, as Railway does
 ```
 
 | Host | Build command | Output directory | Notes |
 | --- | --- | --- | --- |
+| **Railway (one service)** | `npm run build` | served by `npm start` | Root directory = repository root. `railway.json` sets build, start and the `/healthz` health check; the server listens on `$PORT` |
 | Vercel | `npm run build` | `apps/web/dist` | Add a rewrite of `/(.*)` to `/index.html` for client routes |
 | Netlify | `npm run build` | `apps/web/dist` | Add `/* /index.html 200` to `_redirects` |
 | Cloudflare Pages | `npm run build` | `apps/web/dist` | Single-page app fallback on |

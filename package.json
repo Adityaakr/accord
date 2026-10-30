@@ -13,6 +13,7 @@
   "scripts": {
     "dev": "npm run dev -w @accord/web",
     "build": "npm run build -w @accord/web",
+    "start": "node apps/web/scripts/serve.mjs",
     "preview": "npm run preview -w @accord/web",
     "check": "npm run check -w @accord/web",
     "check:rendered": "npm run check:rendered -w @accord/web"
