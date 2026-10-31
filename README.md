@@ -476,6 +476,21 @@ flowchart TB
 
 ---
 
+## Search and AI agents
+
+Every public URL serves real HTML, so search engines and AI agents that do not run JavaScript still read the full page.
+
+| Output | What it is |
+| --- | --- |
+| `/<route>/index.html` | Pre-rendered at build time for every route: title, description, canonical URL, Open Graph and Twitter tags, JSON-LD (Organization, WebSite, SoftwareApplication, WebPage, BreadcrumbList, FAQPage) and the page's content as semantic HTML. React replaces it on load |
+| [`/llms.txt`](https://accordweb-production.up.railway.app/llms.txt) | What Accord is, key facts and a map of every page, for language models |
+| [`/llms-full.txt`](https://accordweb-production.up.railway.app/llms-full.txt) | The whole site as Markdown in one file |
+| `/<slug>.md` | Each page as Markdown, linked from its HTML with `rel="alternate"` |
+| `/sitemap.xml`, `/robots.txt` | Absolute URLs; search and AI crawlers explicitly allowed |
+| `/og-image.png` | The 1200×630 social preview |
+
+The page content comes from `apps/web/seo/pages`, captured from the running site. After changing copy, refresh it with `npm run dev` and then `npm run seo:snapshot -w @accord/web`; set `SITE_URL` when the site moves to its own domain.
+
 ## Deployment
 
 The website is a static build served by a dependency-free Node server (`apps/web/scripts/serve.mjs`): it listens on `$PORT`, falls back to `index.html` for client routes, caches hashed assets for a year and answers `/healthz`. Any static host also works.

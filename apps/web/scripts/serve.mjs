@@ -17,7 +17,7 @@ const TYPES = {
   ".css": "text/css; charset=utf-8", ".json": "application/json; charset=utf-8", ".svg": "image/svg+xml",
   ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".avif": "image/avif",
   ".gif": "image/gif", ".ico": "image/x-icon", ".woff": "font/woff", ".woff2": "font/woff2", ".ttf": "font/ttf",
-  ".txt": "text/plain; charset=utf-8", ".xml": "application/xml; charset=utf-8", ".webmanifest": "application/manifest+json",
+  ".txt": "text/plain; charset=utf-8", ".md": "text/markdown; charset=utf-8", ".xml": "application/xml; charset=utf-8", ".webmanifest": "application/manifest+json",
   ".mp4": "video/mp4", ".pdf": "application/pdf",
 }
 
@@ -55,11 +55,11 @@ const server = createServer((req, res) => {
   }
   let f = fileFor(req.url || "/")
   let status = 200
-  // Client-side routes (/atlas, /research, ...) fall back to the app shell; missing files with an extension are 404s.
+  // Every public route is pre-rendered to its own index.html. Anything else is a real 404: the app shell from
+  // 404.html (React shows the not-found page, and it is marked noindex), so crawlers never index soft 404s.
   if (!f) {
-    const hasExt = extname((req.url || "").split("?")[0]) !== ""
-    f = fileFor("/index.html")
-    if (hasExt || !f) status = 404
+    f = fileFor("/404.html") || fileFor("/index.html")
+    status = 404
   }
   if (!f) {
     res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8", ...HEADERS }).end("Not found")
@@ -70,7 +70,7 @@ const server = createServer((req, res) => {
   res.writeHead(status, {
     "Content-Type": TYPES[ext] || "application/octet-stream",
     "Content-Length": f.size,
-    "Cache-Control": hashed ? "public, max-age=31536000, immutable" : ext === ".html" ? "no-cache" : "public, max-age=3600",
+    "Cache-Control": hashed ? "public, max-age=31536000, immutable" : ext === ".html" || ext === ".md" || ext === ".txt" || ext === ".xml" ? "public, max-age=0, must-revalidate" : "public, max-age=3600",
     ...HEADERS,
   })
   if (req.method === "HEAD") { res.end(); return }

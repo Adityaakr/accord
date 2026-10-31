@@ -13,5 +13,8 @@ export function usePageMeta(title: string, description: string) {
     set('meta[property="og:title"]', "content", title)
     set('meta[property="og:description"]', "content", description)
     set('link[rel="canonical"]', "href", window.location.origin + window.location.pathname)
+    set('meta[property="og:url"]', "content", window.location.origin + window.location.pathname)
+    set('meta[name="twitter:title"]', "content", title)
+    set('meta[name="twitter:description"]', "content", description)
   }, [title, description])
 }

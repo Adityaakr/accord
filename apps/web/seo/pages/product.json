@@ -1,0 +1,8 @@
+{
+  "title": "Accord: Product",
+  "description": "Negotiation, approval and payment in one deal room.",
+  "ld": [
+    "{\"@context\":\"https://schema.org\",\"@type\":\"Organization\",\"name\":\"Accord\",\"url\":\"/\",\"description\":\"The private deal room and control plane for agent-to-agent commerce.\"}",
+    "{\"@context\":\"https://schema.org\",\"@type\":\"SoftwareApplication\",\"name\":\"Accord\",\"applicationCategory\":\"BusinessApplication\",\"operatingSystem\":\"Web\",\"description\":\"Two companies' agents negotiate in confidence, both companies approve the terms, and the terms govern what the buyer's agent may pay. Built on NEAR. First application: Accord Atlas.\"}"
+  ]
+}
