@@ -5,8 +5,7 @@ import { LINKS } from "../content/links"
 import styles from "./Footer.module.css"
 
 /* Footer (template component FcRdbUGhW) per docs/website/ACCORD_LANDING_PAGE_SPEC.md §2.3:
-   Product · Build · Watch · Company columns; bottom row: hackathon badge (links to the X post and the
-   repository when configured), the licence line, the testnet line. Links to pages that do not exist yet
+   Product · Build · Watch · Company columns. Links to pages that do not exist yet
    (Changelog, Status, Brand, Terms, About) are not rendered. Dark theme only (owner's design). */
 
 type Item = { key: string; label: string; href: string; external?: boolean }
@@ -62,7 +61,7 @@ export function Footer() {
             <Logo />
             <p className={`t-body-sm ${styles.tagline}`}>The private deal room and control plane for agent-to-agent commerce.</p>
           </div>
-                    <p className={`t-body-sm ${styles.copyright}`}>
+          <p className={`t-body-sm ${styles.copyright}`}>
             Built on
             <NearLogo />
           </p>
@@ -73,10 +72,6 @@ export function Footer() {
           <Column title="Watch" items={WATCH} />
           <Column title="Company" items={COMPANY} />
         </div>
-      </div>
-      <div className={styles.bottom}>
-        <p className={`t-body-sm ${styles.bottomLine}`}>Open source under the MIT licence.</p>
-        <p className={`t-body-sm ${styles.bottomLine} ${styles.nearLine}`}><NearLogo variant="tile" />Runs on NEAR testnet. Mainnet follows an audit.</p>
       </div>
     </footer>
   )

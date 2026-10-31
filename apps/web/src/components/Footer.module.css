@@ -71,20 +71,3 @@
   .menu { flex-wrap: wrap; gap: 40px 40px; width: 100%; }
 }
 
-/* Spec §2.3 bottom row: badge · licence line · testnet line */
-.bottom {
-  width: 100%;
-  max-width: var(--content-max);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px 24px;
-  margin-top: 48px;
-  padding-top: 24px;
-  border-top: 1px solid var(--hairline);
-}
-.bottomLine { color: var(--text-weak); margin: 0; }
-@media (max-width: 1199.98px) { .bottom { padding-left: 24px; padding-right: 24px; } }
-@media (max-width: 809.98px) { .bottom { padding-left: 16px; padding-right: 16px; margin-top: 32px; } }
-.nearLine { display: inline-flex; align-items: center; gap: 8px; }
