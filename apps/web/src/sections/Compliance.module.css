@@ -9,11 +9,12 @@
 
 /* ---------- heading row ---------- */
 /* The tag takes its own row; the heading and the copy share the next row. Grid baseline alignment puts the first line
-   of the copy on the baseline of the heading's first line, so the two read as one line in every browser. */
+   of the copy on the baseline of the heading's first line; the copy then lifts 7px so its first line sits on the optical
+   middle of the heading's first line instead of hanging off its base. */
 .head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "tag ." "title copy"; column-gap: 64px; row-gap: 24px; align-items: baseline; width: 100%; }
 .headTag { grid-area: tag; }
 .headLeft { grid-area: title; }
-.headRight { grid-area: copy; display: flex; flex-direction: column; gap: 20px; }
+.headRight { grid-area: copy; display: flex; flex-direction: column; gap: 20px; position: relative; top: -7px; }
 .tag { display: inline-flex; align-items: center; gap: 8px; color: var(--text-medium); }
 .title { width: 100%; text-wrap: balance; }
 .description { color: var(--text-medium); text-wrap: pretty; }
@@ -246,7 +247,7 @@
 @media (max-width: 1199.98px) {
   .section { gap: 36px; padding: 72px 24px; }
   .head { grid-template-columns: minmax(0, 1fr); grid-template-areas: "tag" "title" "copy"; row-gap: 20px; }
-  .headRight { max-width: 760px; }
+  .headRight { max-width: 760px; top: 0; }
   .whyHead { flex-direction: column; align-items: flex-start; gap: 8px; }
   .stage { padding: 32px 20px; }
 }
