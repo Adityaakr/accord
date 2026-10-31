@@ -245,17 +245,17 @@ function Monitor() {
    No accused firm is named, and nothing claims the problem is unsolved elsewhere. */
 const WHY: { who: string; role: string; org: string; logo: string; date: string; ref: number; said: string; atlas: string }[] = [
   { who: "Kain Warwick", role: "Founder", org: "Synthetix", logo: "synthetix.svg", date: "Mar 2025", ref: 45,
-    said: "Market makers cost projects $50k to $300k+ a month in the 2017 cycle. Good ones aim for tight spreads; many exercised their call options and dumped.",
-    atlas: "Payment follows the spread, depth and two-sided quoting both sides agreed." },
-  { who: "Jelle Buth", role: "Co-founder", org: "Enflux, a market maker", logo: "enflux.png", date: "Apr 2025", ref: 46,
-    said: "Projects should define liquidity KPIs from order-book activity before they commit. In loan-option deals those KPIs are often missing or vague.",
-    atlas: "The KPIs become the agreement's payment conditions." },
+    said: "Projects paid market makers $50k to $300k+ a month in the 2017 cycle. Many exercised their call options and dumped.",
+    atlas: "Pay follows the agreed spread, depth and two-sided quoting." },
+  { who: "Jelle Buth", role: "Co-founder", org: "Enflux, market maker", logo: "enflux.png", date: "Apr 2025", ref: 46,
+    said: "Projects should set liquidity KPIs before they commit. In loan-option deals they are often missing or vague.",
+    atlas: "The KPIs become the payment conditions." },
   { who: "LO:TECH", role: "Survey", org: "commissioned by a market maker", logo: "lotech.png", date: "Aug 2025", ref: 47,
-    said: "52% of 2,000+ respondents in 98 countries do not trust market makers. The report recommends enforceable contracts and real-time dashboards.",
-    atlas: "Attested observations of the pool's liquidity decide each payment." },
-  { who: "Binance", role: "Market-maker guidance", org: "for listed projects", logo: "binance.svg", date: "Mar 2026", ref: 48,
-    said: "Projects must disclose their market maker's details, legal entity and contract terms to the listing platform.",
-    atlas: "Disclosure shows what was agreed. Atlas measures whether it was met." },
+    said: "52% of 2,000+ respondents do not trust market makers. The report recommends enforceable contracts.",
+    atlas: "Attested observations decide each payment." },
+  { who: "Binance", role: "Exchange guidance", org: "for listed projects", logo: "binance.svg", date: "Mar 2026", ref: 48,
+    said: "Projects must disclose their market maker's legal entity and contract terms to the exchange.",
+    atlas: "Measures whether those terms were met." },
 ]
 const srcHref = (n: number) => REFERENCES.find((r) => r.n === n)?.links[0]
 
@@ -273,7 +273,7 @@ function WhyAtlas() {
         {WHY.map((w, i) => (
           <Appear key={w.ref} as="li" className={styles.whyCard} effect={appear(`${0.05 + i * 0.08}s` as `${number}s`)}>
             <div className={styles.whoRow}>
-              <span className={styles.logo}><img src={`/assets/logos/${w.logo}`} alt="" width={40} height={40} loading="lazy" decoding="async" /></span>
+              <span className={styles.logo}><img src={`/assets/logos/${w.logo}`} alt="" width={32} height={32} loading="lazy" decoding="async" /></span>
               <span className={styles.whoText}>
                 <span className={styles.who}>{w.who}</span>
                 <span className={styles.role}>{w.role} · {w.org}</span>
@@ -285,8 +285,8 @@ function WhyAtlas() {
             </div>
             <p className={styles.said}>{w.said}</p>
             <div className={styles.answer}>
-              <span className={styles.answerTag}><AtlasMark size={14} />Atlas</span>
-              <span>{w.atlas}</span>
+              <AtlasMark size={16} />
+              <span><b className={styles.answerName}>Atlas</b> {w.atlas}</span>
             </div>
           </Appear>
         ))}

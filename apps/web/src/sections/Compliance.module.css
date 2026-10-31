@@ -23,42 +23,48 @@
 .join { color: var(--text-medium); text-decoration: none; }
 .join:hover { color: var(--text-strong); }
 
-/* ---------- why Atlas: four sourced cards, two by two ---------- */
-.why { display: flex; flex-direction: column; gap: 22px; width: 100%; }
+/* ---------- why Atlas: four short sourced cards in one row (two on tablet, one on phone) ---------- */
+.why { display: flex; flex-direction: column; gap: 20px; width: 100%; }
 .whyHead { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
 .whyHeadText { display: flex; flex-direction: column; gap: 8px; max-width: 640px; }
 .whyKicker { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); }
 .whyTitle { color: var(--text-strong); text-wrap: balance; }
 .whyNote { flex: none; font-size: 12px; color: var(--text-weak); }
-.whyGrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+/* Each card spans three subgrid rows (who, quote, answer) so those parts line up across every card in a row */
+.whyGrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .whyCard {
-  display: flex; flex-direction: column; gap: 18px;
-  padding: 22px 24px 20px;
-  border-radius: 18px;
+  display: grid; grid-template-rows: subgrid; grid-row: span 3; row-gap: 14px;
+  padding: 16px 16px 14px;
+  border-radius: 14px;
   background: linear-gradient(160deg, rgba(var(--ink-rgb), 0.045), rgba(var(--ink-rgb), 0.01) 60%), var(--elevation-strong);
   border: 1px solid rgba(var(--ink-rgb), 0.08);
   transition: border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .whyCard:hover { border-color: rgba(var(--ink-rgb), 0.18); }
-.whoRow { display: flex; align-items: center; gap: 12px; }
-.logo { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 11px; overflow: hidden; background: #16171a; border: 1px solid rgba(255, 255, 255, 0.08); }
+/* Four across: logo and source date on top, the name and role below at full card width */
+.whoRow { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "logo . src" "text text text"; align-items: center; gap: 12px 10px; }
+.logo { grid-area: logo; }
+.src { grid-area: src; }
+.whoText { grid-area: text; }
+.logo { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 9px; overflow: hidden; background: #16171a; border: 1px solid rgba(255, 255, 255, 0.08); }
 .logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.logo img[src$=".svg"] { width: 22px; height: 22px; object-fit: contain; }
-.whoText { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.who { font-size: 15px; letter-spacing: -0.01em; color: var(--text-strong); }
-.role { font-size: 12px; color: var(--text-weak); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.logo img[src$=".svg"] { width: 18px; height: 18px; object-fit: contain; }
+.whoText { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.who { font-size: 13.5px; letter-spacing: -0.01em; color: var(--text-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.role { font-size: 11.5px; line-height: 1.35; color: var(--text-weak); }
 .src {
   flex: none; align-self: flex-start;
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 4px 9px; border-radius: 999px; border: 1px solid var(--hairline);
-  font-family: var(--mono); font-size: 10.5px; color: var(--text-weak); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 7px; border-radius: 999px; border: 1px solid var(--hairline);
+  font-family: var(--mono); font-size: 10px; color: var(--text-weak); text-decoration: none;
   transition: color 0.3s ease, border-color 0.3s ease;
 }
 .src:hover { color: var(--text-strong); border-color: rgba(var(--ink-rgb), 0.3); }
 .src:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 2px; }
-.said { margin: 0; flex: 1; font-size: 17px; line-height: 1.55; letter-spacing: -0.01em; color: var(--text-strong); text-wrap: pretty; }
-.answer { display: flex; align-items: baseline; gap: 12px; padding-top: 16px; border-top: 1px solid var(--hairline); font-size: 13.5px; line-height: 1.5; color: var(--text-medium); }
-.answerTag { display: inline-flex; align-items: center; gap: 6px; flex: none; padding: 3px 9px 3px 5px; border-radius: 999px; background: rgba(var(--ink-rgb), 0.06); font-size: 11.5px; color: var(--text-strong); transform: translateY(-1px); }
+.said { margin: 0; font-size: 14.5px; line-height: 1.5; letter-spacing: -0.005em; color: var(--text-strong); text-wrap: pretty; }
+.answer { align-self: start; display: flex; align-items: flex-start; gap: 8px; padding-top: 12px; border-top: 1px solid var(--hairline); font-size: 12.5px; line-height: 1.45; color: var(--text-medium); }
+.answer > svg { flex: none; margin-top: 1px; }
+.answerName { font-weight: 500; color: var(--text-strong); }
 :global([data-theme="light"]) .logo { border-color: rgba(0, 0, 0, 0.06); }
 
 /* ---------- the stage: woven silver dither with a soft light sweep ---------- */
@@ -249,6 +255,8 @@
   .head { grid-template-columns: minmax(0, 1fr); grid-template-areas: "tag" "title" "copy"; row-gap: 20px; }
   .headRight { max-width: 760px; top: 0; }
   .whyHead { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .whyGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .whoRow { grid-template-areas: "logo text src"; align-items: start; }
   .stage { padding: 32px 20px; }
 }
 
@@ -256,10 +264,7 @@
 @media (max-width: 809.98px) {
   .section { gap: 28px; padding: 72px 16px; }
   .whyGrid { grid-template-columns: minmax(0, 1fr); }
-  .whyCard { padding: 18px 16px 16px; gap: 14px; }
-  .said { font-size: 15.5px; }
-  .role { white-space: normal; }
-  .answer { flex-direction: column; gap: 8px; }
+  .said { font-size: 15px; }
   .stage { padding: 16px 10px; border-radius: 16px; }
   .monitor { padding: 16px 14px; border-radius: 18px; gap: 14px; }
   .chip, .illus { display: none; }
