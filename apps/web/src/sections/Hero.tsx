@@ -170,20 +170,6 @@ export function Hero() {
               <WordReveal as="h1" className={`t-h1 ${styles.title}`} text={HEADLINE} delay={0.1} duration={0.8} stagger={0.04} breakAfter={H1_BREAK_AFTER} wordClass={headlineWord} />
               {/* Description (goSSBhPkn): Body Large, word reveal, delay 0.2s, 0.6s per word, stagger 0.04s */}
               <WordReveal as="p" className={`t-body-lg ${styles.description}`} text={LEAD} delay={0.2} duration={0.6} stagger={0.04} />
-              {/* Accord Atlas announcement under the description: linked card */}
-              <Mount y={16} delay="0.35s" className={styles.announce}>
-                <Link to="/atlas" className={styles.announceLink}>
-                  <span className={styles.announceBadge}>
-                    <AtlasMark size={22} live />
-                    {PILL_TAG}
-                  </span>
-                  <span className={styles.announceBody}>
-                    <span className={styles.announceHighlight}>{PILL_KICKER}</span>
-                    <span className={styles.announceSub}>{PILL_TEXT}</span>
-                  </span>
-                  <span className={styles.announceArrow} aria-hidden="true">→</span>
-                </Link>
-              </Mount>
             </div>
           </div>
 
@@ -202,6 +188,21 @@ export function Hero() {
               </Button>
             </Mount>
           </div>
+
+          {/* Accord Atlas announcement, below the buttons: the hero reads headline, lead, actions, then Atlas */}
+          <Mount y={16} delay="0.7s" className={styles.announce}>
+            <Link to="/atlas" className={styles.announceLink}>
+              <span className={styles.announceBadge}>
+                <AtlasMark size={22} live />
+                {PILL_TAG}
+              </span>
+              <span className={styles.announceBody}>
+                <span className={styles.announceHighlight}>{PILL_KICKER}</span>
+                <span className={styles.announceSub}>{PILL_TEXT}</span>
+              </span>
+              <span className={styles.announceArrow} aria-hidden="true">→</span>
+            </Link>
+          </Mount>
         </div>
 
         {/* Image (Mksz61xjD): appear onMount y32 1.4s delay 0.6s; the Part A "Product preview caption" sits under it

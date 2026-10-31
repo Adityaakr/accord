@@ -222,7 +222,7 @@
    shimmer; the badge dot pulses. All motion stops under reduced motion. */
 @property --announce-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
 
-.announce { width: 100%; max-width: 640px; }
+.announce { width: 100%; max-width: 640px; margin-top: -12px; }
 .announceLink {
   position: relative;
   isolation: isolate;
