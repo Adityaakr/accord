@@ -52,6 +52,7 @@ The live record of facts, choices and spec changes. A fact here wins over the sa
 | Sputnik DAO factory, testnet | `sputnikv2.testnet` (not the legacy `sputnik-v2.testnet`) | live `get_default_version` |
 | 1Click | `https://1click.chaindefuser.com` (`GET /v0/tokens`, `POST /v0/quote` with `dry: true`) | https://docs.near-intents.org |
 | Chain Signatures (not used in the core) | `v1.signer-prod.testnet` | docs |
+| Demo accounts, testnet (`make setup`, 31 Oct) | factory `accord-v1.testnet`; buyer `northwind-demo.testnet`; vendor `halcyon-demo.testnet`; authority `halcyon-auth.testnet`; recipient `halcyon-mm.testnet`; keeper `accord-keeper.testnet`; canaries `halcyon-mm-payments.testnet`, `halcyon-treasury.testnet`; attacker lookalike `halcyon-markets.testnet`; `/try` buyer `northwind-try.testnet` (the other three `/try` accounts wait on the faucet's rate limit). Every name was free, so no suffix. `10 NEAR` each from the faucet | `make setup` output |
 
 ## 4. NEAR AI Cloud (research, 31 Oct; probe 0.2)
 

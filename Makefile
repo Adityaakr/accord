@@ -13,7 +13,7 @@ setup-check: ; @bash scripts/setup-check.sh
 ci: ; @cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace
 test: ; @cargo test --workspace
 
-setup: ; $(call todo,0.12 make setup)
+setup: ; @bash scripts/setup.sh
 probe-ai: ; $(call todo,0.2 make probe-ai)
 probe-venue: ; $(call todo,0.7 make probe-venue)
 sandbox: ; $(call todo,1.14 make sandbox)
