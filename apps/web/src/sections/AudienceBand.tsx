@@ -6,14 +6,18 @@ import styles from "./AudienceBand.module.css"
 
 /* Band under the hero (copy from Adi, 30 Oct 2026). The five "Built for" use cases are tabs; each opens a deal-room
    panel showing that use case end to end: the mandate the buyer gives its agent, the agreed terms, and the five core
-   capabilities as they apply to it. Tabs advance every 12s while the band is visible (a bar on the active tab shows the
+   capabilities as they apply to it. Tabs advance every 17s while the band is visible (a bar on the active tab shows the
    time left); resting the pointer on the deal-room card pauses it, and choosing a tab restarts the timer. Reduced motion: no advance. All panels share one grid cell, so
    the band keeps the height of the tallest and never moves when the tab changes. Addresses and .example domains are
    illustrative (RFC 2606), and every panel carries the "Illustrative" pill. */
 
 const CAPS = ["Confidential negotiation", "Agent permissions", "Payment controls", "Recipient authorisation", "Conditional settlement"]
 
-type Panel = { room: string; ask: string; answer: string; lines: ReactNode[] }
+/* One step of the agent's work log. k: think (its reasoning), call (a contract call it signs or asks you to sign),
+   wait (waiting on the other side), event (a result coming back from the contract), out (the agreed terms).
+   s is the step's illustrative duration in seconds, summed into "Worked for …". */
+type Step = { k: "think" | "call" | "wait" | "event" | "out"; t: string; r?: string; s: number; bad?: boolean }
+type Panel = { room: string; ask: string; answer: string; lines: ReactNode[]; trace: Step[] }
 type Use = { label: string; icon: PixelName; line: string; panel: Panel }
 
 const c = (t: string) => <code>{t}</code>
@@ -32,6 +36,19 @@ const USES: Use[] = [
         <>Paying {c("halcyon-mm.testnet")} only, bound to halcyon.example</>,
         <>Each period's payment becomes eligible when 5 of 6 slots pass</>,
       ],
+      trace: [
+        { k: "think", t: "Ceiling is 20,000 USDC a period. A tighter spread and a deeper book are worth more to us than the last 1,500, so I'll seal stricter floors.", s: 4 },
+        { k: "call", t: 'create_agreement(seller: "halcyon-mm.testnet")', r: "agreement 41 · agent key limited to act()", s: 2 },
+        { k: "call", t: "commit_mandate(41, 0x9c2e…a71f)", r: "your mandate sealed, hash on-chain", s: 2 },
+        { k: "wait", t: "Waiting for Halcyon's agent to commit its mandate", r: "committed", s: 41 },
+        { k: "call", t: "trigger_negotiation(41)", r: "Sealed Table job started", s: 3 },
+        { k: "think", t: "Neither side sees the other's limits. If both mandates can be met, only the agreed terms come out.", s: 2 },
+        { k: "event", t: "on_negotiation_output(41)", r: "attestation verified · limits checked", s: 27 },
+        { k: "out", t: "18,500 USDC · ≤40 bps · ≥12,000 depth · ≥95% uptime", s: 1 },
+        { k: "think", t: "Under our ceiling and stricter than every floor we set. Asking you to approve.", s: 3 },
+        { k: "call", t: "approve_terms(41)", r: "approved by yourco.testnet and Halcyon", s: 6 },
+        { k: "call", t: "accept_payee(41, 1)", r: "halcyon-mm.testnet bound to halcyon.example", s: 2 },
+      ],
     },
   },
   {
@@ -46,6 +63,16 @@ const USES: Use[] = [
         <>Duplicates, overcharges and changed bank details are refused</>,
         <>Each vendor is paid only at the address bound to its domain</>,
         <>Paid as one batch once delivery is confirmed; two mismatches held</>,
+      ],
+      trace: [
+        { k: "think", t: "214 invoices. Each needs a matching purchase order, a confirmed delivery and the vendor's bound address before I pay it.", s: 3 },
+        { k: "call", t: "get_record(vendor agreements)", r: "38 active agreements, 38 bound payees", s: 2 },
+        { k: "out", t: "214 read · 212 match order and delivery · 2 don't", s: 19 },
+        { k: "think", t: "INV-2291 bills 4,120 against an order for 3,800. INV-2307 asks us to pay a new bank account. Submitting both as invoiced; the contract decides.", s: 4 },
+        { k: "call", t: "act(Pay{INV-2291, 4,120 USDC})", r: "refused · ERR_AMOUNT_MISMATCH", s: 1, bad: true },
+        { k: "call", t: "act(Pay{INV-2307, new destination})", r: "refused · ERR_PAYEE_MISMATCH", s: 1, bad: true },
+        { k: "think", t: "Both refusals are right. Holding them for you instead of retrying.", s: 2 },
+        { k: "call", t: "act(Pay) × 212", r: "212 accepted, each to its bound address", s: 14 },
       ],
     },
   },
@@ -62,6 +89,18 @@ const USES: Use[] = [
         <>Paying {c("sdkworks.testnet")} only, bound to sdkworks.example</>,
         <>Each tranche becomes payable when the committee accepts the report</>,
       ],
+      trace: [
+        { k: "think", t: "Our maximum is 45,000 USDC over three tranches, and none moves before the committee accepts a report.", s: 3 },
+        { k: "call", t: 'create_agreement(seller: "sdkworks.testnet", tranches: 3)', r: "agreement 114 · agent key limited to act()", s: 2 },
+        { k: "call", t: "commit_mandate(114, 0x41d0…9b3e)", r: "your maximum sealed", s: 2 },
+        { k: "wait", t: "Waiting for SDKWorks to commit its mandate", r: "committed", s: 52 },
+        { k: "call", t: "trigger_negotiation(114)", r: "Sealed Table job started", s: 3 },
+        { k: "event", t: "on_negotiation_output(114)", r: "attestation verified · limits checked", s: 24 },
+        { k: "out", t: "42,000 USDC · tranches of 12,000 / 15,000 / 15,000", s: 1 },
+        { k: "call", t: "approve_terms(114)", r: "approved by both sides", s: 5 },
+        { k: "call", t: "accept_payee(114, 1)", r: "sdkworks.testnet bound to sdkworks.example", s: 2 },
+        { k: "think", t: "Tranche 1 waits on accept_milestone(114, 0). Nothing is payable yet.", s: 2 },
+      ],
     },
   },
   {
@@ -76,6 +115,18 @@ const USES: Use[] = [
         <>Neither agent can change the schedule alone</>,
         <>Paid only to your account {c("yourco.testnet")}, bound to yourco.example</>,
         <>Work starts once 12,900 USDC is funded; then paid monthly on schedule</>,
+      ],
+      trace: [
+        { k: "think", t: "A buyer's agent wants six months of the data API. Our floor is 2,000 USDC a month; it stays sealed.", s: 3 },
+        { k: "event", t: "create_agreement by buyer-agent.testnet", r: "agreement 207 · you are the seller", s: 1 },
+        { k: "call", t: "commit_mandate(207, 0x7be3…05ca)", r: "your floor sealed", s: 2 },
+        { k: "wait", t: "Waiting for the buyer's agent to commit", r: "committed", s: 18 },
+        { k: "call", t: "trigger_negotiation(207)", r: "Sealed Table job started", s: 3 },
+        { k: "event", t: "on_negotiation_output(207)", r: "attestation verified · limits checked", s: 21 },
+        { k: "out", t: "2,150 USDC a month × 6 = 12,900 USDC", s: 1 },
+        { k: "call", t: "approve_terms(207)", r: "approved by both sides", s: 4 },
+        { k: "call", t: 'propose_payee(207, "yourco.example", "yourco.testnet")', r: "domain verified", s: 9 },
+        { k: "wait", t: "Waiting for 12,900 USDC to be funded", r: "funded", s: 33 },
       ],
     },
   },
@@ -92,6 +143,18 @@ const USES: Use[] = [
         <>Paying {c("inferhub.testnet")} only, bound to inferhub.example</>,
         <>Each week becomes payable on schedule, until you revoke</>,
       ],
+      trace: [
+        { k: "think", t: "Up to 500 USDC a week, 2,000 in total, and stop when you revoke. The provider's agent prices by the week.", s: 3 },
+        { k: "call", t: 'create_agreement(seller: "inferhub.testnet")', r: "agreement 88 · agent key limited to act()", s: 2 },
+        { k: "call", t: "commit_mandate(88, 0x2fa9…c710)", r: "your limits sealed", s: 2 },
+        { k: "wait", t: "Waiting for InferHub's agent to commit", r: "committed", s: 7 },
+        { k: "call", t: "trigger_negotiation(88)", r: "Sealed Table job started", s: 3 },
+        { k: "event", t: "on_negotiation_output(88)", r: "attestation verified · limits checked", s: 19 },
+        { k: "out", t: "450 USDC a week · capped at 1,800 USDC", s: 1 },
+        { k: "call", t: "approve_terms(88)", r: "approved by both sides", s: 4 },
+        { k: "call", t: "act(Pay{week 1, 450 USDC})", r: "paid to inferhub.testnet", s: 3 },
+        { k: "think", t: "A 500 USDC payment would be refused. The cap leaves room for three more weeks.", s: 2 },
+      ],
     },
   },
 ]
@@ -101,27 +164,29 @@ const DotMark = () => (
   <span className={styles.dotMark} aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <span key={i} />)}</span>
 )
 
-/* The run, per panel: read the request, open a deal room on Accord, negotiate in the Sealed Table, then verify each
-   capability through Accord one by one, then answer. Every row is rendered from the start, so nothing moves. */
-const PRE = ["Reading the request…", "Opening a deal room on Accord…", "Negotiating inside the Sealed Table…"]
-const STEP_MS = [900, 1000, 1100]
-const CHECK_MS = 650
-const DONE = PRE.length + CAPS.length // phase index when everything has passed
+/* The run, per panel: the agent works through its log (each step shows a spinner, then its result), then the five
+   capabilities pass one by one, then it answers. The log and the checks share one grid cell, so the card never changes
+   height; once done, "Show work" swaps the log back in. Reduced motion starts at the finished state. */
+const STEP_MS: Record<Step["k"], number> = { think: 950, call: 620, wait: 900, event: 620, out: 700 }
+const CHECK_MS = 330
+const VERB: Record<Step["k"], string> = { think: "Thinking", call: "Running", wait: "Waiting", event: "Reading result", out: "Checking terms" }
+const fn = (t: string) => t.split("(")[0]
 
-function usePhase(active: boolean, reduce: boolean) {
-  const [phase, setPhase] = useState(reduce ? DONE : 0)
+function usePhase(active: boolean, reduce: boolean, trace: Step[]) {
+  const done = trace.length + CAPS.length
+  const [phase, setPhase] = useState(reduce ? done : 0)
   useEffect(() => {
-    if (reduce) { setPhase(DONE); return }
+    if (reduce) { setPhase(done); return }
     if (!active) { setPhase(0); return }
     setPhase(0)
     const timers: number[] = []
     let t = 0
-    for (let i = 1; i <= DONE; i++) {
-      t += i <= PRE.length ? STEP_MS[i - 1] : CHECK_MS
+    for (let i = 1; i <= done; i++) {
+      t += i <= trace.length ? STEP_MS[trace[i - 1].k] : CHECK_MS
       timers.push(window.setTimeout(() => setPhase(i), t))
     }
     return () => timers.forEach(window.clearTimeout)
-  }, [active, reduce])
+  }, [active, reduce, trace, done])
   return phase
 }
 
@@ -129,12 +194,48 @@ const Tick = () => (
   <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7" /></svg>
 )
 
+const secs = (n: number) => (n < 60 ? `${n}s` : `${Math.floor(n / 60)}m ${String(n % 60).padStart(2, "0")}s`)
+
+function TraceView({ trace, shown }: { trace: Step[]; shown: number }) {
+  const ref = useRef<HTMLOListElement>(null)
+  /* keep the newest step in view, like a terminal */
+  useEffect(() => { const box = ref.current?.parentElement; if (box) box.scrollTop = box.scrollHeight }, [shown])
+  return (
+    <ol ref={ref} className={styles.trace}>
+      {trace.slice(0, shown + 1).map((st, i) => {
+        const running = i === shown
+        return (
+          <li key={i} className={`${styles.step} ${styles[`k_${st.k}`]}`}>
+            <span className={styles.stepHead}>
+              {st.k === "call" ? <span className={styles.glyph}>▸</span> : st.k === "event" ? <span className={styles.glyph}>←</span> : st.k === "think" ? <span className={styles.glyph}>∴</span> : st.k === "wait" ? <span className={styles.glyph}>…</span> : <span className={styles.glyph}>=</span>}
+              <span className={styles.stepText}>{st.t}</span>
+            </span>
+            {st.r || st.k === "wait" || st.k === "call" ? (
+              <span className={`${styles.stepOut} ${st.bad ? styles.bad : ""}`}>
+                {running ? <><span className={styles.spin} aria-hidden="true" /> {st.k === "wait" ? "waiting" : "running"}</> : <>{st.bad ? "✕" : "↳"} {st.r} <span className={styles.took}>{secs(st.s)}</span></>}
+              </span>
+            ) : null}
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
+
 function PanelView({ p, active, id, labelledBy }: { p: Panel; active: boolean; id: string; labelledBy: string }) {
   const reduce = useReducedMotion() ?? false
-  const phase = usePhase(active, reduce)
-  const checking = phase - PRE.length // index of the line being verified (or < 0 before verification)
-  const done = phase >= DONE
-  const status = done ? p.answer : phase < PRE.length ? PRE[phase] : `Verifying via Accord · ${CAPS[checking]}…`
+  const phase = usePhase(active, reduce, p.trace)
+  const [showWork, setShowWork] = useState(false)
+  useEffect(() => { if (!active) setShowWork(false) }, [active])
+  const T = p.trace.length
+  const working = phase < T
+  const checking = phase - T // index of the line being verified (or < 0 before verification)
+  const done = phase >= T + CAPS.length
+  const elapsed = p.trace.slice(0, Math.min(phase, T)).reduce((n, st) => n + st.s, 0)
+  const total = p.trace.reduce((n, st) => n + st.s, 0)
+  const cur = p.trace[Math.min(phase, T - 1)]
+  const status = done ? p.answer : working ? `${VERB[cur.k]}${cur.k === "call" || cur.k === "event" ? ` ${fn(cur.t)}` : ""}…` : `Verifying via Accord · ${CAPS[checking]}…`
+  const traceOn = working || showWork
 
   return (
     <div id={id} role="tabpanel" aria-labelledby={labelledBy} aria-hidden={!active} className={`${styles.chat} ${active ? styles.chatOn : ""}`}>
@@ -146,20 +247,37 @@ function PanelView({ p, active, id, labelledBy }: { p: Panel; active: boolean; i
         <span className={`${styles.dotMark} ${done ? "" : styles.dotBusy}`} aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <span key={i} style={{ animationDelay: `${(i % 3 + Math.floor(i / 3)) * 0.12}s` }} />)}</span>
         <div className={styles.agentBody}>
           <p className={`${styles.answer} ${done ? (reduce ? "" : styles.sweep) : styles.status}`} key={done ? "done" : `s${phase}`}>{status}</p>
-          <ul className={styles.lines}>
-            {p.lines.map((l, i) => {
-              const state = done || i < checking ? "pass" : i === checking ? "check" : "wait"
-              return (
-                <li key={i} className={`${styles.line} ${styles[state]}`}>
-                  <span className={styles.lineText}>{l}</span>
-                  <span className={styles.cap}>
-                    {state === "pass" ? <span className={styles.ok}><Tick /></span> : state === "check" ? <span className={styles.spin} aria-hidden="true" /> : null}
-                    {CAPS[i]}{state === "check" ? " · verifying" : state === "pass" ? " · passed" : ""}
-                  </span>
-                </li>
-              )
-            })}
-          </ul>
+          <div className={styles.meta} data-seo-skip>
+            {done ? (
+              <>
+                <span>Worked for {secs(total)} · {T} steps</span>
+                <button type="button" className={styles.metaBtn} onClick={() => setShowWork((v) => !v)} aria-expanded={showWork} tabIndex={active ? 0 : -1}>
+                  {showWork ? "Hide work" : "Show work"}
+                </button>
+              </>
+            ) : (
+              <span>{working ? `Step ${phase + 1} of ${T}` : "Checking the agreement"} · {secs(elapsed)}</span>
+            )}
+          </div>
+          <div className={styles.slot}>
+            <div className={`${styles.layer} ${styles.traceLayer} ${traceOn ? styles.layerOn : ""}`} aria-hidden={!traceOn} data-seo-skip>
+              <TraceView trace={p.trace} shown={working ? phase : T} />
+            </div>
+            <ul className={`${styles.lines} ${styles.layer} ${traceOn ? "" : styles.layerOn}`}>
+              {p.lines.map((l, i) => {
+                const state = done || i < checking ? "pass" : i === checking ? "check" : "wait"
+                return (
+                  <li key={i} className={`${styles.line} ${styles[state]}`}>
+                    <span className={styles.lineText}>{l}</span>
+                    <span className={styles.cap}>
+                      {state === "pass" ? <span className={styles.ok}><Tick /></span> : state === "check" ? <span className={styles.spin} aria-hidden="true" /> : null}
+                      {CAPS[i]}{state === "check" ? " · verifying" : state === "pass" ? " · passed" : ""}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -178,7 +296,7 @@ function PanelView({ p, active, id, labelledBy }: { p: Panel; active: boolean; i
   )
 }
 
-const DWELL = 12000
+const DWELL = 17000
 
 export function AudienceBand() {
   const reduce = useReducedMotion() ?? false

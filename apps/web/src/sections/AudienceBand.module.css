@@ -163,9 +163,43 @@
 .tool { width: 19px; height: 19px; color: var(--text-weak); flex: none; }
 .send { display: grid; place-items: center; flex: none; width: 38px; height: 38px; border-radius: 999px; background: var(--teal); color: var(--on-accent); }
 
+/* the agent's working state under the status line, and the work log that shares a cell with the checks */
+.meta { display: flex; align-items: center; gap: 10px; margin-top: -6px; font-size: 11.5px; color: var(--text-weak); font-variant-numeric: tabular-nums; }
+.metaBtn { padding: 0; border: 0; background: none; font: inherit; color: var(--teal); cursor: pointer; }
+.metaBtn:hover { text-decoration: underline; text-underline-offset: 2px; }
+.metaBtn:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 2px; border-radius: 4px; }
+.slot { position: relative; }
+/* one layer at a time: the outgoing one fades in 0.15s, the incoming one waits for it */
+.layer { opacity: 0; visibility: hidden; transition: opacity 0.15s ease, visibility 0s linear 0.15s; }
+.layerOn { opacity: 1; visibility: visible; transition: opacity 0.25s ease 0.15s; }
+/* a visible child would override the hidden panel's visibility and take its clicks */
+.chat:not(.chatOn) .layerOn { visibility: hidden; }
+.traceLayer {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  overflow-y: auto; scrollbar-width: none; overscroll-behavior: contain;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 36px);
+  mask-image: linear-gradient(180deg, transparent 0, #000 36px);
+}
+.traceLayer::-webkit-scrollbar { display: none; }
+.trace { list-style: none; margin: auto 0 0; padding: 36px 0 0; display: flex; flex-direction: column; gap: 9px; }
+.step { display: flex; flex-direction: column; gap: 2px; animation: stepIn 0.28s ease both; }
+@keyframes stepIn { from { opacity: 0; transform: translateY(4px); } }
+.stepHead { display: flex; gap: 8px; align-items: baseline; }
+.glyph { flex: none; width: 10px; font-family: var(--mono); font-size: 11px; color: var(--text-weak); text-align: center; }
+.stepText { font-size: 12.5px; line-height: 1.45; color: var(--text-medium); min-width: 0; overflow-wrap: anywhere; }
+.k_call .stepText, .k_event .stepText, .k_out .stepText { font-family: var(--mono); font-size: 11.5px; color: var(--text-strong); }
+.k_call .glyph, .k_event .glyph { color: var(--teal); }
+.k_think .stepText { color: var(--text-weak); font-style: italic; }
+.k_out .stepText { color: var(--teal); }
+.stepOut { display: flex; align-items: center; gap: 6px; padding-left: 18px; font-family: var(--mono); font-size: 11px; line-height: 1.4; color: var(--text-weak); }
+.took { margin-left: auto; padding-left: 8px; opacity: 0.7; }
+.bad { color: #e5a27e; }
+:global([data-theme="light"]) .bad { color: #b4532a; }
+
 .timer { position: absolute; left: 14px; right: 14px; bottom: 0; height: 2px; border-radius: 2px; background: var(--teal); transform-origin: left; transform: scaleX(0); animation-name: tabTimer; animation-timing-function: linear; animation-fill-mode: forwards; opacity: 0.8; }
 @keyframes tabTimer { to { transform: scaleX(1); } }
-@media (prefers-reduced-motion: reduce) { .chat, .use, .line { transition: none; } .sweep, .status, .dotBusy span, .spin { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .chat, .use, .line { transition: none; } .sweep, .status, .dotBusy span, .spin, .step { animation: none; } .layer { transition: none; } }
 
 @media (max-width: 1199.98px) {
   .band { margin-top: 0; padding: 0 24px; }
