@@ -238,17 +238,17 @@ function Monitor() {
 /* Why Atlas: four public voices on market-making deals, each paired with the part of Atlas that answers it.
    Paraphrases, checked against the sources on 31 Oct 2026; each card links its source (rows 45–48 in references.ts).
    No accused firm is named, and nothing claims the problem is unsolved elsewhere. */
-const WHY: { who: string; role: string; date: string; ref: number; said: string; atlas: string }[] = [
-  { who: "Kain Warwick", role: "Synthetix founder", date: "Mar 2025", ref: 45,
+const WHY: { who: string; role: string; org: string; logo: string; date: string; ref: number; said: string; atlas: string }[] = [
+  { who: "Kain Warwick", role: "Founder", org: "Synthetix", logo: "synthetix.svg", date: "Mar 2025", ref: 45,
     said: "Market makers cost projects $50k to $300k+ a month in the 2017 cycle. Good ones aim for tight spreads; many exercised their call options and dumped.",
     atlas: "Payment follows the spread, depth and uptime both sides agreed." },
-  { who: "Jelle Buth", role: "Co-founder, Enflux (a market maker)", date: "Apr 2025", ref: 46,
+  { who: "Jelle Buth", role: "Co-founder", org: "Enflux, a market maker", logo: "enflux.png", date: "Apr 2025", ref: 46,
     said: "Projects should define liquidity KPIs from order-book activity before they commit. In loan-option deals those KPIs are often missing or vague.",
     atlas: "The KPIs become the agreement's payment conditions." },
-  { who: "LO:TECH survey", role: "Commissioned by LO:TECH, a market maker", date: "Aug 2025", ref: 47,
+  { who: "LO:TECH", role: "Survey", org: "commissioned by a market maker", logo: "lotech.png", date: "Aug 2025", ref: 47,
     said: "52% of 2,000+ respondents in 98 countries do not trust market makers. The report recommends enforceable contracts and real-time dashboards.",
     atlas: "Attested observations of the order book decide each payment." },
-  { who: "Binance", role: "Market-maker guidance", date: "Mar 2026", ref: 48,
+  { who: "Binance", role: "Market-maker guidance", org: "for listed projects", logo: "binance.svg", date: "Mar 2026", ref: 48,
     said: "Projects must disclose their market maker's details, legal entity and contract terms to the listing platform.",
     atlas: "Disclosure shows what was agreed. Atlas measures whether it was met." },
 ]
@@ -258,25 +258,31 @@ function WhyAtlas() {
   return (
     <div className={styles.why}>
       <Appear className={styles.whyHead} effect={appear("0s")}>
-        <span className={styles.whyKicker}>Why Atlas</span>
-        <p className={`t-h5 ${styles.whyTitle}`}>Projects, market makers and exchanges keep pointing at the same gap.</p>
+        <div className={styles.whyHeadText}>
+          <span className={styles.whyKicker}>Why Atlas</span>
+          <p className={`t-h5 ${styles.whyTitle}`}>Projects, market makers and exchanges keep pointing at the same gap.</p>
+        </div>
+        <p className={styles.whyNote}>Paraphrased from public sources, linked on each card.</p>
       </Appear>
       <ul className={styles.whyGrid}>
         {WHY.map((w, i) => (
           <Appear key={w.ref} as="li" className={styles.whyCard} effect={appear(`${0.05 + i * 0.08}s` as `${number}s`)}>
             <div className={styles.whoRow}>
-              <span className={styles.who}>{w.who}</span>
-              <span className={styles.when}>{w.date}</span>
+              <span className={styles.logo}><img src={`/assets/logos/${w.logo}`} alt="" width={40} height={40} loading="lazy" decoding="async" /></span>
+              <span className={styles.whoText}>
+                <span className={styles.who}>{w.who}</span>
+                <span className={styles.role}>{w.role} · {w.org}</span>
+              </span>
+              <a className={styles.src} href={srcHref(w.ref)} target="_blank" rel="noopener noreferrer" aria-label={`Source for ${w.who}, ${w.date} (opens in a new tab)`}>
+                <span>{w.date}</span>
+                <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" /></svg>
+              </a>
             </div>
-            <span className={styles.role}>{w.role}</span>
             <p className={styles.said}>{w.said}</p>
             <div className={styles.answer}>
-              <AtlasMark size={16} />
+              <span className={styles.answerTag}><AtlasMark size={14} />Atlas</span>
               <span>{w.atlas}</span>
             </div>
-            <a className={styles.src} href={srcHref(w.ref)} target="_blank" rel="noopener noreferrer">
-              <span className="mono">[{w.ref}]</span> Source · paraphrase <span aria-hidden="true">↗</span>
-            </a>
           </Appear>
         ))}
       </ul>

@@ -18,32 +18,43 @@
 .join { color: var(--text-medium); text-decoration: none; }
 .join:hover { color: var(--text-strong); }
 
-/* ---------- why Atlas: four sourced cards ---------- */
-.why { display: flex; flex-direction: column; gap: 20px; width: 100%; }
-.whyHead { display: flex; flex-direction: column; gap: 8px; max-width: 640px; }
+/* ---------- why Atlas: four sourced cards, two by two ---------- */
+.why { display: flex; flex-direction: column; gap: 22px; width: 100%; }
+.whyHead { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
+.whyHeadText { display: flex; flex-direction: column; gap: 8px; max-width: 640px; }
 .whyKicker { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); }
 .whyTitle { color: var(--text-strong); text-wrap: balance; }
-.whyGrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.whyNote { flex: none; font-size: 12px; color: var(--text-weak); }
+.whyGrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .whyCard {
-  display: flex; flex-direction: column; gap: 6px;
-  padding: 18px 18px 16px;
-  border-radius: 16px;
-  background: linear-gradient(160deg, rgba(var(--ink-rgb), 0.04), rgba(var(--ink-rgb), 0.01) 60%), var(--elevation-strong);
+  display: flex; flex-direction: column; gap: 18px;
+  padding: 22px 24px 20px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(var(--ink-rgb), 0.045), rgba(var(--ink-rgb), 0.01) 60%), var(--elevation-strong);
   border: 1px solid rgba(var(--ink-rgb), 0.08);
-  transition: border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.whyCard:hover { border-color: rgba(var(--ink-rgb), 0.18); transform: translateY(-2px); }
-.whoRow { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-.who { font-size: 14.5px; letter-spacing: -0.01em; color: var(--text-strong); }
-.when { flex: none; font-family: var(--mono); font-size: 10.5px; color: var(--text-weak); }
-.role { font-size: 11.5px; color: var(--text-weak); }
-.said { margin: 8px 0 0; font-size: 13.5px; line-height: 1.55; color: var(--text-medium); text-wrap: pretty; flex: 1; }
-.answer { display: flex; align-items: flex-start; gap: 9px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--hairline); font-size: 13px; line-height: 1.45; color: var(--text-strong); }
-.answer svg { flex: none; margin-top: 1px; }
-.src { margin-top: 10px; align-self: flex-start; font-size: 11px; color: var(--text-weak); text-decoration: none; transition: color 0.3s ease; }
-.src .mono { font-family: var(--mono); color: var(--teal); }
-.src:hover { color: var(--text-strong); }
-.src:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 2px; border-radius: 4px; }
+.whyCard:hover { border-color: rgba(var(--ink-rgb), 0.18); }
+.whoRow { display: flex; align-items: center; gap: 12px; }
+.logo { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 11px; overflow: hidden; background: #16171a; border: 1px solid rgba(255, 255, 255, 0.08); }
+.logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.logo img[src$=".svg"] { width: 22px; height: 22px; object-fit: contain; }
+.whoText { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.who { font-size: 15px; letter-spacing: -0.01em; color: var(--text-strong); }
+.role { font-size: 12px; color: var(--text-weak); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.src {
+  flex: none; align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 9px; border-radius: 999px; border: 1px solid var(--hairline);
+  font-family: var(--mono); font-size: 10.5px; color: var(--text-weak); text-decoration: none;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+.src:hover { color: var(--text-strong); border-color: rgba(var(--ink-rgb), 0.3); }
+.src:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 2px; }
+.said { margin: 0; flex: 1; font-size: 17px; line-height: 1.55; letter-spacing: -0.01em; color: var(--text-strong); text-wrap: pretty; }
+.answer { display: flex; align-items: baseline; gap: 12px; padding-top: 16px; border-top: 1px solid var(--hairline); font-size: 13.5px; line-height: 1.5; color: var(--text-medium); }
+.answerTag { display: inline-flex; align-items: center; gap: 6px; flex: none; padding: 3px 9px 3px 5px; border-radius: 999px; background: rgba(var(--ink-rgb), 0.06); font-size: 11.5px; color: var(--text-strong); transform: translateY(-1px); }
+:global([data-theme="light"]) .logo { border-color: rgba(0, 0, 0, 0.06); }
 
 /* ---------- the stage: woven silver dither with a soft light sweep ---------- */
 .stage {
@@ -231,7 +242,7 @@
 @media (max-width: 1199.98px) {
   .section { gap: 36px; padding: 72px 24px; }
   .head { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-  .whyGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .whyHead { flex-direction: column; align-items: flex-start; gap: 8px; }
   .stage { padding: 32px 20px; }
 }
 
@@ -239,6 +250,10 @@
 @media (max-width: 809.98px) {
   .section { gap: 28px; padding: 72px 16px; }
   .whyGrid { grid-template-columns: minmax(0, 1fr); }
+  .whyCard { padding: 18px 16px 16px; gap: 14px; }
+  .said { font-size: 15.5px; }
+  .role { white-space: normal; }
+  .answer { flex-direction: column; gap: 8px; }
   .stage { padding: 16px 10px; border-radius: 16px; }
   .monitor { padding: 16px 14px; border-radius: 18px; gap: 14px; }
   .chip, .illus { display: none; }
