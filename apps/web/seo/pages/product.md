@@ -6,7 +6,7 @@ Your negotiating limits, the terms you approve and the destination of your money
 
 [Open a deal room](/join) [Inspect an agreement](/record)
 
-> Illustrative: A buyer's sealed mandate: limits stay hidden, only a commitment hash is recorded.
+> Illustrative: A buyer's sealed mandate: limits stay hidden; only the sealed mandate and its commitment hash go on NEAR.
 
 #### Negotiate with confidential mandates
 

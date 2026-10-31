@@ -35,5 +35,4 @@ export const ROUTES = [
     summary: "What this site stores and for how long." },
   { path: "/sealed-table", alias: "/product/sealed-table" },
   { path: "/payee", alias: "/product/payee" },
-  { path: "/glassbook", alias: "/atlas" },
 ]

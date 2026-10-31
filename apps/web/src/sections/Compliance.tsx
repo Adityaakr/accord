@@ -12,13 +12,13 @@ import styles from "./Compliance.module.css"
 
 /* Home · Accord Atlas (elementId "atlas"). Heading and copy on a two-column row, then a stage holding the Atlas
    monitor: one illustrative period of a NEAR/USDC retainer played end to end. Five steps run along the top (approved
-   conditions, observation slot, attestation, period decision, payment on NEAR); the order book is sampled and each of
+   conditions, observation slot, attestation, period decision, payment on NEAR); the pool is read at hidden times and each of
    six slots attested on a period timeline, readings count between values and meter against the approved conditions,
    then the period is decided and the retainer settles. Loops while in view; reduced motion shows the settled period.
    The Atlas mark stays monochrome; colour lives in the data: teal for bids and passes, coral for asks and misses.
-   Figures match the site's one example: 18,500 USDC a period, ≤40 bps, ≥12,000 USDC depth within 1%, ≥95% uptime,
-   5 of 6 slots. Slot 3 fails on spread, as in the hero preview.
-   Copy: docs/website/ACCORD_WEBSITE_FINAL_COPY.md Part A "Glassbook" (renamed Accord Atlas, 30 Oct 2026). */
+   Figures match the site's one example (kit v7): 18,500 USDC a period, ≤60 bps, ≥12,000 USDC depth within 2% on each
+   side, both sides quoted, 4 of 6 slots. Slot 3 fails on depth, as in the hero preview.
+   Copy: kit v7 website/FINAL_COPY.md Part A "Accord Atlas". */
 
 const appear = (delay: `${number}s`): AppearEffect => ({
   threshold: 0.5,
@@ -29,16 +29,19 @@ const appear = (delay: `${number}s`): AppearEffect => ({
 const STEPS = ["Approved conditions", "Observation slot", "Attestation", "Period decision", "Payment on NEAR"]
 const RECIPIENT = "halcyon-mm.near"
 
-type Slot = { bps: number; depth: number; up: number; pass: boolean }
+/* One illustrative period on Rhea's USDC/wNEAR pool (kit v7): spread ≤ 60 bps (the pool's 0.2% fee puts a round trip
+   at 40 bps or more), depth ≥ 12,000 USDC within 2% of the mid on each side, both sides quoted; 4 of 6 slots to pass.
+   Slot 3 fails on depth. Each slot's time is drawn inside the observer's enclave and shown once observed. */
+type Slot = { bps: number; depth: number; two: boolean; at: string; pass: boolean }
 const SLOTS: Slot[] = [
-  { bps: 36, depth: 12910, up: 98.4, pass: true },
-  { bps: 39, depth: 12480, up: 97.9, pass: true },
-  { bps: 47, depth: 9820, up: 93.1, pass: false },
-  { bps: 38, depth: 12640, up: 97.6, pass: true },
-  { bps: 35, depth: 13105, up: 98.8, pass: true },
-  { bps: 37, depth: 12770, up: 97.4, pass: true },
+  { bps: 48, depth: 12910, two: true, at: "00:47", pass: true },
+  { bps: 51, depth: 12480, two: true, at: "05:12", pass: true },
+  { bps: 52, depth: 9820, two: true, at: "08:31", pass: false },
+  { bps: 47, depth: 12640, two: true, at: "13:05", pass: true },
+  { bps: 45, depth: 13105, two: true, at: "16:58", pass: true },
+  { bps: 49, depth: 12770, two: true, at: "21:40", pass: true },
 ]
-const MEAN = { bps: 37, depth: 12288, up: 97.2 }
+const MEAN = { bps: 49, depth: 12288, two: true }
 
 /* The period as frames: the conditions, then each slot sampled and attested, then the decision, then the payment */
 type Frame = { step: number; slot: number; ms: number }
@@ -95,7 +98,7 @@ function DepthChart({ r, sampling }: { r: { bps: number; depth: number }; sampli
         <linearGradient id="atlas-ask" x1="0" y1="0" x2="0" y2="1"><stop offset="0" className={styles.askStop} stopOpacity="0.32" /><stop offset="1" className={styles.askStop} stopOpacity="0.02" /></linearGradient>
       </defs>
       <rect x="196" y="4" width="128" height="146" rx="4" className={styles.band} />
-      <text x="200" y="16" className={styles.bandLabel}>±1%</text>
+      <text x="200" y="16" className={styles.bandLabel}>±2%</text>
       <g className={styles.side} style={{ transform: `translateX(${-gap}px) scaleY(${h})`, transition: `transform 0.9s ${EASE}` }}>
         <path d="M0 150 L0 30 C 110 38, 205 96, 252 143 L252 150 Z" fill="url(#atlas-bid)" />
         <path d="M0 30 C 110 38, 205 96, 252 143" className={styles.bidLine} />
@@ -107,8 +110,8 @@ function DepthChart({ r, sampling }: { r: { bps: number; depth: number }; sampli
       <line x1="0" y1="150.5" x2="520" y2="150.5" className={styles.axis} />
       <line x1="260" y1="22" x2="260" y2="150" className={styles.mid} />
       <text x="260" y="164" textAnchor="middle" className={styles.tick}>mid</text>
-      <text x="196" y="164" textAnchor="middle" className={styles.tick}>−1%</text>
-      <text x="324" y="164" textAnchor="middle" className={styles.tick}>+1%</text>
+      <text x="196" y="164" textAnchor="middle" className={styles.tick}>−2%</text>
+      <text x="324" y="164" textAnchor="middle" className={styles.tick}>+2%</text>
       <rect x="196" y="4" width="128" height="146" rx="4" className={`${styles.scan} ${sampling ? styles.scanOn : ""}`} />
     </svg>
   )
@@ -125,8 +128,10 @@ function Monitor() {
   const passed = SLOTS.slice(0, marked).filter((s) => s.pass).length
   const cur = fr.slot >= 0 && fr.slot < 6 ? SLOTS[fr.slot] : null
   const read = cur ?? MEAN
-  const bps = useTween(read.bps, reduce), depth = useTween(read.depth, reduce), up = useTween(read.up, reduce)
-  const okBps = read.bps <= 40, okDepth = read.depth >= 12000, okUp = read.up >= 95
+  const bps = useTween(read.bps, reduce), depth = useTween(read.depth, reduce)
+  const okBps = read.bps <= 60, okDepth = read.depth >= 12000, okTwo = read.two
+  /* uptime as Atlas reports it: the share of observed slots in which the pool quoted both sides */
+  const seen = SLOTS.slice(0, marked), uptime = seen.length ? Math.round((seen.filter((x) => x.two).length / seen.length) * 100) : null
 
   /* the period playhead: where the sampling is within the six slots (0 to 1) */
   const head = fr.step === 0 ? 0 : fr.step >= 3 ? 1 : (fr.slot + (fr.step === 2 ? 1 : 0.6)) / 6
@@ -134,20 +139,20 @@ function Monitor() {
 
   const state = fr.step <= 2 ? "Monitoring" : fr.step === 3 ? "Deciding" : "Settled"
   const conds: [string, string, string, number, boolean][] = [
-    ["Spread", `${Math.round(bps)} bps`, "≤ 40 bps", Math.min(1, bps / 50), okBps],
-    ["Depth within 1%", `${usd(depth)} USDC`, "≥ 12,000", Math.min(1, depth / 15000), okDepth],
-    ["Uptime", `${up.toFixed(1)}%`, "≥ 95%", Math.max(0, Math.min(1, (up - 85) / 15)), okUp],
+    ["Spread", `${Math.round(bps)} bps`, "≤ 60 bps", Math.min(1, bps / 75), okBps],
+    ["Depth within 2%", `${usd(depth)} USDC`, "≥ 12,000", Math.min(1, depth / 15000), okDepth],
+    ["Two-sided quoting", okTwo ? "Both sides" : "One side", "required", okTwo ? 1 : 0.5, okTwo],
   ]
-  const marks = [40 / 50, 12000 / 15000, (95 - 85) / 15]
+  const marks = [60 / 75, 12000 / 15000, 1]
 
   return (
     <div ref={ref} className={styles.monitor} role="img"
-      aria-label="Illustrative Accord Atlas monitor for a NEAR/USDC market-making retainer. Approved conditions: spread at most 40 bps, at least 12,000 USDC of depth within 1%, 95% uptime, 5 of 6 observation slots to pass. The venue's public order book is sampled six times and each slot attested; slot 3 fails with a 47 bps spread and 9,820 USDC of depth. 5 of 6 pass, the period is eligible and 18,500 USDC is settled to halcyon-mm.near in USDC on NEAR.">
+      aria-label="Illustrative Accord Atlas monitor for a NEAR/USDC market-making retainer on Rhea's USDC/wNEAR pool. Approved conditions: spread at most 60 bps, at least 12,000 USDC of depth within 2% of the mid on each side, both sides quoted, 4 of 6 observation slots to pass. The pool is read at six times drawn inside the observer's enclave and each slot is attested; slot 3 fails with 9,820 USDC of depth. 5 of 6 pass, the period is eligible and 18,500 USDC is settled to halcyon-mm.near in USDC on NEAR.">
       <div className={styles.bar}>
         <span className={styles.barName}>
           <AtlasMark size={20} />
           <span className={styles.pair}>NEAR<span>/</span>USDC</span>
-          <span className={styles.chip}>Market-making retainer</span>
+          <span className={styles.chip}>Rhea USDC/wNEAR pool</span>
         </span>
         <span className={styles.barRight}>
           <span className={`${styles.state} ${styles[`st_${state}`]}`}><span className={styles.stateDot} />{state}</span>
@@ -168,14 +173,14 @@ function Monitor() {
       <div className={styles.body}>
         <div className={styles.book}>
           <div className={styles.paneHead}>
-            <span>Order book depth</span>
+            <span>Pool liquidity · ±2% of mid</span>
             <span className={styles.legend}><i className={styles.lgBid} />Bids<i className={styles.lgAsk} />Asks</span>
           </div>
           <DepthChart r={read} sampling={fr.step === 1 && !reduce} />
           <dl className={styles.reads}>
             <div><dt>Spread</dt><dd className={okBps ? "" : styles.warn}>{Math.round(bps)}<small> bps</small></dd></div>
-            <div><dt>Depth ±1%</dt><dd className={okDepth ? "" : styles.warn}>{usd(depth)}<small> USDC</small></dd></div>
-            <div><dt>Uptime</dt><dd className={okUp ? "" : styles.warn}>{up.toFixed(1)}<small>%</small></dd></div>
+            <div><dt>Depth ±2%</dt><dd className={okDepth ? "" : styles.warn}>{usd(depth)}<small> USDC</small></dd></div>
+            <div><dt>Uptime, reported</dt><dd>{uptime === null ? "–" : uptime}<small>{uptime === null ? "" : "%"}</small></dd></div>
           </dl>
         </div>
 
@@ -194,7 +199,7 @@ function Monitor() {
           </ul>
           <div className={styles.payout}>
             <span className={styles.dim}>Pass rule</span>
-            <span className={styles.payoutVal}>5 of 6 slots <small>per period</small></span>
+            <span className={styles.payoutVal}>4 of 6 slots <small>per period</small></span>
           </div>
           <div className={`${styles.payout} ${styles.payoutNext}`}>
             <span className={styles.dim}>Retainer</span>
@@ -205,8 +210,8 @@ function Monitor() {
 
       <div className={styles.period}>
         <div className={styles.paneHead}>
-          <span>Period 1 · observation slots</span>
-          <span className={styles.dim}><b className={styles.count}>{passed}</b> of 6 passed<span className={styles.req}> · 5 required</span></span>
+          <span>Period 1 · slot times drawn inside the enclave</span>
+          <span className={styles.dim}><b className={styles.count}>{passed}</b> of 6 passed<span className={styles.req}> · 4 required</span></span>
         </div>
         <div className={styles.track}>
           {SLOTS.map((s, i) => {
@@ -214,7 +219,7 @@ function Monitor() {
             return (
               <div key={i} className={`${styles.seg} ${done ? (s.pass ? styles.segPass : styles.segFail) : ""} ${now ? styles.segNow : ""}`}>
                 <span className={styles.segFill} />
-                <span className={styles.segLabel}><b>S{i + 1}</b>{done ? <> · {s.bps} bps</> : now ? <> · {fr.step === 1 ? "sampling" : "attesting"}</> : null}</span>
+                <span className={styles.segLabel}><b>S{i + 1}</b>{done ? <> · {s.at}</> : now ? <> · {fr.step === 1 ? "sampling" : "attesting"}</> : <> · hidden</>}</span>
               </div>
             )
           })}
@@ -241,13 +246,13 @@ function Monitor() {
 const WHY: { who: string; role: string; org: string; logo: string; date: string; ref: number; said: string; atlas: string }[] = [
   { who: "Kain Warwick", role: "Founder", org: "Synthetix", logo: "synthetix.svg", date: "Mar 2025", ref: 45,
     said: "Market makers cost projects $50k to $300k+ a month in the 2017 cycle. Good ones aim for tight spreads; many exercised their call options and dumped.",
-    atlas: "Payment follows the spread, depth and uptime both sides agreed." },
+    atlas: "Payment follows the spread, depth and two-sided quoting both sides agreed." },
   { who: "Jelle Buth", role: "Co-founder", org: "Enflux, a market maker", logo: "enflux.png", date: "Apr 2025", ref: 46,
     said: "Projects should define liquidity KPIs from order-book activity before they commit. In loan-option deals those KPIs are often missing or vague.",
     atlas: "The KPIs become the agreement's payment conditions." },
   { who: "LO:TECH", role: "Survey", org: "commissioned by a market maker", logo: "lotech.png", date: "Aug 2025", ref: 47,
     said: "52% of 2,000+ respondents in 98 countries do not trust market makers. The report recommends enforceable contracts and real-time dashboards.",
-    atlas: "Attested observations of the order book decide each payment." },
+    atlas: "Attested observations of the pool's liquidity decide each payment." },
   { who: "Binance", role: "Market-maker guidance", org: "for listed projects", logo: "binance.svg", date: "Mar 2026", ref: 48,
     said: "Projects must disclose their market maker's details, legal entity and contract terms to the listing platform.",
     atlas: "Disclosure shows what was agreed. Atlas measures whether it was met." },
@@ -308,7 +313,7 @@ function SlotPanel({ v }: { v: LiveValues }) {
         {slots.map((s) => (
           <li key={s.slot}>
             <Mono className={styles.liveChip} tone={s.result === "FAIL" ? "refusal" : undefined}>
-              slot {s.slot} · {s.result === "PASS" ? "pass" : "fail"} · {s.spreadP50Bps} bps · {s.depthMin} · {s.uptimePct}%
+              slot {s.slot} · {s.result === "PASS" ? "pass" : "fail"} · {s.spreadBps} bps · {Math.min(s.depthBid, s.depthAsk)} · {s.twoSided ? "both sides" : "one side"}
             </Mono>
           </li>
         ))}
@@ -328,10 +333,14 @@ export function Compliance() {
           <h2 className={`t-h2 ${styles.title}`}>Accord Atlas: liquidity agreements with measurable payment conditions.</h2>
         </Appear>
         <Appear className={styles.headRight} effect={appear("0.15s")}>
+          {/* Kit v7 FINAL_COPY Part A "Accord Atlas", verbatim */}
           <p className={`t-body-lg ${styles.description}`}>
-            Built on Accord, Atlas links a market maker's recurring retainer to the spread, depth and uptime both sides agreed. An attested observer samples
-            the venue's public order book on the agreed schedule. When the agreed number of observations pass, the payment is released; when they don't, it
-            is held for both sides to decide.
+            Accord Atlas connects market-making retainers to the liquidity conditions both parties approve. An attested observer samples the venue's public
+            liquidity at hidden times within an agreed schedule, checking spread, depth and two-sided quoting against the agreement.
+          </p>
+          <p className={`t-body ${styles.description} ${styles.descriptionMore}`}>
+            When the required observations pass, payment becomes eligible for release under Accord's payment controls. Otherwise, it remains withheld for
+            both parties to review. Each payment decision is linked to the terms and observations behind it.
           </p>
           <div className={styles.actions}>
             <Button variant="primary" href={LINKS.exploreAtlas}>See the Atlas demonstration</Button>
@@ -352,7 +361,7 @@ export function Compliance() {
 
       <p className={`t-body-sm ${styles.scope}`}>
         <span className={styles.scopeLabel}>Scope</span>
-        Atlas measures the market's condition on the venue, not which participant supplied it. Attributing liquidity to the market maker's own account is planned.
+        Atlas measures venue-level liquidity, not the market maker's individual contribution. Verification using the market maker's authenticated account data is planned.
       </p>
     </section>
   )

@@ -18,17 +18,17 @@ type Block =
 type Shot = { title: string; tag: string; blocks: Block[]; label: string }
 
 const SHOTS = {
-  mandate: { title: "Your mandate", tag: "Sealed", label: "A buyer's sealed mandate: limits stay hidden, only a commitment hash is recorded",
-    blocks: [{ t: "kv", k: "Maximum retainer", v: "•••••• USDC", mono: true }, { t: "kv", k: "Maximum spread", v: "≤ 50 bps", mono: true }, { t: "kv", k: "Minimum depth ±1%", v: "≥ 10,000 USDC", mono: true }, { t: "kv", k: "Walk-away", v: "••••••", mono: true },
-      { t: "note", text: "Encrypted in your browser to the enclave's key. Only this is recorded:" }, { t: "code", text: "commitment 0x7a3f…e19c" }] },
+  mandate: { title: "Your mandate", tag: "Sealed", label: "A buyer's sealed mandate: limits stay hidden; only the sealed mandate and its commitment hash go on NEAR",
+    blocks: [{ t: "kv", k: "Maximum retainer", v: "•••••• USDC", mono: true }, { t: "kv", k: "Maximum spread", v: "≤ 70 bps", mono: true }, { t: "kv", k: "Minimum depth ±2%", v: "≥ 10,000 USDC", mono: true }, { t: "kv", k: "Walk-away", v: "••••••", mono: true },
+      { t: "note", text: "Encrypted in your browser to the Sealed Table's key. On chain: the ciphertext and" }, { t: "code", text: "commitment 0x7a3f…e19c" }] },
   terms: { title: "Proposed terms", tag: "Attested", label: "Proposed terms awaiting approval from both companies",
-    blocks: [{ t: "kv", k: "Retainer", v: "18,500 USDC / period", mono: true }, { t: "kv", k: "Spread", v: "≤ 40 bps", mono: true }, { t: "kv", k: "Depth ±1%", v: "≥ 12,000 USDC", mono: true }, { t: "kv", k: "Uptime", v: "≥ 95%", mono: true }, { t: "kv", k: "Pays when", v: "5 of 6 slots pass", mono: true },
+    blocks: [{ t: "kv", k: "Retainer", v: "18,500 USDC / period", mono: true }, { t: "kv", k: "Spread", v: "≤ 60 bps", mono: true }, { t: "kv", k: "Depth ±2%", v: "≥ 12,000 USDC", mono: true }, { t: "kv", k: "Quoting", v: "both sides", mono: true }, { t: "kv", k: "Pays when", v: "4 of 6 slots pass", mono: true },
       { t: "check", text: "Within both mandates' limits", state: "ok" }, { t: "check", text: "Buyer approved", state: "ok" }, { t: "check", text: "Seller approved", state: "wait" }] },
   payment: { title: "Payment request · act(Pay)", tag: "Checked", label: "A payment request checked against the approved terms before it is paid",
     blocks: [{ t: "check", text: <>Milestone <b>Period 3</b> is due</>, state: "ok" }, { t: "check", text: <>Amount <b>18,500 USDC</b> matches the terms</>, state: "ok" }, { t: "check", text: <>Recipient <b>halcyon-mm.testnet</b>, version 1</>, state: "ok" },
       { t: "amount", value: "18,500 USDC", status: "Paid" }] },
   negotiation: { title: "Sealed Table · round 4", tag: "In enclave", label: "Two agents negotiating inside the Sealed Table, with the limit check",
-    blocks: [{ t: "chat", side: "a", who: "Buyer's agent", text: "16,000 USDC a period at 35 bps." }, { t: "chat", side: "b", who: "Seller's agent", text: "19,500 USDC. 40 bps is our floor." }, { t: "chat", side: "a", who: "Buyer's agent", text: "18,500 at 40 bps, 95% uptime." },
+    blocks: [{ t: "chat", side: "a", who: "Buyer's agent", text: "16,000 USDC a period at 50 bps." }, { t: "chat", side: "b", who: "Seller's agent", text: "19,500 USDC. 55 bps is our floor." }, { t: "chat", side: "a", who: "Buyer's agent", text: "18,500 at 60 bps, both sides quoted." },
       { t: "check", text: "Proposal inside both mandates' limits", state: "ok" }] },
   attestation: { title: "Attestation", tag: "Verified", label: "The attestation that comes with the negotiated terms",
     blocks: [{ t: "kv", k: "Enclave", v: "TDX · measurement approved", mono: true }, { t: "kv", k: "Job", v: "neg-7f3a…c21", mono: true }, { t: "kv", k: "Terms hash", v: "0x91c2…4b07", mono: true }, { t: "kv", k: "Transcript hash", v: "0x3e58…a9d1", mono: true },
@@ -47,13 +47,13 @@ const SHOTS = {
   identity: { title: "What Payee proves", tag: "Scope", label: "What a payee binding proves, and what it does not",
     blocks: [{ t: "check", text: "Control of halcyon.example", state: "ok" }, { t: "check", text: "Approval by the vendor's settlement authority", state: "ok" }, { t: "check", text: "Acceptance by the buyer", state: "ok" }, { t: "check", text: "That the company legally exists (KYB, planned for v2)", state: "wait" }] },
   conditions: { title: "Approved conditions", tag: "Both approved", label: "The liquidity conditions both sides approved before the engagement",
-    blocks: [{ t: "kv", k: "Venue", v: "NEAR/USDC, one venue", mono: true }, { t: "kv", k: "Schedule", v: "6 slots per period", mono: true }, { t: "kv", k: "Spread", v: "≤ 40 bps", mono: true }, { t: "kv", k: "Depth ±1%", v: "≥ 12,000 USDC", mono: true }, { t: "kv", k: "Uptime", v: "≥ 95%", mono: true }, { t: "kv", k: "Pays when", v: "5 of 6 slots pass", mono: true }] },
-  observation: { title: "Slot 3 · NEAR/USDC", tag: "Attested", label: "One observation slot: the venue's public order book, sampled in an enclave",
-    blocks: [{ t: "book" }, { t: "kv", k: "Spread", v: "31 bps · pass", mono: true }, { t: "kv", k: "Depth ±1%", v: "13,400 USDC · pass", mono: true }] },
+    blocks: [{ t: "kv", k: "Venue", v: "Rhea USDC/wNEAR pool", mono: true }, { t: "kv", k: "Schedule", v: "6 hidden slots per period", mono: true }, { t: "kv", k: "Spread", v: "≤ 60 bps", mono: true }, { t: "kv", k: "Depth ±2%", v: "≥ 12,000 USDC", mono: true }, { t: "kv", k: "Quoting", v: "both sides", mono: true }, { t: "kv", k: "Pays when", v: "4 of 6 slots pass", mono: true }] },
+  observation: { title: "Slot 4 · USDC/wNEAR", tag: "Attested", label: "One observation slot: the pool's public liquidity, read at a time drawn inside the observer's enclave",
+    blocks: [{ t: "book" }, { t: "kv", k: "Spread", v: "47 bps · pass", mono: true }, { t: "kv", k: "Depth ±2%", v: "12,640 USDC · pass", mono: true }, { t: "kv", k: "Quoting", v: "both sides · pass", mono: true }] },
   decision: { title: "Period 3", tag: "Eligible", label: "A period decision: five of six slots passed, so the retainer is eligible",
-    blocks: [{ t: "slots", v: [1, 1, 0, 1, 1, 1] }, { t: "note", text: "5 of 6 slots passed. The rule needs 5." }, { t: "amount", value: "18,500 USDC", status: "Eligible" }] },
+    blocks: [{ t: "slots", v: [1, 1, 0, 1, 1, 1] }, { t: "note", text: "5 of 6 slots passed. The rule needs 4." }, { t: "amount", value: "18,500 USDC", status: "Eligible" }] },
   scope: { title: "What this version measures", tag: "v0 scope", label: "What the current version of Atlas measures, and what is planned",
-    blocks: [{ t: "check", text: "Spread, depth and uptime of the venue's public order book", state: "ok" }, { t: "check", text: "Each observation attested", state: "ok" }, { t: "check", text: "Liquidity attributed to the market maker's own account (planned)", state: "wait" },
+    blocks: [{ t: "check", text: "Spread, depth and two-sided quoting of the venue's public liquidity", state: "ok" }, { t: "check", text: "Each observation attested", state: "ok" }, { t: "check", text: "Liquidity attributed to the market maker's own account (planned)", state: "wait" },
       { t: "note", text: "Atlas pays on the conditions as agreed. It does not yet establish who met them." }] },
 } satisfies Record<string, Shot>
 
@@ -74,7 +74,7 @@ function BlockView({ b }: { b: Block }) {
     case "book": return (
       <div className={styles.book} aria-hidden="true">
         {[64, 48, 36, 22].map((w, i) => <span key={`a${i}`} className={styles.ask} style={{ width: `${w}%` }} />)}
-        <span className={styles.mid}>mid 4.812 · spread 31 bps</span>
+        <span className={styles.mid}>mid 4.812 · spread 47 bps</span>
         {[26, 40, 52, 70].map((w, i) => <span key={`b${i}`} className={styles.bid} style={{ width: `${w}%` }} />)}
       </div>
     )

@@ -26,34 +26,34 @@ const c = (t: string) => <code>{t}</code>
 
 const USES: Use[] = [
   {
-    label: "Market-making retainers", icon: "bank", line: "Tied to agreed spread, depth and uptime",
+    label: "Market-making retainers", icon: "bank", line: "Tied to agreed spread, depth and two-sided quoting",
     panel: {
       room: "NEAR/USDC retainer, Q1",
-      ask: "Renew our NEAR/USDC market-making retainer: up to 20,000 USDC a period, spread under 50 bps, at least 10,000 USDC of depth within 1%, 90% uptime. Our agent must not overpay or pay the wrong desk.",
+      ask: "Renew our NEAR/USDC market-making retainer on Rhea: up to 20,000 USDC a period, spread under 70 bps, at least 10,000 USDC of depth within 2%, quotes on both sides. Our agent must not overpay or pay the wrong desk.",
       answer: "18,500 USDC a period. Paid on measured liquidity.",
       lines: [
         <>Terms agreed inside the Sealed Table; both mandates stayed sealed</>,
         <>Your agent's key can call {c("act()")} and nothing else</>,
         <>Any amount, period or recipient off the terms is refused</>,
         <>Paying {c("halcyon-mm.testnet")} only, bound to halcyon.example</>,
-        <>Each period's payment becomes eligible when 5 of 6 slots pass</>,
+        <>Each period's payment becomes eligible when 4 of 6 slots pass</>,
       ],
       trace: [
-        { k: "think", t: "Ceiling is 20,000 USDC a period. A tighter spread and a deeper book are worth more to us than the last 1,500, so I'll seal stricter floors.", s: 4 },
-        { k: "call", t: 'create_agreement(seller: "halcyon-mm.testnet")', r: "agreement 41 · agent key limited to act()", s: 2 },
-        { k: "call", t: "commit_mandate(41, 0x9c2e…a71f)", r: "your mandate sealed, hash on-chain", s: 2 },
+        { k: "think", t: "Ceiling is 20,000 USDC a period. A tighter spread and deeper liquidity are worth more to us than the last 1,500, so I'll seal stricter floors.", s: 4 },
+        { k: "call", t: 'create_agreement({vendor: "halcyon-mm.testnet"})', r: "agreement 41 · agent key limited to act()", s: 2 },
+        { k: "call", t: "commit_mandate(0x9c2e…a71f, ciphertext)", r: "your mandate sealed, hash on-chain", s: 2 },
         { k: "wait", t: "Waiting for Halcyon's agent to commit its mandate", r: "committed", s: 41 },
-        { k: "call", t: "trigger_negotiation(41)", r: "Sealed Table job started", s: 3 },
+        { k: "call", t: "start_negotiation()", r: "Sealed Table job started", s: 3 },
         { k: "think", t: "Neither side sees the other's limits. If both mandates can be met, only the agreed terms come out.", s: 2 },
-        { k: "event", t: "on_negotiation_output(41)", r: "attestation verified · limits checked", s: 27 },
-        { k: "out", t: "18,500 USDC · ≤40 bps · ≥12,000 depth · ≥95% uptime", s: 1 },
+        { k: "event", t: "on_sealed_result()", r: "attestation verified · limits checked", s: 27 },
+        { k: "out", t: "18,500 USDC · ≤60 bps · ≥12,000 depth · both sides · 4 of 6", s: 1 },
         { k: "think", t: "Under our ceiling and stricter than every floor we set. Asking you to approve.", s: 3 },
-        { k: "call", t: "approve_terms(41)", r: "approved by yourco.testnet and Halcyon", s: 6 },
-        { k: "call", t: "accept_payee(41, 1)", r: "halcyon-mm.testnet bound to halcyon.example", s: 2 },
+        { k: "call", t: "approve_terms()", r: "approved by yourco.testnet and Halcyon", s: 6 },
+        { k: "call", t: "accept_recipient(1)", r: "halcyon-mm.testnet bound to halcyon.example", s: 2 },
       ],
       detail: {
         you: "Your agent", them: "Halcyon's agent", hashes: ["0x9c2e…a71f", "0x5d18…e44b"],
-        terms: "18,500 USDC · ≤40 bps · ≥12,000 depth · ≥95% uptime",
+        terms: "18,500 USDC · ≤60 bps · ≥12,000 depth · both sides · 4 of 6",
         keyLabel: "Your agent's key", key: "ed25519:7Hq2…3fKa", agreement: "agreement 41",
         pay: [
           { call: "act(Pay{period 1, 18,500 USDC})" },
@@ -61,9 +61,9 @@ const USES: Use[] = [
           { call: 'act(Pay{to "halcyon-ops.testnet"})', fail: "recipient", err: "ERR_PAYEE_MISMATCH" },
         ],
         domain: "halcyon.example", account: "halcyon-mm.testnet",
-        marks: ["p", "p", "f", "p", "p", "p"], marksLabel: "Observation slots · period 1",
-        rows: [["Spread", "38 bps", "needs ≤ 40"], ["Depth within 1%", "12,640 USDC", "needs ≥ 12,000"], ["Uptime", "97.2%", "needs ≥ 95%"]],
-        result: "5 of 6 slots passed. 18,500 USDC eligible for period 1.",
+        marks: ["p", "p", "f", "p", "p", "p"], marksLabel: "Observation slots at hidden times · period 1",
+        rows: [["Spread", "49 bps", "needs ≤ 60"], ["Depth within 2%", "12,288 USDC", "needs ≥ 12,000"], ["Two-sided quoting", "6 of 6 slots", "needed every slot"]],
+        result: "5 of 6 slots passed, 4 needed. 18,500 USDC eligible for period 1.",
       },
     },
   },
@@ -82,7 +82,7 @@ const USES: Use[] = [
       ],
       trace: [
         { k: "think", t: "214 invoices. Each needs a matching purchase order, a confirmed delivery and the vendor's bound address before I pay it.", s: 3 },
-        { k: "call", t: "get_record(vendor agreements)", r: "38 active agreements, 38 bound payees", s: 2 },
+        { k: "event", t: "Reading 38 vendor agreements", r: "38 authorised recipients", s: 2 },
         { k: "out", t: "214 read · 212 match order and delivery · 2 don't", s: 19, c: 4 },
         { k: "think", t: "INV-2291 bills 4,120 against an order for 3,800. INV-2307 asks us to pay a new bank account. Submitting both as invoiced; the contract decides.", s: 4 },
         { k: "call", t: "act(Pay{INV-2291, 4,120 USDC})", r: "refused · ERR_AMOUNT_MISMATCH", s: 1, bad: true },
@@ -120,15 +120,15 @@ const USES: Use[] = [
       ],
       trace: [
         { k: "think", t: "Our maximum is 45,000 USDC over three tranches, and none moves before the committee accepts a report.", s: 3 },
-        { k: "call", t: 'create_agreement(seller: "sdkworks.testnet", tranches: 3)', r: "agreement 114 · agent key limited to act()", s: 2 },
-        { k: "call", t: "commit_mandate(114, 0x41d0…9b3e)", r: "your maximum sealed", s: 2 },
+        { k: "call", t: 'create_agreement({vendor: "sdkworks.testnet"})', r: "agreement 114 · agent key limited to act()", s: 2 },
+        { k: "call", t: "commit_mandate(0x41d0…9b3e, ciphertext)", r: "your maximum sealed", s: 2 },
         { k: "wait", t: "Waiting for SDKWorks to commit its mandate", r: "committed", s: 52 },
-        { k: "call", t: "trigger_negotiation(114)", r: "Sealed Table job started", s: 3 },
-        { k: "event", t: "on_negotiation_output(114)", r: "attestation verified · limits checked", s: 24 },
+        { k: "call", t: "start_negotiation()", r: "Sealed Table job started", s: 3 },
+        { k: "event", t: "on_sealed_result()", r: "attestation verified · limits checked", s: 24 },
         { k: "out", t: "42,000 USDC · tranches of 12,000 / 15,000 / 15,000", s: 1 },
-        { k: "call", t: "approve_terms(114)", r: "approved by both sides", s: 5 },
-        { k: "call", t: "accept_payee(114, 1)", r: "sdkworks.testnet bound to sdkworks.example", s: 2 },
-        { k: "think", t: "Tranche 1 waits on accept_milestone(114, 0). Nothing is payable yet.", s: 2 },
+        { k: "call", t: "approve_terms()", r: "approved by both sides", s: 5 },
+        { k: "call", t: "accept_recipient(1)", r: "sdkworks.testnet bound to sdkworks.example", s: 2 },
+        { k: "think", t: "Tranche 1 waits on accept_delivery(0). Nothing is payable yet.", s: 2 },
       ],
       detail: {
         you: "Your agent", them: "SDKWorks' agent", hashes: ["0x41d0…9b3e", "0x88c2…17fa"],
@@ -141,7 +141,7 @@ const USES: Use[] = [
         ],
         domain: "sdkworks.example", account: "sdkworks.testnet",
         marks: ["p", "o", "o"], marksLabel: "Tranches",
-        rows: [["Milestone report", "submitted", "tranche 1"], ["Committee", "accepted", "3 of 3 votes"], ["accept_milestone(114, 0)", "called", "by your treasury"]],
+        rows: [["Milestone report", "submitted", "tranche 1"], ["Committee", "accepted", "3 of 3 votes"], ["accept_delivery(0)", "called", "by your treasury"]],
         result: "Tranche 1 payable: 12,000 USDC to sdkworks.testnet.",
       },
     },
@@ -162,13 +162,13 @@ const USES: Use[] = [
       trace: [
         { k: "think", t: "A buyer's agent wants six months of the data API. Our floor is 2,000 USDC a month; it stays sealed.", s: 3 },
         { k: "event", t: "create_agreement by buyer-agent.testnet", r: "agreement 207 · you are the seller", s: 1 },
-        { k: "call", t: "commit_mandate(207, 0x7be3…05ca)", r: "your floor sealed", s: 2 },
+        { k: "call", t: "commit_mandate(0x7be3…05ca, ciphertext)", r: "your floor sealed", s: 2 },
         { k: "wait", t: "Waiting for the buyer's agent to commit", r: "committed", s: 18 },
-        { k: "call", t: "trigger_negotiation(207)", r: "Sealed Table job started", s: 3 },
-        { k: "event", t: "on_negotiation_output(207)", r: "attestation verified · limits checked", s: 21 },
+        { k: "call", t: "start_negotiation()", r: "Sealed Table job started", s: 3 },
+        { k: "event", t: "on_sealed_result()", r: "attestation verified · limits checked", s: 21 },
         { k: "out", t: "2,150 USDC a month × 6 = 12,900 USDC", s: 1 },
-        { k: "call", t: "approve_terms(207)", r: "approved by both sides", s: 4 },
-        { k: "call", t: 'propose_payee(207, "yourco.example", "yourco.testnet")', r: "domain verified", s: 9 },
+        { k: "call", t: "approve_terms()", r: "approved by both sides", s: 4 },
+        { k: "call", t: 'propose_recipient("yourco.example", "yourco.testnet")', r: "domain verified", s: 9 },
         { k: "wait", t: "Waiting for 12,900 USDC to be funded", r: "funded", s: 33 },
       ],
       detail: {
@@ -202,13 +202,13 @@ const USES: Use[] = [
       ],
       trace: [
         { k: "think", t: "Up to 500 USDC a week, 2,000 in total, and stop when you revoke. The provider's agent prices by the week.", s: 3 },
-        { k: "call", t: 'create_agreement(seller: "inferhub.testnet")', r: "agreement 88 · agent key limited to act()", s: 2 },
-        { k: "call", t: "commit_mandate(88, 0x2fa9…c710)", r: "your limits sealed", s: 2 },
+        { k: "call", t: 'create_agreement({vendor: "inferhub.testnet"})', r: "agreement 88 · agent key limited to act()", s: 2 },
+        { k: "call", t: "commit_mandate(0x2fa9…c710, ciphertext)", r: "your limits sealed", s: 2 },
         { k: "wait", t: "Waiting for InferHub's agent to commit", r: "committed", s: 7 },
-        { k: "call", t: "trigger_negotiation(88)", r: "Sealed Table job started", s: 3 },
-        { k: "event", t: "on_negotiation_output(88)", r: "attestation verified · limits checked", s: 19 },
+        { k: "call", t: "start_negotiation()", r: "Sealed Table job started", s: 3 },
+        { k: "event", t: "on_sealed_result()", r: "attestation verified · limits checked", s: 19 },
         { k: "out", t: "450 USDC a week · capped at 1,800 USDC", s: 1 },
-        { k: "call", t: "approve_terms(88)", r: "approved by both sides", s: 4 },
+        { k: "call", t: "approve_terms()", r: "approved by both sides", s: 4 },
         { k: "call", t: "act(Pay{week 1, 450 USDC})", r: "paid to inferhub.testnet", s: 3 },
         { k: "think", t: "A 500 USDC payment would be refused. The cap leaves room for three more weeks.", s: 2, c: 2 },
       ],
@@ -266,8 +266,8 @@ const Tick = () => (
 )
 
 /* Which capability a step belongs to, for opening the detail: by call name; a thought goes with the step it leads to */
-const NEG = ["commit_mandate", "trigger_negotiation", "on_negotiation_output"]
-const PAYEE = ["accept_payee", "propose_payee", "get_record"]
+const NEG = ["commit_mandate", "start_negotiation", "on_sealed_result"]
+const PAYEE = ["accept_recipient", "propose_recipient", "Reading 38 vendor agreements"]
 function capOf(trace: Step[], i: number): number {
   const st = trace[i]
   if (st.c !== undefined) return st.c

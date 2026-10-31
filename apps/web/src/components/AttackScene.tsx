@@ -96,13 +96,13 @@ type Lane = {
 
 const LANES: Lane[] = [
   { arrives: "Our bank details have changed.", quote: true, tags: ["BEC", "ASI01 goal hijack"], agent: "Asks to pay the new account",
-    gate: "controls", stopLine: "destination is not the authorised recipient", outcome: "log", codes: ["ERR_PAYEE_MISMATCH"], resultNote: "nothing paid" },
+    gate: "controls", stopLine: "destination is not the authorised recipient", outcome: "log", codes: ["ERR_PAYEE_MISMATCH"], resultNote: "nothing sent" },
   { arrives: "Urgent: pay invoice 4471 today.", quote: true, tags: ["ASI02 tool misuse"], agent: "Asks for a payment", agentSub: "the schedule does not hold",
-    gate: "controls", stopLine: "amount and milestone checked against the approved schedule", outcome: "log", codes: ["ERR_AMOUNT_MISMATCH", "ERR_MILESTONE_NOT_DUE"] },
+    gate: "controls", stopLine: "amount and milestone checked against the approved schedule", outcome: "log", codes: ["ERR_AMOUNT_MISMATCH", "ERR_NOT_DUE"] },
   { arrives: "Please update our payee.", sub: "sent from the vendor's real mailbox", quote: true, tags: ["BEC"], agent: "Has no method that changes a payee",
     gate: "payee", stopLine: "fresh domain proof · vendor authority · buyer accepts · 24-hour delay", outcome: "nochange", resultTitle: "No change from a message", resultNote: "real changes wait 24\u00a0h" },
   { arrives: "The agent's key is stolen", tags: ["ASI03 privilege abuse"], agent: <>Attacker calls <code className={styles.code}>act()</code></>, agentSub: "with the stolen key",
-    gate: "controls", stopLine: "the same checks, then revoke in one transaction", outcome: "log", codes: ["ERR_REVOKED"], resultNote: "every new payment stops" },
+    gate: "controls", stopLine: "the same checks, then revoke in one transaction", outcome: "log", codes: ["AccessKeyDoesNotExist"], resultNote: "after the revoke" },
   { arrives: "The other agent presses yours", sub: "to concede past your limit", tags: ["ASI07 inter-agent"], agent: "May concede in the conversation",
     gate: "table", stopLine: "code checks every proposal against both mandates' limits", outcome: "limits", resultTitle: "Terms inside your limits,", resultNote: "or no deal; you approve" },
 ]

@@ -132,7 +132,7 @@ const CARDS: Card[] = [
     id: "TFySiAbJr",
     icon: <IconWorkflow />,
     title: "Private to each company",
-    description: "Its mandate and the negotiation; only hashes leave the enclave.",
+    description: "Its mandate (on chain only as ciphertext) and the negotiation; only the terms, hashes and an attestation leave the enclave.",
     delay: "0s",
   },
   {
@@ -146,14 +146,14 @@ const CARDS: Card[] = [
     id: "AqjquRBS_",
     icon: <IconScanEye />,
     title: "Public",
-    description: "The payment schedule the contract enforces and the USDC transfers on NEAR, as with any stablecoin payment.",
+    description: "The payment schedule the contract enforces, the authorised recipient and the payments themselves, as with any stablecoin payment.",
     delay: "0.2s",
   },
   {
     id: "TExcZL5RQ",
     icon: <IconBookCheck />,
     title: "No recall",
-    description: "Revocation is not a recall: it stops every new payment at once, and a payment already made stays made.",
+    description: "Accord does not reverse a payment once it is made; revocation stops the agent, and a payment already made went to the authorised recipient at the approved amount.",
     delay: "0.3s",
   },
   {
@@ -217,8 +217,7 @@ export function Benefits() {
           (Body Small .ls-link) as one block under the grid, on the grid's left edge, the heading's text→link rhythm (gap 16) */}
       <Appear className={styles.closing} effect={appear("0s")}>
         <p className={`t-body-lg ${styles.closingText}`}>
-          Settlement happens on NEAR itself: the contract moves the USDC, so every payment is checked and recorded in one place.
-          Mainnet follows an audit.
+          A keeper service triggers scheduled steps such as observations; it cannot move funds or change an outcome. Mainnet follows an audit.
         </p>
         <div className={styles.links}>
           <Tertiary href={LINKS.security}>Security documentation →</Tertiary>

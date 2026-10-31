@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" role="img" aria-label="An Accord Atlas period: six observation slots at times only the observer's enclave knows, each read from the pool at the first block after its time; four pass, one fails the agreed spread and depth, and one went unobserved. The release rule of four of six is met, so the period's payment becomes eligible and still passes the payment checks; had fewer passed, the period would be withheld, or sent to the buyer for review if unobserved slots could have changed the result. The pool's liquidity shows market conditions, not the market maker's own positions." font-family="Satoshi, Manrope, system-ui, sans-serif" font-size="12" style="color:var(--fg,#e8edf2)">
+  <defs><marker id="arr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker></defs>
+  <text x="40" y="30" font-size="11" letter-spacing="0.8" style="fill:var(--muted,#9aa7b4)">Period 1 · six slots at hidden times · agreed: spread ≤ 60 bps, depth ≥ 1,000 USDC within 2% of mid, both sides quoted · illustrative</text>
+  <line x1="60" y1="130" x2="700" y2="130" stroke="currentColor" stroke-width="1.2"/>
+  <g font-family="JetBrains Mono, ui-monospace, monospace" font-size="10.5">
+    <rect x="62" y="48" width="96" height="66" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--pass,#4fc48a)"/>
+    <text x="110" y="64" text-anchor="middle" font-family="Satoshi, Manrope, system-ui, sans-serif" font-weight="600" font-size="12" style="fill:var(--pass,#4fc48a)">slot 1 · pass</text>
+    <text x="110" y="82" text-anchor="middle" fill="currentColor">44 bps · 1,420</text>
+    <text x="110" y="98" text-anchor="middle" fill="currentColor">both sides</text>
+    <line x1="110" y1="114" x2="110" y2="130" stroke="currentColor"/>
+
+    <rect x="172" y="48" width="96" height="66" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--pass,#4fc48a)"/>
+    <text x="220" y="64" text-anchor="middle" font-family="Satoshi, Manrope, system-ui, sans-serif" font-weight="600" font-size="12" style="fill:var(--pass,#4fc48a)">slot 2 · pass</text>
+    <text x="220" y="82" text-anchor="middle" fill="currentColor">45 bps · 1,290</text>
+    <text x="220" y="98" text-anchor="middle" fill="currentColor">both sides</text>
+    <line x1="220" y1="114" x2="220" y2="130" stroke="currentColor"/>
+
+    <rect x="282" y="48" width="96" height="66" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--pass,#4fc48a)"/>
+    <text x="330" y="64" text-anchor="middle" font-family="Satoshi, Manrope, system-ui, sans-serif" font-weight="600" font-size="12" style="fill:var(--pass,#4fc48a)">slot 3 · pass</text>
+    <text x="330" y="82" text-anchor="middle" fill="currentColor">47 bps · 1,140</text>
+    <text x="330" y="98" text-anchor="middle" fill="currentColor">both sides</text>
+    <line x1="330" y1="114" x2="330" y2="130" stroke="currentColor"/>
+
+    <rect x="392" y="48" width="96" height="66" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--refuse,#ef5a5a)"/>
+    <text x="440" y="64" text-anchor="middle" font-family="Satoshi, Manrope, system-ui, sans-serif" font-weight="600" font-size="12" style="fill:var(--refuse,#ef5a5a)">slot 4 · fail</text>
+    <text x="440" y="82" text-anchor="middle" fill="currentColor">71 bps · 980</text>
+    <text x="440" y="98" text-anchor="middle" fill="currentColor">both sides</text>
+    <line x1="440" y1="114" x2="440" y2="130" stroke="currentColor"/>
+
+    <rect x="502" y="48" width="96" height="66" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--pass,#4fc48a)"/>
+    <text x="550" y="64" text-anchor="middle" font-family="Satoshi, Manrope, system-ui, sans-serif" font-weight="600" font-size="12" style="fill:var(--pass,#4fc48a)">slot 5 · pass</text>
+    <text x="550" y="82" text-anchor="middle" fill="currentColor">44 bps · 1,310</text>
+    <text x="550" y="98" text-anchor="middle" fill="currentColor">both sides</text>
+    <line x1="550" y1="114" x2="550" y2="130" stroke="currentColor"/>
+
+    <rect x="612" y="48" width="96" height="66" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--muted,#9aa7b4)" stroke-dasharray="4 3"/>
+    <text x="660" y="64" text-anchor="middle" font-family="Satoshi, Manrope, system-ui, sans-serif" font-weight="600" font-size="12" style="fill:var(--muted,#9aa7b4)">slot 6 · none</text>
+    <text x="660" y="82" text-anchor="middle" fill="currentColor">not polled</text>
+    <text x="660" y="98" text-anchor="middle" fill="currentColor">unobserved</text>
+    <line x1="660" y1="114" x2="660" y2="130" stroke="currentColor"/>
+  </g>
+  <text x="380" y="152" text-anchor="middle" font-size="11" style="fill:var(--muted,#9aa7b4)">each slot: the observer reads the pool at the first block after a time only its enclave knows</text>
+
+  <line x1="700" y1="130" x2="760" y2="130" stroke="currentColor" stroke-width="1.2" marker-end="url(#arr4)"/>
+  <rect x="760" y="48" width="210" height="60" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--accent,#d8a84a)" stroke-width="1.4"/>
+  <text x="865" y="70" text-anchor="middle" font-weight="600" fill="currentColor">Release rule</text>
+  <text x="865" y="90" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11.5" fill="currentColor">eligible if ≥ 4 of 6 pass</text>
+  <line x1="865" y1="108" x2="865" y2="130" stroke="currentColor" stroke-width="1.2"/>
+  <rect x="760" y="130" width="210" height="44" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--pass,#4fc48a)" stroke-width="1.4"/>
+  <text x="865" y="148" text-anchor="middle" font-weight="600" style="fill:var(--pass,#4fc48a)">4 of 6 passed: eligible</text>
+  <text x="865" y="165" text-anchor="middle" font-size="11" fill="currentColor">then the payment checks apply</text>
+  <rect x="760" y="186" width="210" height="44" rx="6" style="fill:var(--surface-2,#1d2935);stroke:var(--refuse,#ef5a5a)" stroke-dasharray="5 4"/>
+  <text x="865" y="204" text-anchor="middle" font-weight="600" style="fill:var(--refuse,#ef5a5a)">fewer than 4: withheld</text>
+  <text x="865" y="221" text-anchor="middle" font-size="11" fill="currentColor">or review, if slots went unobserved</text>
+
+  <text x="40" y="262" font-size="11" fill="currentColor">Scope: the pool's liquidity shows market conditions, not the market maker's own positions.</text>
+  <text x="40" y="280" font-size="11" style="fill:var(--muted,#9aa7b4)">Attribution from the market maker's own pool positions is planned, not implemented.</text>
+</svg>

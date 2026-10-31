@@ -8,12 +8,12 @@ export type LiveValues = {
   asOf: string                 // ISO timestamp of the snapshot
   source: "live" | "last-known"
   attempts?: number | null         // visitor messages sent to the demo agent (inbox store); absent until the store answers
-  movedByAttempts?: number | null  // from the contract's events; absent until read, 0 only while the events say so
+  paidOutsideTerms?: number | null // "Paid outside the terms", from the contract's refusal and payment events; absent until read, 0 only while the events say so
   lastRefusal: Refusal | null
   agreement: { id: string; state: "Sealed" | "Attested" | "Executing" | "Settled"; terms: { milestone: number; amount: string; due: string }[]; payee: { domain: string; version: number; proof: string }; lastTransfer: { amount: string; to: string; tx: string; at: string } | null }
-  balance: { usdc: string; eth: string; address: string }
+  balance: { usdc: string; account: string } // the agreement's own NEAR account and its USDC (NEP-141) balance
   refusals: Refusal[]
-  slots: { slot: number; result: "PASS" | "FAIL"; spreadP50Bps: number; depthMin: number; uptimePct: number }[]
+  slots: { slot: number; result: "PASS" | "FAIL"; spreadBps: number; depthBid: number; depthAsk: number; twoSided: boolean }[] // observation_recorded (kit v7)
 }
 
 export const API = (import.meta.env as Record<string, string | undefined>).VITE_ACCORD_API_URL

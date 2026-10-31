@@ -71,17 +71,17 @@ const PIECES: Piece[] = [
     ),
   },
   {
-    id: "near-chain-signatures",
+    id: "near-usdc",
     piece: "USDC on NEAR",
     protects: (
       <>
-        The agreement’s USDC is held in escrow by the contract (NEP-141 USDC on NEAR), and only the contract can move it, only through <Mono>act</Mono>. The transfer happens
-        in the same call that checks the terms, so nothing is signed that is not paid
+        The agreement’s USDC (NEP-141 on NEAR) sits in the agreement’s own account, and only the contract can send it, only through <Mono>act</Mono>, after the request
+        is checked against the approved terms
       </>
     ),
     check: (
       <>
-        <Mono>make pay</Mono> shows the USDC transfer on the NEAR testnet explorer
+        <Mono>make pay</Mono> prints <Mono>payment_sent</Mono> with the amount, the recipient and the transaction link
       </>
     ),
   },
@@ -91,15 +91,17 @@ const PIECES: Piece[] = [
 const REPO = isPlaceholder(LINKS.repo) ? "" : LINKS.repo
 const COMMANDS = [
   ...(REPO ? [`git clone ${REPO} && cd accord`] : []),
-  "make setup              # testnet accounts, contract, the agreement's USDC escrow",
+  "make sandbox            # the full flow on a local NEAR sandbox, mocked steps marked",
   "make negotiate          # two sealed mandates in, attested terms out",
-  "make verify-negotiation JOB=<id>",
-  "make bind-payee         # domain proof in the enclave, authority approves, buyer accepts",
-  "make pay                # milestone 1 to the bound payee on NEAR testnet",
-  "make exception          # out-of-mandate request, buyer approves, milestone 2 pays",
-  "make attack             # redirect refused, amount refused, canary, revoke",
-  "make observe SLOT=1     # Accord Atlas: one attested observation slot",
-  "make atlas              # the market-making scenario end to end",
+  "make approve            # both companies approve; the agreement is Executing",
+  "make fund               # the buyer funds the agreement's USDC",
+  "make payee              # recipient proven, approved and accepted",
+  "make pay                # milestone 1 to the authorised recipient on NEAR testnet",
+  "make exception          # a changed amount waits for the buyer's approval",
+  "make attack             # redirect and amount refused, the canary deletes the key",
+  "make revoke             # the key deleted, the next call rejected by the network",
+  "make atlas              # one Accord Atlas period on Rhea's pool, read-only",
+  "make verify DEAL=<agreement>   # no keys needed",
 ].join("\n")
 
 /* F5 official references */

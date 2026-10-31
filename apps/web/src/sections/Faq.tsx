@@ -36,7 +36,7 @@ const COLUMN_1: Item[] = [
     delay: 0.1,
     title: "Who can see my mandate?",
     description:
-      "No one outside the enclave. Your browser encrypts it to the Sealed Table's key, the chain stores a hash, and the enclave decrypts it for one negotiation. The other side sees the agreed terms. What the terms reveal is what any signed agreement reveals: that you were willing to accept them.",
+      "No one outside the attested enclaves that run the negotiation. Your browser encrypts it to a key that exists only inside the Sealed Table, the chain stores the ciphertext and a hash, and the Sealed Table decrypts it for one negotiation, in which the negotiators run on NEAR AI Cloud's private inference. The other side sees the agreed terms. What the terms reveal is what any signed agreement reveals: that you were willing to accept them. This rests on the enclave hardware, on your browser running the published code (the command-line tool is the alternative), and on the operator never moving the key to a different build.",
   },
   {
     id: "PI0KF9DiP",
@@ -50,14 +50,14 @@ const COLUMN_1: Item[] = [
     delay: 0.3,
     title: "What if my agent is tricked?",
     description:
-      "Assume it will be. The demonstration agent follows a spoofed request for new bank details and tries to pay. The contract refuses because the destination is not the authorised recipient, and refuses again when the amount is changed. The agent's judgement is not what protects the money; the contract's comparison is.",
+      "Assume it will be. The demonstration agent follows a spoofed request for new bank details and tries to pay. The contract refuses because the account is not the authorised recipient, and refuses again when the amount is changed. The agent's judgement is not what protects the money; the contract's comparison is.",
   },
   {
     id: "BtWpA9vpz",
     delay: 0.4,
     title: "Our vendor really did change banks. What happens?",
     description:
-      "The vendor proposes the new destination, the enclave fetches a fresh domain proof, the vendor's settlement authority approves, a 24-hour delay runs, and the buyer sees each step before the first payment to the new destination. One stolen key, on either side, cannot do it.",
+      "The vendor proposes the new account, an enclave fetches a fresh domain proof, the vendor's settlement authority approves, the buyer accepts, and a 24-hour delay runs before the first payment can reach it. One stolen key, on either side, cannot do it.",
   },
 ]
 /* Column dOcBK4qsU */
@@ -67,14 +67,14 @@ const COLUMN_2: Item[] = [
     delay: 0.2,
     title: "How does Accord Atlas decide whether a period pays?",
     description:
-      "The approved terms set the venue, the observation schedule, the maximum spread, the minimum depth and the required uptime. An observer in an attested enclave records each slot. A period pays when the agreed number of slots pass; otherwise it is withheld and people on both sides decide. Atlas currently measures the venue's order book, not the market maker's own orders.",
+      "The approved terms set the venue, the number of observation slots, the maximum spread, the minimum depth and the threshold. An observer in an attested enclave draws each slot's time from a seed generated inside it and reads the pool at the first block after that time, so anyone can recompute the reading. A slot passes when it meets every condition. When the agreed number of slots pass, the period's payment becomes eligible and still goes through the same payment controls as any other payment; otherwise it is withheld, or goes to the buyer if unobserved slots could have changed the result. Atlas also reports uptime: the share of observed slots in which the pool quoted both sides. Two limits: Atlas measures the pool's liquidity, not the market maker's own positions, and the hidden times rest on the operator never moving the observer's seed to a build that reveals them.",
   },
   {
     id: "hvppU845s",
     delay: 0.3,
     title: "Can we use Accord if the other side has no agent?",
     description:
-      "Yes. In one-sided mode a person on the vendor side negotiates through the application against the buyer's agent. The buyer's mandate stays sealed from them, and everything after approval works the same way.",
+      "Yes. Every negotiation in the Sealed Table runs between two negotiators built from the two mandates, so a person who writes a mandate in the application takes part exactly as a company with its own agent does. Their limits stay sealed from the other side, and everything after approval works the same way.",
   },
   {
     id: "clXWYfiDG",
@@ -88,7 +88,7 @@ const COLUMN_2: Item[] = [
     delay: 0.5,
     title: "Is it live?",
     description:
-      "Accord runs on NEAR testnet, with settlement in USDC on NEAR. The demonstration agreements on this page are live unless marked recorded. Mainnet follows an audit.",
+      "Accord runs on NEAR testnet, with payments in testnet USDC on NEAR. The demonstration agreements on this page are live unless marked recorded. Mainnet follows an audit.",
   },
 ]
 

@@ -20,7 +20,7 @@ Start with the reference flow, reproduce a refusal, and follow a payment through
 
 | Named accounts and scoped keys | The agent’s key can call `act` on this contract and nothing else. `revoke` deletes it in the same transaction that flags the agreement | `near account list-keys <contract>` shows the key gone after `make attack` |
 
-| USDC on NEAR | The agreement’s USDC is held in escrow by the contract (NEP-141 USDC on NEAR), and only the contract can move it, only through `act`. The transfer happens in the same call that checks the terms, so nothing is signed that is not paid | `make pay` shows the USDC transfer on the NEAR testnet explorer |
+| USDC on NEAR | The agreement’s USDC (NEP-141 on NEAR) sits in the agreement’s own account, and only the contract can send it, only through `act`, after the request is checked against the approved terms | `make pay` prints `payment_sent` with the amount, the recipient and the transaction link |
 
 ## What NEAR does not do here, yet:
 
@@ -28,7 +28,7 @@ confidential settlement (the USDC transfer is public on NEAR, as with any stable
 
 ## Commands
 
-make setup # testnet accounts, contract, the agreement's USDC escrow make negotiate # two sealed mandates in, attested terms out make verify-negotiation JOB=<id> make bind-payee # domain proof in the enclave, authority approves, buyer accepts make pay # milestone 1 to the bound payee on NEAR testnet make exception # out-of-mandate request, buyer approves, milestone 2 pays make attack # redirect refused, amount refused, canary, revoke make observe SLOT=1 # Accord Atlas: one attested observation slot make atlas # the market-making scenario end to end
+make sandbox # the full flow on a local NEAR sandbox, mocked steps marked make negotiate # two sealed mandates in, attested terms out make approve # both companies approve; the agreement is Executing make fund # the buyer funds the agreement's USDC make payee # recipient proven, approved and accepted make pay # milestone 1 to the authorised recipient on NEAR testnet make exception # a changed amount waits for the buyer's approval make attack # redirect and amount refused, the canary deletes the key make revoke # the key deleted, the next call rejected by the network make atlas # one Accord Atlas period on Rhea's pool, read-only make verify DEAL=<agreement> # no keys needed
 
 ## Official references
 

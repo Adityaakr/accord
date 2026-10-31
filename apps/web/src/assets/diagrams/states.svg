@@ -31,10 +31,10 @@
     <text x="290" y="208" fill="currentColor">match, limits checked</text>
 
     <text x="540" y="126" style="fill:var(--muted,#9aa7b4)">Other side sees</text>
-    <text x="540" y="143" fill="currentColor">payments and refusals; transfers on NEAR</text>
+    <text x="540" y="143" fill="currentColor">every payment and refusal, on NEAR</text>
     <text x="540" y="176" style="fill:var(--muted,#9aa7b4)">Contract checks</text>
-    <text x="540" y="193" font-family="JetBrains Mono, ui-monospace, monospace" fill="currentColor">milestone · amount · recipient</text>
-    <text x="540" y="208" font-family="JetBrains Mono, ui-monospace, monospace" fill="currentColor">· destination · not revoked</text>
+    <text x="540" y="193" font-family="JetBrains Mono, ui-monospace, monospace" fill="currentColor">item · evidence · amount</text>
+    <text x="540" y="208" font-family="JetBrains Mono, ui-monospace, monospace" fill="currentColor">· authorised recipient</text>
 
     <text x="790" y="126" style="fill:var(--muted,#9aa7b4)">Other side sees</text>
     <text x="790" y="143" fill="currentColor">the record both can cite</text>

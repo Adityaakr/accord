@@ -77,7 +77,7 @@ const COLS = ["2.5%", "37.5%", "72.5%"]
 const ROWS_EM = [1.6, 11.6, 21.6, 31.6]
 const PLACED: [keyof typeof NODES, number, number][] = [["a", 0, 0], ["b", 1, 0], ["c", 2, 0], ["d", 1, 1], ["e", 2, 1], ["f", 2, 2], ["g", 2, 3]]
 const MID = 3.1 // em below a node's top: the head row's centre
-const CONDITIONS: [string, string][] = [["Spread", "≤ 40 bps"], ["Depth ±1%", "≥ 12,000 USDC"], ["Uptime", "≥ 95%"], ["Pass rule", "5 of 6 slots"]]
+const CONDITIONS: [string, string][] = [["Spread", "≤ 60 bps"], ["Depth ±2%", "≥ 12,000 USDC"], ["Quoting", "both sides"], ["Pass rule", "4 of 6 slots"]]
 const WIRES: { v?: boolean; x: string; y: number; w?: string; len?: number; dashed?: boolean }[] = [
   { x: "27.5%", y: 1.6 + MID, w: "10%" },          // 1 → 2
   { x: "62.5%", y: 1.6 + MID, w: "10%" },          // 2 → 3
@@ -90,8 +90,8 @@ const WIRES: { v?: boolean; x: string; y: number; w?: string; len?: number; dash
 ]
 
 const INSIGHTS = [
-  { icon: "ban" as const, tone: "refuse", title: "Payment refused", text: "ERR_PAYEE_MISMATCH: the destination is not the authorised recipient.", link: "View in refusal log" },
-  { icon: "alert" as const, tone: "warn", title: "Slot 3 missed", text: "Spread above 40 bps for this observation; period still eligible.", link: "Inspect attestation" },
+  { icon: "ban" as const, tone: "refuse", title: "Payment refused", text: "ERR_PAYEE_MISMATCH: the account is not the authorised recipient. Nothing was sent.", link: "View in refusal log" },
+  { icon: "alert" as const, tone: "warn", title: "Slot 3 missed", text: "Depth below 12,000 USDC for this observation; period still eligible.", link: "Inspect attestation" },
   { icon: "check" as const, tone: "ok", title: "Period 2 settled", text: "18,500 USDC confirmed to halcyon-mm.testnet.", link: "Open transaction" },
 ]
 const EVENTS = [

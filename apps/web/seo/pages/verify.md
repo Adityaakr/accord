@@ -2,20 +2,28 @@ Verify
 
 # Verify this agreement.
 
-One screen that walks through an agreement's attestation chain: job id, measurement on OutLayer's register, the outlayer-verify output, commitment hashes, refusal events on the explorer, the payment on NEAR.
+One command checks a live agreement from public data, with no keys: the contract code, the agreement's keys, the Sealed Table release, the sealed outcome, the model attestation, the recipient and the record.
 
 ## Verify this agreement
 
-## The attestation chain, step by step.
+## What make verify checks, line by line.
 
-- `01` Job id The negotiation, the payee binding and the observer run in attested TDX enclaves; each run is a job with an id.
+`make verify DEAL=<agreement>`
 
-- `02` Measurement on OutLayer's register The contract accepts a result only when the job's measurement is approved on OutLayer's register contract.
+The block starts with `accord verify · <agreement>`. Values in angle brackets are real values at run time.
 
-- `03` The `outlayer-verify` output Attestation shows which code ran on which inputs; the check exits `0`. `outlayer-verify job <id>`
+- `01` Contract code `code code hash <8>… = release <v> (<global by hash | embedded>) · no deploy method · ok`
 
-- `04` Commitment hashes Each company seals its mandate in the browser and only a commitment hash is recorded; the commitments in the output must match the ones on chain, and the per-response signatures are checked offline against the transcript hash the enclave published. `make verify-negotiation JOB=<id>`
+- `02` Agreement keys `keys <0 | 1> key · FunctionCall · receiver self · methods [act] · no full access · ok`
 
-- `05` Refusal events on the explorer Every refusal is an event with its reason; read the events on the testnet explorer, and after a revocation the agent's key is shown gone. `near account list-keys <contract>`
+- `03` Sealed Table release `release sealed-table wasm <8>… · keys from pubkey run <task id> · attestation verified · seed binding <shown | not exposed> · ok`
 
-- `06` The payment on NEAR Each USDC transfer is a public NEAR transaction made by the contract itself; read it on the testnet explorer, as with any stablecoin payment.
+- `04` Sealed outcome `sealed outcome signature ok · commitments match · nonce matches · ok`
+
+- `05` Model attestation `model <model> · gateway TDX <ok | not checked> · model TDX <ok | not checked> · GPU <ok | not checked> · fresh nonce bound · ok`
+
+- `06` Recipient `payee <recipient> · proof <domain> · authority approved · buyer accepted · active · ok`
+
+- `07` Record `record <n> payments · <n> refusals · <n> exceptions · <n> set aside · <n> observation conflicts · events match state · ok`
+
+It ends with `verify: <n> checks ok`. It fetches NEAR AI's attestation report without a key when the endpoint allows it; otherwise it uses `NEARAI_API_KEY` if set, or the hosted relay at `/api/verify/<id>` with a nonce it generates itself, and prints which.

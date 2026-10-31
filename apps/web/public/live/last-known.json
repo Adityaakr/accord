@@ -2,16 +2,23 @@
   "asOf": "2026-10-29T00:00:00Z",
   "source": "last-known",
   "attempts": 0,
-  "movedByAttempts": 0,
+  "paidOutsideTerms": 0,
   "lastRefusal": null,
   "agreement": {
     "id": "<live:agreement>",
     "state": "Sealed",
     "terms": [],
-    "payee": { "domain": "", "version": 0, "proof": "" },
+    "payee": {
+      "domain": "",
+      "version": 0,
+      "proof": ""
+    },
     "lastTransfer": null
   },
-  "balance": { "usdc": "", "eth": "", "address": "" },
+  "balance": {
+    "usdc": "",
+    "account": ""
+  },
   "refusals": [],
   "slots": []
 }

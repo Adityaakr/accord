@@ -1,74 +1,42 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { Appear } from "../lib/motion"
 import { appear } from "../components/SectionHeading"
 import { PageHero } from "../components/PageHero"
 import { Mono } from "../components/Mono"
 import { FormButton, type FormButtonState } from "../components/FormButton"
-import { LINKS, isPlaceholder } from "../content/links"
 import { usePageMeta } from "../lib/meta"
 import styles from "./Verify.module.css"
 
 /* ------------------------------------------------------------------
    /verify (spec §4 "Verify a live agreement"): PageHero, the lookup form (the page's primary action), then the
-   attestation chain as a vertical checklist of six cards, each with a copyable command where one exists.
-   Copy: the spec §4 row and the Docs page's "How you check it" lines (docs/website/ACCORD_WEBSITE_FINAL_COPY.md).
+   checks `make verify` runs, as a vertical checklist of seven cards, each with the line it prints, and the summary line.
+   Copy: kit v7 INTERFACES.md section 10 ("Make targets and the lines they print"), the printed lines as written there;
+   values in angle brackets are filled in at run time.
    The lookup opens /record?agreement=<id> only when VITE_ACCORD_API_URL is set; otherwise the field is disabled.
 ------------------------------------------------------------------- */
 
 const API = (import.meta.env as Record<string, string | undefined>).VITE_ACCORD_API_URL
 
 const LEAD =
-  "One screen that walks through an agreement's attestation chain: job id, measurement on OutLayer's register, the outlayer-verify output, commitment hashes, refusal events on the explorer, the payment on NEAR."
+  "One command checks a live agreement from public data, with no keys: the contract code, the agreement's keys, the Sealed Table release, the sealed outcome, the model attestation, the recipient and the record."
 
-const CONTRACT = isPlaceholder(LINKS.contractId) ? "<contract>" : LINKS.contractId
+const VERIFY_COMMAND = "make verify DEAL=<agreement>"
 
-type Step = { id: string; title: string; text: ReactNode; command?: string }
+type Step = { id: string; title: string; line: string }
 
+/* Verbatim from INTERFACES.md section 10, `make verify` */
+const FIRST_LINE = "accord verify · <agreement>"
 const STEPS: Step[] = [
-  {
-    id: "job-id",
-    title: "Job id",
-    text: <>The negotiation, the payee binding and the observer run in attested TDX enclaves; each run is a job with an id.</>,
-  },
-  {
-    id: "measurement",
-    title: "Measurement on OutLayer's register",
-    text: <>The contract accepts a result only when the job's measurement is approved on OutLayer's register contract.</>,
-  },
-  {
-    id: "outlayer-verify",
-    title: <>The <Mono>outlayer-verify</Mono> output</> as unknown as string,
-    text: <>Attestation shows which code ran on which inputs; the check exits <Mono>0</Mono>.</>,
-    command: "outlayer-verify job <id>",
-  },
-  {
-    id: "commitments",
-    title: "Commitment hashes",
-    text: (
-      <>
-        Each company seals its mandate in the browser and only a commitment hash is recorded; the commitments in the output must match the ones on
-        chain, and the per-response signatures are checked offline against the transcript hash the enclave published.
-      </>
-    ),
-    command: "make verify-negotiation JOB=<id>",
-  },
-  {
-    id: "refusals",
-    title: "Refusal events on the explorer",
-    text: (
-      <>
-        Every refusal is an event with its reason; read the events on the testnet explorer, and after a revocation the agent's key is shown gone.
-      </>
-    ),
-    command: `near account list-keys ${CONTRACT}`,
-  },
-  {
-    id: "base-transaction",
-    title: "The payment on NEAR",
-    text: <>Each USDC transfer is a public NEAR transaction made by the contract itself; read it on the testnet explorer, as with any stablecoin payment.</>,
-  },
+  { id: "code", title: "Contract code", line: "code      code hash <8>… = release <v> (<global by hash | embedded>) · no deploy method · ok" },
+  { id: "keys", title: "Agreement keys", line: "keys      <0 | 1> key · FunctionCall · receiver self · methods [act] · no full access · ok" },
+  { id: "release", title: "Sealed Table release", line: "release   sealed-table wasm <8>… · keys from pubkey run <task id> · attestation verified · seed binding <shown | not exposed> · ok" },
+  { id: "sealed", title: "Sealed outcome", line: "sealed    outcome signature ok · commitments match · nonce matches · ok" },
+  { id: "model", title: "Model attestation", line: "model     <model> · gateway TDX <ok | not checked> · model TDX <ok | not checked> · GPU <ok | not checked> · fresh nonce bound · ok" },
+  { id: "payee", title: "Recipient", line: "payee     <recipient> · proof <domain> · authority approved · buyer accepted · active · ok" },
+  { id: "record", title: "Record", line: "record    <n> payments · <n> refusals · <n> exceptions · <n> set aside · <n> observation conflicts · events match state · ok" },
 ]
+const SUMMARY_LINE = "verify: <n> checks ok"
 
 function CopyButton({ text }: { text: string }) {
   const [state, setState] = useState<"idle" | "copied" | "failed">("idle")
@@ -151,26 +119,32 @@ export function Verify() {
           <LookupForm />
         </Appear>
 
-        {/* The attestation chain, as a checklist */}
+        {/* The checks `make verify` runs, as a checklist */}
         <div className={styles.block}>
-          <h2 className={`t-h4 ${styles.subheading}`}>The attestation chain, step by step.</h2>
-          <ol className={styles.steps} aria-label="Six verification steps">
+          <h2 className={`t-h4 ${styles.subheading}`}>What make verify checks, line by line.</h2>
+          <div className={styles.chipRow}>
+            <Mono className={styles.chip}>{VERIFY_COMMAND}</Mono>
+            <CopyButton text={VERIFY_COMMAND} />
+          </div>
+          <p className={`t-body-sm ${styles.weak}`}>
+            The block starts with <Mono>{FIRST_LINE}</Mono>. Values in angle brackets are real values at run time.
+          </p>
+          <ol className={styles.steps} aria-label="Seven verification checks">
             {STEPS.map((s, i) => (
               <Appear key={s.id} as="li" className={styles.step} effect={stepAppear(i)}>
                 <div className={styles.stepHead}>
                   <Mono className={styles.stepNo}>{String(i + 1).padStart(2, "0")}</Mono>
                   <h3 className={`t-h5 ${styles.stepTitle}`}>{s.title}</h3>
                 </div>
-                <p className={`t-body-sm ${styles.stepText}`}>{s.text}</p>
-                {s.command ? (
-                  <div className={styles.chipRow}>
-                    <Mono className={styles.chip}>{s.command}</Mono>
-                    <CopyButton text={s.command} />
-                  </div>
-                ) : null}
+                <div className={styles.chipRow}>
+                  <Mono className={`${styles.chip} ${styles.line}`}>{s.line}</Mono>
+                </div>
               </Appear>
             ))}
           </ol>
+          <p className={`t-body-sm ${styles.weak}`}>
+            It ends with <Mono>{SUMMARY_LINE}</Mono>. It fetches NEAR AI's attestation report without a key when the endpoint allows it; otherwise it uses <Mono>NEARAI_API_KEY</Mono> if set, or the hosted relay at <Mono>/api/verify/&lt;id&gt;</Mono> with a nonce it generates itself, and prints which.
+          </p>
         </div>
       </section>
     </div>

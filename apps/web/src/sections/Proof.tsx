@@ -31,8 +31,8 @@ const STATES = ["Sealed", "Attested", "Executing", "Settled"] as const
 
 /* Spec §3.7 copy, verbatim */
 const ROW_TITLE = "Try to move the money."
-const ROW_P1 = "When the demonstration opens, its agent's inbox is public. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it. The contract refuses, and your attempt appears in the public refusal log with the reason. Revocation removes the agent's key and stops every new payment at once."
-const HELP_LINE = "Ten messages an hour per visitor · Testnet USDC on NEAR"
+const ROW_P1 = "When the demonstration opens, its agent's inbox is public. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it, and your attempt appears in the public refusal log with the contract's reason. Revocation is shown exactly: the agent's only key is deleted in one transaction, and anything it signs afterwards is rejected by the network before it reaches the contract."
+const HELP_LINE = "Ten messages an hour per visitor · Testnet USDC on NEAR · This public room re-arms its agent five minutes after a revocation; in a real agreement only the buyer can."
 const GOAL_LINE = "A successful attempt can only ever produce a payment to the authorised recipient at the approved amount."
 
 /* Form states (spec §3.7), each driven by a real outcome of the POST */
@@ -46,8 +46,8 @@ const MESSAGE_MAX = 2000
 
 /* Spec §5 Refusal line: the sentence for the reason codes the contract emits; other reasons print as received. */
 const REFUSAL_TEXT: Record<string, string> = {
-  ERR_PAYEE_MISMATCH: "Refused: the destination is not the authorised recipient. Nothing was paid.",
-  ERR_AMOUNT_MISMATCH: "Refused: the amount is not the approved amount for this milestone. Nothing was paid.",
+  ERR_PAYEE_MISMATCH: "Refused: the account is not the authorised recipient. Nothing was sent.",
+  ERR_AMOUNT_MISMATCH: "Refused: the amount is not the approved amount for this payment. Nothing was sent.",
 }
 const CODE = /ERR_[A-Z0-9_]+/
 function splitReason(reason: string): { code: string | null; text: string | null } {
@@ -152,7 +152,7 @@ function Counters({ v }: { v: LiveValues }) {
   if (!API) return null
   const items: { label: string; value: number }[] = []
   if (hasCount(v.attempts)) items.push({ label: "Attempts so far", value: v.attempts })
-  if (hasCount(v.movedByAttempts)) items.push({ label: "Money moved by attempts", value: v.movedByAttempts })
+  if (hasCount(v.paidOutsideTerms)) items.push({ label: "Paid outside the terms", value: v.paidOutsideTerms })
   if (items.length === 0) return null
   return (
     <div className={styles.counters}>

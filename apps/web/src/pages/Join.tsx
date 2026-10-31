@@ -14,7 +14,7 @@ const API = (import.meta.env as Record<string, string | undefined>).VITE_ACCORD_
 const LEAD = "Accord is pre-launch and early access is by request. Join as a token project, a market maker, an integration partner, a vendor or a buyer. In a deal room your position stays sealed; the other side sees only the agreed terms."
 
 const STEPS = [
-  { title: "Seal your mandate", text: "Each company seals its mandate in the browser; only a commitment hash is recorded. No one outside the enclave can read it." },
+  { title: "Seal your mandate", text: "Each company sets its limits in the browser and seals them. Only the sealed mandate and its commitment hash go on NEAR; the other side never sees the numbers." },
   { title: "Negotiate, with or without an agent", text: "The Sealed Table negotiates the terms. If you have no agent, a person on your side negotiates through the application against the other side's agent." },
   { title: "Both sides approve", text: "Both companies approve the terms before they take effect. Visible to both: the approved terms, the schedule, every payment, exception and refusal." },
 ]

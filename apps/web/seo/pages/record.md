@@ -20,7 +20,7 @@ Approved terms
 
 No entries yet · 29 Oct 2026, 00:00 UTC
 
-Bound payee
+Authorised recipient
 
 No entries yet · 29 Oct 2026, 00:00 UTC
 

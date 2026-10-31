@@ -1,82 +1,119 @@
-# PROGRESS.md (v4, Accord)
+# PROGRESS.md: the work queue
 
-One item per loop iteration. Tick an item only when its acceptance line passes and `make test` is green. Mark `[blocked]` with a pointer to `BLOCKED.md` when it needs something from Adi. The three proofs are 1.12, 1.13 (mock) and 2.4, 3.5 (live); nothing in Phase 4 or later starts before all four are ticked.
+One unchecked item per loop iteration, in order. An item is done when its acceptance line is true, `make test` is green, the commit names the item, and `CHANGELOG.md` has one line for it. Blocked on Adi: write the exact steps in `BLOCKED.md`, mark the item `[blocked]`, continue with the next unblocked item. Do not move a gate's date; if a gate fails, apply its fallback and write it in `DECISIONS.md` under "Spec changes". Work happens on `main` (the repository starts inside the window, so no separate branch is needed; HACKATHON.md Q-003).
 
-## Phase 0: day-one checks (answers with source URLs in DECISIONS.md)
+Dates are UTC. The window opened 19 Oct; development ends 14 Nov 23:59.
 
-- [ ] 0.1 OutLayer NEAR job flow: `request_execution` parameters, callback shape, how the contract reads the approved measurement, outbound HTTPS from a WASI job, stable per-job decryption key and how to publish it, secrets, WASM target, time limit, deposit. If outbound HTTPS is unavailable, write the negotiation fallback (NEAR AI Cloud alone) into GOAL.md before anything else.
-- [ ] 0.2 NEAR AI Cloud: key works; TEE-served open-weight model chosen; per-response signature retrieved and verified offline; latency per turn measured.
-- [ ] 0.3 Base rail: address derived for `agreement/{id}/base`; one EIP-1559 USDC transfer built, signed through `v1.signer-prod.testnet`, broadcast on Base Sepolia; signing latency; same-nonce replacement fee rule confirmed; USDC contract address and faucet recorded. If it cannot be made to work in a day, switch to `rail-near` and record why.
-- [ ] 0.4 Function-call key scoped to `act`; `env::signer_account_pk` check; `add_key` and `delete_key` from a promise, tested in near-workspaces.
-- [ ] 0.5 near-connect on testnet with Meteor.
-- [ ] 0.6 IronClaw tool manifest format for the agent.
-- [ ] 0.7 Reproducible WASM builds for both jobs.
-- [ ] 0.8 Repo scaffold: workspace, `rust-toolchain.toml`, `.nvmrc`, `.env.example`, `.gitignore` (`.env*`, `data/`), LICENSE (MIT), CI skeleton, `hackathon` branch. Acceptance: `cargo build` and `pnpm install` on a fresh clone.
-- [ ] 0.9 Observer venue: a public depth endpoint for a liquid market, reachable from an OutLayer job, rate limits that allow `20` requests in `100 s`; endpoint, symbol and response shape in DECISIONS.md; three fixtures captured (pass, fail, venue error).
+## Phase 0: day-one checks and scaffold (31 Oct to 1 Nov)
 
-## Phase 1: schema and contract (proofs 2 and 3, mock half)
+Each check runs a probe, prints real output, and writes the answer with its source URL into `DECISIONS.md`. `DECISIONS.md` starts with the facts the 31 Oct research verified; a probe confirms them by running, and its result wins.
 
-- [ ] 1.1 `crates/schema`: AgreementType, both mandate schemas (procurement, market-making), Terms (with `deal_type`, `document_hash`, `release` including `OnAttestation`), ObserverSpec, Observation, Payee, PendingPayee, Payment and PaymentState, Action (`Pay` carries `amount`, `payee_version`, `destination`, `fee`), FeeParams, FeePolicy, NegotiationOutput (`Terms` or `NoDeal`, `limits_checked`), VerificationOutput, ObservationOutput; borsh and serde round trips.
-- [ ] 1.2 Contract: state, `create_agreement` (adds the scoped key, refuses authority == seller, derives and stores the Base address), `commit_mandate`, `negotiated_pairs`, views including `get_inflight` and `get_refusals`.
-- [ ] 1.3 Contract: `trigger_negotiation` (`ERR_PAIR_ALREADY_RUN`; OutLayer request behind a trait), `on_negotiation_output` (measurement, binding, commitments, `limits_checked`; `NoDeal` path), `approve_terms`; test-only `submit_mock_negotiation` behind the `mock` feature.
-- [ ] 1.4 Contract: `propose_payee` (verification request behind a trait), `on_payee_verification` (bound to agreement, version, domain, destination), `approve_payee`, `accept_payee`, versions, `24 h` timelock for versions after the first, `pause_payee_change`, `cancel_payee_change`, `finalize_payee_change`.
-- [ ] 1.5 Contract: `act` with every refusal in the stated order, each recorded in `refusals` and emitted; `Pay` reserves the nonce, records `Authorized`, and calls the rail behind a trait; `set_base_nonce`; `accept_milestone`.
-- [ ] 1.6 Contract: `on_signature` (`Signed` with tx hash, or `Failed`), `get_signed_tx`, `report_broadcast` / `report_confirmed` / `report_failed` (reporter role; status only), one in-flight payment per milestone.
-- [ ] 1.7 Contract: `revoke` (deletes the agent key by promise, sets the flags, state Suspended), canary trigger inside `act`, `replace_agent_key`.
-- [ ] 1.8 Contract: `burn_nonce` (Signed or Broadcast only; replacement transaction at the same nonce with the fee bump; `Burned`).
-- [ ] 1.9 Contract: exceptions (`RequestException { milestone, new_amount }`, `resolve_exception`, the approved amount applies to that milestone once).
-- [ ] 1.9a Contract: `request_observation` (OutLayer request behind the same trait), `on_observation` (measurement, binding, slot bookkeeping, `k` of `n`, `Withheld`), `ERR_KPI_NOT_MET` inside `act`; test-only `submit_mock_observation` behind the `mock` feature.
-- [ ] 1.10 Contract: `terminate`, `settle` (refused while anything is in flight; final refund transfer), all events.
-- [ ] 1.11 `make setup`, `make mandate-buyer`, `make mandate-seller`, `make approve-terms` in mock mode print the lines in GOAL.md.
-- [ ] 1.12 Proof 2, mock half: `make attack` in mock mode prints `ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, the canary touch, the key deletion, `new authorisations: none`.
-- [ ] 1.13 Proof 3, mock half: `make inflight` in mock mode prints the held transfer, the burn, and the failed stale broadcast; `make rotate-key` prints `agent key replaced · state: Executing`.
-- [ ] 1.14 `make glassbook` in mock mode: market-making mandates, terms with KPIs and venue, three mock slots (`2` pass, `1` fail), `period 1` payable, three failing slots, `period 2: Withheld`, exception requested.
+- [ ] 0.1 Toolchain. Pin and install: Rust stable `1.95` or later (`near-sdk 5.30.0` needs it), `cargo-near` (`0.22.0`, or `0.23.0-rc` if 0.22 fails against testnet protocol 88), `near-cli-rs` (`0.30.1`, or `0.31.0-rc`), Node `24`, pnpm, `wasmtime` 28 or later, `outlayer-cli 0.2.1`, `outlayer-verify` (from git). Run `npx skills add near/agent-skills`. Acceptance: `make setup-check` prints each tool, its version and `ok`.
+- [ ] 0.2 NEAR AI Cloud probe (the privacy prompt's checkpoint). `scripts/probe-ai.ts`: list models, pick the NEAR-fleet TEE model in `DECISIONS.md`, send one non-streamed completion with `x-no-aliasing: true` and a random session salt, fetch `/v1/signature/{id}`, recompute both hashes from the exact bytes, recover the EIP-191 signer, fetch `/v1/attestation/report` with a fresh 32-byte nonce, and verify the gateway part and every model candidate: `report_data` (signer and nonce), the TDX quote (`@phala/dcap-qvl`), RTMR3 replay, `MRCONFIGID`, and the GPU evidence through NRAS. Also answer: does the Rust `dcap-qvl` crate build for `wasm32-wasip2`; does the `ecies` crate (pure backend); can NEAR AI's end-to-end encryption headers be used with the chosen model. Acceptance: `make probe-ai` prints `completion ok · signature ok · signer is a verified model key · gateway tdx ok · model tdx ok · gpu ok · nonce bound` and the three answers are in `DECISIONS.md`.
+- [ ] 0.3 OutLayer probe. A `wasm32-wasip2` probe job that makes one HTTPS call, reads a normal secret, reads a `PROTECTED_` secret generated in the TEE and bound to its wasm hash, derives an ed25519 key from that seed, prints the public key and whatever caller identity OutLayer exposes to the job, and can emit a `5 KB` output. Prove, with printed output and task ids: (a) the derived key is the same for runs requested by two different accounts; (b) requirement S1: a direct-calls-only condition (`--direct`, OutLayer's `Predecessor` wrapper; without it a condition is judged against the transaction's signer) admitting an Account Pattern `^a[0-9]+\.<factory>$` and a Whitelist of `releases.<factory>`, plus One build only (`WasmHash`), set on both a `PROTECTED_` seed and a normal secret standing in for `NEARAI_API_KEY`, lets a run requested on chain by a matching account read both, and refuses an HTTPS API call, a request from another account and a request the owner sends to OutLayer directly (OutLayer refuses a run before the code starts when any secret's condition fails, so both secrets need the condition); (c) whether a secret's binding is visible on chain, and whether the owner can move it; (d) `request_execution` from a contract with a `.then` callback, `resource_limits` passed explicitly, `20 KB` read from state by the job and a `5 KB` output delivered to the callback; (e) end-to-end latency against the yield expiry; (f) `outlayer-verify --api https://testnet-api.outlayer.ai job <task-id>` exits `0`. Acceptance: all six answers in `DECISIONS.md`.
+- [ ] 0.4 Keys probe (sandbox, then testnet). A probe contract adds a `FunctionCall` key to itself with `add_access_key_allowance` (receiver itself, `"act"`), the key calls `act`, the contract marks it revoked and calls `delete_key`. Record: the allowance reserved per call at `80 TGas`, the refund, `ERR_REVOKED` for a call landing before the `DeleteKey` receipt (sandbox), `AccessKeyDoesNotExist` after, `NotEnoughAllowance` when exhausted. Acceptance: printed lines in `DECISIONS.md`.
+- [ ] 0.5 Global contracts probe. Publish a small wasm as a global contract by hash on testnet (record the NEAR burned), create a sub-account from a probe factory with `use_global_contract(hash)` and no `AddKey`, and confirm `view_account.code_hash` and an empty key list. Acceptance: decision on the release mode for development and for the hosted demo recorded.
+- [ ] 0.6 Token probe. Circle testnet USDC `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af`: `storage_deposit` for a probe contract, an `ft_transfer_call(…, "fund")` into its `ft_on_transfer`, an `ft_transfer` out with `1 yocto`, a failed transfer to an unregistered account (funds stay), and `ft_balance_of` read from a contract callback. Adi drips USDC from https://faucet.circle.com (Near Testnet) to the buyer account; that step goes to `BLOCKED.md`. Acceptance: printed transfers with links.
+- [ ] 0.7 Venue probe. Against mainnet RPC (read-only views): find the first block at or after a chosen time; `get_pool` and `quote` on `dclv2.ref-labs.near` for pool `17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1|wrap.near|2000` at that `block_id`; the spread from two `10 USDC` quotes; depth by binary search within `200 bps`; the same calls against an archival endpoint at that block. Record response shapes, timing and today's values: they set `min_depth_quote` in the fixtures. Acceptance: `make probe-venue` prints `block · mid · spread bps · depth bid / ask` and reproduces it from archival.
+- [ ] 0.8 Data sources probe. Archival `view_account` at a block 30 days back (code-change signal); whether an indexer gives an account's creation time and recent activity without a key (if none, those signals are `unavailable`); how the app reads events (RPC transaction outcomes by hash, an indexer, or the contract's logs). Acceptance: one line per source in `DECISIONS.md`.
+- [ ] 0.9 Ecosystem facts. Confirm the 31 Oct findings in `DECISIONS.md` section 7 (Agent Market mainnet-only and custodial, so lever 7 is a README paragraph; Sputnik testnet factory `sputnikv2.testnet`; Trezu mainnet-only; HOT not on testnet). Run one unauthenticated `dry: true` 1Click quote. Acceptance: the section has today's confirmation.
+- [ ] 0.10 Wallet probe. A minimal page with NEAR Connect (`@hot-labs/near-connect`) on testnet: sign in with Meteor or Intear, send one function call, sign one NEP-413 message with a fixed nonce twice and confirm both signatures are identical (the doc key depends on it). Acceptance: the working wallets and the determinism result in `DECISIONS.md`.
+- [ ] 0.11 Scaffold. The tree in `INTERFACES.md` section 2, with the files from `starter/` copied to the places its README lists; `Makefile` with every target from `GOAL.md` (unimplemented ones print `not implemented: <item>` and exit `1`); `.env.example` (names only); `.gitignore` with `.env`, `.env.*`, `!.env.example`, `.submission/`, `target/`, `node_modules/`; `LICENSE` (MIT); the product's `README.md` from `starter/README.template.md` (the order of `GOAL.md` "README requirements"; the kit's map is `KIT.md`); `DECISIONS.md`, `CHANGELOG.md`, `BLOCKED.md`; `rust-toolchain.toml`; `pnpm-workspace.yaml`; a local `make ci` (fmt, clippy `-D warnings`, tests, typecheck, lint). Acceptance: `make ci` passes on the empty skeleton.
+- [ ] 0.12 Accounts. `make setup` creates the demo accounts through the faucet (buyer, vendor, authority, recipient, keeper `accord-keeper`, two canaries, one attacker lookalike, and the `/try` room's buyer, vendor, authority and recipient), adds a suffix to any name that is taken, writes keys to `.env` and the real names to `DECISIONS.md`, registers them with the token, and prints each account's NEAR shortfall (the factory needs about `12 NEAR` for a global release; the buyer about `15 NEAR` for the demo and rehearsal agreements). Acceptance: `make setup` is idempotent and prints every account with its balance.
 
-## Phase 2: negotiation (proof 1)
+Gate G0 (1 Nov 23:59): 0.2, 0.3 and 0.4 have real printed output in `DECISIONS.md`. Fallbacks, applied only if a probe fails:
 
-- [ ] 2.1 `jobs/negotiate` against recorded NEAR AI responses: decrypt both blobs with the job key only, two-agent rounds, deterministic limit check for both deal types (accepts a valid proposal, rejects one outside either mandate, emits `NoDeal` on walk-away), output with both commitment hashes and `limits_checked`.
-- [ ] 2.2 Live NEAR AI Cloud turns; per-response signature hashes collected; `make verify-negotiation` verifies them offline. [needs Adi: NEAR AI Cloud key]
-- [ ] 2.3 Job deployed on OutLayer; contract calls `request_execution` for real; callback stores terms; `outlayer-verify job` exits `0`. [needs Adi: OutLayer account, secrets]
-- [ ] 2.4 `make negotiate` prints `limits checked: within both mandates` and the two "readable by the other side: NO" lines with the checks the README explains.
+| If | Then |
+| --- | --- |
+| The callback cannot carry a `5 KB` output, or on-chain requests cannot read the seed | F1: the keeper requests the job through the HTTPS API and submits the signed output with `submit_sealed_result` (once per nonce, same checks); claim 1's limit adds that the keeper could request extra runs and choose among them |
+| No access condition meets S1 | F2: restrict the seeds to the keeper as caller; claim 1's limit adds that the operator's keeper could request extra runs |
+| `PROTECTED_` secrets cannot be bound to a wasm hash | Bind to the project; claim 1's limit adds that the project owner could publish a build that reads the seed |
+| Global contracts misbehave | F4: embedded mode for every release |
+| `dcap-qvl` does not build for wasip2 | F5: the job checks `report_data` and the per-response signatures; full TDX and GPU checks run in `make verify` and the Verified panel; the claims say which |
+| No testnet USDC can be dripped | F6: `tUSDC` everywhere, labelled |
 
-## Phase 3: Base rail and payee binding (proof 3, live half)
+## Phase 1: core, contracts, sandbox (1 to 3 Nov)
 
-- [ ] 3.1 `crates/rail-base`: EIP-1559 ERC-20 transfer encoding, signing hash, signature assembly, address derivation, replacement-fee rule; tests against fixtures. (Or `crates/rail-near` if 0.3 chose the fallback; then 3.2 and 3.5 adapt as GOAL.md says.)
-- [ ] 3.2 Chain Signatures live: `make fund` prints the funded address; `make pay` prints `Authorized · nonce 0`, `Signed`, `Broadcast`, `Confirmed · block <n>` with the Base Sepolia explorer link. [needs Adi: Base Sepolia USDC and ETH on the derived address]
-- [ ] 3.3 `reporter`: polls `get_inflight`, broadcasts, reports; `REPORTER_HOLD=1` holds one transfer back; the app re-checks every reported status against a Base RPC.
-- [ ] 3.4 `jobs/verify-payee`: domain proof fetch and signature check, document structural check, output bound to agreement, version, domain and destination. Demo vendor domain and `.well-known/accord.json` set up. `make bind-payee` prints the binding, the authority approval and the buyer acceptance. [needs Adi: a domain you control]
-- [ ] 3.5 `make inflight` live: a signed transfer held back, listed with its nonce, burned by the buyer, the stale broadcast failing on Base Sepolia with the nonce error quoted.
-- [ ] 3.6 `jobs/observe` against the three fixtures, then deployed on OutLayer; `make observe SLOT=1` returns one live, attested slot from the venue chosen in 0.9 with `outlayer-verify` exiting `0`.
-- [ ] 3.7 Gate, 6 Nov: if 3.6 is ticked, the demo is Glassbook (`DEMO-GLASSBOOK.md`) and `make glassbook` runs live in 4.6; if not, the demo is procurement (`DEMO.md`) and `make glassbook` stays in mock mode, labelled as recorded in the README. Write the decision and the reason in DECISIONS.md. Do not move this date.
+- [ ] 1.1 `accord-core` types (`INTERFACES.md` section 3) with serde and borsh; JCS hashing; `crates/accord-core/tests/jcs_vectors.json` reproduced byte for byte by the TypeScript `canonicalize` in `packages/sdk`.
+- [ ] 1.2 `gates::check_pay`: one unit test per refusal code, in gate order, for `Caller::Agent`, `Caller::VendorClaim` and `Caller::Close`.
+- [ ] 1.3 `limits::within` and `limits::check` for both kinds: boundary tests on every rule in `INTERFACES.md` 6.3, both directions.
+- [ ] 1.4 `terms::structural`, `atlas::slot_time` (stays inside its window, differs per slot), `atlas::passes`, `atlas::evaluate` (`Eligible`, `Review`, `Withheld`, uptime) with tests.
+- [ ] 1.5 Property tests (`crates/accord-core/tests/invariants.rs`, proptest): I1, I2, I3, I6, I7, I8, I12, I13, I15, I16, I17, I18 over random action sequences, `10,000` cases each in CI.
+- [ ] 1.6 Agreement contract, part 1: the storage layout in `INTERFACES.md` 4.7, init with `params`, views, `commit_mandate` (no deposit), `approve_terms`, `cancel`, `ft_on_transfer`; NEP-297 events.
+- [ ] 1.7 Agreement, part 2: `install_agent_key`, `revoke_agent` (flag plus `delete_key`), `act` with the six gates, the refusal ring buffer, the refusal limit counting only the current key, the canary, the payment lock with its `payment_id`, `on_payment_resolved` with fixed gas (a stale callback settles only its own item), `resolve_stale_lock` (`Paid` when the balance proves it, otherwise `AssumedPaid`), deliveries (none after the end of the term, a new one only after a dispute), exceptions (agent and vendor, amount and `waive_evidence`, capped; an approved exception reopens an `AssumedPaid` item), `claim` (also after `Settled` for a `Reserved` item), `close` (stepwise: eligible items first, `Reserved` and `Unfunded` instead of waiting, then the real token balance minus what is reserved), `mutual_close`, `withdraw_near` (keeping `0.05 NEAR` while an item is reserved); the gas-ceiling test.
+- [ ] 1.8 Agreement, part 3: recipient versions with the domain pinned at version 1, `on_payee_proof` checks, approval, acceptance with warnings, timelocked activation, `storage_deposit` for the recipient, cancellation; `report_recipient` to the factory on `ERR_PAYEE_MISMATCH` and `ERR_CANARY`.
+- [ ] 1.9 Agreement, part 4: `start_negotiation` (minimum gas, nonce, input of three fields) and `on_sealed_result` (signature, nonce, commitments, release, `params_hash`, structure, attempts). The `mock` cargo feature adds a test signing key and `submit_mock_*` methods for the sandbox; `make check-deploy` proves the release wasm has neither.
+- [ ] 1.10 Agreement, part 5: `record_observation` (signature, venue, window, idempotent, a different observation for a recorded slot logged as `observation_conflict` and never stored), `close_period` (a conflicted period closes as `Review`), `resolve_period`.
+- [ ] 1.11 Factory and the keyless releases account (`contracts/releases`, created by `new` with no `AddKey`; its input fixed to `{"mode": "pubkey"}`): config, `request_pubkeys` through it, `store_pubkey`, `publish_release` (embedded and global), `create_agreement` batch with no `AddKey` and the live minimums, `on_agreement_created`, registry views, reports, curated blocklist, recipient stats.
+- [ ] 1.12 `tUSDC` test token (NEP-141, NEP-145, open `mint` only when built with the `testnet` feature; metadata name "tUSDC (test token)").
+- [ ] 1.13 Sandbox suite (`tests/`): the full procurement flow; the attack sequence; revoke including the `ERR_REVOKED` window; `claim` after revoke; `close` paying an eligible item before refunding; a failed transfer to an unregistered recipient; a callback forced out of gas and `resolve_stale_lock`; a late callback after `resolve_stale_lock` leaving a newer lock alone; a plain deposit equal to the amount making the stale lock `AssumedPaid`, then settled by an approved exception; `close` reaching `Settled` with a vendor that has no active recipient (the item `Reserved`, then proposed, activated and claimed after `Settled`) and with a delivery attempted after the end (`ERR_DELIVERY_CLOSED`); two differently signed observations for one slot (`observation_conflict`, period `Review`); forged, replayed, cross-agreement and wrong-parameter job outputs; an underfunded `start_negotiation`; I4, I5, I9, I10, I11, I14, I17, I18.
+- [ ] 1.14 `make sandbox`: the flow and one Atlas period on the local sandbox, mocked steps prefixed `[mock]`, ending `sandbox: all checks passed`.
 
-## Phase 4: agent, attack live, exceptions, payee change
+Gate G1 (3 Nov 23:59): `make sandbox` passes and `make test` is green.
 
-- [ ] 4.1 `agent`: inbox fixtures, planner that fills `destination` and `amount` from its vendor record, `act` calls with the scoped key; IronClaw tool manifest.
-- [ ] 4.2 Canaries planted in the agent's tools and memory; `make attack` live: both refusals, canary, key deleted on NEAR, `new authorisations: none`, followed by the in-flight panel.
-- [ ] 4.3 `make exception`: changed amount requested, human approval in the app, milestone 2 confirmed.
-- [ ] 4.4 `make payee-change`: seller alone pending, verification job runs, authority approval starts the timelock, finalize after; buyer pause and cancel tested.
-- [ ] 4.5 `make rotate-key` live after `make attack`; agreement continues to `settle`.
-- [ ] 4.6 `make glassbook` live (only if 3.7 chose Glassbook): six live slots across two periods, `period 1: Confirmed` on Base Sepolia, `period 2: Withheld`, the market maker's exception waiting for the buyer.
+## Phase 2: SDK core and the jobs on testnet (3 to 6 Nov)
 
-## Phase 5: app and one-sided mode
+During this phase the jobs run with development seeds bound to their projects; nothing on chain depends on them. Release 1 is cut at 2.7, once the builds stop changing.
 
-- [ ] 5.1 Mandate editor for both deal types (seal client-side, commit), agreement page with the state machine, payments with Base links, in-flight panel with burn buttons, exceptions, refusals, revocation, key replacement; for market-making, the slots panel (each slot's spread, depth, uptime, pass or fail, job id) and the `k` of `n` meter per period.
-- [ ] 5.2 Negotiation view: round headers, `limits checked`, attested terms, the two "readable: NO" checks, approve.
-- [ ] 5.3 Payee screens for vendor, authority and buyer; change flow with pause and cancel.
-- [ ] 5.4 `/attack` console and `/record/{account}`.
-- [ ] 5.4a `/try` open inbox: public form into the agent's inbox store, rate limit `10` an hour per visitor, live refusal log and the three hero counters; `make inbox` prints the lines in GOAL.md. The form holds no key and cannot call the contract.
-- [ ] 5.5 `make one-sided`: human vendor through the UI; the human still cannot read the buyer's mandate.
-- [ ] 5.6 `make deploy-app`. [needs Adi: Vercel token]
+- [ ] 2.1 `@accord/sdk` core: views, principal and agent actions, the sealing client (eciesjs, canonicalize, NEP-413 doc key, the release-key attestation check), `sealedCheck` (a sanity check, labelled as such; `make negotiate` prints it at 2.8), events, receipts; the `accord` CLI over it. Every later make target calls the CLI.
+- [ ] 2.2 Sealed Table: `pubkey` mode; `negotiate` mode's state reads (pinned endpoints, optimistic finality, retries), envelope decryption, commitment and binding checks against state, the caller check where OutLayer exposes the caller; fixture tests including a ciphertext copied from another agreement (`BAD_INPUT`) and a stale read (infrastructure).
+- [ ] 2.3 Sealed Table: NEAR AI gateway and model attestation with a fresh nonce (or F5); per-response signature verification against any verified model candidate; session salts.
+- [ ] 2.3b Sealed Table: end-to-end encryption of prompts to the verified model key (NEAR AI's `X-Client-Pub-Key` scheme), if probe 0.2 found it usable; otherwise `[skipped]` with the reason, and claim 1 keeps its gateway limit.
+- [ ] 2.4 Sealed Table: the four-message protocol, the prompts, structured outputs, the proposal checks, the leak filter, the final limit check, terms built with the agreement's params, the document encryption, `usage`, the signed output; fixture tests with recorded responses; one live run under `80 s`.
+- [ ] 2.5 Payee job: state reads, the file fetch (both forms), the three checks, the signals with their sources (`ARCHITECTURE.md` 7.3), the rating, the signed output; tests with a fixture server.
+- [ ] 2.6 Observer job: slot times from its seed, the time from the latest final testnet block, the first final mainnet block at or after the slot time (`not_yet` until one exists), `get_pool`, two spread quotes, binary-search depth, the signed output; tests showing that two calls after the slot time return identical outputs and a call before returns `not_yet`.
+- [ ] 2.7 Release 1 and deployment: fresh `PROTECTED_` seeds generated and bound to the three final builds, the Sealed Table's and the Payee's under S1; `NEARAI_API_KEY` set on the Sealed Table project under the same S1 condition (Adi runs that command, `BLOCKED.md`); the factory's `request_pubkeys` through the releases account; `publish_release` (embedded) with the task ids; keeper account, demo principals, canaries, token registration; `make deploy-testnet` prints every id; `make check-deploy` passes.
+- [ ] 2.8 `make negotiate` live: the negotiate block from `INTERFACES.md` section 10 with real values.
+- [ ] 2.9 Keeper: starts negotiations, activates recipients, polls the observer every `30 s` for each open slot and submits what it signs, closes periods, drives `close()`, writes heartbeats.
+- [ ] 2.10 A live market-making agreement (the Atlas fixtures, negotiated and approved through the CLI) with its first observation recorded on chain with a valid observer signature.
 
-## Phase 6: README, demo, release candidate
+Gate G-Atlas (6 Nov 23:59): if 2.10 is done, the video leads with Accord Atlas; otherwise procurement leads and Atlas is shown from recorded periods, labelled "recorded". Do not move the date.
 
-- [ ] 6.1 README in the required structure; the claims-and-limits table verbatim; the privacy boundary; the custody-and-trust table; the prior art table with AP2, OutLayer custody, Dealproof, Dhruva, Pactum, NDAI, card AP agents; every "see" line verified.
-- [ ] 6.2 The demo script chosen in 3.7, rehearsed live twice; the other script kept in the repo and named in the README.
-- [ ] 6.3 CI green on a fresh clone; `.env.example` complete; secret scan of history clean; grep of the repository for every withdrawn claim in GOAL.md returns nothing.
-- [ ] 6.4 Tag `hackathon-submission` candidate; `CHANGELOG.md` complete.
+## Phase 3: checks, agents, the proofs live (6 to 8 Nov)
 
-## Phase 7: publish and submit (each step needs Adi)
+- [ ] 3.1 `@accord/sdk`: `preflight` (signals, buyer approvals), `verify` (code hash, keys, release proofs through the OutLayer attestation API, gateway and model attestations with a caller-chosen nonce, commitments, recipient chain, events, observation conflicts).
+- [ ] 3.2 `@accord/mcp`: the tools in `INTERFACES.md` section 12, stdio and HTTP; tested with a local MCP client.
+- [ ] 3.3 Agent service: the `literal` planner, inbox polling, `AGENT_PREFLIGHT`; the `llm` planner through the MCP tools; the `rearm` mode for the `/try` room (`ARCHITECTURE.md` section 11: its own principals and the `try` mandates, one item due at a time, a new agent key five minutes after a revocation, a new room when one is used up, `TRY_MAX_ROOMS_PER_DAY`, NEAR top-ups and withdrawals, the `try_rooms` table).
+- [ ] 3.4 Live targets on testnet: `make approve`, `make fund`, `make payee`, `make pay`, `make exception`, `make claim`, `make payee-change`, each on its own agreement where it uses up items; `accord recycle` returns the recipient's test USDC to the buyer.
+- [ ] 3.5 `make attack` live: the attack block with real values.
+- [ ] 3.6 `make revoke` live: the revoke block with real values.
+- [ ] 3.7 `make atlas` live: one `Eligible` period paid, one `Withheld` period on the stricter agreement.
 
-- [ ] 7.1 Video recorded and X post published; link in `DECISIONS.md`.
-- [ ] 7.2 Repository public on `hackathon`.
-- [ ] 7.3 Submission payload printed, confirmed, sent; `201` recorded.
+Gate G2 (8 Nov 23:59): `make negotiate`, `make attack` and `make revoke` print live. Nothing in Phase 6 starts before this gate.
+
+## Phase 4: the app (8 to 10 Nov)
+
+- [ ] 4.1 App scaffold: Next.js, NEAR Connect, the site's tokens (dark default, Satoshi for text, JetBrains Mono for numbers, states and codes, red only for refusals, canary trips and revocations), the four-state strip component, the live-panel component with source and age. Diagrams the app shows are copied into `app/public/diagrams/` from `website/diagrams/`, never imported from `website/`, so item 7.3 can move that folder.
+- [ ] 4.2 `/agreements/new`: create, the mandate editor with fictional presets from `fixtures/companies/`, sealing in the browser.
+- [ ] 4.3 `/agreements/[id]`: terms, approvals, funding, recipient panel with rating and reasons, items and deliveries, exceptions and period decisions, the refusal log as a live region, receipts, the keys panel, agent approvals, the Verified panel listing each check by name (nonce generated in the browser).
+- [ ] 4.4 `/try`: the open inbox (store, `10` an hour per visitor and `TRY_MAX_MESSAGES_PER_HOUR` in all), the counters ("Paid outside the terms" and approved payments, from the contract's events), the re-arm notice, and the notice when the daily room cap is reached; `make inbox` passes.
+- [ ] 4.5 `/atlas`, `/payee` (file generator and checker), `/verify` and `/verify/[id]`, `/record` with CSV, `/join`, `/docs`, `/status`, the demo domain routes.
+- [ ] 4.6 `app/tests/no-mandate-routes.test.ts`; `app/src/server/README.md` and the README's "What we keep".
+- [ ] 4.7 Railway deployment: app, agent (with re-arm), keeper, Postgres; hosted agreements in each state and a live Atlas agreement; `/status` green. Adi provides the Railway project and variables (`BLOCKED.md`).
+
+Gate G3 (10 Nov 23:59): the hosted app shows live agreements, `/try` works end to end, `/verify/<id>` passes.
+
+## Phase 5: judge paths and hardening (10 to 11 Nov)
+
+- [ ] 5.1 `make verify DEAL=<id>` with no keys, against the hosted agreements.
+- [ ] 5.2 `make demo` under `2:00` from nothing: faucet accounts, `tUSDC` unless USDC is configured, the recipient proven through the app's demo domain (`INTERFACES.md` section 8) while the negotiation runs.
+- [ ] 5.3 README for the screeners, in the order of `GOAL.md`, every "see" line pasted from a real run.
+- [ ] 5.4 Security pass: the `near-contract-audit` agent skill on both contracts, findings fixed or written up; `cargo clippy -D warnings`; an `act` argument fuzz test; gas and storage measured and written into `ARCHITECTURE.md` section 18.
+- [ ] 5.5 Release 2 in global mode for the hosted agreements; `make check-deploy`.
+
+## Phase 6: levers (11 to 12 Nov, only after G2)
+
+Take `WIN_PLAN.md` levers 3 to 9 in order; each is done when its acceptance line is true or it is marked `[skipped]` with the reason. Levers 1 and 2 are Adi's and run in parallel from 2 Nov.
+
+## Phase 7: release (12 to 13 Nov)
+
+- [ ] 7.1 Release candidate tagged locally; `make demo-reset` creates fresh demo agreements for recording (one per state, plus the two Atlas agreements); rehearsal 1 of `DEMO.md` with every line checked against the README.
+- [ ] 7.2 Rehearsal 2 on a fresh clone in a temp directory.
+- [ ] 7.3 Repository for screeners: move the build kit (`CLAUDE.md`, `GOAL.md`, `ARCHITECTURE.md`, `INTERFACES.md`, `PROGRESS.md`, `DECISIONS.md`, `KIT.md`, `DEMO.md`, `SUBMISSION.md`, `WIN_PLAN.md`, `REFERENCES.md`, `BLOCKED.md`, `website/`, `starter/`) into `docs/build/` and fix every link; keep `HACKATHON.md` and `CHANGELOG.md` at the root. In the same commit, point everything that reads those files at `docs/build/`: the make targets and scripts, and from now on `scripts/submission/build.mjs` (8.2). Add a short root `CLAUDE.md` and an identical `AGENTS.md` for evaluating agents, from `starter/evaluator/`: what the repository is, how to build, test and run the three judge paths, where each part lives, and that nothing should be pushed, posted, submitted or signed on mainnet. They contain no request about scoring, no praise and no instruction to skip a check. From this commit on, the root `CLAUDE.md` is the evaluator note and the build rules are `docs/build/CLAUDE.md`, which every later iteration reads first (Adi's loop prompts already say so). Then grep the repository, the app strings, `DEMO.md` and the X post drafts for every phrase in `GOAL.md` "Withdrawn" and "Words never written": no hit may make a withdrawn claim. Hits inside the files that define those lists and explicit negations ("does not provide confidential settlement") are listed in the report and left as they are.
+- [ ] 7.4 `make release-check` (`SUBMISSION.md`).
+- [ ] 7.5 Adi records the video and posts on X (`DEMO.md`), makes the repository public, and confirms `main` is the default branch. Write the steps into `BLOCKED.md` with exact instructions.
+
+## Phase 8: submission (14 Nov)
+
+- [ ] 8.1 Re-fetch HACKATHON.md and diff it; report changes to Adi.
+- [ ] 8.2 `scripts/submission/build.mjs` behind `make submission-check`: values (from `.submission/values.json` and `docs/build/DECISIONS.md`), `requestId` once, validation, world checks, print the payload. Wait for Adi's yes. Send. Target `12:00 UTC`.

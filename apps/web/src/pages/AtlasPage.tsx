@@ -12,7 +12,7 @@ import { LINKS } from "../content/links"
 import { ProductShot, type ShotVariant } from "../components/ProductShot"
 import styles from "./AtlasPage.module.css"
 
-/* /atlas (was /glassbook; renamed Accord Atlas 30 Oct 2026): docs/website/ACCORD_WEBSITE_CONTENT.md B3, set verbatim.
+/* /atlas (Accord Atlas): docs/website/ACCORD_WEBSITE_CONTENT.md B3, set verbatim.
    Shell = the template's page hero (404 page Main) · four B3 sub-sections as the About section's alternating
    image rows (showcase-image-1…4) · the A5 visual labels as the Compliance section's five badge cards, with the
    observations from useLive().slots under them in the D2 evidence wording · `Review a measurement record`.
@@ -71,7 +71,7 @@ const ROWS: RowProps[] = [
     shot: "conditions",
     imageSide: "left",
     title: "Define the measurement before the engagement.",
-    paragraphs: ["Specify the venue and pair, maximum spread, minimum depth, observation schedule, data-coverage requirements and the rule used to determine payment eligibility."],
+    paragraphs: ["Specify the venue, the maximum spread, the minimum depth within the agreed band, whether both sides must be quoted, the number of observation slots and how many must pass for a period to pay."],
   },
   {
     id: "observations",
@@ -93,8 +93,8 @@ const ROWS: RowProps[] = [
     imageSide: "right",
     title: "What the current version measures.",
     paragraphs: [
-      "Atlas observes the venue's order book. It does not identify which firm supplied that liquidity, detect all forms of manipulation, guarantee execution quality or verify legal compliance.",
-      "Account-attributed performance verification is a planned extension. Token loans and option-based compensation are outside the current retainer-focused flow.",
+      "Atlas reads the venue's public liquidity, today Rhea's USDC/wNEAR pool, at times drawn inside the observer's enclave. It measures venue-level liquidity, not the market maker's individual contribution, and does not detect all forms of manipulation, guarantee execution quality or verify legal compliance.",
+      "Verification using the market maker's authenticated account data is planned. The hidden times rest on the operator never moving the observer's seed to a build that reveals them. Token loans and option-based compensation are outside the current retainer-focused flow.",
     ],
   },
 ]
@@ -130,7 +130,7 @@ function Observations({ v }: { v: LiveValues | null }) {
           {v.slots.map((s) => (
             <li key={s.slot} className={styles.slot}>
               <Mono className={styles.cell}>window {s.slot}</Mono>
-              <Mono className={styles.cell}>spread p50 {s.spreadP50Bps} bps · depth min {s.depthMin} · uptime {s.uptimePct}%</Mono>
+              <Mono className={styles.cell}>spread {s.spreadBps} bps · depth {Math.min(s.depthBid, s.depthAsk)} · {s.twoSided ? "both sides" : "one side"}</Mono>
               <Mono className={styles.cell} tone={s.result === "FAIL" ? "refusal" : undefined}>{resultLine(s.result)}</Mono>
             </li>
           ))}

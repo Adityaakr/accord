@@ -24,7 +24,7 @@ const STEPS: { n: string; title: string; body: string; active?: boolean }[] = [
   {
     n: "01",
     title: "Sealed",
-    body: "Each company seals its mandate in the browser; only a commitment hash is recorded.",
+    body: "Each company sets its limits in the browser and seals them. Only the sealed mandate and its commitment hash go on NEAR; the other side never sees the numbers.",
   },
   {
     n: "02",

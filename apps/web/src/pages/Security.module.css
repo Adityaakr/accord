@@ -55,7 +55,7 @@
   color: var(--text-strong);
 }
 
-/* Reporter limitation: H6 label over a Body Large paragraph, at the lead width */
+/* Settlement note: H6 label over a Body Large paragraph, at the lead width */
 .note {
   display: flex;
   flex-direction: column;

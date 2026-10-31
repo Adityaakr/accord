@@ -1,6 +1,6 @@
 {
   "title": "Accord: Verify this agreement",
-  "description": "One screen that walks through an agreement's attestation chain: job id, measurement on OutLayer's register, the outlayer-verify output, commitment hashes, refusal events on the explorer, the payment on NEAR.",
+  "description": "One command checks a live agreement from public data, with no keys: the contract code, the agreement's keys, the Sealed Table release, the sealed outcome, the model attestation, the recipient and the record.",
   "ld": [
     "{\"@context\":\"https://schema.org\",\"@type\":\"Organization\",\"name\":\"Accord\",\"url\":\"/\",\"description\":\"The private deal room and control plane for agent-to-agent commerce.\"}",
     "{\"@context\":\"https://schema.org\",\"@type\":\"SoftwareApplication\",\"name\":\"Accord\",\"applicationCategory\":\"BusinessApplication\",\"operatingSystem\":\"Web\",\"description\":\"Two companies' agents negotiate in confidence, both companies approve the terms, and the terms govern what the buyer's agent may pay. Built on NEAR. First application: Accord Atlas.\"}"

@@ -31,7 +31,7 @@ const SECTION_APPEAR_TRANSITION: FramerTransition = { type: "tween", ease: EASE_
 
 const PATHS = [
   { role: "project", kicker: "Token project", title: "Pay your market maker on measured conditions",
-    text: "Put the retainer behind the spread, depth and uptime you agreed, with Accord Atlas.", cta: "Request early access" },
+    text: "Put the retainer behind the spread, depth and two-sided quoting you agreed, with Accord Atlas.", cta: "Request early access" },
   { role: "market-maker", kicker: "Market maker", title: "Get paid for the liquidity you already provide",
     text: "Negotiate terms without showing your floor, and get paid when the agreed conditions are measured.", cta: "Join as a market maker" },
   { role: "partner", kicker: "Integration partner", title: "Build on Accord",

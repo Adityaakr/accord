@@ -72,15 +72,17 @@ Paraphrase unless marked verbatim. Each row names the piece of the room it point
 | Chatterjee and Samuelson, Operations Research 31(5), 835 to 851 | 1983 | Bargaining under incomplete information; the sealed-bid double auction | The sealed table's ancestor | https://doi.org/10.1287/opre.31.5.835 |
 | Mert Mumtaz, Helius, via Genfinity | 7 Aug 2026 | The strongest AI and crypto overlap is security, not agent payments; institutions want privacy tuned to policy | Security first | https://genfinity.io/2026/08/07/helius-mert-mumtaz-solana-privacy-protocol-encrypted-balances/ |
 
-The README's problem section may use at most three of these beside the section A1 to A3 rows; the site's section 2a uses them all. Never quote a paraphrase as if verbatim.
+The README's problem section may use at most three of these beside the section A1 to A3 rows; the site's section 2a uses them all. Never quote a paraphrase as if verbatim. Rows that quote members of the jury listed on nearhackathon.com are not used in the README, the app or the video.
 
 ### A5. Stack documentation the README and the website cite
 
 | Source | What it supports |
 | --- | --- |
-| NEAR docs, Chain Signatures implementation: https://docs.near.org/chain-abstraction/chain-signatures/implementation | Obtaining a signature and relaying the signed transaction are separate steps; the basis for the in-flight panel and `burn_nonce`. Never claim revocation recalls a signed transaction |
-| OutLayer trust and verification: https://app.outlayer.ai/docs/trust-verification | How `outlayer-verify` checks a job's measurement against the register contract |
-| NEAR AI Cloud verification: https://docs.near.ai/cloud/verification | Per-response signatures and offline verification |
+| NEAR docs, access keys: https://docs.near.org/protocol/accounts-contracts/access-keys | A function-call key is limited to one receiver and a list of methods, cannot attach a deposit, and spends gas from a fixed allowance; the basis for "What the agent's key can and cannot do" |
+| NEP-591 global contracts: https://github.com/near/NEPs/blob/master/neps/nep-0591.md | A contract referenced by its code hash cannot change; the basis for pinning each agreement's code |
+| NEP-141 fungible tokens: https://github.com/near/NEPs/blob/master/neps/nep-0141.md | `ft_transfer` and `ft_transfer_call` semantics, including refunds of unused amounts; the escrow and payment path |
+| OutLayer trust and verification: https://app.outlayer.ai/docs/trust-verification and signing keys: https://app.outlayer.ai/docs/signing-keys | How a run's attestation is checked (`outlayer-verify`), and how a key bound to one build signs outputs the contract can check |
+| NEAR AI Cloud verification: https://docs.near.ai/cloud/verification | Attestation reports fetched with a fresh nonce, and per-response signatures bound to the attested model key |
 | NEAR Intents confidential execution: https://intents.near.org/confidential | Confidential Intents is a private execution environment; it does not hide data an application publishes or an ordinary transfer on the destination chain. The reason v1 makes no confidential-settlement claim |
 
 ## B. The second vertical: market-maker deals (kept from v2)
@@ -126,9 +128,9 @@ Every row was opened on 29 Oct 2026. Quote the paraphrase, link the source, neve
 
 | Source | Date | What it says | The gap it leaves |
 | --- | --- | --- | --- |
-| Binance updated market-maker guidance: https://www.unlock-bc.com/en/binance-tightens-rules-for-token-market-makers (also https://finance.yahoo.com/markets/crypto/articles/binance-requests-market-maker-transparency-191855624.html) | 25 Mar 2026 | Projects must disclose the market maker's identity, legal entity and agreement terms; profit-sharing and guaranteed-return arrangements banned; token loans must state how borrowed tokens may be used; blacklisting for misconduct. | Disclosure of terms, not proof the terms were kept. A Glassbook mandate is the stated permitted use, with the proof. |
-| Forgd market-maker leaderboard on DefiLlama: https://cointelegraph.com/news/forgd-market-maker-leaderboard-defillama | 5 Aug 2026 | Spread, depth, volume and uptime ratings across 35 market-making firms and more than 500 projects. | Ratings depend on data market makers choose to share, and nothing is enforced. Glassbook measures the market maker's own orders inside an enclave and releases the fee by contract. |
-| Haseeb Qureshi, Dragonfly roundtable, via ChainCatcher: https://www.chaincatcher.com/en/article/2182079 | 19 May 2025 | Three channels to normalise disclosure: exchanges require it, VCs require it, market makers refuse non-disclosing counterparties. | All three are norms. Glassbook is the contract. |
+| Binance updated market-maker guidance: https://www.unlock-bc.com/en/binance-tightens-rules-for-token-market-makers (also https://finance.yahoo.com/markets/crypto/articles/binance-requests-market-maker-transparency-191855624.html) | 25 Mar 2026 | Projects must disclose the market maker's identity, legal entity and agreement terms; profit-sharing and guaranteed-return arrangements banned; token loans must state how borrowed tokens may be used; blacklisting for misconduct. | Disclosure of terms, not proof the terms were kept. An Accord Atlas mandate is the stated permitted use, with the proof. |
+| Forgd market-maker leaderboard on DefiLlama: https://cointelegraph.com/news/forgd-market-maker-leaderboard-defillama | 5 Aug 2026 | Spread, depth, volume and uptime ratings across 35 market-making firms and more than 500 projects. | Ratings depend on data market makers choose to share, and nothing is enforced. Accord Atlas measures the market maker's own orders inside an enclave and releases the fee by contract. |
+| Haseeb Qureshi, Dragonfly roundtable, via ChainCatcher: https://www.chaincatcher.com/en/article/2182079 | 19 May 2025 | Three channels to normalise disclosure: exchanges require it, VCs require it, market makers refuse non-disclosing counterparties. | All three are norms. Accord Atlas is the contract. |
 
 ### 6. Judges on the record
 
@@ -141,11 +143,11 @@ Not found on the record about market-maker deals: Mert Mumtaz, Eddy Lazzarin, Av
 
 ### The one-paragraph version for the README
 
-Market-maker deals are the least transparent contract in crypto: fewer than 1% of protocols disclose their terms, the loan-plus-call structure pays the market maker on price rather than on liquidity, and the self-reported monthly report is the only evidence a project gets. The results are public: $300M of alleged wash trades for one firm on one exchange, $5B of market cap gone from one token in a day, $38M extracted from another before the exchange froze it, and four market makers criminally charged after the FBI built a token to catch them. Regulators now treat the symptoms as market abuse, the largest exchange now demands the terms, and the industry's answer is dashboards. Glassbook is the missing piece: a mandate that states what the market maker may do, an enclave that measures what it did, and a contract that pays only for the difference.
+Market-maker deals are the least transparent contract in crypto: fewer than 1% of protocols disclose their terms, the loan-plus-call structure pays the market maker on price rather than on liquidity, and the self-reported monthly report is the only evidence a project gets. The results are public: $300M of alleged wash trades for one firm on one exchange, $5B of market cap gone from one token in a day, $38M extracted from another before the exchange froze it, and four market makers criminally charged after the FBI built a token to catch them. Regulators now treat the symptoms as market abuse, the largest exchange now demands the terms, and the industry's answer is dashboards. Accord Atlas is the missing piece: a mandate that states what the market maker may do, an enclave that measures what it did, and a contract that pays only for the difference.
 
 ### 7. The fixes tried so far, and where each one stops
 
-Every fix on the market moves one piece of the problem and leaves the others. Glassbook moves all four at once: the project keeps custody, the strategy stays sealed, the market maker's own orders are measured, and the measurement is what pays. Use this in the README's prior-art section.
+Every fix on the market moves one piece of the problem and leaves the others. Accord Atlas moves all four at once: the project keeps custody, the strategy stays sealed, the market maker's own orders are measured, and the measurement is what pays. Use this in the README's prior-art section.
 
 | Fix | Who | What it does | Custody stays with project | Strategy sealed | Own orders measured | Payment follows measurement | Where it stops |
 | --- | --- | --- | --- | --- | --- | --- | --- |

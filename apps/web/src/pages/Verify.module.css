@@ -113,6 +113,8 @@
 .stepText { color: var(--text-medium); }
 .chipRow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; }
 .chip { white-space: normal; overflow-wrap: anywhere; }
+/* A printed line keeps its column padding, as the terminal shows it */
+.line { white-space: pre-wrap; }
 .copy {
   padding: 4px 10px;
   border-radius: 6px;

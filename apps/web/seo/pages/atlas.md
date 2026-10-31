@@ -10,13 +10,13 @@ Agree on the market conditions to measure, inspect the observations, and apply t
 
 ## Define the measurement before the engagement.
 
-Specify the venue and pair, maximum spread, minimum depth, observation schedule, data-coverage requirements and the rule used to determine payment eligibility.
+Specify the venue, the maximum spread, the minimum depth within the agreed band, whether both sides must be quoted, the number of observation slots and how many must pass for a period to pay.
 
 ## Give each observation a place in the record.
 
 Follow the measurement window, source, result and associated execution evidence. Review gaps and exceptions alongside successful observations.
 
-> Illustrative: One observation slot: the venue's public order book, sampled in an enclave.
+> Illustrative: One observation slot: the pool's public liquidity, read at a time drawn inside the observer's enclave.
 
 > Illustrative: A period decision: five of six slots passed, so the retainer is eligible.
 
@@ -26,9 +26,9 @@ Where the approved measurement and release rules are satisfied, the payment beco
 
 ## What the current version measures.
 
-Atlas observes the venue's order book. It does not identify which firm supplied that liquidity, detect all forms of manipulation, guarantee execution quality or verify legal compliance.
+Atlas reads the venue's public liquidity, today Rhea's USDC/wNEAR pool, at times drawn inside the observer's enclave. It measures venue-level liquidity, not the market maker's individual contribution, and does not detect all forms of manipulation, guarantee execution quality or verify legal compliance.
 
-Account-attributed performance verification is a planned extension. Token loans and option-based compensation are outside the current retainer-focused flow.
+Verification using the market maker's authenticated account data is planned. The hidden times rest on the operator never moving the observer's seed to a build that reveals them. Token loans and option-based compensation are outside the current retainer-focused flow.
 
 > Illustrative: What the current version of Atlas measures, and what is planned.
 

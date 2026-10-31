@@ -28,7 +28,7 @@ The first app on Accord: liquidity agreements paid on measured conditions.
 
 ## Built for commerce in stablecoins.
 
-Tied to agreed spread, depth and uptime
+Tied to agreed spread, depth and two-sided quoting
 
 - Market-making retainers
 
@@ -42,7 +42,7 @@ Tied to agreed spread, depth and uptime
 
 Deal room · NEAR/USDC retainer, Q1 Illustrative
 
-Renew our NEAR/USDC market-making retainer: up to 20,000 USDC a period, spread under 50 bps, at least 10,000 USDC of depth within 1%, 90% uptime. Our agent must not overpay or pay the wrong desk.
+Renew our NEAR/USDC market-making retainer on Rhea: up to 20,000 USDC a period, spread under 70 bps, at least 10,000 USDC of depth within 2%, quotes on both sides. Our agent must not overpay or pay the wrong desk.
 
 18,500 USDC a period. Paid on measured liquidity.
 
@@ -54,7 +54,7 @@ Renew our NEAR/USDC market-making retainer: up to 20,000 USDC a period, spread u
 
 - Paying `halcyon-mm.testnet` only, bound to halcyon.example Recipient authorisation · passed
 
-- Each period's payment becomes eligible when 5 of 6 slots pass Conditional settlement · passed
+- Each period's payment becomes eligible when 4 of 6 slots pass Conditional settlement · passed
 
 Deal room · Vendor invoices, October run Illustrative
 
@@ -124,7 +124,9 @@ The first application built on Accord
 
 ## Accord Atlas: liquidity agreements with measurable payment conditions.
 
-Built on Accord, Atlas links a market maker's recurring retainer to the spread, depth and uptime both sides agreed. An attested observer samples the venue's public order book on the agreed schedule. When the agreed number of observations pass, the payment is released; when they don't, it is held for both sides to decide.
+Accord Atlas connects market-making retainers to the liquidity conditions both parties approve. An attested observer samples the venue's public liquidity at hidden times within an agreed schedule, checking spread, depth and two-sided quoting against the agreement.
+
+When the required observations pass, payment becomes eligible for release under Accord's payment controls. Otherwise, it remains withheld for both parties to review. Each payment decision is linked to the terms and observations behind it.
 
 [See the Atlas demonstration](/atlas) [Join as a project or a market maker →](/join)
 
@@ -134,23 +136,23 @@ Projects, market makers and exchanges keep pointing at the same gap.
 
 Paraphrased from public sources, linked on each card.
 
-- Kain Warwick Founder · Synthetix [Mar 2025](https://bitcoinist.com/disturbing-truth-about-crypto-market-makers/) Market makers cost projects $50k to $300k+ a month in the 2017 cycle. Good ones aim for tight spreads; many exercised their call options and dumped. Atlas Payment follows the spread, depth and uptime both sides agreed.
+- Kain Warwick Founder · Synthetix [Mar 2025](https://bitcoinist.com/disturbing-truth-about-crypto-market-makers/) Market makers cost projects $50k to $300k+ a month in the 2017 cycle. Good ones aim for tight spreads; many exercised their call options and dumped. Atlas Payment follows the spread, depth and two-sided quoting both sides agreed.
 
 - Jelle Buth Co-founder · Enflux, a market maker [Apr 2025](https://cointelegraph.com/magazine/market-maker-deals-quietly-killing-crypto-projects) Projects should define liquidity KPIs from order-book activity before they commit. In loan-option deals those KPIs are often missing or vague. Atlas The KPIs become the agreement's payment conditions.
 
-- LO:TECH Survey · commissioned by a market maker [Aug 2025](https://www.theblock.co/post/367243/global-survey-reveals-deep-mistrust-in-crypto-market-making-urgent-call-for-transparency) 52% of 2,000+ respondents in 98 countries do not trust market makers. The report recommends enforceable contracts and real-time dashboards. Atlas Attested observations of the order book decide each payment.
+- LO:TECH Survey · commissioned by a market maker [Aug 2025](https://www.theblock.co/post/367243/global-survey-reveals-deep-mistrust-in-crypto-market-making-urgent-call-for-transparency) 52% of 2,000+ respondents in 98 countries do not trust market makers. The report recommends enforceable contracts and real-time dashboards. Atlas Attested observations of the pool's liquidity decide each payment.
 
 - Binance Market-maker guidance · for listed projects [Mar 2026](https://finance.yahoo.com/markets/crypto/articles/binance-requests-market-maker-transparency-191855624.html) Projects must disclose their market maker's details, legal entity and contract terms to the listing platform. Atlas Disclosure shows what was agreed. Atlas measures whether it was met.
 
-> Illustrative Accord Atlas monitor for a NEAR/USDC market-making retainer. Approved conditions: spread at most 40 bps, at least 12,000 USDC of depth within 1%, 95% uptime, 5 of 6 observation slots to pass. The venue's public order book is sampled six times and each slot attested; slot 3 fails with a 47 bps spread and 9,820 USDC of depth. 5 of 6 pass, the period is eligible and 18,500 USDC is settled to halcyon-mm.near in USDC on NEAR.
+> Illustrative Accord Atlas monitor for a NEAR/USDC market-making retainer on Rhea's USDC/wNEAR pool. Approved conditions: spread at most 60 bps, at least 12,000 USDC of depth within 2% of the mid on each side, both sides quoted, 4 of 6 observation slots to pass. The pool is read at six times drawn inside the observer's enclave and each slot is attested; slot 3 fails with 9,820 USDC of depth. 5 of 6 pass, the period is eligible and 18,500 USDC is settled to halcyon-mm.near in USDC on NEAR.
 
-Scope Atlas measures the market's condition on the venue, not which participant supplied it. Attributing liquidity to the market maker's own account is planned.
+Scope Atlas measures venue-level liquidity, not the market maker's individual contribution. Verification using the market maker's authenticated account data is planned.
 
 How it works
 
 ## How a deal room works.
 
-- `01` · Sealed Each company seals its mandate in the browser; only a commitment hash is recorded.
+- `01` · Sealed Each company sets its limits in the browser and seals them. Only the sealed mandate and its commitment hash go on NEAR; the other side never sees the numbers.
 
 - `02` · Attested The Sealed Table negotiates inside an attested enclave; code checks the result against both mandates' limits; the terms are recorded with an attestation anyone can verify.
 
@@ -190,7 +192,7 @@ The most a hijacked agent can do is make a payment you already approved, to the 
 
 Where each attack stops · the agent is assumed to follow every message it reads
 
-- BEC ASI01 goal hijack What the agent does Asks to pay the new account Where it stops **Agreement controls** destination is not the authorised recipient Result `ERR_PAYEE_MISMATCH` nothing paid
+- BEC ASI01 goal hijack What the agent does Asks to pay the new account Where it stops **Agreement controls** destination is not the authorised recipient Result `ERR_PAYEE_MISMATCH` nothing sent
 
 Not stopped by the contract: a person approving the wrong terms, or a payment the terms already allow. Those stay with people, on the record.
 
@@ -202,7 +204,7 @@ Try to move the money ↓
 
 ## Try to move the money.
 
-When the demonstration opens, its agent's inbox is public. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it. The contract refuses, and your attempt appears in the public refusal log with the reason. Revocation removes the agent's key and stops every new payment at once.
+When the demonstration opens, its agent's inbox is public. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it, and your attempt appears in the public refusal log with the contract's reason. Revocation is shown exactly: the agent's only key is deleted in one transaction, and anything it signs afterwards is rejected by the network before it reaches the contract.
 
 [Preview the demonstration](/try)
 
@@ -212,7 +214,7 @@ Privacy and control
 
 ##### Private to each company
 
-Its mandate and the negotiation; only hashes leave the enclave.
+Its mandate (on chain only as ciphertext) and the negotiation; only the terms, hashes and an attestation leave the enclave.
 
 ##### Visible to both companies
 
@@ -220,11 +222,11 @@ The approved terms, the schedule, every payment, exception and refusal.
 
 ##### Public
 
-The payment schedule the contract enforces and the USDC transfers on NEAR, as with any stablecoin payment.
+The payment schedule the contract enforces, the authorised recipient and the payments themselves, as with any stablecoin payment.
 
 ##### No recall
 
-Revocation is not a recall: it stops every new payment at once, and a payment already made stays made.
+Accord does not reverse a payment once it is made; revocation stops the agent, and a payment already made went to the authorised recipient at the approved amount.
 
 ##### Not legal identity
 
@@ -234,7 +236,7 @@ It does not verify that a company legally exists; Payee establishes control of a
 
 It does not prove that a negotiation was fair or that external data is truthful; attestation shows which code ran on which inputs.
 
-Settlement happens on NEAR itself: the contract moves the USDC, so every payment is checked and recorded in one place. Mainnet follows an audit.
+A keeper service triggers scheduled steps such as observations; it cannot move funds or change an outcome. Mainnet follows an audit.
 
 [Security documentation →](/security)
 
@@ -362,7 +364,7 @@ FAQ
 
 Accord is pre-launch: the testnet build is under way and early access is by request. Tell us which side you are on.
 
-[Token project Pay your market maker on measured conditions Put the retainer behind the spread, depth and uptime you agreed, with Accord Atlas. Request early access](/join?role=project) [Market maker Get paid for the liquidity you already provide Negotiate terms without showing your floor, and get paid when the agreed conditions are measured. Join as a market maker](/join?role=market-maker) [Integration partner Build on Accord Bring your agents to a deal room, or add a deal type with its own mandate schema and release rule. Talk to us about integrating](/join?role=partner)
+[Token project Pay your market maker on measured conditions Put the retainer behind the spread, depth and two-sided quoting you agreed, with Accord Atlas. Request early access](/join?role=project) [Market maker Get paid for the liquidity you already provide Negotiate terms without showing your floor, and get paid when the agreed conditions are measured. Join as a market maker](/join?role=market-maker) [Integration partner Build on Accord Bring your agents to a deal room, or add a deal type with its own mandate schema and release rule. Talk to us about integrating](/join?role=partner)
 
 [Explore Atlas](/atlas)
 

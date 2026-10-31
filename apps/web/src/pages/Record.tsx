@@ -75,7 +75,7 @@ function AgreementPanel({ v }: { v: LiveValues | null }) {
       </div>
 
       <div className={styles.panelRow}>
-        <p className={`t-body-sm ${styles.rowLabel}`}>Bound payee</p>
+        <p className={`t-body-sm ${styles.rowLabel}`}>Authorised recipient</p>
         {!v ? <p className={`t-body-sm ${styles.empty}`}>{LOADING}</p> : payeeKnown ? (
           <div className={styles.lines}>
             <Mono className={styles.cell}>{a.payee.domain} · v{a.payee.version}</Mono>

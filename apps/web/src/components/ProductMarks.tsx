@@ -66,7 +66,7 @@ export const MarkContract = ({ className }: MarkProps) => (
     <path d="M8.5 12.5h7M8.5 17c1-1.2 1.6-1.2 2.3 0s1.4 1.2 2.3 0" />
   </Svg>
 )
-/* Market-making retainers: order-book depth, bids and asks around the spread */
+/* Market-making retainers: pool depth either side of the mid, around the spread */
 export const MarkMarket = ({ className }: MarkProps) => (
   <Svg className={className}>
     <path className={tone} d="M3 20V9h2.5v3H8v3h2.5v5ZM13.5 20v-5H16v-3h2.5V9H21v11Z" stroke="none" />

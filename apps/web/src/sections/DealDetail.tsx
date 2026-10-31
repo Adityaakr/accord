@@ -70,7 +70,7 @@ function Negotiation({ x }: { x: Detail }) {
 const METHODS: [string, string | null][] = [
   ["act()", null],
   ["approve_terms()", "MethodNameMismatch"],
-  ["accept_payee()", "MethodNameMismatch"],
+  ["accept_recipient()", "MethodNameMismatch"],
   ["transfer", "RequiresFullAccess"],
 ]
 function Permissions({ x }: { x: Detail }) {
@@ -129,10 +129,10 @@ function Payments({ x }: { x: Detail }) {
 /* ---------- 4. Recipient authorisation: the domain is proven, approved, then bound to one account ---------- */
 function Recipient({ x }: { x: Detail }) {
   const nodes: [string, string, string][] = [
-    ["Domain", x.domain, "propose_payee"],
-    ["Proof", "domain verified", "verify-payee job"],
-    ["Authority", "approved", "approve_payee"],
-    ["Bound", x.account, "accept_payee · v1"],
+    ["Domain", x.domain, "propose_recipient"],
+    ["Proof", "domain verified", "payee proof job"],
+    ["Authority", "approved", "approve_recipient"],
+    ["Bound", x.account, "accept_recipient · v1"],
   ]
   return (
     <div className={styles.chain}>
@@ -145,7 +145,7 @@ function Recipient({ x }: { x: Detail }) {
           <span className={styles.nodeCall}>{call}</span>
         </div>
       ))}
-      <p className={styles.chainNote} style={d(2.8)}>A different account is refused at payment. Changing it later needs a new version, the authority's approval and a 24 hour timelock.</p>
+      <p className={styles.chainNote} style={d(2.8)}>A different account is refused at payment. Changing it later needs a fresh proof, the authority's approval, the buyer's acceptance and a 24-hour delay.</p>
     </div>
   )
 }

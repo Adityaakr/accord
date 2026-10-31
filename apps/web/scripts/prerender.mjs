@@ -17,7 +17,7 @@ const TEMPLATE = readFileSync(join(DIST, "index.html"), "utf8")
 const OG_IMAGE = `${SITE_URL}/og-image.png`
 const TODAY = new Date().toISOString().slice(0, 10)
 const TAGLINE = "The private deal room and control plane for agent-to-agent commerce."
-const ABOUT = "Accord is a private deal room and control plane for agent-to-agent commerce on NEAR. Two companies' agents negotiate in confidence inside an attested enclave (the Sealed Table); both companies approve the terms; from then on those terms are the only authority the buyer's agent has over money. A NEAR contract (Agreement controls) refuses any payment whose amount, milestone or recipient differs from the approved terms, and Payee binds the recipient to a domain the vendor controls. Settlement is USDC on NEAR. The first application, Accord Atlas, pays market makers' retainers only when the agreed spread, depth and uptime are measured on the venue."
+const ABOUT = "Accord is a private deal room and control plane for agent-to-agent commerce on NEAR. Two companies' agents negotiate in confidence inside an attested enclave (the Sealed Table); both companies approve the terms; from then on those terms are the only authority the buyer's agent has over money. A NEAR contract (Agreement controls) refuses any payment whose amount, milestone or recipient differs from the approved terms, and Payee binds the recipient to a domain the vendor controls. Settlement is USDC on NEAR. The first application, Accord Atlas, pays market makers' retainers only for periods where enough observations of the venue's public liquidity, taken at hidden times, met the agreed spread, depth and two-sided quoting."
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 const abs = (href) => (href.startsWith("/") ? SITE_URL + href : href)
@@ -71,7 +71,7 @@ const APP = {
   "@context": "https://schema.org", "@type": "SoftwareApplication", "@id": `${SITE_URL}/#software`,
   name: "Accord", applicationCategory: "BusinessApplication", applicationSubCategory: "Agent payments and negotiation infrastructure",
   operatingSystem: "Web", url: `${SITE_URL}/`, description: ABOUT, image: OG_IMAGE,
-  featureList: ["Confidential negotiation between agents in an attested enclave (Sealed Table)", "Approved terms enforced by a NEAR contract on every payment (Agreement controls)", "Recipient authorisation bound to a domain the vendor controls (Payee)", "One-transaction revocation of the agent's key", "Settlement in USDC on NEAR", "Accord Atlas: market-making retainers released on measured spread, depth and uptime"],
+  featureList: ["Confidential negotiation between agents in an attested enclave (Sealed Table)", "Approved terms enforced by a NEAR contract on every payment (Agreement controls)", "Recipient authorisation bound to a domain the vendor controls (Payee)", "One-transaction revocation of the agent's key", "Settlement in USDC on NEAR", "Accord Atlas: market-making retainers paid on observed spread, depth and two-sided quoting"],
   offers: { "@type": "Offer", name: "Developer preview", price: "0", priceCurrency: "USD", availability: "https://schema.org/PreOrder", description: "Free testnet access, coming soon. Planned: Accord Teams (subscription) and Accord Atlas (per monitored market). No percentage-based Accord fee on payment amounts; production prices published before launch." },
   publisher: { "@id": `${SITE_URL}/#organization` },
 }

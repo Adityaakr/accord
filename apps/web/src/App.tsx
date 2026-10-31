@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react"
-import { Routes, Route, Navigate, useLocation } from "react-router-dom"
+import { Routes, Route, useLocation } from "react-router-dom"
 import Lenis from "lenis"
 import { Nav } from "./components/Nav"
 import { Footer } from "./components/Footer"
@@ -59,7 +59,6 @@ export function App() {
           <Route path="/product/payee" element={<Payee />} />
           <Route path="/payee" element={<Payee />} />
           <Route path="/atlas" element={<AtlasPage />} />
-          <Route path="/glassbook" element={<Navigate to="/atlas" replace />} />
           <Route path="/security" element={<Security />} />
           <Route path="/docs" element={<Docs />} />
           <Route path="/research" element={<Research />} />
