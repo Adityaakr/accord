@@ -1,182 +1,142 @@
-/* How it works (#how): step list on the left, the deal-room card on the right (the band's stage and card language).
-   Teal for what passed, coral for what was refused, as in the Atlas monitor. */
+/* How it works (#how): template content-section rhythm (as Overview WaR1fWHPo) */
 .section {
-  gap: 48px;
-  padding: 72px 0;
+  gap: 64px;
+  padding: 72px 0px 72px 0px;
   justify-content: center;
   scroll-margin-top: 40px;
 }
 
-.layout {
-  --ok: var(--teal);
-  --no: #ec9a7f;
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 40px; align-items: stretch;
+/* Steps row: the hero's Action-card row (mZ8KywPOa, gap 40), four equal columns on one hairline */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 40px;
+  row-gap: 40px;
   width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-:global([data-theme="light"]) .layout { --no: #c4573b; }
 
-/* ---------- step list ---------- */
-.list { display: flex; flex-direction: column; justify-content: center; }
-.item {
-  all: unset; box-sizing: border-box; cursor: pointer;
-  position: relative; display: flex; flex-direction: column;
-  padding: 18px 0 18px 22px;
-  border-bottom: 1px solid var(--hairline);
-}
-.item:first-child { border-top: 1px solid var(--hairline); }
-.item:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: -2px; border-radius: 6px; }
-.rail { position: absolute; left: 0; top: 18px; bottom: 18px; width: 2px; border-radius: 2px; background: rgba(var(--ink-rgb), 0.08); overflow: hidden; transition: background 0.4s var(--ease); }
-.itemDone .rail { background: color-mix(in srgb, var(--ok) 45%, transparent); }
-.railFill { position: absolute; inset: 0; background: var(--ok); transform-origin: top; transform: scaleY(0); animation-name: fill; animation-timing-function: linear; animation-fill-mode: forwards; }
-@keyframes fill { to { transform: scaleY(1); } }
-.itemOn .rail { background: rgba(var(--ink-rgb), 0.14); }
-.itemHead { display: flex; align-items: center; gap: 12px; }
-.num { font-family: var(--mono); font-size: 12px; color: var(--text-weak); transition: color 0.4s var(--ease); }
-.title { color: var(--text-medium); transition: color 0.4s var(--ease); }
-.item:hover .title { color: var(--text-strong); }
-.itemOn .num { color: var(--ok); }
-.itemOn .title { color: var(--text-strong); }
-.bodyWrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.55s var(--ease); }
-.body { overflow: hidden; min-height: 0; color: var(--text-medium); text-wrap: pretty; opacity: 0; transition: opacity 0.4s var(--ease), padding 0.55s var(--ease); }
-.itemOn .bodyWrap { grid-template-rows: 1fr; }
-.itemOn .body { opacity: 1; padding-top: 10px; transition-delay: 0.1s, 0s; }
-
-/* ---------- stage and card ---------- */
-.stage {
-  position: relative; isolation: isolate; overflow: hidden;
-  display: grid; place-items: center;
-  padding: 32px 28px;
-  border-radius: 20px;
-  border: 1px solid rgba(var(--ink-rgb), 0.06);
-  background: linear-gradient(135deg, #0d1513 0%, #111c19 45%, #0b1110 100%);
-}
-.weave {
-  position: absolute; inset: 0; z-index: -1;
-  background:
-    repeating-linear-gradient(135deg, rgba(145, 207, 181, 0.16) 0 1px, transparent 1px 3px),
-    radial-gradient(50% 45% at 85% 10%, rgba(145, 207, 181, 0.14), transparent 70%);
-  -webkit-mask-image: linear-gradient(160deg, #000 0%, rgba(0,0,0,0.45) 45%, #000 80%);
-  mask-image: linear-gradient(160deg, #000 0%, rgba(0,0,0,0.45) 45%, #000 80%);
-}
-:global([data-theme="light"]) .stage { background: linear-gradient(135deg, #e7f2ee 0%, #d6ebe3 50%, #e9f3ef 100%); }
-:global([data-theme="light"]) .weave { background: repeating-linear-gradient(135deg, rgba(36, 133, 102, 0.2) 0 1px, transparent 1px 3px); }
-
-.card {
+/* One step: pill marker above the card, gap 20 */
+.step {
   position: relative;
-  width: 100%; max-width: 560px;
-  display: flex; flex-direction: column; gap: 14px;
-  padding: 18px 20px 20px;
-  border-radius: 20px;
-  background: linear-gradient(160deg, rgba(var(--ink-rgb), 0.055), rgba(var(--ink-rgb), 0.015) 60%), var(--elevation-strong);
-  border: 1px solid rgba(var(--ink-rgb), 0.09);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 40px 80px -40px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 20px;
+  min-width: 0;
+  height: auto;
 }
-.cardHead { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.room { font-size: 12.5px; color: var(--text-weak); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.room span { color: var(--text-strong); }
-.state { display: inline-flex; align-items: center; gap: 7px; flex: none; padding: 4px 10px 4px 9px; border-radius: 999px; font-size: 12px; color: var(--text-strong); border: 1px solid rgba(var(--ink-rgb), 0.1); transition: background 0.5s var(--ease), border-color 0.5s var(--ease); }
-.stateDot { width: 7px; height: 7px; border-radius: 999px; background: var(--text-weak); transition: background 0.5s var(--ease); }
-.s1 .stateDot, .s2 .stateDot { background: var(--ok); }
-.s3 { background: color-mix(in srgb, var(--ok) 14%, transparent); border-color: color-mix(in srgb, var(--ok) 35%, transparent); }
-.s3 .stateDot { background: var(--ok); }
-.states { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
-.stateSeg { height: 3px; border-radius: 3px; background: rgba(var(--ink-rgb), 0.08); position: relative; overflow: hidden; }
-.stateSeg::after { content: ""; position: absolute; inset: 0; background: var(--ok); transform: scaleX(0); transform-origin: left; transition: transform 0.7s var(--ease); }
-.segOn::after { transform: scaleX(1); }
-.illus { position: absolute; right: 20px; bottom: -26px; font-size: 11px; color: var(--text-weak); }
+/* Each step draws its segment of the stepper line through the pill's centre; the line runs across the column gap
+   to the next step and stops at the row's end */
+.step::before {
+  content: "";
+  position: absolute;
+  top: 3.5px;
+  left: 0;
+  right: -40px;
+  height: 1px;
+  background: var(--hairline);
+}
+.step:last-child::before { right: 0; }
 
-/* scenes share one cell and crossfade */
-.scenes { display: grid; min-height: 272px; }
-.layer { grid-area: 1 / 1; opacity: 0; visibility: hidden; transform: translateY(6px); transition: opacity 0.35s var(--ease), transform 0.5s var(--ease), visibility 0s linear 0.35s; }
-.layerOn { opacity: 1; visibility: visible; transform: none; transition: opacity 0.45s var(--ease) 0.1s, transform 0.6s var(--ease) 0.1s; }
-.scene { display: flex; flex-direction: column; gap: 12px; height: 100%; }
+/* Template indicator pill (14×8, radius 9999, White). At rest a step's pill sits at White 35%; the highlighted step
+   (hovered, keyboard-focused, or the pre-highlighted "03 · Executing") takes it to full White over 120ms. */
+.node {
+  position: relative;
+  z-index: 1;
+  display: block;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(var(--ink-rgb), 0.35);
+  transition: background-color 120ms ease;
+}
+.step:hover .node,
+.step:focus-visible .node,
+.active .node { background: var(--white); }
 
-/* every element with --d rises in at its delay, only in the visible scene */
-.layerOn [style*="--d"] { animation: rise 0.55s var(--ease) var(--d) both; }
-@keyframes rise { from { opacity: 0; transform: translateY(6px); } }
-.still [style*="--d"] { animation: none !important; }
-
-.dim { color: var(--text-weak); }
-.kicker { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-weak); }
-.card code { font-family: var(--mono); font-size: 0.92em; background: none; padding: 0; color: var(--text-strong); }
-.ok, .bad { display: grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 999px; }
-.ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
-.bad { background: color-mix(in srgb, var(--no) 16%, transparent); color: var(--no); }
-.foot { margin-top: auto; display: flex; align-items: center; gap: 8px; padding-top: 12px; border-top: 1px solid var(--hairline); font-size: 12.5px; color: var(--text-strong); }
-
-/* 1 · Sealed */
-.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.mandate { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; background: rgba(var(--ink-rgb), 0.03); border: 1px solid rgba(var(--ink-rgb), 0.07); }
-.mHead { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-strong); }
-.lockChip { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; color: var(--ok); }
-.mRow { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 11.5px; color: var(--text-weak); }
-.mRow i { display: block; width: 46%; height: 8px; border-radius: 4px; background: linear-gradient(90deg, rgba(var(--ink-rgb), 0.08), rgba(var(--ink-rgb), 0.18), rgba(var(--ink-rgb), 0.08)); background-size: 200% 100%; animation: shimmer 2.4s linear infinite; }
-@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-.hash { display: flex; flex-direction: column; gap: 3px; padding-top: 10px; border-top: 1px solid var(--hairline); font-size: 10.5px; }
-.type { font-size: 11.5px !important; }
-
-/* 2 · Attested */
-.enclave { display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 14px; border: 1px dashed color-mix(in srgb, var(--ok) 40%, transparent); background: radial-gradient(90% 90% at 50% 0%, color-mix(in srgb, var(--ok) 8%, transparent), transparent 70%); }
-.encHead { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-strong); }
-.encHead .dim { font-size: 11.5px; }
-.checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
-.checks li { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--text-medium); }
-.terms { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border-radius: 14px; background: rgba(var(--ink-rgb), 0.035); border: 1px solid rgba(var(--ink-rgb), 0.08); }
-.termRow { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--text-medium); }
-.termRow b { font-weight: 400; font-size: 18px; letter-spacing: -0.02em; color: var(--text-strong); }
-.attest { font-size: 11px; color: var(--text-weak); }
-
-/* 3 · Executing */
-.escrow { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-radius: 14px; background: rgba(var(--ink-rgb), 0.03); border: 1px solid rgba(var(--ink-rgb), 0.07); }
-.escHead { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; color: var(--text-medium); }
-.escAmt { font-size: 12px; color: var(--text-weak); font-variant-numeric: tabular-nums; }
-.escAmt b { font-weight: 400; font-size: 16px; color: var(--text-strong); }
-.escBar { height: 5px; border-radius: 999px; background: rgba(var(--ink-rgb), 0.08); overflow: hidden; }
-.escFill { display: block; height: 100%; background: var(--ok); border-radius: inherit; transform-origin: left; }
-.layerOn .escFill { animation: grow 1s var(--ease) 0.3s both; }
-@keyframes grow { from { transform: scaleX(0); } }
-.keyRow { display: flex; align-items: center; gap: 8px; font-size: 11.5px; }
-.keyChip { padding: 2px 8px; border-radius: 999px; font-size: 10.5px; background: rgba(var(--ink-rgb), 0.07); color: var(--text-medium); }
-.pays { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.pays li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 12px; border: 1px solid rgba(var(--ink-rgb), 0.07); background: rgba(var(--ink-rgb), 0.025); }
-.payMain { display: flex; flex-direction: column; gap: 3px; font-size: 12.5px; line-height: 1.4; color: var(--text-medium); min-width: 0; }
-.payMain b { font-weight: 400; color: var(--text-strong); }
-.payMain code { font-size: 11px !important; color: var(--text-weak) !important; overflow-wrap: anywhere; }
-.payBad { border-color: color-mix(in srgb, var(--no) 30%, transparent) !important; }
-.badgeOk, .badgeBad { display: inline-flex; align-items: center; gap: 5px; flex: none; padding: 3px 8px; border-radius: 999px; font-family: var(--mono); font-size: 10.5px; white-space: nowrap; }
-.badgeOk { color: var(--ok); background: color-mix(in srgb, var(--ok) 13%, transparent); }
-.badgeBad { color: var(--no); background: color-mix(in srgb, var(--no) 12%, transparent); }
-
-/* 4 · Settled */
-.record { list-style: none; margin: 0; padding: 0 0 0 4px; display: flex; flex-direction: column; position: relative; }
-.record::before { content: ""; position: absolute; left: 12px; top: 10px; bottom: 10px; width: 1px; background: rgba(var(--ink-rgb), 0.1); }
-.record li { position: relative; display: flex; align-items: center; gap: 12px; padding: 6px 0; font-size: 12.5px; }
-.rDot { display: grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 999px; background: var(--elevation-strong); border: 1px solid color-mix(in srgb, var(--ok) 45%, transparent); color: var(--ok); }
-.r_bad .rDot { border-color: color-mix(in srgb, var(--no) 50%, transparent); color: var(--no); }
-.r_person .rDot { border-color: rgba(var(--ink-rgb), 0.4); color: var(--text-strong); }
-.rText { flex: 1; color: var(--text-strong); min-width: 0; }
-.rVal { font-family: var(--mono); font-size: 11px; color: var(--text-weak); white-space: nowrap; }
-.r_bad .rVal { color: var(--no); }
-
-@media (prefers-reduced-motion: reduce) {
-  .layout *, .layout *::after { transition: none !important; animation: none !important; }
+/* Keyboard focus ring on a step (spec §1.7: focus does what hover does) */
+.step { outline: none; }
+.step:focus-visible {
+  outline: 2px solid rgba(var(--ink-rgb), 0.5);
+  outline-offset: 4px;
 }
 
-/* Tablet */
+/* While another step is hovered or focused, the pre-highlighted step rests like the others */
+.steps:hover .active:not(:hover) .node,
+.steps:focus-within .active:not(:focus-visible) .node { background: rgba(var(--ink-rgb), 0.35); }
+.steps:hover .active:not(:hover) .heading,
+.steps:focus-within .active:not(:focus-visible) .heading { color: var(--text-medium); }
+.steps:hover .active:hover .node,
+.steps:focus-within .active:focus-visible .node { background: var(--white); }
+.steps:hover .active:hover .heading,
+.steps:focus-within .active:focus-visible .heading { color: var(--text-strong); }
+
+/* Action card (BE0Kc14HI / Default): vertical, gap 8, align start, width 1fr */
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  height: auto;
+}
+.heading {
+  width: 100%;
+  height: auto;
+  color: var(--text-medium);
+  transition: color 120ms ease;
+}
+.step:hover .heading,
+.step:focus-visible .heading,
+.active .heading { color: var(--text-strong); }
+.num { font-weight: 400; }
+.body {
+  width: 100%;
+  height: auto;
+}
+
+/* ---------- Tablet: gap 48, padding 72/24; two columns, card gap 32 ---------- */
 @media (max-width: 1199.98px) {
-  .section { gap: 40px; padding: 72px 24px; }
-  .layout { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .section { gap: 48px; padding: 72px 24px 72px 24px; }
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 1fr; /* both rows the same height: the four cards stay equal */
+    column-gap: 32px;
+    row-gap: 40px;
+  }
+  .step::before { right: -32px; }
+  .step:nth-child(2n)::before { right: 0; }
 }
 
-/* Phone */
+/* ---------- Phone: gap 32, padding 72/16; one column, the stepper runs vertically ---------- */
 @media (max-width: 809.98px) {
-  .section { gap: 32px; padding: 72px 16px; }
-  .stage { padding: 16px 10px 34px; border-radius: 16px; }
-  .card { padding: 16px 14px; border-radius: 18px; }
-  .pair { grid-template-columns: 1fr; }
-  .scenes { min-height: 0; }
-  .pays li { flex-direction: column; align-items: flex-start; }
-  .rVal { display: none; }
-  .illus { right: 14px; bottom: -24px; }
+  .section { gap: 32px; padding: 72px 16px 72px 16px; }
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 24px;
+  }
+  .step {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  /* Pill centred on the H6's first line (16px × 110% = 17.6px) */
+  .node { margin-top: 5px; }
+  .step::before {
+    top: -12px;
+    bottom: -12px;
+    left: 6.5px;
+    right: auto;
+    width: 1px;
+    height: auto;
+  }
+  .step:first-child::before { top: 9px; }
+  .step:last-child::before { bottom: calc(100% - 9px); }
+  .step:nth-child(2n)::before { right: auto; }
 }
