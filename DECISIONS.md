@@ -117,6 +117,14 @@ The live record of facts, choices and spec changes. A fact here wins over the sa
 | Work on `main`; the kit moves to `docs/build/` with an evaluator `CLAUDE.md` and `AGENTS.md` at release | Screeners read the default branch, and a root `CLAUDE.md` is loaded as instructions by an evaluating Claude Code session | A `hackathon` branch with the build rules at the root |
 | A labelled re-arm process for the public `/try` room | One visitor naming the canary would otherwise end the demo for everyone | Leaving the room dead until Adi reinstalls a key |
 
+## 6b. Venue probe (0.7, 31 Oct, `make probe-venue`)
+
+- `get_pool` returns `token_x` (USDC), `token_y` (`wrap.near`), `fee` `2000`, `point_delta` `40`, `current_point`. `quote{pool_ids, input_token, output_token, input_amount, tag}` returns `{amount, tag}`; an empty or failed route returns `0`.
+- Mid is computed as `1.0001^current_point × 10^(6 − 24)` in 18-decimal fixed point by squaring with truncation (no floats), so the job, the probe and an archival recomputation agree exactly.
+- Depth search: grow ×4 from `10 USDC` until the band fails, then six bisection steps (about 2% resolution); at most about 24 calls per observation in all, more than the 12 the kit estimated, because a fixed bracket of 12 steps over `10 USDC` to `10M USDC` resolves only to about 2,400 USDC, coarser than the pool's depth. Takes about 7.5 s against `free.rpc.fastnear.com`.
+- Results (bid = USDC the pool pays for wNEAR, ask = USDC it takes for wNEAR, within ±2% of the mid): now spread `41` bps, bid `392` / ask `2,020` USDC; −1 h `49`, `370` / `1,720`; −3 h `52`, `186` / `385`; −6 h `52`, `194` / `430`; −12 h `52`, `186` / `378`. Two-sided every time. The archival endpoint `archival-rpc.mainnet.fastnear.com` reproduced the current block's observation exactly; the public RPC answered for 12 h back, not 24 h.
+- Fixtures set from these: passing agreement `min_depth_quote` `150 USDC` (buyer) against `max_depth_quote` `200 USDC` (vendor), spread ≤ `60` bps; the stricter pair keeps the same depth and its `30` bps spread, which this pool cannot meet. The site's illustrative example (12,000 USDC depth) is not this pool's real depth; the app and README use the real numbers.
+
 ## 9. Open questions the probes answer
 
 - Does `dcap-qvl` build for `wasm32-wasip2`? Does `ecies` (pure backend)? Is NEAR AI's end-to-end encryption usable with the chosen model? (0.2)

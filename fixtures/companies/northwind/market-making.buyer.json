@@ -15,7 +15,7 @@
     "periods": 4,
     "period_secs": 360,
     "max_spread_bps": 60,
-    "min_depth_quote": "SET_FROM_PROBE_0_7",
+    "min_depth_quote": "150000000",
     "depth_band_bps": 200,
     "min_slots": 6,
     "min_threshold": 4

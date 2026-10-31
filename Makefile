@@ -15,7 +15,7 @@ test: ; @cargo test --workspace
 
 setup: ; @bash scripts/setup.sh
 probe-ai: ; $(call todo,0.2 make probe-ai)
-probe-venue: ; $(call todo,0.7 make probe-venue)
+probe-venue: ; @cargo run -q -p accord-venue --features probe --bin probe-venue
 sandbox: ; $(call todo,1.14 make sandbox)
 check-deploy: ; $(call todo,2.7 make check-deploy)
 deploy-testnet: ; $(call todo,2.7 make deploy-testnet)
