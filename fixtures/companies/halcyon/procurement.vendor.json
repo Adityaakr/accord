@@ -1,0 +1,16 @@
+{
+  "kind": "procurement",
+  "role": "vendor",
+  "shared": {
+    "capabilities": "Halcyon Markets builds market data pipelines and reporting for token treasuries."
+  },
+  "limits": {
+    "min_total": "30000000",
+    "target_total": "38000000",
+    "min_items": 2,
+    "max_items": 4,
+    "min_due_offset_secs": 60,
+    "max_acceptance_window_secs": 604800
+  },
+  "instructions": "Hold close to target. Concede once if the buyer gives a reason. Never go below the floor."
+}

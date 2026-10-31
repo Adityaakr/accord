@@ -1,0 +1,9 @@
+{
+  "accord": "1",
+  "network": "testnet",
+  "entries": [
+    { "recipient": "halcyon-mm.testnet", "settlement_authority": "halcyon-auth.testnet" },
+    { "recipient": "halcyon-try-mm.testnet", "settlement_authority": "halcyon-try-auth.testnet" }
+  ],
+  "contact": "This is a fictional company used in the Accord demo."
+}
