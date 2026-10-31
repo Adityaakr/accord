@@ -118,33 +118,11 @@ The first application built on Accord
 
 Built on Accord, Atlas links a market maker's recurring retainer to the spread, depth and uptime both sides agreed. An attested observer samples the venue's public order book on the agreed schedule. When the agreed number of observations pass, the payment is released; when they don't, it is held for both sides to decide.
 
-01
+[See the Atlas demonstration](/atlas) [Join as a project or a market maker →](/join)
 
-Approved conditions
+> Illustrative Accord Atlas monitor for a NEAR/USDC market-making retainer. Approved conditions: spread at most 40 bps, at least 12,000 USDC of depth within 1%, 95% uptime, 5 of 6 observation slots to pass. The venue's public order book is sampled six times and each slot attested; slot 3 fails with a 47 bps spread and 9,820 USDC of depth. 5 of 6 pass, the period is eligible and 18,500 USDC is settled to halcyon-mm.near in USDC on NEAR.
 
-02
-
-Observation slot
-
-03
-
-Attestation
-
-04
-
-Period decision
-
-05
-
-Payment on NEAR
-
-Scope
-
-Atlas measures the market's condition on the venue, not which participant supplied it. Attributing liquidity to the market maker's own account is planned.
-
-[See the Atlas demonstration](/atlas)
-
-[Join as a project or a market maker →](/join)
+Scope Atlas measures the market's condition on the venue, not which participant supplied it. Attributing liquidity to the market maker's own account is planned.
 
 How it works
 
