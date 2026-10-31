@@ -134,7 +134,7 @@ const H1_BREAK_AFTER = HEADLINE.split(" ").indexOf("plane")
 const H1_WORDS = HEADLINE.split(" ")
 const ACCENT = new Set([H1_WORDS.indexOf("deal"), H1_WORDS.indexOf("room"), H1_WORDS.indexOf("control"), H1_WORDS.indexOf("plane")])
 const headlineWord = (i: number) => (ACCENT.has(i) ? styles.h1Accent : i > H1_BREAK_AFTER ? styles.h1Soft : undefined)
-const LEAD = "Accord turns private negotiations into enforceable controls for AI agents. Agents negotiate within confidential mandates; both parties approve the terms. The contract enforces what agents can do, who they can pay, how much and on what evidence."
+const LEAD = "Accord turns private negotiations between AI agents into enforceable payment controls. Each agent negotiates within its company’s confidential mandate, both companies approve the terms, and the contract then decides what the buyer’s agent can authorise, who it can pay, how much, and on what evidence."
 /* Accord Atlas announcement under the description (copy from Adi, 30 Oct 2026), links to /atlas */
 const PILL_KICKER = "The first application on Accord"
 const PILL_TAG = "Introducing Accord Atlas"
