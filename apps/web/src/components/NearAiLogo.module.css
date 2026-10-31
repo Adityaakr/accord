@@ -1,0 +1,2 @@
+/* Cap height of "near" ≈ the x-height of the text around it; the baseline sits on the line */
+.logo { display: inline-block; height: 0.78em; width: auto; aspect-ratio: 730 / 138; vertical-align: -0.04em; color: var(--text-strong); }

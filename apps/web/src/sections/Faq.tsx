@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useInView } from "motion/react"
 import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { FaqAccordion } from "../components/FaqAccordion"
+import { NearAiLogo } from "../components/NearAiLogo"
 import styles from "./Faq.module.css"
 
 /* Framer "FAQ" section: Desktop JCqP92VWu (elementId "faq"), Tablet uX81zskxrJCqP92VWu, Phone Ue6QXWSr_JCqP92VWu
@@ -104,6 +105,12 @@ const FAQ_JSONLD = JSON.stringify({
   })),
 })
 
+/* The answers stay plain strings (the FAQ JSON-LD reads them); on the page, "NEAR AI" shows as NEAR AI's logo. */
+function withNearAi(text: string) {
+  const parts = text.split("NEAR AI")
+  return parts.flatMap((part, i) => (i === 0 ? [part] : [<NearAiLogo key={i} />, part]))
+}
+
 export function Faq() {
   const sectionRef = useRef<HTMLElement>(null)
   /* appearEffect trigger "onScrollTarget": the accordions animate in once the FAQ section itself is in view.
@@ -147,7 +154,7 @@ export function Faq() {
               <FaqAccordion
                 key={item.id}
                 title={item.title}
-                description={item.description}
+                description={withNearAi(item.description)}
                 inView={inView}
                 delay={item.delay}
                 open={openId === item.id}

@@ -102,3 +102,8 @@
   /* right-image rows put the Image before the Content on Phone */
   .rowPhoneImageFirst .image { order: -1; }
 }
+
+/* "The two negotiators run on [NEAR AI] Cloud…": one quiet line between the hero and the rows */
+.runsOn { padding-top: 0; padding-bottom: 8px; }
+.runsOnText { max-width: 760px; color: var(--text-medium); text-wrap: balance; }
+.runsOnLogo { height: 0.82em; margin: 0 0.1em; }

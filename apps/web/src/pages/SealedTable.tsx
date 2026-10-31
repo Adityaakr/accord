@@ -6,6 +6,7 @@ import { PageHero } from "../components/PageHero"
 import { LINKS } from "../content/links"
 import { ProductShot, type ShotVariant } from "../components/ProductShot"
 import styles from "./SealedTable.module.css"
+import { NearAiLogo } from "../components/NearAiLogo"
 
 /* ------------------------------------------------------------------
    Sealed Table page (/product/sealed-table). Copy: doc B1 (docs/website/ACCORD_WEBSITE_CONTENT.md), set verbatim.
@@ -69,6 +70,13 @@ export function SealedTable() {
           { label: "Inspect a negotiation", href: LINKS.record, variant: "secondary" },
         ]}
       />
+
+      {/* Where the negotiators run: NEAR AI Cloud's private inference, shown with NEAR AI's logo */}
+      <section className={`section ${styles.runsOn}`} aria-label="Where the negotiators run">
+        <p className={`t-body-lg ${styles.runsOnText}`}>
+          Inside the Sealed Table's attested enclave, the two negotiators run on <NearAiLogo className={styles.runsOnLogo} /> Cloud's private inference.
+        </p>
+      </section>
 
       {/* B1 sub-sections: four alternating rows (About geometry) + closing button */}
       <section id="negotiation" className={`section ${styles.block}`}>

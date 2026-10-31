@@ -7,6 +7,7 @@ import { Button } from "../components/Button"
 import { Mono } from "../components/Mono"
 import { LINKS, isPlaceholder } from "../content/links"
 import styles from "./Docs.module.css"
+import { NearAiLogo } from "../components/NearAiLogo"
 
 /* ------------------------------------------------------------------
    Developers page (/docs): the template's page hero (PageHero: pill + H1 + two lead paragraphs) followed by
@@ -17,12 +18,12 @@ import styles from "./Docs.module.css"
    External links render only when configured (LINKS.repo); `<repo-url>` never appears as text.
 ------------------------------------------------------------------- */
 
-type Piece = { id: string; piece: string; protects: ReactNode; check: ReactNode }
+type Piece = { id: string; piece: ReactNode; protects: ReactNode; check: ReactNode }
 
 const PIECES: Piece[] = [
   {
     id: "near-ai-cloud",
-    piece: "NEAR AI Cloud",
+    piece: <span className={styles.pieceLogo}><NearAiLogo /> Cloud</span>,
     protects: <>The negotiation turns run on open-weight models inside TEEs, and every response carries a signature</>,
     check: (
       <>

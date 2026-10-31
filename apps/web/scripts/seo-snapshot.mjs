@@ -38,6 +38,8 @@ function toMarkdown() {
   }
   const inline = (node) => {
     if (node.nodeType === 3) return node.textContent
+    // A logo that stands in for words (role="img" with a label, svg included) reads as its label
+    if (node instanceof Element && node.getAttribute("role") === "img" && node.getAttribute("aria-label")) return ` ${node.getAttribute("aria-label")} `
     if (!(node instanceof Element) || skip(node)) return ""
     const tag = node.tagName.toLowerCase()
     const inner = [...node.childNodes].map((c) => {

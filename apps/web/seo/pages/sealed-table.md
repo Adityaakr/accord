@@ -8,6 +8,8 @@ Sealed Table brings both mandates into an approved confidential execution proces
 
 [Open a deal room](/join) [Inspect a negotiation](/record)
 
+Inside the Sealed Table's attested enclave, the two negotiators run on NEAR AI Cloud's private inference.
+
 > Illustrative: A buyer's sealed mandate: limits stay hidden; only the sealed mandate and its commitment hash go on NEAR.
 
 ### Your mandate guides the negotiation.

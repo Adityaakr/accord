@@ -26,4 +26,4 @@ The block starts with `accord verify · <agreement>`. Values in angle brackets a
 
 - `07` Record `record <n> payments · <n> refusals · <n> exceptions · <n> set aside · <n> observation conflicts · events match state · ok`
 
-It ends with `verify: <n> checks ok`. It fetches NEAR AI's attestation report without a key when the endpoint allows it; otherwise it uses `NEARAI_API_KEY` if set, or the hosted relay at `/api/verify/<id>` with a nonce it generates itself, and prints which.
+It ends with `verify: <n> checks ok`. It fetches the attestation report from NEAR AI Cloud without a key when the endpoint allows it; otherwise it uses `NEARAI_API_KEY` if set, or the hosted relay at `/api/verify/<id>` with a nonce it generates itself, and prints which.

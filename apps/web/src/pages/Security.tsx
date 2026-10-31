@@ -11,6 +11,7 @@ import { AttackScene } from "../components/AttackScene"
 import gatesSvg from "../assets/diagrams/gates.svg?raw"
 import visibilitySvg from "../assets/diagrams/visibility.svg?raw"
 import styles from "./Security.module.css"
+import { NearAiLogo } from "../components/NearAiLogo"
 
 /* ------------------------------------------------------------------
    Security page (/security): the template's page hero (PageHero: pill + H1 + lead) followed by one
@@ -53,7 +54,7 @@ const PIECES: Row[] = [
   ],
   [
     "Negotiation",
-    "An OutLayer job; the two negotiators run on NEAR AI Cloud's private inference; one run per pair of commitments",
+    <>An OutLayer job; the two negotiators run on <NearAiLogo /> Cloud's private inference; one run per pair of commitments</>,
     "The job",
     "Terms outside either mandate's hard limits; terms not produced by the attested run",
     "Both humans must approve the terms",

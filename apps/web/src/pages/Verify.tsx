@@ -7,6 +7,7 @@ import { Mono } from "../components/Mono"
 import { FormButton, type FormButtonState } from "../components/FormButton"
 import { usePageMeta } from "../lib/meta"
 import styles from "./Verify.module.css"
+import { NearAiLogo } from "../components/NearAiLogo"
 
 /* ------------------------------------------------------------------
    /verify (spec §4 "Verify a live agreement"): PageHero, the lookup form (the page's primary action), then the
@@ -143,7 +144,7 @@ export function Verify() {
             ))}
           </ol>
           <p className={`t-body-sm ${styles.weak}`}>
-            It ends with <Mono>{SUMMARY_LINE}</Mono>. It fetches NEAR AI's attestation report without a key when the endpoint allows it; otherwise it uses <Mono>NEARAI_API_KEY</Mono> if set, or the hosted relay at <Mono>/api/verify/&lt;id&gt;</Mono> with a nonce it generates itself, and prints which.
+            It ends with <Mono>{SUMMARY_LINE}</Mono>. It fetches the attestation report from <NearAiLogo /> Cloud without a key when the endpoint allows it; otherwise it uses <Mono>NEARAI_API_KEY</Mono> if set, or the hosted relay at <Mono>/api/verify/&lt;id&gt;</Mono> with a nonce it generates itself, and prints which.
           </p>
         </div>
       </section>

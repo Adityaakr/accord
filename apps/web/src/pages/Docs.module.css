@@ -143,3 +143,5 @@
     padding: 72px 16px;
   }
 }
+/* The NEAR AI Cloud row: the logo stands in for the words "NEAR AI" */
+.pieceLogo { display: inline-flex; align-items: baseline; gap: 0.3em; white-space: nowrap; }
