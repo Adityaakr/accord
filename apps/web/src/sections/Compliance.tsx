@@ -7,6 +7,7 @@ import { Mono } from "../components/Mono"
 import { LINKS } from "../content/links"
 import { asOfLabel, useLive, type LiveValues } from "../lib/live"
 import { AtlasMark } from "../components/AtlasMark"
+import { REFERENCES } from "../content/references"
 import styles from "./Compliance.module.css"
 
 /* Home · Accord Atlas (elementId "atlas"). Heading and copy on a two-column row, then a stage holding the Atlas
@@ -234,6 +235,55 @@ function Monitor() {
   )
 }
 
+/* Why Atlas: four public voices on market-making deals, each paired with the part of Atlas that answers it.
+   Paraphrases, checked against the sources on 31 Oct 2026; each card links its source (rows 45–48 in references.ts).
+   No accused firm is named, and nothing claims the problem is unsolved elsewhere. */
+const WHY: { who: string; role: string; date: string; ref: number; said: string; atlas: string }[] = [
+  { who: "Kain Warwick", role: "Synthetix founder", date: "Mar 2025", ref: 45,
+    said: "Market makers cost projects $50k to $300k+ a month in the 2017 cycle. Good ones aim for tight spreads; many exercised their call options and dumped.",
+    atlas: "Payment follows the spread, depth and uptime both sides agreed." },
+  { who: "Jelle Buth", role: "Co-founder, Enflux (a market maker)", date: "Apr 2025", ref: 46,
+    said: "Projects should define liquidity KPIs from order-book activity before they commit. In loan-option deals those KPIs are often missing or vague.",
+    atlas: "The KPIs become the agreement's payment conditions." },
+  { who: "LO:TECH survey", role: "Commissioned by LO:TECH, a market maker", date: "Aug 2025", ref: 47,
+    said: "52% of 2,000+ respondents in 98 countries do not trust market makers. The report recommends enforceable contracts and real-time dashboards.",
+    atlas: "Attested observations of the order book decide each payment." },
+  { who: "Binance", role: "Market-maker guidance", date: "Mar 2026", ref: 48,
+    said: "Projects must disclose their market maker's details, legal entity and contract terms to the listing platform.",
+    atlas: "Disclosure shows what was agreed. Atlas measures whether it was met." },
+]
+const srcHref = (n: number) => REFERENCES.find((r) => r.n === n)?.links[0]
+
+function WhyAtlas() {
+  return (
+    <div className={styles.why}>
+      <Appear className={styles.whyHead} effect={appear("0s")}>
+        <span className={styles.whyKicker}>Why Atlas</span>
+        <p className={`t-h5 ${styles.whyTitle}`}>Projects, market makers and exchanges keep pointing at the same gap.</p>
+      </Appear>
+      <ul className={styles.whyGrid}>
+        {WHY.map((w, i) => (
+          <Appear key={w.ref} as="li" className={styles.whyCard} effect={appear(`${0.05 + i * 0.08}s` as `${number}s`)}>
+            <div className={styles.whoRow}>
+              <span className={styles.who}>{w.who}</span>
+              <span className={styles.when}>{w.date}</span>
+            </div>
+            <span className={styles.role}>{w.role}</span>
+            <p className={styles.said}>{w.said}</p>
+            <div className={styles.answer}>
+              <AtlasMark size={16} />
+              <span>{w.atlas}</span>
+            </div>
+            <a className={styles.src} href={srcHref(w.ref)} target="_blank" rel="noopener noreferrer">
+              <span className="mono">[{w.ref}]</span> Source · paraphrase <span aria-hidden="true">↗</span>
+            </a>
+          </Appear>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 /* spec §3.3: compact slot panel when the snapshot carries real observation slots (src/lib/live.ts `slots`).
    Every value is read from the snapshot; the word "live" is never printed (honesty gate); nothing renders without slots. */
 function SlotPanel({ v }: { v: LiveValues }) {
@@ -283,6 +333,8 @@ export function Compliance() {
           </div>
         </Appear>
       </div>
+
+      <WhyAtlas />
 
       <Appear className={styles.stage} effect={appear("0.1s")}>
         <span className={styles.weave} aria-hidden="true" />

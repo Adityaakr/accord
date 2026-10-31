@@ -128,6 +128,18 @@ Built on Accord, Atlas links a market maker's recurring retainer to the spread, 
 
 [See the Atlas demonstration](/atlas) [Join as a project or a market maker →](/join)
 
+Why Atlas
+
+Projects, market makers and exchanges keep pointing at the same gap.
+
+- Kain Warwick Mar 2025 Synthetix founder Market makers cost projects $50k to $300k+ a month in the 2017 cycle. Good ones aim for tight spreads; many exercised their call options and dumped. Payment follows the spread, depth and uptime both sides agreed. [[45] Source · paraphrase](https://bitcoinist.com/disturbing-truth-about-crypto-market-makers/)
+
+- Jelle Buth Apr 2025 Co-founder, Enflux (a market maker) Projects should define liquidity KPIs from order-book activity before they commit. In loan-option deals those KPIs are often missing or vague. The KPIs become the agreement's payment conditions. [[46] Source · paraphrase](https://cointelegraph.com/magazine/market-maker-deals-quietly-killing-crypto-projects)
+
+- LO:TECH survey Aug 2025 Commissioned by LO:TECH, a market maker 52% of 2,000+ respondents in 98 countries do not trust market makers. The report recommends enforceable contracts and real-time dashboards. Attested observations of the order book decide each payment. [[47] Source · paraphrase](https://www.theblock.co/post/367243/global-survey-reveals-deep-mistrust-in-crypto-market-making-urgent-call-for-transparency)
+
+- Binance Mar 2026 Market-maker guidance Projects must disclose their market maker's details, legal entity and contract terms to the listing platform. Disclosure shows what was agreed. Atlas measures whether it was met. [[48] Source · paraphrase](https://finance.yahoo.com/markets/crypto/articles/binance-requests-market-maker-transparency-191855624.html)
+
 > Illustrative Accord Atlas monitor for a NEAR/USDC market-making retainer. Approved conditions: spread at most 40 bps, at least 12,000 USDC of depth within 1%, 95% uptime, 5 of 6 observation slots to pass. The venue's public order book is sampled six times and each slot attested; slot 3 fails with a 47 bps spread and 9,820 USDC of depth. 5 of 6 pass, the period is eligible and 18,500 USDC is settled to halcyon-mm.near in USDC on NEAR.
 
 Scope Atlas measures the market's condition on the venue, not which participant supplied it. Attributing liquidity to the market maker's own account is planned.
