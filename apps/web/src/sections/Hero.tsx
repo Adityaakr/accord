@@ -192,15 +192,14 @@ export function Hero() {
           {/* Accord Atlas announcement, below the buttons: the hero reads headline, lead, actions, then Atlas */}
           <Mount y={16} delay="0.7s" className={styles.announce}>
             <Link to="/atlas" className={styles.announceLink}>
-              <span className={styles.announceBadge}>
-                <AtlasMark size={22} live />
-                {PILL_TAG}
-              </span>
+              <AtlasMark size={22} />
               <span className={styles.announceBody}>
-                <span className={styles.announceHighlight}>{PILL_KICKER}</span>
+                <span className={styles.announceName}>Accord Atlas</span>
+                <span className={styles.announceDot} aria-hidden="true">·</span>
+                <span className={styles.announceKicker}>{PILL_KICKER}</span>
+                <span className={styles.announceArrow} aria-hidden="true">→</span>
                 <span className={styles.announceSub}>{PILL_TEXT}</span>
               </span>
-              <span className={styles.announceArrow} aria-hidden="true">→</span>
             </Link>
           </Mount>
         </div>

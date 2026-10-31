@@ -4,7 +4,7 @@ Built on NEAR
 
 [Request early access](/join) [Explore Atlas](/atlas)
 
-[Introducing Accord Atlas The first application on Accord Liquidity agreements with measurable payment conditions](/atlas)
+[Accord Atlas The first application on Accord Liquidity agreements with measurable payment conditions](/atlas)
 
 > Illustrative Accord product: the deal-room list, an Accord Atlas market-making agreement shown as its seven-step pipeline from sealed mandates to the USDC transfer on NEAR, and the agreement's activity: a refused payment, a missed observation slot and a settled period.
 

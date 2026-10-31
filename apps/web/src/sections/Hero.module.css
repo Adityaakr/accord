@@ -217,96 +217,21 @@
 .near { display: inline-flex; align-items: center; gap: 5px; vertical-align: bottom; color: var(--text-strong); }
 .near svg { flex: none; transform: translateY(-0.5px); }
 
-/* Accord Atlas announcement under the description: badge | "The first application on Accord" (highlighted) over the
-   product line | arrow. A slow teal light travels the card's border; the highlight carries a gradient with a soft
-   shimmer; the badge dot pulses. All motion stops under reduced motion. */
-@property --announce-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
-
-.announce { width: 100%; max-width: 640px; margin-top: -12px; }
-.announceLink {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 10px 18px 10px 10px;
-  border-radius: 14px;
-  background:
-    radial-gradient(120% 140% at 0% 50%, rgba(145, 207, 181, 0.10), transparent 55%),
-    rgba(var(--ink-rgb), 0.015);
-  color: var(--text-medium);
-  text-decoration: none;
-}
-/* Border: a hairline ring plus a travelling teal arc (conic gradient masked to a 1px ring) */
-.announceLink::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  padding: 1px;
-  border-radius: inherit;
-  background:
-    conic-gradient(from var(--announce-angle), transparent 0deg, rgba(145, 207, 181, 0.85) 40deg, transparent 90deg, transparent 360deg),
-    linear-gradient(var(--hairline), var(--hairline));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation: announceSpin 6s linear infinite;
-  transition: opacity 0.25s ease;
-}
-.announceLink:hover::before { animation-duration: 2.4s; }
-
-.announceBadge {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 12px 5px 5px;
-  border-radius: 9px;
-  background: linear-gradient(180deg, rgba(var(--ink-rgb), 0.07), rgba(var(--ink-rgb), 0.025));
-  border: 1px solid rgba(var(--ink-rgb), 0.14);
-  box-shadow: inset 0 1px 0 rgba(var(--ink-rgb), 0.06);
-  color: var(--text-strong);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 16px;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  transition: background 0.25s ease;
-}
-.announceLink:hover .announceBadge { border-color: rgba(var(--ink-rgb), 0.24); }
-
-.announceBody { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
-/* The highlight: teal → white gradient text with a light band that sweeps across */
-.announceHighlight {
-  font-size: 16px;
-  line-height: 21px;
-  font-weight: 500;
-  letter-spacing: -0.015em;
-  background: linear-gradient(100deg, var(--teal) 0%, var(--text-strong) 45%, var(--text-strong) 55%, var(--teal) 100%);
-  background-size: 220% 100%;
-  background-position: 100% 0;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: announceSheen 5s ease-in-out infinite;
-}
-.announceSub { font-size: 13.5px; line-height: 19px; letter-spacing: -0.01em; color: var(--text-medium); }
-.announceArrow { flex: none; color: var(--teal); font-size: 16px; transition: transform 0.2s ease; }
-.announceLink:hover .announceArrow { transform: translateX(3px); }
-
-@keyframes announceSpin { to { --announce-angle: 360deg; } }
-@keyframes announceSheen { 0%, 20% { background-position: 100% 0; } 60%, 100% { background-position: 0% 0; } }
-
-@media (prefers-reduced-motion: reduce) {
-  .announceLink::before, .announceHighlight { animation: none; }
-  .announceHighlight { background-position: 50% 0; }
-}
+/* Accord Atlas announcement under the buttons: one quiet line under a hairline (mark · name · kicker, description, arrow). */
+.announce { width: 100%; max-width: 760px; margin-top: -8px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+.announceLink { display: inline-flex; max-width: 100%; align-items: center; gap: 14px; text-decoration: none; color: var(--text-medium); }
+.announceBody { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; row-gap: 2px; min-width: 0; flex: 0 1 auto; }
+.announceName { font-size: 15px; font-weight: 500; letter-spacing: -0.01em; color: var(--text-strong); }
+.announceDot { color: var(--text-weak); }
+.announceKicker { font-size: 15px; letter-spacing: -0.01em; color: var(--teal); }
+.announceSub { flex-basis: 100%; font-size: 14px; line-height: 1.45; color: var(--text-weak); }
+.announceArrow { flex: none; color: var(--text-weak); font-size: 16px; transition: transform 0.2s ease, color 0.2s ease; }
+.announceLink:hover .announceArrow { transform: translateX(3px); color: var(--teal); }
+.announceLink:hover .announceName { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(var(--ink-rgb), 0.3); }
+@media (prefers-reduced-motion: reduce) { .announceArrow { transition: none; } }
 @media (max-width: 809.98px) {
-  .announceLink { flex-wrap: wrap; gap: 10px 12px; padding: 12px 14px; }
-  .announceBody { order: 3; flex-basis: 100%; }
-  .announceArrow { margin-left: auto; }
-  .announceHighlight { font-size: 15px; }
+  .announceLink { align-items: flex-start; }
+  .announceDot, .announceArrow { display: none; }
 }
 
 /* Headline tones: the product nouns in a silver sheen, the second line softer, hyphens narrowed */
