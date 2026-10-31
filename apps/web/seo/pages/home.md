@@ -30,7 +30,15 @@ The first app on Accord: liquidity agreements paid on measured conditions.
 
 Tied to agreed spread, depth and uptime
 
-Market-making retainers Vendor contracts Treasury payouts Selling to AI agents Agent-to-agent services
+- Market-making retainers
+
+- Vendor contracts
+
+- Treasury payouts
+
+- Selling to AI agents
+
+- Agent-to-agent services
 
 Deal room · NEAR/USDC retainer, Q1 Illustrative
 
@@ -128,13 +136,13 @@ How it works
 
 ## How a deal room works.
 
-- `01` · Sealed Each company seals its mandate in the browser; only a commitment hash is recorded.
+- 01 Sealed Each company seals its mandate in the browser; only a commitment hash is recorded.
 
-- `02` · Attested The Sealed Table negotiates inside an attested enclave; code checks the result against both mandates' limits; the terms are recorded with an attestation anyone can verify.
+- 02 Attested The Sealed Table negotiates inside an attested enclave; code checks the result against both mandates' limits; the terms are recorded with an attestation anyone can verify.
 
-- `03` · Executing Both companies approve, and the buyer funds the agreement's USDC escrow on NEAR. The agent holds one key for one method; a payment must match the approved milestone, amount and recipient, or it is refused and recorded.
+- 03 Executing Both companies approve, and the buyer funds the agreement's USDC escrow on NEAR. The agent holds one key for one method; a payment must match the approved milestone, amount and recipient, or it is refused and recorded.
 
-- `04` · Settled Payments complete under the agreed conditions, people decide the exceptions, and the record remains.
+- 04 Settled Payments complete under the agreed conditions, people decide the exceptions, and the record remains.
 
 Why now
 
