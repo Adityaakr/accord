@@ -125,6 +125,13 @@ The live record of facts, choices and spec changes. A fact here wins over the sa
 - Results (bid = USDC the pool pays for wNEAR, ask = USDC it takes for wNEAR, within ±2% of the mid): now spread `41` bps, bid `392` / ask `2,020` USDC; −1 h `49`, `370` / `1,720`; −3 h `52`, `186` / `385`; −6 h `52`, `194` / `430`; −12 h `52`, `186` / `378`. Two-sided every time. The archival endpoint `archival-rpc.mainnet.fastnear.com` reproduced the current block's observation exactly; the public RPC answered for 12 h back, not 24 h.
 - Fixtures set from these: passing agreement `min_depth_quote` `150 USDC` (buyer) against `max_depth_quote` `200 USDC` (vendor), spread ≤ `60` bps; the stricter pair keeps the same depth and its `30` bps spread, which this pool cannot meet. The site's illustrative example (12,000 USDC depth) is not this pool's real depth; the app and README use the real numbers.
 
+## 6c. Keys probe (0.4, 31 Oct, testnet; `contracts/probe-keys` on `probe-keys.accord-v1.testnet`)
+
+- `Promise::add_access_key_allowance(pk, Allowance::limited(0.25 NEAR), self, "act")` from the contract added the key; `list-keys` shows `only do ["act"] function calls on probe-keys.accord-v1.testnet with an allowance of 0.25 NEAR` (install tx `54n5EPhYQfayE1mwsrYFiNuANPQ6YNe45acfQGHZvfg2`).
+- The key signed `act` (tx `A58cG3Kw2vy1KPRJG5Wpp8V5UJzKruXPJ9DS9Ph1GwXV`): `0.309 TGas` burned at `80 TGas` prepaid; the allowance fell from `0.25` to `0.2498441571673667 NEAR`, so one call at `80 TGas` with this light body costs about `0.000156 NEAR` of allowance after the refund. The real `act` is heavier; 5.4 measures it.
+- `revoke` (flag, then `Promise::delete_key`, tx `nZPyXHHxfJSvjMo7aeRq4BfDD59AL7dY97bVNe58pu2`) removed it: the key list no longer has it, and the next signature fails before sending with `Access key for public key ed25519:9UTeA6… does not exist while viewing`, the RPC form of `AccessKeyDoesNotExist`.
+- Still for the sandbox (1.13): `ERR_REVOKED` for a call landing between the flag and the `DeleteKey` receipt, and `NotEnoughAllowance` when the allowance runs out.
+
 ## 9. Open questions the probes answer
 
 - Does `dcap-qvl` build for `wasm32-wasip2`? Does `ecies` (pure backend)? Is NEAR AI's end-to-end encryption usable with the chosen model? (0.2)
