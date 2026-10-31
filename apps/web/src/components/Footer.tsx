@@ -18,7 +18,6 @@ const PRODUCT: Item[] = [
   { key: "payee", label: "Payee", href: LINKS.payee },
   { key: "security", label: "Security", href: LINKS.security },
   { key: "research", label: "Research", href: LINKS.research },
-  { key: "pricing", label: "Pricing", href: "/#pricing" },
 ]
 const BUILD: Item[] = [
   ...(LINKS.repo ? [{ key: "github", label: "GitHub", href: LINKS.repo, external: true }] : []),

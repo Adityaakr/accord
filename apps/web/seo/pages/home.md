@@ -308,38 +308,6 @@ Paraphrase
 
 Simon Willison 16 Jun 2025 · [source](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/) 06 / 06
 
-Pricing
-
-## Clear pricing for agreements, controls and monitoring.
-
-Our planned pricing combines agreement management with the negotiation and monitoring your business needs. No percentage-based Accord fee on payment amounts.
-
-Developer preview Coming soon
-
-Free testnet access
-
-Explore private negotiation, payment controls and agreement records using test funds.
-
-[Request early access](/join?role=partner)
-
-Accord Teams Planned
-
-Subscription
-
-Manage business agreements with confidential negotiation, approval workflows and controlled payments.
-
-[Discuss your requirements](/join?role=buyer)
-
-Accord Atlas Planned
-
-Per monitored market
-
-Connect agreed liquidity conditions to payment eligibility, with a defined observation schedule and verifiable records.
-
-[Discuss an Atlas pilot](/join?role=project)
-
-Production prices and included allowances will be published before launch. Network and third-party fees may apply.
-
 FAQ
 
 ## Questions.
