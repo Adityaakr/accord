@@ -8,10 +8,13 @@
 }
 
 /* ---------- heading row ---------- */
-/* both columns start at the top; the right column drops by the tag's height so its first line sits level with the heading */
-.head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; align-items: start; width: 100%; }
-.headLeft { display: flex; flex-direction: column; gap: 20px; }
-.headRight { display: flex; flex-direction: column; gap: 20px; padding-top: 50px; }
+/* The tag takes its own row; the heading and the copy share the next row, so both start on the same line. Trimming the
+   leading above each first line (text-box) puts the tops of their capitals level where supported. */
+.head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "tag ." "title copy"; column-gap: 64px; row-gap: 24px; align-items: start; width: 100%; }
+.headTag { grid-area: tag; }
+.headLeft { grid-area: title; }
+.headRight { grid-area: copy; display: flex; flex-direction: column; gap: 20px; }
+.title, .headRight > .description:first-child { text-box-trim: trim-start; text-box-edge: cap alphabetic; }
 .tag { display: inline-flex; align-items: center; gap: 8px; color: var(--text-medium); }
 .title { width: 100%; text-wrap: balance; }
 .description { color: var(--text-medium); text-wrap: pretty; }
@@ -243,8 +246,8 @@
 /* Tablet */
 @media (max-width: 1199.98px) {
   .section { gap: 36px; padding: 72px 24px; }
-  .head { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-  .headRight { padding-top: 0; max-width: 760px; }
+  .head { grid-template-columns: minmax(0, 1fr); grid-template-areas: "tag" "title" "copy"; row-gap: 20px; }
+  .headRight { max-width: 760px; }
   .whyHead { flex-direction: column; align-items: flex-start; gap: 8px; }
   .stage { padding: 32px 20px; }
 }

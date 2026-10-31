@@ -328,8 +328,10 @@ export function Compliance() {
   return (
     <section id="atlas" className={`section ${styles.section}`}>
       <div className={styles.head}>
-        <Appear className={styles.headLeft} effect={appear("0s")}>
+        <Appear className={styles.headTag} effect={appear("0s")}>
           <span className={styles.tag}><AtlasMark size={20} /><span className="t-body-sm">The first application built on Accord</span></span>
+        </Appear>
+        <Appear className={styles.headLeft} effect={appear("0s")}>
           <h2 className={`t-h2 ${styles.title}`}>Accord Atlas: liquidity agreements with measurable payment conditions.</h2>
         </Appear>
         <Appear className={styles.headRight} effect={appear("0.15s")}>
