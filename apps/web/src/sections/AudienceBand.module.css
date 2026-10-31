@@ -197,6 +197,18 @@
 .bad { color: #e5a27e; }
 :global([data-theme="light"]) .bad { color: #b4532a; }
 
+/* steps and checks open the deal-room detail */
+.stepBtn, .lineBtn { all: unset; box-sizing: border-box; display: flex; flex-direction: column; gap: inherit; width: 100%; cursor: pointer; border-radius: 6px; }
+.stepBtn { gap: 2px; margin: -3px -6px; padding: 3px 6px; width: calc(100% + 12px); transition: background 0.2s ease; }
+.stepBtn:hover:not(:disabled) { background: rgba(var(--ink-rgb), 0.05); }
+.stepBtn:disabled { cursor: default; }
+.lineBtn { gap: 1px; }
+.lineBtn:focus-visible, .stepBtn:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 2px; }
+.view { margin-left: 6px; color: var(--text-weak); opacity: 0; transform: translateX(-3px); transition: opacity 0.2s ease, transform 0.2s ease; }
+.lineBtn:hover .view, .lineBtn:focus-visible .view { opacity: 1; transform: none; }
+.lineBtn:hover .lineText { color: var(--text-strong); }
+@media (hover: none) { .pass .view { opacity: 1; transform: none; } }
+
 .timer { position: absolute; left: 14px; right: 14px; bottom: 0; height: 2px; border-radius: 2px; background: var(--teal); transform-origin: left; transform: scaleX(0); animation-name: tabTimer; animation-timing-function: linear; animation-fill-mode: forwards; opacity: 0.8; }
 @keyframes tabTimer { to { transform: scaleX(1); } }
 @media (prefers-reduced-motion: reduce) { .chat, .use, .line { transition: none; } .sweep, .status, .dotBusy span, .spin, .step { animation: none; } .layer { transition: none; } }

@@ -31,6 +31,7 @@ function toMarkdown() {
     const tag = el.tagName.toLowerCase()
     if (el.hasAttribute && el.hasAttribute("data-seo-skip")) return true
     if (tag === "button" && el.getAttribute("role") === "tab") return false
+    if (tag === "button" && el.hasAttribute("data-seo-keep")) return false
     if (["script", "style", "svg", "nav", "footer", "button", "form", "noscript", "canvas", "video", "iframe"].includes(tag)) return true
     if (el.getAttribute("aria-hidden") === "true" && el.getAttribute("role") !== "tabpanel" && tag !== "figure") return true
     return false

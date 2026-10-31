@@ -3,6 +3,7 @@ import { useInView, useReducedMotion } from "motion/react"
 import { LogoMark } from "../components/Logo"
 import { PixelIcon, type PixelName } from "../components/PixelIcon"
 import styles from "./AudienceBand.module.css"
+import { DealDetail, type Detail } from "./DealDetail"
 
 /* Band under the hero (copy from Adi, 30 Oct 2026). The five "Built for" use cases are tabs; each opens a deal-room
    panel showing that use case end to end: the mandate the buyer gives its agent, the agreed terms, and the five core
@@ -15,9 +16,10 @@ const CAPS = ["Confidential negotiation", "Agent permissions", "Payment controls
 
 /* One step of the agent's work log. k: think (its reasoning), call (a contract call it signs or asks you to sign),
    wait (waiting on the other side), event (a result coming back from the contract), out (the agreed terms).
-   s is the step's illustrative duration in seconds, summed into "Worked for …". */
-type Step = { k: "think" | "call" | "wait" | "event" | "out"; t: string; r?: string; s: number; bad?: boolean }
-type Panel = { room: string; ask: string; answer: string; lines: ReactNode[]; trace: Step[] }
+   s is the step's illustrative duration in seconds, summed into "Worked for …".
+   c pins a step to a capability when its call name doesn't decide it (see capOf). */
+type Step = { k: "think" | "call" | "wait" | "event" | "out"; t: string; r?: string; s: number; bad?: boolean; c?: number }
+type Panel = { room: string; ask: string; answer: string; lines: ReactNode[]; trace: Step[]; detail: Detail }
 type Use = { label: string; icon: PixelName; line: string; panel: Panel }
 
 const c = (t: string) => <code>{t}</code>
@@ -49,6 +51,20 @@ const USES: Use[] = [
         { k: "call", t: "approve_terms(41)", r: "approved by yourco.testnet and Halcyon", s: 6 },
         { k: "call", t: "accept_payee(41, 1)", r: "halcyon-mm.testnet bound to halcyon.example", s: 2 },
       ],
+      detail: {
+        you: "Your agent", them: "Halcyon's agent", hashes: ["0x9c2e…a71f", "0x5d18…e44b"],
+        terms: "18,500 USDC · ≤40 bps · ≥12,000 depth · ≥95% uptime",
+        keyLabel: "Your agent's key", key: "ed25519:7Hq2…3fKa", agreement: "agreement 41",
+        pay: [
+          { call: "act(Pay{period 1, 18,500 USDC})" },
+          { call: "act(Pay{period 1, 19,000 USDC})", fail: "amount", err: "ERR_AMOUNT_MISMATCH" },
+          { call: 'act(Pay{to "halcyon-ops.testnet"})', fail: "recipient", err: "ERR_PAYEE_MISMATCH" },
+        ],
+        domain: "halcyon.example", account: "halcyon-mm.testnet",
+        marks: ["p", "p", "f", "p", "p", "p"], marksLabel: "Observation slots · period 1",
+        rows: [["Spread", "38 bps", "needs ≤ 40"], ["Depth within 1%", "12,640 USDC", "needs ≥ 12,000"], ["Uptime", "97.2%", "needs ≥ 95%"]],
+        result: "5 of 6 slots passed. 18,500 USDC eligible for period 1.",
+      },
     },
   },
   {
@@ -67,13 +83,26 @@ const USES: Use[] = [
       trace: [
         { k: "think", t: "214 invoices. Each needs a matching purchase order, a confirmed delivery and the vendor's bound address before I pay it.", s: 3 },
         { k: "call", t: "get_record(vendor agreements)", r: "38 active agreements, 38 bound payees", s: 2 },
-        { k: "out", t: "214 read · 212 match order and delivery · 2 don't", s: 19 },
+        { k: "out", t: "214 read · 212 match order and delivery · 2 don't", s: 19, c: 4 },
         { k: "think", t: "INV-2291 bills 4,120 against an order for 3,800. INV-2307 asks us to pay a new bank account. Submitting both as invoiced; the contract decides.", s: 4 },
         { k: "call", t: "act(Pay{INV-2291, 4,120 USDC})", r: "refused · ERR_AMOUNT_MISMATCH", s: 1, bad: true },
         { k: "call", t: "act(Pay{INV-2307, new destination})", r: "refused · ERR_PAYEE_MISMATCH", s: 1, bad: true },
         { k: "think", t: "Both refusals are right. Holding them for you instead of retrying.", s: 2 },
         { k: "call", t: "act(Pay) × 212", r: "212 accepted, each to its bound address", s: 14 },
       ],
+      detail: {
+        you: "Your agent", them: "Vendors' agents", hashes: ["0x3a71…d09c", "38 commitments"],
+        terms: "Rates for 38 vendors · your limits sealed",
+        keyLabel: "Your agent's key", key: "ed25519:Bv9d…q71M", agreement: "38 vendor agreements",
+        pay: [
+          { call: "act(Pay{INV-2290, 3,800 USDC})" },
+          { call: "act(Pay{INV-2291, 4,120 USDC})", fail: "amount", err: "ERR_AMOUNT_MISMATCH" },
+          { call: "act(Pay{INV-2307, new destination})", fail: "recipient", err: "ERR_PAYEE_MISMATCH" },
+        ],
+        domain: "northwind.example", account: "northwind.testnet",
+        rows: [["Purchase order matched", "212", "of 214"], ["Delivery confirmed", "212", "of 214"], ["Paid to bound address", "212", "of 212"]],
+        result: "212 paid as one batch. INV-2291 and INV-2307 held for you.",
+      },
     },
   },
   {
@@ -101,6 +130,20 @@ const USES: Use[] = [
         { k: "call", t: "accept_payee(114, 1)", r: "sdkworks.testnet bound to sdkworks.example", s: 2 },
         { k: "think", t: "Tranche 1 waits on accept_milestone(114, 0). Nothing is payable yet.", s: 2 },
       ],
+      detail: {
+        you: "Your agent", them: "SDKWorks' agent", hashes: ["0x41d0…9b3e", "0x88c2…17fa"],
+        terms: "42,000 USDC · tranches of 12,000 / 15,000 / 15,000",
+        keyLabel: "Your agent's key", key: "ed25519:Kp4x…8nTe", agreement: "agreement 114",
+        pay: [
+          { call: "act(Pay{tranche 1, 12,000 USDC})" },
+          { call: "act(Pay{tranche 1, 15,000 USDC})", fail: "amount", err: "ERR_AMOUNT_MISMATCH" },
+          { call: 'act(Pay{to "sdkworks-new.testnet"})', fail: "recipient", err: "ERR_PAYEE_MISMATCH" },
+        ],
+        domain: "sdkworks.example", account: "sdkworks.testnet",
+        marks: ["p", "o", "o"], marksLabel: "Tranches",
+        rows: [["Milestone report", "submitted", "tranche 1"], ["Committee", "accepted", "3 of 3 votes"], ["accept_milestone(114, 0)", "called", "by your treasury"]],
+        result: "Tranche 1 payable: 12,000 USDC to sdkworks.testnet.",
+      },
     },
   },
   {
@@ -128,6 +171,20 @@ const USES: Use[] = [
         { k: "call", t: 'propose_payee(207, "yourco.example", "yourco.testnet")', r: "domain verified", s: 9 },
         { k: "wait", t: "Waiting for 12,900 USDC to be funded", r: "funded", s: 33 },
       ],
+      detail: {
+        you: "Your agent", them: "Buyer's agent", hashes: ["0x7be3…05ca", "0xe912…4b6d"],
+        terms: "2,150 USDC a month × 6 = 12,900 USDC",
+        keyLabel: "The buyer's agent key", key: "ed25519:Wm7c…2LhQ", agreement: "agreement 207",
+        pay: [
+          { call: "act(Pay{month 1, 2,150 USDC})" },
+          { call: "act(Pay{month 1, 1,900 USDC})", fail: "amount", err: "ERR_AMOUNT_MISMATCH" },
+          { call: 'act(Pay{to "resale.testnet"})', fail: "recipient", err: "ERR_PAYEE_MISMATCH" },
+        ],
+        domain: "yourco.example", account: "yourco.testnet",
+        marks: ["p", "o", "o", "o", "o", "o"], marksLabel: "Monthly payments",
+        rows: [["Funded", "12,900 USDC", "of 12,900"], ["Schedule", "monthly", "6 payments"], ["Month 1", "paid", "2,150 USDC"]],
+        result: "Funded in full. Work started; month 2 pays on schedule.",
+      },
     },
   },
   {
@@ -153,8 +210,22 @@ const USES: Use[] = [
         { k: "out", t: "450 USDC a week · capped at 1,800 USDC", s: 1 },
         { k: "call", t: "approve_terms(88)", r: "approved by both sides", s: 4 },
         { k: "call", t: "act(Pay{week 1, 450 USDC})", r: "paid to inferhub.testnet", s: 3 },
-        { k: "think", t: "A 500 USDC payment would be refused. The cap leaves room for three more weeks.", s: 2 },
+        { k: "think", t: "A 500 USDC payment would be refused. The cap leaves room for three more weeks.", s: 2, c: 2 },
       ],
+      detail: {
+        you: "Your agent", them: "InferHub's agent", hashes: ["0x2fa9…c710", "0x6c03…a9e1"],
+        terms: "450 USDC a week · capped at 1,800 USDC",
+        keyLabel: "Your agent's key", key: "ed25519:Tz8r…5vYc", agreement: "agreement 88",
+        pay: [
+          { call: "act(Pay{week 1, 450 USDC})" },
+          { call: "act(Pay{week 2, 500 USDC})", fail: "amount", err: "ERR_AMOUNT_MISMATCH" },
+          { call: 'act(Pay{to "inferhub-2.testnet"})', fail: "recipient", err: "ERR_PAYEE_MISMATCH" },
+        ],
+        domain: "inferhub.example", account: "inferhub.testnet",
+        marks: ["p", "o", "o", "o"], marksLabel: "Weeks under the cap",
+        rows: [["Paid", "450 USDC", "week 1"], ["Left under the cap", "1,350 USDC", "3 weeks"], ["Revoke", "available", "any time"]],
+        result: "Week 2 payable on schedule, until you revoke.",
+      },
     },
   },
 ]
@@ -194,9 +265,26 @@ const Tick = () => (
   <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7" /></svg>
 )
 
+/* Which capability a step belongs to, for opening the detail: by call name; a thought goes with the step it leads to */
+const NEG = ["commit_mandate", "trigger_negotiation", "on_negotiation_output"]
+const PAYEE = ["accept_payee", "propose_payee", "get_record"]
+function capOf(trace: Step[], i: number): number {
+  const st = trace[i]
+  if (st.c !== undefined) return st.c
+  const name = fn(st.t)
+  if (st.k === "think") return i + 1 < trace.length ? capOf(trace, i + 1) : 4
+  if (st.k === "out" || NEG.includes(name)) return 0
+  if (st.k === "wait") return st.t.includes("commit") ? 0 : 4
+  if (name.startsWith("create_agreement")) return 1
+  if (name.startsWith("act")) return 2
+  if (PAYEE.includes(name)) return 3
+  return 4
+}
+const stepsByCap = (trace: Step[]) => CAPS.map((_, c) => trace.filter((_, i) => capOf(trace, i) === c))
+
 const secs = (n: number) => (n < 60 ? `${n}s` : `${Math.floor(n / 60)}m ${String(n % 60).padStart(2, "0")}s`)
 
-function TraceView({ trace, shown }: { trace: Step[]; shown: number }) {
+function TraceView({ trace, shown, onOpen }: { trace: Step[]; shown: number; onOpen: (cap: number) => void }) {
   const ref = useRef<HTMLOListElement>(null)
   /* keep the newest step in view, like a terminal */
   useEffect(() => { const box = ref.current?.parentElement; if (box) box.scrollTop = box.scrollHeight }, [shown])
@@ -206,6 +294,7 @@ function TraceView({ trace, shown }: { trace: Step[]; shown: number }) {
         const running = i === shown
         return (
           <li key={i} className={`${styles.step} ${styles[`k_${st.k}`]}`}>
+            <button type="button" className={styles.stepBtn} disabled={running} onClick={() => onOpen(capOf(trace, i))} aria-label={`${st.t}: open ${CAPS[capOf(trace, i)]}`} tabIndex={-1}>
             <span className={styles.stepHead}>
               {st.k === "call" ? <span className={styles.glyph}>▸</span> : st.k === "event" ? <span className={styles.glyph}>←</span> : st.k === "think" ? <span className={styles.glyph}>∴</span> : st.k === "wait" ? <span className={styles.glyph}>…</span> : <span className={styles.glyph}>=</span>}
               <span className={styles.stepText}>{st.t}</span>
@@ -215,6 +304,7 @@ function TraceView({ trace, shown }: { trace: Step[]; shown: number }) {
                 {running ? <><span className={styles.spin} aria-hidden="true" /> {st.k === "wait" ? "waiting" : "running"}</> : <>{st.bad ? "✕" : "↳"} {st.r} <span className={styles.took}>{secs(st.s)}</span></>}
               </span>
             ) : null}
+            </button>
           </li>
         )
       })}
@@ -222,7 +312,7 @@ function TraceView({ trace, shown }: { trace: Step[]; shown: number }) {
   )
 }
 
-function PanelView({ p, active, id, labelledBy }: { p: Panel; active: boolean; id: string; labelledBy: string }) {
+function PanelView({ p, active, id, labelledBy, onOpen }: { p: Panel; active: boolean; id: string; labelledBy: string; onOpen: (cap: number) => void }) {
   const reduce = useReducedMotion() ?? false
   const phase = usePhase(active, reduce, p.trace)
   const [showWork, setShowWork] = useState(false)
@@ -261,18 +351,21 @@ function PanelView({ p, active, id, labelledBy }: { p: Panel; active: boolean; i
           </div>
           <div className={styles.slot}>
             <div className={`${styles.layer} ${styles.traceLayer} ${traceOn ? styles.layerOn : ""}`} aria-hidden={!traceOn} data-seo-skip>
-              <TraceView trace={p.trace} shown={working ? phase : T} />
+              <TraceView trace={p.trace} shown={working ? phase : T} onOpen={onOpen} />
             </div>
             <ul className={`${styles.lines} ${styles.layer} ${traceOn ? "" : styles.layerOn}`}>
               {p.lines.map((l, i) => {
                 const state = done || i < checking ? "pass" : i === checking ? "check" : "wait"
                 return (
                   <li key={i} className={`${styles.line} ${styles[state]}`}>
+                    <button type="button" className={styles.lineBtn} data-seo-keep onClick={() => onOpen(i)} tabIndex={active && !traceOn ? 0 : -1}>
                     <span className={styles.lineText}>{l}</span>
                     <span className={styles.cap}>
                       {state === "pass" ? <span className={styles.ok}><Tick /></span> : state === "check" ? <span className={styles.spin} aria-hidden="true" /> : null}
                       {CAPS[i]}{state === "check" ? " · verifying" : state === "pass" ? " · passed" : ""}
+                      <span className={styles.view} aria-hidden="true">See how ↗</span>
                     </span>
+                    </button>
                   </li>
                 )
               })}
@@ -304,9 +397,10 @@ export function AudienceBand() {
   const inView = useInView(ref, { amount: 0.4 })
   const [active, setActive] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [open, setOpen] = useState<{ use: number; cap: number } | null>(null)
   const [cycle, setCycle] = useState(0) // bumps on every switch, restarting the timer and the bar
   const go = (n: number) => { setActive(n); setCycle((c) => c + 1) }
-  const running = !reduce && inView && !paused
+  const running = !reduce && inView && !paused && !open
   useEffect(() => {
     if (!running) return
     const t = window.setTimeout(() => go((active + 1) % USES.length), DWELL)
@@ -349,10 +443,18 @@ export function AudienceBand() {
           <span className={styles.weave} aria-hidden="true" />
           <span className={styles.sheen} aria-hidden="true" />
           <div className={styles.stack}>
-            {USES.map((u, i) => <PanelView key={u.label} p={u.panel} active={i === active} id={`use-panel-${i}`} labelledBy={`use-tab-${i}`} />)}
+            {USES.map((u, i) => <PanelView key={u.label} p={u.panel} active={i === active} id={`use-panel-${i}`} labelledBy={`use-tab-${i}`} onOpen={(cap) => setOpen({ use: i, cap })} />)}
           </div>
         </div>
       </div>
+
+      {(() => {
+        const u = USES[open?.use ?? active].panel
+        return (
+          <DealDetail open={open !== null} room={u.room} caps={CAPS} lines={u.lines} detail={u.detail} steps={stepsByCap(u.trace)}
+            cap={open?.cap ?? 0} onCap={(cap) => setOpen((o) => (o ? { ...o, cap } : o))} onClose={() => setOpen(null)} />
+        )
+      })()}
     </aside>
   )
 }
