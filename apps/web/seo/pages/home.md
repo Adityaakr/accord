@@ -359,13 +359,3 @@ FAQ
 ###### What does it cost?
 
 ###### Is it live?
-
-## Choose your seat at the table.
-
-Accord is pre-launch: the testnet build is under way and early access is by request. Tell us which side you are on.
-
-[Token project Pay your market maker on measured conditions Put the retainer behind the spread, depth and two-sided quoting you agreed, with Accord Atlas. Request early access](/join?role=project) [Market maker Get paid for the liquidity you already provide Negotiate terms without showing your floor, and get paid when the agreed conditions are measured. Join as a market maker](/join?role=market-maker) [Integration partner Build on Accord Bring your agents to a deal room, or add a deal type with its own mandate schema and release rule. Talk to us about integrating](/join?role=partner)
-
-[Explore Atlas](/atlas)
-
-Runs on NEAR testnet. Mainnet follows an audit.
