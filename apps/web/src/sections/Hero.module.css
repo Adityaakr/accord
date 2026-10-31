@@ -213,9 +213,8 @@
 
 @media (max-width: 809.98px) { .thesisText { white-space: normal; font-size: 18px; } }
 
-/* "Built on [NEAR mark] NEAR": the mark sits on the text baseline, same colour as the word */
-.near { display: inline-flex; align-items: center; gap: 5px; vertical-align: bottom; color: var(--text-strong); }
-.near svg { flex: none; transform: translateY(-0.5px); }
+/* "Built on [NEAR logo]": NEAR's green lockup badge in the tag line */
+.near { margin-left: 2px; }
 
 /* Accord Atlas announcement under the buttons: one quiet line under a hairline (mark · name · kicker, description, arrow). */
 .announce { width: 100%; max-width: 760px; margin-top: -8px; padding-top: 22px; border-top: 1px solid var(--hairline); }

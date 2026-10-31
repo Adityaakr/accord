@@ -1,0 +1,6 @@
+/* NEAR logo: black on NEAR green, sized from the surrounding text so it sits in a line of copy */
+.logo { display: inline-flex; align-items: center; justify-content: center; flex: none; background: #00ec97; color: #000; vertical-align: middle; }
+.lockup { gap: 0.4em; height: 1.75em; padding: 0 0.7em 0 0.6em; border-radius: 0.5em; }
+.tile { width: 1.5em; height: 1.5em; border-radius: 0.38em; }
+.mark { width: 0.8em; height: 0.8em; }
+.word { width: 2.6em; height: 0.66em; }
