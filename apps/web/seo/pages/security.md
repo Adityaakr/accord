@@ -2,6 +2,8 @@ Security
 
 # Know what is private. Inspect what is enforced.
 
+Negotiation inputs, approved payment conditions and settlement records have different visibility and trust boundaries. Accord makes those distinctions explicit.
+
 | Area | What to know |
 
 | --- | --- |

@@ -2,6 +2,8 @@ Built on NEAR
 
 # The private deal room and control plane for agent-to-agent commerce.
 
+Accord turns private negotiations into enforceable controls for AI agents. Agents negotiate within confidential mandates; both parties approve the terms. The contract enforces what agents can do, who they can pay, how much and on what evidence.
+
 [Request early access](/join) [Explore Atlas](/atlas)
 
 [Accord Atlas The first application on Accord Liquidity agreements with measurable payment conditions](/atlas)

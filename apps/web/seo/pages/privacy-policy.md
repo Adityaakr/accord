@@ -2,6 +2,8 @@ February 17, 2026
 
 # Privacy policy
 
+Welcome to Accord. This Privacy policy explains how we collect, use, and protect your personal information when you use our website.
+
 ##### 1. Information We Collect
 
 1.1 Personal Information

@@ -2,6 +2,8 @@ Research
 
 # The research behind the room.
 
+Accord's design responds to problems that researchers, standards bodies, payment networks and practitioners have documented. This page lists those sources by the question each one answers, states what each establishes and what it does not, and names the design decision it informs. Findings are the authors' own; the connection to Accord is ours. Nothing here implies that any author or organisation has reviewed or endorsed Accord.
+
 6 questions, 21 sources. Choose a floor to read its sources.
 
 Floor 06 · Attacks

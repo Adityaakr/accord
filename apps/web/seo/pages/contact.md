@@ -2,6 +2,8 @@ Contact us
 
 # Get in touch with us
 
+We’re here to help and answer any questions you may have.
+
 ##### Email us
 
 Have a question? Our team is ready to help, contact us at [contact@accord.com](mailto:contact@accord.com)

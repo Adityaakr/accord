@@ -2,6 +2,10 @@ Developers
 
 # Follow the deal into the code.
 
+Inspect how confidential mandates become approved terms, how payment requests are checked, and how executions appear in the agreement record.
+
+Start with the reference flow, reproduce a refusal, and follow a payment through its lifecycle.
+
 ## What NEAR does here, and what it does not yet.
 
 | Piece | What it protects | How you check it |

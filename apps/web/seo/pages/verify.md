@@ -2,6 +2,8 @@ Verify
 
 # Verify this agreement.
 
+One screen that walks through an agreement's attestation chain: job id, measurement on OutLayer's register, the outlayer-verify output, commitment hashes, refusal events on the explorer, the payment on NEAR.
+
 ## Verify this agreement
 
 ## The attestation chain, step by step.

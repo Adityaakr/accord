@@ -2,6 +2,8 @@ Built on Accord · Accord Atlas
 
 # Put liquidity conditions into the payment decision.
 
+Agree on the market conditions to measure, inspect the observations, and apply the results to the payment rules in the deal room.
+
 [Explore an Atlas agreement](/record) [Watch the walkthrough](/demo)
 
 > Illustrative: The liquidity conditions both sides approved before the engagement.

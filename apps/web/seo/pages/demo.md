@@ -2,6 +2,8 @@ Demo
 
 # Watch the demo
 
+The public demonstration is being prepared. Production availability, supported assets and pricing have not been announced.
+
 [Inspect an agreement](/record)
 
 Recorded demo

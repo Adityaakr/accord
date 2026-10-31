@@ -73,7 +73,7 @@ function toMarkdown() {
     }
     if (tag === "li") { const t = clean(inline(el)); if (t) out.push(`- ${t}`); return }
     if (tag === "blockquote") { const t = clean(inline(el)); if (t) out.push(`> ${t}`); return }
-    if (tag === "p" || tag === "dt" || tag === "dd" || tag === "figcaption") { const t = clean(inline(el)); if (t) out.push(t); return }
+    if (tag === "p" || tag === "dt" || tag === "dd" || tag === "figcaption") { const t = clean(el.getAttribute("aria-label") || inline(el)); if (t) out.push(t); return }
     const kids = [...el.children]
     const hasBlock = (n) => [...n.querySelectorAll("*")].some((c) => BLOCK.has(c.tagName.toLowerCase()) || c.getAttribute("role") === "img")
     if (!kids.length || !hasBlock(el)) { const t = clean(inline(el)); if (t && t.length > 1) out.push(t); return }

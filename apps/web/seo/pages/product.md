@@ -2,6 +2,8 @@ Product
 
 # A deal needs more than a conversation.
 
+Your negotiating limits, the terms you approve and the destination of your money belong to the same decision. Accord keeps them connected in one deal room.
+
 [Open a deal room](/join) [Inspect an agreement](/record)
 
 > Illustrative: A buyer's sealed mandate: limits stay hidden, only a commitment hash is recorded.

@@ -2,6 +2,8 @@ Execution record
 
 # Inspect an agreement.
 
+Follow approvals, recipient changes, exceptions and refused requests.
+
 We could not refresh this record. Displaying the last retrieved data.
 
 ## Agreement

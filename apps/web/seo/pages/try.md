@@ -2,6 +2,8 @@ Try
 
 # Try to move the money.
 
+The demonstration agent's inbox is public. Send it new bank details, an urgent invoice or an instruction from the chief executive; the contract refuses anything outside the approved terms and the authorised recipient.
+
 Ten messages an hour per visitor · Testnet USDC on NEAR
 
 A successful attempt can only ever produce a payment to the authorised recipient at the approved amount.
