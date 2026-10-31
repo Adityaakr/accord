@@ -72,7 +72,7 @@ const APP = {
   name: "Accord", applicationCategory: "BusinessApplication", applicationSubCategory: "Agent payments and negotiation infrastructure",
   operatingSystem: "Web", url: `${SITE_URL}/`, description: ABOUT, image: OG_IMAGE,
   featureList: ["Confidential negotiation between agents in an attested enclave (Sealed Table)", "Approved terms enforced by a NEAR contract on every payment (Agreement controls)", "Recipient authorisation bound to a domain the vendor controls (Payee)", "One-transaction revocation of the agent's key", "Settlement in USDC on NEAR", "Accord Atlas: market-making retainers released on measured spread, depth and uptime"],
-  offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "Free on NEAR testnet. Planned mainnet pricing: a flat fee per agreement and per recipient, no percentage of payments." },
+  offers: { "@type": "Offer", name: "Developer preview", price: "0", priceCurrency: "USD", availability: "https://schema.org/PreOrder", description: "Free testnet access, coming soon. Planned: Accord Teams (subscription) and Accord Atlas (per monitored market). No percentage-based Accord fee on payment amounts; production prices published before launch." },
   publisher: { "@id": `${SITE_URL}/#organization` },
 }
 
@@ -162,7 +162,7 @@ Key facts:
 - The buyer's agent holds one key that can call one method, \`act\`; payments that do not match the approved terms are refused with a recorded reason (for example ERR_PAYEE_MISMATCH, ERR_AMOUNT_MISMATCH).
 - Network: NEAR testnet. Settlement: USDC on NEAR (NEP-141). Mainnet follows an audit.
 - Built for: market-making retainers, vendor contracts and invoices, treasury payouts, selling to AI agents, agent-to-agent services.
-- Pricing: free on testnet; planned flat fee per agreement and per recipient; no percentage of payment amounts.
+- Pricing (planned): Developer preview with free testnet access (coming soon); Accord Teams, a subscription; Accord Atlas, per monitored market. No percentage-based Accord fee on payment amounts. Production prices published before launch; network and third-party fees may apply.
 - Every claim is stated with its limit on the Security page; findings cited on the Research page are the authors' own.
 
 ${sect("Product", pages.filter((r) => core.includes(r.slug)))}

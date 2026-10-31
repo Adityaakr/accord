@@ -81,7 +81,7 @@ const COLUMN_2: Item[] = [
     delay: 0.4,
     title: "What does it cost?",
     description:
-      "Testnet is free. Planned pricing: a flat fee per agreement paid by the buyer when terms are approved, and a fee per recipient authorisation paid by the vendor. No percentage of payment amounts.",
+      "The developer preview gives free testnet access, using test funds. Planned pricing: an Accord Teams subscription for managing business agreements, and Accord Atlas priced per monitored market. No percentage-based Accord fee on payment amounts. Production prices and included allowances will be published before launch; network and third-party fees may apply.",
   },
   {
     id: "e7MnSyaRM",

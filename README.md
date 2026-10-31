@@ -344,13 +344,15 @@ Every public statement about Accord is one of these five, stated with its limit.
 
 ## Pricing
 
-| Plan | Status | Price | Paid by |
-| --- | --- | --- | --- |
-| Testnet | Available now | Free | Nobody |
-| Per agreement | Planned | Flat fee, amount set before mainnet | The buyer, when terms are approved |
-| Per recipient | Planned | Flat fee, amount set before mainnet | The vendor, when its recipient is approved |
+**Clear pricing for agreements, controls and monitoring.** Planned pricing combines agreement management with the negotiation and monitoring a business needs. No percentage-based Accord fee on payment amounts.
 
-**0% of payment amounts, on any plan.** Mainnet pricing is a plan, not a price list; it follows the audit.
+| Plan | Price | Status | For |
+| --- | --- | --- | --- |
+| **Developer preview** | Free testnet access | Coming soon | Explore private negotiation, payment controls and agreement records using test funds |
+| **Accord Teams** | Subscription | Planned | Manage business agreements with confidential negotiation, approval workflows and controlled payments |
+| **Accord Atlas** | Per monitored market | Planned | Connect agreed liquidity conditions to payment eligibility, with a defined observation schedule and verifiable records |
+
+Production prices and included allowances will be published before launch. Network and third-party fees may apply.
 
 ---
 

@@ -306,57 +306,35 @@ Simon Willison 16 Jun 2025 · [source](https://simonwillison.net/2025/Jun/16/the
 
 Pricing
 
-## Priced per agreement, never per payment.
+## Clear pricing for agreements, controls and monitoring.
 
-Testnet is free. On mainnet, a flat fee per agreement and per recipient, and no percentage of what you pay.
+Our planned pricing combines agreement management with the negotiation and monitoring your business needs. No percentage-based Accord fee on payment amounts.
 
-Testnet Available now
+Developer preview Coming soon
 
-Free on NEAR testnet
+Free testnet access
 
-For anyone building or evaluating
+Explore private negotiation, payment controls and agreement records using test funds.
 
-- Open deal rooms and negotiate
+[Request early access](/join?role=partner)
 
-- Agreement controls and revocation
+Accord Teams Planned
 
-- Recipient authorisation
+Subscription
 
-- Testnet USDC payments
+Manage business agreements with confidential negotiation, approval workflows and controlled payments.
 
-[Request early access](/join)
+[Discuss your requirements](/join?role=buyer)
 
-Per agreement Planned
+Accord Atlas Planned
 
-Flat fee per agreement
+Per monitored market
 
-Paid by the buyer, when terms are approved
+Connect agreed liquidity conditions to payment eligibility, with a defined observation schedule and verifiable records.
 
-- One fee, whatever the payment amounts
+[Discuss an Atlas pilot](/join?role=project)
 
-- Covers negotiation and enforcement
-
-- Every payment, refusal and decision on record
-
-Amount set before mainnet
-
-Per recipient Planned
-
-Flat fee per recipient
-
-Paid by the vendor, when its recipient is approved
-
-- Domain proof and authority approval
-
-- Reused across that vendor's agreements
-
-- A change needs a fresh authorisation
-
-Amount set before mainnet
-
-0% of payment amounts, on any plan. Your retainer, invoice or grant reaches the recipient in full.
-
-Mainnet pricing is a plan, not a price list; it follows the audit. Questions about it: [talk to us](/join).
+Production prices and included allowances will be published before launch. Network and third-party fees may apply.
 
 FAQ
 
