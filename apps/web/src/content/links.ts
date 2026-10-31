@@ -4,12 +4,12 @@
 const env = import.meta.env as Record<string, string | undefined>
 const app = env.VITE_APP_URL ?? ""
 
-/** Primary CTA: the app route when configured; otherwise the product overview, so it never duplicates `Watch the demo`. */
-export const PRIMARY_CTA = app ? "Open a deal room" : "Explore the product"
+/** Primary CTA: the app route once it is live; until then (pre-launch) an early-access request on /join. */
+export const PRIMARY_CTA = app ? "Open a deal room" : "Request early access"
 
 export const LINKS = {
   /* app routes (fall back to the demo page while the app is unavailable) */
-  openDealRoom: app ? `${app}/agreements/new` : "/product",
+  openDealRoom: app ? `${app}/agreements/new` : "/join",
   exploreAtlas: "/atlas",
   verifyDomain: app ? `${app}/payee` : "/product/payee",
   verify: "/verify",

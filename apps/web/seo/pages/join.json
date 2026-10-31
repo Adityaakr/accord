@@ -1,6 +1,6 @@
 {
-  "title": "Accord: Join a deal room",
-  "description": "Join a deal room as the other side: a project, a market maker, a vendor or a buyer. Your position stays sealed; the other side sees the agreed terms.",
+  "title": "Accord: Request early access",
+  "description": "Accord is pre-launch and early access is by request. Join as a token project, a market maker, an integration partner, a vendor or a buyer. In a deal room your position stays sealed; the other side sees only the agreed terms.",
   "ld": [
     "{\"@context\":\"https://schema.org\",\"@type\":\"Organization\",\"name\":\"Accord\",\"url\":\"/\",\"description\":\"The private deal room and control plane for agent-to-agent commerce.\"}",
     "{\"@context\":\"https://schema.org\",\"@type\":\"SoftwareApplication\",\"name\":\"Accord\",\"applicationCategory\":\"BusinessApplication\",\"operatingSystem\":\"Web\",\"description\":\"Two companies' agents negotiate in confidence, both companies approve the terms, and the terms govern what the buyer's agent may pay. Built on NEAR. First application: Accord Atlas.\"}"

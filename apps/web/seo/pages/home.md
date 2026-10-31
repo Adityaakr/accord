@@ -4,7 +4,7 @@ Built on NEAR
 
 [Introducing Accord Atlas The first application on Accord Liquidity agreements with measurable payment conditions](/atlas)
 
-[Explore the product](/product) [Explore Atlas](/atlas)
+[Request early access](/join) [Explore Atlas](/atlas)
 
 > Illustrative Accord product: the deal-room list, an Accord Atlas market-making agreement shown as its seven-step pipeline from sealed mandates to the USDC transfer on NEAR, and the agreement's activity: a refused payment, a missed observation slot and a settled period.
 
@@ -110,24 +110,6 @@ Buy inference for our research agent from a provider's agent: up to 500 USDC a w
 
 - Each week becomes payable on schedule, until you revoke Conditional settlement · passed
 
-Product preview
-
-## The deal room.
-
-###### Mandates
-
-Set the private requirements and limits your agent negotiates within.
-
-###### Agreement
-
-###### Evidence
-
-###### Payments
-
-###### Activity
-
-[Inspect the record](/record)
-
 The first application built on Accord
 
 ## Accord Atlas: liquidity agreements with measurable payment conditions.
@@ -176,34 +158,6 @@ The venue's order book shows the market's condition, not which participant provi
 
 [Join as a project or a market maker →](/join)
 
-Why these belong together
-
-## Negotiation, approval and payment in one place.
-
-Kept in separate systems, each step leaks or breaks on its own.
-
-#### Negotiation
-
-A negotiation run by one company's agent exposes the other company's position to it.
-
-#### Approval
-
-An approval kept in email gives an agent nothing it can enforce.
-
-#### Payment
-
-A payment instruction that arrives by message is what fraud imitates.
-
-- 01 Sealed Table produces the terms
-
-- 02 Both companies approve the terms
-
-- 03 Agreement controls the agent's only authority
-
-- 04 Payee the only destination it can reach
-
-In Accord, each step's output is what the next step enforces. The Sealed Table's terms are what both companies approve, the approved terms are the agent's only authority, and the recipient established through Payee is the only destination that authority can reach.
-
 How it works
 
 ## How a deal room works.
@@ -215,48 +169,6 @@ How it works
 - `03` · Executing Both companies approve, and the buyer funds the agreement's USDC escrow on NEAR. The agent holds one key for one method; a payment must match the approved milestone, amount and recipient, or it is refused and recorded.
 
 - `04` · Settled Payments complete under the agreed conditions, people decide the exceptions, and the record remains.
-
-The parts of the room
-
-## The parts of the room.
-
-> Actions panel listing executed buy and sell orders
-
-### Sealed Table
-
-Confidential negotiation between agents.
-
-Two sealed mandates enter an attested enclave on NEAR; the agents negotiate with private inference, and deterministic code checks each proposal against both mandates' limits. Only the terms, the commitment hashes and an attestation come out.
-
-- [`make negotiate`](/docs#commands)
-
-### Agreement controls
-
-The approved terms, enforced by the contract.
-
-The control plane: the approved terms, enforced by the contract. A payment request must match the milestone, the amount, the recipient version and the destination, or it is refused and recorded. Revocation removes the agent's key and stops new authorisations in one transaction. The transfer itself, in USDC on NEAR, is the data plane; the contract decides and the contract pays.
-
-- [`make pay`](/docs#commands)
-
-- [`make attack`](/docs#commands)
-
-- [`make revoke`](/docs#commands)
-
-> Recent analyses panel with quick actions
-
-> AI Agents panel listing trading, risk and portfolio agents
-
-### Payee
-
-Recipient authorisation.
-
-A vendor proves control of its domain inside an enclave, its settlement authority approves the destination, and the buyer accepts it. A change needs a fresh proof, the authority's approval and a 24-hour delay.
-
-- [`make bind-payee`](/docs#commands)
-
-- [`make payee-change`](/docs#commands)
-
-[Verify your domain](/product/payee)
 
 Why now
 
@@ -302,9 +214,9 @@ Try to move the money ↓
 
 ## Try to move the money.
 
-The demonstration agent's inbox is public. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it, and your attempt appears in the public refusal log with the contract's reason. Revocation is shown exactly: the agent's key is removed and every new payment stops at once.
+When the demonstration opens, its agent's inbox is public. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it. The contract refuses, and your attempt appears in the public refusal log with the reason. Revocation removes the agent's key and stops every new payment at once.
 
-[Try to move the money](/try)
+[Preview the demonstration](/try)
 
 Privacy and control
 
@@ -426,7 +338,7 @@ For anyone building or evaluating
 
 - Testnet USDC payments
 
-[Explore the product](/product)
+[Request early access](/join)
 
 Per agreement Planned
 
@@ -480,10 +392,12 @@ FAQ
 
 ###### Is it live?
 
-## Open a deal room.
+## Choose your seat at the table.
 
-Ten minutes on NEAR testnet. Each side keeps its position; the contract keeps the terms.
+Accord is pre-launch: the testnet build is under way and early access is by request. Tell us which side you are on.
 
-[Explore the product](/product) [Explore Atlas](/atlas)
+[Token project Pay your market maker on measured conditions Put the retainer behind the spread, depth and uptime you agreed, with Accord Atlas. Request early access](/join?role=project) [Market maker Get paid for the liquidity you already provide Negotiate terms without showing your floor, and get paid when the agreed conditions are measured. Join as a market maker](/join?role=market-maker) [Integration partner Build on Accord Bring your agents to a deal room, or add a deal type with its own mandate schema and release rule. Talk to us about integrating](/join?role=partner)
+
+[Explore Atlas](/atlas)
 
 Runs on NEAR testnet. Mainnet follows an audit.

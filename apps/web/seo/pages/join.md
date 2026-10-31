@@ -1,6 +1,6 @@
-Join
+Early access
 
-# Join a deal room.
+# Request early access.
 
 ## How you join.
 

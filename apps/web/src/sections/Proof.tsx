@@ -31,7 +31,7 @@ const STATES = ["Sealed", "Attested", "Executing", "Settled"] as const
 
 /* Spec §3.7 copy, verbatim */
 const ROW_TITLE = "Try to move the money."
-const ROW_P1 = "The demonstration agent's inbox is public. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it, and your attempt appears in the public refusal log with the contract's reason. Revocation is shown exactly: the agent's key is removed and every new payment stops at once."
+const ROW_P1 = "When the demonstration opens, its agent's inbox is public. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it. The contract refuses, and your attempt appears in the public refusal log with the reason. Revocation removes the agent's key and stops every new payment at once."
 const HELP_LINE = "Ten messages an hour per visitor · Testnet USDC on NEAR"
 const GOAL_LINE = "A successful attempt can only ever produce a payment to the authorised recipient at the approved amount."
 
@@ -380,7 +380,7 @@ export function Proof() {
           <div className={styles.text}>
             <h2 className={`t-h2 ${styles.title}`}>{ROW_TITLE}</h2>
             <p className={`t-body-lg ${styles.description}`}>{ROW_P1}</p>
-            <Button variant="secondary" href="/try">Try to move the money</Button>
+            <Button variant="secondary" href="/try">Preview the demonstration</Button>
           </div>
         </Appear>
       </div>

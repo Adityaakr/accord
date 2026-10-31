@@ -2,7 +2,7 @@ Product
 
 # A deal needs more than a conversation.
 
-[Open a deal room](/product) [Inspect an agreement](/record)
+[Open a deal room](/join) [Inspect an agreement](/record)
 
 #### Negotiate with confidential mandates
 

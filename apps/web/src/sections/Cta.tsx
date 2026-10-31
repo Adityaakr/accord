@@ -2,7 +2,8 @@ import { motion } from "motion/react"
 import { EASE_APPEAR, EASE_UI, toTransition, type FramerTransition } from "../lib/motion"
 import { Dots } from "../components/Dots"
 import { Button } from "../components/Button"
-import { LINKS, PRIMARY_CTA } from "../content/links"
+import { Link } from "react-router-dom"
+import { LINKS } from "../content/links"
 import styles from "./Cta.module.css"
 
 /* Framer "CTA" section: Desktop wg1f6L0lW (elementId "cta"), Tablet uX81zskxrwg1f6L0lW, Phone Ue6QXWSr_wg1f6L0lW
@@ -28,6 +29,15 @@ import styles from "./Cta.module.css"
 /* Section appearEffect (threshold 0.5, replay false): same mapping as <Appear>, applied to the <section> element itself */
 const SECTION_APPEAR_TRANSITION: FramerTransition = { type: "tween", ease: EASE_APPEAR, duration: "1s", delay: "0s" }
 
+const PATHS = [
+  { role: "project", kicker: "Token project", title: "Pay your market maker on measured conditions",
+    text: "Put the retainer behind the spread, depth and uptime you agreed, with Accord Atlas.", cta: "Request early access" },
+  { role: "market-maker", kicker: "Market maker", title: "Get paid for the liquidity you already provide",
+    text: "Negotiate terms without showing your floor, and get paid when the agreed conditions are measured.", cta: "Join as a market maker" },
+  { role: "partner", kicker: "Integration partner", title: "Build on Accord",
+    text: "Bring your agents to a deal room, or add a deal type with its own mandate schema and release rule.", cta: "Talk to us about integrating" },
+] as const
+
 export function Cta() {
   return (
     <motion.section
@@ -49,31 +59,29 @@ export function Cta() {
         <Dots className={styles.dots} />
       </motion.div>
 
-      {/* Container NNQSb_SQE */}
-      <div className={styles.container}>
-        {/* Content suJR2NcRR */}
-        <div className={styles.content}>
-          {/* Text BRU8DvWwL */}
-          <div className={styles.text}>
-            <h2 className={`t-h2 ${styles.title}`}>Open a deal room.</h2>
-            <p className={`t-body-lg ${styles.description}`}>
-              Ten minutes on NEAR testnet. <br className={styles.br} />
-              Each side keeps its position; the contract keeps the terms.
-            </p>
-          </div>
-          {/* Button wLiY5ZCHM → Closing buttons + the small line (owner's copy, always shown) */}
-          <div className={styles.doors}>
-            <div className={styles.actions}>
-              <Button variant="primary" href={LINKS.openDealRoom}>{PRIMARY_CTA}</Button>
-              <Button variant="secondary" href={LINKS.exploreAtlas}>Explore Atlas</Button>
-            </div>
-            <p className={`t-body-sm ${styles.small}`}>Runs on NEAR testnet. Mainnet follows an audit.</p>
-          </div>
+      {/* Pre-launch destination: three paths into a deal room, each to /join with its role preselected */}
+      <div className={styles.paths}>
+        <div className={styles.pathsHead}>
+          <h2 className={`t-h2 ${styles.title}`}>Choose your seat at the table.</h2>
+          <p className={`t-body-lg ${styles.description}`}>
+            Accord is pre-launch: the testnet build is under way and early access is by request. Tell us which side you are on.
+          </p>
+        </div>
+        <div className={styles.pathGrid}>
+          {PATHS.map((p) => (
+            <Link key={p.role} to={`${LINKS.join}?role=${p.role}`} className={styles.path}>
+              <span className={styles.pathKicker}>{p.kicker}</span>
+              <span className={styles.pathTitle}>{p.title}</span>
+              <span className={styles.pathText}>{p.text}</span>
+              <span className={styles.pathCta}>{p.cta} <span aria-hidden="true">→</span></span>
+            </Link>
+          ))}
+        </div>
+        <div className={styles.pathFoot}>
+          <Button variant="secondary" href={LINKS.exploreAtlas}>Explore Atlas</Button>
+          <p className={`t-body-sm ${styles.small}`}>Runs on NEAR testnet. Mainnet follows an audit.</p>
         </div>
       </div>
-
-      {/* Image fsOvCUx92 */}
-      <div className={styles.image} aria-hidden="true" />
     </motion.section>
   )
 }

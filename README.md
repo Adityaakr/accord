@@ -428,12 +428,13 @@ Copy `apps/web/.env.example` to `apps/web/.env`. Every value is optional: when o
 | Variable | Purpose | When unset |
 | --- | --- | --- |
 | `VITE_ACCORD_API_URL` | JSON endpoint for live values; `POST ${URL}/inbox` for the open inbox | Last-known snapshot from `public/live/last-known.json`; the inbox shows it is not open |
-| `VITE_APP_URL` | The app origin; the primary button opens `${APP}/agreements/new` | The button reads "Explore the product" and goes to `/product` |
+| `VITE_APP_URL` | The app origin; the primary button opens `${APP}/agreements/new` | Pre-launch: the button reads "Request early access" and goes to `/join` |
 | `VITE_REPO_URL` | Repository link in the nav and footer | Link hidden |
 | `VITE_DEMO_URL` | The demonstration video | Link hidden |
 | `VITE_RECORD_URL` | The public record page | `/record` |
 | `VITE_CONTRACT_ID` | The testnet agreement contract id | Shown as a placeholder in commands |
 | `VITE_DOCS_URL` | The docs link | `/docs` |
+| `VITE_CONTACT_EMAIL` | Pre-launch: early-access requests on `/join` open an email to this address when no request endpoint is set | The form says requests open shortly |
 
 ---
 

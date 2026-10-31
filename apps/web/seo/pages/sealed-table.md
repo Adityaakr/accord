@@ -2,7 +2,7 @@ Inside Accord · Sealed Table
 
 # Negotiate with confidential mandates.
 
-[Open a deal room](/product) [Inspect a negotiation](/record)
+[Open a deal room](/join) [Inspect a negotiation](/record)
 
 > Mandates panel of the deal room
 
