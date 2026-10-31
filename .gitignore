@@ -1,0 +1,7 @@
+.env
+.env.*
+!.env.example
+.submission/
+target/
+node_modules/
+.DS_Store
