@@ -116,8 +116,6 @@ The first application built on Accord
 
 Built on Accord, Atlas links a market maker's recurring retainer to the spread, depth and uptime both sides agreed. An attested observer samples the venue's public order book on the agreed schedule. When the agreed number of observations pass, the payment is released; when they don't, it is held for both sides to decide.
 
-The observations measure the market's condition on the venue, not which participant supplied it. Attributing liquidity to the market maker's own account is planned.
-
 01
 
 Approved conditions
@@ -138,21 +136,9 @@ Period decision
 
 Payment on NEAR
 
-### What each side states
-
-Each side states its position in confidence: the retainer, the maximum spread, the minimum depth within one percent of the mid price, the required uptime, the venue and the observation schedule. The Sealed Table negotiates the terms; both sides approve them.
-
-### What the observer records
-
-Each period, an observer inside an attested enclave samples the venue's public order book on the agreed schedule and records whether the conditions were met. A period pays when the agreed number of observation slots pass; otherwise it is withheld and people on both sides decide.
-
-### What the demonstration shows
-
-The demonstration shows the approved conditions, every slot with its attestation, each period's decision and the payment on NEAR testnet.
-
 Scope
 
-The venue's order book shows the market's condition, not which participant provided it. Attributing liquidity to the market maker's own account needs authenticated account data from the venue, which is planned and not yet implemented. Atlas pays on the conditions as agreed; it does not yet establish who met them.
+Atlas measures the market's condition on the venue, not which participant supplied it. Attributing liquidity to the market maker's own account is planned.
 
 [See the Atlas demonstration](/atlas)
 
@@ -202,7 +188,7 @@ The most a hijacked agent can do is make a payment you already approved, to the 
 
 Where each attack stops · the agent is assumed to follow every message it reads
 
-- BEC ASI01 goal hijack What the agent does Asks to pay the new account Where it stops **Agreement controls** destination is not the authorised recipient Result `ERR_PAYEE_MISMATCH` nothing signed
+- BEC ASI01 goal hijack What the agent does Asks to pay the new account Where it stops **Agreement controls** destination is not the authorised recipient Result `ERR_PAYEE_MISMATCH` nothing paid
 
 Not stopped by the contract: a person approving the wrong terms, or a payment the terms already allow. Those stay with people, on the record.
 
@@ -236,7 +222,7 @@ The payment schedule the contract enforces and the USDC transfers on NEAR, as wi
 
 ##### No recall
 
-Accord does not recall a signed transfer; revocation stops new authorisations and lists signed transfers for cancellation.
+Revocation is not a recall: it stops every new payment at once, and a payment already made stays made.
 
 ##### Not legal identity
 

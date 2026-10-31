@@ -4,7 +4,7 @@ Built on Accord · Accord Atlas
 
 [Explore an Atlas agreement](/record) [Watch the walkthrough](/demo)
 
-> Agreement terms panel
+> Illustrative: The liquidity conditions both sides approved before the engagement.
 
 ## Define the measurement before the engagement.
 
@@ -14,9 +14,9 @@ Specify the venue and pair, maximum spread, minimum depth, observation schedule,
 
 Follow the measurement window, source, result and associated execution evidence. Review gaps and exceptions alongside successful observations.
 
-> Observation record panel
+> Illustrative: One observation slot: the venue's public order book, sampled in an enclave.
 
-> Payment eligibility panel
+> Illustrative: A period decision: five of six slots passed, so the retainer is eligible.
 
 ## Connect the result to the agreement.
 
@@ -28,7 +28,7 @@ Atlas observes the venue's order book. It does not identify which firm supplied 
 
 Account-attributed performance verification is a planned extension. Token loans and option-based compensation are outside the current retainer-focused flow.
 
-> Order-book observation panel
+> Illustrative: What the current version of Atlas measures, and what is planned.
 
 Measurement record
 

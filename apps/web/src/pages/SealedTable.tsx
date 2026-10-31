@@ -4,6 +4,7 @@ import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { Button } from "../components/Button"
 import { PageHero } from "../components/PageHero"
 import { LINKS } from "../content/links"
+import { ProductShot, type ShotVariant } from "../components/ProductShot"
 import styles from "./SealedTable.module.css"
 
 /* ------------------------------------------------------------------
@@ -28,12 +29,12 @@ const slide = (x: -100 | 100): AppearEffect => ({
   enter: { opacity: 0, x, y: 0, scale: 1, rotate: 0, transition: { type: "spring", stiffness: 240, damping: 80, mass: 1, delay: "0s" } },
 })
 
-type RowProps = { id: string; image: string; imageAlt: string; imageSide: "left" | "right"; title: ReactNode; paragraphs: ReactNode[] }
+type RowProps = { id: string; shot: ShotVariant; imageSide: "left" | "right"; title: ReactNode; paragraphs: ReactNode[] }
 
 /* About "Section" row: Image (1fr, aspect 1.3) + Content (1fr); image slides in from its own side.
    Rows with the image on the right put the image first on Phone (Ue6QXWSr_J3FA8OTKG). */
-function Row({ id, image, imageAlt, imageSide, title, paragraphs }: RowProps) {
-  const img = <Appear effect={slide(imageSide === "left" ? -100 : 100)} className={styles.image} style={{ backgroundImage: `url("${image}")` }} role="img" aria-label={imageAlt} />
+function Row({ id, shot, imageSide, title, paragraphs }: RowProps) {
+  const img = <Appear effect={slide(imageSide === "left" ? -100 : 100)} className={styles.image}><ProductShot variant={shot} /></Appear>
   const content = (
     <Appear effect={slide(imageSide === "left" ? 100 : -100)} className={styles.content}>
       <div className={styles.rowText}>
@@ -73,16 +74,14 @@ export function SealedTable() {
       <section id="negotiation" className={`section ${styles.block}`}>
         <Row
           id="mandate"
-          image="/assets/showcase-image-1.png"
-          imageAlt="Mandates panel of the deal room"
+          shot="mandate"
           imageSide="left"
           title="Your mandate guides the negotiation."
           paragraphs={[<>Define your budget, requirements and acceptable trade-offs. Review the proposed outcome before committing to it.</>]}
         />
         <Row
           id="evidence"
-          image="/assets/showcase-image-2.png"
-          imageAlt="Agreement panel showing the terms awaiting approval"
+          shot="attestation"
           imageSide="right"
           title="The output carries evidence."
           paragraphs={[
@@ -94,8 +93,7 @@ export function SealedTable() {
         />
         <Row
           id="approval"
-          image="/assets/showcase-image-3.png"
-          imageAlt="Evidence panel of the deal room"
+          shot="terms"
           imageSide="left"
           title="Approval remains a commercial decision."
           paragraphs={[
@@ -107,8 +105,7 @@ export function SealedTable() {
         />
         <Row
           id="boundary"
-          image="/assets/showcase-image-4.png"
-          imageAlt="Payments panel of the deal room"
+          shot="visibility"
           imageSide="right"
           title="Privacy has a boundary."
           paragraphs={[

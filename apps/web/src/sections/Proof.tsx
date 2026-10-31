@@ -46,8 +46,8 @@ const MESSAGE_MAX = 2000
 
 /* Spec §5 Refusal line: the sentence for the reason codes the contract emits; other reasons print as received. */
 const REFUSAL_TEXT: Record<string, string> = {
-  ERR_PAYEE_MISMATCH: "Refused: the destination is not the authorised recipient. Nothing was signed.",
-  ERR_AMOUNT_MISMATCH: "Refused: the amount is not the approved amount for this milestone. Nothing was signed.",
+  ERR_PAYEE_MISMATCH: "Refused: the destination is not the authorised recipient. Nothing was paid.",
+  ERR_AMOUNT_MISMATCH: "Refused: the amount is not the approved amount for this milestone. Nothing was paid.",
 }
 const CODE = /ERR_[A-Z0-9_]+/
 function splitReason(reason: string): { code: string | null; text: string | null } {

@@ -5,6 +5,7 @@ import { Button } from "../components/Button"
 import { ContentCard } from "../components/ContentCard"
 import { PageHero } from "../components/PageHero"
 import { LINKS } from "../content/links"
+import { ProductShot, type ShotVariant } from "../components/ProductShot"
 import styles from "./Product.module.css"
 
 /* ------------------------------------------------------------------
@@ -32,8 +33,7 @@ const slide = (x: -100 | 100): AppearEffect => ({
 
 type RowProps = {
   id: string
-  image: string
-  imageAlt: string
+  shot: ShotVariant
   imageSide: "left" | "right"
   title: ReactNode
   subline?: ReactNode
@@ -43,8 +43,8 @@ type RowProps = {
 
 /* About "Section" row: Image (1fr, aspect 1.3) + Content (1fr); image slides in from its own side.
    Rows with the image on the right put the image first on Phone (Ue6QXWSr_J3FA8OTKG). */
-function Row({ id, image, imageAlt, imageSide, title, subline, paragraphs, action }: RowProps) {
-  const img = <Appear effect={slide(imageSide === "left" ? -100 : 100)} className={styles.image} style={{ backgroundImage: `url("${image}")` }} role="img" aria-label={imageAlt} />
+function Row({ id, shot, imageSide, title, subline, paragraphs, action }: RowProps) {
+  const img = <Appear effect={slide(imageSide === "left" ? -100 : 100)} className={styles.image}><ProductShot variant={shot} /></Appear>
   const content = (
     <Appear effect={slide(imageSide === "left" ? 100 : -100)} className={styles.content}>
       <div className={styles.rowText}>
@@ -72,19 +72,19 @@ function Row({ id, image, imageAlt, imageSide, title, subline, paragraphs, actio
 /* A3 premise items as Content Card instances (Features hehXLuKvS / M5z5mWu0X / Dr9qLJnUh) */
 const CARDS = [
   {
-    image: "/assets/content-image-1.png",
+    shot: "mandate" as ShotVariant,
     title: "Negotiate with confidential mandates",
     description: "Give your agent the budget, requirements and limits it needs to negotiate, without directly sharing those instructions with the counterparty.",
     delay: "0s",
   },
   {
-    image: "/assets/image.png",
+    shot: "terms" as ShotVariant,
     title: "Approve what becomes policy",
     description: "Review the proposed agreement together. Its supported payment conditions become checks on what the agent can authorize.",
     delay: "0.2s",
   },
   {
-    image: "/assets/content-image-3.png",
+    shot: "payment" as ShotVariant,
     title: "Keep the payment connected to the deal",
     description: "Check the milestone, amount and approved recipient before authorization. Follow the payment from request to reported confirmation.",
     delay: "0.4s",
@@ -109,7 +109,7 @@ export function Product() {
       <section id="premise" className={`section ${styles.block}`}>
         <div className={styles.cards}>
           {CARDS.map((c) => (
-            <ContentCard key={c.title} className={styles.card} image={c.image} title={c.title} description={c.description} appear={appear(c.delay)} />
+            <ContentCard key={c.title} className={styles.card} visual={<ProductShot variant={c.shot} />} title={c.title} description={c.description} appear={appear(c.delay)} />
           ))}
         </div>
       </section>
@@ -128,8 +128,7 @@ export function Product() {
 
         <Row
           id="sealed-table"
-          image="/assets/content-image-4.png"
-          imageAlt="Actions panel listing executed buy and sell orders"
+          shot="negotiation"
           imageSide="left"
           title="Sealed Table"
           subline="Reach terms without directly disclosing your limits."
@@ -142,8 +141,7 @@ export function Product() {
 
         <Row
           id="payee"
-          image="/assets/content-image-5.png"
-          imageAlt="Recent analyses panel with quick actions"
+          shot="payeeProof"
           imageSide="right"
           title="Payee"
           subline="Make the destination part of the agreement."

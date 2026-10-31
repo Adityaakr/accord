@@ -4,6 +4,7 @@ import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { Button } from "../components/Button"
 import { PageHero } from "../components/PageHero"
 import { LINKS } from "../content/links"
+import { ProductShot, type ShotVariant } from "../components/ProductShot"
 import styles from "./Payee.module.css"
 
 /* ------------------------------------------------------------------
@@ -28,12 +29,12 @@ const slide = (x: -100 | 100): AppearEffect => ({
   enter: { opacity: 0, x, y: 0, scale: 1, rotate: 0, transition: { type: "spring", stiffness: 240, damping: 80, mass: 1, delay: "0s" } },
 })
 
-type RowProps = { id: string; image: string; imageAlt: string; imageSide: "left" | "right"; title: ReactNode; paragraphs: ReactNode[] }
+type RowProps = { id: string; shot: ShotVariant; imageSide: "left" | "right"; title: ReactNode; paragraphs: ReactNode[] }
 
 /* About "Section" row: Image (1fr, aspect 1.3) + Content (1fr); image slides in from its own side.
    Rows with the image on the right put the image first on Phone (Ue6QXWSr_J3FA8OTKG). */
-function Row({ id, image, imageAlt, imageSide, title, paragraphs }: RowProps) {
-  const img = <Appear effect={slide(imageSide === "left" ? -100 : 100)} className={styles.image} style={{ backgroundImage: `url("${image}")` }} role="img" aria-label={imageAlt} />
+function Row({ id, shot, imageSide, title, paragraphs }: RowProps) {
+  const img = <Appear effect={slide(imageSide === "left" ? -100 : 100)} className={styles.image}><ProductShot variant={shot} /></Appear>
   const content = (
     <Appear effect={slide(imageSide === "left" ? 100 : -100)} className={styles.content}>
       <div className={styles.rowText}>
@@ -70,8 +71,7 @@ export function Payee() {
       <section id="recipient" className={`section ${styles.block}`}>
         <Row
           id="destination"
-          image="/assets/content-image-4.png"
-          imageAlt="Actions panel listing executed buy and sell orders"
+          shot="payeeProof"
           imageSide="left"
           title="Establish the destination."
           paragraphs={[
@@ -80,24 +80,21 @@ export function Payee() {
         />
         <Row
           id="change"
-          image="/assets/content-image-5.png"
-          imageAlt="Recent analyses panel with quick actions"
+          shot="payeeChange"
           imageSide="right"
           title="Treat a change as a new decision."
           paragraphs={[<>A new address follows the configured approval and delay process. An instruction in an email is not enough to update the bound destination.</>]}
         />
         <Row
           id="history"
-          image="/assets/content-image-6.png"
-          imageAlt="AI Agents panel listing trading, risk and portfolio agents"
+          shot="payeeHistory"
           imageSide="left"
           title="Keep the history visible."
           paragraphs={[<>Inspect the current recipient version, the approvals behind it and any pending change before authorizing a payment.</>]}
         />
         <Row
           id="identity"
-          image="/assets/showcase-image-5.png"
-          imageAlt="Activity panel of the deal room"
+          shot="identity"
           imageSide="right"
           title="Control is not corporate identity."
           paragraphs={[

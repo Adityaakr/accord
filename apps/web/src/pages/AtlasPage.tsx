@@ -9,6 +9,7 @@ import { Mono } from "../components/Mono"
 import { Button } from "../components/Button"
 import { useLive, asOfLabel, type LiveValues } from "../lib/live"
 import { LINKS } from "../content/links"
+import { ProductShot, type ShotVariant } from "../components/ProductShot"
 import styles from "./AtlasPage.module.css"
 
 /* /atlas (was /glassbook; renamed Accord Atlas 30 Oct 2026): docs/website/ACCORD_WEBSITE_CONTENT.md B3, set verbatim.
@@ -36,16 +37,15 @@ const appearTall = (delay: `${number}s`) => ({ ...appear(delay), threshold: 0.1 
 
 type RowProps = {
   id: string
-  image: string
-  imageAlt: string
+  shot: ShotVariant
   imageSide: "left" | "right"
   title: string
   paragraphs: ReactNode[]
 }
 
 /* About section row (YoIZRFTN2 geometry): Image + Content, 1fr each, gap 64; vertical on Phone */
-function Row({ id, image, imageAlt, imageSide, title, paragraphs }: RowProps) {
-  const img = <Appear effect={slide(imageSide === "left" ? -100 : 100)} className={styles.image} style={{ backgroundImage: `url("${image}")` }} role="img" aria-label={imageAlt} />
+function Row({ id, shot, imageSide, title, paragraphs }: RowProps) {
+  const img = <Appear effect={slide(imageSide === "left" ? -100 : 100)} className={styles.image}><ProductShot variant={shot} /></Appear>
   const content = (
     <Appear effect={slide(imageSide === "left" ? 100 : -100)} className={styles.content}>
       <div className={styles.text}>
@@ -68,32 +68,28 @@ function Row({ id, image, imageAlt, imageSide, title, paragraphs }: RowProps) {
 const ROWS: RowProps[] = [
   {
     id: "measurement",
-    image: "/assets/showcase-image-1.png",
-    imageAlt: "Agreement terms panel",
+    shot: "conditions",
     imageSide: "left",
     title: "Define the measurement before the engagement.",
     paragraphs: ["Specify the venue and pair, maximum spread, minimum depth, observation schedule, data-coverage requirements and the rule used to determine payment eligibility."],
   },
   {
     id: "observations",
-    image: "/assets/showcase-image-2.png",
-    imageAlt: "Observation record panel",
+    shot: "observation",
     imageSide: "right",
     title: "Give each observation a place in the record.",
     paragraphs: ["Follow the measurement window, source, result and associated execution evidence. Review gaps and exceptions alongside successful observations."],
   },
   {
     id: "result",
-    image: "/assets/showcase-image-3.png",
-    imageAlt: "Payment eligibility panel",
+    shot: "decision",
     imageSide: "left",
     title: "Connect the result to the agreement.",
     paragraphs: ["Where the approved measurement and release rules are satisfied, the payment becomes eligible for authorization. Where they are not, the room shows what is outstanding and which review process applies."],
   },
   {
     id: "scope",
-    image: "/assets/showcase-image-4.png",
-    imageAlt: "Order-book observation panel",
+    shot: "scope",
     imageSide: "right",
     title: "What the current version measures.",
     paragraphs: [

@@ -3,6 +3,7 @@ import { Appear, type AppearEffect } from "../lib/motion"
 import { PageHero } from "../components/PageHero"
 import { Button } from "../components/Button"
 import { LINKS } from "../content/links"
+import { InboxMock } from "../components/InboxMock"
 import styles from "./Demo.module.css"
 
 /* /demo: docs/website/ACCORD_WEBSITE_CONTENT.md C (editorial fallback while no deployment is available), D2 "Recorded demo",
@@ -63,13 +64,9 @@ export function Demo() {
       {/* A8 Security demonstration (About section row y_CVc9JIP geometry) */}
       <section id="security" className={`section ${styles.security}`}>
         <div className={styles.row}>
-          <Appear
-            effect={slide(-100)}
-            className={styles.image}
-            style={{ backgroundImage: 'url("/assets/content-image-6.png")' }}
-            role="img"
-            aria-label="AI Agents panel listing trading, risk and portfolio agents"
-          />
+          <Appear effect={slide(-100)} className={styles.image}>
+            <InboxMock />
+          </Appear>
           <Appear effect={slide(100)} className={styles.content}>
             <div className={styles.text}>
               <h2 className={`t-h3 ${styles.rowTitle}`}>Change the instruction. Test the boundary.</h2>

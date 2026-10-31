@@ -30,25 +30,6 @@ const appear = (delay: `${number}s`): AppearEffect => ({
 })
 
 
-/* Part A paragraphs 2 and 3 (paragraph 3 split at the sentence that describes the demonstration) */
-const ITEMS = [
-  {
-    title: "What each side states",
-    body: "Each side states its position in confidence: the retainer, the maximum spread, the minimum depth within one percent of the mid price, the required uptime, the venue and the observation schedule. The Sealed Table negotiates the terms; both sides approve them.",
-    delay: "0s" as const,
-  },
-  {
-    title: "What the observer records",
-    body: "Each period, an observer inside an attested enclave samples the venue's public order book on the agreed schedule and records whether the conditions were met. A period pays when the agreed number of observation slots pass; otherwise it is withheld and people on both sides decide.",
-    delay: "0.1s" as const,
-  },
-  {
-    title: "What the demonstration shows",
-    body: "The demonstration shows the approved conditions, every slot with its attestation, each period's decision and the payment on NEAR testnet.",
-    delay: "0.2s" as const,
-  },
-]
-
 /* Slot map card labels */
 const CARDS = [
   { id: "YmMOXz8s_", icon: <IconTerms />, label: "Approved conditions", delay: "0s" as const },
@@ -105,10 +86,6 @@ export function Compliance() {
             the venue's public order book on the agreed schedule. When the agreed number of observations pass, the payment is released; when they don't, it
             is held for both sides to decide.
           </p>
-          <p className={`t-body-lg ${styles.description}`}>
-            The observations measure the market's condition on the venue, not which participant supplied it. Attributing liquidity to the market maker's own
-            account is planned.
-          </p>
         </Appear>
       </div>
 
@@ -119,16 +96,6 @@ export function Compliance() {
         ))}
       </div>
 
-      {/* Three text columns */}
-      <div className={styles.items}>
-        {ITEMS.map((it) => (
-          <Appear key={it.title} className={styles.item} effect={appear(it.delay)}>
-            <h3 className={`t-h5 ${styles.itemTitle}`}>{it.title}</h3>
-            <p className={`t-body-sm ${styles.itemBody}`}>{it.body}</p>
-          </Appear>
-        ))}
-      </div>
-
       {/* Slot panel (spec §3.3): only when the snapshot has observation slots */}
       {hasSlots ? <SlotPanel v={live} /> : null}
 
@@ -136,7 +103,7 @@ export function Compliance() {
       <Appear className={styles.scope} effect={appear("0s")}>
         <p className={`t-h6 ${styles.scopeLabel}`}>Scope</p>
         <p className={`t-body-sm ${styles.scopeText}`}>
-          The venue's order book shows the market's condition, not which participant provided it. Attributing liquidity to the market maker's own account needs authenticated account data from the venue, which is planned and not yet implemented. Atlas pays on the conditions as agreed; it does not yet establish who met them.
+          Atlas measures the market's condition on the venue, not which participant supplied it. Attributing liquidity to the market maker's own account is planned.
         </p>
         <Button variant="secondary" href={LINKS.exploreAtlas}>See the Atlas demonstration</Button>
         {/* spec §3.3: tertiary link as the section's last line */}

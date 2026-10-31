@@ -68,8 +68,8 @@ export function FaqAccordion({ title, description, inView, delay, open, onToggle
     /* appearEffect wrapper (instance-level) */
     <motion.div
       className={`${styles.appear} ${className}`}
-      initial={{ opacity: 0, y: 32 }}
-      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 32 }}
+      animate={reduceMotion || inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
       transition={{ type: "tween", ease: EASE_APPEAR, duration: 1, delay }}
     >
       {/* Variant frame TOtD54UnA / Nf3dw3Su0 */}

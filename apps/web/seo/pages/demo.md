@@ -8,7 +8,7 @@ Recorded demo
 
 The public demonstration is being prepared. Production availability, supported assets and pricing have not been announced.
 
-> AI Agents panel listing trading, risk and portfolio agents
+> Illustrative: the demonstration agent's inbox. A message with new bank details and an urgent invoice are both refused by the contract with their reasons; the scheduled payment to the authorised recipient goes through.
 
 ## Change the instruction. Test the boundary.
 

@@ -170,3 +170,8 @@ code.mono { padding: 1px 6px; border-radius: 4px; background: var(--elevation-me
     scroll-behavior: auto !important;
   }
 }
+
+/* Print and screenshot tools: never leave scroll-revealed content invisible */
+@media print {
+  [style*="opacity: 0"] { opacity: 1 !important; transform: none !important; filter: none !important; }
+}

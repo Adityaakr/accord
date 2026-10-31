@@ -153,7 +153,7 @@ const CARDS: Card[] = [
     id: "TExcZL5RQ",
     icon: <IconBookCheck />,
     title: "No recall",
-    description: "Accord does not recall a signed transfer; revocation stops new authorisations and lists signed transfers for cancellation.",
+    description: "Revocation is not a recall: it stops every new payment at once, and a payment already made stays made.",
     delay: "0.3s",
   },
   {

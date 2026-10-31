@@ -1,0 +1,49 @@
+/* Same family as InboxMock / HeroPreview: misty backdrop, light panel, sized in em (1em = width / 46). */
+.stage {
+  container-type: inline-size;
+  position: relative; display: grid; place-items: center; width: 100%; height: 100%; min-height: 100%;
+  border-radius: 4px; overflow: hidden;
+  background:
+    radial-gradient(70% 55% at 15% 105%, rgba(70, 72, 76, 0.5), transparent 70%),
+    radial-gradient(60% 50% at 95% 100%, rgba(80, 82, 86, 0.4), transparent 70%),
+    linear-gradient(180deg, #e2e2e2 0%, #d0d0d0 45%, #b5b5b5 100%);
+  font-family: "Inter", "Host Grotesk", sans-serif; color: #17181b;
+}
+.panel { font-size: calc(100cqw / 46); width: 82%; display: flex; flex-direction: column; background: #f7f7f8; border-radius: 0.75em; padding: 1.1em 1.2em 1.2em; box-shadow: 0 1.4em 3em rgba(0, 0, 0, 0.22); }
+.head { display: flex; justify-content: space-between; align-items: center; gap: 0.8em; margin-bottom: 0.9em; }
+.title { font-size: 1.05em; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tags { display: flex; gap: 0.4em; flex: none; }
+.tag { font-size: 0.68em; padding: 0.22em 0.65em; border-radius: 999px; background: #ecfdf3; color: #15803d; font-weight: 500; }
+.illus { font-size: 0.68em; padding: 0.22em 0.65em; border-radius: 999px; background: #ececee; color: #6b6f76; }
+.body { display: flex; flex-direction: column; gap: 0.5em; background: #fff; border: 0.06em solid #e6e7ea; border-radius: 0.55em; padding: 0.85em 0.95em; }
+.kv { display: flex; justify-content: space-between; gap: 1em; font-size: 0.82em; color: #55585e; padding: 0.15em 0; border-bottom: 0.06em solid #f0f0f2; }
+.kv:last-child { border-bottom: 0; }
+.kv code, .kv b { font-family: "JetBrains Mono", monospace; font-size: 0.95em; color: #17181b; font-weight: 500; text-align: right; white-space: nowrap; }
+.kv b { font-family: inherit; }
+.muted code { color: #8a8d93; }
+.check { display: flex; align-items: flex-start; gap: 0.6em; font-size: 0.82em; color: #2b2e33; line-height: 1.4; }
+.check b { font-weight: 600; }
+.mark { display: grid; place-items: center; flex: none; width: 1.35em; height: 1.35em; border-radius: 999px; font-size: 0.85em; font-weight: 700; }
+.ok { background: #ecfdf3; color: #16a34a; }
+.no { background: #fdeef1; color: #c81e3a; }
+.wait { background: #f1f1f3; color: #8a8d93; }
+.note { font-size: 0.74em; line-height: 1.45; color: #6b6f76; }
+.code { font-family: "JetBrains Mono", monospace; font-size: 0.72em; padding: 0.45em 0.6em; border-radius: 0.35em; background: #f4f4f6; color: #17181b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat { display: flex; flex-direction: column; gap: 0.2em; align-items: flex-start; }
+.chatB { align-items: flex-end; }
+.who { font-size: 0.66em; color: #8a8d93; }
+.bubble { font-size: 0.8em; padding: 0.45em 0.75em; border-radius: 0.8em; background: #f1f1f3; max-width: 85%; }
+.chatB .bubble { background: #17181b; color: #fff; }
+.slots { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.4em; }
+.slots span { display: grid; place-items: center; height: 2.4em; border-radius: 0.45em; font-weight: 700; }
+.sPass { background: #ecfdf3; color: #16a34a; }
+.sFail { background: #fdeef1; color: #c81e3a; }
+.book { display: flex; flex-direction: column; gap: 0.25em; padding: 0.2em 0 0.4em; }
+.ask, .bid { height: 0.75em; border-radius: 0.2em; }
+.ask { align-self: flex-end; background: rgba(220, 38, 38, 0.2); }
+.bid { background: rgba(22, 163, 74, 0.22); }
+.mid { text-align: center; font-family: "JetBrains Mono", monospace; font-size: 0.66em; color: #55585e; padding: 0.2em 0; }
+.amount { display: flex; justify-content: space-between; align-items: center; margin-top: 0.3em; padding-top: 0.6em; border-top: 0.06em solid #f0f0f2; }
+.amount > span:first-child { font-size: 1.5em; font-weight: 600; letter-spacing: -0.03em; }
+.pill { font-size: 0.72em; padding: 0.25em 0.7em; border-radius: 999px; background: #ecfdf3; color: #15803d; font-weight: 500; }
+@container (max-width: 380px) { .panel { font-size: calc(100cqw / 32); width: 90%; } }

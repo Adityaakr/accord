@@ -1,4 +1,4 @@
-import { motion } from "motion/react"
+import { motion, useReducedMotion } from "motion/react"
 import { EASE_APPEAR, EASE_UI, toTransition, type FramerTransition } from "../lib/motion"
 import { Dots } from "../components/Dots"
 import { Button } from "../components/Button"
@@ -39,13 +39,14 @@ const PATHS = [
 ] as const
 
 export function Cta() {
+  const reduce = useReducedMotion()
   return (
     <motion.section
       id="cta"
       className={`section ${styles.section}`}
-      initial={{ opacity: 0, x: 0, y: 32, scale: 1, rotate: 0 }}
+      initial={reduce ? false : { opacity: 0, x: 0, y: 32, scale: 1, rotate: 0 }}
       whileInView={{ opacity: 1, x: 0, y: 0, scale: 1, rotate: 0 }}
-      viewport={{ once: true, amount: 0.5 }}
+      viewport={{ once: true, amount: 0.15 }}
       transition={toTransition(SECTION_APPEAR_TRANSITION)}
     >
       {/* Dots UbeG5R_si: loop opacity 1 ↔ 0.5 */}

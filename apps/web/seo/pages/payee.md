@@ -4,7 +4,7 @@ Inside Accord · Payee
 
 [Set up your recipient profile](/product/payee) [Inspect a recipient record](/record)
 
-> Actions panel listing executed buy and sell orders
+> Illustrative: A recipient bound to the vendor's domain, approved and accepted.
 
 ### Establish the destination.
 
@@ -14,9 +14,9 @@ The vendor proposes a destination and demonstrates control of its domain. Its se
 
 A new address follows the configured approval and delay process. An instruction in an email is not enough to update the bound destination.
 
-> Recent analyses panel with quick actions
+> Illustrative: A recipient change that needs a fresh proof, the authority, the buyer and a 24-hour delay.
 
-> AI Agents panel listing trading, risk and portfolio agents
+> Illustrative: The recipient's version history, including a change request that was refused.
 
 ### Keep the history visible.
 
@@ -26,6 +26,6 @@ Inspect the current recipient version, the approvals behind it and any pending c
 
 Domain proof establishes control of a domain. Destination approval establishes authorization within the configured process. Neither alone proves that a business exists or that its commercial claims are genuine.
 
-> Activity panel of the deal room
+> Illustrative: What a payee binding proves, and what it does not.
 
 [Review recipient controls](/security)

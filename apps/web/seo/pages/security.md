@@ -14,7 +14,7 @@ Security
 
 | Recipient authorization | The binding process establishes domain control and destination approval. It is not legal business verification. |
 
-| Revocation | Revocation stops new authorizations through the revoked agent path. It does not recall a transfer already signed. |
+| Revocation | Revocation stops every new payment through the revoked agent key at once. It does not recall a payment already made. |
 
 | Settlement | Settlement is in USDC on NEAR. The contract makes each transfer itself, so payment and verification happen in the same place; the transfers are public, as with any stablecoin payment. |
 
@@ -24,7 +24,7 @@ Security
 
 | --- | --- | --- | --- | --- |
 
-| Agreement funds | USDC (NEP-141) held in escrow by the contract on NEAR. Only the contract can move it, and only through `act`. | The buyer's agent, within the approved terms | A transfer to anyone but the bound payee version. An amount other than the approved one. Any new signature after revocation. | `revoke`, by the buyer |
+| Agreement funds | USDC (NEP-141) held in escrow by the contract on NEAR. Only the contract can move it, and only through `act`. | The buyer's agent, within the approved terms | A transfer to anyone but the bound payee version. An amount other than the approved one. Any new payment after revocation. | `revoke`, by the buyer |
 
 | Mandates | Sealed blobs. Plaintext exists only inside the negotiation enclave, during the run. | The enclave, during the job | The other party, the operator or the app reading them | Nothing to switch off: the plaintext is gone when the run ends |
 
@@ -44,7 +44,7 @@ Security
 
 Where each attack stops · the agent is assumed to follow every message it reads
 
-- BEC ASI01 goal hijack What the agent does Asks to pay the new account Where it stops **Agreement controls** destination is not the authorised recipient Result `ERR_PAYEE_MISMATCH` nothing signed
+- BEC ASI01 goal hijack What the agent does Asks to pay the new account Where it stops **Agreement controls** destination is not the authorised recipient Result `ERR_PAYEE_MISMATCH` nothing paid
 
 Not stopped by the contract: a person approving the wrong terms, or a payment the terms already allow. Those stay with people, on the record.
 
@@ -74,7 +74,7 @@ Not stopped by the contract: a person approving the wrong terms, or a payment th
 
 | Payments go only to the bound payee | The payee is a destination tied to a domain the vendor controls (proof fetched inside an enclave), approved by the vendor's settlement authority, accepted by the buyer, versioned; a change needs a fresh proof, the authority and `24 h` | "Bound" is not "verified as a real business": it proves control and authorisation, not corporate existence. A legal KYB is a v2 integration |
 
-| `revoke` ends every new authorisation at once | It deletes the agent's function-call key and sets the revoked flag in one transaction; the contract requests no further signatures for the agreement | Revocation is not a recall. A payment made before `revoke` stays made. Whatever landed was authorised, to the bound payee, at the approved amount |
+| `revoke` ends every new authorisation at once | It deletes the agent's function-call key and sets the revoked flag in one transaction; the contract makes no further payments for the agreement | Revocation is not a recall. A payment made before `revoke` stays made. Whatever landed was authorised, to the bound payee, at the approved amount |
 
 | Negotiation is private, settlement is not | Mandates and the transcript stay inside the enclave; the commercial terms document is encrypted to the two parties and only its hash is on chain | The payment schedule the contract enforces (amounts and dates) and the USDC transfers are public on NEAR, as with any stablecoin payment |
 

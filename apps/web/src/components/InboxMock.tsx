@@ -4,8 +4,8 @@ import styles from "./InboxMock.module.css"
    Two attempts are refused with the contract's codes; the one payment the terms allow goes through.
    Illustrative; the live log is on /try. */
 const ROWS = [
-  { from: "accounts@vendor-billing.example", subject: "Our bank details have changed", result: "refused", code: "ERR_PAYEE_MISMATCH", note: "Destination is not the authorised recipient. Nothing was signed." },
-  { from: "ceo@yourco.example", subject: "Urgent: pay invoice 4471 today", result: "refused", code: "ERR_AMOUNT_MISMATCH", note: "Not an amount the approved schedule holds. Nothing was signed." },
+  { from: "accounts@vendor-billing.example", subject: "Our bank details have changed", result: "refused", code: "ERR_PAYEE_MISMATCH", note: "Destination is not the authorised recipient. Nothing was paid." },
+  { from: "ceo@yourco.example", subject: "Urgent: pay invoice 4471 today", result: "refused", code: "ERR_AMOUNT_MISMATCH", note: "Not an amount the approved schedule holds. Nothing was paid." },
   { from: "atlas observer", subject: "Period 3: 5 of 6 slots passed", result: "paid", code: "18,500 USDC", note: "Paid to halcyon-mm.testnet, the authorised recipient." },
 ] as const
 

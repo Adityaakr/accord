@@ -4,13 +4,19 @@ Product
 
 [Open a deal room](/join) [Inspect an agreement](/record)
 
+> Illustrative: A buyer's sealed mandate: limits stay hidden, only a commitment hash is recorded.
+
 #### Negotiate with confidential mandates
 
 Give your agent the budget, requirements and limits it needs to negotiate, without directly sharing those instructions with the counterparty.
 
+> Illustrative: Proposed terms awaiting approval from both companies.
+
 #### Approve what becomes policy
 
 Review the proposed agreement together. Its supported payment conditions become checks on what the agent can authorize.
+
+> Illustrative: A payment request checked against the approved terms before it is paid.
 
 #### Keep the payment connected to the deal
 
@@ -20,7 +26,7 @@ Sealed Table and Payee
 
 ## Confidential where it matters. Explicit where money moves.
 
-> Actions panel listing executed buy and sell orders
+> Illustrative: Two agents negotiating inside the Sealed Table, with the limit check.
 
 ### Sealed Table
 
@@ -42,4 +48,4 @@ Destination changes follow a separate approval process and configured delay. Dom
 
 [How recipient approval works →](/product/payee)
 
-> Recent analyses panel with quick actions
+> Illustrative: A recipient bound to the vendor's domain, approved and accepted.

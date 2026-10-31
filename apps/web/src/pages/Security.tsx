@@ -31,7 +31,7 @@ const AREAS: Row[] = [
   ["Approved terms", "Parties review the deal before activation. On-chain payment conditions are public; an encrypted document does not hide fields recorded on a public chain."],
   ["Agent permissions", "The agreement restricts the supported payment operations. Deployment keys, upgrade authority and other signing paths must be disclosed separately."],
   ["Recipient authorization", "The binding process establishes domain control and destination approval. It is not legal business verification."],
-  ["Revocation", "Revocation stops new authorizations through the revoked agent path. It does not recall a transfer already signed."],
+  ["Revocation", "Revocation stops every new payment through the revoked agent key at once. It does not recall a payment already made."],
   ["Settlement", "Settlement is in USDC on NEAR. The contract makes each transfer itself, so payment and verification happen in the same place; the transfers are public, as with any stablecoin payment."],
 ]
 
@@ -41,7 +41,7 @@ const PIECES: Row[] = [
     "Agreement funds",
     <>USDC (NEP-141) held in escrow by the contract on NEAR. Only the contract can move it, and only through <Mono>act</Mono>.</>,
     "The buyer's agent, within the approved terms",
-    "A transfer to anyone but the bound payee version. An amount other than the approved one. Any new signature after revocation.",
+    "A transfer to anyone but the bound payee version. An amount other than the approved one. Any new payment after revocation.",
     <><Mono tone="refusal">revoke</Mono>, by the buyer</>,
   ],
   [
@@ -105,7 +105,7 @@ const CLAIMS: Row[] = [
   ],
   [
     <><Mono>revoke</Mono> ends every new authorisation at once</>,
-    "It deletes the agent's function-call key and sets the revoked flag in one transaction; the contract requests no further signatures for the agreement",
+    "It deletes the agent's function-call key and sets the revoked flag in one transaction; the contract makes no further payments for the agreement",
     <>Revocation is not a recall. A payment made before <Mono>revoke</Mono> stays made. Whatever landed was authorised, to the bound payee, at the approved amount</>,
   ],
   [

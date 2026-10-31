@@ -1,4 +1,4 @@
-import { motion, type Transition, type HTMLMotionProps } from "motion/react"
+import { motion, type Transition, type HTMLMotionProps, useReducedMotion } from "motion/react"
 import type { ReactNode } from "react"
 
 /* ------------------------------------------------------------------
@@ -54,6 +54,9 @@ export const DEFAULT_APPEAR: AppearEffect = {
 
 export function Appear({ as, effect = DEFAULT_APPEAR, delay, children, ...rest }: AppearProps) {
   const Tag = (as ? (motion as any)[as] : motion.div) as typeof motion.div
+  /* Reduced motion: content is visible from the first paint, never faded or moved in. */
+  const reduce = useReducedMotion()
+  if (reduce) return <Tag {...rest}>{children}</Tag>
   const e = effect.enter ?? DEFAULT_APPEAR.enter!
   const transition = toTransition(e.transition)
   if (delay !== undefined) transition.delay = delay
@@ -70,7 +73,8 @@ export function Appear({ as, effect = DEFAULT_APPEAR, delay, children, ...rest }
   )
 }
 
-/* Framer's IntersectionObserver threshold; keep tall elements triggerable. */
+/* IntersectionObserver threshold, capped low so a block taller than the viewport still reveals (a 50% threshold
+   never fires for an element more than twice the viewport's height, leaving it invisible). */
 function clampAmount(threshold: number) {
-  return Math.min(Math.max(threshold, 0), 0.5)
+  return Math.min(Math.max(threshold, 0), 0.15)
 }

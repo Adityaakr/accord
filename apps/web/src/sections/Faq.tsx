@@ -108,7 +108,7 @@ export function Faq() {
   const sectionRef = useRef<HTMLElement>(null)
   /* appearEffect trigger "onScrollTarget": the accordions animate in once the FAQ section itself is in view.
      Framer threshold 0.5; capped at 0.3 so the section (taller than a phone viewport) can still trigger. */
-  const inView = useInView(sectionRef, { once: true, amount: 0.3 })
+  const inView = useInView(sectionRef, { once: true, amount: 0.1 })
   /* Spec §3.11 / §5 Accordion: one open at a time. Opening an item closes the others; clicking the open one closes it. */
   const [openId, setOpenId] = useState<string | null>(null)
 

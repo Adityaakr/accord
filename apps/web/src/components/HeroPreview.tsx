@@ -95,7 +95,7 @@ const INSIGHTS = [
   { icon: "check" as const, tone: "ok", title: "Period 2 settled", text: "18,500 USDC confirmed to halcyon-mm.testnet.", link: "Open transaction" },
 ]
 const EVENTS = [
-  { t: "Attempt refused, nothing signed", ago: "12m ago" },
+  { t: "Attempt refused, nothing paid", ago: "12m ago" },
   { t: "Period 2 payment confirmed", ago: "2h ago" },
   { t: "Recipient v1 approved", ago: "3d ago" },
 ]

@@ -13,7 +13,9 @@ import styles from "./ContentCard.module.css"
          Title UzrNw3S_i: H4 preset (qtCKPWAzU), width 1fr
        Description D18pPODKO: Body Large preset (nBG6kvhVn), width 1fr */
 type Props = {
-  image: string
+  image?: string
+  /** A rendered illustration in place of the image */
+  visual?: ReactNode
   alt?: string
   title: string
   /** Plain text, or marked-up copy (`<Mono>`, `<Ref>`, or several `<p>` for a multi-paragraph description) */
@@ -23,14 +25,14 @@ type Props = {
   appear?: AppearEffect
 }
 
-export function ContentCard({ image, alt = "", title, description, className = "", appear }: Props) {
+export function ContentCard({ image, visual, alt = "", title, description, className = "", appear }: Props) {
   const cls = `${styles.card} ${className}`
   /* A string stays the template's single <p>; marked-up copy may carry its own <p>s, so it gets a <div> wrapper */
   const Description = typeof description === "string" ? "p" : "div"
   const inner = (
     <>
       <div className={styles.image}>
-        <img src={image} alt={alt} loading="lazy" decoding="async" />
+        {visual ?? <img src={image} alt={alt} loading="lazy" decoding="async" />}
       </div>
       <div className={styles.container}>
         <div className={styles.heading}>
