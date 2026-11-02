@@ -8,6 +8,14 @@ Each entry names the `PROGRESS.md` item it blocks. Remove an entry when it is do
 2. Paste `northwind-demo.testnet` and request. Repeat every one to two hours until the buyer holds about `70 USDC` (four drips).
 3. Once the `/try` buyer exists with funds, one drip to `northwind-try.testnet` too.
 
+## 0.2 and 2.3: NEAR AI Cloud credits (completions return HTTP 402)
+
+The key in `.env` works for attestation (gateway TDX, model TDX, GPU and nonce binding all verified live on 3 Nov), but every chat completion returns `HTTP 402 no_limit_configured`: "No spending limit configured. Please contact support to set up credits."
+
+1. Sign in at https://cloud.near.ai with the account that owns the key.
+2. Add credits (the NEAR Builders offer, or buy `$10`) or set a spending limit for the key.
+3. Tell me; I rerun `make probe-ai` and the live negotiation test (`cargo test -p accord-sealed-table --release --test live -- --ignored --nocapture live_negotiation`).
+
 ## 0.1 and 0.3: OutLayer CLI
 
 The agent's attempt to `cargo install outlayer-cli` was stopped by its permission check. Run, in this repository:

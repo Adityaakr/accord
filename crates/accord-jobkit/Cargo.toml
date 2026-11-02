@@ -1,0 +1,30 @@
+[package]
+name = "accord-jobkit"
+description = "Shared plumbing for Accord's OutLayer jobs: seed-derived ed25519 keys, signed outputs, pinned NEAR RPC over a swappable HTTP transport"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[features]
+default = []
+# A native HTTPS transport (ureq) for the local runners and fixture recording. Never part of the wasm build.
+native = ["dep:ureq"]
+
+[dependencies]
+accord-core = { path = "../accord-core" }
+accord-venue = { path = "../accord-venue" }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+hex.workspace = true
+hkdf = "0.12.4"
+ed25519-dalek = "2.2.0"
+bs58 = "0.5.1"
+base64 = "0.22.1"
+ureq = { version = "2.12.1", optional = true }
+
+[target.'cfg(all(target_arch = "wasm32", target_os = "wasi"))'.dependencies]
+wasi-http-client = "0.2.1"
+
+[dev-dependencies]
+hmac.workspace = true

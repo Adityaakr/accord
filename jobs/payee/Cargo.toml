@@ -1,0 +1,27 @@
+[package]
+name = "accord-payee"
+description = "Accord Payee: an OutLayer wasm32-wasip2 job that proves a recipient against the vendor's domain file and rates it"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[features]
+default = []
+# The native runner (`payee-local`) against real testnet RPC and HTTPS. Never part of the wasm build.
+local = ["accord-jobkit/native"]
+
+[dependencies]
+accord-core = { path = "../../crates/accord-core" }
+accord-venue = { path = "../../crates/accord-venue" }
+accord-jobkit = { path = "../../crates/accord-jobkit" }
+serde_json.workspace = true
+hex.workspace = true
+
+[[bin]]
+name = "accord-payee"
+path = "src/main.rs"
+
+[[bin]]
+name = "payee-local"
+path = "src/bin/payee-local.rs"
+required-features = ["local"]

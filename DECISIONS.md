@@ -193,3 +193,39 @@ Filled by Adi only, never guessed. The email and payout account live in `.submis
 - `make serve` keeps a local sandbox running with one agreement in each state, for building and screenshotting the app without testnet. The app labels every screen "local sandbox"; its `/api/dev/*` signing routes answer 404 on any other network, so a deployed app has no signing path.
 - The inbox store moved into `@accord/store` (Postgres with `DATABASE_URL`, a JSON file otherwise), shared by the app, the agent and the keeper.
 - OutLayer's WASI docs cap an on-chain job output at about `900 bytes`. The observer (about `610`) and Payee (about `740`) outputs fit; the Sealed Table's (target under `4 KB`) does not, so fallback F1 (`submit_sealed_result` by the keeper, same checks) is expected; probe 0.3 confirms, and claim 1's limit then says the keeper could request extra runs.
+
+## 13. Sealed Table and NEAR AI probe (3 Nov)
+
+Probe 0.2 (`make probe-ai`, `scripts/probe-ai/probe-ai.ts`), printed on 3 Nov:
+
+```
+models: 64 listed, NEAR-fleet TEE with structured outputs: Qwen/Qwen3.6-35B-A3B-FP8, Qwen/Qwen3.8-27B, Qwen/Qwen3.8-27B-abliterated, Qwen/Qwen3-VL-30B-A3B-Instruct, z-ai/glm-5.3-flash
+model: z-ai/glm-5.3-flash
+attestation report: 295 KB, 1 model candidates, fetched in 1543 ms
+verification of 2 quotes and GPU evidence: 1578 ms
+  gateway 0xb98a789cdc4817275f5155593ba73ef2a957e779: tdx ok (UpToDate), gpu absent; compose f571e5dafe8f96ba
+  model candidate 0 0x3b753b4406613c5e70ae640508632b600424fa0c: tdx ok (UpToDate), gpu ok (NRAS 200 in 539 ms, 8 GPUs, arch HOPPER); compose 5f7ebd85cf1f480a
+completion: HTTP 402 no_limit_configured in 233 ms
+e2ee: not checked: completions are refused (HTTP 402 no_limit_configured); a verified candidate does publish a secp256k1 signing_public_key that hashes to its attested address
+completion FAILED (HTTP 402 no_limit_configured) · signature not checked (no completion) · signer not checked (no completion) · gateway tdx ok · model tdx ok · gpu ok · nonce bound ok
+```
+
+0.2 is not done: NEAR AI refuses every completion with `402 no_limit_configured` ("No spending limit configured. Please contact support to set up credits."), so the completion, the response signature and the E2EE try have not run. Adi: add credits (or a spending limit) to the account that owns `NEARAI_API_KEY` at https://cloud.near.ai, then run `make probe-ai` and `cargo test -p accord-sealed-table --release --test live -- --ignored --nocapture live_negotiation`.
+
+- Model: `z-ai/glm-5.3-flash` (`providerType: vllm`, `verifiable: true`, `structured_outputs`, `0.08 / 0.50` USD per 1M tokens), canonical id with `x-no-aliasing: true`. It lists `reasoning`; whether reasoning tokens fit inside `max_tokens 700` before the JSON is unmeasured until completions work.
+- What the report looks like: one model candidate; the gateway's `event_log` is JSON text and the model's a JSON array; `info.tcb_info` is JSON text; gateway and model sit on different FMSPCs (`70A06D070000`, `90C06F000000`); the model candidate carries `nvidia_payload` for 8 Hopper GPUs (about 98 KB) and `signing_public_key` (64-byte secp256k1, keccak-hashes to `signing_address`, checked).
+- Answer 1, `dcap-qvl` for `wasm32-wasip2`: the Rust crate `0.7.0` builds with `default-features = false, features = ["std", "rustcrypto", "default-x509"]`; its defaults do not (`aws-lc-sys` via `reqwest`). Its collateral fetcher sits behind `report` (reqwest), so the job fetches the four PCCS documents itself (Phala PCCS, each URL once) and verifies with `dcap_qvl::verify::verify` against Intel's root CA, so the PCCS is not trusted. Run inside wasmtime 50 as `wasm32-wasip2` (`jobs/sealed-table/examples/attest_wasm.rs`): report, two quotes, RTMR3, MRCONFIGID, `report_data` and NRAS all pass in 3.3 s. Fallback F5 is not needed.
+- Answer 2, `ecies` (pure backend) for `wasm32-wasip2`: `0.2.14` with `default-features = false, features = ["pure", "std"]` builds and runs (randomness included) in wasmtime; it decrypts ciphertexts made by the SDK's `seal` (eciesjs `0.4.18`, `fixtures/jobs/sealed-table/sealed.json`), and eciesjs opens the job's document ciphertexts (checked with `decryptDocument`).
+- Answer 3, E2EE with the chosen model: not answered live (402). Known: the ECDSA report already gives the model's secp256k1 key bound to the attested address, which the documented ECDSA scheme uses (`X-Signing-Algo: ecdsa`, `X-Client-Pub-Key`, `X-Model-Pub-Key`; ECDH, HKDF-SHA256 `ecdsa_encryption`, AES-256-GCM); the current scheme is Ed25519 v2 (`X-Encryption-Version: 2`). E2EE covers message content (`response_format` stays plain; the schema is not secret). The probe sends one encrypted structured-output completion and checks its signature as soon as completions work. 2.3b stays open; claim 1 keeps its gateway limit.
+- Sealed Table (`jobs/sealed-table`, `accord-sealed-table`), choices the spec left open:
+  - Transport: `wasi-http-client 0.2.1` writes a request body in one `blocking-write-and-flush`, which wasmtime caps at `4096` bytes, so a completion request or the GPU payload traps. The job uses `wasi 0.13.3` directly: it starts the request, then writes the body in 4 KB chunks. `accord-jobkit` still uses `wasi-http-client`; its JSON-RPC bodies are small, but any body over 4 KB would trap.
+  - The token's `decimals` come from its `ft_metadata` (the agreement view does not carry them).
+  - Attestation policy: TCB `UpToDate` or `SWHardeningNeeded`, debug bit off; the gateway must verify; a model candidate counts only with TDX and an NRAS `true`. The output lists only verified candidates (`rejected_candidates` counts the rest).
+  - A proposal is delivered only if it parses, passes `terms::structural` (which holds the acceptance window to the params) and `limits::within` for its sender. A walk-away, including a side that failed twice, is recorded as a `WALK_AWAY` message and counted in `rounds`.
+  - Leak filter: every number in the reasons is read as a value and compared with each private number under each named reading (base units, whole units with up to six decimals, thousands separators, `k`, bps, percent; other private integers as plain integers), so no list of renderings can miss one.
+  - Market-making: one item per period (`id = p + 1`, the retainer, due at `period_secs * (p + 1)`), the venue from the buyer's `shared`, and the message's `total` must equal retainer times periods.
+  - Document: `scope` from the buyer's `shared`, each item's `deliverable` from the buyer's `proposed_items` with the same name (null otherwise), market-making items named `Period n`.
+  - Infrastructure outcomes are signed and carry a short `error` (no mandate content); malformed input gets an unsigned error.
+  - Not done: reading the caller from OutLayer's context and refusing other callers (waits for probe 0.3 to say what OutLayer exposes).
+- Output size: about 6.5 KB for a three-message deal (documents 3.4 KB, response records about 420 bytes each), so over the 4 KB target as well as OutLayer's 900-byte note in section 14. Encrypting the document once under a random key and wrapping that key for each party would save about 1.5 KB, but changes the SDK's `decryptDocument`; F1 carries the full output either way. Open for the main loop.
+- Crate pins: `dcap-qvl 0.7.0`, `ecies 0.2.14`, `k256 0.13.4`, `sha3 0.10.8`, `ed25519-dalek 2.2.0`, `hkdf 0.12.4`, `bs58 0.5.1`, `base64 0.22.1`, `wasi 0.13.3`; `ureq 2.12.1` only in native tests. The probe pins `@phala/dcap-qvl 0.7.0`, `@noble/curves 1.9.7`, `@noble/hashes 1.8.0`, `@noble/ciphers 1.3.0`, `eciesjs 0.4.18`, `canonicalize 2.1.0`, `tsx 4.23.15`. Release wasm: 1,487,312 bytes.
