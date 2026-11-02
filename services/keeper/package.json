@@ -1,0 +1,13 @@
+{
+  "name": "@accord/keeper",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": { "@accord/sdk": "workspace:*", "@accord/store": "workspace:*" }
+}

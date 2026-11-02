@@ -103,6 +103,7 @@ async fn main() -> Result<()> {
             "buyer": key(&env.buyer), "vendor": key(&env.vendor), "authority": key(&env.authority),
             "keeper": key(&env.keeper),
         },
+        "agent": {"agreement": live.id, "key": agent.secret_key().to_string()},
         "recipient": env.recipient.id(),
         "attacker": env.attacker.id(),
         "canaries": env.canaries.iter().map(|c| c.id().to_string()).collect::<Vec<_>>(),

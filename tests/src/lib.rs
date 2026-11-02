@@ -20,6 +20,7 @@ pub const PAYEE_SEED: [u8; 32] = [22; 32];
 pub const OBSERVER_SEED: [u8; 32] = [33; 32];
 pub const MODEL: &str = "z-ai/glm-5.3-flash";
 pub const DOMAIN: &str = "halcyon.example";
+pub const SANDBOX_MANDATE_PUBKEY: &str = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
 pub const CREATE_DEPOSIT: NearToken = NearToken::from_near(8);
 
 pub fn tgas(t: u64) -> Gas {
@@ -168,7 +169,9 @@ impl Env {
         ] {
             let mut out = json!({"mode": "pubkey", "job": job, "signing_pubkey": pubkey(seed)});
             if job == "sealed_table" {
-                out["mandate_pubkey"] = json!(format!("02{}", "ab".repeat(32)));
+                // A real secp256k1 point (the generator; its secret is 1), so the browser can seal in the sandbox.
+                // Sandbox only: nothing sealed here is private.
+                out["mandate_pubkey"] = json!(SANDBOX_MANDATE_PUBKEY);
             }
             let out = sign(seed, out);
             ok(f.call(f.id(), "submit_mock_pubkey")

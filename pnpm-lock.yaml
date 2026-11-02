@@ -26,6 +26,9 @@ importers:
       '@accord/sdk':
         specifier: workspace:*
         version: link:../packages/sdk
+      '@accord/store':
+        specifier: workspace:*
+        version: link:../packages/store
       '@hot-labs/near-connect':
         specifier: 0.11.4
         version: 0.11.4
@@ -99,6 +102,34 @@ importers:
       near-api-js:
         specifier: 7.3.1
         version: 7.3.1
+
+  packages/store:
+    dependencies:
+      pg:
+        specifier: 8.23.1
+        version: 8.23.1
+    devDependencies:
+      '@types/pg':
+        specifier: 8.23.1
+        version: 8.23.1
+
+  services/agent:
+    dependencies:
+      '@accord/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      '@accord/store':
+        specifier: workspace:*
+        version: link:../../packages/store
+
+  services/keeper:
+    dependencies:
+      '@accord/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      '@accord/store':
+        specifier: workspace:*
+        version: link:../../packages/store
 
 packages:
 

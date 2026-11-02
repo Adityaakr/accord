@@ -27,7 +27,8 @@ describe("no route accepts a mandate", () => {
     });
   }
   it("the store has no mandate column", () => {
-    const store = readFileSync(path.join(ROOT, "server/store.ts"), "utf8");
+    const store = readFileSync(path.resolve(ROOT, "../../packages/store/src/index.ts"), "utf8");
+    expect(store).toContain("const SCHEMA");
     const schema = store.slice(store.indexOf("const SCHEMA"), store.indexOf("`;", store.indexOf("const SCHEMA")));
     expect(schema).not.toMatch(FORBIDDEN);
   });

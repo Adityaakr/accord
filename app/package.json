@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @accord/sdk build && next dev -p 3100",
-    "build": "pnpm --filter @accord/sdk build && next build",
+    "dev": "pnpm --filter @accord/sdk --filter @accord/store build && next dev -p 3100",
+    "build": "pnpm --filter @accord/sdk --filter @accord/store build && next build",
     "start": "next start -p ${PORT:-3100}",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
@@ -19,7 +19,8 @@
     "@hot-labs/near-connect": "0.11.4",
     "near-api-js": "7.3.1",
     "pg": "8.23.1",
-    "@noble/hashes": "1.8.0"
+    "@noble/hashes": "1.8.0",
+    "@accord/store": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "19.2.2",
