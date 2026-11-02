@@ -12,3 +12,5 @@ One line per `PROGRESS.md` item, newest last.
 - 3 Nov 2026 · 1.12 · tUSDC test token (NEP-141, NEP-145, mint only with the `testnet` feature).
 - 3 Nov 2026 · 1.13 (part) · sandbox suite: 8 tests on a local node (flow, attack, revoke, claim after revoke, failed transfer, close and reserved claim, forged and replayed outputs, Atlas).
 - 3 Nov 2026 · 1.14 · `make sandbox`: full procurement flow and one Atlas period, mocked steps marked, `sandbox: all checks passed` in 38 s.
+- 3 Nov 2026 · 1.1 · JCS vectors shared by `accord-core` and `@accord/sdk`, reproduced byte for byte; `serde_jcs` replaced by an RFC 8785 writer after the vectors showed it ordering non-BMP keys differently.
+- 3 Nov 2026 · 2.1 (part) · `@accord/sdk`: views and every principal and agent call, the sealing client (envelope, ECIES, document key), `preflight` with its signal sources, `verify` with honest `not checked` lines; 18 tests.

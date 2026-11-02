@@ -31,8 +31,8 @@ dependencies = [
  "hex",
  "hmac",
  "proptest",
+ "ryu-js",
  "serde",
- "serde_jcs",
  "serde_json",
  "sha2 0.10.9",
 ]
@@ -3438,17 +3438,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
-]
-
-[[package]]
-name = "serde_jcs"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cacecf649bc1a7c5f0e299cc813977c6a78116abda2b93b1ee01735b71ead9a8"
-dependencies = [
- "ryu-js",
- "serde",
- "serde_json",
 ]
 
 [[package]]

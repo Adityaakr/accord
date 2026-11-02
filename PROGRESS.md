@@ -34,7 +34,7 @@ Gate G0 (1 Nov 23:59): 0.2, 0.3 and 0.4 have real printed output in `DECISIONS.m
 
 ## Phase 1: core, contracts, sandbox (1 to 3 Nov)
 
-- [ ] 1.1 `accord-core` types (`INTERFACES.md` section 3) with serde and borsh; JCS hashing; `crates/accord-core/tests/jcs_vectors.json` reproduced byte for byte by the TypeScript `canonicalize` in `packages/sdk`.
+- [x] 1.1 `accord-core` types (`INTERFACES.md` section 3) with serde and borsh; JCS hashing; `crates/accord-core/tests/jcs_vectors.json` reproduced byte for byte by the TypeScript `canonicalize` in `packages/sdk`.
 - [x] 1.2 `gates::check_pay`: one unit test per refusal code, in gate order, for `Caller::Agent`, `Caller::VendorClaim` and `Caller::Close`.
 - [x] 1.3 `limits::within` and `limits::check` for both kinds: boundary tests on every rule in `INTERFACES.md` 6.3, both directions.
 - [x] 1.4 `terms::structural`, `atlas::slot_time` (stays inside its window, differs per slot), `atlas::passes`, `atlas::evaluate` (`Eligible`, `Review`, `Withheld`, uptime) with tests.

@@ -8,7 +8,7 @@ license.workspace = true
 [dependencies]
 serde.workspace = true
 serde_json.workspace = true
-serde_jcs.workspace = true
+ryu-js = "0.2.2"
 borsh.workspace = true
 sha2.workspace = true
 hmac.workspace = true
