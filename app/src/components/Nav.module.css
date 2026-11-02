@@ -42,4 +42,5 @@
 @media (max-width: 809.98px) {
   .inner { height: auto; flex-wrap: wrap; padding-top: 12px; padding-bottom: 8px; row-gap: 8px; }
   .links { order: 3; flex-basis: 100%; margin: 0 -10px; }
+  .right { margin-left: auto; }
 }

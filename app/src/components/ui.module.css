@@ -92,8 +92,9 @@
 
 @media (max-width: 809.98px) {
   .pageHead { flex-direction: column; align-items: flex-start; padding: 36px 0 24px; }
-  .strip { grid-auto-flow: row; grid-auto-columns: auto; }
-  .stepNote { white-space: normal; }
+  .strip { gap: 6px; }
+  .stepName { font-size: 12.5px; }
+  .stepNote { display: none; }
   .panelHead { padding: 16px 16px 0; }
   .panelBody { padding: 14px 16px 16px; }
 }
