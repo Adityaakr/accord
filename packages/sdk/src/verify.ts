@@ -6,6 +6,7 @@ import { baseDecode } from "near-api-js";
 import { bytesToHex, randomBytes } from "@noble/hashes/utils";
 import type { Accord } from "./accord.js";
 import { signedBytes } from "./hash.js";
+import { fromBase64 } from "./bytes.js";
 
 export type CheckStatus = "ok" | "fail" | "not_checked";
 
@@ -28,7 +29,7 @@ export function verifyEd25519(output: Record<string, unknown>, publicKey: string
   if (typeof sig !== "string") return false;
   try {
     const key = baseDecode(publicKey.replace(/^ed25519:/, ""));
-    return ed25519.verify(Buffer.from(sig, "base64"), signedBytes(output), key);
+    return ed25519.verify(fromBase64(sig), signedBytes(output), key);
   } catch {
     return false;
   }

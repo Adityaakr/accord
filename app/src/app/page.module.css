@@ -1,0 +1,65 @@
+.primary {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 14px;
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--on-white);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: box-shadow 0.3s var(--ease);
+}
+.primary:hover { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin-bottom: 40px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--hairline);
+  border: 1px solid var(--hairline);
+}
+.stat { display: flex; flex-direction: column; gap: 10px; padding: 18px 20px 20px; background: var(--elevation-strong); }
+.statValue { font-family: var(--font-mono); font-size: 22px; letter-spacing: -0.02em; color: var(--text-strong); font-variant-numeric: tabular-nums; }
+.statRefusal { color: var(--refusal); }
+
+.list { display: flex; flex-direction: column; border-top: 1px solid var(--hairline); }
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.6fr) minmax(0, 1.3fr) 110px;
+  align-items: center;
+  gap: 24px;
+  padding: 18px 12px;
+  margin: 0 -12px;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 6px;
+  transition: background-color 0.2s var(--ease);
+}
+.row:hover { background: var(--elevation-strong); }
+.rowMain { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.rowTitle { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rowParties { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: wrap; }
+.rowMoney { display: flex; flex-direction: column; gap: 8px; }
+.rowState { display: flex; justify-content: flex-end; }
+
+.error, .emptyState {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 28px;
+  border-radius: var(--radius);
+  border: 1px dashed var(--hairline-strong);
+  margin-bottom: 24px;
+}
+.error { border-color: var(--refusal-line); }
+
+@media (max-width: 1023.98px) {
+  .row { grid-template-columns: minmax(0, 1fr) auto; }
+  .rowParties, .rowMoney { grid-column: 1 / -1; }
+  .rowState { grid-row: 1; grid-column: 2; }
+}
+@media (max-width: 809.98px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

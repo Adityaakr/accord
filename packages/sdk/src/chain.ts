@@ -3,6 +3,7 @@
 
 import { Account, JsonRpcProvider, KeyPair, KeyPairSigner, actions, type KeyPairString } from "near-api-js";
 import type { AccordEvent } from "./types.js";
+import { fromBase64, utf8 } from "./bytes.js";
 
 export const RPC: Record<string, { rpc: string; fallback: string; explorer: string }> = {
   testnet: {
@@ -141,7 +142,7 @@ export function toTxResult(res: unknown): TxResult {
   const failure = tx.status.Failure ?? receiptFailure;
   let value: unknown = null;
   if (tx.status.SuccessValue) {
-    const text = Buffer.from(tx.status.SuccessValue, "base64").toString("utf8");
+    const text = utf8(fromBase64(tx.status.SuccessValue));
     try {
       value = JSON.parse(text);
     } catch {

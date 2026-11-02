@@ -6,3 +6,5 @@ export * from "./sealing.js";
 export * from "./preflight.js";
 export * from "./verify.js";
 export * from "./format.js";
+export * from "./guard.js";
+export * from "./bytes.js";

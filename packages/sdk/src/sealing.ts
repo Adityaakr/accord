@@ -9,6 +9,7 @@ import { bytesToHex, hexToBytes, randomBytes, utf8ToBytes } from "@noble/hashes/
 import { secp256k1 } from "@noble/curves/secp256k1";
 import { jcs, sha256Hex } from "./hash.js";
 import type { Signer } from "./chain.js";
+import { fromBase64, toBase64, utf8 } from "./bytes.js";
 
 export type Role = "buyer" | "vendor";
 
@@ -101,22 +102,22 @@ export function seal(args: {
   }
   return {
     commitment: sha256Hex(bytes),
-    ciphertext: Buffer.from(ciphertext).toString("base64"),
+    ciphertext: toBase64(ciphertext),
     envelope,
   };
 }
 
 /** Opens an envelope with the mandate key's secret: used only by the Sealed Table and by tests. */
 export function open(ciphertextB64: string, secretHex: string): { envelope: Envelope; commitment: string } {
-  const bytes = decrypt(secretHex, Buffer.from(ciphertextB64, "base64"));
-  const text = Buffer.from(bytes).toString("utf8");
+  const bytes = decrypt(secretHex, fromBase64(ciphertextB64));
+  const text = utf8(bytes);
   return { envelope: JSON.parse(text) as Envelope, commitment: sha256Hex(bytes) };
 }
 
 /** Decrypts the commercial terms document encrypted to this party's document key. */
 export function decryptDocument(ciphertextB64: string, docKey: DocKey): unknown {
-  const bytes = decrypt(docKey.secret, Buffer.from(ciphertextB64, "base64"));
-  return JSON.parse(Buffer.from(bytes).toString("utf8"));
+  const bytes = decrypt(docKey.secret, fromBase64(ciphertextB64));
+  return JSON.parse(utf8(bytes));
 }
 
 /**
@@ -126,7 +127,7 @@ export function decryptDocument(ciphertextB64: string, docKey: DocKey): unknown 
  */
 export function sealedCheck(ciphertextB64: string, docKey: DocKey): "ERR_SEALED" | "READABLE" {
   try {
-    decrypt(docKey.secret, Buffer.from(ciphertextB64, "base64"));
+    decrypt(docKey.secret, fromBase64(ciphertextB64));
     return "READABLE";
   } catch {
     return "ERR_SEALED";

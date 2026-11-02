@@ -1,0 +1,20 @@
+{
+  "name": "@accord/cli",
+  "version": "0.1.0",
+  "description": "accord: the command line for Accord agreements",
+  "license": "MIT",
+  "type": "module",
+  "bin": { "accord": "dist/main.js" },
+  "main": "dist/main.js",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "dev": "tsx --tsconfig tsconfig.json src/main.ts"
+  },
+  "dependencies": {
+    "@accord/sdk": "workspace:*",
+    "near-api-js": "7.3.1"
+  }
+}
