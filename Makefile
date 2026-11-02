@@ -15,11 +15,12 @@ test: wasm ; @cargo test --workspace
 wasm: ; @bash scripts/build-wasm.sh
 
 setup: ; @bash scripts/setup.sh
-probe-ai: ; $(call todo,0.2 make probe-ai)
+probe-ai: ; @cd scripts/probe-ai && pnpm install --ignore-workspace --frozen-lockfile --silent && pnpm exec tsx probe-ai.ts
 probe-venue: ; @cargo run -q -p accord-venue --features probe --bin probe-venue
 sandbox: wasm ; @cargo run -q -p accord-sandbox --bin sandbox 2>/dev/null
-check-deploy: ; $(call todo,2.7 make check-deploy)
-deploy-testnet: ; $(call todo,2.7 make deploy-testnet)
+serve: wasm ; @cargo run -q -p accord-sandbox --bin serve 2>/dev/null
+check-deploy: wasm ; @npx tsx scripts/check-deploy.ts
+deploy-testnet: wasm ; @npx tsx scripts/deploy-testnet.ts
 negotiate: ; $(call todo,2.8 make negotiate)
 approve: ; $(call todo,3.4 make approve)
 fund: ; $(call todo,3.4 make fund)
@@ -31,11 +32,11 @@ claim: ; $(call todo,3.4 make claim)
 exception: ; $(call todo,3.4 make exception)
 payee-change: ; $(call todo,3.4 make payee-change)
 atlas: ; $(call todo,3.7 make atlas)
-verify: ; $(call todo,5.1 make verify)
+verify: ; @pnpm --silent --filter @accord/cli dev -- verify $(DEAL)
 demo: ; $(call todo,5.2 make demo)
 demo-reset: ; $(call todo,7.1 make demo-reset)
 inbox: ; $(call todo,4.4 make inbox)
 release-check: ; $(call todo,7.4 make release-check)
 submission-check: ; $(call todo,8.2 make submission-check)
 
-.PHONY: help setup-check ci test wasm setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate approve fund payee pay attack revoke claim exception payee-change atlas verify demo demo-reset inbox release-check submission-check
+.PHONY: help setup-check ci test wasm serve setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate approve fund payee pay attack revoke claim exception payee-change atlas verify demo demo-reset inbox release-check submission-check
