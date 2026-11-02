@@ -17,10 +17,13 @@
     "react-dom": "19.2.9",
     "server-only": "0.0.1",
     "@hot-labs/near-connect": "0.11.4",
-    "near-api-js": "7.3.1"
+    "near-api-js": "7.3.1",
+    "pg": "8.23.1",
+    "@noble/hashes": "1.8.0"
   },
   "devDependencies": {
     "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2"
+    "@types/react-dom": "19.2.2",
+    "@types/pg": "8.23.1"
   }
 }
