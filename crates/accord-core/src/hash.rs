@@ -21,6 +21,19 @@ pub fn to_hex(h: &[u8; 32]) -> String {
     hex::encode(h)
 }
 
+/// The bytes a job signs: `JCS(output without "sig")`. Every job output is a JSON object carrying its signature
+/// as `"sig"`; the verifier drops that one field and re-encodes, so no other field can change unnoticed.
+pub fn signed_bytes(output: &serde_json::Value) -> Vec<u8> {
+    match output {
+        serde_json::Value::Object(map) => {
+            let mut m = map.clone();
+            m.remove("sig");
+            jcs(&serde_json::Value::Object(m))
+        }
+        other => jcs(other),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -33,6 +46,12 @@ mod tests {
             String::from_utf8(jcs(&v)).unwrap(),
             r#"{"a":[true,null,"x"],"b":1,"c":{"y":2,"z":1}}"#
         );
+    }
+
+    #[test]
+    fn signed_bytes_drop_only_the_signature() {
+        let v = json!({"mode": "pubkey", "sig": "abc", "b": [1]});
+        assert_eq!(signed_bytes(&v), br#"{"b":[1],"mode":"pubkey"}"#.to_vec());
     }
 
     #[test]
