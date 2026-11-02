@@ -10,13 +10,14 @@ help:
 	@grep -E '^[a-z-]+:' Makefile | sed 's/:.*//' | tr '\n' ' '; echo
 
 setup-check: ; @bash scripts/setup-check.sh
-ci: ; @cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace
-test: ; @cargo test --workspace
+ci: wasm ; @cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace
+test: wasm ; @cargo test --workspace
+wasm: ; @bash scripts/build-wasm.sh
 
 setup: ; @bash scripts/setup.sh
 probe-ai: ; $(call todo,0.2 make probe-ai)
 probe-venue: ; @cargo run -q -p accord-venue --features probe --bin probe-venue
-sandbox: ; $(call todo,1.14 make sandbox)
+sandbox: wasm ; @cargo run -q -p accord-sandbox --bin sandbox 2>/dev/null
 check-deploy: ; $(call todo,2.7 make check-deploy)
 deploy-testnet: ; $(call todo,2.7 make deploy-testnet)
 negotiate: ; $(call todo,2.8 make negotiate)
@@ -37,4 +38,4 @@ inbox: ; $(call todo,4.4 make inbox)
 release-check: ; $(call todo,7.4 make release-check)
 submission-check: ; $(call todo,8.2 make submission-check)
 
-.PHONY: help setup-check ci test setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate approve fund payee pay attack revoke claim exception payee-change atlas verify demo demo-reset inbox release-check submission-check
+.PHONY: help setup-check ci test wasm setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate approve fund payee pay attack revoke claim exception payee-change atlas verify demo demo-reset inbox release-check submission-check
