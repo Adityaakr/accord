@@ -55,6 +55,8 @@ pub fn structural(terms: &Terms, token: &str, params: &Params) -> Result<(), &'s
                 || a.slots_per_period == 0
                 || a.pass_threshold == 0
                 || a.pass_threshold > a.slots_per_period
+                // Slots are tracked in a 32-bit mask on chain.
+                || a.slots_per_period > 32
                 || a.period_secs < u64::from(a.slots_per_period) * 20
             {
                 return Err("ERR_TERMS_ATLAS");

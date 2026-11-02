@@ -9,6 +9,9 @@ use serde_json::json;
 
 /// A key's allowance must cover at least one `act` reserved at 80 TGas (0.08 NEAR) and stays bounded.
 pub const MIN_ALLOWANCE: u128 = 100_000_000_000_000_000_000_000; // 0.1 NEAR
+pub const MIN_CLOSE_GAS: u64 = 150;
+/// The balance callbacks send the refund (`ft_transfer` 15 TGas and its own callback 10 TGas) and need headroom.
+pub const BALANCE_CALLBACK_GAS: u64 = 60;
 pub const MAX_ALLOWANCE: u128 = 5_000_000_000_000_000_000_000_000; // 5 NEAR
 
 #[near(serializers = [json])]
@@ -129,7 +132,30 @@ impl Agreement {
                 );
                 let item_ctx = self.item_ctx_by_id(item);
                 let ctx = self.pay_ctx(&canaries, recipient.as_deref(), item_ctx);
+                let pending = self
+                    .item_index(item)
+                    .and_then(|i| self.items[i].pending_exception);
                 match check_exception_request(&ctx, item, caller) {
+                    // One pending request per item: asking again returns the one already waiting.
+                    Ok(()) if pending.is_some() => {
+                        PromiseOrValue::Value(ActOutcome::ExceptionRequested {
+                            id: pending.unwrap(),
+                        })
+                    }
+                    // The exception list is full: refused and recorded like any other refusal.
+                    Ok(()) if self.exceptions.len() >= MAX_EXCEPTIONS => {
+                        let code = RefusalCode::CapExceeded;
+                        let seq = self.refuse(
+                            code,
+                            item,
+                            amount,
+                            "",
+                            Some(signer),
+                            Via::Agent,
+                            is_current,
+                        );
+                        PromiseOrValue::Value(ActOutcome::Refused { code, seq })
+                    }
                     Ok(()) => {
                         let id =
                             self.create_exception(item, amount, waive_evidence, reason, "agent");
@@ -176,6 +202,7 @@ impl Agreement {
                 }
                 it.status = ItemStatus::Paid;
                 it.settled = amount;
+                it.settled_by = Some(payment_id);
                 self.paid += amount;
                 self.write_receipt(payment_id, &it, amount, &recipient, via);
             } else if via == Via::Close && it.status != ItemStatus::Reserved {
@@ -187,16 +214,38 @@ impl Agreement {
                 );
             }
         } else {
-            // The lock was already resolved as Paid or AssumedPaid; this answer is the truth for its own item.
-            match (ok, it.status) {
-                (true, ItemStatus::AssumedPaid) => {
+            // `resolve_stale_lock` already settled this payment's item. The token's answer is the truth, but it may
+            // only change the item when the item's settlement is still this payment's own.
+            let mine = it.settled_by == Some(payment_id);
+            match (ok, mine, it.status) {
+                (true, true, ItemStatus::AssumedPaid) => {
                     it.status = ItemStatus::Paid;
                     self.write_receipt(payment_id, &it, amount, &recipient, via);
                 }
-                (false, ItemStatus::AssumedPaid | ItemStatus::Paid) => {
+                (false, true, ItemStatus::AssumedPaid | ItemStatus::Paid) => {
                     self.paid = self.paid.saturating_sub(it.settled);
                     it.settled = 0;
+                    it.settled_by = None;
                     it.status = ItemStatus::Eligible;
+                }
+                (true, false, _) => {
+                    // The transfer happened after the item was reopened by an exception. The money left, so it is
+                    // recorded: the item is paid by this payment if nothing else paid it, and counted either way.
+                    if it.status != ItemStatus::Paid {
+                        if it.status == ItemStatus::Reserved {
+                            self.reserved = self.reserved.saturating_sub(amount);
+                        }
+                        it.status = ItemStatus::Paid;
+                        it.settled = amount;
+                        it.settled_by = Some(payment_id);
+                    } else {
+                        emit(
+                            "duplicate_payment",
+                            json!({"payment_id": payment_id, "item": item, "amount": U128(amount)}),
+                        );
+                    }
+                    self.paid += amount;
+                    self.write_receipt(payment_id, &it, amount, &recipient, via);
                 }
                 _ => {}
             }
@@ -231,7 +280,19 @@ impl Agreement {
 
     /// A lock whose callback never ran: read the real balance. Below the ledger before the payment, the transfer
     /// happened; anything else cannot tell, so the item counts as paid (`AssumedPaid`) until an exception reopens it.
-    pub fn resolve_stale_lock(&mut self) -> Promise {
+    pub fn resolve_stale_lock(&mut self) -> PromiseOrValue<()> {
+        // A close whose balance callback never ran leaves `closing` set; clearing it lets `close()` read again.
+        if self.in_flight.is_none()
+            && self.closing
+            && env::block_height() >= self.closing_since + STALE_LOCK_BLOCKS
+        {
+            self.closing = false;
+            emit(
+                "closing_cleared",
+                json!({"since_block": self.closing_since}),
+            );
+            return PromiseOrValue::Value(());
+        }
         let f = self
             .in_flight
             .as_ref()
@@ -241,11 +302,13 @@ impl Agreement {
             "ERR_NO_STALE_LOCK",
         );
         let id = f.payment_id;
-        self.balance_of_self().then(
-            Self::ext(env::current_account_id())
-                .with_static_gas(gas(20))
-                .on_stale_balance(id),
-        )
+        self.balance_of_self()
+            .then(
+                Self::ext(env::current_account_id())
+                    .with_static_gas(gas(20))
+                    .on_stale_balance(id),
+            )
+            .into()
     }
 
     #[private]
@@ -272,6 +335,7 @@ impl Agreement {
             ItemStatus::AssumedPaid
         };
         it.settled = f.amount;
+        it.settled_by = Some(f.payment_id);
         self.paid += f.amount;
         if proven {
             self.write_receipt(
@@ -332,19 +396,28 @@ impl Agreement {
     /// One step per call after the end of the term (or after both parties asked for `mutual_close`): pay the next
     /// eligible item, set aside what cannot be paid, then refund the real balance minus what is reserved.
     pub fn close(&mut self) -> CloseStep {
-        if self.state == State::Settled && self.refunded_owed() > 0 {
-            self.refund_buyer(self.refunded_owed());
+        if self.state == State::Settled && self.refund_owed > 0 {
+            // Retry against the balance the account actually holds now, never more than is owed.
+            self.balance_of_self()
+                .then(
+                    Self::ext(env::current_account_id())
+                        .with_static_gas(gas(BALANCE_CALLBACK_GAS))
+                        .on_refund_balance(),
+                )
+                .detach();
             return CloseStep::RefundRetried;
         }
         self.require_state(State::Executing);
+        // Enough gas that the balance callback and the refund it sends cannot be starved by the caller.
+        require(env::prepaid_gas() >= gas(MIN_CLOSE_GAS), "ERR_LOW_GAS");
         if self.mutual_close != (true, true) {
             self.require_term_over();
         }
         if self.in_flight.is_some() || self.closing {
-            let seq = self.refuse(RefusalCode::InFlight, 0, 0, "", None, Via::Close, false);
+            // Not written to the refusal log: anyone can call `close`, and the log is the agent's record.
             return CloseStep::Refused {
                 code: RefusalCode::InFlight,
-                seq,
+                seq: self.refusal_seq,
             };
         }
         self.close_step()
@@ -391,6 +464,17 @@ impl Agreement {
     }
 
     #[private]
+    pub fn on_refund_balance(&mut self) {
+        let Some(balance) = read_u128() else {
+            return;
+        };
+        let refund = self.refund_owed.min(balance.saturating_sub(self.reserved));
+        if refund > 0 {
+            self.refund_buyer(refund);
+        }
+    }
+
+    #[private]
     pub fn on_refund_resolved(&mut self, amount: U128) {
         if env::promise_result_checked(0, 64).is_err() {
             self.refund_owed = self.refund_owed.saturating_add(amount.0);
@@ -401,7 +485,14 @@ impl Agreement {
     /// After `Settled`: liquid NEAR above the storage stake to the buyer, keeping a little while an item is reserved.
     pub fn withdraw_near(&mut self) -> Promise {
         self.require_buyer();
-        self.require_state(State::Settled);
+        // Settled, or an agreement that never executed: the creation deposit's spare NEAR goes back to the buyer.
+        require(
+            matches!(
+                self.state,
+                State::Settled | State::Cancelled | State::NoDeal
+            ),
+            "ERR_WRONG_STATE",
+        );
         let mut keep = self.storage_stake();
         if self.reserved > 0 {
             keep = keep.saturating_add(RESERVED_KEEP);
@@ -639,7 +730,9 @@ impl Agreement {
                     self.start_payment(plan, Via::Close, None).detach();
                     CloseStep::Paying { item: id }
                 }
-                Err(RefusalCode::NoRecipient) => {
+                Err(RefusalCode::NoRecipient)
+                    if self.escrow().saturating_sub(self.reserved) >= amount =>
+                {
                     it.status = ItemStatus::Reserved;
                     it.eligible_at.get_or_insert(t);
                     self.reserved += amount;
@@ -662,10 +755,11 @@ impl Agreement {
             };
         }
         self.closing = true;
+        self.closing_since = env::block_height();
         self.balance_of_self()
             .then(
                 Self::ext(env::current_account_id())
-                    .with_static_gas(gas(30))
+                    .with_static_gas(gas(BALANCE_CALLBACK_GAS))
                     .on_close_balance(),
             )
             .detach();
@@ -681,12 +775,8 @@ impl Agreement {
         )
     }
 
-    fn refunded_owed(&self) -> Amount {
-        self.refund_owed
-    }
-
     fn refund_buyer(&mut self, amount: Amount) {
-        self.refund_owed = 0;
+        self.refund_owed = self.refund_owed.saturating_sub(amount);
         Promise::new(self.token.clone())
             .function_call(
                 "ft_transfer",

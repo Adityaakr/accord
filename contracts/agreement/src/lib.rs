@@ -139,6 +139,9 @@ pub struct ItemState {
     /// What this item counts toward `paid`: its amount once `Paid` or `AssumedPaid`, else 0.
     #[serde(with = "accord_core::types::u128_str")]
     pub settled: Amount,
+    /// The payment that settled it (`Paid` or `AssumedPaid`). A late callback touches the item only when it carries
+    /// this id, so an answer to an older payment can never undo a newer one.
+    pub settled_by: Option<u64>,
 }
 
 impl ItemState {
@@ -322,6 +325,8 @@ pub struct Agreement {
     pub(crate) next_payment_id: u64,
     /// Set while `close` reads the token balance for the refund; payments wait (`ERR_IN_FLIGHT`).
     pub(crate) closing: bool,
+    /// The block `closing` was set at; after `STALE_LOCK_BLOCKS` anyone can clear it (`resolve_stale_lock`).
+    pub(crate) closing_since: u64,
     pub(crate) mutual_close: (bool, bool),
     pub(crate) agent_key: Option<PublicKey>,
     pub(crate) revoked_keys: Vec<PublicKey>,
@@ -389,6 +394,7 @@ impl Agreement {
             in_flight: None,
             next_payment_id: 1,
             closing: false,
+            closing_since: 0,
             mutual_close: (false, false),
             agent_key: None,
             revoked_keys: Vec::new(),
@@ -540,6 +546,18 @@ impl Agreement {
         recipient: Option<&'a str>,
         item: Option<ItemCtx>,
     ) -> PayCtx<'a> {
+        // What the gates may spend: the ledger before payments, after any refund, minus what is set aside for the
+        // vendor's claims; a claim on a reserved item may spend that item's own reserve.
+        let own_reserve = item
+            .as_ref()
+            .filter(|i| i.status == ItemStatus::Reserved)
+            .map(|i| i.due_amount())
+            .unwrap_or(0);
+        let funded = self
+            .funded
+            .saturating_sub(self.refunded)
+            .saturating_sub(self.reserved)
+            .saturating_add(own_reserve);
         PayCtx {
             state: self.state,
             kind: self.kind,
@@ -548,12 +566,15 @@ impl Agreement {
             item,
             total: self.total(),
             paid: self.paid,
-            // `funded` here is what the gates may spend: the ledger before payments, after any refund.
-            funded: self.funded.saturating_sub(self.refunded),
+            funded,
             in_flight: self.in_flight.is_some() || self.closing,
         }
     }
 }
 
+#[cfg(test)]
+mod review_funds_tests;
+#[cfg(test)]
+mod review_state_tests;
 #[cfg(test)]
 mod tests;

@@ -20,6 +20,8 @@ impl Agreement {
         require(sender_id == self.buyer, "ERR_NOT_BUYER");
         require(msg == "fund", "ERR_BAD_MSG");
         self.require_state(State::Executing);
+        // While `close` reads the balance for the refund, a new deposit would be stranded; the token returns it.
+        require(!self.closing, "ERR_CLOSING");
         let room = self.total().saturating_sub(self.funded);
         let credit = amount.0.min(room);
         self.funded += credit;
@@ -127,6 +129,11 @@ impl Agreement {
             ),
             "ERR_ALREADY_PAID",
         );
+        // A reserved item's amount is set aside; changing it would strand the difference.
+        require(
+            self.items[idx].status != ItemStatus::Reserved,
+            "ERR_RESERVED",
+        );
         self.create_exception(item, amount.0, waive_evidence, reason, "vendor")
     }
 
@@ -138,6 +145,7 @@ impl Agreement {
         let mut it = self.items[idx].clone();
         require(!it.exception_used, "ERR_EXCEPTION_USED");
         require(it.status != ItemStatus::Paid, "ERR_ALREADY_PAID");
+        require(it.status != ItemStatus::Reserved, "ERR_RESERVED");
         // The assumed payment stops counting toward the total once the exception reopens the item.
         let paid_without = if it.status == ItemStatus::AssumedPaid {
             self.paid.saturating_sub(it.settled)
@@ -151,6 +159,7 @@ impl Agreement {
         if it.status == ItemStatus::AssumedPaid {
             self.paid = paid_without;
             it.settled = 0;
+            it.settled_by = None;
             it.status = ItemStatus::Eligible;
             it.eligible_at = Some(now());
         } else if ex.waive_evidence && !matches!(it.status, ItemStatus::Reserved) {

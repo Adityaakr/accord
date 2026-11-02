@@ -118,6 +118,21 @@ impl Params {
         if self.refusal_limit == 0 {
             return Err("ERR_PARAMS_REFUSAL_LIMIT");
         }
+        // No timing longer than ten years, so no deadline computed from them can overflow.
+        const MAX_SECS: u64 = 10 * 365 * 86_400;
+        if [
+            self.timelock_secs,
+            self.claim_delay_secs,
+            self.grace_secs,
+            self.max_acceptance_window_secs,
+            self.observation_grace_secs,
+            self.refusal_window_secs,
+        ]
+        .iter()
+        .any(|&s| s > MAX_SECS)
+        {
+            return Err("ERR_PARAMS_TOO_LONG");
+        }
         if self.mode == Mode::Live
             && (self.timelock_secs < LIVE_MIN_TIMELOCK_SECS
                 || self.claim_delay_secs < LIVE_MIN_CLAIM_DELAY_SECS

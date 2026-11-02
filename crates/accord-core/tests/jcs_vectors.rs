@@ -15,7 +15,11 @@ fn every_vector_matches_byte_for_byte() {
         let name = v["name"].as_str().unwrap();
         let got = String::from_utf8(jcs(&v["input"])).unwrap();
         assert_eq!(got, v["jcs"].as_str().unwrap(), "{name}");
-        assert_eq!(to_hex(&jcs_sha256(&v["input"])), v["sha256"].as_str().unwrap(), "{name}");
+        assert_eq!(
+            to_hex(&jcs_sha256(&v["input"])),
+            v["sha256"].as_str().unwrap(),
+            "{name}"
+        );
     }
 }
 

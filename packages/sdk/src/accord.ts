@@ -182,8 +182,8 @@ export class AgreementClient {
   async claim(item: number): Promise<ActResult> {
     return actResult(await this.call("claim", { item }, 80n));
   }
-  close() { return this.call("close", {}, 100n); }
-  mutualClose() { return this.call("mutual_close", {}, 100n); }
+  close() { return this.call("close", {}, 200n); }
+  mutualClose() { return this.call("mutual_close", {}, 200n); }
   withdrawNear() { return this.call("withdraw_near", {}, 30n); }
   resolveStaleLock() { return this.call("resolve_stale_lock", {}, 80n); }
 

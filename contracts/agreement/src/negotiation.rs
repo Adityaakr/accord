@@ -209,6 +209,7 @@ impl Agreement {
             "ERR_WRONG_STATE",
         );
         self.state = State::Cancelled;
+        self.negotiation = Negotiation::Done;
         emit("cancelled", json!({"by": env::predecessor_account_id()}));
     }
 }
@@ -217,6 +218,9 @@ impl Agreement {
     /// `on_sealed_result`'s checks (ARCHITECTURE.md 8.4). Anything that does not verify is an infrastructure
     /// failure: one more attempt, at most three.
     fn handle_sealed(&mut self, output: Option<Value>, request_nonce: &str) {
+        if self.state != State::Sealed {
+            return; // cancelled meanwhile: a late answer changes nothing
+        }
         let Negotiation::Requested {
             request_nonce: stored,
             attempt,
@@ -347,6 +351,7 @@ impl Agreement {
                 exception_used: false,
                 pending_exception: None,
                 settled: 0,
+                settled_by: None,
             });
         }
         if let Some(atlas) = &terms.atlas {

@@ -229,3 +229,23 @@ completion FAILED (HTTP 402 no_limit_configured) · signature not checked (no co
   - Not done: reading the caller from OutLayer's context and refusing other callers (waits for probe 0.3 to say what OutLayer exposes).
 - Output size: about 6.5 KB for a three-message deal (documents 3.4 KB, response records about 420 bytes each), so over the 4 KB target as well as OutLayer's 900-byte note in section 14. Encrypting the document once under a random key and wrapping that key for each party would save about 1.5 KB, but changes the SDK's `decryptDocument`; F1 carries the full output either way. Open for the main loop.
 - Crate pins: `dcap-qvl 0.7.0`, `ecies 0.2.14`, `k256 0.13.4`, `sha3 0.10.8`, `ed25519-dalek 2.2.0`, `hkdf 0.12.4`, `bs58 0.5.1`, `base64 0.22.1`, `wasi 0.13.3`; `ureq 2.12.1` only in native tests. The probe pins `@phala/dcap-qvl 0.7.0`, `@noble/curves 1.9.7`, `@noble/hashes 1.8.0`, `@noble/ciphers 1.3.0`, `eciesjs 0.4.18`, `canonicalize 2.1.0`, `tsx 4.23.15`. Release wasm: 1,487,312 bytes.
+
+## 15. Adversarial review of the contracts (3 Nov)
+
+Two independent reviews (funds and authority; liveness and state) ran against `contracts/` and `crates/accord-core`, each reproducing findings with unit tests. Their tests stay in the suite as regression tests (`contracts/agreement/src/review_funds_tests.rs`, `review_state_tests.rs`, `contracts/factory/src/review_tests.rs`). Nothing they tried sent USDC to anyone but the current recipient or the buyer's refund, and no forged job output was accepted. Fixed:
+
+- A late payment callback after `resolve_stale_lock` and an approved exception could undo a newer payment or be ignored, paying an item twice. Items now record the payment that settled them (`settled_by`); a late answer changes an item only when it is that payment's, and a late success after a reopen is recorded as the payment it was.
+- `close` reserved items for "no recipient" beyond what the escrow held; reserved money counted as spendable for the next item; an exception could change a reserved item's amount. Now: reserve only what the escrow covers (else `Unfunded`), the gates never spend reserved money except the claim on that same item, and exceptions on `Reserved` items are refused (`ERR_RESERVED`).
+- Funding during `close`'s balance read was stranded: `ft_on_transfer` now refuses while `closing` (the token returns it).
+- A failed refund retried a fixed amount forever: the retry reads the balance and sends `min(owed, balance − reserved)`.
+- `closing` could stay set if its callback failed: `close` needs `150 TGas`, the balance callbacks get `60 TGas` static, and `resolve_stale_lock` clears a `closing` older than `600` blocks.
+- `act` panicked on a second `RequestException` for an item: it now returns the pending exception's id; when the 16-exception list is full it is a recorded refusal (`ERR_CAP_EXCEEDED`).
+- A late Sealed Table answer could revive a `Cancelled` agreement: `cancel` ends the negotiation and results only apply while `Sealed`.
+- The creation deposit was stuck after `Cancelled` or `NoDeal`: `withdraw_near` works in those states too.
+- More than 32 Atlas slots overflowed the slot bitmask: `terms::structural` caps slots at 32. Params longer than ten years are refused (deadline overflow).
+- The factory refuses bad params before writing a creation record, and caps reports at 64 per agreement.
+- `close` while a payment is in flight no longer writes to the refusal log (anyone can call `close`; the log is the agent's record).
+
+Kept as a stated limit: an `AssumedPaid` item counts as paid; if its transfer had in fact failed, the refund at `Settled` returns that amount to the buyer. The vendor's remedy is the exception it requests before close, as the kit designs.
+
+Also: the observer's replay fixtures keyed view calls by the raw `args_base64`, whose JSON key order changes when other crates in the build enable `serde_json/preserve_order`; replay keys now re-encode the arguments as JCS.

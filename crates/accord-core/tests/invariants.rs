@@ -14,10 +14,23 @@ const ATTACKER: &str = "halcyon-markets.testnet";
 
 #[derive(Clone, Debug)]
 enum Step {
-    Pay { item: u32, amount: Amount, to: u8, key_revoked: bool },
-    Accept { item: u32 },
-    Exception { item: u32, amount: Amount, waive: bool },
-    Fund { amount: Amount },
+    Pay {
+        item: u32,
+        amount: Amount,
+        to: u8,
+        key_revoked: bool,
+    },
+    Accept {
+        item: u32,
+    },
+    Exception {
+        item: u32,
+        amount: Amount,
+        waive: bool,
+    },
+    Fund {
+        amount: Amount,
+    },
     Lock(bool),
 }
 
@@ -45,9 +58,24 @@ struct Model {
 impl Model {
     fn new() -> Self {
         let items = (1..=3)
-            .map(|id| ItemCtx { id, amount: 12_000_000, status: ItemStatus::Open, window_end: None, period: None, exception: None })
+            .map(|id| ItemCtx {
+                id,
+                amount: 12_000_000,
+                status: ItemStatus::Open,
+                window_end: None,
+                period: None,
+                exception: None,
+            })
             .collect();
-        Self { items, paid: 0, funded: 0, total: 36_000_000, in_flight: false, paid_count: [0; 4], exception_used: [false; 4] }
+        Self {
+            items,
+            paid: 0,
+            funded: 0,
+            total: 36_000_000,
+            in_flight: false,
+            paid_count: [0; 4],
+            exception_used: [false; 4],
+        }
     }
 
     fn ctx<'a>(&self, canaries: &'a [String], item: u32) -> PayCtx<'a> {

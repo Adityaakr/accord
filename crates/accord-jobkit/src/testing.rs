@@ -29,9 +29,19 @@ pub struct FixtureHttp {
     calls: Cell<usize>,
 }
 
-/// The key a JSON-RPC call is recorded and replayed under: `JCS({"method", "params"})`.
+/// The key a JSON-RPC call is recorded and replayed under: `JCS({"method", "params"})`, with `args_base64` re-encoded
+/// from the JCS of its decoded arguments. The job writes view arguments with `serde_json`, whose key order depends on
+/// features other crates in the build switch on (`preserve_order`), so the raw base64 is not a stable key.
 pub fn rpc_key(method: &str, params: &Value) -> String {
-    String::from_utf8(jcs(&json!({"method": method, "params": params}))).expect("JCS is UTF-8")
+    let mut p = params.clone();
+    if let Some(args) = p["args_base64"]
+        .as_str()
+        .and_then(|a| STANDARD.decode(a).ok())
+        .and_then(|b| serde_json::from_slice::<Value>(&b).ok())
+    {
+        p["args_base64"] = json!(STANDARD.encode(jcs(&args)));
+    }
+    String::from_utf8(jcs(&json!({"method": method, "params": p}))).expect("JCS is UTF-8")
 }
 
 /// A JSON-RPC success envelope.

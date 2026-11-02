@@ -13,6 +13,8 @@ use serde_json::{json, Value};
 
 const TGAS: u64 = 1_000_000_000_000;
 const MAX_REPORTS: usize = 32;
+/// One agreement can name at most this many accounts in reports, so no buyer can grow the factory's state at will.
+const MAX_REPORTS_PER_AGREEMENT: u32 = 64;
 /// What the keyless releases account starts with: its storage and a few `pubkey` runs.
 const RELEASES_FUNDING: NearToken = NearToken::from_near(2);
 
@@ -144,6 +146,7 @@ enum Key {
     Blocked,
     Stats,
     StatsByBuyer,
+    ReportsFiled,
 }
 
 #[near(contract_state)]
@@ -160,6 +163,7 @@ pub struct Factory {
     blocked: LookupMap<AccountId, String>,
     stats: LookupMap<AccountId, Stats>,
     stats_by_buyer: LookupMap<String, Stats>,
+    reports_filed: LookupMap<AccountId, u32>,
 }
 
 impl Default for Factory {
@@ -201,6 +205,7 @@ impl Factory {
             blocked: LookupMap::new(Key::Blocked),
             stats: LookupMap::new(Key::Stats),
             stats_by_buyer: LookupMap::new(Key::StatsByBuyer),
+            reports_filed: LookupMap::new(Key::ReportsFiled),
         }
     }
 
@@ -383,6 +388,13 @@ impl Factory {
             mode == "live" || (mode == "demo" && self.config.demo_allowed),
             "ERR_MODE",
         );
+        // The agreement re-checks these in `new`; checking here too means a creation cannot be made to fail on
+        // purpose after its record is written.
+        let params: accord_core::types::Params = serde_json::from_value(args.params.clone())
+            .unwrap_or_else(|_| env::panic_str("ERR_PARAMS"));
+        if let Err(e) = params.check_mode() {
+            env::panic_str(e);
+        }
         require(
             args.title.len() <= 120 && args.canaries.len() <= 8,
             "ERR_TOO_LARGE",
@@ -484,6 +496,11 @@ impl Factory {
     /// From a registered agreement: a refused payment named this account. Evidence is `{agreement, seq}`.
     pub fn report_recipient(&mut self, account: AccountId, seq: u64) {
         let agreement = self.require_agreement();
+        let filed = self.reports_filed.entry(agreement.clone()).or_default();
+        if *filed >= MAX_REPORTS_PER_AGREEMENT {
+            return;
+        }
+        *filed += 1;
         let list = self.reports.entry(account.clone()).or_default();
         if list.len() < MAX_REPORTS
             && !list
@@ -695,3 +712,6 @@ fn verify_self_signed(v: &Value, key: &PublicKey) -> bool {
         _ => false,
     }
 }
+
+#[cfg(test)]
+mod review_tests;
