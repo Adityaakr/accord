@@ -10,8 +10,8 @@ help:
 	@grep -E '^[a-z-]+:' Makefile | sed 's/:.*//' | tr '\n' ' '; echo
 
 setup-check: ; @bash scripts/setup-check.sh
-ci: wasm ; @cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace
-test: wasm ; @cargo test --workspace
+ci: wasm ; @cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && pnpm -r typecheck && pnpm -r --filter './packages/*' --filter './services/*' --filter @accord/app test
+test: wasm ; @cargo test --workspace && pnpm -r --filter './packages/*' --filter './services/*' --filter @accord/app test
 wasm: ; @bash scripts/build-wasm.sh
 
 setup: ; @bash scripts/setup.sh
