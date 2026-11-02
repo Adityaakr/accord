@@ -14,3 +14,7 @@ One line per `PROGRESS.md` item, newest last.
 - 3 Nov 2026 · 1.14 · `make sandbox`: full procurement flow and one Atlas period, mocked steps marked, `sandbox: all checks passed` in 38 s.
 - 3 Nov 2026 · 1.1 · JCS vectors shared by `accord-core` and `@accord/sdk`, reproduced byte for byte; `serde_jcs` replaced by an RFC 8785 writer after the vectors showed it ordering non-BMP keys differently.
 - 3 Nov 2026 · 2.1 (part) · `@accord/sdk`: views and every principal and agent call, the sealing client (envelope, ECIES, document key), `preflight` with its signal sources, `verify` with honest `not checked` lines; 18 tests.
+- 3 Nov 2026 · 1.5 · property tests in `accord-core` (10,000 cases each): payments stay inside the terms (I1, I2, I3, I6, I15), withheld and review periods do not pay (I13), the Atlas period rule (I18), slot times stay inside their windows.
+- 3 Nov 2026 · 2.1 · `@accord/cli` and `@accord/mcp` over the SDK, with a preflight guard before any payment; `make verify`.
+- 3 Nov 2026 · 4.1 to 4.6 · deal-room app: deal rooms, deal room with live refusal log and Verified panel, create and seal in the browser, /try inbox, Atlas, Verify, Record and CSV, Payee, Status, Docs, Join; no-mandate-routes test; `make serve` for a seeded local sandbox.
+- 3 Nov 2026 · 3.3 (part) · demo agent with the literal planner over the /try inbox, live on the sandbox; keeper loop.
