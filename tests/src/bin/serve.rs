@@ -23,15 +23,33 @@ async fn main() -> Result<()> {
     // Attested: terms signed, waiting for both approvals.
     let attested = env.create("procurement", &params).await?;
     attested.commit_both().await?;
-    attested.must(&env.keeper, "start_negotiation", json!({})).await?;
-    let out = attested.sealed_output(&attested.nonce().await?, &procurement_terms(env.token.id(), &params));
-    attested.must(&env.keeper, "submit_mock_negotiation", json!({"output": out.to_string()})).await?;
-    attested.must(&env.buyer, "approve_terms", json!({"terms_hash": attested.get().await?["terms_hash"]})).await?;
+    attested
+        .must(&env.keeper, "start_negotiation", json!({}))
+        .await?;
+    let out = attested.sealed_output(
+        &attested.nonce().await?,
+        &procurement_terms(env.token.id(), &params),
+    );
+    attested
+        .must(
+            &env.keeper,
+            "submit_mock_negotiation",
+            json!({"output": out.to_string()}),
+        )
+        .await?;
+    attested
+        .must(
+            &env.buyer,
+            "approve_terms",
+            json!({"terms_hash": attested.get().await?["terms_hash"]}),
+        )
+        .await?;
     rooms.push(("Attested", attested.id.clone()));
 
     // Executing: funded, recipient active, one payment, the attack refused, an item delivered, an exception pending.
     let live = env.create("procurement", &params).await?;
-    live.to_executing(&procurement_terms(env.token.id(), &params)).await?;
+    live.to_executing(&procurement_terms(env.token.id(), &params))
+        .await?;
     live.fund(36_000_000).await?;
     live.authorise(env.recipient.id()).await?;
     let agent = live.install_agent().await?;
@@ -49,7 +67,9 @@ async fn main() -> Result<()> {
 
     // Revoked by the canary: the agent's key is gone.
     let tripped = env.create("procurement", &params).await?;
-    tripped.to_executing(&procurement_terms(env.token.id(), &params)).await?;
+    tripped
+        .to_executing(&procurement_terms(env.token.id(), &params))
+        .await?;
     tripped.fund(36_000_000).await?;
     tripped.authorise(env.recipient.id()).await?;
     let a2 = tripped.install_agent().await?;
@@ -59,7 +79,8 @@ async fn main() -> Result<()> {
 
     // Accord Atlas: one period observed and closed Eligible, then paid.
     let mm = env.create("market-making", &params).await?;
-    mm.to_executing(&market_making_terms(env.token.id(), &params, 60)).await?;
+    mm.to_executing(&market_making_terms(env.token.id(), &params, 60))
+        .await?;
     mm.fund(12_000_000).await?;
     mm.authorise(env.recipient.id()).await?;
     let a3 = mm.install_agent().await?;
@@ -67,21 +88,34 @@ async fn main() -> Result<()> {
     for (slot, spread) in [(0u8, 41), (1, 49), (2, 52), (3, 72), (4, 41), (5, 90)] {
         let o = observation(&mm.id, at, 0, slot, spread);
         let sig = mm.sign_observation(&o);
-        mm.must(&env.keeper, "record_observation", json!({"observation": o, "sig": sig})).await?;
+        mm.must(
+            &env.keeper,
+            "record_observation",
+            json!({"observation": o, "sig": sig}),
+        )
+        .await?;
     }
     for slot in 0..3u8 {
         let o = observation(&mm.id, at, 1, slot, 44 + u32::from(slot));
         let sig = mm.sign_observation(&o);
-        mm.must(&env.keeper, "record_observation", json!({"observation": o, "sig": sig})).await?;
+        mm.must(
+            &env.keeper,
+            "record_observation",
+            json!({"observation": o, "sig": sig}),
+        )
+        .await?;
     }
-    env.wait_until(at + ATLAS_PERIOD_SECS + params.observation_grace_secs + 1).await?;
-    mm.must(&env.keeper, "close_period", json!({"period": 0})).await?;
+    env.wait_until(at + ATLAS_PERIOD_SECS + params.observation_grace_secs + 1)
+        .await?;
+    mm.must(&env.keeper, "close_period", json!({"period": 0}))
+        .await?;
     mm.pay(&a3, 1, 6_000_000, env.recipient.id()).await?;
     rooms.push(("Accord Atlas", mm.id.clone()));
 
     // Settled: paid what was earned, refunded the rest.
     let done = env.create("procurement", &params).await?;
-    done.to_executing(&procurement_terms(env.token.id(), &params)).await?;
+    done.to_executing(&procurement_terms(env.token.id(), &params))
+        .await?;
     done.fund(36_000_000).await?;
     done.authorise(env.recipient.id()).await?;
     let a4 = done.install_agent().await?;
@@ -110,7 +144,10 @@ async fn main() -> Result<()> {
     });
     let dir = format!("{}/../target/sandbox", env!("CARGO_MANIFEST_DIR"));
     std::fs::create_dir_all(&dir)?;
-    std::fs::write(format!("{dir}/env.json"), serde_json::to_string_pretty(&info)?)?;
+    std::fs::write(
+        format!("{dir}/env.json"),
+        serde_json::to_string_pretty(&info)?,
+    )?;
     println!("accord serve · local sandbox · {}", env.worker.rpc_addr());
     println!("  factory   {}", env.factory.id());
     for (state, id) in &rooms {

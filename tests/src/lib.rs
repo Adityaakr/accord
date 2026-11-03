@@ -20,7 +20,8 @@ pub const PAYEE_SEED: [u8; 32] = [22; 32];
 pub const OBSERVER_SEED: [u8; 32] = [33; 32];
 pub const MODEL: &str = "z-ai/glm-5.3-flash";
 pub const DOMAIN: &str = "halcyon.example";
-pub const SANDBOX_MANDATE_PUBKEY: &str = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
+pub const SANDBOX_MANDATE_PUBKEY: &str =
+    "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
 pub const CREATE_DEPOSIT: NearToken = NearToken::from_near(8);
 
 pub fn tgas(t: u64) -> Gas {
