@@ -990,3 +990,5 @@ fn no_view_exposes_a_mandate_in_plaintext() {
     assert!(c.contains("ciphertext"));
     assert!(!c.contains("limits") && !c.contains("instructions"));
 }
+
+mod act_fuzz;

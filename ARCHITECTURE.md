@@ -380,6 +380,25 @@ Next.js (App Router, TypeScript strict), Node 24. Wallet connection through NEAR
 | Yield timeout | `200` blocks, about `113 s` on testnet; the Sealed Table run targets under `80 s` |
 | Logs per receipt | At most `100` lines and `16 KB` in total; each event stays under `2 KB` |
 
+Measured on 3 Nov 2026 with `make measure NET=local` (a local node runs the same runtime as testnet; the build is the
+`-mock` agreement, whose only difference is that it skips the OutLayer requests, so `start_negotiation` and the
+Payee request are not measured here). Gas is gas burned, not attached:
+
+| Call | Burned |
+| --- | --- |
+| `approve_terms` (first / second, which starts the agreement) | `2.4` / `2.9 TGas` |
+| `ft_transfer_call` fund (token and `ft_on_transfer`) | `6.7 TGas` |
+| `install_agent_key` | `3.1 TGas` |
+| `act` refused (recorded, returned) | `5.7 TGas` |
+| `act` paying, with the transfer and its callback | `10.5 TGas` |
+| `revoke_agent` | `3.0 TGas` |
+| `mutual_close` (first / second, which settles: balance read, refund) | `2.3` / `11.7 TGas` |
+
+Storage: the agreement account holds `502,903 B` at creation, almost all of it the embedded code (`500,620 B` wasm);
+the state adds `7.9 KB` once terms are in and `9.6 KB` once executing with a payment, a refusal and a receipt, so
+the state stays under `40 KB` as estimated. With an embedded release the stake is `5.1 NEAR` (the code counts);
+with a global release only the state counts, about `0.1 NEAR`.
+
 ## 19. Releases and upgrades
 
 A release is: the agreement wasm hash, the three job builds (wasm hashes) with their seed bindings, the jobs' signing public keys and the mandate public key from `pubkey` runs the releases account requested, the attestation task ids that prove them, and the model id. During development the jobs use dev seeds bound to the project, which change nothing on chain; release 1 is cut after the jobs stop changing (`PROGRESS.md` 2.7): fresh `PROTECTED_` seeds are generated and bound to those exact builds, the releases account requests the `pubkey` runs, and `publish_release` records everything. New agreements pin the current release; existing agreements keep theirs for life. There is no migration path for a live agreement, on purpose. `make check-deploy` compares every hash.

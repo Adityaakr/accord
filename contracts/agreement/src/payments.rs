@@ -126,8 +126,9 @@ impl Agreement {
                 waive_evidence,
                 reason,
             } => {
+                // No single item can be worth more than the whole agreement.
                 require(
-                    reason.len() <= MAX_REASON && amount > 0,
+                    reason.len() <= MAX_REASON && amount > 0 && amount <= self.total(),
                     "ERR_BAD_EXCEPTION",
                 );
                 let item_ctx = self.item_ctx_by_id(item);
@@ -135,6 +136,13 @@ impl Agreement {
                 let pending = self
                     .item_index(item)
                     .and_then(|i| self.items[i].pending_exception);
+                // An item has one exception; once used, a new request could never be approved.
+                require(
+                    !self
+                        .item_index(item)
+                        .is_some_and(|i| self.items[i].exception_used),
+                    "ERR_EXCEPTION_USED",
+                );
                 match check_exception_request(&ctx, item, caller) {
                     // One pending request per item: asking again returns the one already waiting.
                     Ok(()) if pending.is_some() => {

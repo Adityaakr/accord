@@ -19,6 +19,7 @@ dependencies = [
  "accord-core",
  "ed25519-dalek",
  "near-sdk",
+ "proptest",
  "rand 0.8.8",
  "serde_json",
 ]

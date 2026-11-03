@@ -1,0 +1,9 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 5490b885cfb4cec5cf2caced89b7d6c2b16e59c84fd67ab04dfd7f7718683bee # shrinks to steps = [Exception { item: 1, amount: 340282366920938463463374607431768211455, waive: false }, ApproveLatest]
+cc 32a4fff7be50bab1c40b69b063aaa100ef4c2e276eb732320bebd841e977e54b # shrinks to steps = [Exception { item: 3, amount: 36000000, waive: false }, ApproveLatest, Exception { item: 3, amount: 36000000, waive: false }, ApproveLatest]
+cc bad771e2da3181680fff0a35ea8410dd713247f1830452556849a0987804aadd # shrinks to steps = [Pay { item: 1, amount: 12000000, to: 0 }, Settle { ok: true }, Exception { item: 2, amount: 36000000, waive: false }, ApproveLatest]

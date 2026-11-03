@@ -115,8 +115,9 @@ impl Agreement {
     ) -> u32 {
         self.require_vendor();
         self.require_state(State::Executing);
+        // No single item can be worth more than the whole agreement.
         require(
-            reason.len() <= MAX_REASON && amount.0 > 0,
+            reason.len() <= MAX_REASON && amount.0 > 0 && amount.0 <= self.total(),
             "ERR_BAD_EXCEPTION",
         );
         let idx = self
@@ -134,6 +135,7 @@ impl Agreement {
             self.items[idx].status != ItemStatus::Reserved,
             "ERR_RESERVED",
         );
+        require(!self.items[idx].exception_used, "ERR_EXCEPTION_USED");
         self.create_exception(item, amount.0, waive_evidence, reason, "vendor")
     }
 

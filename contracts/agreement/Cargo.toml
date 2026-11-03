@@ -23,6 +23,7 @@ serde_json.workspace = true
 near-sdk = { version = "=5.30.0", features = ["unit-testing"] }
 ed25519-dalek = { version = "2", features = ["rand_core"] }
 rand = "0.8"
+proptest = "1"
 
 [package.metadata.near.reproducible_build]
 image = "sourcescan/cargo-near:0.22.0-rust-1.86.0"

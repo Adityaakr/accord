@@ -14,6 +14,7 @@ const TARGETS: Record<string, () => Promise<{ run: Run }>> = {
   atlas: () => import("./targets/atlas.js"),
   demo: () => import("./targets/demo.js"),
   inbox: () => import("./targets/inbox.js"),
+  measure: () => import("./targets/measure.js"),
   approve: step("approve"),
   fund: step("fund"),
   payee: step("payee"),

@@ -39,9 +39,10 @@ payee-change: ; @$(LIVE) payee-change
 atlas: ; @$(LIVE) atlas
 verify: ; @pnpm --silent --filter @accord/cli dev -- verify $(DEAL)
 demo: ; @$(LIVE) demo
+measure: ; @$(LIVE) measure
 demo-reset: ; $(call todo,7.1 make demo-reset)
 inbox: ; @$(LIVE) inbox
 release-check: ; $(call todo,7.4 make release-check)
 submission-check: ; $(call todo,8.2 make submission-check)
 
-.PHONY: help setup-check ci test wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate approve fund payee pay attack revoke claim exception payee-change atlas verify demo demo-reset inbox release-check submission-check
+.PHONY: help setup-check ci test wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate approve fund payee pay attack revoke claim exception payee-change atlas verify demo measure demo-reset inbox release-check submission-check
