@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { tryRoom } from "@/server/tryroom";
+import { closedReason, duration, rearmTimings, tryRoom } from "@/server/tryroom";
 import { recentMessages } from "@/server/store";
 import { accord } from "@/server/accord";
 import { PageHead, Panel, Pill, Usdc } from "@/components/ui";
@@ -13,6 +13,8 @@ export const metadata = { title: "Try the agent" };
 
 export default async function Try() {
   const room = await tryRoom().catch(() => null);
+  const closed = room ? null : await closedReason();
+  const t = rearmTimings();
   const [messages, refusals, due] = room
     ? await Promise.all([
         recentMessages(room.account, 12),
@@ -36,7 +38,7 @@ export default async function Try() {
             {room ? (
               <InboxForm recipient={room.recipient?.account ?? null} due={due.map((d) => ({ item: d.item, amount: d.amount }))} />
             ) : (
-              <p className="body">The room has used today&apos;s allowance and reopens at 00:00 UTC. The refusal log stays live.</p>
+              <p className="body">{closed}</p>
             )}
           </Panel>
 
@@ -77,8 +79,9 @@ export default async function Try() {
             )}
           </Panel>
           <Panel title="About this room">
-            <p className="small">This public demo room re-arms its agent five minutes after a revocation. In a real agreement only the buyer can do that.</p>
-            <p className="small">Its items are 0.01 USDC each, one due at a time. The form only stores your message; it holds no key and calls no contract. Ten messages an hour per visitor.</p>
+            <p className="small">This public demo room re-arms its agent {duration(t.rearmSecs)} after a revocation. In a real agreement only the buyer can do that.</p>
+            <p className="small">Its items are 0.01 USDC each, one due at a time, the next {duration(t.itemIntervalSecs)} after a payment. The form only stores your message; it holds no key and calls no contract. Ten messages an hour per visitor.</p>
+            <p className="small">The re-arm never asks for a payment. When a room&apos;s term ends, closing it settles any item the terms already made payable, as in every agreement.</p>
           </Panel>
         </aside>
       </div>

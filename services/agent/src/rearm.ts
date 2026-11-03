@@ -1,8 +1,9 @@
 // The /try room's re-arm (ARCHITECTURE.md 11): one public room with fictional principals of its own, kept usable
 // for strangers. It feeds one item at a time, installs a new agent key a while after a revocation (a real
 // agreement needs its buyer for that; the room says so), tops up the room's NEAR, and when the room is used up
-// closes it and opens a fresh one, at most TRY_MAX_ROOMS_PER_DAY a UTC day. It never pays: the agent does, and
-// only what a visitor's message asks.
+// closes it and opens a fresh one, at most TRY_MAX_ROOMS_PER_DAY a UTC day. It never asks for a payment: the agent
+// does, for what a visitor's message asks. One exception, by the contract's rule: closing a room whose term ended
+// settles any item the terms already made payable, as `close` does in every agreement.
 
 import { formatNear, type AgreementView, type ItemView, type Receipt } from "@accord/sdk";
 
@@ -48,10 +49,11 @@ export function nextAction(
   if (!room) return openedToday < cfg.maxRoomsPerDay ? { kind: "open" } : { kind: "wait_for_tomorrow" };
   const { view, items, receipts } = room;
   if (view.state !== "Executing") return { kind: "forget", reason: `the room is ${view.state}` };
+  // Never act while a payment or a close step is in flight: closing now would be refused, not done.
+  if (view.in_flight || view.closing) return { kind: "none" };
   const paid = items.filter((i) => i.status === "Paid" || i.status === "AssumedPaid").length;
   if (paid === items.length) return { kind: "close", reason: `all ${items.length} items paid` };
   if (view.ends_at !== null && now >= view.ends_at) return { kind: "close", reason: "the term ended" };
-  if (view.in_flight || view.closing) return { kind: "none" };
   if (!view.agent_key) {
     return keylessSince !== null && now - keylessSince >= cfg.rearmSecs ? { kind: "install_key" } : { kind: "none" };
   }

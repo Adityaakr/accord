@@ -2,7 +2,7 @@
 // per visitor (a salted hash of the address, never the address) and in total.
 import { createHash } from "node:crypto";
 import { addMessage, countMessagesSince } from "@/server/store";
-import { tryRoom } from "@/server/tryroom";
+import { closedReason, tryRoom } from "@/server/tryroom";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "sender up to 120, subject up to 160 and body up to 2000 characters, all required" }, { status: 400 });
   }
   const room = await tryRoom();
-  if (!room) return Response.json({ error: "the /try room is closed right now; it reopens at 00:00 UTC" }, { status: 503 });
+  if (!room) return Response.json({ error: await closedReason() }, { status: 503 });
   const hourAgo = new Date(Date.now() - 3_600_000).toISOString();
   const visitor = visitorHash(req);
   if (await countMessagesSince(hourAgo, visitor) >= PER_VISITOR_PER_HOUR) {

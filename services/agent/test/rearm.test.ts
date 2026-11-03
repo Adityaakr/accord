@@ -44,6 +44,10 @@ describe("nextAction", () => {
     expect(nextAction(room(["Open"], { ends_at: 50 }), 100, null, 0, cfg).kind).toBe("close");
     expect(nextAction(room(["Open"], { state: "Settled" }), 100, null, 0, cfg).kind).toBe("forget");
   });
+  it("does nothing while a payment or a close step is in flight, even when the room is due to close", () => {
+    const r = room(["Paid", "Paid"], { in_flight: { payment_id: 1 } as never });
+    expect(nextAction(r, 100, null, 0, cfg)).toEqual({ kind: "none" });
+  });
   it("tops the room's NEAR up when liquid runs low", () => {
     const r = { ...room(["Eligible"]), liquid: 10n };
     expect(nextAction(r, 100, null, 0, cfg)).toEqual({ kind: "top_up" });

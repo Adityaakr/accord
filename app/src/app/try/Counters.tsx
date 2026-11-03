@@ -17,7 +17,7 @@ export function Counters() {
     return () => { live = false; clearInterval(t); };
   }, []);
   return (
-    <Panel title="Counted on chain">
+    <Panel title="Counted on chain" eyebrow="this room">
       <div className={styles.counters}>
         <div><span className={styles.big}>{s?.attempts ?? "–"}</span><span className="small">attempts refused</span></div>
         <div><span className={`${styles.big} ${styles.zero}`}>{s?.paid_outside_terms ?? "–"}</span><span className="small">paid outside the terms</span></div>

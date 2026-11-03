@@ -4,7 +4,7 @@
 // the public /try room open (ARCHITECTURE.md 11, `room.ts`).
 
 import { Accord, KeySigner, preflight, type AgreementClient } from "@accord/sdk";
-import { beat, markProcessed, unprocessed, type InboxMessage } from "@accord/store";
+import { beat, markProcessed, unprocessedFor, type InboxMessage } from "@accord/store";
 import { plan } from "./planner.js";
 import { serviceConfig } from "./config.js";
 import { TESTNET_REARM, type RearmConfig } from "./rearm.js";
@@ -12,7 +12,7 @@ import { TryRoomKeeper } from "./room.js";
 import { tryWorld } from "../../../packages/live/src/world.js";
 
 const POLL_MS = 3_000;
-const REARM_EVERY = 5; // polls
+const REARM_MS = 15_000;
 
 function rearmConfig(local: boolean): RearmConfig {
   const n = (name: string, fallback: number) => Number(process.env[name] ?? fallback);
@@ -71,15 +71,25 @@ async function main() {
   const preflightOn = process.env.AGENT_PREFLIGHT === "on";
   console.log(`accord agent · ${cfg.network} · planner literal · preflight ${preflightOn ? "on" : "off"}${fixed ? ` · ${fixed.id}` : ""}${room ? " · /try re-arm on" : ""}`);
 
-  for (let i = 0; ; i++) {
+  // The re-arm runs in its own loop: opening a room can take minutes (negotiation, payee proof), and the inbox of
+  // the current room keeps being answered meanwhile. One step at a time; a failed step is retried on the next.
+  if (room) {
+    void (async () => {
+      for (;;) {
+        await room.step().catch((e: Error) => console.error(`  rearm     ${e.message}`));
+        await new Promise((r) => setTimeout(r, REARM_MS));
+      }
+    })();
+  }
+
+  for (;;) {
     try {
-      if (room && i % REARM_EVERY === 0) await room.step().catch((e: Error) => console.error(`  rearm     ${e.message}`));
       const deals = new Map<string, AgreementClient>();
       if (fixed) deals.set(fixed.id, fixed);
       const armed = room?.current();
       if (armed) deals.set(armed.agreement, armed.deal);
-      const messages = (await unprocessed(20)).filter((m) => deals.has(m.agreement));
-      for (const m of messages) await handle(m, deals.get(m.agreement)!, reader, preflightOn);
+      // Only messages for rooms this agent holds a key for: another room's leftovers never block them.
+      for (const m of await unprocessedFor([...deals.keys()], 20)) await handle(m, deals.get(m.agreement)!, reader, preflightOn);
       await beat("agent", { agreements: [...deals.keys()] });
     } catch (e) {
       console.error(`  agent loop: ${(e as Error).message}`);
