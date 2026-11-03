@@ -101,3 +101,43 @@ export function redact(text: string, secrets: readonly string[]): string {
   for (const s of secrets) out = out.split(s).join("<redacted>");
   return out;
 }
+
+/** What `make serve` writes to target/sandbox/env.json (local-only keys). */
+export interface LocalNodeFile {
+  rpc: string;
+  factory: string;
+  token?: string;
+  principals: Partial<Record<"buyer" | "vendor" | "authority" | "keeper" | "recipient", { account: string; key: string }>>;
+  agents?: Record<string, string>;
+}
+
+/**
+ * The variables a local node supplies, for `--network sandbox`: the factory, the RPC and every principal's key,
+ * plus the agent key of the agreement named by `agreement` when the node installed one. Values already in `env`
+ * win, so a `.env` can still override one role.
+ */
+export function localNodeEnv(file: LocalNodeFile, agreement?: string): Env {
+  const out: Env = { ACCORD_FACTORY: file.factory, NEAR_RPC_URL: file.rpc };
+  if (file.token) out.ACCORD_TOKEN = file.token;
+  for (const role of ["buyer", "vendor", "authority", "keeper", "recipient"] as const) {
+    const p = file.principals[role];
+    if (!p) continue;
+    out[VARS[role].account] = p.account;
+    out[VARS[role].key] = p.key;
+  }
+  const agentKey = agreement ? file.agents?.[agreement] : undefined;
+  if (agreement && agentKey) {
+    out.AGENT_AGREEMENT = agreement;
+    out.ACCORD_AGENT_KEY = agentKey;
+  }
+  return out;
+}
+
+/** Reads `<root>/target/sandbox/env.json` into `env` without overriding what is set. */
+export function loadLocalNode(env: Env, root: string, agreement?: string): string | undefined {
+  const file = join(root, "target/sandbox/env.json");
+  if (!existsSync(file)) return undefined;
+  const overlay = localNodeEnv(JSON.parse(readFileSync(file, "utf8")) as LocalNodeFile, agreement);
+  for (const [k, v] of Object.entries(overlay)) if (env[k] === undefined) env[k] = v;
+  return file;
+}

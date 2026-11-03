@@ -6,8 +6,8 @@
   },
   "limits": {
     "min_retainer_per_period": "5000000",
-    "tightest_spread_bps": 45,
-    "max_depth_quote": "200000000",
+    "tightest_spread_bps": 150,
+    "max_depth_quote": "40000000",
     "max_threshold": 5
   },
   "instructions": "Commit only to conditions the pool already meets most of the time. Ask for at least the floor retainer."

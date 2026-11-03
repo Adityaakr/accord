@@ -4,10 +4,14 @@
 import { Accord, KeySigner, type AgreementView, type AgreementClient } from "@accord/sdk";
 import { beat } from "@accord/store";
 import { serviceConfig } from "../../agent/src/config.js";
+import { httpObserver, observeAgreement, type AskObserver } from "./observe.js";
 
+// The observer's slot windows are a minute long on demo timings; a 15 s loop asks each at least three times.
 const LOOP_MS = 15_000;
 
-async function step(deal: AgreementClient, a: AgreementView, log: (s: string) => void): Promise<void> {
+async function step(
+  deal: AgreementClient, a: AgreementView, ask: AskObserver | undefined, log: (s: string) => void,
+): Promise<void> {
   const now = a.now;
   if (a.state === "Sealed" && typeof a.negotiation === "object" && "Ready" in a.negotiation) {
     const tx = await deal.startNegotiation();
@@ -22,6 +26,8 @@ async function step(deal: AgreementClient, a: AgreementView, log: (s: string) =>
   }
   if (a.state !== "Executing") return;
   if (a.kind === "market-making") {
+    const atlas = (await deal.terms())?.atlas;
+    if (ask && atlas) for (const line of await observeAgreement(deal, atlas, now, ask)) log(line);
     for (const p of await deal.periods()) {
       if (p.outcome === "Open" && p.closable_at !== undefined && p.closable_at <= now) {
         const tx = await deal.closePeriod(p.period);
@@ -46,9 +52,10 @@ async function main() {
   const reader = new Accord({ network: cfg.network, factory: cfg.factory, rpc: cfg.rpc });
   const accord = reader.withSigner(new KeySigner(cfg.keeper.account, cfg.keeper.key, reader.chain));
   console.log(`accord keeper · ${cfg.network} · factory ${cfg.factory} · as ${cfg.keeper.account}`);
-  if (!process.env.OUTLAYER_PAYMENT_KEY) {
-    console.log("  observer  polling off: OutLayer's HTTPS API needs OUTLAYER_PAYMENT_KEY (BLOCKED.md, probe 0.3)");
-  }
+  const ask = cfg.observer ? httpObserver(cfg.observer.url, cfg.observer.token) : undefined;
+  console.log(ask
+    ? `  observer  ${cfg.observer!.url}`
+    : "  observer  polling off: set OUTLAYER_OBSERVER_URL and OUTLAYER_PAYMENT_KEY (BLOCKED.md, probe 0.3)");
   for (;;) {
     const actions: string[] = [];
     try {
@@ -57,7 +64,7 @@ async function main() {
         const deal = accord.agreement(r.account);
         const a = await deal.get().catch(() => null);
         if (!a || a.state === "Settled" || a.state === "NoDeal" || a.state === "Cancelled") continue;
-        await step(deal, a, (s) => { actions.push(s); console.log(`  ${s}`); }).catch((e: Error) => console.log(`  ${r.account}: ${e.message}`));
+        await step(deal, a, ask, (s) => { actions.push(s); console.log(`  ${s}`); }).catch((e: Error) => console.log(`  ${r.account}: ${e.message}`));
       }
       await beat("keeper", { agreements: records.length, actions: actions.length });
     } catch (e) {

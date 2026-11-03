@@ -72,7 +72,20 @@ impl<'a> NearRpc<'a> {
     }
 }
 
+/// A rate limit is the endpoint's state, not the chain's: fastnear answers `{"code": -429}` inside a JSON-RPC
+/// error with status 200, so it must fail over like an HTTP 429.
+fn rate_limited(err: &Value) -> bool {
+    err.get("code").and_then(Value::as_i64) == Some(-429)
+        || err
+            .get("message")
+            .and_then(Value::as_str)
+            .is_some_and(|m| m.to_ascii_lowercase().contains("rate limit"))
+}
+
 fn deterministic_error(method: &str, err: &Value) -> bool {
+    if rate_limited(err) {
+        return false;
+    }
     if method == "block" {
         return true;
     }
@@ -233,6 +246,17 @@ mod tests {
 
     fn ok(v: Value) -> Reply {
         Reply::Json(200, json!({"jsonrpc": "2.0", "id": "accord", "result": v}))
+    }
+
+    #[test]
+    fn a_rate_limit_inside_a_json_rpc_error_fails_over() {
+        let http = FixtureHttp::new();
+        let limited = json!({"jsonrpc": "2.0", "id": "accord", "error": {"code": -429, "message": "Rate limits exceeded."}});
+        http.on_url(MAINNET[0], move |_| Reply::Json(200, limited.clone()));
+        http.on_url(MAINNET[1], |_| ok(json!({"header": {"height": 7}})));
+        let rpc = NearRpc::new(&http, MAINNET, Duration::ZERO);
+        let v = rpc.call("block", json!({"finality": "final"})).unwrap();
+        assert_eq!(v["result"]["header"]["height"], 7);
     }
 
     #[test]

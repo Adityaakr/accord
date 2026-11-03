@@ -5,6 +5,7 @@
 //! still running. Used by the integration tests in `tests/` and by `make sandbox`.
 
 pub mod localjobs;
+pub mod localnet;
 
 use accord_core::hash::{jcs_sha256, sha256, signed_bytes, to_hex};
 use accord_core::types::*;
@@ -293,11 +294,21 @@ impl Env {
     }
 
     pub async fn create(&self, kind: &str, params: &Params) -> Result<Deal<'_>> {
+        self.create_titled(kind, "Liquidity reporting integration", params)
+            .await
+    }
+
+    pub async fn create_titled(
+        &self,
+        kind: &str,
+        title: &str,
+        params: &Params,
+    ) -> Result<Deal<'_>> {
         let r = ok(self
             .buyer
             .call(self.factory.id(), "create_agreement")
             .args_json(json!({"args": {
-                "kind": kind, "title": "Liquidity reporting integration",
+                "kind": kind, "title": title,
                 "vendor": self.vendor.id(), "vendor_authority": self.authority.id(),
                 "canaries": self.canaries.iter().map(|c| c.id()).collect::<Vec<_>>(),
                 "params": params,
@@ -397,6 +408,30 @@ impl Deal<'_> {
         )
         .await?;
         Ok(doc_secret)
+    }
+
+    /// Polls the agreement until `done` holds for its `get_agreement` view, or `secs` pass.
+    pub async fn wait_for(
+        &self,
+        what: &str,
+        secs: u64,
+        done: impl Fn(&Value) -> bool,
+    ) -> Result<Value> {
+        let start = std::time::Instant::now();
+        loop {
+            let a = self.get().await?;
+            if done(&a) {
+                return Ok(a);
+            }
+            if start.elapsed().as_secs() >= secs {
+                bail!(
+                    "{}: still waiting for {what} after {secs} s (state {})",
+                    self.id,
+                    a["state"]
+                );
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+        }
     }
 
     pub async fn nonce(&self) -> Result<String> {

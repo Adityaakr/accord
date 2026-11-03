@@ -10,6 +10,8 @@ export interface ServiceConfig {
   factory: string;
   agent?: { agreement: string; key: string };
   keeper?: { account: string; key: string };
+  /** Where the keeper asks the observer: the local OutLayer on a local node, OutLayer's HTTPS API on testnet. */
+  observer?: { url: string; token?: string };
 }
 
 export function repoRoot(): string {
@@ -34,6 +36,7 @@ export function loadEnv(): void {
 interface SandboxFile {
   rpc: string;
   factory: string;
+  jobs?: string;
   agent?: { agreement: string; key: string };
   principals: Record<string, { account: string; key: string }>;
 }
@@ -46,6 +49,7 @@ export function serviceConfig(): ServiceConfig {
     return {
       network, rpc: sb.rpc, factory: sb.factory, agent: sb.agent,
       keeper: sb.principals.keeper,
+      observer: sb.jobs ? { url: `${sb.jobs}/observe` } : undefined,
     };
   }
   const env = process.env;
@@ -55,5 +59,8 @@ export function serviceConfig(): ServiceConfig {
     factory: env.ACCORD_FACTORY || "accord-v1.testnet",
     agent: env.AGENT_AGREEMENT && env.ACCORD_AGENT_KEY ? { agreement: env.AGENT_AGREEMENT, key: env.ACCORD_AGENT_KEY } : undefined,
     keeper: env.KEEPER_ACCOUNT && env.KEEPER_KEY ? { account: env.KEEPER_ACCOUNT, key: env.KEEPER_KEY } : undefined,
+    observer: env.OUTLAYER_OBSERVER_URL && env.OUTLAYER_PAYMENT_KEY
+      ? { url: env.OUTLAYER_OBSERVER_URL, token: env.OUTLAYER_PAYMENT_KEY }
+      : undefined,
   };
 }

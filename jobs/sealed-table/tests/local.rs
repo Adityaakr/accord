@@ -105,7 +105,7 @@ fn market_making_takes_the_buyers_conditions() {
             a.pass_threshold,
             a.periods
         ),
-        (60, 6, 4, 4)
+        (200, 6, 4, 4)
     );
     assert_eq!(a.retainer_per_period, 7_500_000);
 }
