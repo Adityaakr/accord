@@ -81,8 +81,11 @@ export async function verify(
   add("release", "not_checked",
     `sealed-table wasm ${release.sealed_table.wasm_hash.slice(0, 8)}… · keys from pubkey run ${release.sealed_table.pubkey_task_id} · attestation record check pending probe 0.3`);
 
-  // model: NEAR AI's attestation report, fetched with a fresh nonce chosen here.
-  add(...(await modelCheck(a.model, opts.nonce ?? bytesToHex(randomBytes(32)), opts.nearAiKey)));
+  // model: NEAR AI's attestation report, fetched with a fresh nonce chosen here. A local node's outcome says it
+  // came from the deterministic local negotiator; no model ran, so there is nothing to attest.
+  const local = outText ? (JSON.parse(outText) as { model?: { local?: string } }).model?.local : undefined;
+  if (local) add("model", "not_checked", `no model ran: ${local} (local node)`);
+  else add(...(await modelCheck(a.model, opts.nonce ?? bytesToHex(randomBytes(32)), opts.nearAiKey)));
 
   // payee: the current recipient's chain of approvals, and its proof signed by the release's Payee key.
   const versions = await deal.recipients();

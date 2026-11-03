@@ -1,0 +1,31 @@
+.conditions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.periods { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.periodsCompact { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.period { display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: var(--radius); background: var(--elevation-medium); }
+.future { opacity: 0.55; }
+.periodHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.slots { display: grid; gap: 6px; }
+.slot {
+  display: grid;
+  place-items: center;
+  height: 34px;
+  border-radius: 6px;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: transform 0.2s var(--ease);
+}
+.pass { background: var(--teal-wash); border-color: var(--teal-line); color: var(--teal); }
+.fail { background: rgba(255, 255, 255, 0.03); border-color: var(--hairline-strong); color: var(--text-weak); }
+.empty { border: 1px dashed var(--hairline-strong); }
+.periodFoot { min-height: 20px; }
+
+.tableWrap { width: 100%; overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; text-align: left; }
+.table th { padding: 10px 20px; font-weight: 500; font-size: 12px; color: var(--text-weak); border-bottom: 1px solid var(--hairline); white-space: nowrap; }
+.table td { padding: 12px 20px; border-bottom: 1px solid var(--hairline); color: var(--text-medium); white-space: nowrap; vertical-align: middle; }
+.table tbody tr:last-child td { border-bottom: 0; }
+
+@media (max-width: 809.98px) {
+  .table th, .table td { padding-left: 16px; padding-right: 16px; }
+}

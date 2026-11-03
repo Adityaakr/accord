@@ -2,6 +2,7 @@ import Link from "next/link";
 import { rooms } from "@/server/data";
 import { Pill, PageHead, StatePill, Usdc, Meter } from "@/components/ui";
 import { SourceLine } from "@/components/SourceLine";
+import { AtlasBand } from "@/components/AtlasBand";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +36,8 @@ export default async function Home() {
         <Stat label="Held in escrow" value={<Usdc amount={escrow < 0n ? 0n : escrow} />} />
         <Stat label="Payments refused" value={String(refusals)} tone={refusals > 0 ? "refusal" : undefined} />
       </div>
+
+      <AtlasBand />
 
       {error && (
         <div className={styles.error} role="alert">

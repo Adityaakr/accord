@@ -10,6 +10,7 @@ import { AutoRefresh } from "@/components/AutoRefresh";
 import { VerifiedPanel } from "./VerifiedPanel";
 import { Actions } from "./Actions";
 import { Periods } from "./Periods";
+import { Conditions } from "@/components/atlas";
 import styles from "./room.module.css";
 
 export const dynamic = "force-dynamic";
@@ -102,9 +103,7 @@ export default async function DealRoom({ params }: { params: Promise<{ id: strin
                 {terms.atlas && (
                   <div className={styles.conditions}>
                     <span className="small">Each slot passes when</span>
-                    <Pill>spread ≤ {terms.atlas.max_spread_bps} bps</Pill>
-                    <Pill>depth ≥ {formatUnits(terms.atlas.min_depth_quote, 6, 0)} USDC each side within {terms.atlas.depth_band_bps} bps</Pill>
-                    {a.params.require_two_sided && <Pill>two-sided</Pill>}
+                    <Conditions atlas={terms.atlas} twoSided={a.params.require_two_sided} />
                     <span className="small faint">venue Rhea DCL · {terms.atlas.venue.RheaDcl.pool_id.slice(0, 8)}… · read on NEAR mainnet</span>
                   </div>
                 )}

@@ -31,8 +31,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {c.network === "sandbox" && (
             <div className={styles.banner} role="note">
               <div className="container">
-                Local sandbox from <span className="mono">make serve</span>. The jobs are the mock signer and every
-                principal signs with a throwaway local key. Nothing here is on testnet.
+                Local node from <span className="mono">make dev</span>. The Sealed Table, Payee and observer run their
+                real code here; only the negotiating model is a deterministic stand-in, and every principal signs with
+                a local key. Atlas readings are real NEAR mainnet blocks. Nothing here is on testnet.
               </div>
             </div>
           )}

@@ -1,0 +1,21 @@
+.band {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: -16px 0 40px;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(181, 154, 255, 0.22);
+  background: linear-gradient(90deg, rgba(181, 154, 255, 0.07), transparent 70%), var(--elevation-strong);
+  color: var(--text-medium);
+  transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease);
+}
+.band:hover { border-color: rgba(181, 154, 255, 0.45); }
+.text { flex: 1 1 auto; min-width: 0; font-size: 14px; }
+.arrow { color: var(--text-weak); transition: transform 0.2s var(--ease), color 0.2s var(--ease); }
+.band:hover .arrow { transform: translateX(3px); color: var(--text-strong); }
+
+@media (max-width: 809.98px) {
+  .band { flex-wrap: wrap; align-items: flex-start; }
+  .arrow { display: none; }
+}

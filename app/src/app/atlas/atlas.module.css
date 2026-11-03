@@ -1,0 +1,53 @@
+.reading {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 22px 24px 24px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--hairline);
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(181, 154, 255, 0.07), transparent 55%),
+    var(--elevation-strong);
+}
+.readingHead { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.readingHead > div { display: flex; flex-direction: column; gap: 6px; }
+
+.figures { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; padding-top: 18px; border-top: 1px solid var(--hairline); }
+.figure { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.figureValue { font-family: var(--font-mono); font-size: 24px; letter-spacing: -0.02em; color: var(--text-strong); font-variant-numeric: tabular-nums; }
+.unit { font-size: 14px; color: var(--text-weak); letter-spacing: 0; }
+
+.totals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 16px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--hairline);
+  border: 1px solid var(--hairline);
+}
+.totals .figure { padding: 18px 20px 20px; background: var(--elevation-strong); gap: 8px; }
+.totals .figureValue { font-size: 20px; }
+.withheld { color: var(--refusal); }
+
+.sectionTitle { margin: 56px 0 20px; }
+.rooms { display: flex; flex-direction: column; gap: 16px; }
+.roomTitle { color: var(--text-strong); transition: color 0.2s var(--ease); }
+.roomTitle:hover { color: var(--teal); }
+.roomTop { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; margin-bottom: 16px; }
+
+.cols3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.note { margin-top: 16px; }
+.bullets { display: flex; flex-direction: column; gap: 8px; color: var(--text-medium); }
+.bullets li { padding-left: 16px; position: relative; }
+.bullets li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint); }
+
+@media (max-width: 1023.98px) {
+  .cols3 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 809.98px) {
+  .figures, .totals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .reading { padding: 18px; }
+  .figureValue { font-size: 20px; }
+}
