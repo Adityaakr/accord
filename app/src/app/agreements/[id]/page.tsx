@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { formatUnits, type ItemView, type Refusal } from "@accord/sdk";
+import type { ItemView, Refusal } from "@accord/sdk";
 import { room, type Room } from "@/server/data";
 import { config } from "@/server/accord";
 import { Account, Empty, Hash, KV, Meter, Near, Panel, Pill, StatePill, StateStrip, Usdc, type Tone } from "@/components/ui";
