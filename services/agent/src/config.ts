@@ -3,6 +3,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type { Network } from "@accord/sdk";
+import type { ObserverConfig } from "../../keeper/src/observe.js";
 
 export interface ServiceConfig {
   network: Network;
@@ -11,7 +12,7 @@ export interface ServiceConfig {
   agent?: { agreement: string; key: string };
   keeper?: { account: string; key: string };
   /** Where the keeper asks the observer: the local OutLayer on a local node, OutLayer's HTTPS API on testnet. */
-  observer?: { url: string; token?: string };
+  observer?: ObserverConfig;
 }
 
 export function repoRoot(): string {
@@ -49,7 +50,7 @@ export function serviceConfig(): ServiceConfig {
     return {
       network, rpc: sb.rpc, factory: sb.factory, agent: sb.agent,
       keeper: sb.principals.keeper,
-      observer: sb.jobs ? { url: `${sb.jobs}/observe` } : undefined,
+      observer: sb.jobs ? { kind: "local", url: `${sb.jobs}/observe` } : undefined,
     };
   }
   const env = process.env;
@@ -59,8 +60,18 @@ export function serviceConfig(): ServiceConfig {
     factory: env.ACCORD_FACTORY || "accord-v1.testnet",
     agent: env.AGENT_AGREEMENT && env.ACCORD_AGENT_KEY ? { agreement: env.AGENT_AGREEMENT, key: env.ACCORD_AGENT_KEY } : undefined,
     keeper: env.KEEPER_ACCOUNT && env.KEEPER_KEY ? { account: env.KEEPER_ACCOUNT, key: env.KEEPER_KEY } : undefined,
-    observer: env.OUTLAYER_OBSERVER_URL && env.OUTLAYER_PAYMENT_KEY
-      ? { url: env.OUTLAYER_OBSERVER_URL, token: env.OUTLAYER_PAYMENT_KEY }
-      : undefined,
+    observer: outlayerObserver(env),
+  };
+}
+
+/** OutLayer's HTTPS API for the observer project, when the owner and a payment key are set (INTERFACES.md 15). */
+export function outlayerObserver(env: Record<string, string | undefined>): ObserverConfig | undefined {
+  if (!env.OUTLAYER_OWNER || !env.OUTLAYER_PAYMENT_KEY) return undefined;
+  return {
+    kind: "outlayer",
+    api: (env.OUTLAYER_API_URL || "https://testnet-api.outlayer.ai").replace(/\/$/, ""),
+    owner: env.OUTLAYER_OWNER,
+    project: env.OUTLAYER_OBSERVER_PROJECT || "accord-observer",
+    paymentKey: env.OUTLAYER_PAYMENT_KEY,
   };
 }

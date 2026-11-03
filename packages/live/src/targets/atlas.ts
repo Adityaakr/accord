@@ -3,7 +3,7 @@
 // passing period and cannot pay the withheld one. About seven minutes on demo timings (a six-minute period).
 
 import type { AgreementView, AtlasTerms } from "@accord/sdk";
-import { httpObserver, observationOf, slotsToAsk, type AskObserver } from "../../../../services/keeper/src/observe.js";
+import { observationOf, observerFor, slotsToAsk, type AskObserver } from "../../../../services/keeper/src/observe.js";
 import {
   approveBoth, authorise, client, create, fundTotal, header, installAgent, line, negotiate, PRESETS, sealBoth, sleep,
   usdc, type Agent,
@@ -59,16 +59,17 @@ async function observePeriod(w: World, room: Room, ask: AskObserver, print: bool
 }
 
 export async function run(w: World): Promise<void> {
-  if (!w.observer) throw new Error("no observer: set OUTLAYER_OBSERVER_URL and OUTLAYER_PAYMENT_KEY (BLOCKED.md, probe 0.3)");
-  const ask = httpObserver(w.observer.url, w.observer.token);
-  const [room, strict] = await Promise.all([
-    open(w, "NEAR/USDC liquidity", PRESETS.atlas),
-    open(w, "NEAR/USDC liquidity, strict", PRESETS.strict),
-  ]);
+  if (!w.observer) throw new Error("no observer: set OUTLAYER_OWNER and OUTLAYER_PAYMENT_KEY (BLOCKED.md, probe 0.3)");
+  const ask = observerFor(w.observer);
+  // One after the other: each funds from the same buyer balance.
+  const room = await open(w, "NEAR/USDC liquidity", PRESETS.atlas);
+  const strict = await open(w, "NEAR/USDC liquidity, strict", PRESETS.strict);
   const venue = room.atlas.venue.RheaDcl;
   const [hash, ...rest] = venue.pool_id.split("|");
   header("atlas", room.id, ` · market-making · rhea-dcl ${hash!.slice(0, 8)}…|${rest.join("|")}`, w);
-  line("period 1", "slot times held in the observer's enclave");
+  line("period 1", w.network === "sandbox"
+    ? "slot times held by the observer (local node: a fixed test seed, not an enclave)"
+    : "slot times held in the observer's enclave");
   await Promise.all([observePeriod(w, room, ask, true), observePeriod(w, strict, ask, false)]);
 
   const p = (await w.reader.agreement(room.id).periods())[0]!;

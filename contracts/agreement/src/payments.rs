@@ -136,13 +136,9 @@ impl Agreement {
                 let pending = self
                     .item_index(item)
                     .and_then(|i| self.items[i].pending_exception);
-                // An item has one exception; once used, a new request could never be approved.
-                require(
-                    !self
-                        .item_index(item)
-                        .is_some_and(|i| self.items[i].exception_used),
-                    "ERR_EXCEPTION_USED",
-                );
+                let used = self
+                    .item_index(item)
+                    .is_some_and(|i| self.items[i].exception_used);
                 match check_exception_request(&ctx, item, caller) {
                     // One pending request per item: asking again returns the one already waiting.
                     Ok(()) if pending.is_some() => {
@@ -150,8 +146,9 @@ impl Agreement {
                             id: pending.unwrap(),
                         })
                     }
-                    // The exception list is full: refused and recorded like any other refusal.
-                    Ok(()) if self.exceptions.len() >= MAX_EXCEPTIONS => {
+                    // The exception list is full, or this item's one exception is used (a new request could never
+                    // be approved): refused and recorded like any other refusal, after the key and state gates.
+                    Ok(()) if self.exceptions.len() >= MAX_EXCEPTIONS || used => {
                         let code = RefusalCode::CapExceeded;
                         let seq = self.refuse(
                             code,

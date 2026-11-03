@@ -29,7 +29,7 @@
 }
 .totals .figure { padding: 18px 20px 20px; background: var(--elevation-strong); gap: 8px; }
 .totals .figureValue { font-size: 20px; }
-.withheld { color: var(--refusal); }
+.withheld { color: var(--text-strong); }
 
 .sectionTitle { margin: 56px 0 20px; }
 .rooms { display: flex; flex-direction: column; gap: 16px; }

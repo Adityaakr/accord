@@ -7,3 +7,5 @@
 cc 5490b885cfb4cec5cf2caced89b7d6c2b16e59c84fd67ab04dfd7f7718683bee # shrinks to steps = [Exception { item: 1, amount: 340282366920938463463374607431768211455, waive: false }, ApproveLatest]
 cc 32a4fff7be50bab1c40b69b063aaa100ef4c2e276eb732320bebd841e977e54b # shrinks to steps = [Exception { item: 3, amount: 36000000, waive: false }, ApproveLatest, Exception { item: 3, amount: 36000000, waive: false }, ApproveLatest]
 cc bad771e2da3181680fff0a35ea8410dd713247f1830452556849a0987804aadd # shrinks to steps = [Pay { item: 1, amount: 12000000, to: 0 }, Settle { ok: true }, Exception { item: 2, amount: 36000000, waive: false }, ApproveLatest]
+cc 52836a71ddb6750a09d2210d80345314e0f126c4df1801e319fcb4a5cb478e88 # shrinks to steps = [Exception { item: 1, amount: 12000000, waive: false }, Pay { item: 1, amount: 12000000, to: 0 }, ApproveLatest]
+cc 58d4f64f05dcee447094c38cea720300219ca65b6a51d4d8c16575b16254d2d0 # shrinks to steps = [Pay { item: 1, amount: 12000000, to: 0 }, Pay { item: 0, amount: 12000000, to: 2 }, Settle { ok: true }]

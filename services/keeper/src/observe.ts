@@ -36,17 +36,36 @@ export type ObserverOutput =
 
 export type AskObserver = (agreement: string, ask: SlotAsk) => Promise<ObserverOutput>;
 
-/** An observer over HTTP: the local OutLayer's `/observe`, or OutLayer's HTTPS API with a payment key. */
-export function httpObserver(url: string, token?: string): AskObserver {
+/** Where the observer runs: the local OutLayer on a local node, or OutLayer's HTTPS API on testnet. */
+export type ObserverConfig =
+  | { kind: "local"; url: string }
+  | { kind: "outlayer"; api: string; owner: string; project: string; paymentKey: string };
+
+const OBSERVER_TIMEOUT_MS = 30_000;
+
+/**
+ * The observer as a function. Local: `POST <url>` with the job input, the job output back. OutLayer
+ * (app.outlayer.ai/docs/https-api): `POST <api>/call/<owner>/<project>` with `X-Payment-Key`, body `{input}`, reply
+ * `{status, output}` where `output` is the job's stdout (a JSON string, or already parsed).
+ */
+export function observerFor(cfg: ObserverConfig): AskObserver {
   return async (agreement, ask) => {
-    const res = await fetch(url, {
+    const input = { mode: "observe", agreement, period: ask.period, slot: ask.slot };
+    const local = cfg.kind === "local";
+    const res = await fetch(local ? cfg.url : `${cfg.api}/call/${cfg.owner}/${cfg.project}`, {
       method: "POST",
-      headers: { "content-type": "application/json", ...(token ? { authorization: `Bearer ${token}` } : {}) },
-      body: JSON.stringify({ mode: "observe", agreement, period: ask.period, slot: ask.slot }),
+      headers: { "content-type": "application/json", ...(local ? {} : { "x-payment-key": cfg.paymentKey }) },
+      body: JSON.stringify(local ? input : { input }),
+      signal: AbortSignal.timeout(OBSERVER_TIMEOUT_MS),
     });
-    const body = (await res.json()) as ObserverOutput | { error: string };
-    if (!res.ok || !("mode" in body)) throw new Error(`observer ${res.status}: ${"error" in body ? body.error : ""}`);
-    return body;
+    const body = (await res.json()) as Record<string, unknown>;
+    if (local) {
+      if (!res.ok || !("mode" in body)) throw new Error(`observer ${res.status}: ${String(body.error ?? "")}`);
+      return body as ObserverOutput;
+    }
+    if (body.status !== "completed") throw new Error(`outlayer ${res.status} ${String(body.status)}: ${String(body.error ?? "")}`);
+    const out = typeof body.output === "string" ? JSON.parse(body.output) : body.output;
+    return out as ObserverOutput;
   };
 }
 
@@ -72,13 +91,24 @@ export async function observeAgreement(
   }
   const lines: string[] = [];
   for (const s of slotsToAsk(atlas, periods, recorded, now)) {
-    const out = await ask(deal.id, s);
+    // One slot's failure (an observer error, a timeout, a rejected record) never stops the others.
+    let out: ObserverOutput;
+    try {
+      out = await ask(deal.id, s);
+    } catch (e) {
+      lines.push(`observe ${deal.id} · period ${s.period + 1} slot ${s.slot + 1} · ${(e as Error).message.slice(0, 160)}`);
+      continue;
+    }
     if (out.status === "not_yet") continue;
     if (out.status !== "observed") {
       lines.push(`observe ${deal.id} · period ${s.period + 1} slot ${s.slot + 1} · ${out.error}`);
       continue;
     }
-    const tx = await deal.recordObservation(observationOf(out), out.sig);
+    const tx = await deal.recordObservation(observationOf(out), out.sig).catch((e: Error) => e);
+    if (tx instanceof Error) {
+      lines.push(`observe ${deal.id} · period ${s.period + 1} slot ${s.slot + 1} · record failed: ${tx.message.slice(0, 160)}`);
+      continue;
+    }
     lines.push(
       `observe ${deal.id} · period ${s.period + 1} slot ${s.slot + 1} · mainnet block ${out.venue_block.height} · ` +
         `spread ${out.spread_bps} bps · tx ${tx.txHash}`,

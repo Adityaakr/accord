@@ -24,3 +24,20 @@ describe("localNodeEnv", () => {
     expect(localNodeEnv(file, "a4.accord.test.near").ACCORD_AGENT_KEY).toBeUndefined();
   });
 });
+
+describe("loadLocalNode", () => {
+  it("replaces testnet and blank values from .env with the local node's", async () => {
+    const { mkdtempSync, mkdirSync, writeFileSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const { loadLocalNode } = await import("../src/env.js");
+    const root = mkdtempSync(join(tmpdir(), "accord-cli-"));
+    mkdirSync(join(root, "target/sandbox"), { recursive: true });
+    writeFileSync(join(root, "target/sandbox/env.json"), JSON.stringify(file));
+    const env: Record<string, string | undefined> = { ACCORD_FACTORY: "accord-v1.testnet", BUYER_ACCOUNT: "", NEAR_RPC_URL: "" };
+    expect(loadLocalNode(env, root)).toBeTruthy();
+    expect(env.ACCORD_FACTORY).toBe("accord.test.near");
+    expect(env.BUYER_ACCOUNT).toBe("northwind.test.near");
+    expect(env.NEAR_RPC_URL).toBe("http://127.0.0.1:3030");
+  });
+});

@@ -56,6 +56,9 @@ export default async function Atlas() {
         )}
       </section>
 
+      {c && c.unread > 0 && (
+        <p className="small" style={{ marginTop: 12 }}>{c.unread} agreement{c.unread === 1 ? "" : "s"} could not be read this time; the totals leave {c.unread === 1 ? "it" : "them"} out.</p>
+      )}
       {c && (
         <div className={styles.totals}>
           <Figure label="Retainers paid" value={<Usdc amount={c.totals.paid} />} note={`${c.totals.eligible} period${c.totals.eligible === 1 ? "" : "s"} eligible`} />

@@ -5,6 +5,7 @@ import {
   activate, approveBoth, authorise, client, create, deliverAndAccept, escrow, executingProcurement, fundTotal,
   header, line, negotiate, PRESETS, sealBoth, sleep, usdc, waitFor,
 } from "../flow.js";
+import { preflight } from "@accord/sdk";
 import type { World } from "../world.js";
 
 async function attested(w: World, title: string): Promise<string> {
@@ -127,14 +128,18 @@ export async function payeeChange(w: World): Promise<void> {
   const accepted = (await w.reader.agreement(r.id).recipients())[version - 1]!;
   const a = await w.reader.agreement(r.id).get();
   line("timelock", `approved and accepted · active at ${new Date((accepted.active_at ?? 0) * 1000).toISOString()} (${a.params.timelock_secs} s)`);
-  const early = await r.agent.deal.pay({ item: 1, amount: "12000000", recipient: next });
-  line("early", `pay to ${next} before activation: ${early.code ?? early.status}`);
+  // Checked with preflight, which reads the contract's authorised recipient: a real refused payment would file a
+  // factory report against these legitimate accounts (ERR_PAYEE_MISMATCH reports the recipient).
+  const early = await preflight(w.reader, r.id, next);
+  const earlyBlocked = early.rating === "block" && early.reasons.includes("not the authorised recipient");
+  line("early", `${next} before activation: ${earlyBlocked ? "not the authorised recipient (preflight; the contract would refuse ERR_PAYEE_MISMATCH)" : early.rating}`);
   await activate(w, r.id, version);
   line("active", `version ${version} · ${next}`);
-  const old = await r.agent.deal.pay({ item: 1, amount: "12000000", recipient: r.recipient });
-  line("old", `pay to ${r.recipient}: ${old.code ?? old.status}`);
+  const old = await preflight(w.reader, r.id, r.recipient);
+  const oldBlocked = old.rating === "block" && old.reasons.includes("not the authorised recipient");
+  line("old", `${r.recipient}: ${oldBlocked ? "no longer the authorised recipient (preflight)" : old.rating}`);
   const res = await r.agent.deal.pay({ item: 1, amount: "12000000", recipient: next });
   line("paid", `${res.status === "sent" ? "payment_sent" : res.code ?? res.status} ${usdc("12000000")} → ${next} · tx ${res.txHash}`);
-  if (res.status !== "sent" || early.status !== "refused" || old.status !== "refused") process.exitCode = 1;
+  if (res.status !== "sent" || !earlyBlocked || !oldBlocked) process.exitCode = 1;
 }
 

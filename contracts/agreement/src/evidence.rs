@@ -147,6 +147,12 @@ impl Agreement {
         let mut it = self.items[idx].clone();
         require(!it.exception_used, "ERR_EXCEPTION_USED");
         require(it.status != ItemStatus::Paid, "ERR_ALREADY_PAID");
+        // A payment of this item is in flight at the old amount; changing the amount now would let it settle at an
+        // amount the buyer no longer approves.
+        require(
+            self.in_flight.as_ref().is_none_or(|f| f.item != ex.item),
+            "ERR_IN_FLIGHT",
+        );
         require(it.status != ItemStatus::Reserved, "ERR_RESERVED");
         // The assumed payment stops counting toward the total once the exception reopens the item.
         let paid_without = if it.status == ItemStatus::AssumedPaid {

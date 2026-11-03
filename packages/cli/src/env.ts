@@ -113,8 +113,7 @@ export interface LocalNodeFile {
 
 /**
  * The variables a local node supplies, for `--network sandbox`: the factory, the RPC and every principal's key,
- * plus the agent key of the agreement named by `agreement` when the node installed one. Values already in `env`
- * win, so a `.env` can still override one role.
+ * plus the agent key of the agreement named by `agreement` when the node installed one.
  */
 export function localNodeEnv(file: LocalNodeFile, agreement?: string): Env {
   const out: Env = { ACCORD_FACTORY: file.factory, NEAR_RPC_URL: file.rpc };
@@ -133,11 +132,13 @@ export function localNodeEnv(file: LocalNodeFile, agreement?: string): Env {
   return out;
 }
 
-/** Reads `<root>/target/sandbox/env.json` into `env` without overriding what is set. */
+/**
+ * Reads `<root>/target/sandbox/env.json` into `env`. Asking for the local node is explicit, so its values replace
+ * whatever `.env` holds for the same variables (those are testnet accounts); `--factory` and `--rpc` still win.
+ */
 export function loadLocalNode(env: Env, root: string, agreement?: string): string | undefined {
   const file = join(root, "target/sandbox/env.json");
   if (!existsSync(file)) return undefined;
-  const overlay = localNodeEnv(JSON.parse(readFileSync(file, "utf8")) as LocalNodeFile, agreement);
-  for (const [k, v] of Object.entries(overlay)) if (env[k] === undefined) env[k] = v;
+  Object.assign(env, localNodeEnv(JSON.parse(readFileSync(file, "utf8")) as LocalNodeFile, agreement));
   return file;
 }

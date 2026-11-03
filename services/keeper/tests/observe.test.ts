@@ -34,3 +34,27 @@ describe("observationOf", () => {
     expect(o.slot).toBe(1);
   });
 });
+
+describe("observeAgreement", () => {
+  it("keeps going when one slot's observer call fails", async () => {
+    const { observeAgreement } = await import("../src/observe.js");
+    const recorded: number[] = [];
+    const deal = {
+      id: "a1",
+      periods: async () => [period(0, 1000)],
+      observations: async () => [],
+      recordObservation: async (o: { slot: number }) => { recorded.push(o.slot); return { txHash: `t${o.slot}` }; },
+    } as never;
+    const ask = async (_: string, s: { period: number; slot: number }) => {
+      if (s.slot === 0) throw new Error("timeout");
+      return {
+        mode: "observe", status: "observed", sig: "s", agreement: "a1", period: 0, slot: s.slot, slot_time: 1,
+        venue: { RheaDcl: { network: "mainnet", contract: "c", pool_id: "p" } }, band_bps: 200,
+        venue_block: { height: 9, hash: "h", time: 1 }, mid: "1", spread_bps: 5, depth_bid: "1", depth_ask: "1", two_sided: true,
+      } as never;
+    };
+    const lines = await observeAgreement(deal, { period_secs: 360, slots_per_period: 6 } as never, 1130, ask);
+    expect(recorded).toEqual([1, 2]);
+    expect(lines[0]).toMatch(/slot 1 · timeout/);
+  });
+});

@@ -60,6 +60,8 @@ export async function run(base: World): Promise<void> {
   });
   await client(w, "authority", id).approveRecipient(version);
   await client(w, "buyer", id).acceptRecipient(version, { acknowledgeWarnings: proven.rating === "warn" });
+  await activate(w, id, version);
+  at("recipient", `proven on the demo domain · approved · accepted · active`);
   const a = await negotiation;
   if (a.state !== "Attested") throw new Error(`${id}: ${a.state} after the negotiation`);
   const terms = (await w.reader.agreement(id).terms())!;
@@ -68,8 +70,6 @@ export async function run(base: World): Promise<void> {
   await approveBoth(w, id);
   const { total } = await fundTotal(w, id);
   at("executing", `approved by both · funded ${usdc(total)}`);
-  await activate(w, id, version);
-  at("recipient", `proven on the demo domain · approved · accepted · active`);
 
   const agent = await installAgent(w, id);
   await deliverAndAccept(w, id, 1);

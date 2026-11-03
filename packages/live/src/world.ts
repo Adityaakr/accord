@@ -4,7 +4,10 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { Accord, KeySigner, type Network } from "@accord/sdk";
+import { Account, KeyPair, KeyPairSigner, type KeyPairString } from "near-api-js";
+import { Accord, KeySigner, TGAS, type Network } from "@accord/sdk";
+import type { ObserverConfig } from "../../../services/keeper/src/observe.js";
+import { outlayerObserver } from "../../../services/agent/src/config.js";
 
 export type Role = "buyer" | "vendor" | "authority" | "keeper" | "recipient";
 export interface Principal { account: string; key: string }
@@ -28,8 +31,8 @@ export interface World {
   with(principals: Partial<Record<Role, Principal>>): World;
   /** The local OutLayer's address on a local node. */
   jobs?: string;
-  /** Where to ask the observer: the local OutLayer, or OutLayer's HTTPS API (OUTLAYER_OBSERVER_URL) on testnet. */
-  observer?: { url: string; token?: string };
+  /** Where to ask the observer: the local OutLayer, or OutLayer's HTTPS API on testnet. */
+  observer?: ObserverConfig;
   explorer?: string;
   as(role: Role): Accord;
   signer(role: Role): KeySigner;
@@ -37,7 +40,7 @@ export interface World {
   fund(account: string, amount: bigint): Promise<void>;
   /** Makes sure `account` holds at least `near` NEAR: topped up on a local node, checked on testnet. */
   gas(account: string, near: number): Promise<void>;
-  /** A fresh funded account (`make demo`): the local account faucet, or NEAR's testnet faucet. */
+  /** A fresh funded account (`make demo`): the local account faucet, or a sub-account of the buyer on testnet. */
   newAccount(name: string): Promise<Principal>;
 }
 
@@ -111,7 +114,7 @@ export function world(): World {
       token: f.token, attacker: f.attacker, canaries: f.canaries, domain: f.domain, jobs: f.jobs,
       second: f.second_recipient,
       app: { url: process.env.APP_URL ?? "http://127.0.0.1:3100", demoDomain: "demo.accord.local" },
-      observer: { url: `${f.jobs}/observe` },
+      observer: { kind: "local", url: `${f.jobs}/observe` },
       fund: async (account, amount) => {
         for (let left = amount; left > 0n; ) {
           const step = left > 1_000_000_000n ? 1_000_000_000n : left; // the token's per-call cap
@@ -126,35 +129,48 @@ export function world(): World {
   const env = { ...loadDotEnv(root), ...process.env } as Record<string, string | undefined>;
   const p = (role: string): Principal => ({ account: env[`${role}_ACCOUNT`] ?? "", key: env[`${role}_KEY`] ?? "" });
   const factory = env.ACCORD_FACTORY || "accord-v1.testnet";
+  const testnetReader = new Accord({ network: "testnet", factory, rpc: env.NEAR_RPC_URL || undefined });
   return build("testnet", env.NEAR_RPC_URL || "https://test.rpc.fastnear.com", factory, {
     buyer: p("BUYER"), vendor: p("VENDOR"), authority: p("AUTHORITY"), keeper: p("KEEPER"), recipient: p("RECIPIENT"),
   }, {
     token: env.ACCORD_TOKEN || "",
     attacker: env.ATTACKER_ACCOUNT || "",
     second: env.RECIPIENT2_ACCOUNT || undefined,
-    app: { url: env.APP_URL || "", demoDomain: env.APP_URL ? new URL(env.APP_URL).host : "" },
-    observer: env.OUTLAYER_OBSERVER_URL && env.OUTLAYER_PAYMENT_KEY
-      ? { url: env.OUTLAYER_OBSERVER_URL, token: env.OUTLAYER_PAYMENT_KEY }
-      : undefined,
+    app: appOf(env.APP_URL),
+    observer: outlayerObserver(env),
     canaries: (env.CANARY_ACCOUNTS || "").split(",").map((s) => s.trim()).filter(Boolean),
     domain: env.DEMO_VENDOR_DOMAIN || "",
     explorer: "https://testnet.nearblocks.io",
+    // Test USDC on testnet comes from Circle's faucet into the buyer (BLOCKED.md); a fresh `make demo` account is
+    // registered with the token and given what it needs from the buyer's balance.
     fund: async (account, amount) => {
-      const reader = new Accord({ network: "testnet", factory, rpc: env.NEAR_RPC_URL || undefined });
-      const have = BigInt(await reader.chain.view<string>(env.ACCORD_TOKEN || "", "ft_balance_of", { account_id: account }));
-      if (have < amount) {
-        throw new Error(`${account} holds ${have} base units of ${env.ACCORD_TOKEN}, needs ${amount}: drip test USDC at https://faucet.circle.com (BLOCKED.md)`);
+      const token = env.ACCORD_TOKEN || "";
+      const have = BigInt(await testnetReader.chain.view<string>(token, "ft_balance_of", { account_id: account }));
+      if (have >= amount) return;
+      const funder = p("BUYER");
+      if (account === funder.account) {
+        throw new Error(`${account} holds ${have} base units of ${token}, needs ${amount}: drip test USDC at https://faucet.circle.com (BLOCKED.md)`);
       }
+      const from = new KeySigner(funder.account, funder.key, testnetReader.chain);
+      await from.call(token, "storage_deposit", { account_id: account, registration_only: true }, { gas: 30n * TGAS, deposit: 1_250_000_000_000_000_000_000n });
+      const tx = await from.call(token, "ft_transfer", { receiver_id: account, amount: (amount - have).toString() }, { gas: 30n * TGAS, deposit: 1n });
+      if (!tx.ok) throw new Error(`funding ${account} from ${funder.account}: ${tx.failure}`);
     },
     gas: async (account, near) => {
-      const reader = new Accord({ network: "testnet", factory, rpc: env.NEAR_RPC_URL || undefined });
-      const have = BigInt((await reader.chain.account(account)).amount);
+      const have = BigInt((await testnetReader.chain.account(account)).amount);
       if (have < BigInt(near) * 10n ** 24n) {
         throw new Error(`${account} holds less than ${near} NEAR: top it up from the testnet faucet (make setup prints the shortfall)`);
       }
     },
+    // A fresh account for `make demo`: a sub-account of the buyer's account with 22 NEAR for a buyer (the creation
+    // deposit and gas) or 2 NEAR otherwise. Testnet has no keyless faucet API.
     newAccount: async (name) => {
-      throw new Error(`new testnet accounts come from make setup (${name}); run it once, then make demo`);
+      const funder = p("BUYER");
+      const kp = KeyPair.fromRandom("ed25519");
+      const acct = new Account(funder.account, testnetReader.chain.provider, new KeyPairSigner(KeyPair.fromString(funder.key as KeyPairString)));
+      const near = name.endsWith("-buyer") ? 22n : 2n;
+      await acct.createSubAccount({ accountOrPrefix: name, publicKey: kp.getPublicKey(), nearToTransfer: near * 10n ** 24n });
+      return { account: `${name}.${funder.account}`, key: kp.toString() };
     },
   });
 }
@@ -173,4 +189,15 @@ export function tryWorld(): World {
   const env = { ...loadDotEnv(repoRoot()), ...process.env } as Record<string, string | undefined>;
   const p = (role: string): Principal => ({ account: env[`TRY_${role}_ACCOUNT`] ?? "", key: env[`TRY_${role}_KEY`] ?? "" });
   return w.with({ buyer: p("BUYER"), vendor: p("VENDOR"), authority: p("AUTHORITY"), recipient: { account: env.TRY_RECIPIENT_ACCOUNT ?? "", key: "" } });
+}
+
+/** The app's address for the demo domain; a value without a scheme is a configuration error, said plainly. */
+function appOf(url: string | undefined): { url: string; demoDomain: string } {
+  if (!url) return { url: "", demoDomain: "" };
+  try {
+    const u = new URL(url);
+    return { url: u.origin, demoDomain: u.host };
+  } catch {
+    throw new Error(`APP_URL must be a full URL such as https://accord-app.example, got ${url}`);
+  }
 }

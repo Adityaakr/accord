@@ -9,7 +9,8 @@ import styles from "./atlas.module.css";
 const MAINNET_BLOCK = "https://nearblocks.io/blocks/";
 
 export const OUTCOME_TONE: Record<string, Tone> = {
-  Open: "neutral", Eligible: "teal", Withheld: "refusal", Review: "warn", ResolvedPay: "teal", ResolvedClosed: "muted",
+  // Withheld is the terms working, not a refusal: red stays for refusals, canary trips and revocations.
+  Open: "neutral", Eligible: "teal", Withheld: "muted", Review: "warn", ResolvedPay: "teal", ResolvedClosed: "muted",
 };
 export const OUTCOME_LABEL: Record<string, string> = {
   Open: "open", Eligible: "eligible", Withheld: "withheld", Review: "buyer decides", ResolvedPay: "resolved: pay",

@@ -4,7 +4,7 @@
 import { Accord, KeySigner, type AgreementView, type AgreementClient } from "@accord/sdk";
 import { beat } from "@accord/store";
 import { serviceConfig } from "../../agent/src/config.js";
-import { httpObserver, observeAgreement, type AskObserver } from "./observe.js";
+import { observeAgreement, observerFor, type AskObserver } from "./observe.js";
 
 // The observer's slot windows are a minute long on demo timings; a 15 s loop asks each at least three times.
 const LOOP_MS = 15_000;
@@ -26,14 +26,15 @@ async function step(
   }
   if (a.state !== "Executing") return;
   if (a.kind === "market-making") {
-    const atlas = (await deal.terms())?.atlas;
-    if (ask && atlas) for (const line of await observeAgreement(deal, atlas, now, ask)) log(line);
+    // Close what can close first, so a failing observer never holds a finished period open.
     for (const p of await deal.periods()) {
       if (p.outcome === "Open" && p.closable_at !== undefined && p.closable_at <= now) {
-        const tx = await deal.closePeriod(p.period);
-        log(`period ${a.account} · ${p.period + 1} closed · tx ${tx.txHash}`);
+        const tx = await deal.closePeriod(p.period).catch((e: Error) => e);
+        log(tx instanceof Error ? `period ${a.account} · ${p.period + 1} close failed: ${tx.message.split(" · ")[0]}` : `period ${a.account} · ${p.period + 1} closed · tx ${tx.txHash}`);
       }
     }
+    const atlas = (await deal.terms())?.atlas;
+    if (ask && atlas) for (const line of await observeAgreement(deal, atlas, now, ask)) log(line);
   }
   if (a.ends_at && now >= a.ends_at + a.params.grace_secs && !a.in_flight && !a.closing) {
     try {
@@ -52,10 +53,10 @@ async function main() {
   const reader = new Accord({ network: cfg.network, factory: cfg.factory, rpc: cfg.rpc });
   const accord = reader.withSigner(new KeySigner(cfg.keeper.account, cfg.keeper.key, reader.chain));
   console.log(`accord keeper · ${cfg.network} · factory ${cfg.factory} · as ${cfg.keeper.account}`);
-  const ask = cfg.observer ? httpObserver(cfg.observer.url, cfg.observer.token) : undefined;
-  console.log(ask
-    ? `  observer  ${cfg.observer!.url}`
-    : "  observer  polling off: set OUTLAYER_OBSERVER_URL and OUTLAYER_PAYMENT_KEY (BLOCKED.md, probe 0.3)");
+  const ask = cfg.observer ? observerFor(cfg.observer) : undefined;
+  console.log(cfg.observer
+    ? `  observer  ${cfg.observer.kind === "local" ? cfg.observer.url : `${cfg.observer.api}/call/${cfg.observer.owner}/${cfg.observer.project}`}`
+    : "  observer  polling off: set OUTLAYER_OWNER and OUTLAYER_PAYMENT_KEY (BLOCKED.md, probe 0.3)");
   for (;;) {
     const actions: string[] = [];
     try {

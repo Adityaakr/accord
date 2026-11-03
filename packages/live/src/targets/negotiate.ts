@@ -39,9 +39,13 @@ export async function run(w: World): Promise<void> {
     line("model", `${model.id} · gateway and model attestation ok · fresh nonce ${short(model.nonce ?? "")} · signer ${signer}`);
   }
   const responses = Array.isArray(out.responses) ? out.responses.length : 0;
-  line("rounds", `${ROUNDS[out.rounds] ?? `${out.rounds} messages`} · ${responses} responses · ${responses} signatures ok`);
+  const signed = model.local
+    ? "no model responses (local negotiator)"
+    : `${responses} responses · each signature verified against an attested model key inside the enclave`;
+  line("rounds", `${ROUNDS[out.rounds] ?? `${out.rounds} messages`} · ${signed}`);
   if (a.state !== "Attested") {
     line("state", `${a.state} · ${out.no_deal_reason ?? "no terms"} · ${Math.round((Date.now() - started) / 1000)} s`);
+    process.exitCode = 1;
     return;
   }
   line("limits", "pass · within both mandates (values not shown)");
