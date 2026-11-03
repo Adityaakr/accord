@@ -34,13 +34,19 @@ The faucet gave `10 NEAR` per account. The factory needs about `12 NEAR` and the
 
 ## 2.7 and 5.5: testnet NEAR for the global release (about 55 NEAR, once)
 
-The agreement wasm is `522 KB`. Embedded, every agreement stakes about `5.3 NEAR` for its own copy of the code. Published once as a NEP-591 global contract by hash, agreements stake almost nothing for code, but publishing burns about `0.0001 NEAR` per byte: about `52 NEAR`, once per release.
+The agreement wasm is `500,620 B` (measured 3 Nov). Embedded, every agreement stakes about `5.1 NEAR` for its own copy of the code (measured, ARCHITECTURE 18). Published once as a NEP-591 global contract by hash, agreements stake about `0.1 NEAR` for their state only, but publishing burns about `0.0001 NEAR` per byte: about `50 NEAR`, once per release.
 
 1. Get testnet NEAR into `accord-v1.testnet` until it holds about `60 NEAR` (https://near-faucet.io, or ask in the NEAR developer channels for testnet NEAR).
 2. Tell me when it is there; `make deploy-testnet` then publishes release 1 in the global mode.
 
-Until then, development continues on the local sandbox (`make serve`, `make sandbox`).
+Until then, everything runs on the local node: `make dev` (node, local OutLayer, keeper, agent with the `/try` re-arm, app) and every live target with `NET=local`.
 
 ## Rotate the NEAR AI key after the hackathon
 
 The key in `.env` was pasted into a chat on 3 Nov. After 14 Nov, create a new key at https://cloud.near.ai, put it in `.env` and in the Sealed Table's OutLayer secret, and delete the old one.
+
+## 4.7: Railway for the hosted app, agent and keeper
+
+1. Create a Railway project with four services from this repository: `app` (`pnpm --filter @accord/app build && pnpm --filter @accord/app start`), `agent` (`pnpm --filter @accord/agent start`, `AGENT_REARM=on`), `keeper` (`pnpm --filter @accord/keeper start`) and a Postgres plugin.
+2. Set on all three: `ACCORD_NETWORK=testnet`, `ACCORD_FACTORY`, `NEAR_RPC_URL`, `DATABASE_URL` (from the plugin). On the agent: the `TRY_*` accounts and keys. On the keeper: `KEEPER_ACCOUNT`, `KEEPER_KEY`, `OUTLAYER_OBSERVER_URL`, `OUTLAYER_PAYMENT_KEY`. On the app: `INBOX_DAILY_SALT` (any random string), `APP_URL` (its own public URL).
+3. Send me the app's public host: it goes into the Payee job's `DEMO_DOMAINS` before release 1 (2.7), so proofs from the app's demo domain say `demo_domain: true`.

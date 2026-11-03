@@ -249,3 +249,13 @@ Two independent reviews (funds and authority; liveness and state) ran against `c
 Kept as a stated limit: an `AssumedPaid` item counts as paid; if its transfer had in fact failed, the refund at `Settled` returns that amount to the buyer. The vendor's remedy is the exception it requests before close, as the kit designs.
 
 Also: the observer's replay fixtures keyed view calls by the raw `args_base64`, whose JSON key order changes when other crates in the build enable `serde_json/preserve_order`; replay keys now re-encode the arguments as JCS.
+
+## 16. The local node stands in for testnet (3 Nov)
+
+Testnet is blocked on OutLayer, NEAR and USDC (BLOCKED.md), so the product runs end to end on a local NEAR node first, with as little replaced as possible:
+
+- **What is real.** The four contracts (the `-mock` agreement build, whose only additions are `submit_mock_*` and skipping the OutLayer requests; `make check-deploy` proves the release build has neither); the three jobs' code, run natively from the same crates the enclave builds, with seeds that derive keys exactly as deployed; mandates sealed with eciesjs to the Sealed Table's derived key and opened by the Rust job; every signature checked by the contract; the observer reading real NEAR mainnet blocks.
+- **What is replaced, and labelled.** The model: `jobs/sealed-table/src/local.rs`, a deterministic negotiator inside both mandates' limits; its outputs carry `model.local`, `make negotiate` and Verify say "no model ran". OutLayer's delivery: a watcher submits job outputs through `submit_mock_*` as the keeper. The domains: the vendor's `accord.json` is served from memory, and `demo.accord.local` forwards to the app's demo-domain route. Faucets: test USDC mint and NEAR top-ups from the node's root.
+- **Why.** The remaining risk is integration, not logic: every live target, the keeper, the re-arm and the app have now run against the same contract code and job code testnet will run. Moving to testnet changes the endpoints and the model, not the code paths.
+- **Atlas fixtures.** The passing agreement's conditions were measured from the pool on 3 Nov (`make probe-venue`: `146 bps`, `32.78 USDC` bid depth within `200 bps`): at most `200 bps` and at least `20 USDC`. The strict pair keeps `30 bps`, which a `0.2%` fee pool cannot meet.
+- **Exceptions.** A request above the agreement's total, or on an item whose one exception is used, is refused at request time (`ERR_BAD_EXCEPTION`, `ERR_EXCEPTION_USED`), found by the `act` fuzz test: before, it sat pending, blocking that item's single pending slot, and could never be approved.

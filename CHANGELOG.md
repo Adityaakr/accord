@@ -18,3 +18,9 @@ One line per `PROGRESS.md` item, newest last.
 - 3 Nov 2026 · 2.1 · `@accord/cli` and `@accord/mcp` over the SDK, with a preflight guard before any payment; `make verify`.
 - 3 Nov 2026 · 4.1 to 4.6 · deal-room app: deal rooms, deal room with live refusal log and Verified panel, create and seal in the browser, /try inbox, Atlas, Verify, Record and CSV, Payee, Status, Docs, Join; no-mandate-routes test; `make serve` for a seeded local sandbox.
 - 3 Nov 2026 · 3.3 (part) · demo agent with the literal planner over the /try inbox, live on the sandbox; keeper loop.
+- 3 Nov 2026 · 2.2, 2.5, 2.6 · a local OutLayer: the real Sealed Table, Payee and observer code against a local node, only the model replaced by a deterministic negotiator marked `model.local`; the harness uses the jobs' own key derivation and seals real mandates.
+- 3 Nov 2026 · 2.9 · keeper polls the observer and records real mainnet observations into Atlas agreements; job RPC fails over on a JSON-RPC rate limit (`-429`), a bug the live observer found.
+- 3 Nov 2026 · 2.8, 3.4 to 3.7, 4.4, 5.2 · every live make target on a local node or testnet (`NET=local`): negotiate, approve, fund, payee, pay, attack, revoke, claim, exception, payee-change, atlas (one period Eligible and paid, the strict one Withheld, on real Rhea data), demo (14 s from fresh accounts), inbox; `make dev`.
+- 3 Nov 2026 · 3.3 · the `/try` re-arm in the agent: opens, feeds, re-keys, tops up, closes and reopens rooms under the daily cap.
+- 3 Nov 2026 · 4.5 · the Accord Atlas console: latest mainnet reading, totals, every agreement's periods, the observation stream with mainnet block links; an observation log in Atlas deal rooms; the Atlas band on the home page. Verify says no model ran for a local negotiation.
+- 3 Nov 2026 · 5.4 · `act` fuzz test (400 random sequences) finds two junk exception paths, now refused at request; `make measure` writes gas and storage into ARCHITECTURE 18.
