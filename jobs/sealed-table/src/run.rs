@@ -31,6 +31,10 @@ pub trait Ai: Negotiator {
     fn records(&self) -> Vec<ResponseRecord>;
     /// Prompt and completion tokens so far.
     fn usage(&self) -> (u64, u64);
+    /// True only for the local runner's stand-in (`local.rs`): every output it leads to says `"local": true`.
+    fn local(&self) -> bool {
+        false
+    }
 }
 
 /// NEAR AI Cloud: one verified report, then every answer a verified, model-signed completion.
@@ -216,6 +220,9 @@ pub fn negotiate_with(
     out.set("mode", json!("negotiate"));
     out.set("agreement", json!(agreement));
     out.set("request_nonce", json!(nonce));
+    if ai.local() {
+        out.set("local", json!(true));
+    }
     let value = run(host, src, agreement, nonce, secrets, ai, out);
     sign(value, &key)
 }

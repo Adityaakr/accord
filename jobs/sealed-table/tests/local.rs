@@ -137,3 +137,66 @@ fn the_try_room_takes_twelve_equal_items() {
     assert_eq!(t.items.len(), 12);
     assert!(t.items.iter().all(|i| i.amount == 10_000));
 }
+
+/// Mandates the job accepts but the strategy cannot quote from end in a walk-away or a refusal, never a panic.
+#[test]
+fn odd_vendor_limits_never_panic() {
+    let b = mandate("northwind/procurement.buyer.json");
+    let mut v = mandate("halcyon/procurement.vendor.json");
+    for (min, max) in [(4u32, 2u32), (0, 0)] {
+        v.limits["min_items"] = serde_json::json!(min);
+        v.limits["max_items"] = serde_json::json!(max);
+        let mut neg = LocalNegotiator::new(b.clone(), v.clone(), params());
+        let ctx = Context {
+            kind: b.kind,
+            token: TOKEN.into(),
+            decimals: 6,
+            params: params(),
+            venue: None,
+        };
+        let bp = Party {
+            account: "b".into(),
+            mandate: b.clone(),
+        };
+        let vp = Party {
+            account: "v".into(),
+            mandate: v.clone(),
+        };
+        let table = Table {
+            ctx: &ctx,
+            buyer: &bp,
+            vendor: &vp,
+            salt: "00".into(),
+        };
+        assert!(
+            table.run(&mut neg).is_err(),
+            "min {min} max {max}: an infrastructure error, not terms"
+        );
+    }
+    let mut mm = mandate("halcyon/market-making.vendor.json");
+    mm.limits["min_retainer_per_period"] = serde_json::json!(u128::MAX.to_string());
+    let bm = mandate("northwind/market-making.buyer.json");
+    let mut neg = LocalNegotiator::new(bm.clone(), mm.clone(), params());
+    let ctx = Context {
+        kind: bm.kind,
+        token: TOKEN.into(),
+        decimals: 6,
+        params: params(),
+        venue: Context::venue_from(&bm.shared),
+    };
+    let bp = Party {
+        account: "b".into(),
+        mandate: bm,
+    };
+    let vp = Party {
+        account: "v".into(),
+        mandate: mm,
+    };
+    let _ = Table {
+        ctx: &ctx,
+        buyer: &bp,
+        vendor: &vp,
+        salt: "00".into(),
+    }
+    .run(&mut neg);
+}

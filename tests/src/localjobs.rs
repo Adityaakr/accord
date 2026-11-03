@@ -130,6 +130,18 @@ pub struct LocalJobs {
     http: LocalHttp,
 }
 
+/// Runs a job; a panic inside it becomes the unsigned error output the deployed job would give, never a crash.
+fn guarded(mode: &str, f: impl FnOnce() -> Value) -> Value {
+    std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)).unwrap_or_else(|p| {
+        let why = p
+            .downcast_ref::<&str>()
+            .map(|s| s.to_string())
+            .or_else(|| p.downcast_ref::<String>().cloned())
+            .unwrap_or_else(|| "panic".into());
+        accord_jobkit::error_output(mode, format!("local job panicked: {why}"))
+    })
+}
+
 impl LocalJobs {
     pub fn new(http: LocalHttp) -> Self {
         Self { http }
@@ -137,6 +149,10 @@ impl LocalJobs {
 
     /// The Sealed Table's `negotiate` run, signed with its derived key.
     pub fn negotiate(&self, agreement: &str, nonce: &str) -> Value {
+        guarded("negotiate", || self.negotiate_unguarded(agreement, nonce))
+    }
+
+    fn negotiate_unguarded(&self, agreement: &str, nonce: &str) -> Value {
         let host = LocalHost {
             http: &self.http,
             start: Instant::now(),
@@ -171,10 +187,12 @@ impl LocalJobs {
             retry: Duration::from_secs(5),
             pause: Duration::from_millis(300),
         };
-        accord_payee::run(
-            &json!({"mode": "prove", "agreement": agreement, "version": version}),
-            &deps,
-        )
+        guarded("prove", || {
+            accord_payee::run(
+                &json!({"mode": "prove", "agreement": agreement, "version": version}),
+                &deps,
+            )
+        })
     }
 
     /// The observer's `observe` run: `not_yet` before the hidden slot time, a signed observation after it.
@@ -185,10 +203,12 @@ impl LocalJobs {
             retry: Duration::from_secs(5),
             pause: Duration::from_millis(300),
         };
-        accord_observer::run(
-            &json!({"mode": "observe", "agreement": agreement, "period": period, "slot": slot}),
-            &deps,
-        )
+        guarded("observe", || {
+            accord_observer::run(
+                &json!({"mode": "observe", "agreement": agreement, "period": period, "slot": slot}),
+                &deps,
+            )
+        })
     }
 
     pub fn signs_as(job: Job) -> String {

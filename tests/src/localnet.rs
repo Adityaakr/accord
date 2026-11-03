@@ -53,77 +53,105 @@ async fn submit(env: &Env, agreement: &AccountId, method: &str, args: Value) -> 
     }
 }
 
-/// One pass over every agreement: answers each open negotiation request and each unproven recipient once.
+/// Every agreement the factory lists, page by page.
+async fn all_agreements(env: &Env) -> Result<Vec<AccountId>> {
+    let mut out = Vec::new();
+    let mut from = 1u64;
+    loop {
+        let page = view(
+            env,
+            env.factory.id(),
+            "agreements",
+            json!({"from": from, "limit": 100}),
+        )
+        .await?;
+        let page = page.as_array().cloned().unwrap_or_default();
+        out.extend(
+            page.iter()
+                .filter_map(|r| r["account"].as_str().and_then(|s| s.parse().ok())),
+        );
+        if page.len() < 100 {
+            return Ok(out);
+        }
+        from += 100;
+    }
+}
+
+/// One pass over every agreement: answers each open negotiation request and each unproven recipient once. A
+/// request counts as answered only after its output was submitted, so a failure is tried again next pass; one
+/// agreement's error is logged and the others are still served.
 pub async fn deliver_once(
     env: &Env,
     jobs: &Arc<LocalJobs>,
     done: &Mutex<BTreeSet<String>>,
 ) -> Result<()> {
-    let records = view(
-        env,
-        env.factory.id(),
-        "agreements",
-        json!({"from": null, "limit": 100}),
-    )
-    .await?;
-    for r in records.as_array().cloned().unwrap_or_default() {
-        let Some(id) = r["account"]
-            .as_str()
-            .and_then(|s| s.parse::<AccountId>().ok())
-        else {
-            continue;
-        };
-        let a = view(env, &id, "get_agreement", json!({})).await?;
-        if a["state"] == "Sealed" {
-            if let Some(nonce) = a["negotiation"]["Requested"]["request_nonce"].as_str() {
-                let key = format!("negotiate:{id}:{nonce}");
-                if done.lock().await.insert(key) {
-                    let (j, ids, n) = (jobs.clone(), id.to_string(), nonce.to_string());
-                    let out = blocking(move || j.negotiate(&ids, &n)).await?;
-                    let summary = match out["outcome"].as_str() {
-                        Some("terms") => format!(
-                            "terms {} USDC · {} rounds",
-                            usdc(&out["terms"]["total"]),
-                            out["rounds"]
-                        ),
-                        Some("no_deal") => format!("no deal · {}", out["no_deal_reason"]),
-                        _ => format!("infrastructure · {}", out["error"]),
-                    };
-                    submit(
-                        env,
-                        &id,
-                        "submit_mock_negotiation",
-                        json!({"output": out.to_string()}),
-                    )
-                    .await?;
-                    println!("[local outlayer] sealed-table {id} · {summary} · model local, no attestation");
-                }
-            }
+    for id in all_agreements(env).await? {
+        if let Err(e) = serve(env, jobs, done, &id).await {
+            eprintln!("[local outlayer] {id}: {e}");
         }
-        let recipients = view(env, &id, "get_recipients", json!({})).await?;
-        for v in recipients.as_array().cloned().unwrap_or_default() {
-            if v["status"] != "Proposed" {
-                continue;
-            }
-            let version = v["version"].as_u64().unwrap_or(0) as u32;
-            if !done.lock().await.insert(format!("payee:{id}:{version}")) {
-                continue;
-            }
-            let (j, ids) = (jobs.clone(), id.to_string());
-            let out = blocking(move || j.prove(&ids, version)).await?;
+    }
+    Ok(())
+}
+
+async fn serve(
+    env: &Env,
+    jobs: &Arc<LocalJobs>,
+    done: &Mutex<BTreeSet<String>>,
+    id: &AccountId,
+) -> Result<()> {
+    let a = view(env, id, "get_agreement", json!({})).await?;
+    if let (true, Some(nonce)) = (
+        a["state"] == "Sealed",
+        a["negotiation"]["Requested"]["request_nonce"].as_str(),
+    ) {
+        let key = format!("negotiate:{id}:{nonce}");
+        if !done.lock().await.contains(&key) {
+            let (j, ids, n) = (jobs.clone(), id.to_string(), nonce.to_string());
+            let out = blocking(move || j.negotiate(&ids, &n)).await?;
+            let summary = match out["outcome"].as_str() {
+                Some("terms") => format!(
+                    "terms {} USDC · {} rounds",
+                    usdc(&out["terms"]["total"]),
+                    out["rounds"]
+                ),
+                Some("no_deal") => format!("no deal · {}", out["no_deal_reason"]),
+                _ => format!("infrastructure · {}", out["error"]),
+            };
             submit(
                 env,
-                &id,
-                "submit_mock_payee",
-                json!({"version": version, "output": out.to_string()}),
+                id,
+                "submit_mock_negotiation",
+                json!({"output": out.to_string()}),
             )
             .await?;
+            done.lock().await.insert(key);
             println!(
-                "[local outlayer] payee {id} · version {version} · {} · {}",
-                v["account"].as_str().unwrap_or(""),
-                out["rating"].as_str().unwrap_or("error")
+                "[local outlayer] sealed-table {id} · {summary} · model local, no attestation"
             );
         }
+    }
+    let recipients = view(env, id, "get_recipients", json!({})).await?;
+    for v in recipients.as_array().cloned().unwrap_or_default() {
+        let version = v["version"].as_u64().unwrap_or(0) as u32;
+        let key = format!("payee:{id}:{version}");
+        if v["status"] != "Proposed" || done.lock().await.contains(&key) {
+            continue;
+        }
+        let (j, ids) = (jobs.clone(), id.to_string());
+        let out = blocking(move || j.prove(&ids, version)).await?;
+        submit(
+            env,
+            id,
+            "submit_mock_payee",
+            json!({"version": version, "output": out.to_string()}),
+        )
+        .await?;
+        done.lock().await.insert(key);
+        println!(
+            "[local outlayer] payee {id} · version {version} · {} · {} · domain file served by the local node",
+            v["account"].as_str().unwrap_or(""),
+            out["rating"].as_str().unwrap_or("error")
+        );
     }
     Ok(())
 }
@@ -147,18 +175,48 @@ fn usdc(v: &Value) -> String {
 /// The HTTP side: one JSON request per connection, answered and closed. Bound to 127.0.0.1 only.
 pub async fn serve_http(env: Arc<Env>, jobs: Arc<LocalJobs>) -> Result<()> {
     let listener = TcpListener::bind(JOBS_ADDR).await?;
+    // At most 64 connections at once; each has five seconds to send its request.
+    let slots = Arc::new(tokio::sync::Semaphore::new(64));
     loop {
         let (stream, _) = listener.accept().await?;
+        let Ok(permit) = slots.clone().try_acquire_owned() else {
+            drop(stream);
+            continue;
+        };
         let (env, jobs) = (env.clone(), jobs.clone());
         tokio::spawn(async move {
             if let Err(e) = handle(stream, &env, &jobs).await {
                 eprintln!("[local outlayer] http: {e}");
             }
+            drop(permit);
         });
     }
 }
 
-async fn read_request(stream: &mut TcpStream) -> Result<(String, String, Value)> {
+/// Only this machine's own tools: a browser page elsewhere (a cross-site POST, DNS rebinding) is refused.
+fn local_caller(headers: &str) -> Result<(), &'static str> {
+    let header = |name: &str| {
+        headers.lines().find_map(|l| {
+            let (k, v) = l.split_once(':')?;
+            k.trim()
+                .eq_ignore_ascii_case(name)
+                .then(|| v.trim().to_ascii_lowercase())
+        })
+    };
+    let port = JOBS_ADDR.rsplit(':').next().unwrap_or("");
+    match header("host") {
+        Some(h) if h == JOBS_ADDR || h == format!("localhost:{port}") => {}
+        _ => return Err("host must be this machine"),
+    }
+    if let Some(o) = header("origin") {
+        if !(o.starts_with("http://localhost") || o.starts_with("http://127.0.0.1")) {
+            return Err("cross-origin requests are refused");
+        }
+    }
+    Ok(())
+}
+
+async fn read_request(stream: &mut TcpStream) -> Result<(String, String, String, Vec<u8>)> {
     let mut buf = Vec::new();
     let mut chunk = [0u8; 4096];
     loop {
@@ -190,13 +248,10 @@ async fn read_request(stream: &mut TcpStream) -> Result<(String, String, Value)>
             let mut first = head.lines().next().unwrap_or("").split_whitespace();
             let method = first.next().unwrap_or("").to_string();
             let path = first.next().unwrap_or("").to_string();
-            let body = &buf[end + 4..(end + 4 + len).min(buf.len())];
-            let json = if body.is_empty() {
-                Value::Null
-            } else {
-                serde_json::from_slice(body)?
-            };
-            return Ok((method, path, json));
+            if buf.len() < end + 4 + len {
+                return Err(anyhow!("body shorter than its content-length"));
+            }
+            return Ok((method, path, head, buf[end + 4..end + 4 + len].to_vec()));
         }
         if buf.len() > 70 * 1024 {
             return Err(anyhow!("headers too large"));
@@ -210,41 +265,78 @@ fn find(hay: &[u8], needle: &[u8]) -> Option<usize> {
 }
 
 async fn handle(mut stream: TcpStream, env: &Env, jobs: &Arc<LocalJobs>) -> Result<()> {
-    let (method, path, body) = read_request(&mut stream).await?;
-    let (status, out) = match (method.as_str(), path.as_str()) {
-        ("POST", "/observe") => match observe(jobs, &body).await {
-            Ok(v) => (200, v),
-            Err(e) => (400, json!({"error": e.to_string()})),
+    let read =
+        tokio::time::timeout(std::time::Duration::from_secs(5), read_request(&mut stream)).await;
+    let (status, out) = match read {
+        Err(_) => (408, json!({"error": "request not received within 5 s"})),
+        Ok(Err(e)) => (400, json!({"error": e.to_string()})),
+        Ok(Ok((method, path, head, body))) => match local_caller(&head) {
+            Err(why) => (403, json!({"error": why})),
+            Ok(()) => route(env, jobs, &method, &path, &head, &body).await,
         },
-        ("POST", "/faucet") => match faucet(env, &body).await {
-            Ok(v) => (200, v),
-            Err(e) => (400, json!({"error": e.to_string()})),
-        },
-        ("POST", "/near") => match near(env, &body).await {
-            Ok(v) => (200, v),
-            Err(e) => (400, json!({"error": e.to_string()})),
-        },
-        ("POST", "/account") => match new_account(env, &body).await {
-            Ok(v) => (200, v),
-            Err(e) => (400, json!({"error": e.to_string()})),
-        },
-        ("GET", "/health") => (
-            200,
-            json!({"ok": true, "network": "local", "rpc": env.worker.rpc_addr()}),
-        ),
-        _ => (
-            404,
-            json!({"error": "POST /observe, /faucet or /account; GET /health"}),
-        ),
     };
     let body = out.to_string();
     let reply = format!(
         "HTTP/1.1 {status} {}\r\ncontent-type: application/json\r\ncontent-length: {}\r\nconnection: close\r\n\r\n{body}",
-        if status == 200 { "OK" } else { "Error" },
+        match status { 200 => "OK", 400 => "Bad Request", 403 => "Forbidden", 404 => "Not Found", 408 => "Request Timeout", _ => "Error" },
         body.len()
     );
     stream.write_all(reply.as_bytes()).await?;
     Ok(())
+}
+
+async fn route(
+    env: &Env,
+    jobs: &Arc<LocalJobs>,
+    method: &str,
+    path: &str,
+    head: &str,
+    body: &[u8],
+) -> (u16, Value) {
+    if method == "GET" && path == "/health" {
+        return (
+            200,
+            json!({"ok": true, "network": "local", "rpc": env.worker.rpc_addr()}),
+        );
+    }
+    if method != "POST" {
+        return (
+            404,
+            json!({"error": "POST /observe, /faucet, /near or /account; GET /health"}),
+        );
+    }
+    let json_type = head.lines().any(|l| {
+        l.split_once(':').is_some_and(|(k, v)| {
+            k.trim().eq_ignore_ascii_case("content-type")
+                && v.trim().starts_with("application/json")
+        })
+    });
+    if !json_type {
+        return (
+            400,
+            json!({"error": "content-type must be application/json"}),
+        );
+    }
+    let body: Value = match serde_json::from_slice(body) {
+        Ok(v) => v,
+        Err(e) => return (400, json!({"error": format!("body is not JSON: {e}")})),
+    };
+    let r = match path {
+        "/observe" => observe(jobs, &body).await,
+        "/faucet" => faucet(env, &body).await,
+        "/near" => near(env, &body).await,
+        "/account" => new_account(env, &body).await,
+        _ => {
+            return (
+                404,
+                json!({"error": "POST /observe, /faucet, /near or /account; GET /health"}),
+            )
+        }
+    };
+    match r {
+        Ok(v) => (200, v),
+        Err(e) => (400, json!({"error": e.to_string()})),
+    }
 }
 
 async fn observe(jobs: &Arc<LocalJobs>, body: &Value) -> Result<Value> {

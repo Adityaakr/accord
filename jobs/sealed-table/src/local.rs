@@ -76,7 +76,10 @@ impl LocalNegotiator {
         let b: ProcurementBuyer = limits(&self.buyer)?;
         let v: ProcurementVendor = limits(&self.vendor)?;
         let names = item_names(&self.buyer.shared);
-        let n = (names.len() as u32).clamp(v.min_items, v.max_items);
+        if v.min_items > v.max_items || v.max_items == 0 {
+            return Err("the vendor's item limits leave no count to quote".into());
+        }
+        let n = (names.len() as u32).max(v.min_items).min(v.max_items);
         let build = |total: Amount, duration: u64, window: u64| -> MsgTerms {
             split(total, n, duration, v.min_due_offset_secs, &names, window)
         };
@@ -128,8 +131,11 @@ impl LocalNegotiator {
                     return Ok(Self::reply("ACCEPT", "The counter works."));
                 }
                 let mid = v.target_total / 2 + total / 2;
-                let per_item = mid.div_ceil(Amount::from(n)).div_ceil(USDC) * USDC;
-                let offer = (per_item * Amount::from(n)).max(v.min_total);
+                let per_item = mid
+                    .div_ceil(Amount::from(n))
+                    .div_ceil(USDC)
+                    .saturating_mul(USDC);
+                let offer = per_item.saturating_mul(Amount::from(n)).max(v.min_total);
                 let t = build(offer, c.duration_secs, c.acceptance_window_secs);
                 Ok(self.propose(
                     "FINAL",
@@ -149,7 +155,9 @@ impl LocalNegotiator {
         match (side, self.standing.clone()) {
             (Role::Vendor, None) => {
                 let a = MsgAtlas {
-                    retainer_per_period: (v.min_retainer_per_period / 2 * 3).to_string(),
+                    retainer_per_period: (v.min_retainer_per_period / 2)
+                        .saturating_mul(3)
+                        .to_string(),
                     periods: 4,
                     period_secs: 3600,
                     slots_per_period: 6,
@@ -289,10 +297,10 @@ fn split(
 }
 
 fn atlas_terms(a: MsgAtlas, window: u64) -> MsgTerms {
-    let total = amount(&a.retainer_per_period) * Amount::from(a.periods);
+    let total = amount(&a.retainer_per_period).saturating_mul(Amount::from(a.periods));
     MsgTerms {
         total: total.to_string(),
-        duration_secs: a.period_secs * u64::from(a.periods),
+        duration_secs: a.period_secs.saturating_mul(u64::from(a.periods)),
         acceptance_window_secs: window,
         items: vec![],
         atlas: Some(a),
@@ -342,5 +350,9 @@ impl Ai for LocalNegotiator {
 
     fn usage(&self) -> (u64, u64) {
         (0, 0)
+    }
+
+    fn local(&self) -> bool {
+        true
     }
 }
