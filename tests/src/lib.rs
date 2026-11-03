@@ -4,8 +4,11 @@
 //! keys sign the outputs and the `-mock` wasm accepts them through `submit_mock_*`, with every signature check
 //! still running. Used by the integration tests in `tests/` and by `make sandbox`.
 
+pub mod localjobs;
+
 use accord_core::hash::{jcs_sha256, sha256, signed_bytes, to_hex};
 use accord_core::types::*;
+use accord_jobkit::keys as jobkeys;
 use anyhow::{anyhow, bail, Result};
 use base64::{engine::general_purpose::STANDARD, Engine};
 use ed25519_dalek::{Signer, SigningKey};
@@ -20,12 +23,75 @@ pub const PAYEE_SEED: [u8; 32] = [22; 32];
 pub const OBSERVER_SEED: [u8; 32] = [33; 32];
 pub const MODEL: &str = "z-ai/glm-5.3-flash";
 pub const DOMAIN: &str = "halcyon.example";
-pub const SANDBOX_MANDATE_PUBKEY: &str =
-    "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
+
+/// The three jobs, each with its sandbox-only seed. Keys are derived from the seed exactly as the deployed job
+/// derives them, so the local runner (`localjobs.rs`) runs the real job code against this node.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Job {
+    SealedTable,
+    Payee,
+    Observer,
+}
+
+impl Job {
+    pub fn seed(self) -> [u8; 32] {
+        match self {
+            Job::SealedTable => SEALED_SEED,
+            Job::Payee => PAYEE_SEED,
+            Job::Observer => OBSERVER_SEED,
+        }
+    }
+
+    pub fn key(self) -> SigningKey {
+        match self {
+            Job::SealedTable => accord_sealed_table::keys::signing_key(&SEALED_SEED),
+            Job::Payee => jobkeys::signing_key(&PAYEE_SEED, jobkeys::PAYEE_SIGN_INFO),
+            Job::Observer => jobkeys::signing_key(&OBSERVER_SEED, jobkeys::OBSERVER_SIGN_INFO),
+        }
+    }
+
+    /// The job's own `pubkey` output, as OutLayer would return it.
+    pub fn pubkey_output(self) -> Value {
+        match self {
+            Job::SealedTable => accord_sealed_table::keys::pubkey_output(&SEALED_SEED),
+            Job::Payee => jobkeys::pubkey_output("payee", &self.key()),
+            Job::Observer => jobkeys::pubkey_output("observer", &self.key()),
+        }
+    }
+
+    /// Adds `"sig"` with the job's key: ed25519 over `JCS(output without sig)`.
+    pub fn sign(self, v: Value) -> Value {
+        jobkeys::sign(v, &self.key())
+    }
+}
 pub const CREATE_DEPOSIT: NearToken = NearToken::from_near(8);
 
 pub fn tgas(t: u64) -> Gas {
     Gas::from_tgas(t)
+}
+
+/// A demo company's mandate from `fixtures/companies/`.
+pub fn company_mandate(path: &str) -> Result<Value> {
+    let file = format!(
+        "{}/../fixtures/companies/{path}",
+        env!("CARGO_MANIFEST_DIR")
+    );
+    Ok(serde_json::from_str(
+        &std::fs::read_to_string(&file).map_err(|e| anyhow!("{file}: {e}"))?,
+    )?)
+}
+
+/// The vendor's `accord.json` for this node's accounts: the list form, as the domain would serve it.
+pub fn domain_file(pairs: &[(&AccountId, &AccountId)]) -> Vec<u8> {
+    let entries: Vec<Value> = pairs
+        .iter()
+        .map(|(r, a)| json!({"recipient": r, "settlement_authority": a}))
+        .collect();
+    serde_json::to_vec(&json!({
+        "accord": "1", "network": "testnet", "entries": entries,
+        "contact": "Halcyon Markets is a fictional company on a local Accord node.",
+    }))
+    .expect("json")
 }
 
 pub fn wasm(name: &str) -> Result<Vec<u8>> {
@@ -163,22 +229,15 @@ impl Env {
             .gas(tgas(300))
             .transact()
             .await?)?;
-        for (job, seed, project) in [
-            ("sealed_table", SEALED_SEED, "accord-sealed-table"),
-            ("payee", PAYEE_SEED, "accord-payee"),
-            ("observer", OBSERVER_SEED, "accord-observer"),
+        for (job, name, project) in [
+            (Job::SealedTable, "sealed_table", "accord-sealed-table"),
+            (Job::Payee, "payee", "accord-payee"),
+            (Job::Observer, "observer", "accord-observer"),
         ] {
-            let mut out = json!({"mode": "pubkey", "job": job, "signing_pubkey": pubkey(seed)});
-            if job == "sealed_table" {
-                // A real secp256k1 point (the generator; its secret is 1), so the browser can seal in the sandbox.
-                // Sandbox only: nothing sealed here is private.
-                out["mandate_pubkey"] = json!(SANDBOX_MANDATE_PUBKEY);
-            }
-            let out = sign(seed, out);
             ok(f.call(f.id(), "submit_mock_pubkey")
                 .args_json(json!({
-                    "job": job, "project": format!("{}/{project}", f.id()), "wasm_hash": "cd".repeat(32),
-                    "output": out.to_string(),
+                    "job": name, "project": format!("{}/{project}", f.id()), "wasm_hash": "cd".repeat(32),
+                    "output": job.pubkey_output().to_string(),
                 }))
                 .transact()
                 .await?)?;
@@ -313,6 +372,33 @@ impl Deal<'_> {
         Ok(())
     }
 
+    /// Seals a real mandate the way the SDK does (INTERFACES.md 6.3): the envelope's JCS bytes, ECIES to the
+    /// release's mandate key, committed by `who`. Returns the document key's secret, to open the terms document.
+    pub async fn seal(&self, who: &Account, role: &str, mandate: &Value) -> Result<[u8; 32]> {
+        use accord_sealed_table::{keys, sealing};
+        let doc_secret =
+            keys::mandate_secret(&sha256(format!("doc:{}:{role}", self.id).as_bytes()));
+        let doc_pubkey = keys::mandate_pubkey(&doc_secret);
+        let envelope = json!({
+            "v": 1, "agreement": self.id, "role": role, "party": who.id(), "release": 1,
+            "mandate": mandate, "salt": to_hex(&sha256(format!("salt:{}:{role}", self.id).as_bytes())),
+            "doc_pubkey": doc_pubkey, "doc_key_signer": pubkey([5; 32]),
+        });
+        let bytes = accord_core::hash::jcs(&envelope);
+        let mandate_key = keys::mandate_pubkey(&keys::mandate_secret(&SEALED_SEED));
+        let ciphertext = sealing::encrypt_document(&mandate_key, &bytes).map_err(|e| anyhow!(e))?;
+        self.must(
+            who,
+            "commit_mandate",
+            json!({
+                "commitment": to_hex(&sha256(&bytes)), "ciphertext": STANDARD.encode(ciphertext),
+                "doc_pubkey": doc_pubkey, "doc_key_signer": pubkey([5; 32]),
+            }),
+        )
+        .await?;
+        Ok(doc_secret)
+    }
+
     pub async fn nonce(&self) -> Result<String> {
         let a = self.get().await?;
         a["negotiation"]["Requested"]["request_nonce"]
@@ -322,17 +408,14 @@ impl Deal<'_> {
     }
 
     pub fn sealed_output(&self, nonce: &str, terms: &Terms) -> Value {
-        sign(
-            SEALED_SEED,
-            json!({
-                "mode": "negotiate", "agreement": self.id, "release": 1, "request_nonce": nonce,
-                "buyer_commitment": "11".repeat(32), "vendor_commitment": "22".repeat(32),
-                "outcome": "terms", "terms": terms, "terms_hash": to_hex(&jcs_sha256(terms)),
-                "no_deal_reason": null, "rounds": 4, "transcript_hash": "ef".repeat(32),
-                "documents": {"buyer": "YQ==", "vendor": "Yg=="},
-                "model": {"id": MODEL}, "usage": {"prompt_tokens": 0},
-            }),
-        )
+        Job::SealedTable.sign(json!({
+            "mode": "negotiate", "agreement": self.id, "release": 1, "request_nonce": nonce,
+            "buyer_commitment": "11".repeat(32), "vendor_commitment": "22".repeat(32),
+            "outcome": "terms", "terms": terms, "terms_hash": to_hex(&jcs_sha256(terms)),
+            "no_deal_reason": null, "rounds": 4, "transcript_hash": "ef".repeat(32),
+            "documents": {"buyer": "YQ==", "vendor": "Yg=="},
+            "model": {"id": MODEL}, "usage": {"prompt_tokens": 0},
+        }))
     }
 
     /// Seals, negotiates through the mock signer and approves: `Executing`. Returns the terms hash.
@@ -372,8 +455,7 @@ impl Deal<'_> {
     }
 
     pub fn payee_output(&self, version: u32, account: &AccountId, rating: &str) -> Value {
-        sign(
-            PAYEE_SEED,
+        Job::Payee.sign(
             json!({
                 "mode": "prove", "agreement": self.id, "version": version, "domain": DOMAIN,
                 "url": format!("https://{DOMAIN}/.well-known/accord.json"), "file_sha256": "00".repeat(32),
@@ -467,7 +549,7 @@ impl Deal<'_> {
         let mut v = serde_json::to_value(o).unwrap();
         v["mode"] = json!("observe");
         v["status"] = json!("observed");
-        sign(OBSERVER_SEED, v)["sig"].as_str().unwrap().to_string()
+        Job::Observer.sign(v)["sig"].as_str().unwrap().to_string()
     }
 }
 

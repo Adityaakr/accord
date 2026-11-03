@@ -176,6 +176,7 @@ pub fn synthetic_attestation(signer: &str) -> Attestation {
         report_sha256: "33".repeat(32),
         gateway: part("0x00000000000000000000000000000000000000aa", false),
         candidates: vec![part(signer, true)],
+        local: false,
     }
 }
 

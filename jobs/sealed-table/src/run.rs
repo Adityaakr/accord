@@ -120,6 +120,15 @@ impl Out {
 }
 
 fn model_summary(model: &str, a: &Attestation) -> Value {
+    if a.local {
+        return json!({
+            "id": model,
+            "local": "deterministic local negotiator: no NEAR AI call, no attestation checked",
+            "nonce": a.nonce,
+            "candidates": [],
+            "e2ee": false,
+        });
+    }
     let candidates: Vec<Value> = a
         .candidates
         .iter()

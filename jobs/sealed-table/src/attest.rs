@@ -54,6 +54,8 @@ pub struct Attestation {
     pub report_sha256: String,
     pub gateway: PartResult,
     pub candidates: Vec<PartResult>,
+    /// True only for the local runner's stand-in (`local.rs`): no report was fetched and nothing was verified.
+    pub local: bool,
 }
 
 impl Attestation {
@@ -504,6 +506,7 @@ pub fn attest(host: &dyn Host, api_key: &str, model: &str) -> Result<Attestation
         report_sha256: hex::encode(sha256(&r.body)),
         gateway,
         candidates,
+        local: false,
     })
 }
 

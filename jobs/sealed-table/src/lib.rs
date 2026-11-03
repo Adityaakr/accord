@@ -8,6 +8,7 @@ pub mod attest;
 pub mod host;
 pub mod keys;
 pub mod leak;
+pub mod local;
 pub mod nearai;
 pub mod protocol;
 pub mod run;

@@ -106,12 +106,17 @@ name = "accord-sandbox"
 version = "0.1.0"
 dependencies = [
  "accord-core",
+ "accord-jobkit",
+ "accord-observer",
+ "accord-payee",
+ "accord-sealed-table",
  "anyhow",
  "base64 0.22.1",
  "bs58 0.5.1",
  "ed25519-dalek",
  "hex",
  "near-workspaces",
+ "rand 0.8.8",
  "serde",
  "serde_json",
  "sha2 0.10.9",

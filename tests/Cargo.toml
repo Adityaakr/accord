@@ -8,7 +8,12 @@ publish = false
 
 [dependencies]
 accord-core = { path = "../crates/accord-core" }
+accord-jobkit = { path = "../crates/accord-jobkit", features = ["native"] }
+accord-sealed-table = { path = "../jobs/sealed-table" }
+accord-payee = { path = "../jobs/payee" }
+accord-observer = { path = "../jobs/observer" }
 near-workspaces = "0.24.0"
+rand = "0.8"
 tokio = { version = "1", features = ["full"] }
 anyhow = "1"
 serde_json.workspace = true
