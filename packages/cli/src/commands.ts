@@ -97,16 +97,8 @@ async function txBlock(ctx: Ctx, command: string, id: string, label: string, run
 
 // defaults for `create`
 
-export const DEMO_PARAMS: Params = {
-  mode: "demo", timelock_secs: 120, claim_delay_secs: 120, grace_secs: 600, min_acceptance_window_secs: 60,
-  max_acceptance_window_secs: 604800, require_two_sided: true, observation_grace_secs: 60, refusal_limit: 5,
-  refusal_window_secs: 3600, agent_allowance: DEFAULT_ALLOWANCE,
-};
-/** The live minimums the factory enforces (ARCHITECTURE.md section 4). */
-export const LIVE_PARAMS: Params = {
-  ...DEMO_PARAMS, mode: "live", timelock_secs: 86400, claim_delay_secs: 259200, grace_secs: 345600,
-  observation_grace_secs: 600,
-};
+export { DEMO_PARAMS, LIVE_PARAMS } from "@accord/sdk";
+import { DEMO_PARAMS, LIVE_PARAMS } from "@accord/sdk";
 
 // commands
 

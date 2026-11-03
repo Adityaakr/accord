@@ -1,0 +1,14 @@
+{
+  "name": "@accord/live",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The live make targets (INTERFACES.md section 10) on a local node or testnet",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": { "@accord/sdk": "workspace:*", "@accord/store": "workspace:*", "near-api-js": "7.3.1", "@noble/hashes": "1.8.0" }
+}

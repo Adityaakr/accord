@@ -220,6 +220,10 @@ async fn handle(mut stream: TcpStream, env: &Env, jobs: &Arc<LocalJobs>) -> Resu
             Ok(v) => (200, v),
             Err(e) => (400, json!({"error": e.to_string()})),
         },
+        ("POST", "/near") => match near(env, &body).await {
+            Ok(v) => (200, v),
+            Err(e) => (400, json!({"error": e.to_string()})),
+        },
         ("POST", "/account") => match new_account(env, &body).await {
             Ok(v) => (200, v),
             Err(e) => (400, json!({"error": e.to_string()})),
@@ -273,6 +277,34 @@ async fn faucet(env: &Env, body: &Value) -> Result<Value> {
         usdc(&json!(amount.to_string()))
     );
     Ok(json!({"account": account, "amount": amount.to_string()}))
+}
+
+/// Tops an account up to at least `near` NEAR (at most 100) from the node's root, as the testnet faucet would.
+async fn near(env: &Env, body: &Value) -> Result<Value> {
+    let account: AccountId = body["account"]
+        .as_str()
+        .ok_or_else(|| anyhow!("account"))?
+        .parse()?;
+    let want = body["near"]
+        .as_u64()
+        .filter(|n| *n <= 100)
+        .ok_or_else(|| anyhow!("near: 1 to 100"))?;
+    let have = env.worker.view_account(&account).await?.balance;
+    let target = NearToken::from_near(u128::from(want));
+    if have < target {
+        let r = env
+            .root
+            .transfer_near(
+                &account,
+                NearToken::from_yoctonear(target.as_yoctonear() - have.as_yoctonear()),
+            )
+            .await?;
+        if !r.is_success() {
+            return Err(anyhow!("transfer failed"));
+        }
+        println!("[local faucet] {account} topped up to {want} NEAR");
+    }
+    Ok(json!({"account": account, "near": want}))
 }
 
 /// A new account under the node's root with 30 NEAR, for `make demo` (the testnet faucet's role).

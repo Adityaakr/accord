@@ -77,6 +77,21 @@ importers:
         specifier: 7.3.1
         version: 7.3.1
 
+  packages/live:
+    dependencies:
+      '@accord/sdk':
+        specifier: workspace:*
+        version: link:../sdk
+      '@accord/store':
+        specifier: workspace:*
+        version: link:../store
+      '@noble/hashes':
+        specifier: 1.8.0
+        version: 1.8.0
+      near-api-js:
+        specifier: 7.3.1
+        version: 7.3.1
+
   packages/mcp:
     dependencies:
       '@accord/sdk':
@@ -119,12 +134,18 @@ importers:
 
   services/agent:
     dependencies:
+      '@accord/live':
+        specifier: workspace:*
+        version: link:../../packages/live
       '@accord/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
       '@accord/store':
         specifier: workspace:*
         version: link:../../packages/store
+      near-api-js:
+        specifier: 7.3.1
+        version: 7.3.1
 
   services/keeper:
     dependencies:

@@ -28,8 +28,13 @@ use std::time::{Duration, Instant};
 pub struct LocalHttp {
     rpc: String,
     files: BTreeMap<String, Vec<u8>>,
+    /// The app on this machine, which serves the demo domain's list (`make demo`).
+    app: String,
     inner: UreqHttp,
 }
+
+/// The demo domain on a local node: the app's own `/.well-known/accord.json` (INTERFACES.md 8).
+pub const LOCAL_DEMO_DOMAIN: &str = "demo.accord.local";
 
 impl LocalHttp {
     /// `files`: domain to the `accord.json` it serves.
@@ -37,6 +42,7 @@ impl LocalHttp {
         Self {
             rpc: rpc.to_string(),
             files,
+            app: std::env::var("ACCORD_APP_URL").unwrap_or_else(|_| "http://127.0.0.1:3100".into()),
             inner: UreqHttp::new(),
         }
     }
@@ -57,6 +63,13 @@ impl Http for LocalHttp {
                 ..req.clone()
             };
             return self.inner.send(&local);
+        }
+        if req.url == format!("https://{LOCAL_DEMO_DOMAIN}/.well-known/accord.json") {
+            let app = Request {
+                url: format!("{}/.well-known/accord.json", self.app),
+                ..req.clone()
+            };
+            return self.inner.send(&app);
         }
         if let Some(body) = self.domain_file(&req.url) {
             return Ok(Response {

@@ -25,6 +25,7 @@ export interface InboxMessage {
 export interface Approval { agreement: string; recipient: string; buyer: string; signature: string; approved_at: string }
 export interface DemoVendor { recipient: string; authority: string; registered_at: string }
 export interface Heartbeat { service: string; at: string; detail: unknown }
+export interface TryRoom { agreement: string; opened_at: string; closed_at: string | null; items_paid: number; status: "open" | "closed" }
 
 const SCHEMA = `
 create table if not exists inbox_messages (
@@ -44,6 +45,7 @@ interface FileDb {
   approvals: Approval[];
   demoVendors: DemoVendor[];
   heartbeats: Heartbeat[];
+  tryRooms?: TryRoom[];
 }
 
 let pool: pg.Pool | null = null;
@@ -200,5 +202,36 @@ export async function beat(service: string, detail: unknown) {
   const d = readFile();
   d.heartbeats = d.heartbeats.filter((h) => h.service !== service);
   d.heartbeats.push({ service, at: new Date().toISOString(), detail });
+  writeFile(d);
+}
+
+/** The /try rooms the re-arm opened, newest first. */
+export async function tryRooms(limit = 20): Promise<TryRoom[]> {
+  const p = await db();
+  if (p) return (await p.query("select * from try_rooms order by opened_at desc limit $1", [limit])).rows as TryRoom[];
+  return [...(readFile().tryRooms ?? [])].sort((a, b) => b.opened_at.localeCompare(a.opened_at)).slice(0, limit);
+}
+
+export async function openTryRoom(agreement: string) {
+  const p = await db();
+  if (p) {
+    await p.query("insert into try_rooms (agreement, opened_at, status) values ($1, now(), 'open') on conflict (agreement) do nothing", [agreement]);
+    return;
+  }
+  const d = readFile();
+  d.tryRooms = (d.tryRooms ?? []).filter((r) => r.agreement !== agreement);
+  d.tryRooms.push({ agreement, opened_at: new Date().toISOString(), closed_at: null, items_paid: 0, status: "open" });
+  writeFile(d);
+}
+
+export async function closeTryRoom(agreement: string, itemsPaid: number) {
+  const p = await db();
+  if (p) {
+    await p.query("update try_rooms set closed_at = now(), items_paid = $2, status = 'closed' where agreement = $1", [agreement, itemsPaid]);
+    return;
+  }
+  const d = readFile();
+  const r = (d.tryRooms ?? []).find((x) => x.agreement === agreement);
+  if (r) Object.assign(r, { closed_at: new Date().toISOString(), items_paid: itemsPaid, status: "closed" });
   writeFile(d);
 }

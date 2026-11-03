@@ -9,5 +9,5 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },
-  "dependencies": { "@accord/sdk": "workspace:*", "@accord/store": "workspace:*" }
+  "dependencies": { "@accord/sdk": "workspace:*", "@accord/store": "workspace:*", "@accord/live": "workspace:*", "near-api-js": "7.3.1" }
 }

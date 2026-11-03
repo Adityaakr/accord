@@ -97,7 +97,36 @@ async fn total(deal: &Deal<'_>) -> Result<u128> {
 #[tokio::main]
 async fn main() -> Result<()> {
     let env = Arc::new(Env::new().await?);
-    let file = domain_file(&[(env.recipient.id(), env.authority.id())]);
+    // A second account the vendor's domain lists, for `make payee-change`.
+    let second = env
+        .root
+        .create_subaccount("halcyon-ops")
+        .initial_balance(near_workspaces::types::NearToken::from_near(5))
+        .transact()
+        .await?
+        .into_result()?;
+    // The /try room's own fictional principals (ARCHITECTURE.md 11); its pair is the domain file's third entry.
+    let mut try_accounts = Vec::new();
+    for (name, near) in [
+        ("northwind-try", 60),
+        ("halcyon-try", 10),
+        ("halcyon-try-auth", 5),
+        ("halcyon-try-mm", 5),
+    ] {
+        let a = env
+            .root
+            .create_subaccount(name)
+            .initial_balance(near_workspaces::types::NearToken::from_near(near))
+            .transact()
+            .await?
+            .into_result()?;
+        try_accounts.push(a);
+    }
+    let file = domain_file(&[
+        (env.recipient.id(), env.authority.id()),
+        (second.id(), env.authority.id()),
+        (try_accounts[3].id(), try_accounts[2].id()),
+    ]);
     let http = LocalHttp::new(
         &env.worker.rpc_addr(),
         BTreeMap::from([(DOMAIN.to_string(), file)]),
@@ -247,9 +276,14 @@ async fn main() -> Result<()> {
             "buyer": key(&env.buyer), "vendor": key(&env.vendor), "authority": key(&env.authority),
             "keeper": key(&env.keeper), "recipient": key(&env.recipient),
         },
+        "try": {
+            "buyer": key(&try_accounts[0]), "vendor": key(&try_accounts[1]),
+            "authority": key(&try_accounts[2]), "recipient": key(&try_accounts[3]),
+        },
         "agent": {"agreement": live.id, "key": agent.secret_key().to_string()},
         "agents": agents,
         "recipient": env.recipient.id(),
+        "second_recipient": second.id(),
         "attacker": env.attacker.id(),
         "canaries": env.canaries.iter().map(|c| c.id().to_string()).collect::<Vec<_>>(),
         "signers": {

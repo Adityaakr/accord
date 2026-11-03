@@ -4,8 +4,7 @@ import { parseUnits } from "@accord/sdk";
 
 export const USDC_DECIMALS = 6;
 export const NEAR_DECIMALS = 24;
-/** The default agent key allowance: 0.5 NEAR in yoctoNEAR. */
-export const DEFAULT_ALLOWANCE = "500000000000000000000000";
+export { DEFAULT_AGENT_ALLOWANCE as DEFAULT_ALLOWANCE } from "@accord/sdk";
 
 export function parseAmount(text: string, opts: { raw?: boolean; decimals?: number } = {}): string {
   const t = text.trim();

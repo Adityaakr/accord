@@ -26,8 +26,9 @@ pub const JOB: &str = "payee";
 /// The network every agreement and every listed account lives on in this build.
 pub const NETWORK: &str = "testnet";
 /// Domains whose proofs carry `demo_domain: true`: the app's own host serving the demo list (INTERFACES.md 8).
-/// Compiled in, so a proof cannot claim or hide it. Empty until the app's host is fixed.
-pub const DEMO_DOMAINS: &[&str] = &[];
+/// Compiled in, so a proof cannot claim or hide it. `demo.accord.local` is the local node's name for the app (no
+/// public resolver answers for `.local`); the hosted app's host is added when it is fixed.
+pub const DEMO_DOMAINS: &[&str] = &["demo.accord.local"];
 /// The list form's ceiling; the simple form must also fit in `MAX_SIMPLE_BYTES`.
 pub const MAX_FILE_BYTES: usize = 64 * 1024;
 pub const MAX_SIMPLE_BYTES: usize = 8 * 1024;
