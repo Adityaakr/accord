@@ -59,7 +59,7 @@ export function Footer() {
         <div className={styles.info}>
           <div className={styles.description}>
             <Logo />
-            <p className={`t-body-sm ${styles.tagline}`}>Private agreements. Controlled execution. The private deal room for agent-to-agent commerce.</p>
+            <p className={`t-body-sm ${styles.tagline}`}>The private deal room and control plane for agent-to-agent commerce.</p>
           </div>
           <p className={`t-body-sm ${styles.copyright}`}>
             Built on

@@ -46,7 +46,7 @@ function WordReveal({ as: Tag, className, text, delay, duration, stagger, breakA
               {w.includes("-") ? w.split("-").map((part, k) => <span key={k}>{k > 0 ? <span className={styles.hy}>-</span> : null}{part}</span>) : w}
             </motion.span>
             {i < words.length - 1 ? " " : null}
-            {/* the H1 breaks after its first sentence at widths >= 1024 (the <br> is hidden below that) */}
+            {/* the H1 breaks after "control plane" at widths >= 1024 (the <br> is hidden below that) */}
             {breakAfter === i ? <br className={styles.desktopBreak} /> : null}
           </span>
         )
@@ -118,15 +118,15 @@ const CARDS = [
   { icon: ICON_TRUSTED, title: "Evidence checks", description: "A payment becomes eligible only when the agreed evidence or acceptance is recorded." },
 ]
 
-/* ---------- copy (positioning from Adi, 8 Nov 2026: one product, the approved agreement as the authority) ---------- */
-const HEADLINE = "Private agreements. Controlled execution."
-/* desktop: one sentence per line → index of the word the <br> follows */
-const H1_BREAK_AFTER = HEADLINE.split(" ").indexOf("agreements.")
-/* Two-tone headline: the two nouns carry a silver sheen; the second line steps back in tone */
+/* ---------- copy (Adi, 8 Nov 2026) ---------- */
+const HEADLINE = "The private deal room and control plane for agent-to-agent commerce."
+/* desktop: break after "control plane" → index of the word the <br> follows */
+const H1_BREAK_AFTER = HEADLINE.split(" ").indexOf("plane")
+/* Two-tone headline: "deal room" and "control plane" carry a silver sheen; the second line steps back in tone */
 const H1_WORDS = HEADLINE.split(" ")
-const ACCENT = new Set([H1_WORDS.indexOf("agreements."), H1_WORDS.indexOf("execution.")])
+const ACCENT = new Set([H1_WORDS.indexOf("deal"), H1_WORDS.indexOf("room"), H1_WORDS.indexOf("control"), H1_WORDS.indexOf("plane")])
 const headlineWord = (i: number) => (ACCENT.has(i) ? styles.h1Accent : i > H1_BREAK_AFTER ? styles.h1Soft : undefined)
-const LEAD = "The private deal room for agent-to-agent commerce. Each agent negotiates within its company’s confidential mandate, both companies approve the terms, and the approved agreement stays the authority over what happens next: who the buyer’s agent may pay, how much, and on what evidence."
+const LEAD = "Accord turns private negotiations into enforceable payment rules. Agents negotiate within each business’s confidential limits. Both parties approve the terms, and the contract enforces who can authorise payments, who can receive them, how much can be paid and what evidence is required."
 /* The line under the buttons links to the demonstration (it replaced the Accord Atlas announcement, 8 Nov 2026) */
 const DEMO_TITLE = "From private negotiation to controlled payment."
 const DEMO_TEXT = "Negotiate, approve, observe, hold, refuse a redirected payment, then pay the approved recipient."

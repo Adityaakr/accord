@@ -107,11 +107,11 @@
 }
 .title { text-wrap: balance; }
 .description { text-wrap: pretty; } /* no single-word last line at 1200/1440 */
-/* at >= 1024 the H1 breaks after its first sentence (forced <br>, natural wrapping otherwise);
+/* at >= 1024 the H1 breaks after "control plane" (forced <br>, natural wrapping otherwise);
    below 1024 the <br> is hidden and the balanced wrap above applies */
 .desktopBreak { display: none; }
 @media (min-width: 1024px) {
-  /* two lines exactly: "Private agreements." / "Controlled execution."; the H1 may run wider than the 640 text column */
+  /* two lines exactly: "…and control plane" / "for agent-to-agent commerce."; the H1 may run wider than the 640 text column */
   .title { text-wrap: initial; white-space: nowrap; width: max-content; max-width: none; }
   .desktopBreak { display: inline; }
 }
