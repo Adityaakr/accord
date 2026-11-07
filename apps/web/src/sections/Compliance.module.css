@@ -1,5 +1,5 @@
 /* Home · Market-making agreements in Accord: heading row, sourced cards, then a monochrome stage holding the agreement's
-   monitor (the band's stage and card language, in silver instead of teal), the demonstrated lifecycle, then the scope note. */
+   monitor (the band's stage and card language, in silver instead of teal), then the scope note. */
 .section {
   gap: 40px;
   padding: 72px 0;
@@ -281,21 +281,3 @@
   .settleAmt:not(.amtDone) { display: none; }
 }
 
-/* ---------- the demonstrated lifecycle: six steps in one row (three on tablet, one column on phone) ---------- */
-.life { display: flex; flex-direction: column; gap: 20px; width: 100%; }
-.lifeGrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
-.lifeStep {
-  display: flex; flex-direction: column; gap: 8px;
-  padding: 16px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(var(--ink-rgb), 0.08);
-  background: linear-gradient(160deg, rgba(var(--ink-rgb), 0.04), rgba(var(--ink-rgb), 0.01) 60%), var(--elevation-strong);
-}
-.lifeNum { font-family: var(--mono); font-size: 11px; color: var(--text-weak); }
-.lifeTitle { font-size: 15px; letter-spacing: -0.01em; color: var(--text-strong); }
-.lifeText { font-size: 12.5px; line-height: 1.5; color: var(--text-medium); }
-.lifeRefusal { border-color: rgba(255, 34, 68, 0.28); }
-.lifeRefusal .lifeNum, .lifeRefusal .lifeTitle { color: var(--refusal); }
-.lifeNote { color: var(--text-weak); max-width: 760px; }
-@media (max-width: 1199.98px) { .lifeGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 809.98px) { .lifeGrid { grid-template-columns: 1fr; } }

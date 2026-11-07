@@ -1,281 +1,181 @@
-import { useRef, useState, type KeyboardEvent } from "react"
-import { Link } from "react-router-dom"
+import type { ReactNode } from "react"
+import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
+import { SectionHeading } from "../components/SectionHeading"
 import { PixelIcon, type PixelName } from "../components/PixelIcon"
-import { LINKS } from "../content/links"
+import { LogoMark } from "../components/Logo"
+import { NearLogo } from "../components/NearLogo"
+import { NearAiLogo } from "../components/NearAiLogo"
 import styles from "./UseCases.module.css"
 
-/* Home · Use cases (#use-cases), directly under the hero (copy from Adi, 8 Nov 2026). Accord is one product; each agreement
-   type changes the commercial fields and the evidence it accepts, never the controls. Six selectable cards share one
-   agreement preview beneath them, so the reader sees the same six fields fill in for each type. Nothing advances on its
-   own. Each type carries "Demo" (runs end to end in the developer preview) or "Planned" (not built; the preview shows how
-   it would read). The detailed evidence opens on demand. A source appears only where the research page already carries
-   one; a published concern establishes the problem, never an endorsement. Accounts and .example domains are illustrative. */
+/* Home · Use cases (#use-cases), after How it works (8 Nov 2026). Six cards, each an outcome a business would recognise:
+   a pixel icon on a tile, the outcome as the title, two sentences, and the parts and rails it runs on. The corner of each
+   card holds a small drawing of what the agreement checks, above the title,, in the site's own data colours (teal for a pass, coral for a
+   market's asks, refusal red only for a refused payment), fading into the card. Types that are not built yet say
+   "Planned". Names and figures match the deal-room band above. */
 
-type Decision = "Eligible" | "Held" | "Awaiting review"
-type Evidence = { k: string; v: string; tone?: "pass" | "fail" | "refused" | "pending" }
-type UseCase = {
-  id: string
-  icon: PixelName
-  title: string
-  status: "Demo" | "Planned"
-  line: string
-  body: string
-  condition: string
-  note?: string
-  obligation: string
-  rule: string
-  accepts: string
-  recipient: string
-  decision: Decision
-  why: string
-  evidence: Evidence[]
-  source?: { text: string; href: string }
+const rise = (delay: `${number}s`): AppearEffect => ({
+  threshold: 0.3,
+  replay: false,
+  enter: { opacity: 0, x: 0, y: 24, scale: 1, rotate: 0, transition: { type: "tween", ease: EASE_APPEAR, duration: "1s", delay } },
+})
+
+/* What a card runs on: Accord's own parts carry the Accord mark, partners their own mark or a plain dot */
+type Rail = "near" | "usdc" | "nearai" | "outlayer" | "rhea" | "payee" | "controls" | "sealed"
+function RailMark({ r }: { r: Rail }) {
+  switch (r) {
+    case "near": return <span className={styles.rail}><NearLogo variant="mono" />NEAR</span>
+    case "nearai": return <span className={styles.rail}><NearAiLogo className={styles.nearai} /></span>
+    case "usdc": return <span className={styles.rail}><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true"><circle cx="8" cy="8" r="6.6" /><path d="M9.8 6.1c-.3-.6-1-1-1.8-1-1 0-1.8.6-1.8 1.4 0 1.9 3.7 1 3.7 2.9 0 .8-.8 1.4-1.9 1.4-.8 0-1.5-.4-1.8-1M8 4v8" strokeLinecap="round" /></svg>USDC</span>
+    case "outlayer": return <span className={styles.rail}><i className={styles.railDot} />OutLayer</span>
+    case "rhea": return <span className={styles.rail}><i className={styles.railDot} />Rhea pool</span>
+    case "payee": return <span className={styles.rail}><LogoMark size={13} />Payee</span>
+    case "controls": return <span className={styles.rail}><LogoMark size={13} />Agreement controls</span>
+    case "sealed": return <span className={styles.rail}><LogoMark size={13} />Sealed Table</span>
+  }
 }
 
-const USES: UseCase[] = [
+/* ---------- the corner drawings: drawn on a 200 × 200 grid, shown through the window x 24–186, y 76–174 ---------- */
+const T = "var(--teal)"
+const Dim = "rgba(var(--ink-rgb), 0.28)"
+const Faint = "rgba(var(--ink-rgb), 0.12)"
+
+const Liquidity = () => (
+  <svg viewBox="24 76 162 98" aria-hidden="true">
+    <path d="M30 150 C 62 140, 86 116, 100 98 L100 150 Z" fill={T} opacity="0.16" />
+    <path d="M30 150 C 62 140, 86 116, 100 98" stroke={T} strokeWidth="1.6" fill="none" />
+    <path d="M110 98 C 124 116, 148 140, 180 150 L110 150 Z" fill="#ec9a7f" opacity="0.14" />
+    <path d="M110 98 C 124 116, 148 140, 180 150" stroke="#ec9a7f" strokeWidth="1.6" fill="none" />
+    <line x1="105" y1="78" x2="105" y2="152" stroke={Dim} strokeDasharray="2 3" />
+    <line x1="24" y1="152" x2="186" y2="152" stroke={Faint} />
+    {[0, 1, 2, 3, 4, 5].map((i) => <rect key={i} x={36 + i * 22} y="162" width="18" height="4" rx="2" fill={i === 2 ? "#ec9a7f" : T} opacity={i === 2 ? 0.8 : 0.9} />)}
+  </svg>
+)
+const Invoices = () => (
+  <svg viewBox="24 76 162 98" aria-hidden="true">
+    {[0, 1, 2].map((i) => (
+      <g key={i} transform={`translate(34 ${84 + i * 30})`}>
+        <rect width="132" height="22" rx="6" fill="rgba(var(--ink-rgb), 0.05)" stroke={Faint} />
+        <rect x="10" y="9" width="58" height="4" rx="2" fill={Dim} />
+        <rect x="76" y="9" width="22" height="4" rx="2" fill={Faint} />
+        {i === 1
+          ? <path d="M114 7l8 8M122 7l-8 8" stroke="var(--refusal)" strokeWidth="1.6" strokeLinecap="round" />
+          : <path d="M113 11.5l3 3 6-7" stroke={T} strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />}
+      </g>
+    ))}
+  </svg>
+)
+const Sealed = () => (
+  <svg viewBox="24 76 162 98" aria-hidden="true">
+    {[48, 162].map((x) => (
+      <g key={x} transform={`translate(${x} 122)`}>
+        <circle r="17" fill="rgba(var(--ink-rgb), 0.05)" stroke={Dim} />
+        <rect x="-6" y="-2" width="12" height="9" rx="2" fill="none" stroke={Dim} strokeWidth="1.3" />
+        <path d="M-3.5 -2v-3a3.5 3.5 0 0 1 7 0v3" fill="none" stroke={Dim} strokeWidth="1.3" />
+      </g>
+    ))}
+    <path d="M66 122 H 92 M134 122 H 145" stroke={Dim} strokeDasharray="2 3" />
+    <rect x="94" y="104" width="38" height="36" rx="9" fill="rgba(145, 207, 181, 0.1)" stroke={T} strokeOpacity="0.6" />
+    <path d="M105 122.5l5 5 10-11" stroke={T} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+const Checks = () => (
+  <svg viewBox="24 76 162 98" aria-hidden="true">
+    {Array.from({ length: 15 }, (_, i) => {
+      const x = 34 + (i % 5) * 22, y = 90 + Math.floor(i / 5) * 22
+      return i < 14
+        ? <rect key={i} x={x} y={y} width="16" height="16" rx="4" fill="rgba(145, 207, 181, 0.16)" stroke={T} strokeOpacity="0.55" />
+        : <rect key={i} x={x} y={y} width="16" height="16" rx="4" fill="none" stroke={Dim} strokeDasharray="2 2" />
+    })}
+    <circle cx="160" cy="112" r="11" fill="none" stroke={Dim} strokeDasharray="2 3" />
+    <circle cx="160" cy="109" r="3.2" fill={Dim} />
+    <path d="M153.5 118a6.5 4.5 0 0 1 13 0" fill="none" stroke={Dim} strokeWidth="1.3" />
+  </svg>
+)
+const Uptime = () => (
+  <svg viewBox="24 76 162 98" aria-hidden="true">
+    <line x1="28" y1="104" x2="184" y2="104" stroke={Dim} strokeDasharray="3 3" />
+    {[0.97, 0.99, 0.98, 1, 0.99, 0.98, 1, 0.99, 0.86].map((v, i) => {
+      const h = 64 * v, last = i === 8
+      return <rect key={i} x={34 + i * 16} y={160 - h} width="10" height={h} rx="3" fill={last ? Dim : T} opacity={last ? 1 : 0.75} />
+    })}
+  </svg>
+)
+const Milestones = () => (
+  <svg viewBox="24 76 162 98" aria-hidden="true">
+    <line x1="44" y1="128" x2="164" y2="128" stroke={Faint} strokeWidth="2" />
+    <line x1="44" y1="128" x2="104" y2="128" stroke={T} strokeWidth="2" strokeOpacity="0.7" />
+    <circle cx="44" cy="128" r="11" fill="rgba(145, 207, 181, 0.18)" stroke={T} />
+    <path d="M39 128.5l3.5 3.5 6.5-7" stroke={T} strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="104" cy="128" r="11" fill="var(--elevation-strong)" stroke={T} strokeDasharray="3 3" />
+    <circle cx="164" cy="128" r="11" fill="var(--elevation-strong)" stroke={Dim} />
+    {[0, 1, 2].map((i) => <circle key={i} cx={92 + i * 12} cy="100" r="4.5" fill={i === 0 ? T : "none"} stroke={i === 0 ? "none" : Dim} opacity={i === 0 ? 0.85 : 1} />)}
+  </svg>
+)
+
+type Card = { icon: PixelName; title: string; text: string; runs: Rail[]; art: ReactNode; planned?: boolean }
+const CARDS: Card[] = [
   {
-    id: "market-making", icon: "chart", title: "Market-making agreements", status: "Demo",
-    line: "Retainers tied to agreed liquidity conditions",
-    body: "Connect recurring retainers to agreed liquidity conditions. Define spread, depth and quoting requirements, then use scheduled observations to determine whether a payment is eligible for release.",
-    condition: "the agreed observation threshold is met.",
-    note: "Venue-level observations measure market conditions, not an individual market maker's contribution.",
-    obligation: "Recurring liquidity retainer · 18,500 USDC a period",
-    rule: "4 of 6 observation windows pass: spread ≤ 60 bps, depth ≥ 12,000 USDC within 2%, both sides quoted",
-    accepts: "Signed readings from the agreed observer, taken at hidden times",
-    recipient: "halcyon-mm.near · proven for halcyon.example",
-    decision: "Eligible",
-    why: "5 of 6 windows passed, 4 were required. Window 3 measured 9,820 USDC of depth, below the agreed 12,000.",
-    evidence: [
-      { k: "Window 1", v: "48 bps · 12,910 USDC · both sides", tone: "pass" },
-      { k: "Window 2", v: "51 bps · 12,480 USDC · both sides", tone: "pass" },
-      { k: "Window 3", v: "52 bps · 9,820 USDC · both sides", tone: "fail" },
-      { k: "Window 4", v: "47 bps · 12,640 USDC · both sides", tone: "pass" },
-      { k: "Window 5", v: "45 bps · 13,105 USDC · both sides", tone: "pass" },
-      { k: "Window 6", v: "49 bps · 12,770 USDC · both sides", tone: "pass" },
-      { k: "Observer", v: "signature checked against the approved observer key" },
-    ],
-    source: { text: "Paid liquidity obligations raised liquidity and firm value. Menkveld and Wang, 2013", href: "/research#menkveld-wang" },
+    icon: "chart", title: "Pay a market maker for liquidity that showed up",
+    text: "A project renews an 18,500 USDC retainer. Each period pays only if four of six readings of the pool, taken at hidden times, meet the agreed spread and depth.",
+    runs: ["rhea", "outlayer", "near"], art: <Liquidity />,
   },
   {
-    id: "security", icon: "shield", title: "Security remediation", status: "Planned",
-    line: "Fixes paid when the agreed checks pass",
-    body: "Agree on the fix before commissioning the work. Define the affected software, required checks and acceptance process; keep payment pending until the submitted patch satisfies those requirements.",
-    condition: "the specified checks pass and the required reviewer approves.",
-    obligation: "Fix for a reported vulnerability · 6,000 USDC on acceptance",
-    rule: "The agreed test suite passes on the submitted patch and the named reviewer approves",
-    accepts: "Test results for the submitted patch and the reviewer's approval",
-    recipient: "The researcher's approved account",
-    decision: "Awaiting review",
-    why: "All 14 required checks pass on patch 3f9a2c1. Payment stays pending until the named reviewer approves.",
-    evidence: [
-      { k: "Patch", v: "3f9a2c1 · submitted against the agreed repository" },
-      { k: "Required checks", v: "14 of 14 pass", tone: "pass" },
-      { k: "Reviewer", v: "approval pending", tone: "pending" },
-    ],
+    icon: "bag", title: "Let an agent pay invoices it cannot redirect",
+    text: "Invoices clear against approved milestones once delivery is accepted. A message asking to pay a new account is refused by the contract, whatever the agent was told.",
+    runs: ["payee", "usdc", "near"], art: <Invoices />,
   },
   {
-    id: "infrastructure", icon: "server", title: "Infrastructure service agreements", status: "Planned",
-    line: "Recurring payments tied to service levels",
-    body: "Connect recurring payments to the service levels your business relies on. Agree on availability, latency or capacity requirements, with a defined process for shortfalls and disputed measurements.",
-    condition: "the agreed service evidence and payment rules are satisfied.",
-    obligation: "Dedicated GPU capacity · 48,000 USDC a month",
-    rule: "Availability ≥ 99.5% and p95 latency ≤ 300 ms for the month",
-    accepts: "Measurements from the agreed monitor, with a dispute window for the provider",
-    recipient: "The provider's approved account",
-    decision: "Held",
-    why: "Availability measured 99.2% against the agreed 99.5%. The shortfall rule applies, and the provider can dispute the measurement.",
-    evidence: [
-      { k: "Availability", v: "99.2% · needs ≥ 99.5%", tone: "fail" },
-      { k: "p95 latency", v: "212 ms · needs ≤ 300 ms", tone: "pass" },
-      { k: "Dispute window", v: "open for 72 hours", tone: "pending" },
-    ],
+    icon: "agents", title: "Negotiate a renewal without showing your ceiling",
+    text: "Both companies' agents bargain inside an enclave. Each side's limit stays sealed; only the agreed terms and an attestation come out for both to approve.",
+    runs: ["sealed", "nearai", "outlayer"], art: <Sealed />,
   },
   {
-    id: "agent-services", icon: "agents", title: "Agent-to-agent services", status: "Planned",
-    line: "Specialist work commissioned within set bounds",
-    body: "Let agents commission specialist work within approved boundaries. Set the scope, budget, authorised provider and acceptance criteria before a task begins.",
-    condition: "the deliverable is accepted under the agreed rules.",
-    obligation: "Market research from a specialist agent · up to 450 USDC",
-    rule: "The deliverable is accepted against the agreed criteria",
-    accepts: "The delivered work and the buyer agent's recorded acceptance",
-    recipient: "The provider agent's approved account",
-    decision: "Eligible",
-    why: "The report was delivered within scope and budget, and the buyer's agent recorded its acceptance.",
-    evidence: [
-      { k: "Deliverable", v: "report · hash 0x4be1…9c02" },
-      { k: "Budget", v: "420 of 450 USDC", tone: "pass" },
-      { k: "Acceptance", v: "recorded by the buyer's agent", tone: "pass" },
-    ],
-    source: { text: "Define at the contract level what an agent can and cannot do. a16z Frontier, 2026", href: "/research#a16z-frontier" },
+    icon: "shield", title: "Pay for a security fix only when the checks pass",
+    text: "The researcher's fee is agreed before work starts and stays in escrow until the agreed checks pass on the patch and the named reviewer approves it.",
+    runs: ["controls", "usdc"], art: <Checks />, planned: true,
   },
   {
-    id: "vendor", icon: "bag", title: "Vendor contracts and renewals", status: "Demo",
-    line: "Invoices paid only against approved obligations",
-    body: "Let agents negotiate price, scope and renewal terms within confidential limits. Both businesses approve the agreement before it governs invoices, scheduled payments and recipient changes.",
-    condition: "the invoice matches an approved obligation and the required acceptance is recorded.",
-    obligation: "Analytics contract · 12 monthly milestones of 3,000 USDC",
-    rule: "The invoice matches an approved milestone and the buyer has accepted delivery",
-    accepts: "The buyer's recorded acceptance of the delivery",
-    recipient: "fieldwork.near · proven for fieldwork.example",
-    decision: "Eligible",
-    why: "Milestone 4 was accepted and the invoice matches the approved amount. An earlier request to pay a new account was refused.",
-    evidence: [
-      { k: "accept_delivery(3)", v: "recorded by the buyer", tone: "pass" },
-      { k: "act(Pay{milestone 4, 3,000 USDC})", v: "accepted", tone: "pass" },
-      { k: "act(Pay{to \"fieldwork-new.near\"})", v: "refused · ERR_PAYEE_MISMATCH", tone: "refused" },
-    ],
-    source: { text: "$3.0B lost to business email compromise in 2025. FBI IC3", href: "/research#ic3-2025" },
+    icon: "server", title: "Hold a month of capacity that missed its levels",
+    text: "Monthly GPU capacity pays in full when availability and latency meet the agreed levels. A shortfall follows the agreed rule, and the provider can dispute the reading.",
+    runs: ["controls", "usdc"], art: <Uptime />, planned: true,
   },
   {
-    id: "grants", icon: "book", title: "Grants and funded milestones", status: "Planned",
-    line: "Each payment tied to an accepted milestone",
-    body: "Give recipients clear funding commitments and reviewers clear release conditions. Define deliverables, budgets and approval authority before work begins, with each payment tied to an accepted milestone.",
-    condition: "the designated reviewers approve the milestone.",
-    obligation: "Wallet SDK grant · 42,000 USDC in three milestones",
-    rule: "2 of 3 designated reviewers approve the milestone",
-    accepts: "The milestone report and the reviewers' approvals",
-    recipient: "The grantee's approved account",
-    decision: "Awaiting review",
-    why: "The milestone 1 report is in. 1 of the 2 required approvals is recorded, so 12,000 USDC stays held.",
-    evidence: [
-      { k: "Milestone 1 report", v: "submitted" },
-      { k: "Reviewer A", v: "approved", tone: "pass" },
-      { k: "Reviewer B", v: "pending", tone: "pending" },
-      { k: "Reviewer C", v: "pending", tone: "pending" },
-    ],
+    icon: "vault", title: "Release a grant when the reviewers sign off",
+    text: "Each tranche moves only when two of three named reviewers accept the milestone, and only to the account the grantee has proven it controls.",
+    runs: ["payee", "usdc"], art: <Milestones />, planned: true,
   },
 ]
 
-const SAFEGUARDS = ["Confidential mandates", "Approved terms", "Scoped agent permissions", "Authorised recipients", "Evidence requirements", "Payment limits"]
-const PLANNED = "Planned template. The fields show how this agreement would read; the controls behind them are the ones already demonstrated."
-const DECISION_TONE: Record<Decision, string> = { Eligible: styles.dEligible, Held: styles.dHeld, "Awaiting review": styles.dReview }
-
-const Arrow = () => (
-  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
-)
-
-function Preview({ u, active, id, labelledBy }: { u: UseCase; active: boolean; id: string; labelledBy: string }) {
-  const [open, setOpen] = useState(false)
-  const rows: [string, string][] = [
-    ["Approved obligation", u.obligation],
-    ["Payment condition", u.rule],
-    ["Accepted evidence", u.accepts],
-    ["Authorised recipient", u.recipient],
-  ]
-  return (
-    <div id={id} role="tabpanel" aria-labelledby={labelledBy} hidden={!active} className={styles.preview}>
-      <div className={styles.previewBar}>
-        <span className={styles.previewName}>
-          <PixelIcon name={u.icon} size={18} />
-          <span>{u.title}</span>
-          <span className={`${styles.status} ${u.status === "Demo" ? styles.demo : ""}`}>{u.status}</span>
-        </span>
-        <span className={styles.illus}>Agreement preview · Illustrative</span>
-      </div>
-
-      <div className={styles.previewBody}>
-        <div className={styles.copy}>
-          <p className={styles.body}>{u.body}</p>
-          <p className={styles.condition}><span>Payment condition:</span> {u.condition}</p>
-          {u.note ? <p className={styles.note}>{u.note}</p> : null}
-          {u.status === "Planned" ? <p className={styles.note}>{PLANNED}</p> : null}
-          {u.source ? (
-            <Link to={u.source.href} className={styles.source}>
-              <span className={styles.sourceLabel}>Why it matters</span>
-              <span className={styles.sourceText}>{u.source.text}</span>
-              <Arrow />
-            </Link>
-          ) : null}
-        </div>
-
-        <div className={styles.fields}>
-          <dl className={styles.table}>
-            {rows.map(([k, v]) => (
-              <div key={k} className={styles.row}><dt>{k}</dt><dd>{v}</dd></div>
-            ))}
-            <div className={styles.row}>
-              <dt>Current decision</dt>
-              <dd><span className={`${styles.decision} ${DECISION_TONE[u.decision]}`}><i aria-hidden="true" />{u.decision}</span></dd>
-            </div>
-            <div className={styles.row}><dt>Explanation</dt><dd>{u.why}</dd></div>
-          </dl>
-
-          <button type="button" className={styles.more} aria-expanded={open} aria-controls={`${id}-evidence`} onClick={() => setOpen((o) => !o)}>
-            {open ? "Hide the evidence" : "Show the evidence"}
-            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={open ? styles.flip : ""}><path d="m4 6 4 4 4-4" /></svg>
-          </button>
-          <ul id={`${id}-evidence`} className={styles.evidence} hidden={!open}>
-            {u.evidence.map((e) => (
-              <li key={e.k} className={e.tone ? styles[`e_${e.tone}`] : ""}>
-                <span className={styles.ek}>{e.k}</span>
-                <span className={styles.ev}>{e.v}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export function UseCases() {
-  const [active, setActive] = useState(0)
-  const tabs = useRef<(HTMLButtonElement | null)[]>([])
-  const onKey = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
-    const next = e.key === "ArrowRight" || e.key === "ArrowDown" ? i + 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? USES.length - 1 : null
-    if (next === null) return
-    e.preventDefault()
-    const n = (next + USES.length) % USES.length
-    setActive(n)
-    tabs.current[n]?.focus()
-  }
-
   return (
-    <section id="use-cases" className={styles.band} aria-labelledby="use-cases-title">
-      <div className={styles.inner}>
-        <div className={styles.head}>
-          <span className={styles.eyebrow}><span className={styles.dot} aria-hidden="true" />Use cases</span>
-          <h2 id="use-cases-title" className={styles.heading}>Different agreements. One system of control.</h2>
-          <p className={styles.lead}>
-            Negotiate privately, approve the terms and define what must happen before money moves. Accord brings the same controls to recurring services,
-            specialist work and commerce between agents.
-          </p>
-        </div>
+    <section id="use-cases" className={`section ${styles.section}`}>
+      <SectionHeading
+        eyebrow="Use cases"
+        accent="teal"
+        wide
+        title="Different agreements. One system of control."
+        lead={<p>Negotiate privately, approve the terms and define what must happen before money moves. Each card names what it runs on.</p>}
+      />
 
-        <div className={styles.cards} role="tablist" aria-label="Agreement types">
-          {USES.map((x, i) => (
-            <button key={x.id} ref={(el) => { tabs.current[i] = el }} type="button" role="tab" id={`uc-tab-${x.id}`} aria-controls={`uc-panel-${x.id}`}
-              aria-selected={i === active} tabIndex={i === active ? 0 : -1}
-              className={`${styles.card} ${i === active ? styles.cardOn : ""}`} onClick={() => setActive(i)} onKeyDown={(e) => onKey(e, i)}>
-              <span className={styles.cardTop}>
-                <PixelIcon name={x.icon} size={22} />
-                <span className={`${styles.status} ${x.status === "Demo" ? styles.demo : ""}`}>{x.status}</span>
-              </span>
-              <span className={styles.cardTitle}>{x.title}</span>
-              <span className={styles.cardLine}>{x.line}</span>
-            </button>
-          ))}
-        </div>
+      <ul className={styles.grid}>
+        {CARDS.map((c, i) => (
+          <Appear key={c.title} as="li" className={styles.card} effect={rise(`${(i % 3) * 0.08}s` as `${number}s`)}>
+            <span className={styles.art}>{c.art}</span>
+            <span className={styles.top}>
+              <span className={styles.tile}><PixelIcon name={c.icon} size={22} /></span>
+              {c.planned ? <span className={styles.planned}>Planned</span> : null}
+            </span>
+            <h3 className={styles.title}>{c.title}</h3>
+            <p className={styles.text}>{c.text}</p>
+            <p className={styles.runs}>
+              <span className={styles.by}>runs on</span>
+              {c.runs.map((r) => <RailMark key={r} r={r} />)}
+            </p>
+          </Appear>
+        ))}
+      </ul>
 
-        <div className={styles.stage}>
-          <span className={styles.weave} aria-hidden="true" />
-          <span className={styles.sheen} aria-hidden="true" />
-          {/* every panel stays in the page (crawlers and the Markdown snapshot read all six); only the selected one shows */}
-          <div className={styles.stack}>
-            {USES.map((x, i) => <Preview key={x.id} u={x} active={i === active} id={`uc-panel-${x.id}`} labelledBy={`uc-tab-${x.id}`} />)}
-          </div>
-        </div>
-
-        <div className={styles.foot}>
-          <div className={styles.footHead}>
-            <p className={styles.safeTitle}>Every agreement carries the same safeguards.</p>
-            <Link to={LINKS.exampleAgreement} className={styles.explore}>Explore an example agreement <Arrow /></Link>
-          </div>
-          <ul className={styles.chips}>
-            {SAFEGUARDS.map((s) => <li key={s}>{s}</li>)}
-          </ul>
-        </div>
-      </div>
+      <p className={styles.foot}>Any agreement with approved terms, agreed evidence and an authorised recipient works the same way.</p>
     </section>
   )
 }

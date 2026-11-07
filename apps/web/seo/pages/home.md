@@ -1,8 +1,8 @@
 Built on NEAR
 
-# Private agreements. Controlled execution.
+# The private deal room and control plane for agent-to-agent commerce.
 
-The private deal room for agent-to-agent commerce. Each agent negotiates within its company’s confidential mandate, both companies approve the terms, and the approved agreement stays the authority over what happens next: who the buyer’s agent may pay, how much, and on what evidence.
+Accord turns private negotiations into enforceable payment rules. Agents negotiate within each business’s confidential limits. Both parties approve the terms, and the contract enforces who can authorise payments, who can receive them, how much can be paid and what evidence is required.
 
 [Request early access](/join) [See an agreement in action](/#market-making)
 
@@ -26,281 +26,117 @@ Payments go only to a recipient the vendor has proven and the buyer accepted.
 
 A payment becomes eligible only when the agreed evidence or acceptance is recorded.
 
-Use cases
+## Built for commerce in stablecoins.
 
-## Different agreements. One system of control.
+Retainers paid on agreed spread, depth and two-sided quoting
 
-Negotiate privately, approve the terms and define what must happen before money moves. Accord brings the same controls to recurring services, specialist work and commerce between agents.
+- Market making
 
-- Demo Market-making agreements Retainers tied to agreed liquidity conditions
+- Vendor contracts
 
-- Planned Security remediation Fixes paid when the agreed checks pass
+- Agent services
 
-- Planned Infrastructure service agreements Recurring payments tied to service levels
+- Security fixes
 
-- Planned Agent-to-agent services Specialist work commissioned within set bounds
+- Infrastructure
 
-- Demo Vendor contracts and renewals Invoices paid only against approved obligations
+- Grants
 
-- Planned Grants and funded milestones Each payment tied to an accepted milestone
+Deal room · NEAR/USDC retainer, Q1 Illustrative
 
-Market-making agreements Demo Agreement preview · Illustrative
+Renew our NEAR/USDC market-making retainer on Rhea: up to 20,000 USDC a period, spread under 70 bps, at least 10,000 USDC of depth within 2%, quotes on both sides. Our agent must not overpay or pay the wrong desk.
 
-Connect recurring retainers to agreed liquidity conditions. Define spread, depth and quoting requirements, then use scheduled observations to determine whether a payment is eligible for release.
+18,500 USDC a period. Paid on measured liquidity.
 
-Payment condition: the agreed observation threshold is met.
+- Terms agreed inside the Sealed Table; both mandates stayed sealed Confidential negotiation · passed
 
-Venue-level observations measure market conditions, not an individual market maker's contribution.
+- Your agent's key can call `act()` and nothing else Agent permissions · passed
 
-[Why it matters Paid liquidity obligations raised liquidity and firm value. Menkveld and Wang, 2013](/research#menkveld-wang)
+- Any amount, period or recipient off the terms is refused Payment controls · passed
 
-Approved obligation
+- Paying `halcyon-mm.testnet` only, bound to halcyon.example Recipient authorisation · passed
 
-Recurring liquidity retainer · 18,500 USDC a period
+- Each period's payment becomes eligible when 4 of 6 slots pass Conditional settlement · passed
 
-Payment condition
+Deal room · Vendor invoices, October run Illustrative
 
-4 of 6 observation windows pass: spread ≤ 60 bps, depth ≥ 12,000 USDC within 2%, both sides quoted
+Process October's vendor invoices, 214 in the queue. Pay each one only if it matches its purchase order and a confirmed delivery, only to the vendor's proven address, and hold anything that doesn't.
 
-Accepted evidence
+212 invoices cleared. Two held for you.
 
-Signed readings from the agreed observer, taken at hidden times
+- Rates per vendor agreed in the Sealed Table; your limits stayed sealed Confidential negotiation · passed
 
-Authorised recipient
+- Your agent can only pay invoices matched to an approved order Agent permissions · passed
 
-halcyon-mm.near · proven for halcyon.example
+- Duplicates, overcharges and changed bank details are refused Payment controls · passed
 
-Current decision
+- Each vendor is paid only at the address bound to its domain Recipient authorisation · passed
 
-Eligible
+- Paid as one batch once delivery is confirmed; two mismatches held Conditional settlement · passed
 
-Explanation
+Deal room · Inference credits Planned Illustrative
 
-5 of 6 windows passed, 4 were required. Window 3 measured 9,820 USDC of depth, below the agreed 12,000.
+Buy inference for our research agent from a provider's agent: up to 500 USDC a week, never more than 2,000 USDC in total, and stop when I revoke.
 
-- Window 1 48 bps · 12,910 USDC · both sides
+450 USDC a week. Capped at 1,800.
 
-- Window 2 51 bps · 12,480 USDC · both sides
+- Price agreed agent to agent in the Sealed Table; both limits stayed sealed Confidential negotiation · passed
 
-- Window 3 52 bps · 9,820 USDC · both sides
+- Your agent can only pay 450 USDC a week Agent permissions · passed
 
-- Window 4 47 bps · 12,640 USDC · both sides
+- Anything over the weekly amount or the 1,800 USDC cap is refused Payment controls · passed
 
-- Window 5 45 bps · 13,105 USDC · both sides
+- Paying `inferhub.testnet` only, bound to inferhub.example Recipient authorisation · passed
 
-- Window 6 49 bps · 12,770 USDC · both sides
+- Each week becomes payable on schedule, until you revoke Conditional settlement · passed
 
-- Observer signature checked against the approved observer key
+Deal room · SDK signature fix, report K-17 Planned Illustrative
 
-Security remediation Planned Agreement preview · Illustrative
+Commission the fix for the signature bug Kestrel reported in our SDK: up to 8,000 USDC, paid only when our 14 regression checks pass on the patch and our security lead approves it.
 
-Agree on the fix before commissioning the work. Define the affected software, required checks and acceptance process; keep payment pending until the submitted patch satisfies those requirements.
+6,000 USDC. Checks pass; held for your security lead.
 
-Payment condition: the specified checks pass and the required reviewer approves.
+- Fee agreed in the Sealed Table; your 8,000 USDC ceiling stayed sealed Confidential negotiation · passed
 
-Planned template. The fields show how this agreement would read; the controls behind them are the ones already demonstrated.
+- Your agent's key can call `act()` and nothing else Agent permissions · passed
 
-Approved obligation
+- A different amount or an early payment is refused Payment controls · passed
 
-Fix for a reported vulnerability · 6,000 USDC on acceptance
+- Paying `kestrel-sec.testnet` only, bound to kestrel.example Recipient authorisation · passed
 
-Payment condition
+- Payable once 14 of 14 checks pass and the security lead approves Conditional settlement · passed
 
-The agreed test suite passes on the submitted patch and the named reviewer approves
+Deal room · GPU capacity, November Planned Illustrative
 
-Accepted evidence
+Renew our GPU capacity with Northlight: up to 50,000 USDC a month for 99.5% availability and p95 latency under 300 ms. If a month misses, hold it under the shortfall rule and let them dispute the reading.
 
-Test results for the submitted patch and the reviewer's approval
+48,000 USDC a month. November held at 99.2%.
 
-Authorised recipient
+- Price agreed in the Sealed Table; your 50,000 USDC ceiling stayed sealed Confidential negotiation · passed
 
-The researcher's approved account
+- Your agent can only pay the agreed monthly amount Agent permissions · passed
 
-Current decision
+- Paying a month that missed the levels is refused Payment controls · passed
 
-Awaiting review
+- Paying `northlight.testnet` only, bound to northlight.example Recipient authorisation · passed
 
-Explanation
+- Each month becomes payable when the agreed monitor reports both levels met Conditional settlement · passed
 
-All 14 required checks pass on patch 3f9a2c1. Payment stays pending until the named reviewer approves.
+Deal room · Grant G-114, wallet SDK Planned Illustrative
 
-- Patch 3f9a2c1 · submitted against the agreed repository
+Fund grant G-114 for the wallet SDK: up to 45,000 USDC in three tranches, each only after two of our three reviewers accept the milestone report. Pay the team's own address and nobody else.
 
-- Required checks 14 of 14 pass
+42,000 USDC in three tranches. Released on acceptance.
 
-- Reviewer approval pending
+- Grant size and tranches agreed in the Sealed Table; your maximum stayed sealed Confidential negotiation · passed
 
-Infrastructure service agreements Planned Agreement preview · Illustrative
+- Your agent can only pay these three tranches Agent permissions · passed
 
-Connect recurring payments to the service levels your business relies on. Agree on availability, latency or capacity requirements, with a defined process for shortfalls and disputed measurements.
+- A changed amount or an unscheduled tranche is refused Payment controls · passed
 
-Payment condition: the agreed service evidence and payment rules are satisfied.
+- Paying `sdkworks.testnet` only, bound to sdkworks.example Recipient authorisation · passed
 
-Planned template. The fields show how this agreement would read; the controls behind them are the ones already demonstrated.
-
-Approved obligation
-
-Dedicated GPU capacity · 48,000 USDC a month
-
-Payment condition
-
-Availability ≥ 99.5% and p95 latency ≤ 300 ms for the month
-
-Accepted evidence
-
-Measurements from the agreed monitor, with a dispute window for the provider
-
-Authorised recipient
-
-The provider's approved account
-
-Current decision
-
-Held
-
-Explanation
-
-Availability measured 99.2% against the agreed 99.5%. The shortfall rule applies, and the provider can dispute the measurement.
-
-- Availability 99.2% · needs ≥ 99.5%
-
-- p95 latency 212 ms · needs ≤ 300 ms
-
-- Dispute window open for 72 hours
-
-Agent-to-agent services Planned Agreement preview · Illustrative
-
-Let agents commission specialist work within approved boundaries. Set the scope, budget, authorised provider and acceptance criteria before a task begins.
-
-Payment condition: the deliverable is accepted under the agreed rules.
-
-Planned template. The fields show how this agreement would read; the controls behind them are the ones already demonstrated.
-
-[Why it matters Define at the contract level what an agent can and cannot do. a16z Frontier, 2026](/research#a16z-frontier)
-
-Approved obligation
-
-Market research from a specialist agent · up to 450 USDC
-
-Payment condition
-
-The deliverable is accepted against the agreed criteria
-
-Accepted evidence
-
-The delivered work and the buyer agent's recorded acceptance
-
-Authorised recipient
-
-The provider agent's approved account
-
-Current decision
-
-Eligible
-
-Explanation
-
-The report was delivered within scope and budget, and the buyer's agent recorded its acceptance.
-
-- Deliverable report · hash 0x4be1…9c02
-
-- Budget 420 of 450 USDC
-
-- Acceptance recorded by the buyer's agent
-
-Vendor contracts and renewals Demo Agreement preview · Illustrative
-
-Let agents negotiate price, scope and renewal terms within confidential limits. Both businesses approve the agreement before it governs invoices, scheduled payments and recipient changes.
-
-Payment condition: the invoice matches an approved obligation and the required acceptance is recorded.
-
-[Why it matters $3.0B lost to business email compromise in 2025. FBI IC3](/research#ic3-2025)
-
-Approved obligation
-
-Analytics contract · 12 monthly milestones of 3,000 USDC
-
-Payment condition
-
-The invoice matches an approved milestone and the buyer has accepted delivery
-
-Accepted evidence
-
-The buyer's recorded acceptance of the delivery
-
-Authorised recipient
-
-fieldwork.near · proven for fieldwork.example
-
-Current decision
-
-Eligible
-
-Explanation
-
-Milestone 4 was accepted and the invoice matches the approved amount. An earlier request to pay a new account was refused.
-
-- accept_delivery(3) recorded by the buyer
-
-- act(Pay{milestone 4, 3,000 USDC}) accepted
-
-- act(Pay{to "fieldwork-new.near"}) refused · ERR_PAYEE_MISMATCH
-
-Grants and funded milestones Planned Agreement preview · Illustrative
-
-Give recipients clear funding commitments and reviewers clear release conditions. Define deliverables, budgets and approval authority before work begins, with each payment tied to an accepted milestone.
-
-Payment condition: the designated reviewers approve the milestone.
-
-Planned template. The fields show how this agreement would read; the controls behind them are the ones already demonstrated.
-
-Approved obligation
-
-Wallet SDK grant · 42,000 USDC in three milestones
-
-Payment condition
-
-2 of 3 designated reviewers approve the milestone
-
-Accepted evidence
-
-The milestone report and the reviewers' approvals
-
-Authorised recipient
-
-The grantee's approved account
-
-Current decision
-
-Awaiting review
-
-Explanation
-
-The milestone 1 report is in. 1 of the 2 required approvals is recorded, so 12,000 USDC stays held.
-
-- Milestone 1 report submitted
-
-- Reviewer A approved
-
-- Reviewer B pending
-
-- Reviewer C pending
-
-Every agreement carries the same safeguards.
-
-[Explore an example agreement](/#market-making)
-
-- Confidential mandates
-
-- Approved terms
-
-- Scoped agent permissions
-
-- Authorised recipients
-
-- Evidence requirements
-
-- Payment limits
+- Each tranche becomes payable when two of three reviewers accept the report Conditional settlement · passed
 
 Featured agreement · Demo
 
@@ -328,26 +164,6 @@ Paraphrased from public sources, linked on each card.
 
 > Illustrative monitor for a NEAR/USDC market-making agreement on Rhea's USDC/wNEAR pool. Approved conditions: spread at most 60 bps, at least 12,000 USDC of depth within 2% of the mid on each side, both sides quoted, 4 of 6 observation slots to pass. The pool is read at six times drawn inside the observer's enclave and each slot is attested; slot 3 fails with 9,820 USDC of depth. 5 of 6 pass, the period is eligible and 18,500 USDC is settled to halcyon-mm.near in USDC on NEAR.
 
-The demonstration
-
-One agreement, from private negotiation to controlled payment.
-
-[Watch the walkthrough →](/demo)
-
-- 01 Negotiate Two agents propose terms within different confidential mandates.
-
-- 02 Approve Both parties approve the exact agreement version, including the recipient and the evidence requirements.
-
-- 03 Observe The agreed observer submits a result bound to that agreement and payment period.
-
-- 04 Hold Missing or failing evidence leaves the payment ineligible.
-
-- 05 Attack An injected message tells the agent to change the recipient. The agent attempts it; the contract refuses it.
-
-- 06 Pay Valid evidence and the remaining controls permit the scheduled payment to the approved recipient.
-
-The same controls run a second agreement type in the demonstration: a vendor milestone, paid only after the buyer explicitly accepts the delivery.
-
 Scope The demonstration proves condition-linked payment, not account-level performance attribution. Public order-book observations measure the venue's liquidity, not the hired market maker's own contribution. Verification using the market maker's authenticated account data is planned.
 
 How it works
@@ -361,6 +177,26 @@ How it works
 - `03` · Executing Both companies approve, and the buyer funds the agreement's USDC escrow on NEAR. The agent holds one key for one method; a payment must match the approved milestone, amount and recipient, or it is refused and recorded.
 
 - `04` · Settled Payments complete under the agreed conditions, people decide the exceptions, and the record remains.
+
+Use cases
+
+## Different agreements. One system of control.
+
+Negotiate privately, approve the terms and define what must happen before money moves. Each card names what it runs on.
+
+- Pay a market maker for liquidity that showed up A project renews an 18,500 USDC retainer. Each period pays only if four of six readings of the pool, taken at hidden times, meet the agreed spread and depth. runs on Rhea pool OutLayer NEAR NEAR
+
+- Let an agent pay invoices it cannot redirect Invoices clear against approved milestones once delivery is accepted. A message asking to pay a new account is refused by the contract, whatever the agent was told. runs on Payee USDC NEAR NEAR
+
+- Negotiate a renewal without showing your ceiling Both companies' agents bargain inside an enclave. Each side's limit stays sealed; only the agreed terms and an attestation come out for both to approve. runs on Sealed Table NEAR AI OutLayer
+
+- Planned Pay for a security fix only when the checks pass The researcher's fee is agreed before work starts and stays in escrow until the agreed checks pass on the patch and the named reviewer approves it. runs on Agreement controls USDC
+
+- Planned Hold a month of capacity that missed its levels Monthly GPU capacity pays in full when availability and latency meet the agreed levels. A shortfall follows the agreed rule, and the provider can dispute the reading. runs on Agreement controls USDC
+
+- Planned Release a grant when the reviewers sign off Each tranche moves only when two of three named reviewers accept the milestone, and only to the account the grantee has proven it controls. runs on Payee USDC
+
+Any agreement with approved terms, agreed evidence and an authorised recipient works the same way.
 
 Why now
 

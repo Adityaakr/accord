@@ -180,7 +180,7 @@ export function Hero() {
           {/* The demonstration, below the buttons: the hero reads headline, lead, actions, then the walkthrough */}
           <Mount y={16} delay="0.7s" className={styles.announce}>
             <Link to={LINKS.demo} className={styles.announceLink}>
-              <span className={styles.announceMark}><LogoMark size={18} /></span>
+              <LogoMark size={22} />
               <span className={styles.announceBody}>
                 <span className={styles.announceName}>{DEMO_TITLE}</span>
                 <span className={styles.announceArrow} aria-hidden="true">→</span>

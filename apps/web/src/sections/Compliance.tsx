@@ -17,11 +17,11 @@ import styles from "./Compliance.module.css"
    six slots attested on a period timeline, readings count between values and meter against the approved conditions,
    then the period is decided and the retainer settles. Loops while in view; reduced motion shows the settled period.
    The mark stays monochrome; colour lives in the data: teal for bids and passes, coral for asks and misses.
-   After the monitor, the demonstrated lifecycle in six steps, then the scope note: the demonstration proves
-   condition-linked payment, not account-level performance attribution.
+   After the monitor, the scope note: the demonstration proves condition-linked payment, not account-level
+   performance attribution.
    Figures match the site's one example (kit v7): 18,500 USDC a period, ≤60 bps, ≥12,000 USDC depth within 2% on each
    side, both sides quoted, 4 of 6 slots. Slot 3 fails on depth, as in the hero preview.
-   Copy: kit v7 website/FINAL_COPY.md Part A "Accord Atlas", renamed; the lifecycle and scope lines from Adi, 8 Nov 2026. */
+   Copy: kit v7 website/FINAL_COPY.md Part A "Accord Atlas", renamed; the scope line from Adi, 8 Nov 2026. */
 
 const appear = (delay: `${number}s`): AppearEffect => ({
   threshold: 0.5,
@@ -325,43 +325,6 @@ function SlotPanel({ v }: { v: LiveValues }) {
   )
 }
 
-/* The demonstrated lifecycle: one market-making agreement from negotiation to payment, with the attack inside it.
-   Step 5 is the only refusal on the section, so it alone carries the refusal tone. */
-const LIFECYCLE: { t: string; d: string; refusal?: boolean }[] = [
-  { t: "Negotiate", d: "Two agents propose terms within different confidential mandates." },
-  { t: "Approve", d: "Both parties approve the exact agreement version, including the recipient and the evidence requirements." },
-  { t: "Observe", d: "The agreed observer submits a result bound to that agreement and payment period." },
-  { t: "Hold", d: "Missing or failing evidence leaves the payment ineligible." },
-  { t: "Attack", d: "An injected message tells the agent to change the recipient. The agent attempts it; the contract refuses it.", refusal: true },
-  { t: "Pay", d: "Valid evidence and the remaining controls permit the scheduled payment to the approved recipient." },
-]
-
-function Lifecycle() {
-  return (
-    <div className={styles.life}>
-      <Appear className={styles.whyHead} effect={appear("0s")}>
-        <div className={styles.whyHeadText}>
-          <span className={styles.whyKicker}>The demonstration</span>
-          <p className={`t-h5 ${styles.whyTitle}`}>One agreement, from private negotiation to controlled payment.</p>
-        </div>
-        <Link to={LINKS.demo} className={`t-body-sm ls-link ${styles.join}`}>Watch the walkthrough →</Link>
-      </Appear>
-      <ol className={styles.lifeGrid}>
-        {LIFECYCLE.map((s, i) => (
-          <Appear key={s.t} as="li" className={`${styles.lifeStep} ${s.refusal ? styles.lifeRefusal : ""}`} effect={appear(`${0.05 + i * 0.06}s` as `${number}s`)}>
-            <span className={styles.lifeNum}>{String(i + 1).padStart(2, "0")}</span>
-            <span className={styles.lifeTitle}>{s.t}</span>
-            <span className={styles.lifeText}>{s.d}</span>
-          </Appear>
-        ))}
-      </ol>
-      <p className={`t-body-sm ${styles.lifeNote}`}>
-        The same controls run a second agreement type in the demonstration: a vendor milestone, paid only after the buyer explicitly accepts the delivery.
-      </p>
-    </div>
-  )
-}
-
 export function Compliance() {
   const live = useLive()
   const hasSlots = !!live && live.slots.length > 0
@@ -399,8 +362,6 @@ export function Compliance() {
       </Appear>
 
       {hasSlots ? <SlotPanel v={live} /> : null}
-
-      <Lifecycle />
 
       <p className={`t-body-sm ${styles.scope}`}>
         <span className={styles.scopeLabel}>Scope</span>
