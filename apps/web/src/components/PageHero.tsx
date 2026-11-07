@@ -9,7 +9,7 @@ import styles from "./PageHero.module.css"
    Supporting-page hero: the 404 page shell (WebPageNode Nvv2EHdv3, Main hIwfdG7eE) reused as the
    template's page heading: Dots loop, Tag pill + H1 + lead (word reveal), one row of buttons (mount appear).
    Every geometry/timing value is the 404 page's; the button row is the Hero's `.actions` (gap 8).
-   Every supporting page (Product, Sealed Table, Payee, Accord Atlas, Security, Docs, Research, Demo, Record, 404)
+   Every supporting page (Product, Sealed Table, Payee, Market-making agreements, Security, Docs, Research, Demo, Record, 404)
    renders this one shell so the pill / H1 / lead / buttons share one left edge, one max-width and one rhythm.
 ------------------------------------------------------------------- */
 

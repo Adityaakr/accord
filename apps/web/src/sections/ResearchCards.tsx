@@ -25,7 +25,7 @@ const PAPERS: Paper[] = [
     href: "https://a16zfrontier.com/posts/article/5-ways-blockchains-help-ai-agents/",
   },
   {
-    id: "menkveld-wang", img: "/research/mw.jpg", host: "ideas.repec.org · J. Financial Markets", product: "Accord Atlas",
+    id: "menkveld-wang", img: "/research/mw.jpg", host: "ideas.repec.org · J. Financial Markets", product: "Market-making agreements",
     finding: "Paid liquidity obligations raised liquidity and firm value.",
     who: "Menkveld and Wang", venue: "Journal of Financial Markets · 2013",
     href: "https://doi.org/10.1016/j.finmar.2012.12.003",

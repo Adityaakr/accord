@@ -52,9 +52,9 @@ const SHOTS = {
     blocks: [{ t: "book" }, { t: "kv", k: "Spread", v: "47 bps · pass", mono: true }, { t: "kv", k: "Depth ±2%", v: "12,640 USDC · pass", mono: true }, { t: "kv", k: "Quoting", v: "both sides · pass", mono: true }] },
   decision: { title: "Period 3", tag: "Eligible", label: "A period decision: five of six slots passed, so the retainer is eligible",
     blocks: [{ t: "slots", v: [1, 1, 0, 1, 1, 1] }, { t: "note", text: "5 of 6 slots passed. The rule needs 4." }, { t: "amount", value: "18,500 USDC", status: "Eligible" }] },
-  scope: { title: "What this version measures", tag: "v0 scope", label: "What the current version of Atlas measures, and what is planned",
+  scope: { title: "What this version measures", tag: "v0 scope", label: "What the current version of a market-making agreement measures, and what is planned",
     blocks: [{ t: "check", text: "Spread, depth and two-sided quoting of the venue's public liquidity", state: "ok" }, { t: "check", text: "Each observation attested", state: "ok" }, { t: "check", text: "Liquidity attributed to the market maker's own account (planned)", state: "wait" },
-      { t: "note", text: "Atlas pays on the conditions as agreed. It does not yet establish who met them." }] },
+      { t: "note", text: "The agreement pays on the conditions as agreed. It does not yet establish who met them." }] },
 } satisfies Record<string, Shot>
 
 export type ShotVariant = keyof typeof SHOTS

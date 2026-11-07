@@ -1,4 +1,4 @@
-/* Line icons for the Accord Atlas period flow (spec §1.8: 1.5px stroke, currentColor, used only where they carry meaning).
+/* Line icons for the market-making agreement period flow (spec §1.8: 1.5px stroke, currentColor, used only where they carry meaning).
    They replace the template's compliance-seal images, which implied certifications Accord does not hold. */
 const base = { width: 40, height: 40, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true }
 

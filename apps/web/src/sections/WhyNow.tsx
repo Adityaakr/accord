@@ -39,7 +39,7 @@ function Tile({ label, value, line, children, className = "", delay }: TileProps
 export function WhyNow() {
   return (
     <section id="why-now" className={`section ${styles.section}`} aria-labelledby="why-now-title">
-      <SectionHeading eyebrow="Why now" title={<span id="why-now-title">An agent can be talked into paying. The contract cannot.</span>} accent="orange" wide />
+      <SectionHeading eyebrow="Why now" title={<span id="why-now-title">An agent’s instructions can change. Its payment authority stays within the approved rules.</span>} accent="orange" wide />
 
       <div className={styles.stats}>
         <Tile

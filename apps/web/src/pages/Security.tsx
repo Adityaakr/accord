@@ -116,9 +116,9 @@ const CLAIMS: Row[] = [
     "The enforced schedule (amounts, dates, recipient) and every payment are public on NEAR, as with any stablecoin payment",
   ],
   [
-    "An Accord Atlas payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception",
+    "A market-making agreement's payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception",
     "Each slot's time is drawn inside the observer's enclave from a seed generated there; the observation is taken at the first NEAR mainnet block after that time, signed by the observer's key, and checked by the contract against the agreed spread, depth and two-sided quoting; anyone can recompute it from an archival node",
-    "Atlas measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment",
+    "A market-making agreement's observer measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment",
   ],
 ]
 

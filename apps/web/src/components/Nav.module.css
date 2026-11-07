@@ -19,7 +19,6 @@
   justify-content: center;
   gap: 72px;
   padding: 16px 0;
-  overflow: hidden;
 }
 .navbar {
   display: flex;
@@ -59,6 +58,7 @@
     justify-content: flex-start;
     gap: 40px;
     padding: 16px 24px;
+    overflow: hidden; /* the open menu animates its height */
   }
   .navbar { width: 100%; flex: none; }
   .hamburger { display: block; }
@@ -101,3 +101,33 @@
   .themePhone { display: grid; }
   .themeDesktop { display: none; }
 }
+
+/* Product menu (desktop): a button in the link row, a small panel under it */
+.group { position: relative; display: flex; align-items: center; }
+.groupBtn { display: inline-flex; align-items: center; gap: 4px; padding: 0; border: 0; background: none; font-family: inherit; cursor: pointer; }
+.groupBtn:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 3px; border-radius: 4px; }
+.chev, .chevOpen { transition: transform 0.2s ease; opacity: 0.7; }
+.chevOpen { transform: rotate(180deg); }
+.panel {
+  position: absolute; top: 100%; left: 50%; z-index: 30;
+  translate: -50% 0;
+  margin-top: 14px;
+  width: 300px;
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 6px;
+  border-radius: 14px;
+  background: var(--elevation-strong);
+  border: 1px solid rgba(var(--ink-rgb), 0.1);
+  box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.7);
+}
+/* keeps the pointer inside the group while it crosses the gap to the panel */
+.panel::before { content: ""; position: absolute; left: 0; right: 0; top: -16px; height: 16px; }
+.panelItem { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 9px; text-decoration: none; transition: background 0.2s ease; }
+.panelItem:hover, .panelItem:focus-visible { background: rgba(var(--ink-rgb), 0.06); outline: none; }
+.panelLabel { font-size: 14px; color: var(--text-strong); letter-spacing: -0.01em; }
+.panelNote { font-size: 12.5px; line-height: 1.4; color: var(--text-weak); }
+
+/* Product group in the phone menu */
+.mobileGroup { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding-left: 14px; border-left: 1px solid var(--hairline); }
+.mobileGroupLabel { color: var(--text-weak); }
+@media (prefers-reduced-motion: reduce) { .chev, .chevOpen, .panelItem { transition: none; } }

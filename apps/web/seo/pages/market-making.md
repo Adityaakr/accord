@@ -1,10 +1,10 @@
-Built on Accord · Accord Atlas
+Use case · Market-making agreements
 
 # Put liquidity conditions into the payment decision.
 
 Agree on the market conditions to measure, inspect the observations, and apply the results to the payment rules in the deal room.
 
-[Explore an Atlas agreement](/record) [Watch the walkthrough](/demo)
+[Explore an example agreement](/record) [Watch the walkthrough](/demo)
 
 > Illustrative: The liquidity conditions both sides approved before the engagement.
 
@@ -26,11 +26,11 @@ Where the approved measurement and release rules are satisfied, the payment beco
 
 ## What the current version measures.
 
-Atlas reads the venue's public liquidity, today Rhea's USDC/wNEAR pool, at times drawn inside the observer's enclave. It measures venue-level liquidity, not the market maker's individual contribution, and does not detect all forms of manipulation, guarantee execution quality or verify legal compliance.
+The observer reads the venue's public liquidity, today Rhea's USDC/wNEAR pool, at times drawn inside the observer's enclave. It measures venue-level liquidity, not the market maker's individual contribution, and does not detect all forms of manipulation, guarantee execution quality or verify legal compliance.
 
 Verification using the market maker's authenticated account data is planned. The hidden times rest on the operator never moving the observer's seed to a build that reveals them. Token loans and option-based compensation are outside the current retainer-focused flow.
 
-> Illustrative: What the current version of Atlas measures, and what is planned.
+> Illustrative: What the current version of a market-making agreement measures, and what is planned.
 
 Measurement record
 

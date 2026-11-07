@@ -396,11 +396,11 @@ More
 
 #### What it does not establish
 
-results for crypto venues or for agreements measured the way Accord Atlas measures them.
+results for crypto venues or for agreements measured the way Accord's market-making agreements measure them.
 
 #### Design decision it informs
 
-a liquidity agreement with a stated obligation is a known, valuable contract; Atlas makes the obligation measurable each period and ties the retainer to the measurement.
+a liquidity agreement with a stated obligation is a known, valuable contract; a market-making agreement in Accord makes the obligation measurable each period and ties the retainer to the measurement.
 
 [doi.org](https://doi.org/10.1111/jofi.12285)
 
@@ -428,7 +428,7 @@ any integration or relationship between Accord and Kraken. The two pages are cit
 
 #### Design decision it informs
 
-Atlas's observer reads public order-book data and therefore measures conditions, not contribution. The Atlas page says so beside the claim. Account-attributed verification, using the market maker's authenticated feed inside the enclave, is planned and not implemented.
+The market-making agreement's observer reads public order-book data and therefore measures conditions, not contribution. The market-making page says so beside the claim. Account-attributed verification, using the market maker's authenticated feed inside the enclave, is planned and not implemented.
 
 ## Related approaches, and where each stops
 

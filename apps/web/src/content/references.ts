@@ -11,7 +11,7 @@ export const REFERENCES: Reference[] = [
   { n: 13, source: "Haseeb Qureshi at TOKEN2049, via RootData (paraphrase)", date: "7 Oct 2026", links: ["https://www.rootdata.com/news/781111"] },
   { n: 35, source: "Simon Willison, The lethal trifecta for AI agents", date: "16 Jun 2025", links: ["https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/"] },
   { n: 38, source: "Visa, Find and Buy with AI: Visa Intelligent Commerce (Jack Forestell, verbatim quote)", date: "30 Apr 2025", links: ["https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21361.html"] },
-  /* Why Atlas (Home · Accord Atlas). Rows 45–48 continue past the archived 44-row bibliography; re-opened 31 Oct 2026. */
+  /* Why it matters (Home · Market-making agreements in Accord). Rows 45–48 continue past the archived 44-row bibliography; re-opened 31 Oct 2026. */
   { n: 45, source: "Kain Warwick, Synthetix founder, on X, via Bitcoinist (paraphrase)", date: "26 Mar 2025", links: ["https://bitcoinist.com/disturbing-truth-about-crypto-market-makers/", "https://x.com/kaiynne/status/1904775834826912170"] },
   { n: 46, source: "Jelle Buth, co-founder of market maker Enflux, in Cointelegraph Magazine, Market maker deals are quietly killing crypto projects (paraphrase)", date: "16 Apr 2025", links: ["https://cointelegraph.com/magazine/market-maker-deals-quietly-killing-crypto-projects"] },
   { n: 47, source: "LO:TECH market-making survey, via The Block (sponsored; LO:TECH is a market maker)", date: "19 Aug 2025", links: ["https://www.theblock.co/post/367243/global-survey-reveals-deep-mistrust-in-crypto-market-making-urgent-call-for-transparency"] },

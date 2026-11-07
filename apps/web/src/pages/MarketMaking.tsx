@@ -10,9 +10,10 @@ import { Button } from "../components/Button"
 import { useLive, asOfLabel, type LiveValues } from "../lib/live"
 import { LINKS } from "../content/links"
 import { ProductShot, type ShotVariant } from "../components/ProductShot"
-import styles from "./AtlasPage.module.css"
+import styles from "./MarketMaking.module.css"
 
-/* /atlas (Accord Atlas): docs/website/ACCORD_WEBSITE_CONTENT.md B3, set verbatim.
+/* /use-cases/market-making (alias /atlas): the featured agreement type, docs/website/ACCORD_WEBSITE_CONTENT.md B3. It was the
+   Accord Atlas page until 8 Nov 2026; Accord is now the only product and market making one of its agreement types.
    Shell = the template's page hero (404 page Main) · four B3 sub-sections as the About section's alternating
    image rows (showcase-image-1…4) · the A5 visual labels as the Compliance section's five badge cards, with the
    observations from useLive().slots under them in the D2 evidence wording · `Review a measurement record`.
@@ -93,7 +94,7 @@ const ROWS: RowProps[] = [
     imageSide: "right",
     title: "What the current version measures.",
     paragraphs: [
-      "Atlas reads the venue's public liquidity, today Rhea's USDC/wNEAR pool, at times drawn inside the observer's enclave. It measures venue-level liquidity, not the market maker's individual contribution, and does not detect all forms of manipulation, guarantee execution quality or verify legal compliance.",
+      "The observer reads the venue's public liquidity, today Rhea's USDC/wNEAR pool, at times drawn inside the observer's enclave. It measures venue-level liquidity, not the market maker's individual contribution, and does not detect all forms of manipulation, guarantee execution quality or verify legal compliance.",
       "Verification using the market maker's authenticated account data is planned. The hidden times rest on the operator never moving the observer's seed to a build that reveals them. Token loans and option-based compensation are outside the current retainer-focused flow.",
     ],
   },
@@ -141,17 +142,17 @@ function Observations({ v }: { v: LiveValues | null }) {
   )
 }
 
-export function AtlasPage() {
-  usePageMeta("Accord Atlas", "Accord Atlas: liquidity agreements with measurable payment conditions, the first application built on Accord.")
+export function MarketMaking() {
+  usePageMeta("Accord: Market-making agreements", "Market-making agreements in Accord: retainers tied to agreed liquidity conditions, with scheduled observations deciding whether each payment is eligible.")
   const live = useLive()
   return (
     <div className={styles.page}>
       <PageHero
-        pill="Built on Accord · Accord Atlas"
+        pill="Use case · Market-making agreements"
         title="Put liquidity conditions into the payment decision."
         lead="Agree on the market conditions to measure, inspect the observations, and apply the results to the payment rules in the deal room."
         actions={[
-          { label: "Explore an Atlas agreement", href: LINKS.record, variant: "primary" },
+          { label: "Explore an example agreement", href: LINKS.record, variant: "primary" },
           { label: "Watch the walkthrough", href: LINKS.demo, variant: "secondary" },
         ]}
       />

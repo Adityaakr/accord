@@ -453,11 +453,11 @@ const QUESTIONS: Question[] = [
           },
           {
             label: NOT_ESTABLISHES,
-            text: "results for crypto venues or for agreements measured the way Accord Atlas measures them.",
+            text: "results for crypto venues or for agreements measured the way Accord's market-making agreements measure them.",
           },
           {
             label: INFORMS,
-            text: "a liquidity agreement with a stated obligation is a known, valuable contract; Atlas makes the obligation measurable each period and ties the retainer to the measurement.",
+            text: "a liquidity agreement with a stated obligation is a known, valuable contract; a market-making agreement in Accord makes the obligation measurable each period and ties the retainer to the measurement.",
           },
         ],
       },
@@ -486,7 +486,7 @@ const QUESTIONS: Question[] = [
       },
       {
         label: INFORMS,
-        text: "Atlas's observer reads public order-book data and therefore measures conditions, not contribution. The Atlas page says so beside the claim. Account-attributed verification, using the market maker's authenticated feed inside the enclave, is planned and not implemented.",
+        text: "The market-making agreement's observer reads public order-book data and therefore measures conditions, not contribution. The market-making page says so beside the claim. Account-attributed verification, using the market maker's authenticated feed inside the enclave, is planned and not implemented.",
       },
     ],
   },

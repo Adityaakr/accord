@@ -7,7 +7,7 @@ import { Dots } from "../components/Dots"
 import { ActionCard, ActionCardIcon, type IconPath } from "../components/ActionCard"
 import { LINKS, PRIMARY_CTA } from "../content/links"
 import { HeroPreview } from "../components/HeroPreview"
-import { AtlasMark } from "../components/AtlasMark"
+import { LogoMark } from "../components/Logo"
 import { NearLogo } from "../components/NearLogo"
 import styles from "./Hero.module.css"
 
@@ -46,7 +46,7 @@ function WordReveal({ as: Tag, className, text, delay, duration, stagger, breakA
               {w.includes("-") ? w.split("-").map((part, k) => <span key={k}>{k > 0 ? <span className={styles.hy}>-</span> : null}{part}</span>) : w}
             </motion.span>
             {i < words.length - 1 ? " " : null}
-            {/* spec §3.1: the H1 breaks after "control plane" at widths >= 1024 (the <br> is hidden below that) */}
+            {/* the H1 breaks after its first sentence at widths >= 1024 (the <br> is hidden below that) */}
             {breakAfter === i ? <br className={styles.desktopBreak} /> : null}
           </span>
         )
@@ -115,22 +115,21 @@ const CARDS = [
   { icon: ICON_WORKSPACE, title: "Sealed Table", description: "Agents negotiate in confidence. Only the agreed terms and a proof come out." },
   { icon: ICON_AGENTS, title: "Agreement controls", description: "The contract enforces the terms. Any payment that doesn't match is refused." },
   { icon: ICON_SECURE, title: "Payee", description: "Payments go only to a recipient the vendor has proven and the buyer accepted." },
-  { icon: ICON_TRUSTED, title: "Accord Atlas", description: "The first app on Accord: liquidity agreements paid on measured conditions." },
+  { icon: ICON_TRUSTED, title: "Evidence checks", description: "A payment becomes eligible only when the agreed evidence or acceptance is recorded." },
 ]
 
-/* ---------- copy (Part A · Hero, verbatim) ---------- */
-const HEADLINE = "The private deal room and control plane for agent-to-agent commerce."
-/* spec §3.1: "Break after 'control plane' on desktop" → index of the word the <br> follows */
-const H1_BREAK_AFTER = HEADLINE.split(" ").indexOf("plane")
-/* Two-tone headline: "deal room" and "control plane" carry a silver sheen; the second line steps back in tone */
+/* ---------- copy (positioning from Adi, 8 Nov 2026: one product, the approved agreement as the authority) ---------- */
+const HEADLINE = "Private agreements. Controlled execution."
+/* desktop: one sentence per line → index of the word the <br> follows */
+const H1_BREAK_AFTER = HEADLINE.split(" ").indexOf("agreements.")
+/* Two-tone headline: the two nouns carry a silver sheen; the second line steps back in tone */
 const H1_WORDS = HEADLINE.split(" ")
-const ACCENT = new Set([H1_WORDS.indexOf("deal"), H1_WORDS.indexOf("room"), H1_WORDS.indexOf("control"), H1_WORDS.indexOf("plane")])
+const ACCENT = new Set([H1_WORDS.indexOf("agreements."), H1_WORDS.indexOf("execution.")])
 const headlineWord = (i: number) => (ACCENT.has(i) ? styles.h1Accent : i > H1_BREAK_AFTER ? styles.h1Soft : undefined)
-const LEAD = "Accord turns private negotiations between AI agents into enforceable payment controls. Each agent negotiates within its company’s confidential mandate, both companies approve the terms, and the contract then decides what the buyer’s agent can authorise, who it can pay, how much, and on what evidence."
-/* Accord Atlas announcement under the description (copy from Adi, 30 Oct 2026), links to /atlas */
-const PILL_KICKER = "The first application on Accord"
-const PILL_TAG = "Introducing Accord Atlas"
-const PILL_TEXT = "Liquidity agreements with measurable payment conditions"
+const LEAD = "The private deal room for agent-to-agent commerce. Each agent negotiates within its company’s confidential mandate, both companies approve the terms, and the approved agreement stays the authority over what happens next: who the buyer’s agent may pay, how much, and on what evidence."
+/* The line under the buttons links to the demonstration (it replaced the Accord Atlas announcement, 8 Nov 2026) */
+const DEMO_TITLE = "From private negotiation to controlled payment."
+const DEMO_TEXT = "Negotiate, approve, observe, hold, refuse a redirected payment, then pay the approved recipient."
 
 export function Hero() {
   return (
@@ -172,22 +171,20 @@ export function Hero() {
             </Mount>
             {/* Kt0jRKddM: Button Secondary (T_m9VlS9B), appear onMount y24 1.4s delay 0.6s */}
             <Mount y={24} delay="0.6s">
-              <Button variant="secondary" href={LINKS.exploreAtlas}>
-                Explore Atlas
+              <Button variant="secondary" href={LINKS.exampleAgreement}>
+                See an agreement in action
               </Button>
             </Mount>
           </div>
 
-          {/* Accord Atlas announcement, below the buttons: the hero reads headline, lead, actions, then Atlas */}
+          {/* The demonstration, below the buttons: the hero reads headline, lead, actions, then the walkthrough */}
           <Mount y={16} delay="0.7s" className={styles.announce}>
-            <Link to="/atlas" className={styles.announceLink}>
-              <AtlasMark size={22} />
+            <Link to={LINKS.demo} className={styles.announceLink}>
+              <span className={styles.announceMark}><LogoMark size={18} /></span>
               <span className={styles.announceBody}>
-                <span className={styles.announceName}>Accord Atlas</span>
-                <span className={styles.announceDot} aria-hidden="true">·</span>
-                <span className={styles.announceKicker}>{PILL_KICKER}</span>
+                <span className={styles.announceName}>{DEMO_TITLE}</span>
                 <span className={styles.announceArrow} aria-hidden="true">→</span>
-                <span className={styles.announceSub}>{PILL_TEXT}</span>
+                <span className={styles.announceSub}>{DEMO_TEXT}</span>
               </span>
             </Link>
           </Mount>

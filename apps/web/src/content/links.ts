@@ -10,7 +10,9 @@ export const PRIMARY_CTA = app ? "Open a deal room" : "Request early access"
 export const LINKS = {
   /* app routes (fall back to the demo page while the app is unavailable) */
   openDealRoom: app ? `${app}/agreements/new` : "/join",
-  exploreAtlas: "/atlas",
+  useCases: "/#use-cases",
+  exampleAgreement: "/#market-making",
+  marketMaking: "/use-cases/market-making",
   verifyDomain: app ? `${app}/payee` : "/product/payee",
   verify: "/verify",
   join: "/join",
@@ -23,8 +25,8 @@ export const LINKS = {
   record: "/record",
   product: "/product",
   sealedTable: "/product/sealed-table",
+  agreementControls: "/product#premise",
   payee: "/product/payee",
-  atlas: "/atlas",
   security: "/security",
   docs: "/docs",
   research: "/research",

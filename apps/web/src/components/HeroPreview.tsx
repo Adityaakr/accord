@@ -4,7 +4,7 @@ import styles from "./HeroPreview.module.css"
 
 /* Hero product preview, built to the template's original hero image (assets/hero-image-2.png): misty backdrop, a
    light app window with stacked windows behind it, an icon rail, a list panel, a canvas of numbered nodes, and an
-   assistant-style side panel. The content is Accord's: the deal-room list, the Accord Atlas agreement as its seven-step
+   assistant-style side panel. The content is Accord's: the deal-room list, the market-making agreement as its seven-step
    pipeline, and the agreement's activity. Illustrative (labelled so); nothing is read from a live source.
    Scales with its container: 1em = container width / 108. */
 
@@ -43,8 +43,8 @@ function I({ n, className = "" }: { n: keyof typeof P; className?: string }) {
 type Room = { icon: keyof typeof P; name: string; sub: string; state: "Executing" | "Attested" | "Sealed" | "Settled"; active?: boolean }
 const GROUPS: { label: string; rooms: Room[] }[] = [
   { label: "Market making", rooms: [
-    { icon: "chart", name: "Atlas · NEAR/USDC", sub: "Retainer · 18,500 USDC", state: "Executing", active: true },
-    { icon: "chart", name: "Atlas · L2/USDC", sub: "Retainer · 12,500 USDC", state: "Attested" },
+    { icon: "chart", name: "Market making · NEAR/USDC", sub: "Retainer · 18,500 USDC", state: "Executing", active: true },
+    { icon: "chart", name: "Market making · L2/USDC", sub: "Retainer · 12,500 USDC", state: "Attested" },
   ] },
   { label: "Vendors and invoices", rooms: [
     { icon: "file", name: "Cloud GPU capacity", sub: "Invoice · 48,000 USDC", state: "Executing" },
@@ -65,7 +65,7 @@ const NODES: Record<string, Node> = {
   a: { n: 1, icon: "lock", title: "Sealed mandates", sub: "Both companies sealed limits", kind: "Sealed Table", status: "done" },
   b: { n: 2, icon: "file", title: "Approved terms", sub: "18,500 USDC / period", kind: "Agreement", status: "done" },
   c: { n: 3, icon: "badge", title: "Authorised recipient", sub: "halcyon-mm.testnet · v1", kind: "Payee", status: "done" },
-  d: { n: 4, icon: "eye", title: "Observation slots", sub: "Period 3", kind: "Atlas observer", status: "done", slots: true },
+  d: { n: 4, icon: "eye", title: "Observation slots", sub: "Period 3", kind: "Agreed observer", status: "done", slots: true },
   e: { n: 5, icon: "branch", title: "Period decision", sub: "5 of 6 passed · eligible", kind: "Decision", status: "done" },
   f: { n: 6, icon: "send", title: "Payment request", sub: "18,500 USDC → halcyon-mm", kind: "Agreement controls", status: "now" },
   g: { n: 7, icon: "swap", title: "Transfer", sub: "USDC on NEAR testnet", kind: "Settlement", status: "next" },
@@ -124,7 +124,7 @@ function NodeCard({ node, style }: { node: Node; style: CSSProperties }) {
 
 export function HeroPreview() {
   return (
-    <div className={styles.stage} role="img" aria-label="Illustrative Accord product: the deal-room list, an Accord Atlas market-making agreement shown as its seven-step pipeline from sealed mandates to the USDC transfer on NEAR, and the agreement's activity: a refused payment, a missed observation slot and a settled period.">
+    <div className={styles.stage} role="img" aria-label="Illustrative Accord product: the deal-room list, a market-making agreement shown as its seven-step pipeline from sealed mandates to the USDC transfer on NEAR, and the agreement's activity: a refused payment, a missed observation slot and a settled period.">
       <span className={styles.sheet2} aria-hidden="true" />
       <span className={styles.sheet1} aria-hidden="true" />
       <div className={styles.window}>
@@ -160,7 +160,7 @@ export function HeroPreview() {
         {/* Agreement */}
         <section className={styles.main}>
           <header className={styles.mainHead}>
-            <span className={styles.mainTitle}>Atlas · NEAR/USDC</span>
+            <span className={styles.mainTitle}>Market making · NEAR/USDC</span>
             <I n="star" className={styles.dim} />
             <I n="more" className={styles.dim} />
             <span className={styles.tag}>Illustrative</span>

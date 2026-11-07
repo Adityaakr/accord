@@ -16,8 +16,8 @@ const PAGES = join(ROOT, "seo/pages")
 const TEMPLATE = readFileSync(join(DIST, "index.html"), "utf8")
 const OG_IMAGE = `${SITE_URL}/og-image.png`
 const TODAY = new Date().toISOString().slice(0, 10)
-const TAGLINE = "The private deal room and control plane for agent-to-agent commerce."
-const ABOUT = "Accord is a private deal room and control plane for agent-to-agent commerce on NEAR. Two companies' agents negotiate in confidence inside an attested enclave (the Sealed Table); both companies approve the terms; from then on those terms are the only authority the buyer's agent has over money. A NEAR contract (Agreement controls) refuses any payment whose amount, milestone or recipient differs from the approved terms, and Payee binds the recipient to a domain the vendor controls. Settlement is USDC on NEAR. The first application, Accord Atlas, pays market makers' retainers only for periods where enough observations of the venue's public liquidity, taken at hidden times, met the agreed spread, depth and two-sided quoting."
+const TAGLINE = "Private agreements. Controlled execution. The private deal room for agent-to-agent commerce."
+const ABOUT = "Accord is the private deal room for agent-to-agent commerce on NEAR: businesses delegate negotiation to an agent, and the approved agreement remains the authority over what happens next. Two companies' agents negotiate in confidence inside an attested enclave (the Sealed Table); both companies approve the terms; from then on those terms are the only authority the buyer's agent has over money. A NEAR contract (Agreement controls) refuses any payment whose amount, milestone or recipient differs from the approved terms, and Payee binds the recipient to a domain the vendor controls. Settlement is USDC on NEAR. Agreement types (market making, security remediation, infrastructure services, agent-to-agent services, vendor contracts and grants) change the commercial fields and the evidence accepted, not the controls. The demonstrated type is the market-making agreement: a retainer paid only for periods where enough observations of the venue's public liquidity, taken at hidden times, met the agreed spread, depth and two-sided quoting."
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 const abs = (href) => (href.startsWith("/") ? SITE_URL + href : href)
@@ -71,8 +71,8 @@ const APP = {
   "@context": "https://schema.org", "@type": "SoftwareApplication", "@id": `${SITE_URL}/#software`,
   name: "Accord", applicationCategory: "BusinessApplication", applicationSubCategory: "Agent payments and negotiation infrastructure",
   operatingSystem: "Web", url: `${SITE_URL}/`, description: ABOUT, image: OG_IMAGE,
-  featureList: ["Confidential negotiation between agents in an attested enclave (Sealed Table)", "Approved terms enforced by a NEAR contract on every payment (Agreement controls)", "Recipient authorisation bound to a domain the vendor controls (Payee)", "One-transaction revocation of the agent's key", "Settlement in USDC on NEAR", "Accord Atlas: market-making retainers paid on observed spread, depth and two-sided quoting"],
-  offers: { "@type": "Offer", name: "Developer preview", price: "0", priceCurrency: "USD", availability: "https://schema.org/PreOrder", description: "Free testnet access, coming soon. Planned: Accord Teams (subscription) and Accord Atlas (per monitored market). No percentage-based Accord fee on payment amounts; production prices published before launch." },
+  featureList: ["Confidential negotiation between agents in an attested enclave (Sealed Table)", "Approved terms enforced by a NEAR contract on every payment (Agreement controls)", "Recipient authorisation bound to a domain the vendor controls (Payee)", "One-transaction revocation of the agent's key", "Settlement in USDC on NEAR", "Market-making agreements: retainers paid on observed spread, depth and two-sided quoting"],
+  offers: { "@type": "Offer", name: "Developer preview", price: "0", priceCurrency: "USD", availability: "https://schema.org/PreOrder", description: "Free testnet access, coming soon. Planned: Accord Teams (subscription) and market-making agreements (per monitored market). No percentage-based Accord fee on payment amounts; production prices published before launch." },
   publisher: { "@id": `${SITE_URL}/#organization` },
 }
 
@@ -150,7 +150,7 @@ for (const r of pages) {
 write(join(DIST, "llms-full.txt"), full.join(""))
 
 const sect = (title, list) => `## ${title}\n\n${list.map((r) => `- [${r.name}](${SITE_URL}/${r.slug}.md): ${r.summary}`).join("\n")}\n`
-const core = ["home", "atlas", "product", "sealed-table", "payee", "security"]
+const core = ["home", "market-making", "product", "sealed-table", "payee", "security"]
 const llms = `# Accord
 
 > ${TAGLINE}
@@ -158,11 +158,11 @@ const llms = `# Accord
 ${ABOUT}
 
 Key facts:
-- Parts: Sealed Table (confidential negotiation in an attested enclave), Agreement controls (approved terms enforced by a NEAR contract), Payee (recipient authorisation), Accord Atlas (first application: liquidity agreements with measurable payment conditions).
+- Parts: Sealed Table (confidential negotiation in an attested enclave), Agreement controls (approved terms enforced by a NEAR contract), Payee (recipient authorisation), Evidence checks (a payment becomes eligible only when the agreed evidence or acceptance is recorded).
 - The buyer's agent holds one key that can call one method, \`act\`; payments that do not match the approved terms are refused with a recorded reason (for example ERR_PAYEE_MISMATCH, ERR_AMOUNT_MISMATCH).
 - Network: NEAR testnet. Settlement: USDC on NEAR (NEP-141). Mainnet follows an audit.
-- Built for: market-making retainers, vendor contracts and invoices, treasury payouts, selling to AI agents, agent-to-agent services.
-- Pricing (planned): Developer preview with free testnet access (coming soon); Accord Teams, a subscription; Accord Atlas, per monitored market. No percentage-based Accord fee on payment amounts. Production prices published before launch; network and third-party fees may apply.
+- Agreement types: market-making agreements (demo), vendor contracts and renewals (demo), security remediation, infrastructure service agreements, agent-to-agent services, grants and funded milestones (planned).
+- Pricing (planned): Developer preview with free testnet access (coming soon); Accord Teams, a subscription; market-making agreements, per monitored market. No percentage-based Accord fee on payment amounts. Production prices published before launch; network and third-party fees may apply.
 - Every claim is stated with its limit on the Security page; findings cited on the Research page are the authors' own.
 
 ${sect("Product", pages.filter((r) => core.includes(r.slug)))}

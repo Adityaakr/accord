@@ -101,7 +101,7 @@ const COMMANDS = [
   "make exception          # a changed amount waits for the buyer's approval",
   "make attack             # redirect and amount refused, the canary deletes the key",
   "make revoke             # the key deleted, the next call rejected by the network",
-  "make atlas              # one Accord Atlas period on Rhea's pool, read-only",
+  "make atlas              # one market-making period on Rhea's pool, read-only",
   "make verify DEAL=<agreement>   # no keys needed",
 ].join("\n")
 
@@ -215,7 +215,7 @@ export function Docs() {
             ))}
           </ul>
           <p className={`t-body-sm ${styles.refNote}`}>
-            The exchange references illustrate the difference between aggregate and account-specific evidence; they do not assert that Atlas has integrated Kraken.
+            The exchange references illustrate the difference between aggregate and account-specific evidence; they do not assert that Accord has integrated Kraken.
           </p>
         </Appear>
 

@@ -11,7 +11,7 @@ import styles from "./Footer.module.css"
 type Item = { key: string; label: string; href: string; external?: boolean }
 
 const PRODUCT: Item[] = [
-  { key: "atlas", label: "Accord Atlas", href: LINKS.exploreAtlas },
+  { key: "use-cases", label: "Use cases", href: LINKS.useCases },
   { key: "how", label: "How it works", href: "/#how" },
   { key: "sealed", label: "Sealed Table", href: LINKS.sealedTable },
   { key: "payee", label: "Payee", href: LINKS.payee },
@@ -59,7 +59,7 @@ export function Footer() {
         <div className={styles.info}>
           <div className={styles.description}>
             <Logo />
-            <p className={`t-body-sm ${styles.tagline}`}>The private deal room and control plane for agent-to-agent commerce.</p>
+            <p className={`t-body-sm ${styles.tagline}`}>Private agreements. Controlled execution. The private deal room for agent-to-agent commerce.</p>
           </div>
           <p className={`t-body-sm ${styles.copyright}`}>
             Built on

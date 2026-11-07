@@ -4,9 +4,9 @@ export const SITE_URL = (process.env.SITE_URL || "https://accordweb-production.u
 
 export const ROUTES = [
   { path: "/", slug: "home", name: "Home", priority: 1.0, changefreq: "weekly",
-    summary: "What Accord is, who it is for, how a deal room works, Accord Atlas, why now, the demonstration, privacy, research, pricing and FAQ." },
-  { path: "/atlas", slug: "atlas", name: "Accord Atlas", priority: 0.9, changefreq: "weekly",
-    summary: "The first application on Accord: liquidity agreements with measurable payment conditions." },
+    summary: "What Accord is, the six agreement types it controls, market-making agreements, how a deal room works, why now, the demonstration, privacy, research and FAQ." },
+  { path: "/use-cases/market-making", slug: "market-making", name: "Market-making agreements", priority: 0.9, changefreq: "weekly",
+    summary: "Retainers tied to agreed liquidity conditions; scheduled observations decide whether each payment is eligible." },
   { path: "/product", slug: "product", name: "Product", priority: 0.8, changefreq: "monthly",
     summary: "Negotiation, approval and payment in one deal room." },
   { path: "/product/sealed-table", slug: "sealed-table", name: "Sealed Table", priority: 0.8, changefreq: "monthly",
@@ -35,4 +35,5 @@ export const ROUTES = [
     summary: "What this site stores and for how long." },
   { path: "/sealed-table", alias: "/product/sealed-table" },
   { path: "/payee", alias: "/product/payee" },
+  { path: "/atlas", alias: "/use-cases/market-making" },
 ]

@@ -66,9 +66,9 @@ const COLUMN_2: Item[] = [
   {
     id: "kZiqr8pYb",
     delay: 0.2,
-    title: "How does Accord Atlas decide whether a period pays?",
+    title: "How does a market-making agreement decide whether a period pays?",
     description:
-      "The approved terms set the venue, the number of observation slots, the maximum spread, the minimum depth and the threshold. An observer in an attested enclave draws each slot's time from a seed generated inside it and reads the pool at the first block after that time, so anyone can recompute the reading. A slot passes when it meets every condition. When the agreed number of slots pass, the period's payment becomes eligible and still goes through the same payment controls as any other payment; otherwise it is withheld, or goes to the buyer if unobserved slots could have changed the result. Atlas also reports uptime: the share of observed slots in which the pool quoted both sides. Two limits: Atlas measures the pool's liquidity, not the market maker's own positions, and the hidden times rest on the operator never moving the observer's seed to a build that reveals them.",
+      "The approved terms set the venue, the number of observation slots, the maximum spread, the minimum depth and the threshold. An observer in an attested enclave draws each slot's time from a seed generated inside it and reads the pool at the first block after that time, so anyone can recompute the reading. A slot passes when it meets every condition. When the agreed number of slots pass, the period's payment becomes eligible and still goes through the same payment controls as any other payment; otherwise it is withheld, or goes to the buyer if unobserved slots could have changed the result. The observer also reports uptime: the share of observed slots in which the pool quoted both sides. Two limits: the observer measures the pool's liquidity, not the market maker's own positions, and the hidden times rest on the operator never moving the observer's seed to a build that reveals them.",
   },
   {
     id: "hvppU845s",
@@ -82,7 +82,7 @@ const COLUMN_2: Item[] = [
     delay: 0.4,
     title: "What does it cost?",
     description:
-      "The developer preview gives free testnet access, using test funds. Planned pricing: an Accord Teams subscription for managing business agreements, and Accord Atlas priced per monitored market. No percentage-based Accord fee on payment amounts. Production prices and included allowances will be published before launch; network and third-party fees may apply.",
+      "The developer preview gives free testnet access, using test funds. Planned pricing: an Accord Teams subscription for managing business agreements, and market-making agreements priced per monitored market. No percentage-based Accord fee on payment amounts. Production prices and included allowances will be published before launch; network and third-party fees may apply.",
   },
   {
     id: "e7MnSyaRM",

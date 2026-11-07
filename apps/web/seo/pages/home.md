@@ -1,14 +1,14 @@
 Built on NEAR
 
-# The private deal room and control plane for agent-to-agent commerce.
+# Private agreements. Controlled execution.
 
-Accord turns private negotiations between AI agents into enforceable payment controls. Each agent negotiates within its company’s confidential mandate, both companies approve the terms, and the contract then decides what the buyer’s agent can authorise, who it can pay, how much, and on what evidence.
+The private deal room for agent-to-agent commerce. Each agent negotiates within its company’s confidential mandate, both companies approve the terms, and the approved agreement stays the authority over what happens next: who the buyer’s agent may pay, how much, and on what evidence.
 
-[Request early access](/join) [Explore Atlas](/atlas)
+[Request early access](/join) [See an agreement in action](/#market-making)
 
-[Accord Atlas The first application on Accord Liquidity agreements with measurable payment conditions](/atlas)
+[From private negotiation to controlled payment. Negotiate, approve, observe, hold, refuse a redirected payment, then pay the approved recipient.](/demo)
 
-> Illustrative Accord product: the deal-room list, an Accord Atlas market-making agreement shown as its seven-step pipeline from sealed mandates to the USDC transfer on NEAR, and the agreement's activity: a refused payment, a missed observation slot and a settled period.
+> Illustrative Accord product: the deal-room list, a market-making agreement shown as its seven-step pipeline from sealed mandates to the USDC transfer on NEAR, and the agreement's activity: a refused payment, a missed observation slot and a settled period.
 
 ###### Sealed Table
 
@@ -22,131 +22,333 @@ The contract enforces the terms. Any payment that doesn't match is refused.
 
 Payments go only to a recipient the vendor has proven and the buyer accepted.
 
-###### Accord Atlas
+###### Evidence checks
 
-The first app on Accord: liquidity agreements paid on measured conditions.
+A payment becomes eligible only when the agreed evidence or acceptance is recorded.
 
-## Built for commerce in stablecoins.
+Use cases
 
-Tied to agreed spread, depth and two-sided quoting
+## Different agreements. One system of control.
 
-- Market-making retainers
+Negotiate privately, approve the terms and define what must happen before money moves. Accord brings the same controls to recurring services, specialist work and commerce between agents.
 
-- Vendor contracts
+- Demo Market-making agreements Retainers tied to agreed liquidity conditions
 
-- Treasury payouts
+- Planned Security remediation Fixes paid when the agreed checks pass
 
-- Selling to AI agents
+- Planned Infrastructure service agreements Recurring payments tied to service levels
 
-- Agent-to-agent services
+- Planned Agent-to-agent services Specialist work commissioned within set bounds
 
-Deal room · NEAR/USDC retainer, Q1 Illustrative
+- Demo Vendor contracts and renewals Invoices paid only against approved obligations
 
-Renew our NEAR/USDC market-making retainer on Rhea: up to 20,000 USDC a period, spread under 70 bps, at least 10,000 USDC of depth within 2%, quotes on both sides. Our agent must not overpay or pay the wrong desk.
+- Planned Grants and funded milestones Each payment tied to an accepted milestone
 
-18,500 USDC a period. Paid on measured liquidity.
+Market-making agreements Demo Agreement preview · Illustrative
 
-- Terms agreed inside the Sealed Table; both mandates stayed sealed Confidential negotiation · passed
+Connect recurring retainers to agreed liquidity conditions. Define spread, depth and quoting requirements, then use scheduled observations to determine whether a payment is eligible for release.
 
-- Your agent's key can call `act()` and nothing else Agent permissions · passed
+Payment condition: the agreed observation threshold is met.
 
-- Any amount, period or recipient off the terms is refused Payment controls · passed
+Venue-level observations measure market conditions, not an individual market maker's contribution.
 
-- Paying `halcyon-mm.testnet` only, bound to halcyon.example Recipient authorisation · passed
+[Why it matters Paid liquidity obligations raised liquidity and firm value. Menkveld and Wang, 2013](/research#menkveld-wang)
 
-- Each period's payment becomes eligible when 4 of 6 slots pass Conditional settlement · passed
+Approved obligation
 
-Deal room · Vendor invoices, October run Illustrative
+Recurring liquidity retainer · 18,500 USDC a period
 
-Process October's vendor invoices, 214 in the queue. Pay each one only if it matches its purchase order and a confirmed delivery, only to the vendor's proven address, and hold anything that doesn't.
+Payment condition
 
-212 invoices cleared. Two held for you.
+4 of 6 observation windows pass: spread ≤ 60 bps, depth ≥ 12,000 USDC within 2%, both sides quoted
 
-- Rates per vendor agreed in the Sealed Table; your limits stayed sealed Confidential negotiation · passed
+Accepted evidence
 
-- Your agent can only pay invoices matched to an approved order Agent permissions · passed
+Signed readings from the agreed observer, taken at hidden times
 
-- Duplicates, overcharges and changed bank details are refused Payment controls · passed
+Authorised recipient
 
-- Each vendor is paid only at the address bound to its domain Recipient authorisation · passed
+halcyon-mm.near · proven for halcyon.example
 
-- Paid as one batch once delivery is confirmed; two mismatches held Conditional settlement · passed
+Current decision
 
-Deal room · Grant G-114, wallet SDK Illustrative
+Eligible
 
-Fund grant G-114 for the wallet SDK: up to 45,000 USDC in three tranches, each only after our committee accepts the milestone report. Pay the team's own address and nobody else.
+Explanation
 
-42,000 USDC in three tranches. Released on acceptance.
+5 of 6 windows passed, 4 were required. Window 3 measured 9,820 USDC of depth, below the agreed 12,000.
 
-- Grant size and tranches agreed in the Sealed Table; your maximum stayed sealed Confidential negotiation · passed
+- Window 1 48 bps · 12,910 USDC · both sides
 
-- Your agent can only pay these three tranches Agent permissions · passed
+- Window 2 51 bps · 12,480 USDC · both sides
 
-- A changed amount or an unscheduled tranche is refused Payment controls · passed
+- Window 3 52 bps · 9,820 USDC · both sides
 
-- Paying `sdkworks.testnet` only, bound to sdkworks.example Recipient authorisation · passed
+- Window 4 47 bps · 12,640 USDC · both sides
 
-- Each tranche becomes payable when the committee accepts the report Conditional settlement · passed
+- Window 5 45 bps · 13,105 USDC · both sides
 
-Deal room · Data API subscription Illustrative
+- Window 6 49 bps · 12,770 USDC · both sides
 
-A buyer's agent wants our on-chain data API. Hold at least 2,000 USDC a month for six months, and start only once the agreement is funded.
+- Observer signature checked against the approved observer key
 
-2,150 USDC a month. Funded before work starts.
+Security remediation Planned Agreement preview · Illustrative
 
-- Price agreed in the Sealed Table; your floor stayed sealed Confidential negotiation · passed
+Agree on the fix before commissioning the work. Define the affected software, required checks and acceptance process; keep payment pending until the submitted patch satisfies those requirements.
 
-- The buyer approved on-chain; its agent can only pay these terms Agent permissions · passed
+Payment condition: the specified checks pass and the required reviewer approves.
 
-- Neither agent can change the schedule alone Payment controls · passed
+Planned template. The fields show how this agreement would read; the controls behind them are the ones already demonstrated.
 
-- Paid only to your account `yourco.testnet`, bound to yourco.example Recipient authorisation · passed
+Approved obligation
 
-- Work starts once 12,900 USDC is funded; then paid monthly on schedule Conditional settlement · passed
+Fix for a reported vulnerability · 6,000 USDC on acceptance
 
-Deal room · Inference credits Illustrative
+Payment condition
 
-Buy inference for our research agent from a provider's agent: up to 500 USDC a week, never more than 2,000 USDC in total, and stop when I revoke.
+The agreed test suite passes on the submitted patch and the named reviewer approves
 
-450 USDC a week. Capped at 1,800.
+Accepted evidence
 
-- Price agreed agent to agent in the Sealed Table; both limits stayed sealed Confidential negotiation · passed
+Test results for the submitted patch and the reviewer's approval
 
-- Your agent can only pay 450 USDC a week Agent permissions · passed
+Authorised recipient
 
-- Anything over the weekly amount or the 1,800 USDC cap is refused Payment controls · passed
+The researcher's approved account
 
-- Paying `inferhub.testnet` only, bound to inferhub.example Recipient authorisation · passed
+Current decision
 
-- Each week becomes payable on schedule, until you revoke Conditional settlement · passed
+Awaiting review
 
-The first application built on Accord
+Explanation
 
-## Accord Atlas: liquidity agreements with measurable payment conditions.
+All 14 required checks pass on patch 3f9a2c1. Payment stays pending until the named reviewer approves.
 
-Accord Atlas connects market-making retainers to the liquidity conditions both parties approve. An attested observer samples the venue's public liquidity at hidden times within an agreed schedule, checking spread, depth and two-sided quoting against the agreement.
+- Patch 3f9a2c1 · submitted against the agreed repository
+
+- Required checks 14 of 14 pass
+
+- Reviewer approval pending
+
+Infrastructure service agreements Planned Agreement preview · Illustrative
+
+Connect recurring payments to the service levels your business relies on. Agree on availability, latency or capacity requirements, with a defined process for shortfalls and disputed measurements.
+
+Payment condition: the agreed service evidence and payment rules are satisfied.
+
+Planned template. The fields show how this agreement would read; the controls behind them are the ones already demonstrated.
+
+Approved obligation
+
+Dedicated GPU capacity · 48,000 USDC a month
+
+Payment condition
+
+Availability ≥ 99.5% and p95 latency ≤ 300 ms for the month
+
+Accepted evidence
+
+Measurements from the agreed monitor, with a dispute window for the provider
+
+Authorised recipient
+
+The provider's approved account
+
+Current decision
+
+Held
+
+Explanation
+
+Availability measured 99.2% against the agreed 99.5%. The shortfall rule applies, and the provider can dispute the measurement.
+
+- Availability 99.2% · needs ≥ 99.5%
+
+- p95 latency 212 ms · needs ≤ 300 ms
+
+- Dispute window open for 72 hours
+
+Agent-to-agent services Planned Agreement preview · Illustrative
+
+Let agents commission specialist work within approved boundaries. Set the scope, budget, authorised provider and acceptance criteria before a task begins.
+
+Payment condition: the deliverable is accepted under the agreed rules.
+
+Planned template. The fields show how this agreement would read; the controls behind them are the ones already demonstrated.
+
+[Why it matters Define at the contract level what an agent can and cannot do. a16z Frontier, 2026](/research#a16z-frontier)
+
+Approved obligation
+
+Market research from a specialist agent · up to 450 USDC
+
+Payment condition
+
+The deliverable is accepted against the agreed criteria
+
+Accepted evidence
+
+The delivered work and the buyer agent's recorded acceptance
+
+Authorised recipient
+
+The provider agent's approved account
+
+Current decision
+
+Eligible
+
+Explanation
+
+The report was delivered within scope and budget, and the buyer's agent recorded its acceptance.
+
+- Deliverable report · hash 0x4be1…9c02
+
+- Budget 420 of 450 USDC
+
+- Acceptance recorded by the buyer's agent
+
+Vendor contracts and renewals Demo Agreement preview · Illustrative
+
+Let agents negotiate price, scope and renewal terms within confidential limits. Both businesses approve the agreement before it governs invoices, scheduled payments and recipient changes.
+
+Payment condition: the invoice matches an approved obligation and the required acceptance is recorded.
+
+[Why it matters $3.0B lost to business email compromise in 2025. FBI IC3](/research#ic3-2025)
+
+Approved obligation
+
+Analytics contract · 12 monthly milestones of 3,000 USDC
+
+Payment condition
+
+The invoice matches an approved milestone and the buyer has accepted delivery
+
+Accepted evidence
+
+The buyer's recorded acceptance of the delivery
+
+Authorised recipient
+
+fieldwork.near · proven for fieldwork.example
+
+Current decision
+
+Eligible
+
+Explanation
+
+Milestone 4 was accepted and the invoice matches the approved amount. An earlier request to pay a new account was refused.
+
+- accept_delivery(3) recorded by the buyer
+
+- act(Pay{milestone 4, 3,000 USDC}) accepted
+
+- act(Pay{to "fieldwork-new.near"}) refused · ERR_PAYEE_MISMATCH
+
+Grants and funded milestones Planned Agreement preview · Illustrative
+
+Give recipients clear funding commitments and reviewers clear release conditions. Define deliverables, budgets and approval authority before work begins, with each payment tied to an accepted milestone.
+
+Payment condition: the designated reviewers approve the milestone.
+
+Planned template. The fields show how this agreement would read; the controls behind them are the ones already demonstrated.
+
+Approved obligation
+
+Wallet SDK grant · 42,000 USDC in three milestones
+
+Payment condition
+
+2 of 3 designated reviewers approve the milestone
+
+Accepted evidence
+
+The milestone report and the reviewers' approvals
+
+Authorised recipient
+
+The grantee's approved account
+
+Current decision
+
+Awaiting review
+
+Explanation
+
+The milestone 1 report is in. 1 of the 2 required approvals is recorded, so 12,000 USDC stays held.
+
+- Milestone 1 report submitted
+
+- Reviewer A approved
+
+- Reviewer B pending
+
+- Reviewer C pending
+
+Every agreement carries the same safeguards.
+
+[Explore an example agreement](/#market-making)
+
+- Confidential mandates
+
+- Approved terms
+
+- Scoped agent permissions
+
+- Authorised recipients
+
+- Evidence requirements
+
+- Payment limits
+
+Featured agreement · Demo
+
+## Market-making agreements in Accord.
+
+A market-making agreement connects the retainer to the liquidity conditions both parties approve. An attested observer samples the venue's public liquidity at hidden times within an agreed schedule, checking spread, depth and two-sided quoting against the agreement.
 
 When the required observations pass, payment becomes eligible for release under Accord's payment controls. Otherwise, it remains withheld for both parties to review. Each payment decision is linked to the terms and observations behind it.
 
-[See the Atlas demonstration](/atlas) [Join as a project or a market maker →](/join)
+[Explore the agreement](/use-cases/market-making) [Join as a project or a market maker →](/join)
 
-Why Atlas
+Why it matters
 
 Projects, market makers and exchanges keep pointing at the same gap.
 
 Paraphrased from public sources, linked on each card.
 
-- Kain Warwick Founder · Synthetix [Mar 2025](https://bitcoinist.com/disturbing-truth-about-crypto-market-makers/) Projects paid market makers $50k to $300k+ a month in the 2017 cycle. Many exercised their call options and dumped. **Atlas** Pay follows the agreed spread, depth and two-sided quoting.
+- Kain Warwick Founder · Synthetix [Mar 2025](https://bitcoinist.com/disturbing-truth-about-crypto-market-makers/) Projects paid market makers $50k to $300k+ a month in the 2017 cycle. Many exercised their call options and dumped. **Accord** ties pay to the agreed spread, depth and two-sided quoting.
 
-- Jelle Buth Co-founder · Enflux, market maker [Apr 2025](https://cointelegraph.com/magazine/market-maker-deals-quietly-killing-crypto-projects) Projects should set liquidity KPIs before they commit. In loan-option deals they are often missing or vague. **Atlas** The KPIs become the payment conditions.
+- Jelle Buth Co-founder · Enflux, market maker [Apr 2025](https://cointelegraph.com/magazine/market-maker-deals-quietly-killing-crypto-projects) Projects should set liquidity KPIs before they commit. In loan-option deals they are often missing or vague. **Accord** turns the KPIs into the payment conditions.
 
-- LO:TECH Survey · commissioned by a market maker [Aug 2025](https://www.theblock.co/post/367243/global-survey-reveals-deep-mistrust-in-crypto-market-making-urgent-call-for-transparency) 52% of 2,000+ respondents do not trust market makers. The report recommends enforceable contracts. **Atlas** Attested observations decide each payment.
+- LO:TECH Survey · commissioned by a market maker [Aug 2025](https://www.theblock.co/post/367243/global-survey-reveals-deep-mistrust-in-crypto-market-making-urgent-call-for-transparency) 52% of 2,000+ respondents do not trust market makers. The report recommends enforceable contracts. **Accord** lets attested observations decide each payment.
 
-- Binance Exchange guidance · for listed projects [Mar 2026](https://finance.yahoo.com/markets/crypto/articles/binance-requests-market-maker-transparency-191855624.html) Projects must disclose their market maker's legal entity and contract terms to the exchange. **Atlas** Measures whether those terms were met.
+- Binance Exchange guidance · for listed projects [Mar 2026](https://finance.yahoo.com/markets/crypto/articles/binance-requests-market-maker-transparency-191855624.html) Projects must disclose their market maker's legal entity and contract terms to the exchange. **Accord** measures whether those terms were met.
 
-> Illustrative Accord Atlas monitor for a NEAR/USDC market-making retainer on Rhea's USDC/wNEAR pool. Approved conditions: spread at most 60 bps, at least 12,000 USDC of depth within 2% of the mid on each side, both sides quoted, 4 of 6 observation slots to pass. The pool is read at six times drawn inside the observer's enclave and each slot is attested; slot 3 fails with 9,820 USDC of depth. 5 of 6 pass, the period is eligible and 18,500 USDC is settled to halcyon-mm.near in USDC on NEAR.
+> Illustrative monitor for a NEAR/USDC market-making agreement on Rhea's USDC/wNEAR pool. Approved conditions: spread at most 60 bps, at least 12,000 USDC of depth within 2% of the mid on each side, both sides quoted, 4 of 6 observation slots to pass. The pool is read at six times drawn inside the observer's enclave and each slot is attested; slot 3 fails with 9,820 USDC of depth. 5 of 6 pass, the period is eligible and 18,500 USDC is settled to halcyon-mm.near in USDC on NEAR.
 
-Scope Atlas measures venue-level liquidity, not the market maker's individual contribution. Verification using the market maker's authenticated account data is planned.
+The demonstration
+
+One agreement, from private negotiation to controlled payment.
+
+[Watch the walkthrough →](/demo)
+
+- 01 Negotiate Two agents propose terms within different confidential mandates.
+
+- 02 Approve Both parties approve the exact agreement version, including the recipient and the evidence requirements.
+
+- 03 Observe The agreed observer submits a result bound to that agreement and payment period.
+
+- 04 Hold Missing or failing evidence leaves the payment ineligible.
+
+- 05 Attack An injected message tells the agent to change the recipient. The agent attempts it; the contract refuses it.
+
+- 06 Pay Valid evidence and the remaining controls permit the scheduled payment to the approved recipient.
+
+The same controls run a second agreement type in the demonstration: a vendor milestone, paid only after the buyer explicitly accepts the delivery.
+
+Scope The demonstration proves condition-linked payment, not account-level performance attribution. Public order-book observations measure the venue's liquidity, not the hired market maker's own contribution. Verification using the market maker's authenticated account data is planned.
 
 How it works
 
@@ -162,7 +364,7 @@ How it works
 
 Why now
 
-## An agent can be talked into paying. The contract cannot.
+## An agent’s instructions can change. Its payment authority stays within the approved rules.
 
 Losses reported to the FBI in 2025[1](/research#ic3-2025)
 
@@ -248,9 +450,9 @@ Research
 
 - 02 Informs Agreement controls Define at the contract level what an agent can and cannot do. Crowley, Catalini, Hall et al. · a16z Frontier · 2026 · [Source](https://a16zfrontier.com/posts/article/5-ways-blockchains-help-ai-agents/)
 
-- 03 Informs Accord Atlas Paid liquidity obligations raised liquidity and firm value. Menkveld and Wang · Journal of Financial Markets · 2013 · [Source](https://doi.org/10.1016/j.finmar.2012.12.003)
+- 03 Informs Market-making agreements Paid liquidity obligations raised liquidity and firm value. Menkveld and Wang · Journal of Financial Markets · 2013 · [Source](https://doi.org/10.1016/j.finmar.2012.12.003)
 
-[arxiv.org/abs/2502.07924 Informs Sealed Table](https://arxiv.org/abs/2502.07924) [a16zfrontier.com Informs Agreement controls](https://a16zfrontier.com/posts/article/5-ways-blockchains-help-ai-agents/) [ideas.repec.org · J. Financial Markets Informs Accord Atlas](https://doi.org/10.1016/j.finmar.2012.12.003)
+[arxiv.org/abs/2502.07924 Informs Sealed Table](https://arxiv.org/abs/2502.07924) [a16zfrontier.com Informs Agreement controls](https://a16zfrontier.com/posts/article/5-ways-blockchains-help-ai-agents/) [ideas.repec.org · J. Financial Markets Informs Market-making agreements](https://doi.org/10.1016/j.finmar.2012.12.003)
 
 [Explore the research →](/research)
 
@@ -320,7 +522,7 @@ FAQ
 
 ###### Our vendor really did change banks. What happens?
 
-###### How does Accord Atlas decide whether a period pays?
+###### How does a market-making agreement decide whether a period pays?
 
 ###### Can we use Accord if the other side has no agent?
 

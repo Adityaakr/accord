@@ -10,7 +10,7 @@ import { Contact } from "./pages/Contact"
 import { Product } from "./pages/Product"
 import { SealedTable } from "./pages/SealedTable"
 import { Payee } from "./pages/Payee"
-import { AtlasPage } from "./pages/AtlasPage"
+import { MarketMaking } from "./pages/MarketMaking"
 import { Security } from "./pages/Security"
 import { Docs } from "./pages/Docs"
 import { Research } from "./pages/Research"
@@ -58,7 +58,8 @@ export function App() {
           <Route path="/product/sealed-table" element={<SealedTable />} />
           <Route path="/product/payee" element={<Payee />} />
           <Route path="/payee" element={<Payee />} />
-          <Route path="/atlas" element={<AtlasPage />} />
+          <Route path="/use-cases/market-making" element={<MarketMaking />} />
+          <Route path="/atlas" element={<MarketMaking />} />
           <Route path="/security" element={<Security />} />
           <Route path="/docs" element={<Docs />} />
           <Route path="/research" element={<Research />} />

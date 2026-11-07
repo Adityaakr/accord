@@ -1,5 +1,5 @@
-/* Home · Accord Atlas: heading row, then a monochrome stage holding the Atlas monitor (the band's stage and card
-   language, in silver instead of teal: Atlas visuals are never green), then the scope note. */
+/* Home · Market-making agreements in Accord: heading row, sourced cards, then a monochrome stage holding the agreement's
+   monitor (the band's stage and card language, in silver instead of teal), the demonstrated lifecycle, then the scope note. */
 .section {
   gap: 40px;
   padding: 72px 0;
@@ -16,6 +16,7 @@
 .headLeft { grid-area: title; }
 .headRight { grid-area: copy; display: flex; flex-direction: column; gap: 20px; position: relative; top: -16px; }
 .tag { display: inline-flex; align-items: center; gap: 8px; color: var(--text-medium); }
+.tagDot { width: 6px; height: 6px; border-radius: 999px; background: var(--teal); }
 .title { width: 100%; text-wrap: balance; }
 .description { color: var(--text-medium); text-wrap: pretty; }
 .descriptionMore { margin-top: -6px; font-size: 15px; line-height: 1.6; color: var(--text-weak); }
@@ -23,7 +24,7 @@
 .join { color: var(--text-medium); text-decoration: none; }
 .join:hover { color: var(--text-strong); }
 
-/* ---------- why Atlas: four short sourced cards in one row (two on tablet, one on phone) ---------- */
+/* ---------- why it matters: four short sourced cards in one row (two on tablet, one on phone) ---------- */
 .why { display: flex; flex-direction: column; gap: 20px; width: 100%; }
 .whyHead { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
 .whyHeadText { display: flex; flex-direction: column; gap: 8px; max-width: 640px; }
@@ -279,3 +280,22 @@
   .req { display: none; }
   .settleAmt:not(.amtDone) { display: none; }
 }
+
+/* ---------- the demonstrated lifecycle: six steps in one row (three on tablet, one column on phone) ---------- */
+.life { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+.lifeGrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.lifeStep {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 16px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(var(--ink-rgb), 0.08);
+  background: linear-gradient(160deg, rgba(var(--ink-rgb), 0.04), rgba(var(--ink-rgb), 0.01) 60%), var(--elevation-strong);
+}
+.lifeNum { font-family: var(--mono); font-size: 11px; color: var(--text-weak); }
+.lifeTitle { font-size: 15px; letter-spacing: -0.01em; color: var(--text-strong); }
+.lifeText { font-size: 12.5px; line-height: 1.5; color: var(--text-medium); }
+.lifeRefusal { border-color: rgba(255, 34, 68, 0.28); }
+.lifeRefusal .lifeNum, .lifeRefusal .lifeTitle { color: var(--refusal); }
+.lifeNote { color: var(--text-weak); max-width: 760px; }
+@media (max-width: 1199.98px) { .lifeGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 809.98px) { .lifeGrid { grid-template-columns: 1fr; } }

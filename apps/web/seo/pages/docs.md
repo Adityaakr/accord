@@ -28,7 +28,7 @@ confidential settlement (the USDC transfer is public on NEAR, as with any stable
 
 ## Commands
 
-make sandbox # the full flow on a local NEAR sandbox, mocked steps marked make negotiate # two sealed mandates in, attested terms out make approve # both companies approve; the agreement is Executing make fund # the buyer funds the agreement's USDC make payee # recipient proven, approved and accepted make pay # milestone 1 to the authorised recipient on NEAR testnet make exception # a changed amount waits for the buyer's approval make attack # redirect and amount refused, the canary deletes the key make revoke # the key deleted, the next call rejected by the network make atlas # one Accord Atlas period on Rhea's pool, read-only make verify DEAL=<agreement> # no keys needed
+make sandbox # the full flow on a local NEAR sandbox, mocked steps marked make negotiate # two sealed mandates in, attested terms out make approve # both companies approve; the agreement is Executing make fund # the buyer funds the agreement's USDC make payee # recipient proven, approved and accepted make pay # milestone 1 to the authorised recipient on NEAR testnet make exception # a changed amount waits for the buyer's approval make attack # redirect and amount refused, the canary deletes the key make revoke # the key deleted, the next call rejected by the network make atlas # one market-making period on Rhea's pool, read-only make verify DEAL=<agreement> # no keys needed
 
 ## Official references
 
@@ -44,4 +44,4 @@ make sandbox # the full flow on a local NEAR sandbox, mocked steps marked make n
 
 - [Kraken account-specific execution data](https://docs.kraken.com/exchange/api-reference/spot-websocket-v2/executions)
 
-The exchange references illustrate the difference between aggregate and account-specific evidence; they do not assert that Atlas has integrated Kraken.
+The exchange references illustrate the difference between aggregate and account-specific evidence; they do not assert that Accord has integrated Kraken.
