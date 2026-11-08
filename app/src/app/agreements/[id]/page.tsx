@@ -1,3 +1,4 @@
+import { Underline } from "./Underline";
 import { InviteCard } from "./InviteCard";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -195,6 +196,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
           <Link key={k} href={`?tab=${k}`} scroll={false} className={`${styles.tab} ${k === tab ? styles.tabOn : ""}`} aria-current={k === tab ? "page" : undefined}>
             {label}
             {k === "activity" && a.refusals > 0 ? <span className={styles.tabCount}>{a.refusals}</span> : null}
+            {k === tab ? <Underline /> : null}
           </Link>
         ))}
       </nav>
