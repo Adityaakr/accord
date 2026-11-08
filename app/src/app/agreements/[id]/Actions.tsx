@@ -57,7 +57,8 @@ export function Actions({
   if (client) {
     const party = role === "buyer" || role === "vendor";
     // Sealing and negotiation.
-    if (party && a.state === "Sealed" && a.negotiation !== "Done" && !(typeof a.negotiation === "object" && "Requested" in a.negotiation)) {
+    // Once both sides have sealed (Ready, Requested or Done) there is nothing left to seal.
+    if (party && a.state === "Sealed" && a.negotiation === "AwaitingMandates") {
       add("seal", <a className={styles.btn} href={`/agreements/${a.account}/seal`}>Seal your mandate</a>);
     }
     if (a.state === "Sealed" && typeof a.negotiation === "object" && "Ready" in a.negotiation) {

@@ -5,6 +5,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Accord, AccordError, formatUnits, parseUnits, type Kind, type Mandate } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { useAppConfig } from "@/components/AppConfig";
@@ -58,6 +59,7 @@ export function SealForm({
   const preset = options.find((p) => p.id === presetId) ?? options[0] ?? null;
   const [draft, setDraft] = useState<Draft | null>(null);
   const [instructions, setInstructions] = useState<string | null>(null);
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ commitment: string; txHash: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -82,6 +84,7 @@ export function SealForm({
       const client = new Accord({ network: cfg.network === "sandbox" ? "sandbox" : "testnet", factory: cfg.factory, rpc: cfg.rpc, signer: w.signer })
         .agreement(agreement);
       setDone(await client.sealMandate(mandate, { role }));
+      router.refresh(); // "Sealed so far" re-reads the commitments
     } catch (e) {
       setError(e instanceof AccordError ? e.code ?? e.message : (e as Error).message);
     } finally {
