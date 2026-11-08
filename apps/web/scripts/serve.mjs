@@ -81,9 +81,16 @@ function fileFor(urlPath) {
   return null
 }
 
+const APP_ONLY = /^\/(signin|try-it|rooms|agreements|enter|profile|settings|onboarding|approvals|deliveries|invite|recipients|payout|agents|market-making)(\/|$)/
+
 const server = createServer((req, res) => {
   const path = (req.url || "/").split("?")[0]
   if (path === "/app" || path.startsWith("/app/")) return proxyToApp(req, res)
+  /* App-only paths typed or linked without the /app prefix (e.g. /signin): send them to the app */
+  if (APP_ONLY.test(path)) {
+    res.writeHead(308, { Location: "/app" + (req.url || "/"), ...HEADERS }).end()
+    return
+  }
   if (req.method !== "GET" && req.method !== "HEAD") {
     res.writeHead(405, { Allow: "GET, HEAD", ...HEADERS }).end()
     return
