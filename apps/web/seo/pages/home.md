@@ -408,23 +408,20 @@ Compared
 
 ## Accord compared with the alternatives.
 
-Of five ways an agent can pay another business, only Accord keeps each side's limits sealed while agents negotiate, then lets the agent pay on its own while a contract checks each payment against terms both companies approved. Escrow services offer arbitration and are in production; Accord is pre-launch.
+Only Accord keeps both sides' limits sealed during negotiation and lets an agent pay on its own while a contract checks every payment. Escrow offers arbitration and is in production; Accord is pre-launch.
 
 **What each option enforces when an agent pays another business**
 
 | Capability | Accord | Escrow service | Multisig wallet | Agent wallet with spending limits | Plain stablecoin transfer |
 | --- | --- | --- | --- | --- | --- |
-| Agents negotiate without revealing either side's limits | Yes : Sealed Table enclave | No : no agent negotiation step | No : no negotiation step | No : no negotiation step | No : no negotiation step |
-| Both companies approve the terms before money moves | Yes : both approve on chain | Yes : in the escrow agreement | Partly : if both firms are signers | No : one owner sets limits | No |
-| A message cannot redirect the recipient | Yes : Payee and the contract; changes wait 24 h | Partly : verified payee; bank details editable | Partly : signer review or a guard | Partly : if an allowlist is set | No : the sender decides |
-| Each payment checked against the agreed amount and milestone | Yes : in the contract | Yes : released on agreed terms | Partly : signer review or a roles module | Partly : caps, not agreement terms | No |
+| Each side's limits stay sealed while agents negotiate | Yes : Sealed Table enclave | No : no negotiation step | No : no negotiation step | No : no negotiation step | No |
+| Each payment checked against the agreed terms | Yes : in the contract | Yes : by the escrow agent | Partly : signer review | Partly : caps, not terms | No |
+| A message cannot redirect the recipient | Yes : Payee and the contract | Partly : payee details editable | Partly : signers or a guard | Partly : if allowlisted | No |
 | Payment released only on agreed evidence | Yes : checked by the contract | Yes : on buyer acceptance | Partly : signers' judgement | No | No |
-| An agent can pay without a person signing each payment | Yes : inside the approved terms | Partly : API; funding usually manual | Partly : allowance or roles module | Yes | Yes : whoever holds the key |
-| Both sides can check decisions from public data | Yes : on-chain events and make verify | No : private statements | Partly : transactions, not reasons | Partly : transactions, not policy | Partly : the transaction only |
-| A neutral third party resolves disputes | No : the buyer decides exceptions | Partly : funds held; an arbitrator decides | No | No | No |
-| In production today | No : pre-launch | Yes | Yes | Yes | Yes |
+| An agent can pay without a person signing each payment | Yes : inside the approved terms | No : funding is manual | Partly : spending-limit module | Yes | Yes |
+| A neutral third party resolves disputes | No : the buyer decides exceptions | Yes : an arbitrator decides | No | No | No |
 
-Partly means it depends on how the option is set up or who checks it. Escrow: Escrow.com's published process. Multisig: Safe with its modules. Agent wallets: policy engines such as Coinbase's and Privy's. Checked 8 November 2026. Accord is pre-launch: built and tested end to end on a local NEAR node, with the testnet release pending.
+Partly: depends on setup or who checks. Sources: Escrow.com's process, Safe and its modules, Coinbase and Privy wallet policies; checked 8 November 2026. Accord is pre-launch: built and tested on a local NEAR node, testnet release pending.
 
 Why now
 

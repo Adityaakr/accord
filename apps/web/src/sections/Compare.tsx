@@ -10,7 +10,7 @@ import styles from "./Compare.module.css"
    - every Accord cell grounded in the contract source (~/accord-app: negotiation.rs approve_terms, gates.rs check_pay,
      recipients.rs, payments.rs act, evidence.rs exceptions);
    - placement and phone layout.
-   Two rows the alternatives win are kept on purpose. Marks have a shape as well as a colour: teal tick (Yes), half
+   Trimmed to six rows (8 Nov 2026); the dispute row, which escrow wins, is kept on purpose. Marks have a shape as well as a colour: teal tick (Yes), half
    square (Partly), dashed square (No); red stays for refusals only. Phone: the table scrolls inside its card with
    the capability column pinned. */
 
@@ -21,24 +21,18 @@ type Row = { cap: string; cells: [Cell, Cell, Cell, Cell, Cell] }
 const COLS = ["Escrow service", "Multisig wallet", "Agent wallet with spending limits", "Plain stablecoin transfer"]
 
 const ROWS: Row[] = [
-  { cap: "Agents negotiate without revealing either side's limits",
-    cells: [["yes", "Sealed Table enclave"], ["no", "no agent negotiation step"], ["no", "no negotiation step"], ["no", "no negotiation step"], ["no", "no negotiation step"]] },
-  { cap: "Both companies approve the terms before money moves",
-    cells: [["yes", "both approve on chain"], ["yes", "in the escrow agreement"], ["partly", "if both firms are signers"], ["no", "one owner sets limits"], ["no"]] },
+  { cap: "Each side's limits stay sealed while agents negotiate",
+    cells: [["yes", "Sealed Table enclave"], ["no", "no negotiation step"], ["no", "no negotiation step"], ["no", "no negotiation step"], ["no"]] },
+  { cap: "Each payment checked against the agreed terms",
+    cells: [["yes", "in the contract"], ["yes", "by the escrow agent"], ["partly", "signer review"], ["partly", "caps, not terms"], ["no"]] },
   { cap: "A message cannot redirect the recipient",
-    cells: [["yes", "Payee and the contract; changes wait 24 h"], ["partly", "verified payee; bank details editable"], ["partly", "signer review or a guard"], ["partly", "if an allowlist is set"], ["no", "the sender decides"]] },
-  { cap: "Each payment checked against the agreed amount and milestone",
-    cells: [["yes", "in the contract"], ["yes", "released on agreed terms"], ["partly", "signer review or a roles module"], ["partly", "caps, not agreement terms"], ["no"]] },
+    cells: [["yes", "Payee and the contract"], ["partly", "payee details editable"], ["partly", "signers or a guard"], ["partly", "if allowlisted"], ["no"]] },
   { cap: "Payment released only on agreed evidence",
     cells: [["yes", "checked by the contract"], ["yes", "on buyer acceptance"], ["partly", "signers' judgement"], ["no"], ["no"]] },
   { cap: "An agent can pay without a person signing each payment",
-    cells: [["yes", "inside the approved terms"], ["partly", "API; funding usually manual"], ["partly", "allowance or roles module"], ["yes"], ["yes", "whoever holds the key"]] },
-  { cap: "Both sides can check decisions from public data",
-    cells: [["yes", "on-chain events and make verify"], ["no", "private statements"], ["partly", "transactions, not reasons"], ["partly", "transactions, not policy"], ["partly", "the transaction only"]] },
+    cells: [["yes", "inside the approved terms"], ["no", "funding is manual"], ["partly", "spending-limit module"], ["yes"], ["yes"]] },
   { cap: "A neutral third party resolves disputes",
-    cells: [["no", "the buyer decides exceptions"], ["partly", "funds held; an arbitrator decides"], ["no"], ["no"], ["no"]] },
-  { cap: "In production today",
-    cells: [["no", "pre-launch"], ["yes"], ["yes"], ["yes"], ["yes"]] },
+    cells: [["no", "the buyer decides exceptions"], ["yes", "an arbitrator decides"], ["no"], ["no"], ["no"]] },
 ]
 
 const WORD: Record<Mark, string> = { yes: "Yes", partly: "Partly", no: "No" }
@@ -67,7 +61,7 @@ export function Compare() {
         accent="teal"
         wide
         title="Accord compared with the alternatives."
-        lead={<p>Of five ways an agent can pay another business, only Accord keeps each side's limits sealed while agents negotiate, then lets the agent pay on its own while a contract checks each payment against terms both companies approved. Escrow services offer arbitration and are in production; Accord is pre-launch.</p>}
+        lead={<p>Only Accord keeps both sides' limits sealed during negotiation and lets an agent pay on its own while a contract checks every payment. Escrow offers arbitration and is in production; Accord is pre-launch.</p>}
       />
 
       <Appear as="div" className={styles.card} effect={rise}>
@@ -95,9 +89,8 @@ export function Compare() {
       </Appear>
 
       <p className={styles.foot}>
-        Partly means it depends on how the option is set up or who checks it. Escrow: Escrow.com's published process. Multisig: Safe with its
-        modules. Agent wallets: policy engines such as Coinbase's and Privy's. Checked 8 November 2026. Accord is pre-launch: built and tested
-        end to end on a local NEAR node, with the testnet release pending.
+        Partly: depends on setup or who checks. Sources: Escrow.com's process, Safe and its modules, Coinbase and Privy wallet policies; checked
+        8 November 2026. Accord is pre-launch: built and tested on a local NEAR node, testnet release pending.
       </p>
     </section>
   )
