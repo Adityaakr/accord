@@ -62,7 +62,7 @@
 .rim { fill: none; stroke: rgba(var(--teal-rgb), 0.35); stroke-width: 1; stroke-dasharray: 4 6; }
 
 .word { pointer-events: none; }
-.wordDepth, .wordTop { font-size: 40px; font-weight: 600; letter-spacing: -0.04em; text-anchor: middle; }
+.wordDepth, .wordTop { font-size: 36px; font-weight: 600; letter-spacing: -0.04em; text-anchor: middle; }
 .wordDepth { fill: var(--word-depth); }
 .wordTop { fill: rgba(var(--ink-rgb), 0.1); stroke: rgba(var(--teal-rgb), 0.35); stroke-width: 0.75; }
 

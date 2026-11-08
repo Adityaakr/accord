@@ -201,7 +201,7 @@ export function AttackScene() {
             <polygon className={styles.rim} points={pts([P(270, -225, 0), P(750, -225, 0), P(750, 225, 0), P(270, 225, 0)])} />
 
             {/* Accord wordmark on the platform's front-right edge, extruded */}
-            <g transform={`matrix(${C} -0.5 ${C} 0.5 ${P(712, 178, 0)[0]} ${P(712, 178, 0)[1]})`} className={styles.word}>
+            <g transform={`matrix(${C} -0.5 ${C} 0.5 ${P(712, 112, 0)[0]} ${P(712, 112, 0)[1]})`} className={styles.word}>
               {[4, 3, 2, 1].map((k) => <text key={k} x={0} y={k} className={styles.wordDepth}>Accord</text>)}
               <text x={0} y={0} className={styles.wordTop}>Accord</text>
             </g>
