@@ -26,7 +26,8 @@ export default function SignIn() {
       <span className={styles.weave} aria-hidden="true" />
       <span className={styles.sheen} aria-hidden="true" />
       <header className={styles.top}>
-        <Link href="/signin" className={styles.brand}><LogoMark /><span>Accord</span></Link>
+        {/* the site's landing page: a plain link, so the /app basePath is not added */}
+        <a href="/" className={styles.brand} aria-label="Accord website"><LogoMark /><span>Accord</span></a>
         <ThemeToggle compact />
       </header>
       <div className={styles.center}>

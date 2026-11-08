@@ -47,7 +47,8 @@ export default function Enter() {
   return (
     <div className={`${styles.page} texture-strong`}>
       <header className={styles.top}>
-        <Link href="/" className={styles.brand}><LogoMark /><span>Accord</span></Link>
+        {/* the site's landing page: a plain link, so the /app basePath is not added */}
+        <a href="/" className={styles.brand} aria-label="Accord website"><LogoMark /><span>Accord</span></a>
         <div className={styles.topRight}>
           {w.accountId ? <span className={`mono ${styles.who}`} title={w.accountId}>{shortAccount(w.accountId)}</span> : <Link href="/signin" className="link">Sign in</Link>}
           <ThemeToggle compact />
