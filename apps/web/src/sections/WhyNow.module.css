@@ -41,13 +41,13 @@
 .value {
   font-family: var(--mono);
   font-weight: 500;
-  font-size: 32px;
-  line-height: 110%;
+  font-size: 48px;
+  line-height: 1.05;
   letter-spacing: -0.03em;
   color: var(--text-strong);
 }
 .line { color: var(--text-weak); max-width: 46ch; }
-.lossTile .value { font-size: 40px; }
+.lossTile .value { font-size: 72px; letter-spacing: -0.04em; }
 .line :global(code.mono) { color: var(--text-strong); background: none; padding: 0; font-size: 0.95em; }
 .chartWrap { margin-top: auto; padding-top: 24px; width: 100%; }
 
@@ -94,7 +94,8 @@
   .tile, .lossTile.tile { grid-column: 1 / -1; padding: 20px 16px; }
   .lossTile { display: flex; }
   .lossTile > .chartWrap { padding-top: 16px; }
-  .value, .lossTile .value { font-size: 32px; }
+  .value { font-size: 40px; }
+  .lossTile .value { font-size: 52px; }
   .source { margin-top: -16px; }
   .worstText { font-size: 20px; }
 }
