@@ -229,9 +229,16 @@ impl Agreement {
                 }
                 (false, true, ItemStatus::AssumedPaid | ItemStatus::Paid) => {
                     self.paid = self.paid.saturating_sub(it.settled);
+                    // After `Settled` only a claim on a `Reserved` item can pay, and the close refund left this
+                    // amount on the account (the refund never exceeds the ledger): set it aside for the vendor.
+                    if self.state == State::Settled {
+                        self.reserved += it.settled;
+                        it.status = ItemStatus::Reserved;
+                    } else {
+                        it.status = ItemStatus::Eligible;
+                    }
                     it.settled = 0;
                     it.settled_by = None;
-                    it.status = ItemStatus::Eligible;
                 }
                 (true, false, _) => {
                     // The transfer happened after the item was reopened by an exception. The money left, so it is
@@ -399,10 +406,12 @@ impl Agreement {
     }
 
     /// One step per call after the end of the term (or after both parties asked for `mutual_close`): pay the next
-    /// eligible item, set aside what cannot be paid, then refund the real balance minus what is reserved.
+    /// eligible item, set aside what cannot be paid, then refund the buyer: the real balance when nothing is owed to
+    /// the vendor, else the real balance minus what is reserved, capped at the ledger's `funded - paid - reserved`.
     pub fn close(&mut self) -> CloseStep {
-        if self.state == State::Settled && self.refund_owed > 0 {
-            // Retry against the balance the account actually holds now, never more than is owed.
+        if self.state == State::Settled && (self.refund_owed > 0 || !self.owed_to_vendor()) {
+            // Retry against the balance the account actually holds now, never more than is owed; once nothing is
+            // owed to the vendor any more, sweep what is left (a stray deposit) to the buyer.
             self.balance_of_self()
                 .then(
                     Self::ext(env::current_account_id())
@@ -458,7 +467,15 @@ impl Agreement {
             .saturating_sub(self.paid)
             .saturating_sub(self.reserved);
         self.state = State::Settled;
-        let refund = balance.saturating_sub(self.reserved);
+        // While anything is owed to the vendor (a reserved item, or an `AssumedPaid` item a late failed callback
+        // would set aside again), never more than the ledger owes the buyer: the balance read can include tokens an
+        // `ft_transfer_call` credited and `ft_on_transfer` refused (`ERR_CLOSING`), which the token takes back from
+        // this account afterwards. With nothing owed, the whole balance goes back (stray deposits included).
+        let refund = if self.owed_to_vendor() {
+            balance.saturating_sub(self.reserved).min(self.refunded)
+        } else {
+            balance
+        };
         emit(
             "settled",
             json!({"paid": U128(self.paid), "reserved": U128(self.reserved), "refunded": U128(refund)}),
@@ -473,7 +490,11 @@ impl Agreement {
         let Some(balance) = read_u128() else {
             return;
         };
-        let refund = self.refund_owed.min(balance.saturating_sub(self.reserved));
+        let refund = if self.owed_to_vendor() {
+            self.refund_owed.min(balance.saturating_sub(self.reserved))
+        } else {
+            balance
+        };
         if refund > 0 {
             self.refund_buyer(refund);
         }
@@ -513,6 +534,17 @@ impl Agreement {
 }
 
 impl Agreement {
+    /// Money the vendor may still take after `Settled`: a reserved item, or an `AssumedPaid` item that a late
+    /// failed callback would set aside again. While it is, the refund never exceeds the ledger.
+    pub(crate) fn owed_to_vendor(&self) -> bool {
+        self.reserved > 0
+            || self.in_flight.is_some()
+            || self
+                .items
+                .iter()
+                .any(|it| it.status == ItemStatus::AssumedPaid)
+    }
+
     pub(crate) fn item_ctx_by_id(&self, id: u32) -> Option<accord_core::gates::ItemCtx> {
         self.normalized_item(id).map(|it| self.item_ctx(&it))
     }

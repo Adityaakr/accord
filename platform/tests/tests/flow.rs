@@ -229,9 +229,10 @@ async fn a_failed_transfer_clears_the_lock_and_keeps_the_escrow() -> Result<()> 
     Ok(())
 }
 
-/// I17: close after the term with no recipient sets the eligible item aside, refunds the rest of the real balance
-/// (a stray deposit too), and the vendor claims the reserved item after `Settled`. A delivery after the end is
-/// refused.
+/// I17: close after the term with no recipient sets the eligible item aside, refunds the ledger's rest (never more
+/// while something is set aside: tokens in transit could be counted), the vendor claims the reserved item after
+/// `Settled`, and a last `close` sweeps the stray deposit to the buyer once nothing is owed. A delivery after the end
+/// is refused.
 #[tokio::test]
 async fn close_reserves_refunds_and_the_reserved_item_stays_claimable() -> Result<()> {
     let env = Env::new().await?;
@@ -271,10 +272,10 @@ async fn close_reserves_refunds_and_the_reserved_item_stays_claimable() -> Resul
     assert_eq!(a["state"], "Settled");
     assert_eq!(
         env.balance(env.buyer.id()).await?,
-        24_000_000 + 1_000_000,
-        "refund includes the stray deposit"
+        24_000_000,
+        "the refund is the ledger's, not the balance's, while an item is reserved"
     );
-    assert_eq!(env.balance(&deal.id).await?, ITEM);
+    assert_eq!(env.balance(&deal.id).await?, ITEM + 1_000_000);
     deal.authorise(env.recipient.id()).await?;
     env.wait_until(env.now().await? + params.claim_delay_secs + 2)
         .await?;
@@ -283,6 +284,15 @@ async fn close_reserves_refunds_and_the_reserved_item_stays_claimable() -> Resul
         "sent"
     );
     assert_eq!(env.balance(env.recipient.id()).await?, ITEM);
+    let step: serde_json::Value = deal.must(&env.keeper, "close", json!({})).await?.json()?;
+    assert_eq!(step, json!("RefundRetried"));
+    env.worker.fast_forward(3).await?;
+    assert_eq!(
+        env.balance(env.buyer.id()).await?,
+        24_000_000 + 1_000_000,
+        "the stray deposit is swept to the buyer once nothing is owed"
+    );
+    assert_eq!(env.balance(&deal.id).await?, 0);
     Ok(())
 }
 

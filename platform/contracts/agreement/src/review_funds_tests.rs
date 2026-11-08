@@ -530,3 +530,214 @@ fn review_act_request_exception_panics_when_one_is_pending() {
     assert_eq!(ids[0], ids[1]);
     assert_eq!(a.exceptions.len(), 1);
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// Audit L4 and L1 (9 Nov 2026): the close refund and late callbacks after Settled. Fixed behaviour.
+// ---------------------------------------------------------------------------------------------------------------
+
+/// The amounts of the `ft_transfer` calls the last call scheduled.
+fn ft_transfers() -> Vec<u128> {
+    near_sdk::test_utils::get_created_receipts()
+        .iter()
+        .flat_map(|r| r.actions.iter())
+        .filter_map(|a| match a {
+            near_sdk::mock::MockAction::FunctionCallWeight {
+                method_name, args, ..
+            } if method_name == b"ft_transfer" => {
+                let v: Value = serde_json::from_slice(args).ok()?;
+                v["amount"].as_str()?.parse().ok()
+            }
+            _ => None,
+        })
+        .collect()
+}
+
+/// L4-F1: the close refund trusted a balance read that can include tokens an `ft_transfer_call` credited and that
+/// `ft_on_transfer` refused (`ERR_CLOSING`), so the token returns them after the read. Ledger: funded 36, item 1
+/// reserved 12, so the refund is 24 whatever the read says, and the vendor's 12 stays for its claim.
+#[test]
+fn audit_close_refund_never_exceeds_the_ledger_when_tokens_are_in_transit() {
+    let mut a = executing(Kind::Procurement);
+    fund(&mut a, 36_000_000);
+    deliver_and_accept(&mut a, 1, T0 + 100);
+    call("anyone.testnet", None, END, vec![]);
+    assert_eq!(a.close(), CloseStep::Reserved { item: 1 });
+    assert_eq!(a.reserved, 12_000_000);
+    call("anyone.testnet", None, END + 1, vec![]);
+    assert_eq!(a.close(), CloseStep::Settling);
+    // A 12 USDC transfer_call lands on the token between close() and the balance read; ft_on_transfer refuses it.
+    assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        call(token().as_str(), None, END + 1, vec![]);
+        a.ft_on_transfer(acc(BUYER), U128(12_000_000), "fund".into())
+    }))
+    .is_err());
+    call(
+        me().as_str(),
+        None,
+        END + 2,
+        vec![PromiseResult::Successful(b"\"48000000\"".to_vec())],
+    );
+    a.on_close_balance();
+    let logs = get_logs();
+    let settled = logs.iter().find(|l| l.contains("\"settled\"")).unwrap();
+    assert!(
+        settled.contains("\"refunded\":\"24000000\""),
+        "refund exceeds funded - paid - reserved: {settled}"
+    );
+    assert_eq!(ft_transfers(), vec![24_000_000]);
+    assert_eq!(a.refunded, 24_000_000);
+    assert_eq!(a.reserved, 12_000_000);
+}
+
+/// The refund retry is held to the same ledger bound while the vendor is owed: it never sends more than is owed.
+#[test]
+fn audit_refund_retry_sends_at_most_what_is_owed() {
+    let mut a = executing(Kind::Procurement);
+    fund(&mut a, 36_000_000);
+    deliver_and_accept(&mut a, 1, T0 + 100);
+    call("anyone.testnet", None, END, vec![]);
+    assert_eq!(a.close(), CloseStep::Reserved { item: 1 });
+    call("anyone.testnet", None, END + 1, vec![]);
+    assert_eq!(a.close(), CloseStep::Settling);
+    call(
+        me().as_str(),
+        None,
+        END + 2,
+        vec![PromiseResult::Successful(b"\"36000000\"".to_vec())],
+    );
+    a.on_close_balance();
+    call(me().as_str(), None, END + 3, vec![PromiseResult::Failed]);
+    a.on_refund_resolved(U128(24_000_000));
+    assert_eq!(a.refund_owed, 24_000_000);
+    call("anyone.testnet", None, END + 4, vec![]);
+    assert_eq!(a.close(), CloseStep::RefundRetried);
+    // Tokens in transit inflate the read again (36 + 14); the retry still sends the 24 owed.
+    call(
+        me().as_str(),
+        None,
+        END + 5,
+        vec![PromiseResult::Successful(b"\"50000000\"".to_vec())],
+    );
+    a.on_refund_balance();
+    assert_eq!(a.refund_owed, 0);
+    assert_eq!(ft_transfers(), vec![24_000_000]);
+    assert_eq!(a.reserved, 12_000_000);
+}
+
+/// L4-F2: a payment resolved as `AssumedPaid` whose late callback reports failure after `Settled` used to reopen
+/// the item to `Eligible`, which nothing can pay after Settled. Fixed: it becomes `Reserved` (its amount set aside
+/// again) and the vendor can claim it.
+#[test]
+fn audit_late_failure_after_settled_reserves_the_item_for_the_vendor() {
+    let mut a = ready_to_pay(); // funded 36, recipient active, item 1 eligible
+    let x = stale_assumed_paid(&mut a, T0 + 110);
+    call("anyone.testnet", None, END, vec![]);
+    assert_eq!(a.close(), CloseStep::Settling);
+    call(
+        me().as_str(),
+        None,
+        END + 1,
+        vec![PromiseResult::Successful(b"\"36000000\"".to_vec())],
+    );
+    a.on_close_balance();
+    assert_eq!(a.state, State::Settled);
+    // The 12 USDC assumed paid stayed on the account: the refund is the ledger's 24, not the balance's 36.
+    assert_eq!(a.refunded, 24_000_000);
+    call(me().as_str(), None, END + 2, vec![PromiseResult::Failed]);
+    a.on_payment_resolved(x.payment_id, 1, U128(x.amount), acc(RECIPIENT), Via::Agent);
+    assert_eq!(a.items[0].status, ItemStatus::Reserved);
+    assert_eq!(a.reserved, 12_000_000);
+    assert_eq!(a.paid, 0);
+    call(VENDOR, None, END + 400, vec![]);
+    assert!(
+        matches!(a.claim(1), PromiseOrValue::Promise(_)),
+        "the vendor's unpaid item cannot be claimed after Settled: {:?}",
+        a.items[0].status
+    );
+}
+
+/// L1-4: the same through the vendor's claim: a Reserved item's claim goes stale (reserve released, AssumedPaid),
+/// then the late callback reports failure. Fixed: the reserve is restored and the vendor can claim again.
+#[test]
+fn audit_late_failed_claim_after_stale_restores_the_reserve() {
+    let mut a = executing(Kind::Procurement);
+    fund(&mut a, 36_000_000);
+    deliver_and_accept(&mut a, 1, T0 + 100);
+    call("anyone.testnet", None, END, vec![]);
+    assert_eq!(a.close(), CloseStep::Reserved { item: 1 });
+    call("anyone.testnet", None, END + 1, vec![]);
+    assert_eq!(a.close(), CloseStep::Settling);
+    call(
+        me().as_str(),
+        None,
+        END + 2,
+        vec![PromiseResult::Successful(b"\"36000000\"".to_vec())],
+    );
+    a.on_close_balance();
+    assert_eq!(a.state, State::Settled);
+    authorise_recipient(&mut a, RECIPIENT, END + 10);
+    call(VENDOR, None, END + 130, vec![]);
+    assert!(matches!(a.claim(1), PromiseOrValue::Promise(_)));
+    let f = a.in_flight.clone().unwrap();
+    call("anyone.testnet", None, END + 130 + 600, vec![]);
+    let _ = a.resolve_stale_lock();
+    call(
+        me().as_str(),
+        None,
+        END + 731,
+        vec![PromiseResult::Successful(b"\"12000000\"".to_vec())],
+    );
+    a.on_stale_balance(f.payment_id);
+    assert_eq!(a.items[0].status, ItemStatus::AssumedPaid);
+    assert_eq!(a.reserved, 0);
+    call(me().as_str(), None, END + 732, vec![PromiseResult::Failed]);
+    a.on_payment_resolved(f.payment_id, 1, U128(f.amount), acc(RECIPIENT), Via::Claim);
+    assert_eq!(a.items[0].status, ItemStatus::Reserved);
+    assert_eq!(a.paid, 0);
+    assert_eq!(a.reserved, 12_000_000, "reserve restored");
+    call(VENDOR, None, END + 900, vec![]);
+    assert!(matches!(a.claim(1), PromiseOrValue::Promise(_)));
+}
+
+/// With the refund capped while the vendor is owed, a stray deposit stays on the account at `Settled`; once the
+/// vendor's reserved item is paid, `close()` sweeps what is left to the buyer. While anything is still reserved it
+/// cannot.
+#[test]
+fn audit_a_stray_deposit_is_swept_to_the_buyer_once_nothing_is_owed() {
+    let mut a = executing(Kind::Procurement);
+    fund(&mut a, 36_000_000);
+    deliver_and_accept(&mut a, 1, T0 + 100);
+    call("anyone.testnet", None, END, vec![]);
+    assert_eq!(a.close(), CloseStep::Reserved { item: 1 });
+    call("anyone.testnet", None, END + 1, vec![]);
+    assert_eq!(a.close(), CloseStep::Settling);
+    // 36 funded plus a 1 USDC plain transfer the contract was never told about.
+    call(
+        me().as_str(),
+        None,
+        END + 2,
+        vec![PromiseResult::Successful(b"\"37000000\"".to_vec())],
+    );
+    a.on_close_balance();
+    assert_eq!(ft_transfers(), vec![24_000_000]);
+    // Reserved: no sweep.
+    call("anyone.testnet", None, END + 3, vec![]);
+    assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| a.close())).is_err());
+    authorise_recipient(&mut a, RECIPIENT, END + 10);
+    call(VENDOR, None, END + 130, vec![]);
+    assert!(matches!(a.claim(1), PromiseOrValue::Promise(_)));
+    call("anyone.testnet", None, END + 131, vec![]);
+    assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| a.close())).is_err());
+    settle_payment(&mut a, true, END + 132);
+    assert_eq!(a.reserved, 0);
+    call("anyone.testnet", None, END + 133, vec![]);
+    assert_eq!(a.close(), CloseStep::RefundRetried);
+    call(
+        me().as_str(),
+        None,
+        END + 134,
+        vec![PromiseResult::Successful(b"\"1000000\"".to_vec())],
+    );
+    a.on_refund_balance();
+    assert_eq!(ft_transfers(), vec![1_000_000]);
+}
