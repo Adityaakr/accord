@@ -1,26 +1,47 @@
 import Link from "next/link";
-import { rooms } from "@/server/data";
-import { Pill, PageHead, StatePill, Usdc, Meter } from "@/components/ui";
+import { roomTable, type RoomRow } from "@/server/data";
+import { PageHead, Pill, Usdc } from "@/components/ui";
 import { SourceLine } from "@/components/SourceLine";
-import styles from "../page.module.css";
+import { STEPS } from "@/app/agreements/[id]/pipeline";
+import styles from "./rooms.module.css";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Deal rooms" };
 
-// Deal rooms: the signed-in person's rooms (?party=<account>, set by the sidebar), or every room on the factory.
-export default async function Rooms({ searchParams }: { searchParams: Promise<{ party?: string }> }) {
-  const { party } = await searchParams;
-  let data: Awaited<ReturnType<typeof rooms>> | null = null;
+// Deal rooms (PLATFORM.md §6): the signed-in person's rooms (?party=, set by the sidebar) or every room on the factory,
+// one row each with its seven-step pipeline, money and what waits. Filters live in the URL.
+const TYPES = [["all", "All types"], ["market-making", "Market making"], ["procurement", "Vendor contracts"]] as const;
+const STATES = [["all", "Any state"], ["open", "In negotiation"], ["executing", "Executing"], ["needs", "Needs you"], ["ended", "Ended"]] as const;
+
+function matches(r: RoomRow, type: string, state: string): boolean {
+  if (type !== "all" && r.kind !== type) return false;
+  if (state === "open") return r.state === "Sealed" || r.state === "Attested";
+  if (state === "executing") return r.state === "Executing";
+  if (state === "needs") return r.needs > 0;
+  if (state === "ended") return r.state === "Settled" || !!r.terminal;
+  return true;
+}
+
+export default async function Rooms({ searchParams }: { searchParams: Promise<{ party?: string; type?: string; state?: string }> }) {
+  const { party, type = "all", state = "all" } = await searchParams;
+  let data: Awaited<ReturnType<typeof roomTable>> | null = null;
   let error: string | null = null;
   try {
-    data = await rooms(party);
+    data = await roomTable(party);
   } catch (e) {
     error = (e as Error).message;
   }
-
-  const list = data?.rooms ?? [];
-  const live = list.filter((r) => r.view?.state === "Executing").length;
-  const escrow = list.reduce((s, r) => s + BigInt(r.view?.funded ?? "0") - BigInt(r.view?.paid ?? "0") - BigInt(r.view?.refunded ?? "0"), 0n);
-  const refusals = list.reduce((s, r) => s + (r.view?.refusals ?? 0), 0);
+  const all = data?.rows ?? [];
+  const rows = all.filter((r) => matches(r, type, state));
+  const href = (k: "type" | "state", v: string) => {
+    const q = new URLSearchParams();
+    if (party) q.set("party", party);
+    const t = k === "type" ? v : type, s = k === "state" ? v : state;
+    if (t !== "all") q.set("type", t);
+    if (s !== "all") q.set("state", s);
+    const qs = q.toString();
+    return `/rooms${qs ? `?${qs}` : ""}`;
+  };
 
   return (
     <div className="container">
@@ -28,79 +49,84 @@ export default async function Rooms({ searchParams }: { searchParams: Promise<{ 
         eyebrow={data ? <SourceLine {...data.source} /> : null}
         title={party ? "Your deal rooms" : "All deal rooms"}
         lead={party ? <>Rooms where <span className="mono">{party}</span> is the buyer, the vendor or the vendor's authority. <Link href="/rooms" className="weak">See every room on the factory</Link>.</> : "Every deal room on the factory. Each is its own NEAR account; the terms both companies approved decide what the buyer's agent may pay."}
-        aside={<Link href="/agreements/new" className={styles.primary}>New agreement</Link>}
+        aside={<Link href="/agreements/new" className={styles.primary}>New deal room</Link>}
       />
 
-      <div className={styles.stats}>
-        <Stat label="Deal rooms" value={String(list.length)} />
-        <Stat label="Executing" value={String(live)} />
-        <Stat label="Held in escrow" value={<Usdc amount={escrow < 0n ? 0n : escrow} />} />
-        <Stat label="Payments refused" value={String(refusals)} tone={refusals > 0 ? "refusal" : undefined} />
+      <div className={styles.filters} role="toolbar" aria-label="Filter deal rooms">
+        <div className={styles.group}>
+          {TYPES.map(([k, label]) => <Link key={k} href={href("type", k)} className={`${styles.chip} ${type === k ? styles.chipOn : ""}`} aria-current={type === k ? "true" : undefined}>{label}</Link>)}
+        </div>
+        <div className={styles.group}>
+          {STATES.filter(([k]) => party || k !== "needs").map(([k, label]) => <Link key={k} href={href("state", k)} className={`${styles.chip} ${state === k ? styles.chipOn : ""}`} aria-current={state === k ? "true" : undefined}>{label}</Link>)}
+        </div>
+        <span className={styles.count}>{rows.length} of {all.length}</span>
       </div>
 
-      {error && (
-        <div className={styles.error} role="alert">
-          <p className="h5">The chain could not be read</p>
-          <p className="small mono">{error}</p>
+      {error && <div className={styles.error} role="alert"><p className="h5">The chain could not be read</p><p className="small mono">{error}</p></div>}
+
+      {data && rows.length === 0 && (
+        <div className={styles.empty}>
+          <p className="h4">{all.length === 0 ? (party ? "You are not in a deal room yet" : "No deal rooms yet") : "No rooms match these filters"}</p>
+          <p className="body">{all.length === 0 ? "Start a market-making or vendor deal room. Each one runs seven steps, from sealed limits to a settled payment." : "Clear a filter to see more."}</p>
         </div>
       )}
 
-      {data && list.length === 0 && (
-        <div className={styles.emptyState}>
-          <p className="h4">{party ? "You are not in a deal room yet" : "No deal rooms yet"}</p>
-          <p className="body">Start a market-making or vendor deal room. Each one runs seven steps, from sealed limits to a settled payment.</p>
+      {rows.length > 0 && (
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th scope="col">Room</th>
+                <th scope="col">Counterparty</th>
+                <th scope="col">Step</th>
+                <th scope="col" className={styles.num}>Escrowed</th>
+                <th scope="col" className={styles.num}>Paid</th>
+                <th scope="col">Next eligible</th>
+                <th scope="col"><span className="visually-hidden">Flags</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => {
+                const counterparty = party && r.buyer !== party ? r.buyer : r.vendor;
+                const stepName = r.terminal ? (r.terminal === "NoDeal" ? "No deal" : "Cancelled") : STEPS[r.step];
+                return (
+                  <tr key={r.account}>
+                    <td>
+                      <Link href={`/agreements/${r.account}`} className={styles.room}>
+                        <span className={styles.title}>{r.title}</span>
+                        <span className={styles.meta}>
+                          {r.kind === "market-making" ? <Pill tone="purple">market making</Pill> : <Pill>vendor contract</Pill>}
+                          <span className="mono small">{r.account}</span>
+                        </span>
+                      </Link>
+                    </td>
+                    <td className="mono small" data-label="Counterparty">{counterparty}</td>
+                    <td data-label="Step">
+                      <span className={styles.step} aria-label={`Step ${r.step + 1} of 7: ${stepName}`}>
+                        <span className={styles.dots} aria-hidden="true">
+                          {STEPS.map((s, i) => <i key={s} className={r.terminal ? styles.dotEnded : i < r.step || r.state === "Settled" ? styles.dotDone : i === r.step ? styles.dotOn : ""} />)}
+                        </span>
+                        <span className={styles.stepName}>{stepName}</span>
+                      </span>
+                    </td>
+                    <td className={styles.num} data-label="Escrowed"><Usdc amount={r.escrowed} /></td>
+                    <td className={styles.num} data-label="Paid"><Usdc amount={r.paid} /></td>
+                    <td data-label="Next eligible">{r.next ? <span className={styles.next}><Usdc amount={r.next.amount} /><span className={styles.nextNote}>{r.next.payableNow ? "eligible now" : "waiting on evidence"}</span></span> : <span className="faint small">none</span>}</td>
+                    <td className={styles.flagCell}>
+                      {r.needs > 0 || r.refusals > 0 ? (
+                        <span className={styles.flags}>
+                          {r.needs > 0 && <Link href={`/agreements/${r.account}`} className={styles.needs}>{r.needs} for you</Link>}
+                          {r.refusals > 0 && <span className={styles.refused}>{r.refusals} refused</span>}
+                        </span>
+                      ) : null}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
-
-      {list.length > 0 && (
-        <ul className={styles.list}>
-          {list.map(({ record, view }) => {
-            const total = BigInt(view?.total ?? "0");
-            const paid = BigInt(view?.paid ?? "0");
-            return (
-              <li key={record.account}>
-                <Link href={`/agreements/${record.account}`} className={styles.row}>
-                  <div className={styles.rowMain}>
-                    <div className={styles.rowTitle}>
-                      <span className="h5">{record.title}</span>
-                      {record.kind === "market-making" ? <Pill tone="purple">market making</Pill> : <Pill>vendor contract</Pill>}
-                      {view?.canary_tripped && <Pill tone="refusal">canary tripped</Pill>}
-                    </div>
-                    <span className="small mono">{record.account}</span>
-                  </div>
-                  <div className={styles.rowParties}>
-                    <span className="small">{record.buyer}</span>
-                    <span className="faint" aria-hidden="true">→</span>
-                    <span className="small">{record.vendor}</span>
-                  </div>
-                  <div className={styles.rowMoney}>
-                    {total > 0n ? (
-                      <>
-                        <span className="small"><Usdc amount={paid} /> <span className="faint">of</span> <Usdc amount={total} /></span>
-                        <Meter value={paid} max={total} />
-                      </>
-                    ) : (
-                      <span className="small faint">terms not agreed yet</span>
-                    )}
-                  </div>
-                  <div className={styles.rowState}>
-                    <StatePill state={view?.state ?? "Sealed"} />
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function Stat({ label, value, tone }: { label: string; value: React.ReactNode; tone?: "refusal" }) {
-  return (
-    <div className={styles.stat}>
-      <span className="small">{label}</span>
-      <span className={`${styles.statValue} ${tone === "refusal" ? styles.statRefusal : ""}`}>{value}</span>
     </div>
   );
 }

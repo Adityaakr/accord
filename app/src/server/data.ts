@@ -6,6 +6,7 @@ import type {
   StoredObservation,
 } from "@accord/sdk";
 import { accord, source, type Source } from "./accord";
+import { currentStep } from "@/app/agreements/[id]/pipeline";
 
 export interface RoomSummary {
   record: AgreementRecord;
@@ -368,4 +369,57 @@ export async function recipients(account: string): Promise<{ account: string; ro
   }));
   rows.sort((x, y) => Number(!!y.pending) - Number(!!x.pending) || x.title.localeCompare(y.title));
   return { account, rows, source: src };
+}
+
+// ---------- Deal rooms table (PLATFORM.md §6): one row per room with its step and what is next ----------
+
+export interface RoomRow {
+  account: string;
+  title: string;
+  kind: string;
+  state: string;
+  buyer: string;
+  vendor: string;
+  /** Index into STEPS, or -1 when the room ended without a deal */
+  step: number;
+  terminal: "NoDeal" | "Cancelled" | null;
+  escrowed: string;
+  paid: string;
+  total: string;
+  next: { amount: string; payableNow: boolean } | null;
+  refusals: number;
+  /** How many things in this room wait on the signed-in account (0 without one) */
+  needs: number;
+  roles: Role[];
+}
+
+export async function roomTable(party?: string): Promise<{ rows: RoomRow[]; source: Source }> {
+  const a = accord();
+  const [records, src, folio] = await Promise.all([
+    party ? a.listAgreements({ party }) : a.listAgreements({ limit: 100 }),
+    source(),
+    party ? portfolio(party).catch(() => null) : Promise.resolve(null),
+  ]);
+  const needsBy = new Map<string, number>();
+  for (const n of folio?.needs ?? []) needsBy.set(n.room, (needsBy.get(n.room) ?? 0) + 1);
+  const rows = await Promise.all(records.map(async (record): Promise<RoomRow | null> => {
+    const d = a.agreement(record.account);
+    const view = await d.get().catch(() => null);
+    if (!view) return null;
+    const [items, periods] = await Promise.all([d.items().catch(() => [] as ItemView[]), d.periods().catch(() => [] as PeriodView[])]);
+    const escrow = big(view.funded) - big(view.paid) - big(view.refunded);
+    let next: RoomRow["next"] = null;
+    for (const it of view.state === "Executing" ? items : []) {
+      if (it.status === "Eligible") { next = { amount: it.due_amount, payableNow: true }; break; }
+      if (!next && (it.status === "Open" || it.status === "Delivered")) next = { amount: it.due_amount, payableNow: false };
+    }
+    const terminal = view.state === "NoDeal" || view.state === "Cancelled" ? view.state : null;
+    return {
+      account: record.account, title: view.title, kind: view.kind, state: view.state, buyer: view.buyer, vendor: view.vendor,
+      step: currentStep(view, items, periods), terminal, escrowed: (escrow > 0n ? escrow : 0n).toString(), paid: view.paid,
+      total: view.total, next, refusals: view.refusals, needs: needsBy.get(record.account) ?? 0,
+      roles: party ? rolesIn(view, party) : [],
+    };
+  }));
+  return { rows: rows.filter((r): r is RoomRow => !!r).reverse(), source: src };
 }
