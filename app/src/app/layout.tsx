@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Host_Grotesk, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
-import { Nav } from "@/components/Nav";
+import { Nav, Sidebar } from "@/components/Nav";
 import { WalletProvider } from "@/components/wallet/WalletProvider";
 import { AppConfigProvider } from "@/components/AppConfig";
 import { LogoMark } from "@/components/LogoMark";
@@ -37,7 +37,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
             </div>
           )}
-          <main id="main" className={styles.main}>{children}</main>
+          <div className={styles.shell}>
+            <Sidebar />
+            <main id="main" className={styles.main}>{children}</main>
+          </div>
           <footer className={styles.footer}>
             <div className={`container ${styles.footerInner}`}>
               <div className={styles.footerBrand}>
