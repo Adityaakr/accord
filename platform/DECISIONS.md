@@ -448,3 +448,61 @@ Kept as stated limits: an item can be reopened from `AssumedPaid` by one excepti
   agreements, and `ft_transfer_call` on each factory's own token (read from that factory's config) only into that
   factory's agreements; a token into the other factory's agreement is refused. With the variables absent the app is
   as before. Limit: the portfolio totals add test USDC and Circle USDC together.
+
+## 25. Audit fixes and release 4 (9 Nov 2026)
+
+Five auditors (L1 payment path, L2 authorisation and keys, L3 creation and code integrity, L4 funds, L5 the jobs) and
+two skeptics reproduced each finding with a test; every fix below went in test first (the test failed for the reason
+named, then passed), and the tests stay in the suite. Release 4 carries the contract fixes for **new** agreements
+only: a6, a8 and a1.accord-usdc.testnet keep running release 3's code by hash and are unchanged.
+
+| # | Finding | Fix | Tests | Commit |
+| --- | --- | --- | --- | --- |
+| 1 | HIGH (C1, L4-F1): `on_close_balance` refunded `balance - reserved`; a deposit sent with `ft_transfer_call` during the close is credited, refused by `ft_on_transfer` (`ERR_CLOSING`) and taken back after the read, so the refund spent the vendor's reserve | While anything is owed to the vendor (a reserved item, an `AssumedPaid` item, a payment in flight) the refund is capped at the ledger (`funded - paid - reserved`) and the `settled` event carries the capped value; with nothing owed the whole balance goes back, and `close()` after `Settled` sweeps what is left once nothing is owed (so a stray deposit still reaches the buyer). The retry keeps `min(owed, balance - reserved)` | `review_funds_tests::audit_close_refund_never_exceeds_the_ledger_when_tokens_are_in_transit`, `audit_refund_retry_sends_at_most_what_is_owed`, `audit_a_stray_deposit_is_swept_to_the_buyer_once_nothing_is_owed`; sandbox `tests/audit.rs a_deposit_in_transit_during_close_never_spends_the_reserve` (skeptic C1); I17 in `flow.rs` updated: the stray deposit comes back with the last `close` | afe5467 |
+| 2 | LOW (L4-F2, L1-4): a late failed callback after `Settled` reopened an `AssumedPaid` item as `Eligible`, which nothing can pay after `Settled` | After `Settled` it becomes `Reserved` with its amount set aside again; with 1, nothing is stranded | `audit_late_failure_after_settled_reserves_the_item_for_the_vendor`, `audit_late_failed_claim_after_stale_restores_the_reserve` | afe5467 |
+| 3 | MEDIUM (L2-1, L5, C3): `submit_sealed_result` fed unverified output into `handle_sealed` (garbage burned attempts or discarded a real answer), and with S1 open the keeper could request its own run for the live nonce and submit the signed outcome it preferred | Full verification (`check_sealed`, current nonce, terms or a final no-deal) before any state change, else `ERR_BAD_OUTPUT`; F1 is not in use (nothing in the keeper, agent or app calls it), so the method is compiled only with the cargo feature `f1` and `make check-deploy` refuses a wasm carrying `submit_sealed_result` | `tests.rs audit_keeper_garbage_is_refused_and_burns_no_attempt`, `audit_keeper_garbage_cannot_discard_the_real_answer` | 6081b5e |
+| 4 | MEDIUM-LOW (L5): an off-curve doc key let a negotiation agree and then fail as a retryable `infrastructure` outcome, telling its sender a deal existed inside its limits; and a party could re-seal after an attempt | Job: `sealing::open` requires a real secp256k1 point (`k256`), so it is a final `BAD_INPUT` before any model call. Contract: `commit_mandate` is refused once an attempt ran (chosen over resetting both commitments: the existing retry flows re-run `start_negotiation` without re-sealing, and it needs no second seal from the other side). The SDK derives doc keys with `secp256k1.getPublicKey`, so the app always produces a point | `jobs/sealed-table/tests/audit.rs an_off_curve_doc_key_is_bad_input_before_any_model_call`; `tests.rs audit_a_mandate_cannot_be_replaced_after_an_attempt` | 8d53aee, b5f2bcc |
+| 5 | MEDIUM (claim gap): S1 is not enforced on testnet (section 18); L5-F2: the jobs served accounts no factory created | The three jobs compile in the testnet factories (`accord-v2.testnet`, `accord-usdc.testnet`) and serve only `a<n>.<factory>` accounts whose own view names that factory and id and that the factory's `is_agreement` confirms, checked before anything is spent (model, domain fetch, mainnet read). S1 itself cannot be checked inside the job: OutLayer gives a job `NEAR_SENDER_ID` = the transaction signer for on-chain requests and the payment key's owner over HTTPS (https://app.outlayer.ai/docs/https-api, "Environment Variables in WASM"), never the contract that called `request_execution`; no `NEAR_PREDECESSOR_ID` is documented. So S1 stays on the secret's access condition (Account Pattern with direct calls only, https://app.outlayer.ai/docs/secrets), which only the dashboard can set: `docs/build/BLOCKED.md`. Claim 1's limit now says so everywhere the table appears | `accord-jobkit factory::tests`, `sealed-table tests/audit.rs an_account_outside_the_factory_gets_no_negotiation`, `a_factory_agreement_still_negotiates`, `payee an_account_outside_the_factory_is_refused_before_any_fetch`, `observer an_account_outside_the_factory_is_refused_before_mainnet` | e12adb2, 3348618 |
+| 6 | MEDIUM (L3-F3): `verify` checked the code hash and keys, which anyone can reproduce on an account no factory created | On top of the known-factory and `is_agreement` checks, the code check fails unless the id is `a<id>.<factory>`, the job keys are the release's and token, outlayer and keeper are the factory's config. Both factories supported; a6, a8 and a1.accord-usdc still verify | `packages/sdk/test/verify.test.ts` | 763123f |
+| 7 | MEDIUM (L3-F4): a report filed by any buyer's agreement downgraded every other buyer's preflight for that recipient | Only reports from agreements with the same buyer count toward the rating; the rest are `foreign_reports`, shown as information. Not done: storing the reporting buyer in the factory (a state change) | `packages/sdk/test/preflight.test.ts` | a894147, ca7b24b, 79da2ab |
+| 8 | LOW (L1-1, L1-2, L1-3, L2-2, L2-3, L2-4, L1-1c, L2-6 / L3-F6): `act` and the sensitive methods | A `Pay` recipient is at most 64 bytes and an account id (else malformed, panics before any gate); canaries match in any case; the allowance is at most `params.agent_allowance`; a repeated `RequestException` is a counted `ERR_CAP_EXCEEDED`; the agent's own requests take at most 8 of the 16 exception slots; a claim's refusal is an event only, never in the agent's 128-slot log; `Settled` deletes the agent's key; and the twelve sensitive buyer, authority, party and owner methods take exactly 1 yoctoNEAR (a full-access key only). The SDK attaches it only for agreements not on the release 1 to 3 code, so older agreements keep working; the relayer already carries a deposit inside a delegate | `tests.rs audit_a_recipient_must_be_an_account_id_before_any_gate`, `audit_a_canary_spelling_variant_still_revokes`, `audit_install_agent_key_respects_the_params_allowance`, `audit_repeated_exception_requests_count_toward_the_limit`, `audit_the_agent_cannot_exhaust_the_exception_slots`, `audit_vendor_claims_never_evict_agent_refusals`, `audit_settled_revokes_the_agent_key`, `audit_sensitive_methods_need_one_yocto`; factory `audit_owner_methods_need_one_yocto`; sdk `test/yocto.test.ts` | 2f54fef, 277870d |
+| 9 | LOW (L2-5, L3-F1, L3-F2): factory | `vendor != vendor_authority` (`ERR_PARTIES`); the typed params are forwarded, never the raw JSON; the factory keeps the stake for what a creation stores (record plus 512 bytes for the callback) and passes the rest of the deposit on. `by_party` stays a `Vec` per party: paginating it changes the stored layout of a live factory, so it is a stated limit (one party with tens of thousands of agreements makes the creation callback expensive) | factory `audit_the_vendor_may_not_be_its_own_authority`, `audit_only_the_typed_params_reach_the_agreement`, `audit_creation_storage_is_paid_by_the_caller`, `audit_a_failed_creation_refunds_all_but_the_record_stake`; sandbox `padded_params_cannot_fail_a_creation_after_its_record`, `creation_storage_is_paid_by_the_buyer` | 5bc986b |
+| 10 | LOW (L5 L1): no floor on a market-making vendor's depth band | Optional `min_depth_band_bps` in the vendor's limits (`0` when absent, so older mandates keep their meaning) | `accord-core limits audit_the_vendor_can_floor_the_depth_band` | 4e1dc78 |
+
+- **Changed limit:** section 17 kept "the refund at `Settled` returns the amount if the transfer in fact failed" for an
+  item left `AssumedPaid`. With the cap in 1 that amount now stays on the account until the payment's own callback
+  answers: a failure sets the item `Reserved` (2) and the vendor claims it; a success leaves it paid. If that callback
+  never runs, the amount stays on the account.
+- **Factory state:** no field of `Factory` and no stored type changed (the new checks only read), so the new factory
+  code is borsh-compatible with the live state of both factories and was deployed in place. After the upgrade both
+  read their config, releases, registry and agreement list as before (`config`, `current_release`,
+  `is_agreement(a6)`, `agreements` checked), and a6, a8 and a1.accord-usdc verify unchanged.
+- **Not deployed:** the job changes (findings 4 and 5, and 10's local negotiator) need new builds and OutLayer uploads;
+  release 4 keeps release 3's job builds. Steps in `docs/build/BLOCKED.md`.
+- **Deployed on testnet (9 Nov 2026):**
+  - factory code (`ES9rwM2J…`, state kept) on accord-v2.testnet
+    https://testnet.nearblocks.io/txns/GvJ6Sjw63Difny9cdwnU2AyBQtXvet1Es9oS1VSFCjS9 and on accord-usdc.testnet
+    https://testnet.nearblocks.io/txns/5y2cFxHEAvSR85cuyecWUPNNQpQFvnbzQitoXVPZkQxA. New agreements still get release
+    3's code until release 4 is current.
+  - release 4's pubkey runs, on release 3's job builds (`make deploy-testnet` with `JOBS_FROM_RELEASE=3`): accord-v2
+    requests 13987 (sealed table) https://testnet.nearblocks.io/txns/3nceFkkX9gLnzNgH8ruWkWtTvH5eDBB5BHsZ2mNy27Lm,
+    13988 (payee) https://testnet.nearblocks.io/txns/FRvDHNkonJCvUQACQ1t7DTCayXPEgTHnfNJkfm1CjP8D, 13989 (observer)
+    https://testnet.nearblocks.io/txns/H6w7biiHNHJUnf4FWny2gNxjQAJ5GAsvAEumYCr8m4pi; accord-usdc requests 13990
+    https://testnet.nearblocks.io/txns/AsEUBvwK19JJFyw9EpFnEHFPU6GAHYUo7Hwd8kfgV84n, 13991
+    https://testnet.nearblocks.io/txns/8n3TGfsZKSpRz4GNBkGSMFAGbh2VgoA6L5coUXMX5U8F, 13993
+    https://testnet.nearblocks.io/txns/AGBEmS1kuy3iQ4QzPTmMqLEVpE5FYhwCd5A4S9eZxhhJ. All six stored; the keys equal
+    release 3's (sealed table `GgC8gEhK…`).
+  - creation through the upgraded factory still works on release 3: `a9.accord-v2.testnet` created by a throwaway
+    faucet account https://testnet.nearblocks.io/txns/D8aWcmS9JLjKTEg73CZxzqwGXQR18g43xdnb9iU6EsxT, cancelled
+    https://testnet.nearblocks.io/txns/BbSU9gR84g9VfrDzJbDsbA28ivZNhx3JAQFe8GySMeBd, `1.98 NEAR` withdrawn
+    https://testnet.nearblocks.io/txns/7orZUPGJTWbQ6hEb25VLPL1bixoMJ31kxAZfDMmKKwBX (the factory kept about
+    `0.008 NEAR` for the record, finding 9).
+  - funding: two testnet faucet accounts (`accord-r4-fund1`, `accord-r4-fund2`, 10 NEAR each) were deleted into
+    accord-v2.testnet (https://testnet.nearblocks.io/txns/4onpVKM3qRosBSuodGYSnpuL7FkBJYL2VyzrU1ozkPyA,
+    https://testnet.nearblocks.io/txns/7P5Auw4ai64u1xk7zL17NWWUmC1HHk3Jy2d4Jn3quuFo); it holds about `21.4 NEAR`
+    above its storage stake.
+- **Not done yet: release 4 itself.** Publishing the new agreement code as a global contract burns about `50 NEAR`
+  (release 1's publish burned `50.13 NEAR`, ten times the storage of the `500 KB` wasm), and the faucet stopped
+  answering after two accounts. Until the release is published and current, `make check-deploy` reports the local
+  wasm `ECgsrZwy…` against release 3, and the three proofs on a release 4 agreement wait. Steps:
+  `docs/build/BLOCKED.md`.

@@ -2,6 +2,22 @@
 
 Each entry names the `PROGRESS.md` item it blocks. Remove an entry when it is done.
 
+## Release 4 (audit fixes): about 30 NEAR for the global contract
+
+Added 9 Nov 2026 (DECISIONS.md 25). Everything up to the publish is done: both factories run the new factory code, and
+release 4's three pubkey runs are stored on each. Publishing the new agreement code as a global contract burns about
+`50 NEAR`; accord-v2.testnet holds about `21.4 NEAR` above its storage, and the testnet faucet stopped answering.
+
+1. Send `30 NEAR` (testnet) to `accord-v2.testnet`, and `10 NEAR` to `northwind-demo.testnet` (the three proofs create
+   three agreements at `2 NEAR` each, and `make negotiate` wants `8 NEAR` free first).
+2. Tell me; I run, from `platform/` with the keys from `.env`:
+   - `RELEASE_MODE=global RELEASE_VERSION=4 JOBS_FROM_RELEASE=3 TASK_IDS=13987,13988,13989 make deploy-testnet`
+     (publishes the global contract `ECgsrZwy…`, `publish_release` 4, `set_current_release` 4 on accord-v2);
+   - the same on accord-usdc with `ACCORD_FACTORY=accord-usdc.testnet FACTORY_KEY=$FACTORY_USDC_KEY
+     TASK_IDS=13990,13991,13993` (the global contract is then already on chain, so it is not published again);
+   - `make check-deploy`, then `make negotiate`, `make finish DEAL=<the new agreement>`, `make attack`, `make revoke`
+     and `make verify DEAL=<it>`, and record every transaction in DECISIONS.md 25.
+
 ## 2.7 (S1) and audit finding 5: new job builds, and the seed condition only the dashboard can set
 
 Added 9 Nov 2026 (DECISIONS.md 25). The job code on `main` (commit e12adb2 and 8d53aee) serves only agreements of
