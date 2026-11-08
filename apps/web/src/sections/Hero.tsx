@@ -16,7 +16,7 @@ import styles from "./Hero.module.css"
    Hero (dK4Q5QRjZ, elementId "hero"): Home page, Desktop breakpoint WQLkyLRf1.
    Tablet replica uX81zskxrdK4Q5QRjZ, Phone Ue6QXWSr_dK4Q5QRjZ.
    Every value below is copied from the Framer tree. Copy is the Hero section of
-   docs/website/ACCORD_WEBSITE_FINAL_COPY.md Part A (docs/website/framer-port/REFILL-V3.md, row sections/Hero.tsx), set verbatim:
+   copy brief ACCORD_WEBSITE_FINAL_COPY.md Part A (copy brief framer-port/REFILL-V3.md, row sections/Hero.tsx), set verbatim:
    pill (the eyebrow line), H1, the thesis line under it, one description paragraph, two buttons, the
    product-preview caption under the image. The four action cards carry the Part A titles and one-liners.
 ------------------------------------------------------------------- */

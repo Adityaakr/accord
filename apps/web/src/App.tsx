@@ -23,7 +23,7 @@ import styles from "./App.module.css"
 
 /* Layout template "Layout" (vLUWo2njy): fill Background, vertical stack, centered,
    gap 48 (desktop) / 0 (tablet, phone): [Navigation sticky z1] [page content] [Footer].
-   Routes follow docs/website/ACCORD_WEBSITE_CONTENT.md §F1. */
+   Routes follow copy brief ACCORD_WEBSITE_CONTENT.md §F1. */
 export function App() {
   const location = useLocation()
   const lenis = useRef<Lenis | null>(null)

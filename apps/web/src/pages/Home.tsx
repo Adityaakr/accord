@@ -15,8 +15,8 @@ import { Reviews } from "../sections/Reviews"
 import { Faq } from "../sections/Faq"
 import styles from "./Home.module.css"
 
-/* Home page narrative (docs/website/EDITORIAL-DIRECTIVE.md): the Framer template's sections, kept as designed,
-   carrying docs/website/ACCORD_HOMEPAGE_FINAL.md:
+/* Home page narrative (copy brief EDITORIAL-DIRECTIVE.md): the Framer template's sections, kept as designed,
+   carrying copy brief ACCORD_HOMEPAGE_FINAL.md:
    1 Hero + product preview · 1a Built on (BuiltOn: moving logo line) · the deal-room band (AudienceBand: six agreement types as tabs) · 2 Market-making agreements in Accord (Compliance, the featured type) · 3 How a deal room works (HowSteps) · 3a Core features (CoreFeatures: seven controls, bento) · 3b Use cases (UseCases: six cards, each naming what it runs on) ·
    Shortened 31 Oct 2026: the deal-room preview (Overview), "Why these belong together" (Features) and "The parts of the room" (About)
    repeated the same negotiate → approve → pay story and now live on /product, /product/sealed-table and /product/payee ·

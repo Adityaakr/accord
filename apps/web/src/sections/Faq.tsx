@@ -27,7 +27,7 @@ const appear = (delay: `${number}s`): AppearEffect => ({
 /* description is plain text: it is rendered as the accordion body and emitted verbatim in the FAQPage JSON-LD (spec §9) */
 type Item = { id: string; title: string; description: string; delay: number }
 
-/* Eight questions (docs/website/ACCORD_WEBSITE_FINAL_COPY.md Part A "FAQ"), verbatim and in the doc's order.
+/* Eight questions (copy brief ACCORD_WEBSITE_FINAL_COPY.md Part A "FAQ"), verbatim and in the doc's order.
    Column 1 = questions 1 to 4, column 2 = 5 to 8 (the template's four instances per column).
    Template appear stagger kept: column 1 starts at 0.1s, column 2 at 0.2s, +0.1s per row. */
 /* Column LjjlNqQud */

@@ -17,8 +17,8 @@ import { NearAiLogo } from "../components/NearAiLogo"
 /* ------------------------------------------------------------------
    Security page (/security): the template's page hero (PageHero: pill + H1 + lead) followed by one
    content section of stacked table blocks in the template's table style.
-   Copy: docs/website/ACCORD_WEBSITE_CONTENT.md A10 (hero + the Area / What to know table). The trust model blocks
-   reuse the brief's (v4) wording as parked in docs/website/framer-port/content-sections/Security.tsx: per-piece
+   Copy: copy brief ACCORD_WEBSITE_CONTENT.md A10 (hero + the Area / What to know table). The trust model blocks
+   reuse the brief's (v4) wording as parked in copy brief framer-port/content-sections/Security.tsx: per-piece
    table, privacy table and the "what we do not claim" bullets. The six-claims table is byte for byte from kit v7
    GOAL.md; the keeper block follows kit v7 ARCHITECTURE.md.
    No footnote markers on this page.

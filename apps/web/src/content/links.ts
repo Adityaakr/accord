@@ -1,4 +1,4 @@
-/* Route and CTA map (docs/website/ACCORD_WEBSITE_CONTENT.md §F1). Unconfigured external links are empty strings:
+/* Route and CTA map (copy brief ACCORD_WEBSITE_CONTENT.md §F1). Unconfigured external links are empty strings:
    render them only when set (`LINKS.repo && <a …>`); never show a placeholder URL.
    .env: VITE_APP_URL, VITE_REPO_URL, VITE_DEMO_VIDEO_URL, VITE_CONTRACT_ID, VITE_X_POST_URL */
 const env = import.meta.env as Record<string, string | undefined>

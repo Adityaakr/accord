@@ -9,7 +9,7 @@ import { EASE_UI } from "../lib/motion"
 import { LINKS, PRIMARY_CTA } from "../content/links"
 import styles from "./Nav.module.css"
 
-/* Navigation (template component xfh9lOiA3) per docs/website/ACCORD_LANDING_PAGE_SPEC.md §2.1, regrouped 8 Nov 2026 around one
+/* Navigation (template component xfh9lOiA3) per copy brief ACCORD_LANDING_PAGE_SPEC.md §2.1, regrouped 8 Nov 2026 around one
    product: centre: Use cases · Product (menu: Overview, Sealed Table, Agreement controls, Payee) · How it works · Security ·
    Verify · Research · Docs; right: GitHub (icon + label, only when configured) and the primary button.
    Phone menu: the same links in the same order, the Product group set out under its label, plus Join and Record. */

@@ -8,7 +8,7 @@ import { ProductShot, type ShotVariant } from "../components/ProductShot"
 import styles from "./Payee.module.css"
 
 /* ------------------------------------------------------------------
-   Payee page (/product/payee, also /payee). Copy: doc B2 (docs/website/ACCORD_WEBSITE_CONTENT.md), set verbatim.
+   Payee page (/product/payee, also /payee). Copy: doc B2 (copy brief ACCORD_WEBSITE_CONTENT.md), set verbatim.
    Shell = the template's page hero (PageHero: pill + H1 word-reveal + lead + buttons, looping Dots).
    Then one content section (#recipient) in About geometry: four alternating image rows
    (content images 4/5/6 + showcase image 5) and the doc's closing button in the Hero `.actions` row style.

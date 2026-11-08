@@ -11,7 +11,7 @@ import styles from "./Product.module.css"
 
 /* ------------------------------------------------------------------
    Product page (/product). Copy: doc A3 "Product premise" + A7 "Sealed Table and Payee"
-   (docs/website/ACCORD_WEBSITE_CONTENT.md), set verbatim.
+   (copy brief ACCORD_WEBSITE_CONTENT.md), set verbatim.
    Shell = the template's page hero (PageHero: pill + H1 word-reveal + lead + buttons, looping Dots),
    then two content sections in template geometry:
      #premise      three Content Card instances (Features FfCn55RGg row)

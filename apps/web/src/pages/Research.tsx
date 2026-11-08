@@ -8,7 +8,7 @@ import { ResearchStack } from "../components/ResearchStack"
 import styles from "./Research.module.css"
 
 /* ------------------------------------------------------------------
-   Research page (/research): docs/website/ACCORD_RESEARCH_PAGE.md Part A, set verbatim (REFILL-V3 row
+   Research page (/research): copy brief ACCORD_RESEARCH_PAGE.md Part A, set verbatim (REFILL-V3 row
    `pages/Research.tsx`). Part B of that file is editorial and is not rendered.
    Shell: the template's page hero (PageHero = the 404 page Main) with the header H1 and its paragraph as
    the lead, then one section of sub-sections, each an H3 (`.t-h3`). The six question sub-sections carry

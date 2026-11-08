@@ -4,7 +4,7 @@ import { NearLogo } from "./NearLogo"
 import { LINKS } from "../content/links"
 import styles from "./Footer.module.css"
 
-/* Footer (template component FcRdbUGhW) per docs/website/ACCORD_LANDING_PAGE_SPEC.md §2.3:
+/* Footer (template component FcRdbUGhW) per copy brief ACCORD_LANDING_PAGE_SPEC.md §2.3:
    Product · Build · Watch · Company columns. Links to pages that do not exist yet
    (Changelog, Status, Brand, Terms, About) are not rendered. Dark theme only (owner's design). */
 

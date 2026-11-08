@@ -9,7 +9,7 @@ import styles from "./SealedTable.module.css"
 import { NearAiLogo } from "../components/NearAiLogo"
 
 /* ------------------------------------------------------------------
-   Sealed Table page (/product/sealed-table). Copy: doc B1 (docs/website/ACCORD_WEBSITE_CONTENT.md), set verbatim.
+   Sealed Table page (/product/sealed-table). Copy: doc B1 (copy brief ACCORD_WEBSITE_CONTENT.md), set verbatim.
    Shell = the template's page hero (PageHero: pill + H1 word-reveal + lead + buttons, looping Dots);
    the doc's second paragraph sits under the lead as a second Body Large line.
    Then one content section (#negotiation) in About geometry: four alternating image rows (showcase images 1–4)

@@ -10,7 +10,7 @@ import { ProductShot, type ShotVariant } from "../components/ProductShot"
 import tl from "../styles/Timeline.module.css"
 import styles from "./MarketMaking.module.css"
 
-/* /use-cases/market-making (alias /atlas): the featured agreement type, docs/website/ACCORD_WEBSITE_CONTENT.md B3. It was the
+/* /use-cases/market-making (alias /atlas): the featured agreement type, copy brief ACCORD_WEBSITE_CONTENT.md B3. It was the
    Accord Atlas page until 8 Nov 2026; Accord is now the only product and market making one of its agreement types.
    Shell = the template's page hero (404 page Main) · four B3 sub-sections as the About section's alternating
    image rows (showcase-image-1…4) · the A5 visual labels as the Compliance section's five badge cards, with the

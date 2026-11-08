@@ -1,7 +1,7 @@
 import { REFERENCES } from "../content/references"
 
 /* Footnote marker `[n]` → links to row n in the References section (#ref-n).
-   Every number on the site carries one; see docs/website/ACCORD_WEBSITE_README.md §2 rule 1. */
+   Every number on the site carries one; see copy brief ACCORD_WEBSITE_README.md §2 rule 1. */
 export function Ref({ n }: { n: number | number[] }) {
   const ns = Array.isArray(n) ? n : [n]
   return (
