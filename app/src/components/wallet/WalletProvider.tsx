@@ -6,6 +6,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { fromBase64, toTxResult, type Signer, type TxResult } from "@accord/sdk";
+import { isWalletNetworkError, rawWalletError, walletErrorMessage } from "./txError";
 
 export type WalletKind = "near-connect" | "sandbox";
 /** How the person signed in: their own NEAR wallet, NEAR Auth email (testnet), or a local sandbox key. */
@@ -37,6 +38,10 @@ export function useWallet(): WalletState {
 }
 
 interface ConnectorWallet {
+  manifest?: { name?: string; features?: { signDelegateActions?: boolean } };
+  signDelegateActions?(p: {
+    signerId?: string; network?: string; delegateActions: { receiverId: string; actions: unknown[] }[];
+  }): Promise<{ signedDelegateActions: string[] }>;
   signAndSendTransaction(p: { signerId?: string; receiverId: string; actions: unknown[] }): Promise<unknown>;
   signMessage(p: { message: string; recipient: string; nonce: Uint8Array; signerId?: string }): Promise<{ publicKey: string; signature: string }>;
   getAccounts(): Promise<{ accountId: string }[]>;
@@ -48,24 +53,50 @@ interface Connector {
   on(event: string, cb: (p: unknown) => void): void;
 }
 
-function connectorSigner(wallet: ConnectorWallet, accountId: string): Signer {
+/** Wallets that sign NEP-366 delegate actions send through Accord's relayer on testnet (see /api/relay). */
+export const relays = (wallet: ConnectorWallet | null | undefined, chain: string) =>
+  chain === "testnet" && wallet?.manifest?.features?.signDelegateActions === true && typeof wallet.signDelegateActions === "function";
+
+async function sendRelayed(wallet: ConnectorWallet, accountId: string, chain: string, receiverId: string, action: unknown): Promise<unknown> {
+  const signed = await wallet.signDelegateActions!({ signerId: accountId, network: chain, delegateActions: [{ receiverId, actions: [action] }] });
+  const signedDelegate = signed?.signedDelegateActions?.[0];
+  if (!signedDelegate) throw new Error("the wallet returned no signed request");
+  const res = await fetch("/api/relay", {
+    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ signedDelegate }),
+  });
+  const body = (await res.json().catch(() => ({}))) as { outcome?: unknown; error?: string };
+  if (!res.ok || !body.outcome) throw Object.assign(new Error(body.error ?? `HTTP ${res.status}`), { relay: true });
+  return body.outcome;
+}
+
+function connectorSigner(wallet: ConnectorWallet, accountId: string, chain: string): Signer {
+  const name = wallet.manifest?.name ?? "Your wallet";
   return {
     accountId,
     async call(contractId, method, args, opts = {}): Promise<TxResult> {
-      const outcome = await wallet.signAndSendTransaction({
-        signerId: accountId,
-        receiverId: contractId,
-        actions: [{
-          type: "FunctionCall",
-          params: {
-            methodName: method,
-            args,
-            gas: String(opts.gas ?? 100_000_000_000_000n),
-            deposit: String(opts.deposit ?? 0n),
-          },
-        }],
-      });
-      return toTxResult(outcome);
+      const action = {
+        type: "FunctionCall",
+        params: {
+          methodName: method,
+          args,
+          gas: String(opts.gas ?? 100_000_000_000_000n),
+          deposit: String(opts.deposit ?? 0n),
+        },
+      };
+      let outcome: unknown;
+      try {
+        outcome = relays(wallet, chain)
+          ? await sendRelayed(wallet, accountId, chain, contractId, action)
+          : await wallet.signAndSendTransaction({ signerId: accountId, receiverId: contractId, actions: [action] });
+      } catch (e) {
+        if ((e as { relay?: boolean }).relay) throw new Error(`Accord's relayer could not send this transaction: ${(e as Error).message}.`);
+        throw new Error(walletErrorMessage(e, name, chain));
+      }
+      try {
+        return toTxResult(outcome);
+      } catch {
+        throw new Error(`${name} sent the transaction but returned no readable result. Check the room in a moment.`);
+      }
     },
     async signMessage(message, recipient, nonce) {
       const s = await wallet.signMessage({ message, recipient, nonce, signerId: accountId });
@@ -133,6 +164,12 @@ export function WalletProvider({ network, children }: { network: string; childre
       return;
     }
     let live = true;
+    // Some wallets also reject their own internal promises when their RPC fails; the signer already shows that
+    // inline, so keep it from surfacing as an uncaught runtime error.
+    const quiet = (ev: PromiseRejectionEvent) => {
+      if (isWalletNetworkError(rawWalletError(ev.reason))) ev.preventDefault();
+    };
+    window.addEventListener("unhandledrejection", quiet);
     (async () => {
       const { NearConnector } = await import("@hot-labs/near-connect");
       const c = new NearConnector({ network: chain }) as unknown as Connector;
@@ -143,13 +180,13 @@ export function WalletProvider({ network, children }: { network: string; childre
         const { wallet, accounts } = await c.getConnectedWallet();
         const id = accounts[0]?.accountId ?? null;
         setAccountId(id);
-        setSigner(id ? connectorSigner(wallet, id) : null);
+        setSigner(id ? connectorSigner(wallet, id, chain) : null);
         setVia(id ? "wallet" : null);
       });
       try {
         const { wallet, accounts } = await c.getConnectedWallet();
         const id = accounts[0]?.accountId ?? null;
-        if (live && id) { setAccountId(id); setSigner(connectorSigner(wallet, id)); setVia("wallet"); return; }
+        if (live && id) { setAccountId(id); setSigner(connectorSigner(wallet, id, chain)); setVia("wallet"); return; }
       } catch {
         // no wallet connected yet
       }
@@ -162,7 +199,7 @@ export function WalletProvider({ network, children }: { network: string; childre
         }
       }
     })();
-    return () => { live = false; };
+    return () => { live = false; window.removeEventListener("unhandledrejection", quiet); };
   }, [kind, chain]);
 
   const connect = useCallback(async (sandboxRole?: string) => {
