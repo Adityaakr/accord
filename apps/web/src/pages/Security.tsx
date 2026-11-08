@@ -10,6 +10,7 @@ import { KitFigure } from "../components/KitFigure"
 import { AttackScene } from "../components/AttackScene"
 import { GatesFlow } from "../components/GatesFlow"
 import visibilitySvg from "../assets/diagrams/visibility.svg?raw"
+import tl from "../styles/Timeline.module.css"
 import styles from "./Security.module.css"
 import { NearAiLogo } from "../components/NearAiLogo"
 
@@ -129,28 +130,42 @@ const KEEPER: ReactNode[] = [
   "Every method it calls is open to anyone, so if the keeper is down a party can call the same methods from the app. A slot nobody polls counts as unobserved, and a period that unobserved slots leave undecided goes to the buyer, not to payment.",
 ]
 
+/* A table as timeline rows (styles/Timeline.module.css): the first cell is the row's name, each other cell a
+   labelled line under it (the label is the column's heading), so wide tables read cleanly at any width. */
 function Table({ head, rows, label }: { head: string[]; rows: Row[]; label: string }) {
   return (
-    <div className="table-wrap">
-      <table className="table" aria-label={label}>
-        <thead>
-          <tr>
-            {head.map((h) => (
-              <th key={h} scope="col">{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((cells, r) => (
-            <tr key={r}>
-              {cells.map((c, i) => (
-                <td key={i}>{c}</td>
+    <div className={`${tl.group} ${styles.tGroup}`}>
+      <ol className={tl.rows} aria-label={label}>
+        {rows.map((cells, r) => (
+          <li key={r} className={`${tl.row} ${styles.tRow}`}>
+            <span className={`mono ${tl.num}`}>{String(r + 1).padStart(2, "0")}</span>
+            <div className={styles.tMain}>
+              <p className={`${tl.name} ${styles.tName}`}>{cells[0]}</p>
+              {cells.slice(1).map((c, i) => (
+                <div key={i} className={styles.tLine}>
+                  {head.length > 2 ? <p className={styles.tLabel}>{head[i + 1]}</p> : null}
+                  <div className={styles.tText}>{c}</div>
+                </div>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            </div>
+          </li>
+        ))}
+      </ol>
     </div>
+  )
+}
+
+/* A list as numbered timeline rows */
+function List({ items }: { items: ReactNode[] }) {
+  return (
+    <ol className={`${tl.rows} ${styles.tGroup}`}>
+      {items.map((item, i) => (
+        <li key={i} className={`${tl.row} ${styles.tRow}`}>
+          <span className={`mono ${tl.num}`}>{String(i + 1).padStart(2, "0")}</span>
+          <div className={styles.tText}>{item}</div>
+        </li>
+      ))}
+    </ol>
   )
 }
 
@@ -195,11 +210,7 @@ export function Security() {
 
         <Appear className={styles.block} effect={blockAppear("0s")}>
           <h2 className={`t-h4 ${styles.subheading}`}>What we do not claim</h2>
-          <ul className={styles.list}>
-            {NOT_CLAIMED.map((item, i) => (
-              <li key={i} className={`t-body-lg ${styles.item}`}>{item}</li>
-            ))}
-          </ul>
+          <List items={NOT_CLAIMED} />
         </Appear>
 
         <Appear className={styles.block} effect={blockAppear("0s")}>
@@ -210,11 +221,7 @@ export function Security() {
 
         <Appear className={styles.block} effect={blockAppear("0s")}>
           <h2 className={`t-h4 ${styles.subheading}`}>What the keeper can and cannot do</h2>
-          <ul className={styles.list}>
-            {KEEPER.map((item, i) => (
-              <li key={i} className={`t-body-lg ${styles.item}`}>{item}</li>
-            ))}
-          </ul>
+          <List items={KEEPER} />
         </Appear>
 
         {/* The A10 Settlement cell */}

@@ -4,29 +4,31 @@ Security
 
 Negotiation inputs, approved payment conditions and settlement records have different visibility and trust boundaries. Accord makes those distinctions explicit.
 
-| Area | What to know |
-| --- | --- |
-| Confidential mandates | Inputs are processed through the configured confidential execution path. Protection depends on its code, attestation, key handling and infrastructure assumptions. |
-| Approved terms | Parties review the deal before activation. On-chain payment conditions are public; an encrypted document does not hide fields recorded on a public chain. |
-| Agent permissions | The agreement restricts the supported payment operations. Deployment keys, upgrade authority and other signing paths must be disclosed separately. |
-| Recipient authorization | The binding process establishes domain control and destination approval. It is not legal business verification. |
-| Revocation | Revocation stops every new payment through the revoked agent key at once. It does not recall a payment already made. |
-| Settlement | Settlement is in USDC on NEAR. The contract makes each transfer itself, so payment and verification happen in the same place; the transfers are public, as with any stablecoin payment. |
+- 01 Confidential mandates Inputs are processed through the configured confidential execution path. Protection depends on its code, attestation, key handling and infrastructure assumptions.
+
+- 02 Approved terms Parties review the deal before activation. On-chain payment conditions are public; an encrypted document does not hide fields recorded on a public chain.
+
+- 03 Agent permissions The agreement restricts the supported payment operations. Deployment keys, upgrade authority and other signing paths must be disclosed separately.
+
+- 04 Recipient authorization The binding process establishes domain control and destination approval. It is not legal business verification.
+
+- 05 Revocation Revocation stops every new payment through the revoked agent key at once. It does not recall a payment already made.
+
+- 06 Settlement Settlement is in USDC on NEAR. The contract makes each transfer itself, so payment and verification happen in the same place; the transfers are public, as with any stablecoin payment.
 
 ## Custody, authority and limits, per piece.
 
-| Piece | Where it is | Who can act | What cannot happen | Kill switch |
-| --- | --- | --- | --- | --- |
-| Agreement funds | USDC (NEP-141) in the agreement's own NEAR account, its code pinned by hash and no full-access key. Only the contract can send it: through `act`, the vendor's `claim` of an eligible payment to the authorised recipient, or the refund at `close`. | The buyer's agent, within the approved terms | A payment to anyone but the authorised recipient. An amount other than the approved one. A payment by the agent after revocation. | `revoke_agent`, by the buyer |
-| Mandates | Encrypted in the browser to a key that exists only inside the Sealed Table; on chain only as ciphertext and a commitment hash. Plaintext exists only inside the enclave, during the run. | The Sealed Table, during one negotiation | The other party, the operator or the app reading them | Nothing to switch off: the plaintext is gone when the run ends |
-| Negotiation | An OutLayer job; the two negotiators run on NEAR AI Cloud's private inference; one run per pair of commitments | The job | Terms outside either mandate's hard limits; terms not produced by the attested run | Both humans must approve the terms |
-| Payee record | On the contract, versioned; the recipient is a NEAR account listed in a file on the vendor's domain, fetched inside an enclave | The vendor proposes, the vendor's settlement authority approves, the buyer accepts; a change also waits `24 h` | A change by one key alone; a change without a fresh domain proof | The buyer or the vendor's settlement authority can cancel a pending change |
+- 01 Agreement funds Where it is USDC (NEP-141) in the agreement's own NEAR account, its code pinned by hash and no full-access key. Only the contract can send it: through `act`, the vendor's `claim` of an eligible payment to the authorised recipient, or the refund at `close`. Who can act The buyer's agent, within the approved terms What cannot happen A payment to anyone but the authorised recipient. An amount other than the approved one. A payment by the agent after revocation. Kill switch `revoke_agent`, by the buyer
+
+- 02 Mandates Where it is Encrypted in the browser to a key that exists only inside the Sealed Table; on chain only as ciphertext and a commitment hash. Plaintext exists only inside the enclave, during the run. Who can act The Sealed Table, during one negotiation What cannot happen The other party, the operator or the app reading them Kill switch Nothing to switch off: the plaintext is gone when the run ends
+
+- 03 Negotiation Where it is An OutLayer job; the two negotiators run on NEAR AI Cloud's private inference; one run per pair of commitments Who can act The job What cannot happen Terms outside either mandate's hard limits; terms not produced by the attested run Kill switch Both humans must approve the terms
+
+- 04 Payee record Where it is On the contract, versioned; the recipient is a NEAR account listed in a file on the vendor's domain, fetched inside an enclave Who can act The vendor proposes, the vendor's settlement authority approves, the buyer accepts; a change also waits `24 h` What cannot happen A change by one key alone; a change without a fresh domain proof Kill switch The buyer or the vendor's settlement authority can cancel a pending change
 
 ## What stays private, and what does not
 
-| Stays private | Visible to the two parties | Public |
-| --- | --- | --- |
-| Your ceiling, your walk-away, your weights. The negotiation itself: only the terms, the commitment hashes, a transcript hash and attestation references leave the enclave. The commercial terms document: encrypted to the two parties. | The approved terms, the schedule, every payment, exception and refusal | The enforced schedule (amounts, dates, recipient) and every payment, public on NEAR as with any stablecoin payment |
+- 01 Your ceiling, your walk-away, your weights. The negotiation itself: only the terms, the commitment hashes, a transcript hash and attestation references leave the enclave. The commercial terms document: encrypted to the two parties. Visible to the two parties The approved terms, the schedule, every payment, exception and refusal Public The enforced schedule (amounts, dates, recipient) and every payment, public on NEAR as with any stablecoin payment
 
 ## Where each attack stops
 
@@ -48,17 +50,17 @@ Not stopped by the contract: a person approving the wrong terms, or a payment th
 
 ## What we do not claim
 
-- Revocation is not a recall. It ends the agent's authority in one transaction; a payment already made stays made, and it went to the authorised recipient at the approved amount. What the vendor has earned stays claimable by the vendor.
+- 01 Revocation is not a recall. It ends the agent's authority in one transaction; a payment already made stays made, and it went to the authorised recipient at the approved amount. What the vendor has earned stays claimable by the vendor.
 
-- "Authorised recipient" means control of a domain plus approval by the vendor's own settlement authority and acceptance by the buyer. It is not a legal KYB and does not prove that a company exists.
+- 02 "Authorised recipient" means control of a domain plus approval by the vendor's own settlement authority and acceptance by the buyer. It is not a legal KYB and does not prove that a company exists.
 
-- "Sealed" means each mandate is readable only inside attested enclaves, under the hardware's trust assumptions. The terms you sign still show that you accepted them, as any signed deal does.
+- 03 "Sealed" means each mandate is readable only inside attested enclaves, under the hardware's trust assumptions. The terms you sign still show that you accepted them, as any signed deal does.
 
-- Attestation proves which code ran, not that the deal was good. The code checks the hard limits; the humans decide whether to sign.
+- 04 Attestation proves which code ran, not that the deal was good. The code checks the hard limits; the humans decide whether to sign.
 
-- The enforced schedule and every payment are public on NEAR, as with any stablecoin payment.
+- 05 The enforced schedule and every payment are public on NEAR, as with any stablecoin payment.
 
-- The demo agent is deliberately naive about instructions in email. The product is the boundary around the agent, not the agent's judgement.
+- 06 The demo agent is deliberately naive about instructions in email. The product is the boundary around the agent, not the agent's judgement.
 
 ## Claims and their limits
 
@@ -84,22 +86,25 @@ Public refusal log every refusal is an on-chain event with its reason · nothing
 
 The agent cannot reorder, skip or argue with a gate. Humans change the inputs (approve an exception, accept a new recipient); the gates stay the same.
 
-| We claim | Because | Limit, stated next to it |
-| --- | --- | --- |
-| Each company's mandate is readable only inside attested enclaves | The browser encrypts the mandate to a key derived from a seed generated inside the Sealed Table's enclave, bound to its release build and readable only by runs an agreement requests or that publish the key's public half; the chain holds the ciphertext and a commitment hash; the two negotiators run on NEAR AI Cloud models in TEEs, and the gateway's and the model's attestations are verified with a fresh nonce | Under the hardware's trust assumptions (Intel TDX, NVIDIA confidential computing) and OutLayer's keystore governance. The deployer owns the seed and the factory account, and could rebind the seed to another build or request extra runs. Prompts reach the model through NEAR AI's attested gateway over TLS (TLS binding is not checked from inside the job), unless end-to-end encryption to the model shipped (2.3b). The browser trusts the code the app serves; the CLI is the alternative. The ciphertext stays on chain. The final terms reveal that each side accepted them, as any signed deal does. A negotiator can concede in words; code checks the numbers |
-| The approved terms are the agent's only authority | The agent's only key is a function-call key on the agreement's own account that can call `act` and nothing else; `act` refuses any payment whose item, evidence, amount or recipient differs from the terms both companies approved | The agent's judgement is bounded, not protected: it can still be fooled into asking. Attestation proves which code produced the terms, not that the deal was good; people decide that when they approve |
-| Payments go only to the authorised recipient | The recipient is a NEAR account listed in a file on the vendor's domain, fetched inside an enclave; the vendor's settlement authority approves it on chain and the buyer accepts it; a change needs all three again and a 24-hour delay | Authorisation proves control of the domain and the authority's approval, not that the company legally exists. A legal KYB check is a later integration |
-| Revoking ends the agent's authority in one transaction | `revoke_agent` marks the agent's key revoked, so the contract refuses it from that receipt on, and deletes it from the agreement account in the same transaction; the account has no other key, so after the deletion lands (about one block) anything the agent signs is rejected by the network before it reaches the contract | A payment already made stays made, and it went to the authorised recipient at the approved amount. A call that reached the chain before the revoke still runs, with every check. Revoking never cancels what the vendor has earned: an eligible payment stays claimable by the vendor |
-| Negotiation is private; settlement is public | Mandates and the transcript stay inside enclaves; only the terms, commitment hashes, a transcript hash and attestation references leave; the commercial terms document is encrypted to the two parties | The enforced schedule (amounts, dates, recipient) and every payment are public on NEAR, as with any stablecoin payment |
-| A market-making agreement's payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception | Each slot's time is drawn inside the observer's enclave from a seed generated there; the observation is taken at the first NEAR mainnet block after that time, signed by the observer's key, and checked by the contract against the agreed spread, depth and two-sided quoting; anyone can recompute it from an archival node | A market-making agreement's observer measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment |
+- 01 Each company's mandate is readable only inside attested enclaves Because The browser encrypts the mandate to a key derived from a seed generated inside the Sealed Table's enclave, bound to its release build and readable only by runs an agreement requests or that publish the key's public half; the chain holds the ciphertext and a commitment hash; the two negotiators run on NEAR AI Cloud models in TEEs, and the gateway's and the model's attestations are verified with a fresh nonce Limit, stated next to it Under the hardware's trust assumptions (Intel TDX, NVIDIA confidential computing) and OutLayer's keystore governance. The deployer owns the seed and the factory account, and could rebind the seed to another build or request extra runs. Prompts reach the model through NEAR AI's attested gateway over TLS (TLS binding is not checked from inside the job), unless end-to-end encryption to the model shipped (2.3b). The browser trusts the code the app serves; the CLI is the alternative. The ciphertext stays on chain. The final terms reveal that each side accepted them, as any signed deal does. A negotiator can concede in words; code checks the numbers
+
+- 02 The approved terms are the agent's only authority Because The agent's only key is a function-call key on the agreement's own account that can call `act` and nothing else; `act` refuses any payment whose item, evidence, amount or recipient differs from the terms both companies approved Limit, stated next to it The agent's judgement is bounded, not protected: it can still be fooled into asking. Attestation proves which code produced the terms, not that the deal was good; people decide that when they approve
+
+- 03 Payments go only to the authorised recipient Because The recipient is a NEAR account listed in a file on the vendor's domain, fetched inside an enclave; the vendor's settlement authority approves it on chain and the buyer accepts it; a change needs all three again and a 24-hour delay Limit, stated next to it Authorisation proves control of the domain and the authority's approval, not that the company legally exists. A legal KYB check is a later integration
+
+- 04 Revoking ends the agent's authority in one transaction Because `revoke_agent` marks the agent's key revoked, so the contract refuses it from that receipt on, and deletes it from the agreement account in the same transaction; the account has no other key, so after the deletion lands (about one block) anything the agent signs is rejected by the network before it reaches the contract Limit, stated next to it A payment already made stays made, and it went to the authorised recipient at the approved amount. A call that reached the chain before the revoke still runs, with every check. Revoking never cancels what the vendor has earned: an eligible payment stays claimable by the vendor
+
+- 05 Negotiation is private; settlement is public Because Mandates and the transcript stay inside enclaves; only the terms, commitment hashes, a transcript hash and attestation references leave; the commercial terms document is encrypted to the two parties Limit, stated next to it The enforced schedule (amounts, dates, recipient) and every payment are public on NEAR, as with any stablecoin payment
+
+- 06 A market-making agreement's payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception Because Each slot's time is drawn inside the observer's enclave from a seed generated there; the observation is taken at the first NEAR mainnet block after that time, signed by the observer's key, and checked by the contract against the agreed spread, depth and two-sided quoting; anyone can recompute it from an archival node Limit, stated next to it A market-making agreement's observer measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment
 
 ## What the keeper can and cannot do
 
-- It can start negotiations whose commitments are both in, activate recipients whose delay has passed, poll the observer for each open slot and submit what it signs, close finished periods and drive `close()` for ended agreements.
+- 01 It can start negotiations whose commitments are both in, activate recipients whose delay has passed, poll the observer for each open slot and submit what it signs, close finished periods and drive `close()` for ended agreements.
 
-- It cannot move funds, choose observations or change a result. It holds no secret that affects an outcome, and its account has full access to itself only.
+- 02 It cannot move funds, choose observations or change a result. It holds no secret that affects an outcome, and its account has full access to itself only.
 
-- Every method it calls is open to anyone, so if the keeper is down a party can call the same methods from the app. A slot nobody polls counts as unobserved, and a period that unobserved slots leave undecided goes to the buyer, not to payment.
+- 03 Every method it calls is open to anyone, so if the keeper is down a party can call the same methods from the app. A slot nobody polls counts as unobserved, and a period that unobserved slots leave undecided goes to the buyer, not to payment.
 
 ## Settlement on NEAR
 
