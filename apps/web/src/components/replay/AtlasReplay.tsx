@@ -4,11 +4,11 @@ import type { Atlas } from "./parse"
 import { useReplay } from "./useReplay"
 import styles from "./Replay.module.css"
 
-/* make atlas, replayed: one market-making period. Six slot cells fill one by one as each is observed (its mainnet
-   block, the spread, the depth on each side as two small bars, the pass tick) while the counter ticks up and the
+/* make market-making (recorded as make atlas), replayed: one market-making period. Six slot cells fill one by one as
+   each is observed (its mainnet block, the spread, the depth on each side as two small bars, the pass tick) while the counter ticks up and the
    threshold marker lights once crossed. Then the decision (Eligible) and the payment sliding to the recipient (teal).
    Beside it the strict agreement: every cell hollow, Withheld, and the agent's attempt refused in red. The depth pair
-   is the observer's bid / ask (platform packages/live/src/targets/atlas.ts prints depth_bid / depth_ask). */
+   is the observer's bid / ask (platform packages/live/src/targets/market-making.ts prints depth_bid / depth_ask). */
 
 const tick = (
   <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m2.5 6.4 2.4 2.3 4.6-5" /></svg>

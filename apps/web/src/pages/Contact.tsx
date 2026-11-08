@@ -189,7 +189,7 @@ export function Contact() {
           <div className={styles.formTitle}>
             <h2 className={`t-h5 ${styles.formHeading}`}>Fill out the form</h2>
             <p className={`t-body-sm ${styles.formDescription}`}>
-              {CONTACT_EMAIL ? "Submitting opens your email app with the message filled in; nothing is sent until you send it there." : "The form opens once our inbox is connected. Until then, request early access on the early-access page."}
+              {CONTACT_EMAIL ? "Submitting opens your email app with the message filled in; nothing is sent until you send it there." : "The form opens once our inbox is connected. Until then, How to start on /join walks through a deal on testnet."}
             </p>
           </div>
 

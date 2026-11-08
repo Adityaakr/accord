@@ -77,14 +77,13 @@ export function PrivacyPolicy() {
         </div>
 
         {/* Sections ytF4ldnHg: rewritten 8 Nov 2026 to describe what this site actually does (it replaced the template's
-            account, newsletter and cookie text, none of which applied). Keep it in step with the code: forms in
-            pages/Join.tsx and pages/Contact.tsx, the inbox in lib/live.ts, the theme in components/ThemeToggle.tsx. */}
+            account, newsletter and cookie text, none of which applied). Keep it in step with the code: the form in
+            pages/Contact.tsx, the inbox in lib/live.ts, the theme in components/ThemeToggle.tsx. */}
         <div className={styles.sections}>
           <Section title="1. What this site collects">
             <div className={`t-body-sm ${styles.rich}`}>
               <p>Only what you choose to send:</p>
               <ul>
-                <li>The early-access request on /join: your organisation, role, a contact and your message.</li>
                 <li>The contact form: your name, email, optional phone, subject and message.</li>
                 <li>The demonstration inbox on /try: the sender, subject and text of the message you send to the demonstration agent.</li>
               </ul>
@@ -94,7 +93,6 @@ export function PrivacyPolicy() {
           <Section title="2. Where it goes">
             <div className={`t-body-sm ${styles.rich}`}>
               <ul>
-                <li>Early-access requests go to Accord's request store, or, before that store is live, open in your own email app addressed to us. Nothing is sent until you press send there.</li>
                 <li>Contact messages open in your own email app addressed to us.</li>
                 <li>Messages to the demonstration inbox are public: the agent reads them and every refusal is shown on /try and /record. Do not put personal information in them.</li>
               </ul>
@@ -110,7 +108,7 @@ export function PrivacyPolicy() {
           </Section>
 
           <Section title="5. How long we keep it">
-            <Body>Early-access requests and contact messages are kept while we discuss your request, and deleted when you ask. Demonstration inbox messages stay on the public record of the demonstration.</Body>
+            <Body>Contact messages are kept while we reply, and deleted when you ask. Demonstration inbox messages stay on the public record of the demonstration.</Body>
           </Section>
 
           <Section title="6. Your choices">

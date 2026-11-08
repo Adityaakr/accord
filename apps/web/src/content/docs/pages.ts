@@ -262,7 +262,7 @@ export const DOC_PAGES: DocPage[] = [
             kind: "rows",
             rows: [
               { name: "Vendor contracts and renewals", value: "procurement · demo", href: TESTNET.agreementUrl, tone: "ok", detail: "Milestones released on accepted delivery; the reference type. Agreement `a6.accord-v2.testnet` ran it end to end on testnet: `35.50 tUSDC` in 3 items, item 1 paid, a redirect refused, the key revoked." },
-              { name: "Market-making agreements", value: "market-making · demo", href: "/use-cases/market-making", tone: "ok", detail: "A retainer period is payable only when enough observations of the venue's public liquidity, taken at hidden times, meet the agreed spread, depth and two-sided quoting. In the demonstration, 4 of 6 readings of Rhea's USDC/wNEAR pool must pass. Its recorded runs are on a local node reading real NEAR mainnet blocks; see [make atlas](/docs/cli#market-making)." },
+              { name: "Market-making agreements", value: "market-making · demo", href: "/use-cases/market-making", tone: "ok", detail: "A retainer period is payable only when enough observations of the venue's public liquidity, taken at hidden times, meet the agreed spread, depth and two-sided quoting. In the demonstration, 4 of 6 readings of Rhea's USDC/wNEAR pool must pass. Its recorded runs are on a local node reading real NEAR mainnet blocks; see [make market-making](/docs/cli#market-making)." },
             ],
           },
         ],
@@ -550,12 +550,12 @@ export const DOC_PAGES: DocPage[] = [
           {
             kind: "rows",
             rows: [
-              { name: "One period", value: "make atlas", detail: "One market-making period on Rhea's USDC/wNEAR pool, read-only on mainnet: the observations with their mainnet blocks, the pass count against the threshold, the agent's payment, then a stricter agreement's period `Withheld`, and the scope line." },
+              { name: "One period", value: "make market-making", detail: "One market-making period on Rhea's USDC/wNEAR pool, read-only on mainnet: the observations with their mainnet blocks, the pass count against the threshold, the agent's payment, then a stricter agreement's period `Withheld`, and the scope line." },
             ],
           },
           {
             kind: "code",
-            label: "make atlas NET=local · from the platform README (3 Nov 2026)",
+            label: "make market-making NET=local · recorded on 3 Nov 2026 as make atlas, its earlier name, from the platform README",
             replay: "atlas",
             code: `accord atlas · a14.accord.test.near · market-making · rhea-dcl 17208628…|wrap.near|2000 · local node
   period 1  slot times held in the observer's enclave

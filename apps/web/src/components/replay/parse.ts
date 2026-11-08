@@ -1,5 +1,5 @@
-/* Parsers for the platform README's raw output blocks (make attack, make atlas). The replays draw only what these
-   return, so every number, code, account and hash on screen comes from the block's own text. A parser returns null
+/* Parsers for the platform README's raw output blocks (make attack, make market-making). The replays draw only what
+   these return, so every number, code, account and hash on screen comes from the block's own text. A parser returns null
    when a line it needs is missing; the docs then show the raw block alone. */
 
 type Line = { tag: string; rest: string }
