@@ -356,7 +356,7 @@ Verify
 
 ### Checkable from public data
 
-One command checks a live agreement with no keys: the contract code, the agent's key, the Sealed Table release, the attestation, the recipient and the record.
+One command checks an agreement from public data, with no keys: the contract code, the agent's key, the recipient proof and the record. The enclave release check follows the testnet release.
 
 [Each claim and its limit, on Security →](/security)
 

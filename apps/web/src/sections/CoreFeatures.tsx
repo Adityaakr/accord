@@ -3,12 +3,13 @@ import { Link } from "react-router-dom"
 import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { SectionHeading } from "../components/SectionHeading"
 import { PixelIcon, type PixelName } from "../components/PixelIcon"
+import { SceneEvidence, SceneKey, SceneNegotiation, ScenePayee, ScenePayment, SceneRevoke, SceneVerify } from "./CoreScenes"
 import styles from "./CoreFeatures.module.css"
 
 /* Home · Core features (#features), after How it works (8 Nov 2026). The seven controls between an agent and the money,
    as a bento grid in the template's system: Elevation Strong tiles at radius 4 with the hairline, a small product
    detail in JetBrains Mono at the top of each tile (teal for a pass, refusal red only for a refusal or a revocation),
-   then the title and two sentences. Since 8 Nov 2026 each detail floats on the use-case cards' teal stage (weave,
+   then the title and two sentences. Since 8 Nov 2026 each card's detail is a live scene (CoreScenes) on the teal stage. Since 8 Nov 2026 each detail floats on the use-case cards' teal stage (weave,
    glow, fade) with a pixel icon tile beside the label, so the two card sections read as one family. Every line is something the demonstration does today; values match the deal-room
    band and /verify. Grid: 2+1 / 1+1+1 / 1+2 on desktop, two columns on tablet, one on phone. */
 
@@ -18,94 +19,35 @@ const rise = (delay: `${number}s`): AppearEffect => ({
   enter: { opacity: 0, x: 0, y: 24, scale: 1, rotate: 0, transition: { type: "tween", ease: EASE_APPEAR, duration: "1s", delay } },
 })
 
-const Ok = () => <span className={styles.ok} aria-hidden="true">✓</span>
-
-/* ---------- the product details, one per feature ---------- */
-const Sealed = () => (
-  <div className={styles.sealed}>
-    <div className={styles.flow}>
-      <span className={styles.chip}><i className={styles.lock} />Buyer · sealed</span>
-      <span className={styles.arrow} />
-      <span className={`${styles.chip} ${styles.chipOn}`}>Sealed Table · attested</span>
-      <span className={`${styles.arrow} ${styles.arrowIn}`} />
-      <span className={styles.chip}><i className={styles.lock} />Seller · sealed</span>
-    </div>
-    <span className={styles.result}><Ok />Terms 18,500 USDC a period · both companies approve</span>
-  </div>
-)
-const OneKey = () => (
-  <div className={styles.term}>
-    <span><b>keys</b> 1 · FunctionCall</span>
-    <span><b>methods</b> [act]</span>
-    <span><b>full access</b> none <Ok /></span>
-  </div>
-)
-const Controls = () => (
-  <div className={styles.rows}>
-    <span className={styles.row}><span>→ halcyon-mm</span><span className={styles.pass}>paid</span></span>
-    <span className={styles.row}><span>→ new account</span><span className={styles.err}>ERR_PAYEE_MISMATCH</span></span>
-    <span className={styles.row}><span>25,000 USDC</span><span className={styles.err}>ERR_AMOUNT_MISMATCH</span></span>
-  </div>
-)
-const Payee = () => (
-  <div className={styles.steps}>
-    {["Domain proven", "Authority approves", "Buyer accepts"].map((s) => <span key={s} className={styles.step}><Ok />{s}</span>)}
-    <span className={styles.note}>Changes wait 24 h</span>
-  </div>
-)
-const Evidence = () => (
-  <div className={styles.slots}>
-    <span className={styles.slotRow} aria-hidden="true">
-      {[1, 1, 0, 1, 1, 0].map((p, i) => <i key={i} className={p ? styles.slotPass : styles.slotMiss} />)}
-    </span>
-    <span className={styles.note}>4 of 6 observations passed · <span className={styles.pass}>eligible</span></span>
-  </div>
-)
-const Revoke = () => (
-  <div className={styles.term}>
-    <span className={styles.cmd}>revoke_agent()</span>
-    <span><b>keys</b> 0</span>
-    <span className={styles.err}>AccessKeyDoesNotExist</span>
-  </div>
-)
-const Verify = () => (
-  <div className={styles.term}>
-    <span className={styles.cmd}>$ make verify DEAL=&lt;agreement&gt;</span>
-    {["01 Contract code", "02 Agreement keys", "03 Sealed Table release", "04 Sealed outcome", "05 Model attestation"].map((l) => (
-      <span key={l} className={styles.line}><span>{l}</span><span className={styles.pass}>ok</span></span>
-    ))}
-  </div>
-)
-
 type Feature = { icon: PixelName; kicker: string; title: string; text: string; detail: ReactNode; wide?: boolean }
 const FEATURES: Feature[] = [
   {
-    icon: "agents", kicker: "Sealed Table", title: "Confidential negotiation", wide: true, detail: <Sealed />,
+    icon: "agents", kicker: "Sealed Table", title: "Confidential negotiation", wide: true, detail: <SceneNegotiation />,
     text: "Each company seals its limits in the browser, and the agents negotiate inside an attested enclave. Only the agreed terms and an attestation come out, and both companies approve before anything takes effect.",
   },
   {
-    icon: "key", kicker: "Agent permissions", title: "One key, one method", detail: <OneKey />,
+    icon: "key", kicker: "Agent permissions", title: "One key, one method", detail: <SceneKey />,
     text: "The buyer's agent holds a key that can call one method, act, on one contract. It cannot deploy code, add keys or move funds any other way.",
   },
   {
-    icon: "shield", kicker: "Agreement controls", title: "Every payment checked", detail: <Controls />,
+    icon: "shield", kicker: "Agreement controls", title: "Every payment checked", detail: <ScenePayment />,
     text: "Each payment must match the approved milestone, amount and recipient. Anything else is refused, and the reason is recorded.",
   },
   {
-    icon: "bank", kicker: "Payee", title: "A recipient that cannot be redirected", detail: <Payee />,
+    icon: "bank", kicker: "Payee", title: "A recipient that cannot be redirected", detail: <ScenePayee />,
     text: "The vendor proves its domain, its settlement authority approves the account and the buyer accepts it. A message cannot change it.",
   },
   {
-    icon: "chart", kicker: "Evidence checks", title: "Evidence before release", detail: <Evidence />,
+    icon: "chart", kicker: "Evidence checks", title: "Evidence before release", detail: <SceneEvidence />,
     text: "A payment becomes eligible only when the agreed evidence is recorded. Otherwise it is withheld for both sides to review.",
   },
   {
-    icon: "power", kicker: "Revocation", title: "Stop the agent in one transaction", detail: <Revoke />,
+    icon: "power", kicker: "Revocation", title: "Stop the agent in one transaction", detail: <SceneRevoke />,
     text: "The buyer calls revoke_agent and the agent's key is deleted. Payments already made stay with the authorised recipient.",
   },
   {
-    icon: "terminal", kicker: "Verify", title: "Checkable from public data", wide: true, detail: <Verify />,
-    text: "One command checks a live agreement with no keys: the contract code, the agent's key, the Sealed Table release, the attestation, the recipient and the record.",
+    icon: "terminal", kicker: "Verify", title: "Checkable from public data", wide: true, detail: <SceneVerify />,
+    text: "One command checks an agreement from public data, with no keys: the contract code, the agent's key, the recipient proof and the record. The enclave release check follows the testnet release.",
   },
 ]
 
@@ -124,9 +66,7 @@ export function CoreFeatures() {
         {FEATURES.map((f, i) => (
           <Appear key={f.title} as="article" className={`${styles.card} ${f.wide ? styles.wide : ""}`} effect={rise(`${(i % 3) * 0.08}s` as `${number}s`)}>
             {/* the stage: the use-case cards' teal weave and glow, fading into the card, with the product detail floating on it */}
-            <div className={styles.stage} aria-hidden="true">
-              <div className={styles.detail}>{f.detail}</div>
-            </div>
+            <div className={styles.stage} aria-hidden="true">{f.detail}</div>
             <div className={styles.copy}>
               <p className={styles.label}>
                 <span className={styles.tile}><PixelIcon name={f.icon} size={18} /></span>

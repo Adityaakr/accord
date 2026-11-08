@@ -1,0 +1,58 @@
+/* Core features scenes: a dark canvas with a dot grid (the How-it-works course), real-looking UI in the site's tokens,
+   one bright hero. Teal for a pass; refusal red only for refusals and revocation. No transitions: values per frame. */
+.frame { width: 100%; border-radius: 14px; overflow: hidden; background: #0c0e0e; border: 1px solid rgba(var(--ink-rgb), 0.08); box-shadow: 0 24px 48px -28px rgba(0, 0, 0, 0.8); }
+:global([data-theme="light"]) .frame { background: #f2f4f3; box-shadow: 0 24px 48px -30px rgba(20, 30, 25, 0.3); }
+.svg { display: block; width: 100%; height: auto; font-family: "Host Grotesk", sans-serif; }
+.gridDot { fill: rgba(var(--ink-rgb), 0.08); }
+
+.card { fill: #1a1c1d; stroke: rgba(var(--ink-rgb), 0.09); }
+.cardOn { fill: #1a1f1d; stroke: rgba(145, 207, 181, 0.5); }
+.cardBad { fill: #1f1a1b; stroke: rgba(255, 34, 68, 0.45); }
+:global([data-theme="light"]) .card, :global([data-theme="light"]) .cardOn, :global([data-theme="light"]) .cardBad { fill: #ffffff; }
+.enclave { fill: rgba(145, 207, 181, 0.06); stroke: rgba(145, 207, 181, 0.45); }
+.terminal { fill: #121415; stroke: rgba(var(--ink-rgb), 0.09); }
+:global([data-theme="light"]) .terminal { fill: #ffffff; }
+.node { fill: rgba(var(--ink-rgb), 0.04); stroke: rgba(var(--ink-rgb), 0.22); }
+.badge { fill: rgba(145, 207, 181, 0.14); stroke: rgba(145, 207, 181, 0.6); }
+.pill { fill: rgba(var(--ink-rgb), 0.04); stroke: rgba(var(--ink-rgb), 0.18); }
+.pillOn { fill: rgba(145, 207, 181, 0.13); stroke: rgba(145, 207, 181, 0.6); }
+.stampBad { fill: rgba(255, 34, 68, 0.08); stroke: rgba(255, 34, 68, 0.45); }
+.rowOk { fill: rgba(145, 207, 181, 0.1); stroke: rgba(145, 207, 181, 0.45); }
+.rowBad { fill: rgba(255, 34, 68, 0.06); stroke: rgba(255, 34, 68, 0.3); }
+.msg { fill: #222526; stroke: rgba(var(--ink-rgb), 0.18); }
+:global([data-theme="light"]) .msg { fill: #ffffff; }
+.wall { fill: none; stroke: rgba(255, 34, 68, 0.35); stroke-dasharray: 4 4; }
+.button { stroke: rgba(255, 34, 68, 0.45); }
+.block { fill: rgba(var(--ink-rgb), 0.04); stroke: rgba(var(--ink-rgb), 0.15); }
+.blockOn { fill: rgba(145, 207, 181, 0.1); stroke: rgba(145, 207, 181, 0.55); }
+
+.wire { fill: none; stroke: rgba(var(--ink-rgb), 0.25); stroke-width: 1.3; }
+.wireOn { fill: none; stroke: var(--teal); stroke-width: 1.6; }
+.scan { stroke: var(--teal); stroke-width: 1.2; stroke-dasharray: 3 3; }
+.rule { stroke: rgba(var(--ink-rgb), 0.08); }
+.strike { stroke: rgba(var(--ink-rgb), 0.5); stroke-width: 1.2; }
+.pinLine { stroke: rgba(var(--ink-rgb), 0.25); stroke-dasharray: 2 2; }
+.pinLineOn { stroke: rgba(145, 207, 181, 0.6); }
+
+.title { font-size: 12.5px; font-weight: 500; fill: var(--text-strong); }
+.dim { font-size: 11.5px; fill: rgba(var(--ink-rgb), 0.55); }
+.dimSmall { font-size: 10.5px; fill: rgba(var(--ink-rgb), 0.7); font-style: italic; }
+.mono { font-family: var(--mono); font-size: 10.5px; fill: rgba(var(--ink-rgb), 0.55); }
+.monoStrong { font-family: var(--mono); font-size: 11px; fill: var(--text-strong); }
+.monoOn { font-family: var(--mono); font-size: 11px; fill: var(--teal); }
+.okText { font-family: var(--mono); font-size: 10.5px; fill: var(--teal); }
+.badText { font-family: var(--mono); font-size: 10.5px; fill: var(--refusal); }
+.cipher { font-family: var(--mono); font-size: 10.5px; fill: var(--teal); }
+.count { font-family: var(--mono); font-size: 22px; fill: var(--text-strong); }
+.status { font-family: var(--mono); font-size: 10.5px; fill: rgba(var(--ink-rgb), 0.5); }
+.statusOn { font-family: var(--mono); font-size: 10.5px; fill: var(--teal); }
+.caret { fill: var(--teal); }
+
+.tick { fill: none; stroke: var(--teal); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.cross { fill: none; stroke: var(--refusal); stroke-width: 1.8; stroke-linecap: round; }
+.lockOn rect, .lockOn path { fill: none; stroke: var(--teal); stroke-width: 1.4; }
+.lockOff rect, .lockOff path { fill: none; stroke: rgba(var(--ink-rgb), 0.5); stroke-width: 1.4; }
+.packet { fill: var(--teal); filter: drop-shadow(0 0 4px rgba(145, 207, 181, 0.8)); }
+.packetBad { fill: #e5a27e; }
+.hero { fill: #ffffff; filter: drop-shadow(0 0 5px rgba(145, 207, 181, 0.8)); }
+:global([data-theme="light"]) .hero { fill: var(--teal); }
