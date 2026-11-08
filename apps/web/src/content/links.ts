@@ -3,7 +3,7 @@
    .env: VITE_APP_URL, VITE_REPO_URL, VITE_DEMO_VIDEO_URL, VITE_CONTRACT_ID, VITE_X_POST_URL */
 const env = import.meta.env as Record<string, string | undefined>
 /* The app is served at <site>/app (the website proxies it; platform/DEPLOY.md). VITE_APP_URL overrides it. */
-const app = env.VITE_APP_URL ?? "/app"
+const app = env.VITE_APP_URL || "/app" // empty (an unset Docker build arg) means the default
 
 /** Primary CTA: always the app (<site>/app/signin). The guided testnet path is LINKS.tryDeal. */
 export const PRIMARY_CTA = "Open the app"
