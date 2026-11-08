@@ -29,3 +29,44 @@ jobs:
           name: web-dist
           path: apps/web/dist
           retention-days: 7
+
+  rust:
+    name: Platform · Rust money path (accord-core, accord-agreement)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: platform
+    steps:
+      - uses: actions/checkout@v4
+      # rustup reads platform/rust-toolchain.toml (channel, rustfmt, clippy, wasm targets) on first use.
+      - name: Rust toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: platform
+      - name: Unit, property and fuzz tests on the mocked chain
+        run: cargo test --locked -p accord-core -p accord-agreement
+
+  platform-ts:
+    name: Platform · TypeScript typecheck and tests (sdk, cli, mcp, store, live, services, app)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: platform/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: platform/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Build the libraries the others import
+        run: pnpm --filter @accord/sdk --filter @accord/store build
+      - name: Typecheck
+        run: pnpm -r typecheck
+      - name: Tests
+        run: pnpm -r --filter './packages/*' --filter './services/*' --filter @accord/app test
