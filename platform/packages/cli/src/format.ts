@@ -79,7 +79,7 @@ export function formatVerify(r: VerifyReport): string[] {
 // check (preflight)
 
 const SIGNAL_ORDER: (keyof Signals)[] = [
-  "exists", "authorised", "canary", "blocked", "is_contract", "code_changed_30d", "reports", "prior_payments",
+  "exists", "authorised", "canary", "blocked", "is_contract", "code_changed_30d", "reports", "foreign_reports", "prior_payments",
   "age_days", "tx_30d",
 ];
 

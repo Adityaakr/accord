@@ -1326,7 +1326,8 @@ fn needs_one_yocto<R>(f: impl FnOnce() -> R) -> bool {
 fn audit_sensitive_methods_need_one_yocto() {
     let mut a = ready_to_pay();
     let t = T0 + 120;
-    let checks: Vec<(&str, Box<dyn FnOnce(&mut Agreement)>)> = vec![
+    type Check = (&'static str, Box<dyn FnOnce(&mut Agreement)>);
+    let checks: Vec<Check> = vec![
         (
             BUYER,
             Box::new(|a| {

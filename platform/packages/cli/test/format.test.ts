@@ -47,12 +47,12 @@ describe("check output", () => {
     approvedByBuyer: false,
     signals: {
       exists: true, is_contract: true, code_changed_30d: "unavailable", age_days: "unavailable", tx_30d: "unavailable",
-      prior_payments: 0, reports: 2, blocked: false, canary: false, authorised: false,
+      prior_payments: 0, reports: 2, foreign_reports: 0, blocked: false, canary: false, authorised: false,
     },
     sources: {
       exists: "NEAR RPC view_account", is_contract: "NEAR RPC view_account code_hash",
       code_changed_30d: "unavailable: no archival RPC", age_days: "unavailable: no keyless indexer",
-      tx_30d: "unavailable: no keyless indexer", prior_payments: "factory recipient_stats", reports: "factory reports",
+      tx_30d: "unavailable: no keyless indexer", prior_payments: "factory recipient_stats", reports: "factory reports", foreign_reports: "factory reports, other buyers",
       blocked: "factory blocked (curated list)", canary: "agreement canaries", authorised: "agreement current recipient",
     },
   };
