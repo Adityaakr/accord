@@ -381,7 +381,6 @@ The site's [/security](https://accordweb-production.up.railway.app/security) pag
 ├── docs/
 │   ├── diagrams/             Excalidraw sources with SVG and PNG exports
 │   ├── product/              a pointer to the product kit in platform/
-│   ├── website/              website copy and specs as written, dated
 │   └── hackathon/            the organisers' HACKATHON.md
 ├── AGENTS.md, CLAUDE.md     notes for evaluating agents: layout, judge paths, where the claims are
 ├── .github/workflows/ci.yml  website: typecheck, copy rules, references, build

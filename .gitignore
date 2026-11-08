@@ -17,3 +17,6 @@ dist/
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# website copy briefs and specs: kept locally, not published (they use earlier names)
+docs/website/
