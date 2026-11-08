@@ -63,7 +63,7 @@ code.cmd, .cmd { display: block; min-width: 0; font-size: 13px; line-height: 1.6
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cmd { clip-path: none; }
+  code.cmd, .cmd { clip-path: none; }
   .typed .cmd { animation: none; }
   .outLine, .state, .step, .stepNum, .stepCmd code:global(.mono) { transition: none; }
 }
