@@ -1,12 +1,16 @@
 // The app's only stored data (INTERFACES.md section 9): the /try inbox, the buyer's signed preflight approvals,
 // demo vendors for the demo domain, the /try rooms and service heartbeats. Postgres when DATABASE_URL is set; a
-// JSON file under app/.data for local development. No table has a column for a mandate.
+// JSON file under app/.data for local development. No table has a column for a mandate. Organisations, members,
+// invitations and the audit log live in ./orgs.ts and share the same backend.
 
 
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
+import { ORG_SCHEMA, orgs, type OrgTables } from "./orgs.js";
+
+export * from "./orgs.js";
 
 export interface InboxMessage {
   id: string;
@@ -40,7 +44,7 @@ create table if not exists try_rooms (agreement text primary key, opened_at time
 create table if not exists heartbeats (service text primary key, at timestamptz, detail jsonb);
 `;
 
-interface FileDb {
+interface FileDb extends OrgTables {
   inbox: InboxMessage[];
   approvals: Approval[];
   demoVendors: DemoVendor[];
@@ -55,7 +59,7 @@ async function db(): Promise<pg.Pool | null> {
   if (!process.env.DATABASE_URL) return null;
   if (!pool) {
     pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 5 });
-    ready = pool.query(SCHEMA).then(() => undefined);
+    ready = pool.query(SCHEMA + ORG_SCHEMA).then(() => undefined);
   }
   await ready;
   return pool;
@@ -73,7 +77,7 @@ function findRoot(): string {
   return process.cwd();
 }
 
-const EMPTY: FileDb = { inbox: [], approvals: [], demoVendors: [], heartbeats: [], tryRooms: [] };
+const EMPTY: FileDb = { inbox: [], approvals: [], demoVendors: [], heartbeats: [], tryRooms: [], orgs: [], members: [], invites: [], audit: [], notifications: [] };
 
 /** The whole file. A missing file is an empty store; an unreadable one is an error, never silently empty. */
 function readFile(): FileDb {
@@ -322,3 +326,6 @@ export async function closeRoomMessages(agreement: string) {
     for (const m of d.inbox) if (m.agreement === agreement && !m.processed_at) Object.assign(m, { processed_at: new Date().toISOString(), outcome: "room_closed" });
   });
 }
+
+/** Organisations, members, roles, invitations and the audit log (./orgs.ts), on the same backend as the rest. */
+export const org = orgs({ db, read: () => readFile(), mutate: (f) => mutate((d) => f(d)) });
