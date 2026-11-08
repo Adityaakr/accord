@@ -17,7 +17,11 @@ use serde_json::{json, Map, Value};
 
 pub const NEARAI_KEY_VAR: &str = "NEARAI_API_KEY";
 pub const TEMPERATURE: f64 = 0.2;
-pub const MAX_TOKENS: u32 = 700;
+/// The models NEAR AI serves in TEEs reason before they answer, and the reasoning counts against max_tokens: at 700 a
+/// negotiation turn stopped on `length` with no message (testnet a2.accord-v2, 8 Nov 2026). Low effort answers in about
+/// 400 tokens; 2500 leaves headroom for a long transcript.
+pub const MAX_TOKENS: u32 = 2500;
+pub const REASONING_EFFORT: &str = "low";
 
 pub struct Secrets {
     pub seed: [u8; 32],
@@ -85,6 +89,7 @@ impl Negotiator for NearAi<'_> {
             "stream": false,
             "temperature": TEMPERATURE,
             "max_tokens": MAX_TOKENS,
+            "reasoning_effort": REASONING_EFFORT,
             "response_format": protocol::response_format(),
         });
         let bytes = serde_json::to_vec(&body).map_err(|e| e.to_string())?;
