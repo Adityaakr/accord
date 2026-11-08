@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useWallet } from "./WalletProvider";
 import styles from "./WalletButton.module.css";
@@ -36,6 +37,7 @@ export function WalletButton() {
                 <span>Act as {p.role}</span><span className="mono faint">{short(p.account)}</span>
               </button>
             ))}
+            <Link href="/profile" role="menuitem" className={styles.item} onClick={() => setOpen(false)}>Profile</Link>
             <button type="button" role="menuitem" className={styles.item} onClick={() => { void w.disconnect(); setOpen(false); }}>
               Disconnect
             </button>
@@ -68,8 +70,6 @@ export function WalletButton() {
   }
 
   return (
-    <button type="button" className={styles.connect} onClick={() => void w.connect()} disabled={w.connecting}>
-      {w.connecting ? "Connecting…" : "Connect wallet"}
-    </button>
+    <Link href="/signin" className={styles.connect}>Sign in</Link>
   );
 }
