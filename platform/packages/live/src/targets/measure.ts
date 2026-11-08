@@ -30,9 +30,11 @@ export async function run(w: World): Promise<void> {
   const agent = await installAgent(w, id);
   rows.push(["install_agent_key", agent.tx]);
   await deliverAndAccept(w, id, 1);
+  const terms = (await w.reader.agreement(id).terms())!;
+  const item1 = terms.items[0]!;
   const refused = await agent.deal.pay({ item: 2, amount: "12000000", recipient: w.attacker });
   rows.push(["act (refused)", refused.gasBurnt ?? 0n]);
-  const paid = await agent.deal.pay({ item: 1, amount: "12000000", recipient: w.principals.recipient.account });
+  const paid = await agent.deal.pay({ item: item1.id ?? 1, amount: item1.amount, recipient: w.principals.recipient.account });
   rows.push(["act (pays, with callback)", paid.gasBurnt ?? 0n]);
   rows.push(["revoke_agent", await client(w, "buyer", id).revokeAgent()]);
   const before = await storage();

@@ -19,6 +19,10 @@ export async function run(w: World): Promise<void> {
   await deliverAndAccept(w, id, 2);
   header("revoke", id, "", w);
   let ok = true;
+  // pay each item at its negotiated amount: the terms differ from run to run
+  const terms = (await w.reader.agreement(id).terms())!;
+  const item1 = terms.items[0]!;
+  const item2 = terms.items[1] ?? item1;
 
   const before = await w.reader.chain.accessKeys(id);
   line("before", `${before.length} key · ${before.map(describe).join(" | ")}`);
@@ -28,7 +32,7 @@ export async function run(w: World): Promise<void> {
   const after = await w.reader.chain.accessKeys(id);
   let rejected = "";
   try {
-    await agent.deal.pay({ item: 1, amount: "12000000", recipient: ready.recipient });
+    await agent.deal.pay({ item: item1.id ?? 1, amount: item1.amount, recipient: ready.recipient });
     rejected = "went through";
   } catch (e) {
     rejected = /AccessKeyDoesNotExist|does not exist|AccessKeyNotFound/i.test((e as Error).message)
@@ -45,8 +49,8 @@ export async function run(w: World): Promise<void> {
   const allowance = p && p !== "FullAccess" && p.FunctionCall.allowance ? `${formatNear(p.FunctionCall.allowance)} NEAR` : "?";
   line("install", `buyer · tx ${fresh.tx.txHash} · AddKey ${fresh.publicKey} · FunctionCall [act] · allowance ${allowance}`);
 
-  const r = await fresh.deal.pay({ item: 2, amount: "12000000", recipient: ready.recipient });
+  const r = await fresh.deal.pay({ item: item2.id ?? 2, amount: item2.amount, recipient: ready.recipient });
   ok &&= r.status === "sent";
-  line("resume", `agent pays item 2 · ${r.status === "sent" ? "payment_sent" : r.code ?? r.status} ${usdc("12000000")} → ${ready.recipient} · tx ${r.txHash}`);
+  line("resume", `agent pays item 2 · ${r.status === "sent" ? "payment_sent" : r.code ?? r.status} ${usdc(item2.amount)} → ${ready.recipient} · tx ${r.txHash}`);
   if (!ok) process.exitCode = 1;
 }

@@ -138,8 +138,9 @@ export async function payeeChange(w: World): Promise<void> {
   const old = await preflight(w.reader, r.id, r.recipient);
   const oldBlocked = old.rating === "block" && old.reasons.includes("not the authorised recipient");
   line("old", `${r.recipient}: ${oldBlocked ? "no longer the authorised recipient (preflight)" : old.rating}`);
-  const res = await r.agent.deal.pay({ item: 1, amount: "12000000", recipient: next });
-  line("paid", `${res.status === "sent" ? "payment_sent" : res.code ?? res.status} ${usdc("12000000")} → ${next} · tx ${res.txHash}`);
+  const item1 = (await w.reader.agreement(r.id).terms())!.items[0]!;
+  const res = await r.agent.deal.pay({ item: item1.id ?? 1, amount: item1.amount, recipient: next });
+  line("paid", `${res.status === "sent" ? "payment_sent" : res.code ?? res.status} ${usdc(item1.amount)} → ${next} · tx ${res.txHash}`);
   if (res.status !== "sent" || !earlyBlocked || !oldBlocked) process.exitCode = 1;
 }
 

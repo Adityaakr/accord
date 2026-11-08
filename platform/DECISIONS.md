@@ -506,3 +506,30 @@ only: a6, a8 and a1.accord-usdc.testnet keep running release 3's code by hash an
   answering after two accounts. Until the release is published and current, `make check-deploy` reports the local
   wasm `ECgsrZwy…` against release 3, and the three proofs on a release 4 agreement wait. Steps:
   `docs/build/BLOCKED.md`.
+
+## 26. Release 4 (audit fixes) live on testnet, proofs re-run (9 Nov 2026)
+
+The audited agreement code (`ECgsrZwyoZvoHDjawYhRnFbxoWtt6Sx9iaPsEzqwTTGz`) is published as a global contract
+(`R2qxw4u5q7unDwoUP4VCSA5BQ4pjnwpbX3eX65czRqo`) and is release 4 on both factories: accord-v2.testnet
+(`EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU`, `J9uADVqQSkY6f1uMYbMbWoPnB4oiwuS3CtLayKojtgeC`) and accord-usdc.testnet
+(`GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai`, `5D9LxPuU4phUXTgRawd97TmhZPGiPjWzSPWCYXJteoLJ`). `make check-deploy`: release 4,
+no mock or F1 symbols, 9 agreements match. Agreements created before this keep release 3 (code pinned by hash).
+
+| Proof | Agreement | Result | Tx |
+|---|---|---|---|
+| negotiate | a10 | Attested in 64 s, 33.00 USDC in 3 items, attestation ok, `ERR_SEALED` both ways | (see `make negotiate` output) |
+| finish: fund | a10 | 33.00 USDC escrowed | `2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22` |
+| finish: pay | a10 | item 1, 12.00 USDC to halcyon-mm.testnet | `Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm` |
+| finish: refused | a10 | ERR_PAYEE_MISMATCH | `51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu` |
+| attack | a11 | ERR_PAYEE_MISMATCH, ERR_AMOUNT_MISMATCH, ERR_CANARY revokes and deletes the key; 0.00 moved | `HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv`, `3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh`, `DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT` |
+| revoke | a13 | DeleteKey; next call AccessKeyDoesNotExist; new key pays item 2 | `8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3`, `DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT`, `24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe` |
+| verify | a10 | code = release 4 · 5 ok · 1 partial · 1 not checked | |
+
+The first `make revoke` run (a12) stopped at its last step because the script paid item 2 at a fixed 12.00 while the
+negotiated amount differed; the contract refused it (`ERR_AMOUNT_MISMATCH`), as it should. The live targets now pay each
+item at its negotiated amount.
+
+Circle USDC, release 3 on accord-usdc: `a1.accord-usdc.testnet` funded 14.00 Circle USDC
+(`4gPohYYMokgQcPcgNhX3tCTTXjA35AfuKkpGs1SpS2no`), paid 5.00 to halcyon-mm.testnet (`E127BGy3Tw6PmhE9JcoFr7vQsKTiHNevTTiAxEjJGWK2`),
+refused a redirect with ERR_PAYEE_MISMATCH (`9rgsBFA26yedWuEEJk77sKBDrDGS9mHn9BFMknCaP8BB`), revoked
+(`FTigDebs1kZjLpTN8nC8SZWp4dMM1ChuUyR211JZnzuW`); the agent's next call failed with AccessKeyDoesNotExist.
