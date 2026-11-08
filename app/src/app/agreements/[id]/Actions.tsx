@@ -115,9 +115,8 @@ export function Actions({
           setAgentSecret(kp.toString());
           return tx;
         })} />);
-      } else {
-        add("revoke", <Btn busy={busy} danger label="Revoke the agent" onClick={open("Revoke the agent", () => client.revokeAgent())} />);
       }
+      // Revoke lives in the room header, always in view (RoomHeader: hold to confirm, key read back first).
     }
     if (role === "buyer" && a.state === "Settled") {
       add("withdraw", <Btn busy={busy} label="Withdraw spare NEAR" onClick={open("Withdraw NEAR", () => client.withdrawNear())} />);
