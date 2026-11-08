@@ -200,7 +200,7 @@ One agreement from sealed limits to a settled payment, in six steps. Every agree
 
 - 06Settled
 
-Step 01 of 06
+Step 01 of 06 · Sealed
 
 ### Sealed: each side seals its limits.
 
@@ -218,13 +218,7 @@ Cannot happen
 
 The other side, the operator or the app reading the numbers
 
-Deal room · step 01 of 06 Sealed
-
-buyer mandate sealed · commitment on NEAR vendor mandate sealed · commitment on NEAR limits hidden from both sides
-
-Both mandates sealed. Neither side sees the other's limits.
-
-Step 02 of 06
+Step 02 of 06 · Attested
 
 ### Attested: agents negotiate in the enclave.
 
@@ -242,13 +236,7 @@ Cannot happen
 
 Terms outside either side's limits; a mandate leaving the enclave
 
-Deal room · step 02 of 06 Attested
-
-proposals checked against both limits agreed terms recorded attestation verified
-
-Terms agreed inside both limits, with an attestation.
-
-Step 03 of 06
+Step 03 of 06 · Executing
 
 ### Approved: both companies approve and fund.
 
@@ -266,13 +254,7 @@ Cannot happen
 
 Terms taking effect before both sides approve
 
-Deal room · step 03 of 06 Executing
-
-approvals buyer ✓ · vendor ✓ recipient bound to the vendor's domain escrow funded · USDC on NEAR
-
-Approved by both companies. Recipient bound. Escrow funded.
-
-Step 04 of 06
+Step 04 of 06 · Executing
 
 ### Executing: the agent pays inside the rules.
 
@@ -290,13 +272,7 @@ Cannot happen
 
 A payment to another account, a different amount or an early payment
 
-Deal room · step 04 of 06 Executing
-
-approved account within the terms new account ERR_PAYEE_MISMATCH different amount ERR_AMOUNT_MISMATCH
-
-Payments inside the terms go through. Anything else is refused and recorded.
-
-Step 05 of 06
+Step 05 of 06 · Executing
 
 ### Checked: evidence decides each payment.
 
@@ -314,13 +290,7 @@ Cannot happen
 
 The keeper moving funds or changing an outcome
 
-Deal room · step 05 of 06 Executing
-
-evidence observation, acceptance or review conditions met eligible not met withheld for review
-
-Evidence decides: eligible, or withheld for review.
-
-Step 06 of 06
+Step 06 of 06 · Settled
 
 ### Settled: paid, recorded, checkable.
 
@@ -338,11 +308,7 @@ Cannot happen
 
 A payment being reversed or redirected after the fact
 
-Deal room · step 06 of 06 Settled
-
-transfer USDC → approved recipient exceptions decided by the buyer make verify code, key, recipient, record
-
-Paid to the approved recipient, recorded and checkable.
+Terms agreed inside both limits, with an attestation.
 
 Core features
 

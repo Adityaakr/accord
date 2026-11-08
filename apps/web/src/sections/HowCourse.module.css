@@ -1,0 +1,63 @@
+/* The course: a dark canvas with a dot grid that moves with the camera, real-looking system UI in the site's tokens,
+   one bright hero. Teal is the accent; refusal red only for a refusal. No transitions: every value is set per frame. */
+.view { position: relative; width: 100%; aspect-ratio: 460 / 330; border-radius: 16px; overflow: hidden; background: #0c0e0e; border: 1px solid rgba(var(--ink-rgb), 0.08); transform-origin: 50% 60%; }
+:global([data-theme="light"]) .view { background: #f2f4f3; }
+.svg { display: block; width: 100%; height: 100%; font-family: "Host Grotesk", sans-serif; }
+.gridDot { fill: rgba(var(--ink-rgb), 0.09); }
+
+.card { fill: #1a1c1d; stroke: rgba(var(--ink-rgb), 0.08); stroke-width: 1; }
+:global([data-theme="light"]) .card { fill: #ffffff; }
+.cardTitle { font-size: 12.5px; font-weight: 500; fill: var(--text-strong); }
+.cardSub { font-family: var(--mono); font-size: 9.5px; fill: rgba(var(--ink-rgb), 0.45); }
+.rowText { font-size: 12px; fill: var(--text-strong); }
+.rowSub { font-family: var(--mono); font-size: 9.5px; fill: rgba(var(--ink-rgb), 0.45); }
+.rowSubOn { font-family: var(--mono); font-size: 9.5px; fill: var(--teal); }
+
+.track { stroke: rgba(var(--ink-rgb), 0.12); }
+.slot { fill: none; stroke: rgba(var(--ink-rgb), 0.3); stroke-dasharray: 2 2.5; }
+.lockOn { fill: none; stroke: var(--teal); stroke-width: 1.4; }
+.lockOff { fill: none; stroke: rgba(var(--ink-rgb), 0.5); stroke-width: 1.4; }
+
+.zone { fill: rgba(var(--ink-rgb), 0.04); stroke: rgba(var(--ink-rgb), 0.2); stroke-dasharray: 3 3; }
+.zoneText { font-family: var(--mono); font-size: 8.5px; fill: rgba(var(--ink-rgb), 0.45); }
+.trackLine { fill: rgba(var(--ink-rgb), 0.1); }
+.overlap { fill: rgba(145, 207, 181, 0.22); }
+.fill { fill: rgba(145, 207, 181, 0.55); }
+.tip { fill: #232627; stroke: rgba(var(--ink-rgb), 0.15); }
+.tipOn { fill: rgba(145, 207, 181, 0.16); stroke: rgba(145, 207, 181, 0.6); }
+.tipText { font-family: var(--mono); font-size: 9.5px; fill: rgba(var(--ink-rgb), 0.6); }
+.tipTextOn { font-family: var(--mono); font-size: 9.5px; fill: var(--teal); }
+:global([data-theme="light"]) .tip { fill: #ffffff; }
+
+.pill { fill: rgba(145, 207, 181, 0.12); stroke: rgba(145, 207, 181, 0.55); }
+.pillText { font-family: var(--mono); font-size: 10px; fill: var(--teal); }
+.tick { fill: none; stroke: var(--teal); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tickDark { fill: none; stroke: #0c0e0e; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.cross { fill: none; stroke: var(--refusal); stroke-width: 1.8; stroke-linecap: round; }
+
+.appIcon { fill: var(--teal); }
+.appIconUsdc { fill: #2775ca; }
+.appGlyph { font-size: 15px; font-weight: 600; fill: #fff; }
+.noteTitle { font-size: 12px; font-weight: 500; fill: var(--text-strong); }
+.noteNow { font-family: var(--mono); font-size: 9px; fill: rgba(var(--ink-rgb), 0.4); }
+.noteBody { font-size: 11px; fill: rgba(var(--ink-rgb), 0.62); }
+
+.rowOk { fill: rgba(145, 207, 181, 0.1); stroke: rgba(145, 207, 181, 0.45); }
+.rowBad { fill: rgba(255, 34, 68, 0.07); stroke: rgba(255, 34, 68, 0.35); }
+.outOk { font-family: var(--mono); font-size: 9.5px; fill: var(--teal); }
+.outBad { font-family: var(--mono); font-size: 9.5px; fill: var(--refusal); }
+
+.cond { stroke: rgba(var(--ink-rgb), 0.35); stroke-dasharray: 4 4; }
+.base { stroke: rgba(var(--ink-rgb), 0.15); }
+.bar { fill: none; stroke: rgba(var(--ink-rgb), 0.3); stroke-dasharray: 3 3; }
+.barOn { fill: rgba(145, 207, 181, 0.28); stroke: rgba(145, 207, 181, 0.7); }
+.line { fill: none; stroke: var(--teal); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.count { font-family: var(--mono); font-size: 10.5px; fill: rgba(var(--ink-rgb), 0.6); }
+
+.button { stroke: rgba(145, 207, 181, 0.55); }
+.btnSlot { fill: rgba(0, 0, 0, 0.25); stroke: rgba(var(--ink-rgb), 0.15); }
+.buttonText { font-size: 13px; font-weight: 500; fill: var(--text-strong); }
+.buttonTextOn { font-size: 13px; font-weight: 500; fill: #0c0e0e; }
+
+.hero { fill: #ffffff; filter: drop-shadow(0 0 6px rgba(145, 207, 181, 0.8)); }
+:global([data-theme="light"]) .hero { fill: var(--teal); }
