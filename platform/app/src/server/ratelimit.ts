@@ -1,5 +1,6 @@
 // A small in-memory limiter for routes that spend the relayer's gas. Per process; enough for testnet.
 import "server-only";
+import { fromThisSite } from "./origin";
 
 const hits = new Map<string, number[]>();
 
@@ -16,9 +17,7 @@ export function allow(key: string, max: number, windowMs: number): boolean {
 /** Same-origin JSON only, like the app's other write routes. */
 export function sameOriginJson(req: Request): string | null {
   if (!(req.headers.get("content-type") ?? "").includes("application/json")) return "JSON only";
-  const origin = req.headers.get("origin");
-  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
-  if (origin && host && new URL(origin).host !== host) return "cross-origin request";
+  if (!fromThisSite(req)) return "cross-origin request";
   return null;
 }
 

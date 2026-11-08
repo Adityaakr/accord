@@ -32,6 +32,8 @@ function proxyToApp(req, res) {
   const headers = { ...req.headers }
   // keep the visitor's host for the app's same-origin checks and cookies; the upstream gets its own Host header
   headers["x-forwarded-host"] = req.headers.host || ""
+  // Railway's edge rewrites x-forwarded-host to the app's own host; this one reaches the app unchanged
+  headers["x-accord-site-host"] = req.headers.host || ""
   headers["x-forwarded-proto"] = req.headers["x-forwarded-proto"] || "https"
   headers.host = target.host
   const send = target.protocol === "https:" ? httpsRequest : httpRequest

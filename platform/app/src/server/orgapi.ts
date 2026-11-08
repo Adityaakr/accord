@@ -5,6 +5,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 import { OrgError } from "@accord/store";
 import { sessionAccount } from "./session";
+import { fromThisSite } from "./origin";
 
 const STATUS = { not_found: 404, forbidden: 403, conflict: 409, invalid: 400, expired: 410 } as const;
 
@@ -17,14 +18,7 @@ export function fail(e: unknown) {
 function sameOrigin(req: Request): boolean {
   if (req.method === "GET") return true;
   if (!(req.headers.get("content-type") ?? "").includes("application/json")) return false;
-  const origin = req.headers.get("origin");
-  if (!origin) return true;
-  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
-  try {
-    return new URL(origin).host === host;
-  } catch {
-    return false;
-  }
+  return fromThisSite(req);
 }
 
 export async function withSession(req: Request, f: (account: string) => Promise<Response>): Promise<Response> {
