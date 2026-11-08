@@ -1,0 +1,17 @@
+.body { display: flex; flex-direction: column; gap: 12px; }
+.box { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: var(--radius); background: var(--elevation-medium); }
+.you { color: var(--text-strong); font-weight: 500; }
+.ok { color: var(--teal); }
+.refusal { align-self: flex-start; padding: 2px 7px; border-radius: 4px; color: var(--refusal); background: var(--refusal-bg); font-size: 12px; }
+.agent { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid var(--hairline); }
+.toggle { padding: 3px 9px; border-radius: 999px; border: 1px solid var(--hairline-strong); color: var(--text-medium); font-family: var(--font-mono); font-size: 12px; }
+.toggle[aria-pressed="true"] { color: var(--teal); border-color: var(--teal-line); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 100%;
+  padding: 9px 12px; border-radius: var(--radius); background: var(--elevation-medium); color: var(--text-medium);
+  font-weight: 500; transition: background-color 0.3s var(--ease), color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+.btn:hover:not(:disabled) { background: var(--elevation-weak); color: var(--text-strong); }
+.btn:disabled { opacity: 0.55; cursor: default; }
+.primary { background: var(--white); color: var(--on-white); }
+.primary:hover:not(:disabled) { background: var(--white); color: var(--on-white); box-shadow: 0 0 0 2px rgba(var(--ink-rgb), 0.5); }

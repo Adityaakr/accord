@@ -9,7 +9,7 @@ import type { PixelName } from "../PixelIcon";
 import { useWallet } from "../wallet/WalletProvider";
 
 export type WorkspaceId = "buyer" | "vendor" | "authority" | "reviewer" | "auditor";
-export type NavIcon = "home" | "rooms" | "approvals" | "agents" | "recipients" | "record" | "verify" | "deliveries" | "payout";
+export type NavIcon = "home" | "rooms" | "approvals" | "agents" | "recipients" | "record" | "verify" | "deliveries" | "payout" | "try";
 export interface NavItem { href: string; label: string; icon: NavIcon; match: (p: string) => boolean }
 
 export interface Workspace {
@@ -40,6 +40,7 @@ export const WORKSPACES: Workspace[] = [
       { href: "/approvals", label: "Approvals", icon: "approvals", match: starts("/approvals") },
       { href: "/agents", label: "Agents", icon: "agents", match: starts("/agents") },
       { href: "/record", label: "Record", icon: "record", match: starts("/record") },
+      { href: "/try-it", label: "Try a deal", icon: "try", match: starts("/try-it") },
     ],
   },
   {

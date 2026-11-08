@@ -15,7 +15,12 @@ import styles from "./signin.module.css";
 export default function SignIn() {
   const w = useWallet();
   const router = useRouter();
-  useEffect(() => { if (w.accountId) router.replace("/enter"); }, [w.accountId, router]);
+  useEffect(() => {
+    if (!w.accountId) return;
+    // ?next=/try-it returns a visitor to where they started; only paths inside the app
+    const next = new URLSearchParams(window.location.search).get("next");
+    router.replace(next && /^\/[a-z0-9/_-]*$/i.test(next) && !next.startsWith("//") ? next : "/enter");
+  }, [w.accountId, router]);
   return (
     <div className={styles.page}>
       <span className={styles.weave} aria-hidden="true" />

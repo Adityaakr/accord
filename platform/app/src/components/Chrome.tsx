@@ -53,7 +53,8 @@ export function Chrome({ network, factory, sandbox, children }: { network: strin
           <nav className={styles.footerLinks} aria-label="Footer">
             <Link href="/status">Status</Link>
             <Link href="/docs">Docs</Link>
-            <Link href="/try">Try the demo</Link>
+            <Link href="/try-it">Try a deal</Link>
+            <Link href="/try">Public demo room</Link>
             <a href="https://accordweb-production.up.railway.app" target="_blank" rel="noreferrer">accord site</a>
           </nav>
           <span className="small mono">{network} · factory {factory}</span>

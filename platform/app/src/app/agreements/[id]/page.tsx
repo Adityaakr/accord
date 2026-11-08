@@ -14,6 +14,8 @@ import { AutoRefresh } from "@/components/AutoRefresh";
 import { CountUp } from "@/components/CountUp";
 import { VerifiedPanel } from "./VerifiedPanel";
 import { Actions } from "./Actions";
+import { DemoPanel } from "./DemoPanel";
+import { isDemoRoom } from "@/server/demo";
 import { Periods } from "./Periods";
 import { Conditions } from "@/components/atlas";
 import { RoomHeader } from "./RoomHeader";
@@ -338,6 +340,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
         </div>
 
         <aside className={styles.side}>
+          {config().network === "testnet" && isDemoRoom(a) && <DemoPanel agreement={a} explorer={config().explorer} />}
           <Actions agreement={a} items={r.items} exceptions={r.exceptions} recipients={r.recipients} periods={r.periods} />
           <Panel title="At a glance">
             <KV rows={[

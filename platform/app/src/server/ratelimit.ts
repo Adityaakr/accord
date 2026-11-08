@@ -21,3 +21,9 @@ export function sameOriginJson(req: Request): string | null {
   if (origin && host && new URL(origin).host !== host) return "cross-origin request";
   return null;
 }
+
+/** Gives back the last call counted for `key`, for a call that failed before it spent anything. */
+export function forget(key: string): void {
+  const recent = hits.get(key);
+  if (recent?.length) recent.pop();
+}
