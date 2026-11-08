@@ -12,6 +12,7 @@ import { useAppConfig } from "@/components/AppConfig";
 import { HoldButton } from "@/components/me/Confirm";
 import { agreementClient, errorText, readBack } from "@/components/me/client";
 import { STEPS, STEP_NOTE } from "./pipeline";
+import { IconTile } from "@/components/IconTile";
 import styles from "./header.module.css";
 
 export interface HeaderProps {
@@ -60,7 +61,7 @@ export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys,
         {STEPS.map((s, i) => {
           const done = step > i, on = step === i;
           return (
-            <li key={s} className={`${styles.step} ${done ? styles.done : ""} ${on ? styles.on : ""}`} aria-current={on ? "step" : undefined}>
+            <li key={s} className={`${styles.step} ${done ? styles.done : ""} ${on ? styles.on : ""}`} aria-current={on ? "step" : undefined} style={{ ["--i" as string]: i }}>
               <span className={styles.bar} aria-hidden="true" />
               <span className={styles.name}>{s}</span>
               <span className={styles.note}>{STEP_NOTE[s]}</span>
@@ -77,7 +78,7 @@ export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys,
       </ol>
 
       <div className={styles.agent} aria-live="polite">
-        <span className={styles.agentLabel}>Agent</span>
+        <span className={styles.agentLabel}><IconTile name="key" size={28} tone={status === "active" ? "teal" : "metal"} />Agent</span>
         {status === "revoked" ? (
           <span className={styles.revokedLine}>
             Agent revoked · next call rejected by the network

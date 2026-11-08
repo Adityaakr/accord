@@ -64,11 +64,13 @@
 .kvRow {
   display: grid;
   grid-template-columns: minmax(110px, 38%) minmax(0, 1fr);
+  align-items: center;
   gap: 12px;
-  padding: 9px 0;
+  min-height: 40px;
+  padding: 8px 0;
   border-top: 1px solid var(--hairline);
 }
-.kvRow:first-child { border-top: 0; padding-top: 0; }
+.kvRow:first-child { border-top: 0; padding-top: 0; min-height: 32px; }
 .kvRow dt { color: var(--text-weak); }
 .kvRow dd { margin: 0; color: var(--text-strong); min-width: 0; overflow-wrap: anywhere; text-align: right; }
 .empty { color: var(--text-weak); padding: 4px 0; }

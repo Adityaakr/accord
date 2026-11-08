@@ -39,3 +39,7 @@
 .link { align-self: flex-start; color: var(--text-medium); text-decoration: underline; }
 .ok { color: var(--teal); }
 .bad { color: var(--refusal); }
+
+/* the signed-in role: one quiet chip in sans text */
+.role { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 500; color: var(--teal); background: var(--teal-wash); border: 1px solid var(--teal-line); white-space: nowrap; }
+.roleViewer { color: var(--text-weak); background: rgba(var(--ink-rgb), 0.04); border-color: var(--hairline); }

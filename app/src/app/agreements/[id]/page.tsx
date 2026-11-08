@@ -1,3 +1,4 @@
+import { shortAccount } from "@/components/account/short";
 import { Underline } from "./Underline";
 import { InviteCard } from "./InviteCard";
 import type { Metadata } from "next";
@@ -7,9 +8,10 @@ import { notFound } from "next/navigation";
 import { formatUnits, type ItemView, type Refusal } from "@accord/sdk";
 import { room, type Room } from "@/server/data";
 import { config } from "@/server/accord";
-import { Account, Empty, Hash, KV, Meter, Near, Panel, Pill, StatePill, Usdc, type Tone } from "@/components/ui";
+import { Account, Empty, Hash, KV, Meter, Near, Panel, Pill, Usdc, type Tone } from "@/components/ui";
 import { SourceLine } from "@/components/SourceLine";
 import { AutoRefresh } from "@/components/AutoRefresh";
+import { CountUp } from "@/components/CountUp";
 import { VerifiedPanel } from "./VerifiedPanel";
 import { Actions } from "./Actions";
 import { Periods } from "./Periods";
@@ -171,19 +173,14 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
         </div>
         <div className={styles.titleRow}>
           <h1 className="h2">{a.title}</h1>
-          <div className={styles.titlePills}>
-            <StatePill state={a.state} />
-            {a.params.mode === "demo" && <Pill tone="warn" title="Shorter timelocks and delays than a live agreement">demo timings</Pill>}
-          </div>
+          <span className={`${styles.stateChip} ${styles[`state${a.state}`] ?? ""}`}>{STATE_LABEL[a.state] ?? a.state}</span>
         </div>
         <p className={styles.subline}>
-          <KindLabel kind={a.kind} />
-          <span className="faint">·</span>
-          <Account id={a.account} href={explorer(a.account)} />
-          <span className="faint">·</span>
+          <span><KindLabel kind={a.kind} /></span>
+          <span><Account id={a.account} href={explorer(a.account)} /></span>
           <span className="small">release {a.release}</span>
-          <span className="faint">·</span>
-          <span className="small">{a.buyer} <span className="faint">buys from</span> {a.vendor}</span>
+          <span className="small"><span title={a.buyer}>{shortAccount(a.buyer)}</span> <span className="faint">buys from</span> <span title={a.vendor}>{shortAccount(a.vendor)}</span></span>
+          {a.params.mode === "demo" && <span className="small faint" title="Shorter timelocks and delays than a live agreement">Demo timings · changes wait {duration(a.params.timelock_secs)}</span>}
         </p>
         <RoomHeader room={a.account} buyer={a.buyer} step={step} terminal={terminal} agentKey={a.agent_key}
           revokedKeys={a.revoked_keys} canaryTripped={a.canary_tripped} executing={a.state === "Executing"} />
@@ -202,7 +199,8 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
       </nav>
 
       <div className={styles.grid}>
-        <div className={styles.main}>
+        {/* keyed on the tab: switching tabs remounts this column, which crossfades in through a short blur */}
+        <div className={`${styles.main} ${styles.fade}`} key={tab}>
           {tab === "terms" && <>{termsPanel}{itemsPanel}{partiesPanel}</>}
 
           {tab === "negotiation" && <Negotiation {...negotiation} />}
@@ -343,10 +341,10 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
           <Actions agreement={a} items={r.items} exceptions={r.exceptions} recipients={r.recipients} periods={r.periods} />
           <Panel title="At a glance">
             <KV rows={[
-              ["In escrow", <Usdc key="e" amount={escrow < 0n ? 0n : escrow} />],
-              ["Paid", <Usdc key="p" amount={paid} />],
-              ["Refused", <span key="r" className={`mono ${a.refusals > 0 ? styles.refusedText : ""}`}>{a.refusals}</span>],
-              ["Recipient", a.recipient ? <span key="rc" className="mono">{a.recipient.account}</span> : <span key="rc" className="faint">none yet</span>],
+              ["In escrow", <CountUp key="e" value={(escrow < 0n ? 0n : escrow).toString()} unit="USDC" />],
+              ["Paid", <CountUp key="p" value={paid.toString()} unit="USDC" />],
+              ["Refused", <span key="r" className={`num ${a.refusals > 0 ? styles.refusedText : ""}`}>{a.refusals}</span>],
+              ["Recipient", a.recipient ? <span key="rc" className="mono" title={a.recipient.account}>{shortAccount(a.recipient.account)}</span> : <span key="rc" className="faint">none yet</span>],
             ]} />
           </Panel>
         </aside>
@@ -383,6 +381,8 @@ function Receipts({ receipts }: { receipts: Room["receipts"] }) {
     </Panel>
   );
 }
+
+const STATE_LABEL: Record<string, string> = { NoDeal: "No deal" };
 
 function Figure({ label, value }: { label: string; value: React.ReactNode }) {
   return (

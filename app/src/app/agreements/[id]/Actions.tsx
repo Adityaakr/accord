@@ -12,7 +12,7 @@ import {
 } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { useAppConfig } from "@/components/AppConfig";
-import { Panel, Pill } from "@/components/ui";
+import { Panel } from "@/components/ui";
 import { agreementClient, errorText, txLine } from "@/components/me/client";
 import { can, useOrg, type Capability } from "@/components/org/OrgProvider";
 import styles from "./actions.module.css";
@@ -175,8 +175,8 @@ export function Actions({
   return (
     <Panel
       title="Your actions"
-      eyebrow={w.accountId ? <>signed in as <AccountId id={w.accountId} /> · {role === "viewer" ? "not a party" : role}</> : "connect a wallet to act as a party"}
-      aside={role !== "viewer" ? <Pill tone="teal">{role}</Pill> : undefined}
+      eyebrow={w.accountId ? <>Signed in as <AccountId id={w.accountId} /></> : "Connect a wallet to act as a party"}
+      aside={w.accountId ? <span className={`${styles.role} ${role === "viewer" ? styles.roleViewer : ""}`}>{role === "viewer" ? "Not a party" : role === "authority" ? "Authority" : role.charAt(0).toUpperCase() + role.slice(1)}</span> : undefined}
     >
       {!w.accountId && <p className="small">Anyone can read this room. Only its buyer, vendor and settlement authority can act, each with their own wallet.</p>}
       {w.accountId && entries.length === 0 && hidden === 0 && <p className="small">Nothing for you to do here right now.</p>}

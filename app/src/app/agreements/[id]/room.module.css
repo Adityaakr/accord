@@ -1,12 +1,21 @@
 .head { display: flex; flex-direction: column; gap: 16px; padding: 40px 0 36px; }
 .headTop { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .titleRow { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
-.titlePills { display: flex; gap: 8px; flex-wrap: wrap; }
-.subline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+/* the state: one quiet chip in sans text, teal only while money can move */
+.stateChip { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12.5px; font-weight: 500; color: var(--text-medium); background: rgba(var(--ink-rgb), 0.05); border: 1px solid var(--hairline); }
+.stateExecuting { color: var(--teal); background: var(--teal-wash); border-color: var(--teal-line); }
+.stateAttested { color: var(--text-strong); }
+.stateSettled, .stateNoDeal, .stateCancelled { color: var(--text-weak); }
+/* plain spacing between the items: a wrapped line never starts or ends on a stray separator */
+.subline { display: flex; align-items: center; gap: 6px 20px; flex-wrap: wrap; margin-bottom: 18px; }
+.subline > span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 
 .grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
 .main, .side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .side { position: sticky; top: 84px; }
+.fade { animation: tabIn 0.42s var(--ease) both; }
+@keyframes tabIn { from { opacity: 0; filter: blur(4px); transform: translateY(4px); } to { opacity: 1; filter: none; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .fade { animation: none; } }
 
 .figures { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .figure { display: flex; flex-direction: column; gap: 6px; }
