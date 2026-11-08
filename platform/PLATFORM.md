@@ -7,10 +7,10 @@ Grounded in this repo (file:line), live NEAR docs and npm (checked 8 Nov 2026), 
 ## 1. Recommendation
 
 Keep the app (Next.js, `@hot-labs/near-connect`, the SDK, the contracts) and add the layer a business needs on top of it:
-**one sign-in that accepts a work email or a NEAR wallet, an organisation with members and roles, a "Needs you" home, and
-deal rooms that guide each party through their next step.** Email sign-in uses **NEAR Auth (FastAuth)**, a non-custodial MPC
-account with relayer-paid gas; wallets use **HOT Connect**, already wired in. Every money action is signed by the person, in
-their own wallet or MPC account, never by Accord's servers. Organisations live off chain in v1 (one signer per role, as the
+**one sign-in with the person's own NEAR wallet, an organisation with members and roles, a "Needs you" home, and
+deal rooms that guide each party through their next step.** Wallets connect through **HOT Connect**, already wired in.
+Sign-in is external NEAR wallets only (9 Nov 2026; email sign-in through NEAR Auth was built on 8 Nov and removed).
+Every money action is signed by the person, in their own wallet, never by Accord's servers. Organisations live off chain in v1 (one signer per role, as the
 contract requires today); production adds a Sputnik DAO or multisig per company plus a contract-level **guardian** that can
 only revoke the agent, so the kill switch stays one click.
 
@@ -23,21 +23,18 @@ only revoke the agent, so the kill switch stays one click.
 - **NEAR's own recommendation is HOT Connect.** `@hot-labs/near-connect` v0.12.0 (26 Oct 2026) is in NEAR's login docs;
   Wallet Selector is in maintenance (its README points to HOT Connect); MyNearWallet shut down on 31 Oct 2026.
   The app is on v0.11.4 (app/package.json): a minor upgrade.
-- **Email users must not make Accord a custodian.** If an email reset can sign, email takeover is control of the money, and
+- **Accord must not become a custodian.** If an email reset can sign, email takeover is control of the money, and
   Accord holding a signing share undermines the non-custodial position (FinCEN 2019 CVC guidance; not legal advice).
-  NEAR Auth's MPC (auth.near.org, `@fast-auth-near/react-sdk` v1.3.1) fits; Web3Auth puts the raw key in the app (rejected).
+  The person's own wallet keeps every key outside Accord.
 - **The data for a real home already exists.** `agreements_for(account)` (contracts/factory/src/lib.rs:628) and
   `listAgreements({party})` (packages/sdk/src/accord.ts:61) are unused; the home lists every room on the factory
   (app/src/app/page.tsx:10, server/data.ts:17).
 
-## 3. Steelman of the rejected option: Privy for email sign-in
+## 3. Email sign-in: considered and removed
 
-Privy is the smoothest consumer sign-in on the market, NEAR's docs have a Privy tutorial with testnet, it is free under
-500 monthly users, and it plugs into HOT Connect, so one modal serves both kinds of user. We still pass for now: NEAR is a
-"Tier 2" chain in Privy (raw signing only), its custody model for NEAR is not stated, users get unnamed implicit accounts that
-must be funded before their first transaction, and the bridge (`@peerfolio/privy-near-connect` v0.0.8) is a community
-package at version 0.0.x. NEAR Auth gives named accounts, MPC custody and relayer-paid gas. Revisit Privy if NEAR Auth's
-mainnet whitelisting or pricing blocks launch.
+Email sign-in (NEAR Auth MPC accounts, and Privy before it) was weighed on 8 Nov and NEAR Auth was built. On 9 Nov 2026
+sign-in became external NEAR wallets only: an email account could not seal a mandate (its signatures are public), the
+shared testnet client only returned to `localhost:3000`, and one way in keeps every signing path in the person's wallet.
 
 ## 4. Who uses it
 
@@ -61,9 +58,8 @@ or multisig per company (`sputnikv2.testnet`, live), guardian role added to the 
 ## 5. The journeys
 
 **Buyer, first time**
-1. **accord.app → Sign in.** One card: "Continue with work email" (NEAR Auth) or "Connect a NEAR wallet" (HOT Connect:
-   Meteor, Intear, Ledger, Nightly, WalletConnect on testnet). Email users get a named account (`acme-jane.near`) with gas
-   paid by Accord's relayer.
+1. **useaccord.tech/app → Sign in.** One card: "Connect a NEAR wallet" (HOT Connect: Meteor, Intear, Ledger, Nightly,
+   WalletConnect on testnet). Meteor and Intear send through Accord's relayer, so there is no gas.
 2. **Create the organisation.** Name, domain, verify the domain (DNS TXT, the same proof Payee uses), invite finance and an
    operator by email. Each invitee signs in the same way.
 3. **Connect an agent.** Your agent through the MCP server (packages/mcp, 14 tools) or the CLI. The screen shows the exact
@@ -139,7 +135,7 @@ external audit, legal opinion on money transmission (not legal advice; verify wi
 ## 10. Build order
 
 1. **Testnet live** (unblocks everything): accounts, release, USDC, NEAR AI, OutLayer, Railway (section 11).
-2. **Sign-in**: HOT Connect 0.12 + NEAR Auth; profile; network from config, not hard-coded (WalletProvider.tsx:127).
+2. **Sign-in**: HOT Connect 0.12 (wallets only); profile; network from config, not hard-coded (WalletProvider.tsx:127).
 3. **Home and Deal rooms for "my" rooms**: `agreements_for`; Needs you; room tabs.
 4. **Organisation**: domain proof, members, roles, invitations, notifications (Postgres in packages/store).
 5. **Signature moments and the negotiation view**.
@@ -158,11 +154,11 @@ From BLOCKED.md, plus the new platform:
 | 3 | Testnet USDC: Circle faucet (check NEAR is listed) or near-faucet.io, ~70 to the buyer and one drip to the /try buyer | Funding escrow |
 | 4 | NEAR AI Cloud credits or a spending limit at cloud.near.ai (completions return HTTP 402 today); rotate the key | Live negotiation |
 | 5 | OutLayer: install `outlayer-cli`, `outlayer login testnet` as `accord-v1.testnet` | Enclave jobs: Sealed Table, Payee proof, observer |
-| 6 | NEAR Auth testnet credentials (free) from auth.near.org | Email sign-in |
+| 6 | (none: email sign-in was removed on 9 Nov 2026) | |
 | 7 | Railway: app, agent, keeper and Postgres services with variables; the app's public host | Running it for others |
 | 8 | A domain (e.g. accord.app or accord.xyz) with DNS access | App URL, verified-domain demo, email |
 | 9 | A sending email (Resend or Postmark) and a contact address | Invitations and notifications |
-| 10 | Mainnet only, later: NEAR Intents partner JWT (optional), NEAR Auth mainnet whitelisting, audit, counsel | Production |
+| 10 | Mainnet only, later: NEAR Intents partner JWT (optional), audit, counsel | Production |
 
 ## Telemetry
 - divergence: 0.81 (evidence 0.93, conclusion 0.63) | threshold 0.30 UNCALIBRATED

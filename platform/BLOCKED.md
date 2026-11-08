@@ -13,7 +13,7 @@ observer through OutLayer's HTTPS API, which needs `OUTLAYER_PAYMENT_KEY` in `.e
 
 ## Signed-in app screenshots on testnet
 
-Testnet pages behind sign-in need a real wallet (Meteor or Intear) or NEAR Auth on port 3000. Sign in once at
+Testnet pages behind sign-in need a real wallet (Meteor or Intear). Sign in once at
 http://localhost:3200/signin as `northwind-demo.testnet`; the public Verify page needs no sign-in.
 
 ## Rotate the NEAR AI key after the hackathon

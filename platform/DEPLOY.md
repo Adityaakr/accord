@@ -23,7 +23,6 @@ website service forwards `<site>/app/*` to it, so visitors use one address.
 | `DATABASE_URL` | add a **Postgres** service and reference its URL (`${{Postgres.DATABASE_URL}}`) |
 | `NEXT_PUBLIC_BASE_PATH` | `/app` (default; build-time) |
 | `NEARAI_API_KEY` | optional: only for the agent's LLM planner and the verify relay |
-| `NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID` | optional: your own NEAR Auth client for email sign-in on a hosted domain (build-time) |
 | `RESEND_API_KEY` | optional: invite and notification emails |
 | `FAUCET_ACCOUNT` | `faucet.accord-v2.testnet`: tops visitors up to 2.5 NEAR and 100 tUSDC on `/app/try-it` |
 | `FAUCET_KEY` | the faucet account's key (top it up with testnet NEAR when it runs low) |
@@ -58,7 +57,6 @@ They are not needed to use the app. To add one: a service from this repo with ro
 
 ## Notes
 
-- Email sign-in (NEAR Auth): the shared testnet client only returns to `http://localhost:3000`. A hosted domain needs
-  its own client id (apply at auth.near.org) set as `NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID`.
+- Sign-in is an external NEAR wallet through HOT Connect; there is no email sign-in and no sign-in provider to configure.
 - Sessions use an httpOnly cookie on the website's domain (the proxy keeps the original host).
 - No key is ever built into the image; every secret is a runtime variable.

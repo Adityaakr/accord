@@ -234,7 +234,7 @@ Open `/app/try-it`. Everything there is NEAR testnet with test USDC. The vendor 
 
 | # | Do | See |
 | --- | --- | --- |
-| 1 | Sign in with Meteor or Intear on testnet, or your email | `01 Connect a wallet` marked done, with your account |
+| 1 | Sign in with Meteor or Intear on testnet | `01 Connect a wallet` marked done, with your account |
 | 2 | **Get test funds** | `0.00 NEAR` becomes `2.50 NEAR · 100.00 tUSDC`, both faucet transactions linked |
 | 3 | **Create the room** | `Your room is a8.accord-v2.testnet: My first deal room.` (your number will differ) |
 | 4 | **Seal your mandate** with the Northwind preset (`40` tUSDC ceiling, 2 to 4 items) | In the Demo counterparty panel: `Sealed the vendor's mandate (Halcyon procurement preset)`, then `Started the negotiation in the Sealed Table`; the state moves `Sealed` to `Attested` |
@@ -444,6 +444,6 @@ The website's `APP_ORIGIN` points at the app service, and `serve.mjs` forwards `
 | [OutLayer](https://app.outlayer.ai/docs/getting-started) | Intel TDX enclaves for the Sealed Table, Payee and the observer |
 | USDC on NEAR | Settlement as a NEP-141 token (`tUSDC` on testnet) |
 | Rhea | The USDC/wNEAR pool the market-making observer reads, read only |
-| Libraries | near-sdk `5.30.0`, near-contract-standards `5.30.0`, near-api-js `7.3.1`, eciesjs, canonicalize, @noble, Next.js `16`, NEAR Connect, the MCP TypeScript SDK; the website on React `19` and Vite `7` |
+| Libraries | near-sdk `5.30.0`, near-contract-standards `5.30.0`, near-api-js `7.3.1`, eciesjs, canonicalize, @noble, Next.js `16`, HOT Connect (`@hot-labs/near-connect`, wallet sign-in), the MCP TypeScript SDK; the website on React `19` and Vite `7` |
 
 No partnership is claimed. Built for NEAR HACKATHON (development closes 14 Nov 2026). Licence: [MIT](LICENSE).

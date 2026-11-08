@@ -375,3 +375,14 @@ Kept as stated limits: an item can be reopened from `AssumedPaid` by one excepti
   unless the buyer approves an exception", matching the site's `/security`.
 - Gate G-Atlas (6 Nov) did not pass on testnet: market making on testnet waits on an OutLayer payment key
   (`BLOCKED.md`). The testnet proof and the video lead with procurement (`a6.accord-v2.testnet`, section 21).
+
+## 23. Sign-in: external NEAR wallets only (9 Nov 2026)
+
+- **9 Nov 2026: sign-in is external NEAR wallets only; email sign-in (NEAR Auth) removed.** Section 20 is kept as the
+  record of what was built. The app connects wallets through HOT Connect (`@hot-labs/near-connect` 0.12.0); on testnet its
+  manifest (hot-dao/near-selector `repository/manifest.json`, `features.testnet`) lists Meteor, Intear, Ledger, Nightly
+  and WalletConnect among others. Meteor and Intear sign NEP-366 delegates and send through Accord's relayer
+  (`/api/relay`, unchanged), so they pay no gas.
+- Removed: the "Continue with work email" button, `/api/fastauth/*`, the server's NEAR Auth token check and account
+  funding, the email session path, `NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID` and the `@fast-auth-near/*`, `near-api-js-v5` and
+  `buffer` packages. Wallet sessions (NEP-413, `/api/session`) are unchanged.

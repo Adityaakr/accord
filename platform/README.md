@@ -18,7 +18,7 @@ Open `/app/try-it`: on the live site once the app service is deployed (until the
 USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, with its authority
 `halcyon-auth.testnet`), and the agent is a demo agent run by Accord for test rooms; both are labelled in the room.
 
-1. Do: sign in with Meteor or Intear on testnet, or your email. See: `01 Connect a wallet · done`, with your account.
+1. Do: sign in with Meteor or Intear on testnet. See: `01 Connect a wallet · done`, with your account.
 2. Do: **Get test funds**. See: `0.00 NEAR` become `2.50 NEAR · 100.00 tUSDC`, with both faucet transactions linked.
 3. Do: **Create the room**. See: `Your room is a8.accord-v2.testnet: My first deal room.` (your number will differ).
 4. Do: **Seal your mandate** with the Northwind preset (40 tUSDC ceiling, 2 to 4 items). See, in the room's Demo
