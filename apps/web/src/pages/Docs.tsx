@@ -76,8 +76,8 @@ const PIECES: Piece[] = [
     piece: "USDC on NEAR",
     protects: (
       <>
-        The agreement’s USDC (NEP-141 on NEAR) sits in the agreement’s own account, and only the contract can send it, only through <Mono>act</Mono>, after the request
-        is checked against the approved terms
+        The agreement’s USDC (NEP-141 on NEAR) sits in the agreement’s own account, and only the contract can send it: through <Mono>act</Mono> after the request
+        is checked against the approved terms, through the vendor's <Mono>claim</Mono> of an eligible payment, or as the refund at <Mono>close</Mono>
       </>
     ),
     check: (

@@ -17,10 +17,10 @@ Negotiation inputs, approved payment conditions and settlement records have diff
 
 | Piece | Where it is | Who can act | What cannot happen | Kill switch |
 | --- | --- | --- | --- | --- |
-| Agreement funds | USDC (NEP-141) in the agreement's own NEAR account, its code pinned by hash and no full-access key. Only the contract can send it, and only through `act`. | The buyer's agent, within the approved terms | A payment to anyone but the authorised recipient. An amount other than the approved one. A payment by the agent after revocation. | `revoke_agent`, by the buyer |
+| Agreement funds | USDC (NEP-141) in the agreement's own NEAR account, its code pinned by hash and no full-access key. Only the contract can send it: through `act`, the vendor's `claim` of an eligible payment to the authorised recipient, or the refund at `close`. | The buyer's agent, within the approved terms | A payment to anyone but the authorised recipient. An amount other than the approved one. A payment by the agent after revocation. | `revoke_agent`, by the buyer |
 | Mandates | Encrypted in the browser to a key that exists only inside the Sealed Table; on chain only as ciphertext and a commitment hash. Plaintext exists only inside the enclave, during the run. | The Sealed Table, during one negotiation | The other party, the operator or the app reading them | Nothing to switch off: the plaintext is gone when the run ends |
 | Negotiation | An OutLayer job; the two negotiators run on NEAR AI Cloud's private inference; one run per pair of commitments | The job | Terms outside either mandate's hard limits; terms not produced by the attested run | Both humans must approve the terms |
-| Payee record | On the contract, versioned; the recipient is a NEAR account listed in a file on the vendor's domain, fetched inside an enclave | The vendor proposes, the vendor's settlement authority approves, the buyer accepts; a change also waits `24 h` | A change by one key alone; a change without a fresh domain proof | The buyer can pause |
+| Payee record | On the contract, versioned; the recipient is a NEAR account listed in a file on the vendor's domain, fetched inside an enclave | The vendor proposes, the vendor's settlement authority approves, the buyer accepts; a change also waits `24 h` | A change by one key alone; a change without a fresh domain proof | The buyer or the vendor's settlement authority can cancel a pending change |
 
 ## What stays private, and what does not
 

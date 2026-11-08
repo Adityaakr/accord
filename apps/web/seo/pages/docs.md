@@ -14,7 +14,7 @@ Start with the reference flow, reproduce a refusal, and follow a payment through
 | OutLayer | The negotiation, the payee binding and the observer run in attested TDX enclaves. The contract accepts a result only when the job’s measurement is approved on OutLayer’s register contract and the commitments in the output match the ones on chain | `outlayer-verify job <id>` exits `0` |
 | The agreement contract | The approved terms are the only authority the agent has. Every refusal is an event with its reason | Read the events on the testnet explorer, or run `make attack` and watch them appear |
 | Named accounts and scoped keys | The agent’s key can call `act` on this contract and nothing else. `revoke` deletes it in the same transaction that flags the agreement | `near account list-keys <contract>` shows the key gone after `make attack` |
-| USDC on NEAR | The agreement’s USDC (NEP-141 on NEAR) sits in the agreement’s own account, and only the contract can send it, only through `act`, after the request is checked against the approved terms | `make pay` prints `payment_sent` with the amount, the recipient and the transaction link |
+| USDC on NEAR | The agreement’s USDC (NEP-141 on NEAR) sits in the agreement’s own account, and only the contract can send it: through `act` after the request is checked against the approved terms, through the vendor's `claim` of an eligible payment, or as the refund at `close` | `make pay` prints `payment_sent` with the amount, the recipient and the transaction link |
 
 ## What NEAR does not do here, yet:
 

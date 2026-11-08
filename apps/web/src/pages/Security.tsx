@@ -40,7 +40,7 @@ const PIECES_HEAD = ["Piece", "Where it is", "Who can act", "What cannot happen"
 const PIECES: Row[] = [
   [
     "Agreement funds",
-    <>USDC (NEP-141) in the agreement's own NEAR account, its code pinned by hash and no full-access key. Only the contract can send it, and only through <Mono>act</Mono>.</>,
+    <>USDC (NEP-141) in the agreement's own NEAR account, its code pinned by hash and no full-access key. Only the contract can send it: through <Mono>act</Mono>, the vendor's <Mono>claim</Mono> of an eligible payment to the authorised recipient, or the refund at <Mono>close</Mono>.</>,
     "The buyer's agent, within the approved terms",
     "A payment to anyone but the authorised recipient. An amount other than the approved one. A payment by the agent after revocation.",
     <><Mono tone="refusal">revoke_agent</Mono>, by the buyer</>,
@@ -64,7 +64,7 @@ const PIECES: Row[] = [
     "On the contract, versioned; the recipient is a NEAR account listed in a file on the vendor's domain, fetched inside an enclave",
     <>The vendor proposes, the vendor's settlement authority approves, the buyer accepts; a change also waits <Mono>24 h</Mono></>,
     "A change by one key alone; a change without a fresh domain proof",
-    "The buyer can pause",
+    "The buyer or the vendor's settlement authority can cancel a pending change",
   ],
 ]
 
