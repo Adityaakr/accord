@@ -73,7 +73,8 @@ const APP = {
   name: "Accord", applicationCategory: "BusinessApplication", applicationSubCategory: "Agent payments and negotiation infrastructure",
   operatingSystem: "Web", url: `${SITE_URL}/`, description: ABOUT, image: OG_IMAGE,
   featureList: CONTROLS.map((c) => `${c.name}: ${c.text}`),
-  offers: { "@type": "Offer", name: "Testnet", price: "0", priceCurrency: "USD", availability: "https://schema.org/InStock", description: "Free access for developers, coming soon. Planned: Accord Teams (subscription) and market-making agreements (per monitored market). No percentage-based Accord fee on payment amounts; production prices published before launch." },
+  isAccessibleForFree: true,
+  offers: { "@type": "Offer", name: "NEAR testnet", url: `${SITE_URL}/app/try-it`, price: "0", priceCurrency: "USD", availability: "https://schema.org/InStock", description: "Free on NEAR testnet with test USDC: open /app/try-it with a NEAR wallet. Mainnet follows an audit. Planned: Accord Teams (subscription) and market-making agreements (per monitored market). No percentage-based Accord fee on payment amounts; production prices are published before launch." },
   publisher: { "@id": `${SITE_URL}/#organization` },
 }
 
@@ -99,6 +100,16 @@ const CONTROL_LIST = {
   "@context": "https://schema.org", "@type": "ItemList", "@id": `${SITE_URL}/#features`, name: "Seven controls between an agent and the money",
   itemListElement: CONTROLS.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, description: c.text, url: `${SITE_URL}/#features` })),
 }
+/* /docs/quickstart: the /app/try-it walkthrough as HowTo steps (do X, see Y) */
+const TRY_HOW_TO = {
+  "@context": "https://schema.org", "@type": "HowTo", "@id": `${SITE_URL}/docs/quickstart#try-it`, name: "Run one Accord deal on NEAR testnet at /app/try-it",
+  description: "Connect a NEAR wallet, get test funds, open a deal room against Accord's demo vendor, let the demo agent pay, watch a redirect get refused and revoke the key. Everything is on NEAR testnet with test USDC.",
+  totalTime: "PT3M", estimatedCost: { "@type": "MonetaryAmount", currency: "USD", value: "0" },
+  tool: [{ "@type": "HowToTool", name: "A NEAR testnet wallet (Meteor, Intear, Ledger, Nightly or WalletConnect) through HOT Connect" }],
+  step: TRY_STEPS.map((t, i) => ({ "@type": "HowToStep", position: i + 1, name: t.name, text: `${t.do} You see: ${t.see}`, url: `${SITE_URL}/app/try-it` })),
+}
+const isDoc = (r) => r.path.startsWith("/docs/")
+const docsHome = () => ROUTES.find((r) => r.path === "/docs")
 const RUNTIME_DUPES = ["Organization", "SoftwareApplication", "WebSite", "WebPage", "BreadcrumbList"]
 
 function render(route, target = route) {
@@ -106,11 +117,18 @@ function render(route, target = route) {
   const url = `${SITE_URL}${target.path === "/" ? "/" : target.path}`
   const title = meta.title || `Accord: ${target.name}`
   const description = meta.description || target.summary
-  const crumbs = [{ name: "Accord", url: `${SITE_URL}/` }, ...(target.path === "/" ? [] : [{ name: target.name, url }])]
+  const crumbs = [{ name: "Accord", url: `${SITE_URL}/` }, ...(isDoc(target) ? [{ name: docsHome().name, url: `${SITE_URL}/docs` }] : []), ...(target.path === "/" ? [] : [{ name: target.name.replace(/^Docs: /, ""), url }])]
   const ld = [ORG, WEBSITE, APP,
     { "@context": "https://schema.org", "@type": "WebPage", "@id": `${url}#webpage`, url, name: title, description, isPartOf: { "@id": `${SITE_URL}/#website` }, about: { "@id": `${SITE_URL}/#software` }, primaryImageOfPage: OG_IMAGE, dateModified: TODAY, inLanguage: "en" },
     { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: c.url })) },
     ...(target.path === "/" ? [USE_CASE_LIST, HOW_TO, CONTROL_LIST, GLOSSARY_SET] : []),
+    ...(target.path === "/docs" || isDoc(target) ? [{
+      "@context": "https://schema.org", "@type": "TechArticle", "@id": `${url}#article`, url, headline: title.slice(0, 110), description,
+      dateModified: TODAY, inLanguage: "en", proficiencyLevel: "Beginner", image: OG_IMAGE,
+      author: { "@id": `${SITE_URL}/#organization` }, publisher: { "@id": `${SITE_URL}/#organization` },
+      about: { "@id": `${SITE_URL}/#software` }, isPartOf: { "@id": `${SITE_URL}/#website` }, mainEntityOfPage: { "@id": `${url}#webpage` },
+    }] : []),
+    ...(target.path === "/docs/quickstart" ? [TRY_HOW_TO] : []),
     ...(meta.ld || []).map((s) => { try { return JSON.parse(s) } catch { return null } }).filter((o) => o && !RUNTIME_DUPES.includes(o["@type"])),
   ].filter((o, i, all) => all.findIndex((x) => x["@type"] === o["@type"] && (x["@id"] || "") === (o["@id"] || "")) === i)
   const head = [
