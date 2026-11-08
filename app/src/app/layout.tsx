@@ -3,6 +3,7 @@ import { Host_Grotesk, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 import { Nav, Sidebar } from "@/components/Nav";
 import { WalletProvider } from "@/components/wallet/WalletProvider";
+import { OrgProvider } from "@/components/org/OrgProvider";
 import { AppConfigProvider } from "@/components/AppConfig";
 import { LogoMark } from "@/components/LogoMark";
 import { config } from "@/server/accord";
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <AppConfigProvider value={{ network: c.network, rpc: c.rpc, factory: c.factory, explorer: c.explorer }}>
         <WalletProvider network={c.label}>
+        <OrgProvider>
           <a href="#main" className="visually-hidden">Skip to content</a>
           <Nav network={c.label} />
           {c.network === "sandbox" && (
@@ -56,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span className="small mono">{c.label} · factory {c.factory}</span>
             </div>
           </footer>
+        </OrgProvider>
         </WalletProvider>
         </AppConfigProvider>
       </body>
