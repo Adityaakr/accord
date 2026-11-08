@@ -53,7 +53,7 @@ export function Docs() {
           </div>
         </header>
 
-        <Block b={{ kind: "figure", figure: "hero", caption: "Illustrative. [Deal rooms](/docs/quickstart) · [the agreement's steps](/docs/concepts#lifecycle) · [the activity and refusal log](/docs/concepts#refusals)" }} />
+        <Block b={{ kind: "figure", figure: "hero", caption: "Illustrative mock-up. On testnet today: procurement agreement [a6](/record), every step on chain. Inside the mock-up: [deal rooms](/docs/quickstart) · [the agreement's steps](/docs/concepts#lifecycle) · [the activity and refusal log](/docs/concepts#refusals)" }} />
 
         {GROUPS.map((g) => (
           <section key={g} className={styles.section}>

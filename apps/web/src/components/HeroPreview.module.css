@@ -72,7 +72,8 @@
 .main { background: #fff; border-radius: 0.45em 0.45em 0 0; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
 .mainHead { display: flex; align-items: center; gap: 0.7em; padding: 0.95em 1.1em; border-bottom: 0.08em solid #ececef; }
 .mainTitle { font-size: 1.02em; font-weight: 600; white-space: nowrap; }
-.tag { font-size: 0.66em; padding: 0.2em 0.6em; border-radius: 999px; background: #f1f1f3; color: #6b6f76; }
+/* the "Illustrative" chip: never below 11px, dark enough to read (the caption under the image says it in full) */
+.tag { font-size: max(0.8em, 11px); font-weight: 600; padding: 0.2em 0.65em; border-radius: 999px; background: #ececef; color: #3d4047; white-space: nowrap; }
 .btnGhost, .btnDark { font-size: 0.8em; padding: 0.45em 0.9em; border-radius: 0.4em; white-space: nowrap; }
 .btnGhost { border: 0.1em solid #dcdde1; color: #222; background: #fff; }
 .btnDark { background: #16171a; color: #fff; }

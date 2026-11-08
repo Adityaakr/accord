@@ -195,6 +195,11 @@ export function Hero() {
           <div className={styles.image}>
             <HeroPreview />
           </div>
+          {/* The mock-up shows the product's shape, not a running deployment: say so in words a visitor reads */}
+          <p className={`t-body-sm ${styles.caption}`}>
+            Illustrative mock-up. On testnet today: procurement agreement{" "}
+            <Link to={LINKS.record} className="ls-link-inline">a6</Link>, every step on chain.
+          </p>
         </Mount>
 
         {/* Action cards (mZ8KywPOa) */}
