@@ -1,8 +1,8 @@
 /* What runs on NEAR testnet today, with the transaction behind each claim (8 Nov 2026). Agreement a6.accord-v2.testnet
    ran the full flow on release 3 of factory accord-v2.testnet: the Sealed Table negotiation used the real NEAR AI model
    inside OutLayer's attested enclave; settlement is a test USDC token (tusdc.accord-v1.testnet). */
-const tx = (h: string) => `https://testnet.nearblocks.io/txns/${h}`
-const acct = (a: string) => `https://testnet.nearblocks.io/address/${a}`
+export const tx = (h: string) => `https://testnet.nearblocks.io/txns/${h}`
+export const acct = (a: string) => `https://testnet.nearblocks.io/address/${a}`
 
 export const TESTNET = {
   factory: "accord-v2.testnet",
@@ -48,15 +48,15 @@ export const INFRA = [
 ]
 
 /* make verify on a6, as it printed (8 Nov 2026): each check with what it means in plain words */
-export type Check = { id: string; name: string; meaning: string; ok: boolean }
+export type Check = { id: string; name: string; meaning: string; ok: boolean; href: string }
 export const CHECKS: Check[] = [
-  { id: "code", name: "Contract code", meaning: "Matches the published release", ok: true },
-  { id: "keys", name: "Agreement keys", meaning: "No full-access key", ok: true },
-  { id: "sealed", name: "Sealed outcome", meaning: "Signed inside the enclave", ok: true },
-  { id: "release", name: "Enclave release", meaning: "Needs the outlayer-verify tool", ok: false },
-  { id: "model", name: "Model attestation", meaning: "The real model, fresh nonce", ok: true },
-  { id: "payee", name: "Recipient", meaning: "Proven on the vendor's domain", ok: true },
-  { id: "record", name: "Record", meaning: "Payments match the receipts", ok: true },
+  { id: "code", name: "Contract code", meaning: "Matches the published release", ok: true, href: TESTNET.releaseUrl },
+  { id: "keys", name: "Agreement keys", meaning: "No full-access key", ok: true, href: `${acct("a6.accord-v2.testnet")}?tab=accesskeys` },
+  { id: "sealed", name: "Sealed outcome", meaning: "Signed inside the enclave", ok: true, href: tx("GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW") },
+  { id: "release", name: "Enclave release", meaning: "Needs the outlayer-verify tool", ok: false, href: "https://app.outlayer.ai/docs/trust-verification" },
+  { id: "model", name: "Model attestation", meaning: "The real model, fresh nonce", ok: true, href: "https://testnet-api.outlayer.ai/attestations/13596" },
+  { id: "payee", name: "Recipient", meaning: "Proven on the vendor's domain", ok: true, href: tx("6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6") },
+  { id: "record", name: "Record", meaning: "Payments match the receipts", ok: true, href: tx("2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ") },
 ]
 export const VERIFY_COMMAND = "make verify DEAL=a6.accord-v2.testnet"
 export const VERIFY_RAW = `accord verify · a6.accord-v2.testnet
@@ -68,3 +68,14 @@ model     z-ai/glm-5.3-flash · fresh nonce 9debe4c3… · nonce bound in the re
 payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · ok
 record    1 payments · 1 refusals · 0 exceptions · receipts match paid · ok
 verify: 6 checks ok · 1 not checked`
+
+/* Transactions behind agreement a6's record, so /verify's live rows link to the exact evidence for a6; any other
+   agreement links to its account's transaction list instead. */
+export const KNOWN_TX: Record<string, { payment: string; refusal: string; recipientApproval: string; release: string }> = {
+  "a6.accord-v2.testnet": {
+    payment: tx("2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ"),
+    refusal: tx("AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs"),
+    recipientApproval: tx("FBQnqtKXs5B5zn1A4F1yCDUmACYMqsi2zM2uez6YxDis"),
+    release: tx("7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh"),
+  },
+}

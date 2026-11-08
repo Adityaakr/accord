@@ -1,6 +1,4 @@
-/* /verify: one centred column (760px) in the home timeline's style: borderless rows, quiet small-caps group labels,
-   numbers in a thin left gutter, values and results right-aligned in mono, one hairline under the head and one above
-   the foot. Red only for a real failure. */
+/* /verify: page shell, the id field and the raw-output footer; rows, groups and links are styles/Timeline.module.css. */
 .page { width: 100%; display: flex; flex-direction: column; align-items: center; }
 .main { align-items: center; gap: 36px; padding: 0 0 104px; }
 
@@ -14,68 +12,23 @@
 .submit:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 3px; }
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-.timeline { width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 32px; }
-.head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--hairline); }
-.headLabel { font-size: 13px; color: var(--text-weak); }
-.headLink { min-width: 0; font-size: 12.5px; color: var(--text-medium); text-decoration: none; overflow-wrap: anywhere; text-align: right; }
-.headLink:hover { color: var(--text-strong); }
+.headLink { min-width: 0; font-size: 12.5px; overflow-wrap: anywhere; text-align: right; }
 
-.group { display: flex; flex-direction: column; gap: 6px; }
-.groupLabel { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0; padding-left: 44px; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-weak); }
-.lower { text-transform: none; letter-spacing: 0; font-family: var(--mono); font-size: 12px; }
-.groupMeta { text-transform: none; letter-spacing: 0; font-size: 11.5px; }
-
-.rows { list-style: none; margin: 0; padding: 0; position: relative; }
-.rows::before { content: ""; position: absolute; left: 13px; top: 14px; bottom: 14px; width: 1px; background: var(--hairline); }
-.row { position: relative; display: grid; grid-template-columns: 28px 150px minmax(0, 1fr) 84px; align-items: center; column-gap: 16px; min-height: 40px; }
-.num { position: relative; z-index: 1; justify-self: start; font-size: 11.5px; color: var(--text-weak); background: var(--background); padding: 2px 0; }
-.name { font-size: 15px; color: var(--text-strong); }
-.value { font-size: 12px; color: var(--text-medium); text-align: right; overflow-wrap: anywhere; }
-.meaning { font-size: 13.5px; color: var(--text-weak); text-align: right; }
-.status { justify-self: end; font-size: 12px; white-space: nowrap; }
-.ok { color: var(--teal); }
-.bad { color: var(--refusal); }
-.weak { color: var(--text-weak); }
-.shimmer { color: transparent; background: linear-gradient(90deg, rgba(var(--ink-rgb), 0.18) 0%, rgba(var(--ink-rgb), 0.55) 50%, rgba(var(--ink-rgb), 0.18) 100%) 0 0 / 200% 100%; -webkit-background-clip: text; background-clip: text; animation: shimmer 1.4s linear infinite; }
-@keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
-@media (prefers-reduced-motion: reduce) { .shimmer { animation: none; color: var(--text-weak); background: none; } }
-
-.note { margin: 6px 0 0; padding-left: 44px; font-size: 13px; line-height: 1.6; color: var(--text-weak); }
-.note :global(.mono) { font-size: 12.5px; color: var(--text-medium); }
-.noteLink { margin-left: 12px; color: var(--text-medium); text-decoration: none; white-space: nowrap; }
-.noteLink:first-of-type { margin-left: 4px; }
-.noteLink:hover { color: var(--text-strong); }
-
-.cmdRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; padding-left: 44px; }
-.cmd { min-width: 0; font-size: 13px; color: var(--text-strong); background: none; padding: 0; word-break: keep-all; }
-.prompt { color: var(--teal); margin-right: 10px; }
-.copy { flex: none; padding: 0; border: 0; background: none; font-family: var(--mono); font-size: 12px; color: var(--text-weak); cursor: pointer; }
-.copy:hover { color: var(--text-strong); }
-
-.foot { padding-top: 16px; border-top: 1px solid var(--hairline); }
 .foot summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-size: 13.5px; color: var(--text-medium); cursor: pointer; list-style: none; }
 .foot summary::-webkit-details-marker { display: none; }
-.foot summary .ok { font-size: 12.5px; }
+.foot summary :global(.mono) { font-size: 12.5px; }
 .sep { color: var(--text-weak); }
-.footLink { font-size: 12.5px; color: var(--text-medium); text-decoration: none; }
-.footLink:hover { color: var(--text-strong); }
+
 .toggle { color: var(--text-strong); }
 .foot summary:hover .toggle { text-decoration: underline; text-underline-offset: 3px; }
 .toggleIcon { transition: transform 160ms ease; }
 .foot[open] .toggleIcon { transform: rotate(180deg); }
-.raw { margin: 16px 0 0; padding: 0; font-family: var(--mono); font-size: 12px; line-height: 1.7; color: var(--text-medium); white-space: pre-wrap; overflow-wrap: anywhere; }
-.headLink:focus, .footLink:focus, .noteLink:focus, .foot summary:focus, .copy:focus { outline: none; }
-.headLink:focus-visible, .footLink:focus-visible, .noteLink:focus-visible, .foot summary:focus-visible, .copy:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 3px; border-radius: 3px; }
+.foot summary:focus { outline: none; }
+.foot summary:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 3px; border-radius: 3px; }
+/* The raw output keeps its columns: lines never wrap, the block scrolls sideways inside itself */
+.raw { margin: 16px 0 0; padding: 0 0 6px; overflow-x: auto; font-family: var(--mono); font-size: 12px; line-height: 1.7; color: var(--text-medium); white-space: pre; }
 
 @media (max-width: 1199.98px) { .main { padding: 0 24px 88px; } }
-@media (max-width: 809.98px) {
-  .main { gap: 28px; padding: 0 16px 72px; }
-  .timeline { gap: 26px; }
-  .row { grid-template-columns: 24px minmax(0, 1fr) 76px; grid-template-rows: auto auto; column-gap: 12px; padding: 7px 0; min-height: 0; }
-  .value, .meaning { grid-column: 2; grid-row: 2; text-align: left; }
-  .status { grid-column: 3; grid-row: 1 / span 2; }
-  .rows::before { left: 11px; }
-  .groupLabel, .note, .cmdRow { padding-left: 36px; }
-  .cmd { font-size: 12px; word-break: normal; }
-  .cmdRow { align-items: flex-start; padding-top: 8px; padding-bottom: 8px; }
-}
+@media (max-width: 809.98px) { .main { gap: 28px; padding: 0 16px 72px; } }
+.headValue, .seg { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
+.seg { white-space: normal; }
