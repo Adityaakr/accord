@@ -13,6 +13,7 @@ import { useWallet } from "@/components/wallet/WalletProvider";
 import { useAppConfig } from "@/components/AppConfig";
 import { Panel, Pill } from "@/components/ui";
 import { agreementClient, errorText, txLine } from "@/components/me/client";
+import { can, useOrg, type Capability } from "@/components/org/OrgProvider";
 import styles from "./actions.module.css";
 
 type Role = "buyer" | "vendor" | "authority" | "viewer";
@@ -24,6 +25,7 @@ export function Actions({
 }) {
   const w = useWallet();
   const cfg = useAppConfig();
+  const org = useOrg();
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
@@ -52,7 +54,18 @@ export function Actions({
   const open = (label: string, fn: () => Promise<unknown>) => () => void run(label, fn);
   const now = a.now;
   const entries: ReactNode[] = [];
-  const add = (key: string, node: ReactNode) => entries.push(<li key={key}>{node}</li>);
+  let hidden = 0;
+  // The organisation role shapes what is shown (an operator sees no Fund or Approve); the contract still checks the signer.
+  const capOf = (key: string): Capability =>
+    key === "seal" || key === "negotiate" ? "seal"
+    : key === "approve" || key === "cancel" || key.startsWith("ap-") ? "approve"
+    : key.startsWith("d-") ? "operate"
+    : key.startsWith("act-") || key.startsWith("cp-") || key === "close" ? "open"
+    : "treasury";
+  const add = (key: string, node: ReactNode) => {
+    if (can(org.role, capOf(key))) entries.push(<li key={key}>{node}</li>);
+    else hidden += 1;
+  };
 
   if (client) {
     const party = role === "buyer" || role === "vendor";
@@ -165,7 +178,11 @@ export function Actions({
       aside={role !== "viewer" ? <Pill tone="teal">{role}</Pill> : undefined}
     >
       {!w.accountId && <p className="small">Anyone can read this room. Only its buyer, vendor and settlement authority can act, each with their own wallet.</p>}
-      {w.accountId && entries.length === 0 && <p className="small">Nothing for you to do here right now.</p>}
+      {w.accountId && entries.length === 0 && hidden === 0 && <p className="small">Nothing for you to do here right now.</p>}
+      {hidden > 0 && <p className="small">{hidden === 1 ? "One action here is" : `${hidden} actions here are`} for other roles in {org.data?.org?.name ?? "your organisation"}. Your role is <span className="mono">{org.role}</span>; an admin can change it in Settings.</p>}
+      {org.data?.org && w.accountId && role === "viewer" && (
+        <p className="small">Your wallet is not one of this room&apos;s parties. Only <span className="mono">{a.buyer}</span> can sign its buyer actions, whatever role {org.data.org.name} gives you.</p>
+      )}
       {entries.length > 0 && <ul className={styles.list}>{entries}</ul>}
       {agentSecret && (
         <div className={styles.secret} role="alert">

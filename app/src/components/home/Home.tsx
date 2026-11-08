@@ -10,6 +10,7 @@ import type { Portfolio } from "@/server/data";
 import { useWallet } from "../wallet/WalletProvider";
 import { SignInCard } from "../SignInCard";
 import { Stage } from "../Stage";
+import { OrgStrip } from "../org/OrgStrip";
 import { Pill, StatePill, Usdc } from "../ui";
 import styles from "./Home.module.css";
 
@@ -67,6 +68,8 @@ export function Home() {
         </div>
         <Link href="/agreements/new" className={styles.primary}>New deal room</Link>
       </div>
+
+      <OrgStrip />
 
       {error && <div className={styles.error} role="alert"><p className="h5">The chain could not be read</p><p className="small mono">{error}</p></div>}
       {!data && !error && <div className={styles.loading} aria-busy="true"><span /><span /><span /></div>}
