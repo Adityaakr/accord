@@ -7,8 +7,9 @@ Each entry names the `PROGRESS.md` item it blocks. Remove an entry when it is do
 The full procurement flow runs on testnet (`a6.accord-v2.testnet`, DECISIONS 21). `make atlas NET=testnet` asks the
 observer through OutLayer's HTTPS API, which needs `OUTLAYER_PAYMENT_KEY` in `.env`; it is not set.
 
-1. Create a payment key for `accord-v1.testnet` in OutLayer's dashboard (https://outlayer.fastnear.com, testnet) and fund it.
-2. Put it in `.env` as `OUTLAYER_PAYMENT_KEY=…` and tell me; I run `make atlas NET=testnet`.
+1. `outlayer keys create --project accord-v1.testnet/accord-observer`, then `outlayer keys topup` (top-ups are paid in
+   OutLayer's stablecoin, which the testnet accounts do not hold).
+2. Put the key (`outlayer keys show`) in `.env` as `OUTLAYER_PAYMENT_KEY=…` and tell me; I run `make atlas NET=testnet`.
 
 ## Signed-in app screenshots on testnet
 
