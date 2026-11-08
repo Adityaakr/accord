@@ -170,13 +170,163 @@ How it works
 
 ## How a deal room works.
 
-- `01` · Sealed Each company sets its limits in the browser and seals them. Only the sealed mandate and its commitment hash go on NEAR; the other side never sees the numbers.
+One agreement from sealed limits to a settled payment, in six steps. The example is the market-making room above.
 
-- `02` · Attested The Sealed Table negotiates inside an attested enclave; code checks the result against both mandates' limits; the terms are recorded with an attestation anyone can verify.
+- `01` · Sealed Each side seals its limits
 
-- `03` · Executing Both companies approve, and the buyer funds the agreement's USDC escrow on NEAR. The agent holds one key for one method; a payment must match the approved milestone, amount and recipient, or it is refused and recorded.
+- `02` · Attested Agents negotiate in the enclave
 
-- `04` · Settled Payments complete under the agreed conditions, people decide the exceptions, and the record remains.
+- `03` · Approved Both companies approve and fund
+
+- `04` · Executing The agent pays inside the rules
+
+- `05` · Checked Evidence decides each payment
+
+- `06` · Settled Paid, recorded, checkable
+
+Step 01 of 06
+
+### Sealed: each side seals its limits.
+
+Each company sets its limits in the browser, such as a price ceiling and the conditions it needs, and seals them. The mandate is encrypted to a key that exists only inside the Sealed Table's enclave.
+
+Who acts
+
+Each company, in its own browser
+
+On NEAR
+
+The sealed mandate as ciphertext and its commitment hash
+
+Cannot happen
+
+The other side, the operator or the app reading the numbers
+
+Agreement record · NEAR/USDC retainer Sealed
+
+buyer mandate sealed · commitment 9f3c…a1 seller mandate sealed · commitment 41de…7b ceiling hidden
+
+Illustrative values
+
+Step 02 of 06
+
+### Attested: agents negotiate in the enclave.
+
+Both companies' agents negotiate inside the Sealed Table, an attested enclave. Code checks every proposal against both mandates' hard limits, and the agreed terms come out with an attestation anyone can verify.
+
+Who acts
+
+Both agents, inside the enclave
+
+On NEAR
+
+The agreed terms, the sealed outcome and the attestation
+
+Cannot happen
+
+Terms outside either side's limits; a mandate leaving the enclave
+
+Agreement record · NEAR/USDC retainer Attested
+
+round 1 19,800 USDC · above buyer limit round 2 18,500 USDC · inside both limits attestation verified
+
+Illustrative values
+
+Step 03 of 06
+
+### Approved: both companies approve and fund.
+
+People at both companies read the terms and approve them. Payee binds the recipient: the vendor proves its domain and its settlement authority approves the account. The buyer then funds the agreement's USDC escrow on NEAR.
+
+Who acts
+
+A person at each company
+
+On NEAR
+
+Both approvals, the authorised recipient and the escrowed USDC
+
+Cannot happen
+
+Terms taking effect before both sides approve
+
+Agreement record · NEAR/USDC retainer Executing
+
+approved buyer ✓ · seller ✓ recipient halcyon-mm.testnet · bound to halcyon.example escrow funded · USDC on NEAR
+
+Illustrative values
+
+Step 04 of 06
+
+### Executing: the agent pays inside the rules.
+
+The buyer's agent holds one key that can call one method, act. Each payment must match the approved milestone, amount and recipient; anything else is refused and recorded, whatever the agent was told.
+
+Who acts
+
+The buyer's agent, through act
+
+On NEAR
+
+Every payment and every refusal with its reason
+
+Cannot happen
+
+A payment to another account, a different amount or an early payment
+
+Agreement record · NEAR/USDC retainer Executing
+
+act · period 1 18,500 → halcyon-mm act · new account ERR_PAYEE_MISMATCH act · 25,000 ERR_AMOUNT_MISMATCH
+
+Illustrative values
+
+Step 05 of 06
+
+### Checked: evidence decides each payment.
+
+A payment becomes eligible only when the agreed evidence is recorded. For a market-making agreement, an attested observer reads the pool at hidden times; elsewhere it is delivery acceptance or a reviewer's approval. Otherwise the payment is withheld.
+
+Who acts
+
+An attested observer or the named reviewer; a keeper triggers scheduled steps
+
+On NEAR
+
+Each observation or acceptance, and the period's result
+
+Cannot happen
+
+The keeper moving funds or changing an outcome
+
+Agreement record · NEAR/USDC retainer Executing
+
+spread ≤ 60 bps 5 of 6 slots depth ≥ 12,000 4 of 6 slots period 1 4 of 6 passed · eligible
+
+Illustrative values
+
+Step 06 of 06
+
+### Settled: paid, recorded, checkable.
+
+Eligible payments complete to the authorised recipient in USDC. People decide the exceptions, the buyer can revoke the agent's key in one transaction, and the record remains for anyone to check with one command.
+
+Who acts
+
+The contract pays; people decide exceptions
+
+On NEAR
+
+The transfer, any exception and the full record
+
+Cannot happen
+
+A payment being reversed or redirected after the fact
+
+Agreement record · NEAR/USDC retainer Settled
+
+transfer 18,500 USDC → halcyon-mm.testnet exceptions none open make verify 7 checks ok
+
+Illustrative values
 
 Core features
 

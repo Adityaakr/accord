@@ -1,142 +1,173 @@
-/* How it works (#how): template content-section rhythm (as Overview WaR1fWHPo) */
+/* How it works (#how): the template section rhythm, the stepper (hairline + 14×8 pills, H6 titles) and one detail
+   panel in the template card (Elevation Strong, radius 4). Teal marks progress and passes; refusal red only for
+   refusals. Six steps across on desktop, three × two on tablet, a horizontal scroller on phone. */
 .section {
-  gap: 64px;
-  padding: 72px 0px 72px 0px;
+  gap: 48px;
+  padding: 72px 0;
   justify-content: center;
   scroll-margin-top: 40px;
 }
+.flow { width: 100%; }
 
-/* Steps row: the hero's Action-card row (mZ8KywPOa, gap 40), four equal columns on one hairline */
+/* ---------- the stepper ---------- */
 .steps {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  column-gap: 40px;
-  row-gap: 40px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  column-gap: 24px;
   width: 100%;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  margin-bottom: 24px;
 }
-
-/* One step: pill marker above the card, gap 20 */
 .step {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-start;
-  gap: 20px;
+  gap: 8px;
   min-width: 0;
-  height: auto;
+  padding: 0 0 4px;
+  text-align: left;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
 }
-/* Each step draws its segment of the stepper line through the pill's centre; the line runs across the column gap
-   to the next step and stops at the row's end */
+/* each step draws its segment of the hairline through the pill's centre, across the gap to the next step */
 .step::before {
   content: "";
   position: absolute;
   top: 3.5px;
   left: 0;
-  right: -40px;
+  right: -24px;
   height: 1px;
   background: var(--hairline);
 }
 .step:last-child::before { right: 0; }
+.done::before { background: rgba(145, 207, 181, 0.45); }
+:global([data-theme="light"]) .done::before { background: rgba(36, 133, 102, 0.45); }
 
-/* Template indicator pill (14×8, radius 9999, White). At rest a step's pill sits at White 35%; the highlighted step
-   (hovered, keyboard-focused, or the pre-highlighted "03 · Executing") takes it to full White over 120ms. */
+/* the auto-advance timer runs along the active step's segment */
+.timer {
+  position: absolute;
+  top: 3px;
+  left: 0;
+  right: -24px;
+  height: 2px;
+  background: var(--teal);
+  transform-origin: left;
+  animation: timer 6.5s linear forwards;
+}
+.step:last-child .timer { right: 0; }
+
 .node {
   position: relative;
   z-index: 1;
   display: block;
-  flex: 0 0 auto;
   width: 14px;
   height: 8px;
+  margin-bottom: 12px;
   border-radius: 9999px;
   background: rgba(var(--ink-rgb), 0.35);
   transition: background-color 120ms ease;
 }
-.step:hover .node,
-.step:focus-visible .node,
-.active .node { background: var(--white); }
+.done .node { background: rgba(145, 207, 181, 0.7); }
+.active .node, .step:hover .node { background: var(--white); }
 
-/* Keyboard focus ring on a step (spec §1.7: focus does what hover does) */
+.heading { color: var(--text-medium); transition: color 120ms ease; }
+.active .heading, .step:hover .heading { color: var(--text-strong); }
+.num { font-weight: 400; }
+.short { color: var(--text-weak); }
+.active .short { color: var(--text-medium); }
+
 .step { outline: none; }
-.step:focus-visible {
-  outline: 2px solid rgba(var(--ink-rgb), 0.5);
-  outline-offset: 4px;
+.step:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 6px; border-radius: 2px; }
+
+/* ---------- the panel ---------- */
+.panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 32px;
+  padding: 32px;
+  border-radius: 4px;
+  background: var(--elevation-strong);
+  animation: panelIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
+.panel[hidden] { display: none; }
 
-/* While another step is hovered or focused, the pre-highlighted step rests like the others */
-.steps:hover .active:not(:hover) .node,
-.steps:focus-within .active:not(:focus-visible) .node { background: rgba(var(--ink-rgb), 0.35); }
-.steps:hover .active:not(:hover) .heading,
-.steps:focus-within .active:not(:focus-visible) .heading { color: var(--text-medium); }
-.steps:hover .active:hover .node,
-.steps:focus-within .active:focus-visible .node { background: var(--white); }
-.steps:hover .active:hover .heading,
-.steps:focus-within .active:focus-visible .heading { color: var(--text-strong); }
+.text { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.kicker { font-size: 12px; letter-spacing: 0.04em; color: var(--text-weak); background: none; padding: 0; }
+.title { font-family: "Host Grotesk", sans-serif; font-weight: 500; font-size: 24px; line-height: 1.25; letter-spacing: -0.02em; color: var(--text-strong); text-wrap: balance; }
+.body { font-size: 15px; line-height: 1.6; color: var(--text-medium); max-width: 58ch; }
 
-/* Action card (BE0Kc14HI / Default): vertical, gap 8, align start, width 1fr */
-.card {
+.facts { display: flex; flex-direction: column; gap: 10px; margin: 8px 0 0; }
+.facts > div { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; padding-top: 10px; border-top: 1px solid rgba(var(--ink-rgb), 0.07); }
+.facts dt { font-size: 12px; letter-spacing: 0.02em; color: var(--text-weak); padding-top: 2px; }
+.facts dd { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-strong); }
+.never dd { color: var(--text-medium); }
+
+/* the agreement record */
+.record {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 8px;
-  width: 100%;
-  height: auto;
+  gap: 16px;
+  min-width: 0;
+  padding: 20px;
+  border-radius: 4px;
+  background: rgba(var(--ink-rgb), 0.025);
+  border: 1px solid rgba(var(--ink-rgb), 0.07);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.5;
 }
-.heading {
-  width: 100%;
-  height: auto;
-  color: var(--text-medium);
-  transition: color 120ms ease;
-}
-.step:hover .heading,
-.step:focus-visible .heading,
-.active .heading { color: var(--text-strong); }
-.num { font-weight: 400; }
-.body {
-  width: 100%;
-  height: auto;
-}
+.recordHead { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--text-weak); }
+.state { padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(145, 207, 181, 0.5); color: var(--text-strong); background: rgba(145, 207, 181, 0.08); white-space: nowrap; }
+:global([data-theme="light"]) .state { border-color: rgba(36, 133, 102, 0.5); background: rgba(36, 133, 102, 0.08); }
+.lines { display: flex; flex-direction: column; }
+.line { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid rgba(var(--ink-rgb), 0.06); }
+.line:last-child { border-bottom: 0; }
+.lk { color: var(--text-weak); white-space: nowrap; }
+.pass { color: var(--text-strong); text-align: right; }
+.pass::before { content: "✓"; color: var(--teal); margin-right: 8px; }
+.weak { color: var(--text-weak); text-align: right; }
+.refuse { color: var(--refusal); background: var(--refusal-bg); padding: 2px 8px; border-radius: 4px; font-size: 11.5px; }
+.track { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: auto; }
+.track i { height: 3px; border-radius: 2px; background: rgba(var(--ink-rgb), 0.1); }
+.track .trackOn { background: var(--teal); }
+.illus { font-size: 11px; color: var(--text-weak); }
 
-/* ---------- Tablet: gap 48, padding 72/24; two columns, card gap 32 ---------- */
+@keyframes timer { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes panelIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) { .panel, .timer { animation: none; } }
+
+/* ---------- Tablet: three steps per row ---------- */
 @media (max-width: 1199.98px) {
-  .section { gap: 48px; padding: 72px 24px 72px 24px; }
-  .steps {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-rows: 1fr; /* both rows the same height: the four cards stay equal */
-    column-gap: 32px;
-    row-gap: 40px;
-  }
-  .step::before { right: -32px; }
-  .step:nth-child(2n)::before { right: 0; }
+  .section { gap: 40px; padding: 72px 24px; }
+  .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 28px; }
+  .step:nth-child(3n)::before, .step:nth-child(3n) .timer { right: 0; }
+  .panel { grid-template-columns: 1fr; }
 }
 
-/* ---------- Phone: gap 32, padding 72/16; one column, the stepper runs vertically ---------- */
+/* ---------- Phone: the stepper scrolls sideways inside its own row; the panel stacks ---------- */
 @media (max-width: 809.98px) {
-  .section { gap: 32px; padding: 72px 16px 72px 16px; }
+  .section { gap: 32px; padding: 72px 16px; }
   .steps {
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: 24px;
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    margin: 0 0 20px;
+    scroll-padding-left: 0;
   }
-  .step {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 16px;
-  }
-  /* Pill centred on the H6's first line (16px × 110% = 17.6px) */
-  .node { margin-top: 5px; }
-  .step::before {
-    top: -12px;
-    bottom: -12px;
-    left: 6.5px;
-    right: auto;
-    width: 1px;
-    height: auto;
-  }
-  .step:first-child::before { top: 9px; }
-  .step:last-child::before { bottom: calc(100% - 9px); }
-  .step:nth-child(2n)::before { right: auto; }
+  .steps::-webkit-scrollbar { display: none; }
+  .step { flex: 0 0 150px; scroll-snap-align: start; }
+  .step::before, .timer { right: -20px; }
+  .step:nth-child(3n)::before, .step:nth-child(3n) .timer { right: -20px; }
+  .step:last-child::before, .step:last-child .timer { right: 0; }
+  .panel { padding: 20px 16px; gap: 20px; }
+  .title { font-size: 20px; }
+  .facts > div { grid-template-columns: 1fr; gap: 2px; }
+  .line { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .pass, .weak { text-align: left; }
 }
