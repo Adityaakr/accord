@@ -1,8 +1,5 @@
 {
   "title": "Accord docs: Verify an agreement",
   "description": "Check any Accord agreement from public data with one command and no keys, or run five of the checks in the browser at /verify.",
-  "ld": [
-    "{\"@context\":\"https://schema.org\",\"@type\":\"Organization\",\"name\":\"Accord\",\"url\":\"/\",\"description\":\"The private deal room and control plane for agent-to-agent commerce.\"}",
-    "{\"@context\":\"https://schema.org\",\"@type\":\"SoftwareApplication\",\"name\":\"Accord\",\"applicationCategory\":\"BusinessApplication\",\"operatingSystem\":\"Web\",\"description\":\"Accord turns private negotiations between agents into enforceable payment rules. Both companies approve the terms, and a NEAR contract enforces who pays, who receives, how much and on what evidence.\"}"
-  ]
+  "ld": []
 }

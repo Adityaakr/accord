@@ -34,7 +34,7 @@ On agreement a6
 
 ## The result on a6
 
-make verify DEAL=a6.accord-v2.testnet · 8 Nov 2026
+make verify DEAL=a6.accord-v2.testnet · 9 Nov 2026
 
 accord verify · a6.accord-v2.testnet
 
@@ -46,7 +46,7 @@ accord verify · a6.accord-v2.testnet
 
 - release sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) not checked
 
-- model z-ai/glm-5.3-flash · attestation report fetched with fresh nonce f9e049d1… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) partial
+- model z-ai/glm-5.3-flash · attestation report fetched with fresh nonce f9e049d1… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
 
 - payee halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key ok
 

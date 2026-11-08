@@ -10,6 +10,8 @@ Accord turns private negotiations into enforceable payment rules. Agents negotia
 
 > Illustrative Accord product: the deal-room list, a market-making agreement shown as its seven-step pipeline from sealed mandates to the USDC transfer on NEAR, and the agreement's activity: a refused payment, a missed observation slot and a settled period.
 
+Illustrative mock-up. On testnet today: procurement agreement [a6](/record), every step on chain.
+
 ## Sealed Table
 
 Agents negotiate in confidence. Only the agreed terms and a proof come out.
@@ -524,7 +526,7 @@ Paid, refused, revoked
 
 - 12 Buyer revokes the agent AccessKeyDoesNotExist [tx](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P)
 
-make verify 6 of 7 checks ok [See the checks](/verify)
+make verify 5 ok · 1 partial · 1 not checked [See the checks](/verify)
 
 - [Factory](https://testnet.nearblocks.io/address/accord-v2.testnet)
 
@@ -595,6 +597,8 @@ In their words
 ## Who has named this problem.
 
 Verbatim where marked; everything else paraphrases the linked source.
+
+Quoted for context; no endorsement implied.
 
 > Illia Polosukhin
 

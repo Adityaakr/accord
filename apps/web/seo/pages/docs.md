@@ -8,7 +8,7 @@ Accord is the private deal room and control plane for agent-to-agent commerce. A
 
 > Illustrative Accord product: the deal-room list, a market-making agreement shown as its seven-step pipeline from sealed mandates to the USDC transfer on NEAR, and the agreement's activity: a refused payment, a missed observation slot and a settled period.
 
-Illustrative. [Deal rooms](/docs/quickstart) · [the agreement's steps](/docs/concepts#lifecycle) · [the activity and refusal log](/docs/concepts#refusals)
+Illustrative mock-up. On testnet today: procurement agreement [a6](/record), every step on chain. Inside the mock-up: [deal rooms](/docs/quickstart) · [the agreement's steps](/docs/concepts#lifecycle) · [the activity and refusal log](/docs/concepts#refusals)
 
 ## Get started
 
