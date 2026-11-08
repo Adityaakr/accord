@@ -187,3 +187,183 @@ export async function portfolio(account: string): Promise<Portfolio> {
   out.topCode = top ? { code: top[0], count: top[1] } : null;
   return out;
 }
+
+// ---------- Approvals, Agents, Recipients (PLATFORM.md §6): read models across one person's rooms ----------
+
+export type ApprovalKind = "seal" | "terms" | "recipient-approve" | "recipient-accept" | "delivery" | "exception" | "period";
+
+export interface ApprovalItem {
+  key: string;
+  kind: ApprovalKind;
+  room: string;
+  title: string;
+  role: Role;
+  /** What is waiting, in a few words */
+  what: string;
+  detail: string;
+  /** In token base units, when the decision is about an amount */
+  amount: string | null;
+  /** The account the money would go to, when there is one */
+  recipient: string | null;
+  /** When it started waiting (unix seconds) */
+  at: number;
+  /** The exception id, item id, recipient version or period index the action takes */
+  ref: number | null;
+  termsHash: string | null;
+  /** For a recipient decision: the lookalike rating */
+  rating: string | null;
+  href: string;
+}
+
+export interface Approvals { account: string; items: ApprovalItem[]; source: Source }
+
+function rolesIn(view: AgreementView, account: string): Role[] {
+  const roles: Role[] = [];
+  if (view.buyer === account) roles.push("buyer");
+  if (view.vendor === account) roles.push("vendor");
+  if (view.vendor_authority === account) roles.push("authority");
+  return roles;
+}
+
+export async function approvals(account: string): Promise<Approvals> {
+  const a = accord();
+  const [records, src] = await Promise.all([a.listAgreements({ party: account }), source()]);
+  const items: ApprovalItem[] = [];
+  await Promise.all(records.map(async (record) => {
+    const d = a.agreement(record.account);
+    const view = await d.get().catch(() => null);
+    if (!view) return;
+    const roles = rolesIn(view, account);
+    const isBuyer = roles.includes("buyer"), isVendor = roles.includes("vendor"), isAuthority = roles.includes("authority");
+    const [its, exceptions, recipients, periods, commitments] = await Promise.all([
+      d.items().catch(() => [] as ItemView[]), d.exceptions().catch(() => [] as ExceptionView[]),
+      d.recipients().catch(() => [] as RecipientVersion[]), d.periods().catch(() => [] as PeriodView[]),
+      d.commitments().catch(() => ({ buyer: null, vendor: null })),
+    ]);
+    const room = record.account, title = view.title, href = `/agreements/${room}`;
+    const payee = view.recipient?.account ?? null;
+    const push = (x: Omit<ApprovalItem, "room" | "title" | "href" | "key"> & { href?: string }) =>
+      items.push({ room, title, href: x.href ?? href, key: `${room}:${x.kind}:${x.ref ?? ""}:${x.role}`, ...x });
+    const base = { amount: null, recipient: null, ref: null, termsHash: null, rating: null };
+
+    if (view.state === "Sealed" && view.negotiation === "AwaitingMandates") {
+      for (const r of (["buyer", "vendor"] as const)) {
+        if (roles.includes(r) && !commitments[r]) {
+          push({ ...base, kind: "seal", role: r, what: "Seal your limits", detail: "The negotiation starts once both mandates are sealed.", at: record.created_at, href: `${href}/seal` });
+        }
+      }
+    }
+    if (view.state === "Attested" && view.terms_hash) {
+      const sealedAt = Math.max(commitments.buyer?.at ?? 0, commitments.vendor?.at ?? 0, record.created_at);
+      for (const r of (["buyer", "vendor"] as const)) {
+        if (roles.includes(r) && !view.approvals[r]) {
+          push({ ...base, kind: "terms", role: r, what: "Approve the terms", detail: "The agreed terms wait for your approval.", amount: view.total, recipient: payee, termsHash: view.terms_hash, at: sealedAt });
+        }
+      }
+    }
+    for (const v of recipients) {
+      if (isAuthority && v.status === "Proven") {
+        push({ ...base, kind: "recipient-approve", role: "authority", what: "Approve the recipient", detail: `Proven against ${v.domain}.`, recipient: v.account, ref: v.version, rating: v.rating, at: v.proposed_at });
+      }
+      if (isBuyer && v.status === "AuthorityApproved") {
+        push({ ...base, kind: "recipient-accept", role: "buyer", what: "Accept the recipient", detail: `Approved by ${view.vendor_authority} for ${v.domain}.`, recipient: v.account, ref: v.version, rating: v.rating, at: v.proposed_at });
+      }
+    }
+    if (isBuyer) {
+      for (const it of its) {
+        if (it.status === "Delivered" && it.delivery && it.delivery.window_end > view.now) {
+          push({ ...base, kind: "delivery", role: "buyer", what: "Review a delivery", detail: `Item ${it.id} · accept or dispute before the window closes.`, amount: it.due_amount, recipient: payee, ref: it.id, at: it.delivery.at });
+        }
+      }
+      for (const e of exceptions) {
+        if (e.status === "pending") {
+          push({ ...base, kind: "exception", role: "buyer", what: "Decide an exception", detail: `Asked by the ${e.by}: ${e.reason}`, amount: e.amount, recipient: payee, ref: e.id, at: e.at });
+        }
+      }
+      for (const p of periods) {
+        if (p.outcome === "Review" || p.outcome === "Withheld") {
+          push({ ...base, kind: "period", role: "buyer", what: "Resolve a period", detail: `Period ${p.period + 1}: ${p.passed} of ${p.observed} observations passed${p.conflict ? ", readings disagree" : ""}.`, recipient: payee, ref: p.period, at: p.ends_at ?? record.created_at });
+        }
+      }
+    }
+    void isVendor;
+  }));
+  items.sort((x, y) => y.at - x.at || x.title.localeCompare(y.title));
+  return { account, items, source: src };
+}
+
+export interface AgentRow {
+  room: string;
+  title: string;
+  state: string;
+  key: string | null;
+  status: "active" | "revoked" | "none";
+  revoked: number;
+  lastCall: number | null;
+  payments: number;
+  refusals: number;
+  topCode: string | null;
+}
+
+export async function agents(account: string): Promise<{ account: string; rows: AgentRow[]; source: Source }> {
+  const a = accord();
+  const [records, src] = await Promise.all([a.listAgreements({ party: account }), source()]);
+  const rows: AgentRow[] = [];
+  await Promise.all(records.map(async (record) => {
+    const d = a.agreement(record.account);
+    const view = await d.get().catch(() => null);
+    if (!view || view.buyer !== account) return;
+    const [refusals, receipts] = await Promise.all([d.refusals(undefined, 128).catch(() => [] as Refusal[]), d.receipts().catch(() => [] as Receipt[])]);
+    const byAgent = refusals.filter((r) => r.via === "agent");
+    const paid = receipts.filter((r) => r.via === "agent");
+    const calls = byAgent.map((r) => r.at).concat(paid.map((r) => r.at));
+    const codes = new Map<string, number>();
+    for (const r of byAgent) codes.set(r.code, (codes.get(r.code) ?? 0) + 1);
+    const top = [...codes.entries()].sort((x, y) => y[1] - x[1])[0];
+    rows.push({
+      room: record.account, title: view.title, state: view.state, key: view.agent_key,
+      status: view.agent_key ? "active" : view.revoked_keys > 0 ? "revoked" : "none", revoked: view.revoked_keys,
+      lastCall: calls.length ? Math.max(...calls) : null, payments: paid.length, refusals: byAgent.length, topCode: top ? top[0] : null,
+    });
+  }));
+  const order = { active: 0, none: 1, revoked: 2 } as const;
+  rows.sort((x, y) => order[x.status] - order[y.status] || x.title.localeCompare(y.title));
+  return { account, rows, source: src };
+}
+
+export interface RecipientRow {
+  room: string;
+  title: string;
+  roles: Role[];
+  buyer: string;
+  vendor: string;
+  authority: string;
+  now: number;
+  current: { version: number; account: string; domain: string; activeAt: number | null; proposedAt: number } | null;
+  pending: { version: number; account: string; domain: string; status: string; proposedAt: number; activeAt: number | null; rating: string | null } | null;
+}
+
+const PENDING = new Set(["Proposed", "Proven", "AuthorityApproved", "Accepted"]);
+
+export async function recipients(account: string): Promise<{ account: string; rows: RecipientRow[]; source: Source }> {
+  const a = accord();
+  const [records, src] = await Promise.all([a.listAgreements({ party: account }), source()]);
+  const rows: RecipientRow[] = [];
+  await Promise.all(records.map(async (record) => {
+    const d = a.agreement(record.account);
+    const view = await d.get().catch(() => null);
+    if (!view) return;
+    const versions = await d.recipients().catch(() => [] as RecipientVersion[]);
+    const cur = versions.find((v) => v.status === "Active") ?? null;
+    const pen = versions.find((v) => PENDING.has(v.status)) ?? null;
+    if (!cur && !pen) return;
+    rows.push({
+      room: record.account, title: view.title, roles: rolesIn(view, account), buyer: view.buyer, vendor: view.vendor,
+      authority: view.vendor_authority, now: view.now,
+      current: cur && { version: cur.version, account: cur.account, domain: cur.domain, activeAt: cur.active_at, proposedAt: cur.proposed_at },
+      pending: pen && { version: pen.version, account: pen.account, domain: pen.domain, status: pen.status, proposedAt: pen.proposed_at, activeAt: pen.active_at, rating: pen.rating },
+    });
+  }));
+  rows.sort((x, y) => Number(!!y.pending) - Number(!!x.pending) || x.title.localeCompare(y.title));
+  return { account, rows, source: src };
+}
