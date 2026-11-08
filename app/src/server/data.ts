@@ -2,7 +2,7 @@
 
 import "server-only";
 import type {
-  AgreementRecord, AgreementView, ExceptionView, ItemView, PeriodView, Receipt, RecipientVersion, Refusal, Terms,
+  AgreementRecord, AgreementView, Commitment, ExceptionView, ItemView, PeriodView, Receipt, RecipientVersion, Refusal, Terms,
   StoredObservation,
 } from "@accord/sdk";
 import { accord, source, type Source } from "./accord";
@@ -29,17 +29,19 @@ export interface Room {
   periods: PeriodView[];
   observations: StoredObservation[][];
   receipts: Receipt[];
+  /** Each side's sealed mandate commitment (public: ciphertext and hash only), or null before it seals */
+  commitments: { buyer: Commitment | null; vendor: Commitment | null };
   source: Source;
 }
 
 export async function room(id: string): Promise<Room> {
   const d = accord().agreement(id);
-  const [view, terms, items, refusals, recipients, exceptions, periods, receipts, src] = await Promise.all([
+  const [view, terms, items, refusals, recipients, exceptions, periods, receipts, commitments, src] = await Promise.all([
     d.get(), d.terms(), d.items(), d.refusals(undefined, 128), d.recipients(), d.exceptions(), d.periods(), d.receipts(),
-    source(),
+    d.commitments().catch(() => ({ buyer: null, vendor: null })), source(),
   ]);
   const observations = await Promise.all(periods.map((p) => d.observations(p.period)));
-  return { view, terms, items, refusals: refusals.reverse(), recipients, exceptions, periods, observations, receipts, source: src };
+  return { view, terms, items, refusals: refusals.reverse(), recipients, exceptions, periods, observations, receipts, commitments, source: src };
 }
 
 // ---------- Home: one person's rooms, what needs them, and the numbers (PLATFORM.md §7) ----------
