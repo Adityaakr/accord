@@ -327,3 +327,37 @@ Kept as stated limits: an item can be reopened from `AssumedPaid` by one excepti
 - **No NEP-413 for email users:** browser-sdk 1.4.2 has no message signing, and a NEAR Auth signature is the public result of an on-chain call, so it can never seed the document key. Email users approve and fund; sealing a mandate shows "Seal with a wallet". "Confirm it's you" uses the verified login instead of a signed message.
 - **Callback origin:** the shared testnet client only accepts `http://localhost:3000` as a redirect. Locally, email sign-in works when the app is served on port 3000; a hosted app needs its own NEAR Auth credentials registered for its domain (`NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID`). Verified 8 Nov: the popup reaches `login.testnet.fast-auth.com/u/login/identifier` (email, passkey, Google).
 - **Not verified headlessly:** completing a real email login, the account funding, and an MPC-signed transaction. They need a person to log in once.
+
+## 21. Testnet release 3 (8 Nov): the full flow on a6.accord-v2.testnet
+
+- **Why a3.accord-v2.testnet ended WALK_AWAY.** After OutLayer's keystore came back (22:23), the run on release 2
+  (request 13673) reached the model and verified both responses, but the vendor's QUOTE carried a filled `atlas` block
+  in a procurement agreement on both tries; `to_terms` refuses that, so the protocol walked away in round 1. The schema
+  allowed `atlas` as null or the object and nothing told the model which one.
+- **Fix:** `response_format(kind)` narrows `terms.atlas` to `null` for procurement and to the object for market making,
+  so constrained decoding cannot produce the wrong form (commit 397d7b3, test `response_format_narrows_atlas_to_the_kind`).
+  The live test reached terms in 3 rounds. New Sealed Table build `7c832ce9…`, deployed as a new OutLayer version,
+  secret row moved with `outlayer secrets access --build` (seed kept).
+- **Release 3** (global, agreement code unchanged): pubkey runs 13682 (sealed table), 13672 (payee), 13683 (observer;
+  publishing a release clears the pending set, so all three are requested again); publish
+  https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh, current
+  https://testnet.nearblocks.io/txns/CeP5paUQ3KL61v9RqsiCaLE632wVpQ8fmJKCuh3B7JRU.
+- **a6.accord-v2.testnet, end to end** (`make negotiate`, then `make finish DEAL=a6.accord-v2.testnet`):
+  - mandates sealed: https://testnet.nearblocks.io/txns/Ek9Zr1wjD6nrWaKHFak8UDv5Jwbaacqrdh1huNp6qwAk (buyer),
+    https://testnet.nearblocks.io/txns/2Zq8pfNoa1dFzMLAy79aGyek72q3LGcrvRqAjYABisKZ (vendor)
+  - negotiation in OutLayer's enclave with glm-5.3-flash, QUOTE → COUNTER → FINAL → ACCEPT, 35.50 tUSDC in 3 items,
+    59 s: https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW
+  - approvals: https://testnet.nearblocks.io/txns/H6cMyE6kzs9SdrC4yaP7CvnDxJqH4NSx7ivKeu2rBHSg (buyer),
+    https://testnet.nearblocks.io/txns/2uv8tTfeYhe2aZ5cMrVNfFzr88kPL4HeSxwYzNhtmveT (vendor)
+  - funded 35.50: https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy
+  - recipient `halcyon-mm.testnet` proven by the Payee job on `accordweb-production.up.railway.app`:
+    https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6, authority
+    https://testnet.nearblocks.io/txns/FBQnqtKXs5B5zn1A4F1yCDUmACYMqsi2zM2uez6YxDis, buyer
+    https://testnet.nearblocks.io/txns/3d3LSZvz3yPX5LM1Bk6t9bxiX2x1JDMEt9mfa2fbw11p
+  - agent key: https://testnet.nearblocks.io/txns/EUJ86tSVNuYsgtMVYYZZ9CYbsJmY6jCKm1Uew5doPU1C
+  - item 1 paid 16.50 to the recipient: https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ
+  - 13.00 redirected to `halcyon-markets.testnet` refused `ERR_PAYEE_MISMATCH`:
+    https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs
+  - revoked: https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P; the agent's next call is
+    rejected by the network with `AccessKeyDoesNotExist`
+  - `make verify DEAL=a6.accord-v2.testnet`: 6 checks ok · 1 not checked (release: needs `outlayer-verify`)

@@ -2,22 +2,18 @@
 
 Each entry names the `PROGRESS.md` item it blocks. Remove an entry when it is done.
 
-## 2.8 and 3.4: OutLayer's testnet keystore is down (not Adi's to fix; recorded so the rerun is one command)
+## 3.7: market making on testnet needs an OutLayer payment key
 
-8 Nov, from about 20:30 local: every OutLayer job that needs a secret fails before the code starts with
-`Decrypt failed: every keystore instance is unreachable`. Seen on the Sealed Table (request 13608 for
-`a3.accord-v2.testnet` and its retry, tx `6JpBYBC2…`) and on the Payee job's pubkey probes (txs `2DoUyM1s…`,
-`6bzvTbXp…`). The NEAR AI credits blocker is gone: the new key answers, and release 2 (DECISIONS 19) fixes the
-token budget that made `a2` walk away. `a3.accord-v2.testnet` is sealed with one negotiation attempt left.
+The full procurement flow runs on testnet (`a6.accord-v2.testnet`, DECISIONS 21). `make atlas NET=testnet` asks the
+observer through OutLayer's HTTPS API, which needs `OUTLAYER_PAYMENT_KEY` in `.env`; it is not set.
 
-When the keystore answers again (a `request_pubkey` for `payee` no longer logs the error):
+1. Create a payment key for `accord-v1.testnet` in OutLayer's dashboard (https://outlayer.fastnear.com, testnet) and fund it.
+2. Put it in `.env` as `OUTLAYER_PAYMENT_KEY=…` and tell me; I run `make atlas NET=testnet`.
 
-```
-make finish DEAL=a3.accord-v2.testnet NET=testnet   # negotiate, approve, fund, Payee proof, pay, attack, revoke
-make verify DEAL=a3.accord-v2.testnet
-```
+## Signed-in app screenshots on testnet
 
-If a3's last attempt is spent, create a fresh agreement in the app (or `make negotiate NET=testnet`) and pass its id.
+Testnet pages behind sign-in need a real wallet (Meteor or Intear) or NEAR Auth on port 3000. Sign in once at
+http://localhost:3200/signin as `northwind-demo.testnet`; the public Verify page needs no sign-in.
 
 ## Rotate the NEAR AI key after the hackathon
 
