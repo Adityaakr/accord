@@ -28,7 +28,10 @@ pub enum CloseStep {
 #[near]
 impl Agreement {
     /// The buyer installs the agent's one key: a `FunctionCall` key on this account, for `act` only.
+    #[payable]
     pub fn install_agent_key(&mut self, public_key: PublicKey, allowance: U128) -> Promise {
+        // Exactly 1 yoctoNEAR: only a full-access key can attach it, so a function-call key cannot call this.
+        near_sdk::assert_one_yocto();
         self.require_buyer();
         self.require_state(State::Executing);
         // The ceiling is the one both parties approved in the params (`params_hash`), within the global bounds.
@@ -462,7 +465,10 @@ impl Agreement {
 
     /// Both parties end the agreement early; the second call closes it like `close()`. Items not yet eligible are
     /// not paid.
+    #[payable]
     pub fn mutual_close(&mut self) -> Option<CloseStep> {
+        // Exactly 1 yoctoNEAR: only a full-access key can attach it, so a function-call key cannot call this.
+        near_sdk::assert_one_yocto();
         let role = self.require_party();
         self.require_state(State::Executing);
         match role {
@@ -536,7 +542,10 @@ impl Agreement {
     }
 
     /// After `Settled`: liquid NEAR above the storage stake to the buyer, keeping a little while an item is reserved.
+    #[payable]
     pub fn withdraw_near(&mut self) -> Promise {
+        // Exactly 1 yoctoNEAR: only a full-access key can attach it, so a function-call key cannot call this.
+        near_sdk::assert_one_yocto();
         self.require_buyer();
         // Settled, or an agreement that never executed: the creation deposit's spare NEAR goes back to the buyer.
         require(

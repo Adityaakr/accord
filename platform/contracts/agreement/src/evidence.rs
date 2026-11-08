@@ -64,7 +64,10 @@ impl Agreement {
         );
     }
 
+    #[payable]
     pub fn accept_delivery(&mut self, item: u32) {
+        // Exactly 1 yoctoNEAR: only a full-access key can attach it, so a function-call key cannot call this.
+        near_sdk::assert_one_yocto();
         self.require_buyer();
         self.require_state(State::Executing);
         let idx = self
@@ -139,7 +142,10 @@ impl Agreement {
         self.create_exception(item, amount.0, waive_evidence, reason, "vendor")
     }
 
+    #[payable]
     pub fn approve_exception(&mut self, id: u32) {
+        // Exactly 1 yoctoNEAR: only a full-access key can attach it, so a function-call key cannot call this.
+        near_sdk::assert_one_yocto();
         self.require_buyer();
         self.require_state(State::Executing);
         let mut ex = self.pending_exception(id);
@@ -331,7 +337,10 @@ impl Agreement {
     }
 
     /// The buyer decides a `Review` or `Withheld` period.
+    #[payable]
     pub fn resolve_period(&mut self, period: u32, pay: bool) {
+        // Exactly 1 yoctoNEAR: only a full-access key can attach it, so a function-call key cannot call this.
+        near_sdk::assert_one_yocto();
         self.require_buyer();
         self.require_state(State::Executing);
         let mut ps = self

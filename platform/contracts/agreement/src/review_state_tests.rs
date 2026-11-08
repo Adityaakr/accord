@@ -72,6 +72,8 @@ fn call_gas(pred: &str, at: u64, results: Vec<PromiseResult>, tgas: u64) {
         .block_timestamp(at * 1_000_000_000)
         .block_height(at)
         .account_balance(NearToken::from_near(5))
+        // Every principal call attaches 1 yoctoNEAR, as a wallet does for the sensitive methods.
+        .attached_deposit(NearToken::from_yoctonear(1))
         .prepaid_gas(gas(tgas));
     testing_env!(
         b.build(),

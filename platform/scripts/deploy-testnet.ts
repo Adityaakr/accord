@@ -6,6 +6,8 @@
 //   RELEASE_FROM=<factory>   publish the same release as that factory's release <n> on this factory: the same agreement
 //                            code hash (the global contract is not published again), the same job builds and model;
 //                            only the pubkey runs are new, because they go through this factory's releases account.
+//   JOBS_FROM_RELEASE=<m>    new agreement code (target/wasm/agreement.wasm) with the job builds of this factory's
+//                            release <m>: for a contract-only release while new job builds wait on an upload.
 
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -26,6 +28,7 @@ const TGAS = 1_000_000_000_000n;
 const wasm = (n: string) => readFileSync(`${repoRoot()}/target/wasm/${n}.wasm`);
 const sha256 = (b: Uint8Array) => createHash("sha256").update(b).digest();
 const FROM = env.RELEASE_FROM || "";
+const JOBS_FROM = env.JOBS_FROM_RELEASE ? Number(env.JOBS_FROM_RELEASE) : null;
 
 const provider = new JsonRpcProvider({ url: RPC });
 const factory = new Account(FACTORY, provider, new KeyPairSigner(KeyPair.fromString(need("FACTORY_KEY") as KeyPairString)));
@@ -104,9 +107,12 @@ async function main() {
   const missing = ["sealed_table", "payee", "observer"].filter((j) => !pending?.[j]);
   if (missing.length && !(await view("release", { version: VERSION }))) {
     let projects: Record<string, { project: string; version_key: string }>;
-    if (source) {
+    const jobs = source ?? (JOBS_FROM ? await view<SourceRelease>("release", { version: JOBS_FROM }) : null);
+    if (JOBS_FROM && !jobs) throw new Error(`${FACTORY} has no release ${JOBS_FROM} to take the job builds from`);
+    if (jobs) {
       const of = (j: SourceJob) => ({ project: j.project, version_key: j.wasm_hash });
-      projects = { sealed_table: of(source.sealed_table), payee: of(source.payee), observer: of(source.observer) };
+      projects = { sealed_table: of(jobs.sealed_table), payee: of(jobs.payee), observer: of(jobs.observer) };
+      if (JOBS_FROM) console.log(`  jobs              the builds of release ${JOBS_FROM} (sealed table ${jobs.sealed_table.wasm_hash.slice(0, 8)}…)`);
     } else {
       const owner = need("OUTLAYER_OWNER");
       const hashes = Object.fromEntries(["sealed-table", "observer", "payee"].map((j) => {
@@ -153,7 +159,7 @@ async function main() {
       version: VERSION, mode: MODE, code_hash: hash, code: MODE === "Embedded" ? code.toString("base64") : null,
       task_ids: { sealed_table: sealedTask, payee: payeeTask, observer: observerTask },
       model: source?.model || env.ACCORD_MODEL || "z-ai/glm-5.3-flash",
-    }, 300n);
+    }, 300n, 1n); // exactly 1 yoctoNEAR: owner methods need a full-access key (the factory code is updated above first)
   }
   await call("set_current_release", { version: VERSION });
   console.log(`deploy-testnet: release ${VERSION} current on ${FACTORY}`);

@@ -199,7 +199,10 @@ impl Agreement {
     }
 
     /// Both parties approve the same terms hash; the second approval starts the agreement.
+    #[payable]
     pub fn approve_terms(&mut self, terms_hash: String) {
+        // Exactly 1 yoctoNEAR: only a full-access key can attach it, so a function-call key cannot call this.
+        near_sdk::assert_one_yocto();
         let role = self.require_party();
         self.require_state(State::Attested);
         require(

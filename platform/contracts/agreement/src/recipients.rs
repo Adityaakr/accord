@@ -85,7 +85,10 @@ impl Agreement {
         self.handle_payee(version, parsed);
     }
 
+    #[payable]
     pub fn approve_recipient(&mut self, version: u32) {
+        // Exactly 1 yoctoNEAR: only a full-access key can attach it, so a function-call key cannot call this.
+        near_sdk::assert_one_yocto();
         require(
             env::predecessor_account_id() == self.vendor_authority,
             "ERR_NOT_AUTHORITY",
@@ -102,7 +105,10 @@ impl Agreement {
 
     /// The buyer accepts: never a `block`, and a `warn` only with the warnings acknowledged. With no current
     /// recipient the version is active at once; a change waits `timelock_secs`.
+    #[payable]
     pub fn accept_recipient(&mut self, version: u32, acknowledge_warnings: bool) {
+        // Exactly 1 yoctoNEAR: only a full-access key can attach it, so a function-call key cannot call this.
+        near_sdk::assert_one_yocto();
         self.require_buyer();
         let mut r = self.version(version);
         require(

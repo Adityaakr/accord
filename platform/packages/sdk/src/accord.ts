@@ -99,6 +99,15 @@ export class Accord {
   }
 }
 
+/**
+ * The sensitive buyer, authority and party methods take exactly 1 yoctoNEAR, which only a full-access key can attach
+ * (from release 4, DECISIONS.md 25). Agreements running the earlier code (releases 1 to 3 share one global contract)
+ * refuse any deposit on those methods, so the client attaches it only to agreements that do not run that code.
+ */
+export const ONE_YOCTO = "one-yocto" as const;
+/** Agreement code that predates the 1 yoctoNEAR methods: releases 1 to 3 on testnet, used by global hash. */
+export const PRE_YOCTO_CODE_HASHES = ["8wMuMRreZfLiVPNjcsPjB2ZkcJJwsKh56BsasVxdpEBN"];
+
 export class AgreementClient {
   constructor(readonly accord: Accord, readonly id: string) {}
 
@@ -106,8 +115,20 @@ export class AgreementClient {
     return this.accord.chain.view<T>(this.id, method, args);
   }
 
-  private async call(method: string, args: object = {}, tgas = 100n, deposit = 0n): Promise<TxResult> {
-    const tx = await this.accord.need().call(this.id, method, args, { gas: tgas * TGAS, deposit });
+  private yocto?: Promise<bigint>;
+
+  /** 1 yoctoNEAR for an agreement whose code takes it on the sensitive methods, 0 for the earlier code. */
+  private oneYocto(): Promise<bigint> {
+    this.yocto ??= this.accord.chain.account(this.id).then(
+      (a) => (PRE_YOCTO_CODE_HASHES.includes(a.global_contract_hash ?? a.code_hash) ? 0n : 1n),
+      () => 1n,
+    );
+    return this.yocto;
+  }
+
+  private async call(method: string, args: object = {}, tgas = 100n, deposit: bigint | typeof ONE_YOCTO = 0n): Promise<TxResult> {
+    const attach = deposit === ONE_YOCTO ? await this.oneYocto() : deposit;
+    const tx = await this.accord.need().call(this.id, method, args, { gas: tgas * TGAS, deposit: attach });
     if (!tx.ok) throw new AccordError(method, tx);
     return tx;
   }
@@ -148,7 +169,7 @@ export class AgreementClient {
     return { commitment: sealed.commitment, txHash: tx.txHash };
   }
   startNegotiation() { return this.call("start_negotiation", {}, 300n); }
-  approveTerms(termsHash: string) { return this.call("approve_terms", { terms_hash: termsHash }, 30n); }
+  approveTerms(termsHash: string) { return this.call("approve_terms", { terms_hash: termsHash }, 30n, ONE_YOCTO); }
   cancel() { return this.call("cancel", {}, 30n); }
   async fund(amount: string): Promise<TxResult> {
     const a = await this.get();
@@ -161,27 +182,27 @@ export class AgreementClient {
   proposeRecipient(account: string, domain: string) {
     return this.call("propose_recipient", { account, domain }, 300n);
   }
-  approveRecipient(version: number) { return this.call("approve_recipient", { version }, 30n); }
+  approveRecipient(version: number) { return this.call("approve_recipient", { version }, 30n, ONE_YOCTO); }
   acceptRecipient(version: number, opts: { acknowledgeWarnings?: boolean } = {}) {
-    return this.call("accept_recipient", { version, acknowledge_warnings: opts.acknowledgeWarnings ?? false }, 50n);
+    return this.call("accept_recipient", { version, acknowledge_warnings: opts.acknowledgeWarnings ?? false }, 50n, ONE_YOCTO);
   }
   activateRecipient(version: number) { return this.call("activate_recipient", { version }, 50n); }
   cancelRecipientChange(version: number) { return this.call("cancel_recipient_change", { version }, 30n); }
   installAgentKey(publicKey: string, allowance: string) {
-    return this.call("install_agent_key", { public_key: publicKey, allowance }, 50n);
+    return this.call("install_agent_key", { public_key: publicKey, allowance }, 50n, ONE_YOCTO);
   }
   revokeAgent() { return this.call("revoke_agent", {}, 30n); }
   submitDelivery(item: number, evidenceHash: string, uri: string) {
     return this.call("submit_delivery", { item, evidence_hash: evidenceHash, uri }, 30n);
   }
-  acceptDelivery(item: number) { return this.call("accept_delivery", { item }, 30n); }
+  acceptDelivery(item: number) { return this.call("accept_delivery", { item }, 30n, ONE_YOCTO); }
   disputeDelivery(item: number, reason: string) { return this.call("dispute_delivery", { item, reason }, 30n); }
   requestException(e: { item: number; amount: string; waiveEvidence: boolean; reason: string }) {
     return this.call("request_exception", { item: e.item, amount: e.amount, waive_evidence: e.waiveEvidence, reason: e.reason }, 30n);
   }
-  approveException(id: number) { return this.call("approve_exception", { id }, 30n); }
+  approveException(id: number) { return this.call("approve_exception", { id }, 30n, ONE_YOCTO); }
   rejectException(id: number) { return this.call("reject_exception", { id }, 30n); }
-  resolvePeriod(period: number, pay: boolean) { return this.call("resolve_period", { period, pay }, 30n); }
+  resolvePeriod(period: number, pay: boolean) { return this.call("resolve_period", { period, pay }, 30n, ONE_YOCTO); }
   closePeriod(period: number) { return this.call("close_period", { period }, 50n); }
   recordObservation(observation: unknown, sig: string) {
     return this.call("record_observation", { observation, sig }, 50n);
@@ -190,8 +211,8 @@ export class AgreementClient {
     return actResult(await this.call("claim", { item }, 80n));
   }
   close() { return this.call("close", {}, 200n); }
-  mutualClose() { return this.call("mutual_close", {}, 200n); }
-  withdrawNear() { return this.call("withdraw_near", {}, 30n); }
+  mutualClose() { return this.call("mutual_close", {}, 200n, ONE_YOCTO); }
+  withdrawNear() { return this.call("withdraw_near", {}, 30n, ONE_YOCTO); }
   resolveStaleLock() { return this.call("resolve_stale_lock", {}, 80n); }
 
   // The agent: the signer is the agreement account itself, signing with its one function-call key.

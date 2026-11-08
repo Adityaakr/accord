@@ -310,6 +310,7 @@ impl Factory {
 
     /// Completes the pending release with the attestation task ids. `code` only for `Embedded`; for `Global` the
     /// code must already be published by hash.
+    #[payable]
     pub fn publish_release(
         &mut self,
         version: u32,
@@ -319,6 +320,8 @@ impl Factory {
         task_ids: TaskIds,
         model: String,
     ) {
+        // Exactly 1 yoctoNEAR: only a full-access key can attach it, so a function-call key cannot call this.
+        near_sdk::assert_one_yocto();
         self.require_owner();
         require(!self.releases.contains_key(&version), "ERR_RELEASE_EXISTS");
         let take = |job: &str, task: u64| -> (JobRelease, Option<String>) {
@@ -377,7 +380,10 @@ impl Factory {
         self.current = Some(version);
     }
 
+    #[payable]
     pub fn set_config(&mut self, config: Config) {
+        // Exactly 1 yoctoNEAR: only a full-access key can attach it, so a function-call key cannot call this.
+        near_sdk::assert_one_yocto();
         self.require_owner();
         require(config.owner == self.config.owner, "ERR_OWNER_FIXED");
         self.config = config;
@@ -571,7 +577,10 @@ impl Factory {
         s.total = U128(s.total.0.saturating_add(amount.0));
     }
 
+    #[payable]
     pub fn block_recipient(&mut self, account: AccountId, evidence_url: String) {
+        // Exactly 1 yoctoNEAR: only a full-access key can attach it, so a function-call key cannot call this.
+        near_sdk::assert_one_yocto();
         self.require_owner();
         require(
             evidence_url.starts_with("https://") && evidence_url.len() <= 300,

@@ -77,6 +77,8 @@ fn call(pred: &str, signer: Option<[u8; 32]>, at: u64, results: Vec<PromiseResul
         .block_timestamp(at * 1_000_000_000)
         .block_height(at)
         .account_balance(NearToken::from_near(5))
+        // Every principal call attaches 1 yoctoNEAR, as a wallet does for the sensitive methods.
+        .attached_deposit(NearToken::from_yoctonear(1))
         .prepaid_gas(gas(300));
     if let Some(s) = signer {
         b.signer_account_pk(pk(s));

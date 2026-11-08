@@ -289,3 +289,39 @@ fn audit_a_failed_creation_refunds_all_but_the_record_stake() {
         .unwrap();
     assert_eq!(refund, sent);
 }
+
+/// L2-6 / L3-F6 (finding 8): the owner's sensitive methods need exactly 1 yoctoNEAR, which only a full-access key
+/// can attach.
+#[test]
+fn audit_owner_methods_need_one_yocto() {
+    let needs =
+        |f: &mut dyn FnMut()| match std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)) {
+            Ok(_) => false,
+            Err(e) => e
+                .downcast_ref::<String>()
+                .is_some_and(|m| m.contains("1 yoctoNEAR")),
+        };
+    let mut f = factory();
+    let cfg = f.config.clone();
+    ctx("owner.testnet", NearToken::from_near(0), vec![]);
+    assert!(needs(&mut || f.set_config(cfg.clone())));
+    ctx("owner.testnet", NearToken::from_near(0), vec![]);
+    assert!(needs(
+        &mut || f.block_recipient(acc("x.testnet"), "https://e".into())
+    ));
+    ctx("owner.testnet", NearToken::from_near(0), vec![]);
+    assert!(needs(&mut || f.publish_release(
+        2,
+        ReleaseMode::Global,
+        Base58CryptoHash::from([0u8; 32]),
+        None,
+        TaskIds {
+            sealed_table: 1,
+            payee: 1,
+            observer: 1
+        },
+        "m".into(),
+    )));
+    ctx("owner.testnet", NearToken::from_yoctonear(1), vec![]);
+    f.set_config(cfg);
+}

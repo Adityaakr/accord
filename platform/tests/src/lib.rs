@@ -264,6 +264,7 @@ impl Env {
         let code = wasm("agreement-mock")?;
         let hash = bs58::encode(sha256(&code)).into_string();
         ok(f.call(f.id(), "publish_release")
+            .deposit(NearToken::from_yoctonear(1))
             .args_json(json!({
                 "version": 1, "mode": "Embedded", "code_hash": hash, "code": STANDARD.encode(&code),
                 "task_ids": {"sealed_table": 1, "payee": 2, "observer": 3}, "model": MODEL,
@@ -361,6 +362,19 @@ impl Env {
     }
 }
 
+/// The agreement methods that take exactly 1 yoctoNEAR (a full-access key only; DECISIONS.md 25).
+pub const ONE_YOCTO: &[&str] = &[
+    "install_agent_key",
+    "accept_recipient",
+    "approve_exception",
+    "resolve_period",
+    "accept_delivery",
+    "approve_terms",
+    "mutual_close",
+    "withdraw_near",
+    "approve_recipient",
+];
+
 /// One agreement under test.
 pub struct Deal<'a> {
     pub env: &'a Env,
@@ -389,9 +403,15 @@ impl Deal<'_> {
         method: &str,
         args: Value,
     ) -> Result<ExecutionFinalResult> {
+        let deposit = if ONE_YOCTO.contains(&method) {
+            NearToken::from_yoctonear(1)
+        } else {
+            NearToken::from_yoctonear(0)
+        };
         Ok(who
             .call(&self.id, method)
             .args_json(args)
+            .deposit(deposit)
             .gas(tgas(300))
             .transact()
             .await?)

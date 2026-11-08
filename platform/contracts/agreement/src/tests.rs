@@ -77,6 +77,8 @@ fn call(pred: &str, signer: Option<[u8; 32]>, at: u64, results: Vec<PromiseResul
         .block_timestamp(at * 1_000_000_000)
         .block_height(at)
         .account_balance(NearToken::from_near(5))
+        // Every principal call attaches 1 yoctoNEAR, as a wallet does for the sensitive methods.
+        .attached_deposit(NearToken::from_yoctonear(1))
         .prepaid_gas(gas(300));
     if let Some(s) = signer {
         b.signer_account_pk(pk(s));
@@ -1292,4 +1294,69 @@ fn audit_settled_revokes_the_agent_key() {
         a.agent_key.is_none(),
         "the agent's key outlived the agreement"
     );
+}
+
+/// Sets the environment for one call with no attached deposit (a function-call access key cannot attach one).
+fn call_unpaid(pred: &str, at: u64) {
+    let mut b = VMContextBuilder::new();
+    b.current_account_id(me())
+        .predecessor_account_id(acc(pred))
+        .signer_account_id(acc(pred))
+        .block_timestamp(at * 1_000_000_000)
+        .block_height(at)
+        .account_balance(NearToken::from_near(5))
+        .attached_deposit(NearToken::from_yoctonear(0))
+        .prepaid_gas(gas(300));
+    testing_env!(b.build());
+}
+
+fn needs_one_yocto<R>(f: impl FnOnce() -> R) -> bool {
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)) {
+        Ok(_) => false,
+        Err(e) => e
+            .downcast_ref::<String>()
+            .is_some_and(|m| m.contains("1 yoctoNEAR")),
+    }
+}
+
+/// L2-6 / L3-F6 (finding 8): the buyer's, the authority's and the parties' sensitive methods took no deposit, so a
+/// function-call access key a dapp holds for the principal's account could call them. Fixed: each needs exactly
+/// 1 yoctoNEAR, which only a full-access key can attach.
+#[test]
+fn audit_sensitive_methods_need_one_yocto() {
+    let mut a = ready_to_pay();
+    let t = T0 + 120;
+    let checks: Vec<(&str, Box<dyn FnOnce(&mut Agreement)>)> = vec![
+        (
+            BUYER,
+            Box::new(|a| {
+                let _ = a.install_agent_key(pk([12; 32]), U128(crate::payments::MIN_ALLOWANCE));
+            }),
+        ),
+        (BUYER, Box::new(|a| a.accept_recipient(1, false))),
+        (BUYER, Box::new(|a| a.approve_exception(0))),
+        (BUYER, Box::new(|a| a.resolve_period(0, true))),
+        (BUYER, Box::new(|a| a.accept_delivery(2))),
+        (BUYER, Box::new(|a| a.approve_terms("00".repeat(32)))),
+        (
+            BUYER,
+            Box::new(|a| {
+                let _ = a.mutual_close();
+            }),
+        ),
+        (
+            BUYER,
+            Box::new(|a| {
+                let _ = a.withdraw_near();
+            }),
+        ),
+        (AUTH, Box::new(|a| a.approve_recipient(1))),
+    ];
+    for (i, (who, f)) in checks.into_iter().enumerate() {
+        call_unpaid(who, t);
+        assert!(
+            needs_one_yocto(|| f(&mut a)),
+            "method {i} ran without 1 yoctoNEAR"
+        );
+    }
 }
