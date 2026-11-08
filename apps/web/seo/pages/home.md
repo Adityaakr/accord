@@ -26,6 +26,20 @@ Payments go only to a recipient the vendor has proven and the buyer accepted.
 
 A payment becomes eligible only when the agreed evidence or acceptance is recorded.
 
+## Built on
+
+- NEAR : The agreement contract, its escrowed USDC and the on-chain record of every payment and refusal.
+
+- NEAR AI Cloud : Private inference for the negotiating agents; each response's signature is checked in the enclave.
+
+- OutLayer : Attested enclaves for the Sealed Table, the recipient binding and the market observer.
+
+- USDC : Settlement on NEAR as a NEP-141 token, paid only by the contract from each agreement's own account.
+
+- Rhea : The USDC/wNEAR pool the market-making observer reads at hidden times.
+
+Accord builds on these networks and services; it does not claim a partnership with them.
+
 ## Built for commerce in stablecoins.
 
 Retainers paid on agreed spread, depth and two-sided quoting
@@ -569,20 +583,6 @@ Research
 [arxiv.org/abs/2502.07924 Informs Sealed Table](https://arxiv.org/abs/2502.07924) [a16zfrontier.com Informs Agreement controls](https://a16zfrontier.com/posts/article/5-ways-blockchains-help-ai-agents/) [ideas.repec.org · J. Financial Markets Informs Market-making agreements](https://doi.org/10.1016/j.finmar.2012.12.003)
 
 [Explore the research →](/research)
-
-## Built on
-
-- NEAR : The agreement contract, its escrowed USDC and the on-chain record of every payment and refusal.
-
-- NEAR AI Cloud : Private inference for the negotiating agents; each response's signature is checked in the enclave.
-
-- OutLayer : Attested enclaves for the Sealed Table, the recipient binding and the market observer.
-
-- USDC on NEAR : Settlement as a NEP-141 token, paid only by the contract from each agreement's own account.
-
-- Rhea : The USDC/wNEAR pool the market-making observer reads at hidden times.
-
-Accord builds on these networks and services; it does not claim a partnership with them. Built and tested end to end on a local NEAR node; the enclave and model runs follow the testnet release.
 
 In their words
 
