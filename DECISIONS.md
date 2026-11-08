@@ -319,3 +319,11 @@ Kept as stated limits: an item can be reopened from `AssumedPaid` by one excepti
 - **OutLayer keystore outage:** two runs for a3.accord-v2.testnet (requests 13608 and the retry) failed before the job
   started with "Decrypt failed: every keystore instance is unreachable"; OutLayer's API had been redeployed minutes
   earlier. The contract recorded `negotiation_failed` (attempt 1, 2) and the fee was refunded.
+
+## 20. Email sign-in with NEAR Auth (8 Nov)
+
+- **What:** "Continue with work email" signs in through NEAR Auth (FastAuth) on testnet with its shared testnet Auth0 client (`np8paqIpMWmNbzT4xAvOOapZBjsOpptl`, `login.testnet.fast-auth.com`; docs.auth.near.org/resources/testnet), `@fast-auth-near/browser-sdk` 1.4.2 and `@fast-auth-near/javascript-provider` 1.4.1. The person's account is the implicit account named by their MPC-derived ed25519 key (`v1.signer-prod.testnet`, predecessor `fast-auth.testnet`).
+- **Server:** `/api/fastauth/session` verifies the Auth0 ID token against the tenant's JWKS, derives the account from the MPC contract itself (the browser cannot choose it), funds a new account with 0.3 NEAR once, and opens the usual session. `/api/fastauth/sign` relays the approved `sign` call (300 Tgas, 1 yoctoNEAR) for a signed-in session, rate-limited, after verifying the signing JWT. The relayer `relay.accord-v2.testnet` holds only its own key (`RELAYER_ACCOUNT`, `RELAYER_KEY`); no user key exists anywhere.
+- **No NEP-413 for email users:** browser-sdk 1.4.2 has no message signing, and a NEAR Auth signature is the public result of an on-chain call, so it can never seed the document key. Email users approve and fund; sealing a mandate shows "Seal with a wallet". "Confirm it's you" uses the verified login instead of a signed message.
+- **Callback origin:** the shared testnet client only accepts `http://localhost:3000` as a redirect. Locally, email sign-in works when the app is served on port 3000; a hosted app needs its own NEAR Auth credentials registered for its domain (`NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID`). Verified 8 Nov: the popup reaches `login.testnet.fast-auth.com/u/login/identifier` (email, passkey, Google).
+- **Not verified headlessly:** completing a real email login, the account funding, and an MPC-signed transaction. They need a person to log in once.

@@ -40,7 +40,7 @@ export default function Profile() {
         <div><dt>Network</dt><dd className="mono">{w.network}</dd></div>
         <div><dt>Factory</dt><dd className="mono">{c.factory}</dd></div>
         <div><dt>Theme</dt><dd><ThemeToggle /></dd></div>
-        <div><dt>Keys</dt><dd>{w.method === "sandbox" ? "This is a throwaway sandbox key on this machine. On testnet and mainnet your keys stay in your own wallet." : "Your keys stay in your wallet. Accord never holds a key that can approve terms or move funds."}</dd></div>
+        <div><dt>Keys</dt><dd>{w.method === "sandbox" ? "This is a throwaway sandbox key on this machine. On testnet and mainnet your keys stay in your own wallet." : w.method === "email" ? "Your account's key is derived by NEAR's MPC network for your NEAR Auth login. No full private key exists anywhere; each signature needs your approval in NEAR Auth." : "Your keys stay in your wallet. Accord never holds a key that can approve terms or move funds."}</dd></div>
       </dl>
       <div className={styles.actions}>
         <button type="button" className={styles.secondary} onClick={() => void w.disconnect().then(() => router.replace("/signin"))}>Disconnect</button>
