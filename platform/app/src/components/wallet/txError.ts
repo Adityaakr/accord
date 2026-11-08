@@ -14,7 +14,14 @@ const NETWORK = [
   /timeout|timed out/i,
   /InvalidNonce/,
 ];
-const DECLINED = [/user rejected/i, /rejected by user/i, /user (denied|cancel+ed)/i, /cancel+ed by user/i, /^cancel+ed$/i, /window closed/i, /popup closed/i];
+const DECLINED = [
+  /user rejected/i, /rejected by user/i, /rejected the request/i, /user (denied|declined|cancel+ed|closed)/i, /cancel+ed by user/i,
+  /^cancel+ed$/i, /request (was )?cancel+ed/i, /window (was )?closed/i, /popup (was )?closed/i, /modal (was )?closed/i, /wallet closed/i,
+  /\b4001\b/,
+];
+
+/** What the page shows when the person closed or declined a wallet request. */
+export const CANCELLED = "Wallet request cancelled. Try again when you're ready.";
 
 const ALTERNATIVE = "Try again, or use Meteor or Intear on testnet.";
 
@@ -32,11 +39,21 @@ export function rawWalletError(e: unknown): string {
 }
 
 export const isWalletNetworkError = (raw: string) => NETWORK.some((r) => r.test(raw));
+export const isWalletDeclined = (raw: string) => DECLINED.some((r) => r.test(raw));
+
+/** One readable line for any wallet request that failed outside a transaction (connecting, signing a message). */
+export function friendlyWalletError(e: unknown, wallet = "Your wallet"): string {
+  const raw = rawWalletError(e);
+  if (isWalletDeclined(raw)) return CANCELLED;
+  if (isWalletNetworkError(raw)) return `${wallet} could not reach the network. Try again in a moment.`;
+  const reason = raw.replace(/\s+/g, " ").trim().slice(0, 160);
+  return reason ? `${wallet} could not complete the request (${reason}). Try again.` : `${wallet} could not complete the request. Try again.`;
+}
 
 /** The line to show when `wallet` could not send a transaction on `network`. */
 export function walletErrorMessage(e: unknown, wallet: string, network: string): string {
   const raw = rawWalletError(e);
-  if (DECLINED.some((r) => r.test(raw))) return `You declined the transaction in ${wallet}. Nothing was sent.`;
+  if (isWalletDeclined(raw)) return `${CANCELLED} Nothing was sent.`;
   if (isWalletNetworkError(raw)) {
     return network === "testnet"
       ? `${wallet} could not send this testnet transaction: its network connection rejected it. ${ALTERNATIVE}`
