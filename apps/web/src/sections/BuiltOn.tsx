@@ -3,7 +3,7 @@ import { NearLogo } from "../components/NearLogo"
 import { NearAiLogo } from "../components/NearAiLogo"
 import styles from "./BuiltOn.module.css"
 
-/* Home · Built on (#built-on): a slim strip after the research, before the quotes (8 Nov 2026). What Accord runs on,
+/* Home · Built on (#built-on): a slim moving line (since 8 Nov 2026; was a five-column strip) after the research, before the quotes (8 Nov 2026). What Accord runs on,
    one line each, in the same words as /docs "Five pieces of the NEAR stack". Every mark is monochrome (NEAR and
    NEAR AI in their mono variants; OutLayer and Rhea as the plain dot used on the use-case cards; USDC as a generic
    outline coin, not Circle's logo), nothing links out, and the note says plainly that no partnership is claimed.
@@ -24,12 +24,23 @@ const Coin = () => (
 )
 
 const ITEMS = [
-  { name: "NEAR", mark: <span aria-hidden="true"><NearLogo variant="mono" /></span>, line: "The agreement contract, its escrowed USDC and the on-chain record of every payment and refusal." },
-  { name: "Cloud", mark: <span className={styles.nearai}><NearAiLogo mono /></span>, line: "Private inference for the negotiating agents; each response's signature is checked in the enclave." },
-  { name: "OutLayer", mark: <Dot />, line: "Attested enclaves for the Sealed Table, the recipient binding and the market observer." },
-  { name: "USDC on NEAR", mark: <Coin />, line: "Settlement as a NEP-141 token, paid only by the contract from each agreement's own account." },
-  { name: "Rhea", mark: <Dot />, line: "The USDC/wNEAR pool the market-making observer reads at hidden times." },
+  { name: "NEAR", mark: <span aria-hidden="true"><NearLogo variant="mono" /></span>, short: "contract, escrow and record", line: "The agreement contract, its escrowed USDC and the on-chain record of every payment and refusal." },
+  { name: "Cloud", mark: <span className={styles.nearai}><NearAiLogo mono /></span>, short: "private inference for the agents", line: "Private inference for the negotiating agents; each response's signature is checked in the enclave." },
+  { name: "OutLayer", mark: <Dot />, short: "attested enclaves", line: "Attested enclaves for the Sealed Table, the recipient binding and the market observer." },
+  { name: "USDC on NEAR", mark: <Coin />, short: "settlement, NEP-141", line: "Settlement as a NEP-141 token, paid only by the contract from each agreement's own account." },
+  { name: "Rhea", mark: <Dot />, short: "the pool the observer reads", line: "The USDC/wNEAR pool the market-making observer reads at hidden times." },
 ]
+
+function Item({ it }: { it: (typeof ITEMS)[number] }) {
+  return (
+    <li className={styles.item}>
+      <span className={styles.name}>{it.mark}<span>{it.name}</span><span className={styles.sr}>: </span></span>
+      {/* a short phrase on the line; the full sentence for screen readers and agents */}
+      <span className={styles.line} aria-hidden="true">{it.short}</span>
+      <span className={styles.sr}>{it.line}</span>
+    </li>
+  )
+}
 
 export function BuiltOn() {
   return (
@@ -39,13 +50,13 @@ export function BuiltOn() {
         <h2 id="built-on-title" className={`t-body-sm ${styles.label}`}>Built on</h2>
       </div>
 
-      <Appear as="ul" className={styles.strip} effect={rise}>
-        {ITEMS.map((it) => (
-          <li key={it.name} className={styles.item}>
-            <span className={styles.name}>{it.mark}<span>{it.name}</span><span className={styles.sr}>: </span></span>
-            <span className={styles.line}>{it.line}</span>
-          </li>
-        ))}
+      {/* The moving line: the list, then the same list again (hidden from readers and agents) so the loop never breaks.
+          Hover or keyboard focus pauses it; with reduced motion it stands still and wraps. */}
+      <Appear as="div" className={styles.marquee} effect={rise}>
+        <div className={styles.track}>
+          <ul className={styles.list}>{ITEMS.map((it) => <Item key={it.name} it={it} />)}</ul>
+          <ul className={`${styles.list} ${styles.copy}`} aria-hidden="true" data-seo-skip>{ITEMS.map((it) => <Item key={it.name} it={it} />)}</ul>
+        </div>
       </Appear>
 
       <p className={styles.note}>

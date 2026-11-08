@@ -127,6 +127,38 @@ const MAPS = {
     "......XXXX......",
     ".......XX.......",
   ],
+  key: [
+    ".XXXX...........",
+    "XX..XX..........",
+    "XX..XXXXXXXXXXX.",
+    "XX..XXXXXXXXXXX.",
+    "XX..XX....XX.XX.",
+    ".XXXX.....XX.XX.",
+  ],
+  power: [
+    ".......XX.......",
+    ".......XX.......",
+    "...XX..XX..XX...",
+    "..XX...XX...XX..",
+    ".XX....XX....XX.",
+    ".XX..........XX.",
+    ".XX..........XX.",
+    ".XX..........XX.",
+    "..XX........XX..",
+    "...XX......XX...",
+    "....XXXXXXXX....",
+  ],
+  terminal: [
+    "XXXXXXXXXXXXXXXX",
+    "X..............X",
+    "X.XX...........X",
+    "X..XX..........X",
+    "X...XX.........X",
+    "X..XX..........X",
+    "X.XX...XXXXX...X",
+    "X..............X",
+    "XXXXXXXXXXXXXXXX",
+  ],
 } as const
 
 export type PixelName = keyof typeof MAPS

@@ -1,43 +1,48 @@
-/* Home · Built on: a slim strip. A small tag label (the SectionHeading pill, no H2 display size), one template card
-   (Elevation Strong, radius 4) split into five columns by hairlines; 3 + 2 on tablet, a list on phone. */
+/* Home · Built on: a slim moving line between two hairlines. Items run left in a loop (two copies of the list, the
+   second hidden from readers), edges fade, hover or focus pauses, reduced motion stands still and wraps. */
 .section { gap: 20px; padding: 56px 0; scroll-margin-top: 40px; }
 
 .head { display: flex; align-items: center; gap: 8px; }
 .pill { width: 14px; height: 8px; border-radius: 9999px; background: var(--teal); }
 .label { color: var(--text-strong); font-weight: 400; }
 
-.strip {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.marquee {
   width: 100%;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  border-radius: 4px;
-  background: var(--elevation-strong);
   overflow: hidden;
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
-.item { display: flex; flex-direction: column; gap: 10px; padding: 22px 20px; border-left: 1px solid var(--hairline); min-width: 0; }
-.item:first-child { border-left: 0; }
-.name { display: inline-flex; align-items: center; gap: 8px; font-family: "Host Grotesk", sans-serif; font-size: 15px; font-weight: 500; letter-spacing: -0.01em; color: var(--text-strong); white-space: nowrap; }
-.nearai { display: inline-flex; font-size: 14px; }
-.line { font-size: 13px; line-height: 1.5; color: var(--text-weak); text-wrap: pretty; }
-.dot { width: 9px; height: 9px; border-radius: 2px; border: 1px solid var(--text-weak); }
+.track { display: flex; width: max-content; animation: run 60s linear infinite; }
+.marquee:hover .track, .marquee:focus-within .track { animation-play-state: paused; }
+.list { display: flex; flex: none; list-style: none; margin: 0; padding: 0; }
 
+.item { display: inline-flex; align-items: baseline; gap: 12px; padding: 22px 40px 22px 0; white-space: nowrap; }
+.item::after { content: ""; align-self: center; width: 5px; height: 5px; margin-left: 28px; border-radius: 50%; background: var(--teal); opacity: 0.7; }
+.name { display: inline-flex; align-items: center; gap: 8px; align-self: center; font-family: "Host Grotesk", sans-serif; font-size: 16px; font-weight: 500; letter-spacing: -0.01em; color: var(--text-strong); }
+.nearai { display: inline-flex; font-size: 15px; }
+.line { font-size: 14px; color: var(--text-weak); }
+.dot { width: 9px; height: 9px; border-radius: 2px; border: 1px solid var(--text-weak); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
 .note { font-size: 13px; line-height: 1.55; color: var(--text-weak); max-width: 80ch; }
 
-@media (max-width: 1199.98px) {
-  .section { padding: 56px 24px; }
-  .strip { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-  .item { grid-column: span 2; border-left: 0; border-top: 1px solid var(--hairline); }
-  .item:nth-child(-n + 3) { border-top: 0; }
-  .item:nth-child(4), .item:nth-child(5) { grid-column: span 3; }
-  .item:nth-child(2), .item:nth-child(3), .item:nth-child(5) { border-left: 1px solid var(--hairline); }
+@keyframes run { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee { -webkit-mask-image: none; mask-image: none; }
+  .track { animation: none; width: 100%; }
+  .copy { display: none; }
+  .list { flex-wrap: wrap; }
+  .item { white-space: normal; padding: 14px 32px 14px 0; }
+  .item::after { display: none; }
 }
+@media (max-width: 1199.98px) { .section { padding: 56px 24px; } }
 @media (max-width: 809.98px) {
   .section { padding: 48px 16px; }
-  .strip { grid-template-columns: 1fr; }
-  .item, .item:nth-child(n) { grid-column: auto; border-left: 0; border-top: 1px solid var(--hairline); padding: 18px 16px; }
-  .item:first-child { border-top: 0; }
+  .track { animation-duration: 45s; }
+  .item { padding: 18px 28px 18px 0; }
+  .item::after { margin-left: 18px; }
+  .line { font-size: 13px; }
 }

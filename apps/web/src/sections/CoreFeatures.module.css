@@ -5,9 +5,11 @@
 .grid { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 
 .card {
+  --px-hi: #ffffff; --px-mid: #c9ccd1; --px-lo: #7d838b;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
+  overflow: hidden;
   padding: 24px;
   border-radius: 4px;
   background: var(--elevation-strong);
@@ -16,24 +18,54 @@
   transition: outline-color 120ms ease;
 }
 .card:hover { outline-color: rgba(var(--ink-rgb), 0.3); }
+:global([data-theme="light"]) .card { --px-hi: #5a5f66; --px-mid: #2b2e33; --px-lo: #0e0f11; }
 .wide { grid-column: span 2; }
 
-/* the product detail: an inset panel, same height in every tile so the titles line up */
+/* the stage: the use-case cards' teal weave with a soft glow, fading out at the bottom into the card */
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 200px;
+  margin: -24px -24px 0;
+  padding: 24px;
+  background:
+    radial-gradient(70% 80% at 70% 20%, rgba(145, 207, 181, 0.1), transparent 70%),
+    repeating-linear-gradient(135deg, rgba(145, 207, 181, 0.055) 0 1px, transparent 1px 4px);
+  -webkit-mask-image: linear-gradient(180deg, #000 86%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 86%, transparent 100%);
+}
+:global([data-theme="light"]) .stage {
+  background:
+    radial-gradient(70% 80% at 70% 20%, rgba(36, 133, 102, 0.1), transparent 70%),
+    repeating-linear-gradient(135deg, rgba(36, 133, 102, 0.07) 0 1px, transparent 1px 4px);
+}
+
+/* the product detail: a small raised card on the stage, lifting a little on hover */
 .detail {
   display: flex;
   align-items: center;
-  height: 156px;
-  padding: 18px;
-  border-radius: 4px;
-  background: rgba(var(--ink-rgb), 0.025);
-  border: 1px solid rgba(var(--ink-rgb), 0.07);
+  width: 100%;
+  max-width: 560px;
+  min-height: 120px;
+  padding: 16px 18px;
+  border-radius: 8px;
+  background: var(--elevation-strong);
+  border: 1px solid rgba(var(--ink-rgb), 0.1);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 0, 0, 0.2);
   font-family: var(--mono);
   font-size: 12px;
   line-height: 1.5;
   color: var(--text-medium);
   overflow: hidden;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.4s ease;
 }
+:global([data-theme="light"]) .detail { box-shadow: 0 18px 40px -20px rgba(20, 30, 25, 0.25); }
+.card:hover .detail { transform: translateY(-4px); border-color: rgba(145, 207, 181, 0.35); }
 .detail b { font-weight: 500; color: var(--text-weak); margin-right: 6px; }
+
+.label { display: flex; align-items: center; gap: 10px; }
+.tile { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: rgba(var(--ink-rgb), 0.05); border: 1px solid rgba(var(--ink-rgb), 0.1); }
 
 .copy { display: flex; flex-direction: column; gap: 8px; }
 .kicker { font-size: 12px; letter-spacing: 0.04em; color: var(--text-weak); background: none; padding: 0; }
@@ -86,7 +118,10 @@
   .grid { grid-template-columns: 1fr; gap: 12px; }
   .wide { grid-column: auto; }
   .card { padding: 20px 16px; }
-  .detail { height: auto; min-height: 132px; }
+  .stage { height: auto; min-height: 170px; margin: -20px -16px 0; padding: 20px 16px; }
+  .detail { min-height: 0; }
   .flow { grid-template-columns: 1fr; justify-items: start; }
   .arrow { display: none; }
 }
+
+@media (prefers-reduced-motion: reduce) { .detail { transition: none; } .card:hover .detail { transform: none; } }

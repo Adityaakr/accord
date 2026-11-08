@@ -2,12 +2,14 @@ import type { ReactNode } from "react"
 import { Link } from "react-router-dom"
 import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { SectionHeading } from "../components/SectionHeading"
+import { PixelIcon, type PixelName } from "../components/PixelIcon"
 import styles from "./CoreFeatures.module.css"
 
 /* Home · Core features (#features), after How it works (8 Nov 2026). The seven controls between an agent and the money,
    as a bento grid in the template's system: Elevation Strong tiles at radius 4 with the hairline, a small product
    detail in JetBrains Mono at the top of each tile (teal for a pass, refusal red only for a refusal or a revocation),
-   then the title and two sentences. Every line is something the demonstration does today; values match the deal-room
+   then the title and two sentences. Since 8 Nov 2026 each detail floats on the use-case cards' teal stage (weave,
+   glow, fade) with a pixel icon tile beside the label, so the two card sections read as one family. Every line is something the demonstration does today; values match the deal-room
    band and /verify. Grid: 2+1 / 1+1+1 / 1+2 on desktop, two columns on tablet, one on phone. */
 
 const rise = (delay: `${number}s`): AppearEffect => ({
@@ -75,34 +77,34 @@ const Verify = () => (
   </div>
 )
 
-type Feature = { kicker: string; title: string; text: string; detail: ReactNode; wide?: boolean }
+type Feature = { icon: PixelName; kicker: string; title: string; text: string; detail: ReactNode; wide?: boolean }
 const FEATURES: Feature[] = [
   {
-    kicker: "Sealed Table", title: "Confidential negotiation", wide: true, detail: <Sealed />,
+    icon: "agents", kicker: "Sealed Table", title: "Confidential negotiation", wide: true, detail: <Sealed />,
     text: "Each company seals its limits in the browser, and the agents negotiate inside an attested enclave. Only the agreed terms and an attestation come out, and both companies approve before anything takes effect.",
   },
   {
-    kicker: "Agent permissions", title: "One key, one method", detail: <OneKey />,
+    icon: "key", kicker: "Agent permissions", title: "One key, one method", detail: <OneKey />,
     text: "The buyer's agent holds a key that can call one method, act, on one contract. It cannot deploy code, add keys or move funds any other way.",
   },
   {
-    kicker: "Agreement controls", title: "Every payment checked", detail: <Controls />,
+    icon: "shield", kicker: "Agreement controls", title: "Every payment checked", detail: <Controls />,
     text: "Each payment must match the approved milestone, amount and recipient. Anything else is refused, and the reason is recorded.",
   },
   {
-    kicker: "Payee", title: "A recipient that cannot be redirected", detail: <Payee />,
+    icon: "bank", kicker: "Payee", title: "A recipient that cannot be redirected", detail: <Payee />,
     text: "The vendor proves its domain, its settlement authority approves the account and the buyer accepts it. A message cannot change it.",
   },
   {
-    kicker: "Evidence checks", title: "Evidence before release", detail: <Evidence />,
+    icon: "chart", kicker: "Evidence checks", title: "Evidence before release", detail: <Evidence />,
     text: "A payment becomes eligible only when the agreed evidence is recorded. Otherwise it is withheld for both sides to review.",
   },
   {
-    kicker: "Revocation", title: "Stop the agent in one transaction", detail: <Revoke />,
+    icon: "power", kicker: "Revocation", title: "Stop the agent in one transaction", detail: <Revoke />,
     text: "The buyer calls revoke_agent and the agent's key is deleted. Payments already made stay with the authorised recipient.",
   },
   {
-    kicker: "Verify", title: "Checkable from public data", wide: true, detail: <Verify />,
+    icon: "terminal", kicker: "Verify", title: "Checkable from public data", wide: true, detail: <Verify />,
     text: "One command checks a live agreement with no keys: the contract code, the agent's key, the Sealed Table release, the attestation, the recipient and the record.",
   },
 ]
@@ -121,9 +123,15 @@ export function CoreFeatures() {
       <div className={styles.grid}>
         {FEATURES.map((f, i) => (
           <Appear key={f.title} as="article" className={`${styles.card} ${f.wide ? styles.wide : ""}`} effect={rise(`${(i % 3) * 0.08}s` as `${number}s`)}>
-            <div className={styles.detail} aria-hidden="true">{f.detail}</div>
+            {/* the stage: the use-case cards' teal weave and glow, fading into the card, with the product detail floating on it */}
+            <div className={styles.stage} aria-hidden="true">
+              <div className={styles.detail}>{f.detail}</div>
+            </div>
             <div className={styles.copy}>
-              <p className={`mono ${styles.kicker}`}>{f.kicker}</p>
+              <p className={styles.label}>
+                <span className={styles.tile}><PixelIcon name={f.icon} size={18} /></span>
+                <span className={`mono ${styles.kicker}`}>{f.kicker}</span>
+              </p>
               <h3 className={styles.title}>{f.title}</h3>
               <p className={styles.text}>{f.text}</p>
             </div>
