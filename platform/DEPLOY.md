@@ -78,7 +78,7 @@ needed for `/app/try-it`, where each room runs its own demo agent. Each is one m
 | `TRY_AUTHORITY_ACCOUNT`, `TRY_AUTHORITY_KEY` | | required with the re-arm | no |
 | `TRY_RECIPIENT_ACCOUNT` | | required with the re-arm | no |
 | `ACCORD_TOKEN` | | `tusdc.accord-v1.testnet` | yes |
-| `DEMO_VENDOR_DOMAIN` | | required with the re-arm: the domain whose `/.well-known/accord.json` lists `TRY_RECIPIENT_ACCOUNT` | no |
+| `DEMO_VENDOR_DOMAIN` | | required with the re-arm: `accordweb-production.up.railway.app`, whose `/.well-known/accord.json` lists `TRY_RECIPIENT_ACCOUNT` (`halcyon-try-mm.testnet`) | no |
 | `APP_URL` | | optional: the app's URL | no |
 | `BUYER_ACCOUNT`, `BUYER_KEY` | | optional: funds new rooms with test USDC | no |
 | `TRY_MAX_ROOMS_PER_DAY`, `TRY_ITEM_INTERVAL_SECS`, `TRY_REARM_SECS` | | optional | no |

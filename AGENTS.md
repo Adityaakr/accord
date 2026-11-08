@@ -33,6 +33,10 @@ Facts: factory `accord-v2.testnet` on release `3`, test USDC `tusdc.accord-v1.te
 4. **Run the whole flow locally, no network.** `cd platform && make sandbox` ends with `sandbox: all checks passed`; jobs are replaced by a mock signer and every mocked line says `[mock]`.
 5. **Try it in the browser.** `/app/try-it`: the steps and their literal output are in [`README.md`](README.md#try-it-in-3-minutes-on-testnet). It is live at https://accordweb-production.up.railway.app/app/try-it; the README also says how to run it locally.
 
+## Use from an agent
+
+A keyless, read-only MCP server (7 tools, stdio or HTTP), the `accord` CLI, the TypeScript SDK and `GET https://accordweb-production.up.railway.app/app/api/verify/<agreement>` as JSON. The exact commands are in [`README.md`](README.md#use-from-an-agent).
+
 ## Where the claims are
 
 Every public statement about Accord is one of six claims, each with its limit, in [`platform/GOAL.md`](platform/GOAL.md) ("Claims and their limits"). The README and the site's `/security` carry the same table. The threat model is `platform/ARCHITECTURE.md` section 16.

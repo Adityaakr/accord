@@ -38,13 +38,14 @@ Two companies' agents negotiate inside an attested enclave from sealed mandates.
 2. [How it works](#how-it-works)
 3. [Try it in 3 minutes on testnet](#try-it-in-3-minutes-on-testnet)
 4. [Verify any agreement](#verify-any-agreement)
-5. [Testnet proof](#testnet-proof)
-6. [Where each attack stops](#where-each-attack-stops)
-7. [Claims and their limits](#claims-and-their-limits)
-8. [Repository map](#repository-map)
-9. [Run locally](#run-locally)
-10. [Deployment](#deployment)
-11. [Built with](#built-with)
+5. [Use from an agent](#use-from-an-agent)
+6. [Testnet proof](#testnet-proof)
+7. [Where each attack stops](#where-each-attack-stops)
+8. [Claims and their limits](#claims-and-their-limits)
+9. [Repository map](#repository-map)
+10. [Run locally](#run-locally)
+11. [Deployment](#deployment)
+12. [Built with](#built-with)
 
 ## The problem
 
@@ -303,6 +304,42 @@ The nonce is fresh on every run. `model` is `partial`: the report is fetched wit
 
 </details>
 
+## Use from an agent
+
+Everything below reads NEAR testnet with no account and no keys. Run it from `platform/` after `corepack enable && pnpm install`.
+
+**MCP server** (`@accord/mcp`, stdio by default). With no key in the environment it serves 7 read-only tools: `accord_list_agreements`, `accord_get_agreement`, `accord_due_items`, `accord_preflight`, `accord_refusals`, `accord_receipts` and `accord_verify`. The paying and principal tools appear only when their keys are set ([`platform/INTERFACES.md`](platform/INTERFACES.md) section 12).
+
+```bash
+ACCORD_FACTORY=accord-v2.testnet pnpm --silent --filter @accord/mcp dev            # stdio
+ACCORD_FACTORY=accord-v2.testnet pnpm --silent --filter @accord/mcp dev -- --http 3333   # streamable HTTP at http://127.0.0.1:3333/mcp
+```
+
+On start it prints `accord-mcp · 7 tools · agent off · principal off` on stderr. An MCP client config runs the first command with `cwd` set to `platform/`.
+
+**CLI** (`accord`; read-only commands need no key):
+
+```bash
+ACCORD_FACTORY=accord-v2.testnet pnpm --silent --filter @accord/cli dev -- show --agreement a6.accord-v2.testnet
+ACCORD_FACTORY=accord-v2.testnet pnpm --silent --filter @accord/cli dev -- receipts --agreement a6.accord-v2.testnet --json
+```
+
+**SDK** (`@accord/sdk`, TypeScript on `near-api-js`; build it once with `pnpm --filter @accord/sdk build`):
+
+```ts
+import { Accord, verify } from "@accord/sdk";
+const accord = new Accord({ network: "testnet", factory: "accord-v2.testnet" });
+const report = await verify(accord, "a6.accord-v2.testnet"); // { checks: [{ name, status, detail }], ok, partial, failed, notChecked }
+```
+
+**HTTP**: the live app returns the same report as JSON, with a nonce you choose (64 hex characters) or one it generates:
+
+```bash
+curl -s https://accordweb-production.up.railway.app/app/api/verify/a6.accord-v2.testnet
+```
+
+An account that is not an Accord agreement answers `404` with `{"error":"<account> is not an Accord agreement"}` once the app runs this commit. The site also serves [/llms.txt](https://accordweb-production.up.railway.app/llms.txt) and [/facts.json](https://accordweb-production.up.railway.app/facts.json).
+
 ## Testnet proof
 
 Agreement [`a6.accord-v2.testnet`](https://testnet.nearblocks.io/address/a6.accord-v2.testnet) ran the full flow on 8 Nov 2026, on release 3 of factory `accord-v2.testnet`. The Sealed Table negotiation used the real NEAR AI model (`z-ai/glm-5.3-flash`) inside OutLayer's attested enclave: `QUOTE → COUNTER → FINAL → ACCEPT`, `35.50` tUSDC in 3 items. Settlement is a test USDC token.
@@ -331,6 +368,7 @@ Agreement [`a6.accord-v2.testnet`](https://testnet.nearblocks.io/address/a6.acco
 | OutLayer jobs | Sealed Table, Payee and observer, as OutLayer projects `accord-v1.testnet/accord-{sealed-table,payee,observer}`; release 3 pubkey runs `13682`, `13672`, `13683` |
 | NEAR AI Cloud attestation | [testnet-api.outlayer.ai/attestations/13596](https://testnet-api.outlayer.ai/attestations/13596) |
 | Demo accounts | vendor `halcyon-demo.testnet`, authority `halcyon-auth.testnet`, recipient `halcyon-mm.testnet` |
+| Demo vendor's domain | `accordweb-production.up.railway.app`, Accord's own site, serving the Payee file ([`/.well-known/accord.json`](https://accordweb-production.up.railway.app/.well-known/accord.json)) for Halcyon, a fictional company. A real vendor serves the same file on its own domain |
 
 Sources: [`apps/web/src/content/testnet.ts`](apps/web/src/content/testnet.ts) and [`platform/DECISIONS.md`](platform/DECISIONS.md) section 21. Market-making agreements run end to end on a local node; on testnet they wait on an OutLayer payment key ([`platform/BLOCKED.md`](platform/BLOCKED.md)).
 
