@@ -107,6 +107,9 @@
   /* signed out the row is short: it wraps instead of scrolling, so nothing is clipped */
   .signedOut { flex-wrap: wrap; overflow-x: visible; gap: 4px 8px; }
   .signedOut .group { flex-wrap: wrap; }
+  /* the theme switch is its icon alone here, so the row stays two lines at 390px */
+  .signedOut .bottom { flex: none; }
+  .signedOut .bottom button > span { display: none; }
 }
 
 .search { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; border-radius: var(--radius); border: 1px solid var(--hairline-strong); color: var(--text-weak); font-size: 13px; transition: color 0.2s var(--ease), border-color 0.2s var(--ease); }
