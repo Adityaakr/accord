@@ -57,9 +57,45 @@ export async function emailSignedIn(): Promise<boolean> {
   }
 }
 
-/** Opens the NEAR Auth login (an Auth0 popup on login.testnet.fast-auth.com). */
+/** True when the app uses NEAR Auth's shared testnet client, which only returns to http://localhost:3000. */
+export const SHARED_TESTNET_CLIENT = !process.env.NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID;
+export const SHARED_CLIENT_ORIGIN = "http://localhost:3000";
+
+/** Shown when the login window never opened, was closed, or was replaced (e.g. an extension's phishing block). */
+export const EMAIL_BLOCKED = "The NEAR Auth window was blocked or closed. A browser extension may be blocking login.testnet.fast-auth.com. Try a window without extensions, or connect a wallet.";
+
+/** Opens the NEAR Auth login (an Auth0 popup on login.testnet.fast-auth.com). Rejects with EMAIL_BLOCKED when the popup
+ *  is blocked (window.open returns null), closed before the login completes, or nothing comes back within 60 seconds. */
 export async function emailLogin(): Promise<void> {
-  await (await load()).client.login();
+  const { client } = await load();
+  let popup: Window | null | undefined;
+  const open = window.open;
+  window.open = function (this: Window, ...args: Parameters<typeof window.open>) {
+    const w = open.apply(window, args);
+    popup = w;
+    return w;
+  } as typeof window.open;
+  try {
+    await new Promise<void>((resolve, reject) => {
+      let done = false;
+      const finish = (err?: Error) => {
+        if (done) return;
+        done = true;
+        window.clearInterval(watch);
+        window.clearTimeout(limit);
+        if (err) reject(err); else resolve();
+      };
+      // a popup that closes before the SDK resolves is given a moment, since a successful login also closes it
+      const watch = window.setInterval(() => {
+        if (popup === null) finish(new Error(EMAIL_BLOCKED));
+        else if (popup && popup.closed) window.setTimeout(() => finish(new Error(EMAIL_BLOCKED)), 2500);
+      }, 500);
+      const limit = window.setTimeout(() => finish(new Error(EMAIL_BLOCKED)), 60_000);
+      client.login().then(() => finish(), () => finish(new Error(EMAIL_BLOCKED)));
+    });
+  } finally {
+    window.open = open;
+  }
 }
 
 export async function emailLogout(): Promise<void> {
