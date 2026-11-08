@@ -81,6 +81,7 @@ export function Reviews() {
           <p className={`t-body-lg ${styles.description}`}>
             Verbatim where marked; everything else paraphrases the linked source.
           </p>
+          <p className={`t-body-sm ${styles.disclaimer}`}>Quoted for context; no endorsement implied.</p>
         </Appear>
       </div>
 
