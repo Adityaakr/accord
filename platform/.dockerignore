@@ -1,0 +1,9 @@
+**/node_modules
+**/.next
+**/.next-*
+target
+.env
+.env.*
+!.env.example
+app/.data
+.submission
