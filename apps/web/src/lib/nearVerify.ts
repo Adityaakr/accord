@@ -12,7 +12,7 @@ export const FACTORY = "accord-v2.testnet"
 const PRIMARY = "https://test.rpc.fastnear.com"
 const FALLBACK = "https://rpc.testnet.fastnear.com"
 /** Ask the fallback too when the primary has not answered by then; give up on a call after TIMEOUT. */
-const HEDGE_MS = 1200
+const HEDGE_MS = 2500 // a later hedge halves the burst a page sends, and with it the 429s a browser logs
 const TIMEOUT_MS = 8000
 
 export class RpcDown extends Error {}
