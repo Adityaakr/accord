@@ -24,17 +24,8 @@
   transition: background-color 0.2s var(--ease), color 0.2s var(--ease);
 }
 .account:hover { background: var(--elevation-weak); color: var(--text-strong); }
-.avatar {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: var(--teal-wash);
-  color: var(--teal);
-  font-weight: 500;
-  font-size: 12px;
-}
+.account { max-width: 260px; min-width: 0; }
+.id { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .menu {
   position: absolute;
   right: 0;

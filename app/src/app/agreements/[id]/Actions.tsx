@@ -4,6 +4,7 @@
 // is one of the principal's own transactions, signed by their own wallet; the contract checks the caller again.
 
 import { useMemo, useState, type ReactNode } from "react";
+import { AccountId, shortAccount } from "@/components/account/AccountId";
 import { useRouter } from "next/navigation";
 import {
   parseUnits, formatUnits,
@@ -174,7 +175,7 @@ export function Actions({
   return (
     <Panel
       title="Your actions"
-      eyebrow={w.accountId ? <>signed in as <span className="mono">{w.accountId}</span> · {role === "viewer" ? "not a party" : role}</> : "connect a wallet to act as a party"}
+      eyebrow={w.accountId ? <>signed in as <AccountId id={w.accountId} /> · {role === "viewer" ? "not a party" : role}</> : "connect a wallet to act as a party"}
       aside={role !== "viewer" ? <Pill tone="teal">{role}</Pill> : undefined}
     >
       {!w.accountId && <p className="small">Anyone can read this room. Only its buyer, vendor and settlement authority can act, each with their own wallet.</p>}

@@ -4,6 +4,7 @@
 // and the wallet sends the ciphertext. No request from this page carries the mandate.
 
 import { useMemo, useState } from "react";
+import { AccountId, shortAccount } from "@/components/account/AccountId";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Accord, AccordError, formatUnits, parseUnits, type Kind, type Mandate } from "@accord/sdk";
@@ -97,7 +98,7 @@ export function SealForm({
     return <Panel title="Connect the party's wallet"><p className="body">Only the buyer ({buyer}) or the vendor ({vendor}) can seal a mandate here.</p></Panel>;
   }
   if (!role) {
-    return <Panel title="Not a party"><p className="body"><span className="mono">{w.accountId}</span> is neither the buyer nor the vendor of this agreement.</p></Panel>;
+    return <Panel title="Not a party"><p className="body"><AccountId id={w.accountId} /> is neither the buyer nor the vendor of this agreement.</p></Panel>;
   }
 
   // Email (NEAR Auth) sign-in cannot seal: its signatures are public, so they cannot protect the mandate's document key.

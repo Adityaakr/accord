@@ -4,6 +4,7 @@
 // in; then sign in, confirm it's you, and accept. The link works once and expires.
 
 import Link from "next/link";
+import { AccountId, shortAccount } from "@/components/account/AccountId";
 import { useEffect, useState } from "react";
 import { useWallet } from "../wallet/WalletProvider";
 import { SignInCard } from "../SignInCard";
@@ -86,7 +87,7 @@ export function InvitePage({ token }: { token: string }) {
                   ? <p className={styles.error}>This account already belongs to {o.data!.org!.name}. An account belongs to one organisation.</p>
                   : <>
                       <button type="button" className={styles.primary} onClick={() => void accept()} disabled={busy}>{busy ? "Joining…" : `Join as ${p.role}`}</button>
-                      <p className={styles.note}>Joining as <span className="mono">{w.accountId}</span>. A role decides what you are shown; your wallet still signs every on-chain action.</p>
+                      <p className={styles.note}>Joining as <AccountId id={w.accountId} />. A role decides what you are shown; your wallet still signs every on-chain action.</p>
                     </>
               )}
               {error && <p className={styles.error} role="alert">{error}</p>}

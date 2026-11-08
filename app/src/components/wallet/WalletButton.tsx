@@ -4,10 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useWallet } from "./WalletProvider";
 import styles from "./WalletButton.module.css";
-
-function short(id: string): string {
-  return id.length > 26 ? `${id.slice(0, 12)}…${id.slice(-10)}` : id;
-}
+import { Identicon } from "@/components/account/Identicon";
+import { shortAccount as short } from "@/components/account/AccountId";
 
 export function WalletButton() {
   const w = useWallet();
@@ -25,8 +23,8 @@ export function WalletButton() {
     return (
       <div className={styles.wrap} ref={ref}>
         <button type="button" className={styles.account} onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-          <span className={styles.avatar} aria-hidden="true">{w.accountId.slice(0, 1).toUpperCase()}</span>
-          <span className="mono">{short(w.accountId)}</span>
+          <Identicon id={w.accountId} size={24} radius={6} />
+          <span className={`mono ${styles.id}`} title={w.accountId}>{short(w.accountId)}</span>
         </button>
         {open && (
           <div className={styles.menu} role="menu">

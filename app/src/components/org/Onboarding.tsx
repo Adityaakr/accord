@@ -3,6 +3,7 @@
 // After the first sign-in: create the organisation (name and domain) or join one with an invitation, then prove the
 // domain. The one place outside a deal room where the teal stage and a floating card appear.
 
+import { AccountId } from "@/components/account/AccountId";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -32,7 +33,7 @@ export function Onboarding() {
   else if (o.data?.org && created) {
     card = (
       <div className={styles.card}>
-        <div className={styles.steps}><span className={`${styles.dot} ${styles.dotOn}`} /><span className={`${styles.dot} ${styles.dotOn}`} /><span>Step 2 of 2</span></div>
+        <p className={styles.steps}>Step 2 of 2</p>
         <p className={styles.cardTitle}>Prove you control {o.data.org.domain}</p>
         <p className={styles.cardLead}>Counterparties see a verified domain next to your organisation&apos;s name. Add one of these, then check.</p>
         <DomainProof />
@@ -70,7 +71,7 @@ export function Onboarding() {
     };
     card = (
       <form className={styles.card} onSubmit={submit}>
-        <div className={styles.steps}><span className={`${styles.dot} ${styles.dotOn}`} /><span className={styles.dot} /><span>Step 1 of 2</span></div>
+        <p className={styles.steps}>Step 1 of 2</p>
         <p className={styles.cardTitle}>Set up your organisation</p>
         <p className={styles.cardLead}>Your company in Accord: its people, what each of them can do, and the deal rooms they share.</p>
         <div className={styles.switch} role="group" aria-label="Create or join">
@@ -97,7 +98,7 @@ export function Onboarding() {
         )}
         <button type="submit" className={styles.primary} disabled={busy}>{busy ? "Working…" : mode === "create" ? "Create the organisation" : "Open the invitation"}</button>
         {error && <p className={styles.error} role="alert">{error}</p>}
-        <p className={styles.note}>Signed in as <span className="mono">{w.accountId}</span></p>
+        <p className={styles.note}>Signed in as <AccountId id={w.accountId} /></p>
       </form>
     );
   }

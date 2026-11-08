@@ -2,6 +2,7 @@
 // line every live panel carries.
 
 import type { ReactNode } from "react";
+import { shortAccount } from "@/components/account/short";
 import { formatUnits, type State } from "@accord/sdk";
 import styles from "./ui.module.css";
 
@@ -115,7 +116,7 @@ export function Empty({ children }: { children: ReactNode }) {
 }
 
 export function Account({ id, href }: { id: string; href?: string }) {
-  const short = id.length > 34 ? `${id.slice(0, 16)}…${id.slice(-14)}` : id;
+  const short = shortAccount(id);
   return href
     ? <a className={`mono link ${styles.account}`} href={href} title={id} target="_blank" rel="noreferrer">{short}</a>
     : <span className={`mono ${styles.account}`} title={id}>{short}</span>;

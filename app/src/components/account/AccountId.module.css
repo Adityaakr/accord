@@ -1,0 +1,4 @@
+.wrap { display: inline-flex; align-items: baseline; gap: 8px; min-width: 0; max-width: 100%; }
+.wrap > .mono, .wrap > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.copy { font-size: 12px; color: var(--text-weak); padding: 1px 6px; border-radius: 6px; border: 1px solid var(--hairline); transition: color 0.2s var(--ease), border-color 0.2s var(--ease); flex: none; }
+.copy:hover { color: var(--text-strong); border-color: var(--hairline-strong); }
