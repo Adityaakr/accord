@@ -1,4 +1,4 @@
-//! Accord Atlas: hidden slot times, the pass rule and the period decision (ARCHITECTURE.md section 9).
+//! Market making: hidden slot times, the pass rule and the period decision (ARCHITECTURE.md section 9).
 
 use crate::types::*;
 use hmac::{Hmac, Mac};

@@ -1,5 +1,5 @@
 #![allow(unused_must_use)]
-//! `make sandbox`: the full procurement flow and one Accord Atlas period on a local NEAR sandbox. The three jobs are
+//! `make sandbox`: the full procurement flow and one market-making period on a local NEAR sandbox. The three jobs are
 //! replaced by the mock signer, and every mocked step is marked `[mock]`. Ends with `sandbox: all checks passed`.
 
 use accord_sandbox::*;
@@ -107,7 +107,7 @@ async fn main() -> Result<()> {
     );
     println!("  resume    buyer installs a new key · item 2 paid");
 
-    // Accord Atlas: one period.
+    // Market making: one period.
     let mm = env.create("market-making", &params).await?;
     mm.to_executing(&market_making_terms(env.token.id(), &params, 60))
         .await?;
@@ -115,7 +115,7 @@ async fn main() -> Result<()> {
     mm.authorise(env.recipient.id()).await?;
     let mm_agent = mm.install_agent().await?;
     let at = mm.get().await?["executing_at"].as_u64().unwrap();
-    println!("  atlas     {} · market-making · rhea-dcl 17208628… · 6 slots · threshold 4 · max spread 60 bps", mm.id);
+    println!("  market    {} · market-making · rhea-dcl 17208628… · 6 slots · threshold 4 · max spread 60 bps", mm.id);
     for (slot, spread) in [(0u8, 41), (1, 49), (2, 52), (3, 72), (4, 41), (5, 90)] {
         let o = observation(&mm.id, at, 0, slot, spread);
         let sig = mm.sign_observation(&o);

@@ -335,7 +335,7 @@ impl Agreement {
         }
     }
 
-    /// Both approvals in: the clock starts, items and Atlas periods are created from the terms.
+    /// Both approvals in: the clock starts, items and market-making periods are created from the terms.
     fn start_executing(&mut self) {
         let at = now();
         self.state = State::Executing;

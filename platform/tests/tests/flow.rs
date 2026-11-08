@@ -349,7 +349,7 @@ async fn forged_and_replayed_sealed_outputs_are_refused() -> Result<()> {
     Ok(())
 }
 
-/// Accord Atlas: six observations, four passing, the period closes `Eligible` and the agent pays; a conflicting
+/// Market making: six observations, four passing, the period closes `Eligible` and the agent pays; a conflicting
 /// observation is logged and never stored (I18); the stricter agreement's period is `Withheld`.
 #[tokio::test]
 async fn atlas_period_eligible_then_paid_and_strict_withheld() -> Result<()> {

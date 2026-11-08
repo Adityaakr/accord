@@ -3,7 +3,7 @@
 //! local OutLayer (the real job code, the model replaced by a deterministic negotiator; `localjobs.rs`), a test
 //! USDC faucet and an account faucet (`localnet.rs`). It seeds agreements in each state through the same path a
 //! user takes: real mandates sealed to the Sealed Table's key, negotiated by the local job, a recipient proven by
-//! the Payee job, payments from an agent key. The two Accord Atlas agreements are funded and left running: the
+//! the Payee job, payments from an agent key. The two market-making agreements are funded and left running: the
 //! keeper (`make dev`) records real mainnet observations into them as their hidden slot times pass.
 //! Writes the connection details and the local-only keys to target/sandbox/env.json.
 
@@ -217,7 +217,7 @@ async fn main() -> Result<()> {
     tripped.pay(&a2, 1, ITEM, env.canaries[1].id()).await?;
     rooms.push(("Executing, key revoked", tripped.id.to_string()));
 
-    // Accord Atlas: two market-making agreements on the real Rhea pool, observed live by the keeper.
+    // Market making: two agreements on the real Rhea pool, observed live by the keeper.
     let mut atlas = Vec::new();
     for (title, buyer, vendor) in [
         (
@@ -238,7 +238,7 @@ async fn main() -> Result<()> {
         let key = mm.install_agent().await?;
         agents.insert(mm.id.to_string(), key.secret_key().to_string());
         atlas.push(mm.id.to_string());
-        rooms.push(("Accord Atlas", mm.id.to_string()));
+        rooms.push(("Market making", mm.id.to_string()));
     }
 
     // Settled by mutual close: item 1 paid, the rest refunded to the buyer.

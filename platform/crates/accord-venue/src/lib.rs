@@ -1,4 +1,4 @@
-//! Accord Atlas venue reads (ARCHITECTURE.md 9.3): Rhea DCL's mid, spread and depth at one mainnet block, through
+//! Market-making venue reads (ARCHITECTURE.md 9.3): Rhea DCL's mid, spread and depth at one mainnet block, through
 //! view calls only. Integer and fixed-point arithmetic throughout, so the probe, the observer job and anyone
 //! recomputing from an archival node get the same numbers.
 

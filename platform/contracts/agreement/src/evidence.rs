@@ -1,4 +1,4 @@
-//! What makes an item payable: funding, deliveries (procurement), observations and periods (Accord Atlas), and
+//! What makes an item payable: funding, deliveries (procurement), observations and periods (market-making agreements), and
 //! exceptions the buyer approves.
 
 use crate::signed;

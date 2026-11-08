@@ -1,6 +1,6 @@
 [package]
 name = "accord-core"
-description = "Accord's pure logic: types, the six payment gates, limit checks, Atlas slot times and rule, JCS hashing"
+description = "Accord's pure logic: types, the six payment gates, limit checks, market-making slot times and rule, JCS hashing"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

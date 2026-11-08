@@ -1,6 +1,6 @@
 [package]
 name = "accord-venue"
-description = "Accord Atlas venue reads: Rhea DCL mid, spread and depth at one mainnet block, over any JSON-RPC transport"
+description = "Market-making venue reads: Rhea DCL mid, spread and depth at one mainnet block, over any JSON-RPC transport"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

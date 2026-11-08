@@ -1,4 +1,4 @@
-// The keeper's observer polling (ARCHITECTURE.md 9.2, PROGRESS 2.9): for every open Accord Atlas period, ask the
+// The keeper's observer polling (ARCHITECTURE.md 9.2, PROGRESS 2.9): for every open market-making period, ask the
 // observer about each slot whose window has opened and that has no observation on chain yet, and submit what it
 // signs. The observer answers `not_yet` (unsigned, saying nothing about the time) until the hidden slot time and
 // a final mainnet block after it exist, so asking early costs a call and reveals nothing.

@@ -140,7 +140,7 @@ fn procurement_terms() -> Terms {
     }
 }
 
-/// One Atlas period with `slots` slots (each window 20 s, the minimum `structural` allows).
+/// One market-making period with `slots` slots (each window 20 s, the minimum `structural` allows).
 fn mm_terms_slots(slots: u8) -> Terms {
     let period_secs = u64::from(slots) * 20;
     Terms {

@@ -148,7 +148,7 @@ proptest! {
         }
     }
 
-    /// I13: an Accord Atlas item whose period is Withheld, Review or closed unpaid is never payable, unless an
+    /// I13: a market-making item whose period is Withheld, Review or closed unpaid is never payable, unless an
     /// approved exception waives the evidence.
     #[test]
     fn withheld_and_review_periods_do_not_pay(
@@ -168,7 +168,7 @@ proptest! {
         prop_assert_eq!(r.is_ok(), waive);
     }
 
-    /// I18 and the Atlas rule: a conflict always sends the period to Review; otherwise Eligible exactly when the
+    /// I18 and the market-making rule: a conflict always sends the period to Review; otherwise Eligible exactly when the
     /// passes reach the threshold, Review when the unobserved slots could still reach it, else Withheld; uptime is
     /// reported, never the rule.
     #[test]

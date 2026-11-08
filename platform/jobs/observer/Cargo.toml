@@ -1,6 +1,6 @@
 [package]
 name = "accord-observer"
-description = "Accord Atlas observer: an OutLayer wasm32-wasip2 job that signs the venue's metrics at a hidden slot time"
+description = "Market-making observer: an OutLayer wasm32-wasip2 job that signs the venue's metrics at a hidden slot time"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

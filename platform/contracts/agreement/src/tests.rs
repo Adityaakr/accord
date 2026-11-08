@@ -1,5 +1,5 @@
 //! Unit tests against the mocked blockchain: the procurement flow, the attack refusals, revocation, the stale lock,
-//! close, exceptions and Accord Atlas periods. The sandbox suite in `tests/` repeats the critical ones on a real node.
+//! close, exceptions and market-making periods. The sandbox suite in `tests/` repeats the critical ones on a real node.
 
 use super::*;
 use crate::payments::CloseStep;

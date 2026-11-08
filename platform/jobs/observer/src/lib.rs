@@ -1,4 +1,4 @@
-//! The Accord Atlas observer (INTERFACES.md 7.3, ARCHITECTURE.md 9.2 and 9.3).
+//! The market-making observer (INTERFACES.md 7.3, ARCHITECTURE.md 9.2 and 9.3).
 //!
 //! `{"mode": "observe", "agreement", "period", "slot"}`: reads the agreement's terms and `executing_at` from
 //! testnet state over the pinned endpoints, takes the current time from the latest final testnet block (never the
@@ -87,7 +87,7 @@ fn not_yet() -> Value {
     json!({"mode": "observe", "status": "not_yet"})
 }
 
-/// The agreement's Atlas terms and `executing_at`, read from its own state.
+/// The agreement's market-making terms and `executing_at`, read from its own state.
 fn read_state(rpc: &NearRpc, ask: &Ask, deps: &Deps) -> Result<(AtlasTerms, u64), String> {
     let terms = rpc::retry(deps.retry, deps.pause, || {
         rpc::view_json(rpc, &ask.agreement, "get_terms", &json!({}), "optimistic").map(Some)

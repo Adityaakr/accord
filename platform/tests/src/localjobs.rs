@@ -7,7 +7,7 @@
 //! - the vendor's domain file is served from memory instead of fetched from the domain;
 //! - the Sealed Table's model is `local::LocalNegotiator`, and its output carries `model.local`.
 //!
-//! The observer still reads mainnet (view calls only), so Atlas periods are measured from the real pool.
+//! The observer still reads mainnet (view calls only), so market-making periods are measured from the real pool.
 
 use crate::{Job, OBSERVER_SEED, PAYEE_SEED, SEALED_SEED};
 use accord_core::limits::{Mandate, Role};
