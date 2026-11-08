@@ -6,6 +6,26 @@ One command checks a live agreement from public data, with no keys: the contract
 
 ## Verify this agreement
 
+Live on testnet: [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
+
+6 ok · 1 not checked
+
+- ok contract code
+
+- ok agent key
+
+- ok sealed outcome
+
+- ok model attestation
+
+- ok recipient proof
+
+- ok record
+
+- not checked release attestation (the outlayer-verify tool is not installed yet)
+
+[Run it again in the app](/app/verify/a6.accord-v2.testnet) · [factory accord-v2.testnet](https://testnet.nearblocks.io/address/accord-v2.testnet)
+
 ## What make verify checks, line by line.
 
 `make verify DEAL=<agreement>`

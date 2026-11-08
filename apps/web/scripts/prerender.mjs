@@ -73,7 +73,7 @@ const APP = {
   name: "Accord", applicationCategory: "BusinessApplication", applicationSubCategory: "Agent payments and negotiation infrastructure",
   operatingSystem: "Web", url: `${SITE_URL}/`, description: ABOUT, image: OG_IMAGE,
   featureList: CONTROLS.map((c) => `${c.name}: ${c.text}`),
-  offers: { "@type": "Offer", name: "Developer preview", price: "0", priceCurrency: "USD", availability: "https://schema.org/PreOrder", description: "Free access for developers, coming soon. Planned: Accord Teams (subscription) and market-making agreements (per monitored market). No percentage-based Accord fee on payment amounts; production prices published before launch." },
+  offers: { "@type": "Offer", name: "Testnet", price: "0", priceCurrency: "USD", availability: "https://schema.org/InStock", description: "Free access for developers, coming soon. Planned: Accord Teams (subscription) and market-making agreements (per monitored market). No percentage-based Accord fee on payment amounts; production prices published before launch." },
   publisher: { "@id": `${SITE_URL}/#organization` },
 }
 
@@ -146,7 +146,7 @@ function render(route, target = route) {
 ${md ? mdToHtml(md) : `<h1>${esc(title)}</h1><p>${esc(description)}</p>`}
 </main>
 <nav aria-label="Site"><h2>Pages</h2><ul>${nav}</ul></nav>
-<footer><p>${esc(ABOUT)}</p><p>Pre-launch: built and tested on a local NEAR node; testnet release pending; mainnet follows an audit. <a href="/llms.txt">llms.txt</a> · <a href="/sitemap.xml">Sitemap</a></p></footer>
+<footer><p>${esc(ABOUT)}</p><p>Live on NEAR testnet (factory accord-v2.testnet); the full flow ran on agreement a6.accord-v2.testnet; mainnet follows an audit. <a href="/llms.txt">llms.txt</a> · <a href="/sitemap.xml">Sitemap</a></p></footer>
 </div></div>`
 
   let html = TEMPLATE
@@ -194,14 +194,15 @@ ${ABOUT}
 Key facts:
 - Parts: Sealed Table (confidential negotiation in an attested enclave), Agreement controls (approved terms enforced by a NEAR contract), Payee (recipient authorisation), Evidence checks (a payment becomes eligible only when the agreed evidence or acceptance is recorded).
 - The buyer's agent holds one key that can call one method, \`act\`; payments that do not match the approved terms are refused with a recorded reason (for example ERR_PAYEE_MISMATCH, ERR_AMOUNT_MISMATCH).
-- Status: pre-launch. Built and tested end to end on a local NEAR node; the NEAR testnet release is pending; mainnet follows an audit. Settlement: USDC on NEAR (NEP-141).
+- Status: Deployed on NEAR testnet (factory accord-v2.testnet, release 3). The full flow ran there on agreement a6.accord-v2.testnet: sealed limits, the Sealed Table negotiation by the real NEAR AI model inside OutLayer's attested enclave, approvals, funding, a payment, a refused redirect (ERR_PAYEE_MISMATCH) and a revocation. Settlement on testnet uses a test USDC token. Mainnet follows an audit. Settlement: USDC on NEAR (NEP-141).
+- Proof on testnet: every step of agreement a6.accord-v2.testnet is linked to its transaction at ${SITE_URL}/#testnet and https://testnet.nearblocks.io/address/a6.accord-v2.testnet
 - Agreement types: market-making agreements (demo), vendor contracts and renewals (demo), security remediation, infrastructure service agreements, agent-to-agent services, grants and funded milestones (planned).
-- Pricing (planned): Developer preview with free access (coming soon); Accord Teams, a subscription; market-making agreements, per monitored market. No percentage-based Accord fee on payment amounts. Production prices published before launch; network and third-party fees may apply.
+- Pricing: free on NEAR testnet with test funds today. Planned: Accord Teams, a subscription; market-making agreements, per monitored market. No percentage-based Accord fee on payment amounts. Production prices published before launch; network and third-party fees may apply.
 - Every claim is stated with its limit on the Security page; findings cited on the Research page are the authors' own.
 
 ## Agreement types
 
-Same controls in every type; the commercial fields and the evidence accepted change. "demo": built and shown in the demonstration (local NEAR node). "planned": designed, not built.
+Same controls in every type; the commercial fields and the evidence accepted change. "demo": built and run on NEAR testnet. "planned": designed, not built.
 
 ${USE_CASES.map((u) => `- **${u.name}** (${u.status}): ${u.outcome} ${u.how} Evidence: ${u.evidence}.${u.limit ? ` Limit: ${u.limit}` : ""}`).join("\n")}
 

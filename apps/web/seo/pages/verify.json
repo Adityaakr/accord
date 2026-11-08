@@ -1,5 +1,5 @@
 {
   "title": "Accord: Verify an agreement",
-  "description": "One command checks a live Accord agreement from public data, with no keys: contract code, keys, the Sealed Table release, attestation and recipient.",
+  "description": "Check an Accord agreement from public data, with no keys. Agreement a6.accord-v2.testnet on NEAR testnet passes six checks, from contract code to the record.",
   "ld": []
 }

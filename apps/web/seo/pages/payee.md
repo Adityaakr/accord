@@ -4,7 +4,7 @@ Inside Accord · Payee
 
 A payment needs an approved destination as well as an approved amount. Payee connects the recipient's domain proof, settlement authority and payment address to the deal.
 
-[Set up your recipient profile](/product/payee) [Inspect a recipient record](/record)
+[Set up your recipient profile](/app/payee) [Inspect a recipient record](/record)
 
 > Illustrative: A recipient bound to the vendor's domain, approved and accepted.
 

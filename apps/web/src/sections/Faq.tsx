@@ -82,14 +82,14 @@ const COLUMN_2: Item[] = [
     delay: 0.4,
     title: "What does it cost?",
     description:
-      "The developer preview gives free testnet access, using test funds. Planned pricing: an Accord Teams subscription for managing business agreements, and market-making agreements priced per monitored market. No percentage-based Accord fee on payment amounts. Production prices and included allowances will be published before launch; network and third-party fees may apply.",
+      "Testnet use is free and uses test funds. Planned pricing: an Accord Teams subscription for managing business agreements, and market-making agreements priced per monitored market. No percentage-based Accord fee on payment amounts. Production prices and included allowances will be published before launch; network and third-party fees may apply.",
   },
   {
     id: "e7MnSyaRM",
     delay: 0.5,
     title: "Is it live?",
     description:
-      "Not yet. Accord is pre-launch: it is built and tested end to end on a local NEAR node, and the NEAR testnet release is pending. The demonstration on this page shows recorded runs until then. Mainnet follows an audit.",
+      "On NEAR testnet, yes. The full flow ran on agreement a6.accord-v2.testnet: both sides sealed their limits, the Sealed Table negotiated inside an attested enclave, both companies approved, the buyer funded, the agent paid, a redirected payment was refused and the agent was revoked. Settlement on testnet uses a test USDC token. Mainnet follows an audit.",
   },
 ]
 

@@ -2,11 +2,11 @@ Contact us
 
 # Get in touch with us
 
-Questions about Accord, early access or an agreement type? Write to us.
+Questions about Accord or an agreement type? Write to us.
 
-## Early access
+## Getting started
 
-Accord is pre-launch. To join a deal room, [request early access](/join).
+Accord runs on NEAR testnet. To start a deal room, see [how to start](/join).
 
 ## Check it yourself
 

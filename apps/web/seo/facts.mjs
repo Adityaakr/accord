@@ -1,15 +1,15 @@
 /* The facts agents and answer engines read about Accord, in one place: llms.txt, llms-full.txt, /facts.json and the
    home page's JSON-LD (ItemList of use cases, DefinedTermSet glossary) are all built from here by scripts/prerender.mjs.
    Keep every line inside what is built: status "demo" means built and shown in the demonstration (run end to end on a
-   local NEAR node; the testnet release is pending, per ~/accord-app PROGRESS.md), "planned" means designed, not built. Refusal codes are the contract's own (accord-core RefusalCode). */
+   NEAR testnet; agreement a6.accord-v2.testnet ran the full flow on 8 Nov 2026), "planned" means designed, not built. Refusal codes are the contract's own (accord-core RefusalCode). */
 
 export const ONE_LINE = "Accord is the private deal room and control plane for agent-to-agent commerce: agents negotiate privately, both companies approve the terms, and a NEAR contract enforces who can authorise payments, who can receive them, how much can be paid and what evidence is required."
 
 export const STATUS = {
-  network: "NEAR. Built and tested end to end on a local NEAR node; the NEAR testnet release is pending",
+  network: "NEAR testnet: factory accord-v2.testnet, release 3; the full flow ran on agreement a6.accord-v2.testnet (https://testnet.nearblocks.io/address/a6.accord-v2.testnet)",
   settlement: "USDC on NEAR (NEP-141), from each agreement's own account",
   mainnet: "Follows an audit; not live",
-  stage: "Pre-launch: early access by request at /join",
+  stage: "Testnet. Start at /join; the app opens with a NEAR wallet or a work email (NEAR Auth); settlement on testnet uses a test USDC token",
 }
 
 /* The six agreement types. Same controls in every one; the commercial fields and the evidence accepted change. */
@@ -59,11 +59,11 @@ export const ANSWERS = [
   { q: "What is Accord?", a: ONE_LINE },
   { q: "How does Accord stop an AI agent from paying the wrong account?", a: "The agent cannot change the recipient. Payee binds the recipient to a domain the vendor controls and the buyer accepted, and the Agreement controls contract refuses any payment to another account with ERR_PAYEE_MISMATCH, whatever the agent was instructed." },
   { q: "Can the other company see my price limit?", a: "No. Each company's mandate is encrypted in the browser and readable only inside the attested enclave where the agents negotiate. Only the agreed terms and an attestation come out; only a commitment hash of each mandate goes on NEAR." },
-  { q: "What blockchain and currency does Accord use?", a: "NEAR. Payments settle in USDC on NEAR (NEP-141) from each agreement's own account. Accord is pre-launch: built and tested on a local NEAR node, with the testnet release pending and mainnet after an audit." },
+  { q: "What blockchain and currency does Accord use?", a: "NEAR. Payments settle in USDC on NEAR (NEP-141) from each agreement's own account. Accord is deployed on NEAR testnet, where the full flow has run end to end; mainnet follows an audit." },
   { q: "What kinds of agreements does Accord support?", a: "Six agreement types share the same controls: market-making agreements and vendor contracts (in the demonstration), and agent-to-agent services, security remediation, infrastructure service agreements and grants (planned)." },
   { q: "How are market makers paid in Accord?", a: "A retainer period is paid only if enough observations of the venue's public liquidity, taken at hidden times, meet the agreed spread, depth and two-sided quoting. Otherwise the payment is withheld for both parties to review." },
   { q: "What happens if an agent is compromised?", a: "Its instructions can change, but its payment authority cannot: every payment must match the approved milestone, amount and recipient or it is refused and recorded. The buyer can revoke the agent's key in one transaction." },
-  { q: "Is Accord live?", a: "Not yet. Accord is pre-launch: it is built and tested end to end on a local NEAR node, the NEAR testnet release is pending, and mainnet follows an audit. Early access is by request." },
+  { q: "Is Accord live?", a: "On NEAR testnet, yes. Accord is deployed there (factory accord-v2.testnet, release 3). The full flow ran there on agreement a6.accord-v2.testnet: sealed limits, the Sealed Table negotiation by the real NEAR AI model inside OutLayer's attested enclave, approvals, funding, a payment, a refused redirect (ERR_PAYEE_MISMATCH) and a revocation. Settlement on testnet uses a test USDC token. Mainnet follows an audit." },
   { q: "How does a deal room work?", a: "In six steps: each company seals its limits; the agents negotiate inside an attested enclave and only the agreed terms come out; both companies approve, the recipient is bound and the buyer funds a USDC escrow; the agent pays through one method, act, and anything off the terms is refused; the agreed evidence decides whether each payment is eligible; eligible payments settle to the approved recipient and the record stays checkable." },
   { q: "What is Accord built on?", a: "NEAR (the agreement contract, escrow and record), NEAR AI Cloud (private inference for the negotiating agents), OutLayer (attested enclaves), USDC on NEAR (settlement) and Rhea (the pool the market-making observer reads). Funding from other chains through NEAR Intents is planned. No partnership is claimed." },
 ]
@@ -94,7 +94,7 @@ export const CONTROLS = [
   { name: "A recipient that cannot be redirected", text: "The vendor proves its domain, its settlement authority approves the account and the buyer accepts it; a message cannot change it." },
   { name: "Evidence before release", text: "A payment becomes eligible only when the agreed evidence is recorded; otherwise it is withheld." },
   { name: "Stop the agent in one transaction", text: "revoke_agent deletes the agent's key; later calls fail with AccessKeyDoesNotExist; payments already made stay paid." },
-  { name: "Checkable from public data", text: "make verify checks the contract code, the agent key, the recipient proof and the record with no keys; the enclave release check follows the testnet release." },
+  { name: "Checkable from public data", text: "make verify checks the contract code, the agent key, the recipient proof and the record with no keys; the release attestation check needs the outlayer-verify tool." },
 ]
 
 /* Built on: the strip under the hero. No partnership is claimed. */

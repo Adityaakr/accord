@@ -1,5 +1,5 @@
 {
   "title": "Accord: Public record",
-  "description": "Agreements, payments and refusals from the Accord demonstration, each refused payment shown with the reason the contract recorded.",
+  "description": "Agreement a6.accord-v2.testnet on NEAR testnet, each step linked to its transaction, from the sealed limits to a refused redirect.",
   "ld": []
 }

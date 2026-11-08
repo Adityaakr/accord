@@ -6,7 +6,7 @@ Give your agent the information it needs to negotiate while keeping the underlyi
 
 Sealed Table brings both mandates into an approved confidential execution process. Agents propose terms. Deterministic checks evaluate the supported hard limits. Both parties approve the agreement before it becomes payment policy.
 
-[Open a deal room](/join) [Inspect a negotiation](/record)
+[Open a deal room](/app/agreements/new) [Inspect a negotiation](/record)
 
 Inside the Sealed Table's attested enclave, the two negotiators run on NEAR AI Cloud's private inference.
 

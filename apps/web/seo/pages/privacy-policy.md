@@ -2,7 +2,7 @@
 
 # Privacy policy
 
-What this website collects, where it goes and what it never does. Accord is pre-launch; this page covers the site, not the product.
+What this website collects, where it goes and what it never does. This page covers the site, not the product.
 
 ## 1. What this site collects
 
@@ -24,7 +24,7 @@ Only what you choose to send:
 
 ## 3. What we do not do
 
-This site has no analytics, no advertising and no tracking cookies, and we do not sell or share what you send. Once the demonstration runs on NEAR testnet, its agreements, payments and refusals are public there by design.
+This site has no analytics, no advertising and no tracking cookies, and we do not sell or share what you send. Agreements, payments and refusals on NEAR testnet are public there by design.
 
 ## 4. Your browser and our host
 

@@ -4,7 +4,7 @@ Product
 
 Your negotiating limits, the terms you approve and the destination of your money belong to the same decision. Accord keeps them connected in one deal room.
 
-[Open a deal room](/join) [Inspect an agreement](/record)
+[Open a deal room](/app/agreements/new) [Inspect an agreement](/record)
 
 > Illustrative: A buyer's sealed mandate: limits stay hidden; only the sealed mandate and its commitment hash go on NEAR.
 
