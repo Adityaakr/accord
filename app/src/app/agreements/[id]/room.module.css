@@ -26,7 +26,7 @@
 .table td { padding: 13px 20px; border-bottom: 1px solid var(--hairline); color: var(--text-medium); vertical-align: middle; white-space: nowrap; }
 .table tbody tr:last-child td { border-bottom: 0; }
 .table tbody tr { transition: background-color 0.2s var(--ease); }
-.table tbody tr:hover { background: rgba(255, 255, 255, 0.015); }
+.table tbody tr:hover { background: rgba(var(--ink-rgb), 0.015); }
 .pad { padding: 4px 20px 16px; }
 
 .refusalCount {

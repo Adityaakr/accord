@@ -16,7 +16,7 @@
   transition: transform 0.2s var(--ease);
 }
 .pass { background: var(--teal-wash); border-color: var(--teal-line); color: var(--teal); }
-.fail { background: rgba(255, 255, 255, 0.03); border-color: var(--hairline-strong); color: var(--text-weak); }
+.fail { background: rgba(var(--ink-rgb), 0.03); border-color: var(--hairline-strong); color: var(--text-weak); }
 .empty { border: 1px dashed var(--hairline-strong); }
 .periodFoot { min-height: 20px; }
 

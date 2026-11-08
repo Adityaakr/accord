@@ -48,7 +48,7 @@
   font-weight: 500;
   transition: box-shadow 0.3s var(--ease), opacity 0.2s;
 }
-.submit:hover:not(:disabled) { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); }
+.submit:hover:not(:disabled) { box-shadow: 0 0 0 2px rgba(var(--ink-rgb), 0.5); }
 .submit:disabled { opacity: 0.5; cursor: default; }
 .error { color: var(--refusal); padding: 10px 12px; border-radius: var(--radius); background: var(--refusal-bg); }
 

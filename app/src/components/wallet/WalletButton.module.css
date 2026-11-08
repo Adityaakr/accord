@@ -10,7 +10,7 @@
   white-space: nowrap;
   transition: box-shadow 0.3s var(--ease);
 }
-.connect:hover { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); }
+.connect:hover { box-shadow: 0 0 0 2px rgba(var(--ink-rgb), 0.5); }
 .connect:disabled { opacity: 0.6; cursor: default; }
 .account {
   display: inline-flex;

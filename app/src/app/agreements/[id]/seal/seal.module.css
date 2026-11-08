@@ -1,6 +1,6 @@
 /* The seal moment: one floating card on the teal stage. Numbers (mono) blur out as hash slices blur in, staggered,
    about 600 ms in all; reduced motion shows the end state. */
-.momentCard { width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: 14px; padding: 20px 22px; border-radius: 20px; background: linear-gradient(160deg, rgba(255,255,255,0.055), rgba(255,255,255,0.015) 60%), var(--elevation-strong); border: 1px solid rgba(255,255,255,0.09); box-shadow: 0 40px 80px -40px rgba(0,0,0,0.7); }
+.momentCard { width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: 14px; padding: 20px 22px; border-radius: 20px; background: linear-gradient(160deg, rgba(var(--ink-rgb), 0.055), rgba(var(--ink-rgb), 0.015) 60%), var(--elevation-strong); border: 1px solid rgba(var(--ink-rgb), 0.09); box-shadow: 0 40px 80px -40px rgba(var(--shadow-rgb), 0.7); }
 .momentHead { display: flex; align-items: center; gap: 10px; }
 .momentLock { color: var(--text-weak); transition: color 0.3s var(--ease) 0.3s; }
 .go .momentLock { color: var(--teal); }

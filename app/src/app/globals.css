@@ -7,22 +7,27 @@
   --elevation-strong: rgb(19, 21, 23);
   --elevation-medium: rgb(35, 35, 38);
   --elevation-weak: rgb(48, 49, 49);
+  --ink-rgb: 255, 255, 255;
+  --teal-rgb: 145, 207, 181;
+  --refusal-rgb: 255, 34, 68;
+  --bg-rgb: 8, 10, 9;
+  --shadow-rgb: 0, 0, 0;
   --white: rgb(255, 255, 255);
   --text-strong: rgb(255, 255, 255);
-  --text-medium: rgba(255, 255, 255, 0.8);
-  --text-weak: rgba(255, 255, 255, 0.62);
-  --text-faint: rgba(255, 255, 255, 0.42);
+  --text-medium: rgba(var(--ink-rgb), 0.8);
+  --text-weak: rgba(var(--ink-rgb), 0.62);
+  --text-faint: rgba(var(--ink-rgb), 0.42);
   --teal: rgb(145, 207, 181);
-  --teal-wash: rgba(145, 207, 181, 0.1);
-  --teal-line: rgba(145, 207, 181, 0.32);
+  --teal-wash: rgba(var(--teal-rgb), 0.1);
+  --teal-line: rgba(var(--teal-rgb), 0.32);
   --yellow: rgb(212, 177, 68);
   --yellow-wash: rgba(212, 177, 68, 0.12);
   --purple: rgb(181, 154, 255);
   --refusal: rgb(255, 34, 68);
-  --refusal-bg: rgba(255, 34, 68, 0.12);
-  --refusal-line: rgba(255, 34, 68, 0.35);
-  --hairline: rgba(255, 255, 255, 0.08);
-  --hairline-strong: rgba(255, 255, 255, 0.14);
+  --refusal-bg: rgba(var(--refusal-rgb), 0.12);
+  --refusal-line: rgba(var(--refusal-rgb), 0.35);
+  --hairline: rgba(var(--ink-rgb), 0.08);
+  --hairline-strong: rgba(var(--ink-rgb), 0.14);
   --on-white: rgb(8, 9, 10);
 
   --font-text: var(--font-host-grotesk), "Host Grotesk", system-ui, sans-serif;
@@ -34,7 +39,33 @@
   --content-max: 1200px;
   --gutter: 32px;
   --ease: cubic-bezier(0.2, 0.8, 0.3, 1);
+  --stage-a: #0d1513; --stage-b: #111c19; --stage-c: #0b1110;
+  --px-hi: #ffffff; --px-mid: #c9ccd1; --px-lo: #7d838b;
   color-scheme: dark;
+}
+
+/* Light theme: the website's light tokens (apps/web global.css :root[data-theme="light"]). Teal deepened for
+   contrast on white; red stays for refusals only. */
+:root[data-theme="light"] {
+  --ink-rgb: 14, 15, 17;
+  --teal-rgb: 36, 133, 102;
+  --refusal-rgb: 208, 20, 54;
+  --bg-rgb: 246, 246, 244;
+  --shadow-rgb: 40, 50, 45;
+  --background: rgb(246, 246, 244);
+  --elevation-strong: rgb(255, 255, 255);
+  --elevation-medium: rgb(239, 239, 237);
+  --elevation-weak: rgb(224, 224, 221);
+  --white: rgb(17, 18, 20);
+  --text-strong: rgb(14, 15, 17);
+  --teal: rgb(36, 133, 102);
+  --yellow: rgb(150, 112, 10);
+  --yellow-wash: rgba(150, 112, 10, 0.1);
+  --refusal: rgb(208, 20, 54);
+  --on-white: #ffffff;
+  --stage-a: #e7f2ee; --stage-b: #d6ebe3; --stage-c: #e9f3ef;
+  --px-hi: #5a5f66; --px-mid: #2b2e33; --px-lo: #0e0f11;
+  color-scheme: light;
 }
 
 *, *::before, *::after { box-sizing: border-box; }

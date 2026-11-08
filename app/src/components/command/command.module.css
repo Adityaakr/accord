@@ -1,6 +1,6 @@
 /* The command bar: one floating card over a dimmed page; teal marks the selection, red only on a revoke action. */
-.backdrop { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: center; align-items: flex-start; padding: 14vh 16px 16px; background: rgba(4, 6, 5, 0.66); backdrop-filter: blur(3px); animation: fade 0.18s var(--ease); }
-.panel { width: 100%; max-width: 620px; display: flex; flex-direction: column; border-radius: var(--radius-lg); background: var(--elevation-strong); border: 1px solid var(--hairline-strong); box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.85); overflow: hidden; animation: rise 0.22s var(--ease); }
+.backdrop { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: center; align-items: flex-start; padding: 14vh 16px 16px; background: rgba(var(--bg-rgb), 0.66); backdrop-filter: blur(3px); animation: fade 0.18s var(--ease); }
+.panel { width: 100%; max-width: 620px; display: flex; flex-direction: column; border-radius: var(--radius-lg); background: var(--elevation-strong); border: 1px solid var(--hairline-strong); box-shadow: 0 40px 80px -30px rgba(var(--shadow-rgb), 0.85); overflow: hidden; animation: rise 0.22s var(--ease); }
 .inputRow { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--hairline); }
 .kbd { flex: none; font-family: var(--font-mono); font-size: 11px; color: var(--text-weak); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--hairline-strong); }
 .input { flex: 1; min-width: 0; background: none; border: 0; outline: none; color: var(--text-strong); font-size: 15px; }
