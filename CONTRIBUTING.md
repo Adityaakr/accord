@@ -1,13 +1,24 @@
 # Contributing to Accord
 
-Thank you for helping. This repository holds the Accord website today and is laid out so the product packages (contract, enclave jobs, agent) land beside it. Read the README first.
+Thank you for helping. This repository holds the Accord website (`apps/web`) and the product (`platform/`: contracts, enclave jobs, SDK, CLI, agent and the deal-room app). Read the README first; `platform/CLAUDE.md` holds the build rules for `platform/`.
 
 ## Setup
 
+The website:
+
 ```sh
 nvm use            # Node from .nvmrc
-npm install        # installs every workspace
+npm install        # installs the apps/* workspace
 npm run dev        # http://localhost:5180
+```
+
+The product:
+
+```sh
+cd platform
+corepack enable && pnpm install
+make setup-check   # each pinned tool with its version and ok
+make test          # cargo tests, then the package, service and app tests
 ```
 
 ## Before you open a pull request
@@ -18,13 +29,13 @@ npm run build      # production build
 npm run check:rendered   # optional: copy rules on the rendered pages (needs Playwright and a running dev server)
 ```
 
-CI runs the first two on every pull request.
+CI runs the first two on every pull request. For changes in `platform/`, run `make test` and the app's `pnpm --filter @accord/app typecheck`.
 
 ## Copy rules
 
 Accord's credibility is its claims. The copy check (`apps/web/scripts/check-copy.mjs`) enforces these, and reviewers enforce the rest.
 
-- Every public statement about Accord is one of the claims in `docs/product/GOAL.md`, written with its limit next to it.
+- Every public statement about Accord is one of the claims in `platform/GOAL.md`, written with its limit next to it.
 - No trust words as product adjectives: secure, trustless, bank-grade, military-grade, AI-powered, seamless, revolutionary, autonomous.
 - No retired phrases (the list is in the check script and in `GOAL.md`).
 - No em-dashes in our own words. Quotations keep their punctuation.
@@ -34,7 +45,7 @@ Accord's credibility is its claims. The copy check (`apps/web/scripts/check-copy
 
 ## Naming
 
-Accord is the platform. Its parts are Sealed Table, Agreement controls and Payee. Accord Atlas is the first application: write "Accord Atlas" in headings and at the first mention on a page, "Atlas" after that.
+Accord is one product. Its parts are Sealed Table, Agreement controls, Payee and Evidence checks. Market making is one of six agreement types and the featured one: write "market-making agreements" (the earlier sub-brand name was retired on 8 Nov 2026), and keep `market-making` as the agreement type in code.
 
 ## Design
 

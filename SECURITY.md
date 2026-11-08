@@ -10,7 +10,7 @@ Include what you found, how to reproduce it and what an attacker could do with i
 
 ## Scope
 
-- The agreement contract, the enclave jobs (negotiation, payee verification, observation) and the agent, as specified in `docs/product/GOAL.md`.
+- The agreement contract, the enclave jobs (negotiation, payee verification, observation) and the agent, as specified in `platform/GOAL.md` and built in `platform/`.
 - The website in `apps/web`, including its forms and any endpoint it calls.
 
 ## What Accord does and does not claim
