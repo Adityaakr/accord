@@ -1,6 +1,7 @@
 import { InviteCard } from "./InviteCard";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { KindLabel } from "@/components/rooms/KindLabel";
 import { notFound } from "next/navigation";
 import { formatUnits, type ItemView, type Refusal } from "@accord/sdk";
 import { room, type Room } from "@/server/data";
@@ -170,12 +171,13 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
         <div className={styles.titleRow}>
           <h1 className="h2">{a.title}</h1>
           <div className={styles.titlePills}>
-            {isAtlas ? <Pill tone="purple">market making</Pill> : <Pill>vendor contract</Pill>}
             <StatePill state={a.state} />
             {a.params.mode === "demo" && <Pill tone="warn" title="Shorter timelocks and delays than a live agreement">demo timings</Pill>}
           </div>
         </div>
         <p className={styles.subline}>
+          <KindLabel kind={a.kind} />
+          <span className="faint">·</span>
           <Account id={a.account} href={explorer(a.account)} />
           <span className="faint">·</span>
           <span className="small">release {a.release}</span>

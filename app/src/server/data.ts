@@ -59,6 +59,8 @@ export interface NeedsYou {
   href: string;
   /** Lower is more urgent */
   rank: number;
+  /** The role this is for: Home shows only the needs of the workspace in use */
+  role: Role;
 }
 
 export interface PortfolioRoom {
@@ -142,21 +144,25 @@ export async function portfolio(account: string): Promise<Portfolio> {
 
     // what this person can do next in this room
     const room = record.account, title = view.title, href = `/agreements/${room}`;
-    const need = (action: string, detail: string, rank: number, to = href) => out.needs.push({ room, title, action, detail, href: to, rank });
+    const need = (action: string, detail: string, rank: number, to = href, role: Role = "buyer") => out.needs.push({ room, title, action, detail, href: to, rank, role });
     const live = view.state === "Executing";
     if (view.state === "Sealed" && view.negotiation === "AwaitingMandates") {
       if (isBuyer && !commitments.buyer) need("Seal your limits", "The negotiation starts once both mandates are sealed.", 1, `${href}/seal`);
-      if (isVendor && !commitments.vendor) need("Seal your limits", "The negotiation starts once both mandates are sealed.", 1, `${href}/seal`);
+      if (isVendor && !commitments.vendor) need("Seal your limits", "The negotiation starts once both mandates are sealed.", 1, `${href}/seal`, "vendor");
     }
     if (view.state === "Attested") {
       if (isBuyer && !view.approvals.buyer) need("Approve the terms", "The agreed terms wait for your approval.", 0);
-      if (isVendor && !view.approvals.vendor) need("Approve the terms", "The agreed terms wait for your approval.", 0);
+      if (isVendor && !view.approvals.vendor) need("Approve the terms", "The agreed terms wait for your approval.", 0, href, "vendor");
     }
     if (live && isBuyer && big(view.funded) < big(view.total)) need("Fund the escrow", "Payments become possible once the agreement holds its USDC.", 1);
     const pr = view.pending_recipient;
-    if (pr?.status === "Proven" && isAuthority) need("Approve the recipient", `${pr.account} proved the vendor's domain.`, 0);
+    if (pr?.status === "Proven" && isAuthority) need("Approve the recipient", `${pr.account} proved the vendor's domain.`, 0, href, "authority");
     if (pr?.status === "AuthorityApproved" && isBuyer) need("Accept the recipient", `${pr.account}, approved by the vendor's authority.`, 0);
-    if (live && isVendor && !view.recipient && !pr) need("Propose a recipient", "Name the account payments go to; it is proven against your domain.", 1);
+    if (live && isVendor && !view.recipient && !pr) need("Propose a recipient", "Name the account payments go to; it is proven against your domain.", 1, href, "vendor");
+    if (live && isVendor) {
+      const claimable = items.filter((i) => i.status === "Eligible").length;
+      if (claimable) need("Claim a payment", `${claimable} eligible payment${claimable > 1 ? "s" : ""} you can claim to your recipient.`, 1, `${href}?tab=funds`, "vendor");
+    }
     const pendingEx = exceptions.filter((e) => e.status === "pending");
     if (isBuyer && pendingEx.length) need("Decide an exception", `${pendingEx.length} request${pendingEx.length > 1 ? "s" : ""} held for you.`, 0);
     const delivered = items.filter((i) => i.status === "Delivered");
@@ -422,4 +428,49 @@ export async function roomTable(party?: string): Promise<{ rows: RoomRow[]; sour
     };
   }));
   return { rows: rows.filter((r): r is RoomRow => !!r).reverse(), source: src };
+}
+
+// ---------- Deliveries and claims (vendor workspace): every item in the rooms this account sells in ----------
+
+export interface DeliveryRow {
+  room: string;
+  title: string;
+  kind: string;
+  item: number;
+  amount: string;
+  status: string;
+  dueAt: number | null;
+  eligibleAt: number | null;
+  /** what the vendor does next, in a few words */
+  next: string;
+  /** the room tab where it happens */
+  tab: "evidence" | "funds" | "activity";
+  /** true when the next step is the vendor's to take */
+  yours: boolean;
+}
+
+export async function deliveries(account: string): Promise<{ account: string; rows: DeliveryRow[]; source: Source }> {
+  const a = accord();
+  const [records, src] = await Promise.all([a.listAgreements({ party: account }), source()]);
+  const rows: DeliveryRow[] = [];
+  await Promise.all(records.map(async (record) => {
+    const d = a.agreement(record.account);
+    const view = await d.get().catch(() => null);
+    if (!view || view.vendor !== account) return;
+    const items = await d.items().catch(() => [] as ItemView[]);
+    const mm = view.kind === "market-making";
+    for (const it of items) {
+      const st = String(it.status);
+      const step: Pick<DeliveryRow, "next" | "tab" | "yours"> =
+        st === "Eligible" ? { next: "Claim the payment", tab: "funds", yours: true }
+        : st === "Open" ? (mm ? { next: "Waiting for the period's observations", tab: "evidence", yours: false } : { next: "Deliver", tab: "evidence", yours: view.state === "Executing" })
+        : st === "Delivered" ? { next: "Waiting for the buyer to accept", tab: "evidence", yours: false }
+        : st === "Disputed" ? { next: "Disputed by the buyer", tab: "activity", yours: false }
+        : st === "Paid" || st === "AssumedPaid" ? { next: "Paid", tab: "activity", yours: false }
+        : { next: st, tab: "activity", yours: false };
+      rows.push({ room: record.account, title: view.title, kind: view.kind, item: it.id, amount: it.due_amount, status: st, dueAt: it.due_at, eligibleAt: it.eligible_at, ...step });
+    }
+  }));
+  rows.sort((x, y) => Number(y.yours) - Number(x.yours) || (x.dueAt ?? Infinity) - (y.dueAt ?? Infinity));
+  return { account, rows, source: src };
 }

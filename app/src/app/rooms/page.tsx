@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { roomTable, type RoomRow } from "@/server/data";
-import { PageHead, Pill, Usdc } from "@/components/ui";
+import { PageHead, Usdc } from "@/components/ui";
+import { KindLabel } from "@/components/rooms/KindLabel";
 import { SourceLine } from "@/components/SourceLine";
 import { STEPS } from "@/app/agreements/[id]/pipeline";
 import styles from "./rooms.module.css";
@@ -22,8 +23,8 @@ function matches(r: RoomRow, type: string, state: string): boolean {
   return true;
 }
 
-export default async function Rooms({ searchParams }: { searchParams: Promise<{ party?: string; type?: string; state?: string }> }) {
-  const { party, type = "all", state = "all" } = await searchParams;
+export default async function Rooms({ searchParams }: { searchParams: Promise<{ party?: string; role?: string; type?: string; state?: string }> }) {
+  const { party, role, type = "all", state = "all" } = await searchParams;
   let data: Awaited<ReturnType<typeof roomTable>> | null = null;
   let error: string | null = null;
   try {
@@ -31,11 +32,12 @@ export default async function Rooms({ searchParams }: { searchParams: Promise<{ 
   } catch (e) {
     error = (e as Error).message;
   }
-  const all = data?.rows ?? [];
+  const all = (data?.rows ?? []).filter((r) => !role || !party || r.roles.includes(role as RoomRow["roles"][number]));
   const rows = all.filter((r) => matches(r, type, state));
   const href = (k: "type" | "state", v: string) => {
     const q = new URLSearchParams();
     if (party) q.set("party", party);
+    if (role) q.set("role", role);
     const t = k === "type" ? v : type, s = k === "state" ? v : state;
     if (t !== "all") q.set("type", t);
     if (s !== "all") q.set("state", s);
@@ -47,9 +49,9 @@ export default async function Rooms({ searchParams }: { searchParams: Promise<{ 
     <div className="container">
       <PageHead
         eyebrow={data ? <SourceLine {...data.source} /> : null}
-        title={party ? "Your deal rooms" : "All deal rooms"}
-        lead={party ? <>Rooms where <span className="mono">{party}</span> is the buyer, the vendor or the vendor's authority. <Link href="/rooms" className="weak">See every room on the factory</Link>.</> : "Every deal room on the factory. Each is its own NEAR account; the terms both companies approved decide what the buyer's agent may pay."}
-        aside={<Link href="/agreements/new" className={styles.primary}>New deal room</Link>}
+        title={party ? (role === "vendor" ? "Rooms you sell in" : role === "authority" ? "Rooms you authorise" : role === "buyer" ? "Rooms you buy in" : "Your deal rooms") : "All deal rooms"}
+        lead={party ? <>Rooms where <span className="mono">{party}</span> is {role === "vendor" ? "the vendor" : role === "authority" ? "the vendor's settlement authority" : role === "buyer" ? "the buyer" : "the buyer, the vendor or the vendor's authority"}. <Link href="/rooms" className="weak">See every room on the factory</Link>.</> : "Every deal room on the factory. Each is its own NEAR account; the terms both companies approved decide what the buyer's agent may pay."}
+        aside={!role || role === "buyer" ? <Link href="/agreements/new" className={styles.primary}>New deal room</Link> : null}
       />
 
       <div className={styles.filters} role="toolbar" aria-label="Filter deal rooms">
@@ -94,10 +96,7 @@ export default async function Rooms({ searchParams }: { searchParams: Promise<{ 
                     <td>
                       <Link href={`/agreements/${r.account}`} className={styles.room}>
                         <span className={styles.title}>{r.title}</span>
-                        <span className={styles.meta}>
-                          {r.kind === "market-making" ? <Pill tone="purple">market making</Pill> : <Pill>vendor contract</Pill>}
-                          <span className="mono small">{r.account}</span>
-                        </span>
+                        <KindLabel kind={r.kind} />
                       </Link>
                     </td>
                     <td className="mono small" data-label="Counterparty">{counterparty}</td>
