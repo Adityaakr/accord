@@ -130,6 +130,8 @@ scope · venue-level liquidity, not the market maker's own orders
 
 The slots are real mainnet blocks; the agreements and transactions are on the local node.
 
+Recorded on 3 Nov 2026 when the command was named make atlas; it is now make market-making. The text below is the output as recorded.
+
 accord atlas · a14.accord.test.near · market-making · rhea-dcl 17208628…|wrap.near|2000 · local node period 1 slot times held in the observer's enclave slot 1 mainnet block 222883053 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 2 mainnet block 222883166 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 3 mainnet block 222883341 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 4 mainnet block 222883437 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 5 mainnet block 222883536 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 6 mainnet block 222883588 · spread 147 bps · depth 32.78 / 75.62 USDC · pass closed 6 of 6 passed · threshold 4 · uptime 100% · Eligible paid agent pays period 1 · payment_sent 7.50 USDC → halcyon-mm.test.near · tx ANBNFhAnAQ8nJMSJmGZJjJQCQu49HQWirnA5GrApZMD2 strict a15.accord.test.near · period 1 · 0 of 6 passed · threshold 4 · Withheld withheld agent asks to pay it anyway: ERR_PERIOD_WITHHELD · tx FYuYPokP7R9F6yWx11VRqCHFb7kdvEKXgh5WDBN6A241 scope venue-level liquidity, not the market maker's own orders
 
 ## Verify, demo and the rest

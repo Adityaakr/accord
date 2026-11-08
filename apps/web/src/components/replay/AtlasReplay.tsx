@@ -14,6 +14,9 @@ const tick = (
   <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m2.5 6.4 2.4 2.3 4.6-5" /></svg>
 )
 
+/* The recorded text starts with the command's earlier name; say so right above it, and keep the text as recorded */
+const RAW_NOTE = (raw: string) => (/^accord atlas\b/.test(raw) ? "Recorded on 3 Nov 2026 when the command was named make atlas; it is now make market-making. The text below is the output as recorded." : undefined)
+
 export function AtlasReplay({ data, raw, label, caption }: { data: Atlas; raw: string; label?: string; caption?: string }) {
   const S = data.slots.length
   const DECIDE = S + 1, PAY = S + 2, STRICT = S + 3, REFUSE = S + 4
@@ -27,7 +30,7 @@ export function AtlasReplay({ data, raw, label, caption }: { data: Atlas; raw: s
   const thPos = `${(data.closed.threshold / data.closed.of) * 100}%`
 
   return (
-    <ReplayFrame ref={ref} label={label} caption={caption} raw={raw} onReplay={replay} canReplay={!reduce} ariaLabel={`${data.title} on ${data.account}: ${data.closed.passed} of ${data.closed.of} slots passed against a threshold of ${data.closed.threshold}, ${data.closed.outcome}, ${data.paid.amount} paid to ${data.paid.to}; the strict agreement ${data.strict.account} passed ${data.strict.passed} of ${data.strict.of}, ${data.strict.outcome}, and the agent's attempt was refused with ${data.withheld.code}`}>
+    <ReplayFrame ref={ref} label={label} caption={caption} raw={raw} rawNote={RAW_NOTE(raw)} onReplay={replay} canReplay={!reduce} ariaLabel={`${data.title} on ${data.account}: ${data.closed.passed} of ${data.closed.of} slots passed against a threshold of ${data.closed.threshold}, ${data.closed.outcome}, ${data.paid.amount} paid to ${data.paid.to}; the strict agreement ${data.strict.account} passed ${data.strict.passed} of ${data.strict.of}, ${data.strict.outcome}, and the agent's attempt was refused with ${data.withheld.code}`}>
       <div className={styles.atlas}>
         <p className={styles.atlasMeta}><span className="mono">{data.account}</span> · {data.type} · <span className="mono">{data.venue}</span> · {data.where}</p>
 

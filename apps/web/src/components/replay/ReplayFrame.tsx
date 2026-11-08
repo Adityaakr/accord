@@ -5,9 +5,10 @@ import styles from "./Replay.module.css"
 
 /* The shell every replay shares: the provenance label with a Replay button, the drawing, the block's caption, and a
    "Show raw output" toggle that reveals the exact original text with copy, so nothing in the block is lost. */
-type Props = { label?: string; caption?: ReactNode; raw: string; onReplay: () => void; canReplay: boolean; children: ReactNode; ariaLabel: string }
+/* rawNote: one line shown above the raw text, e.g. when the output was recorded under an earlier command name */
+type Props = { label?: string; caption?: ReactNode; raw: string; rawNote?: string; onReplay: () => void; canReplay: boolean; children: ReactNode; ariaLabel: string }
 
-export const ReplayFrame = forwardRef<HTMLDivElement, Props>(function ReplayFrame({ label, caption, raw, onReplay, canReplay, children, ariaLabel }, ref) {
+export const ReplayFrame = forwardRef<HTMLDivElement, Props>(function ReplayFrame({ label, caption, raw, rawNote, onReplay, canReplay, children, ariaLabel }, ref) {
   const [open, setOpen] = useState(false)
   const id = useId()
   return (
@@ -31,6 +32,7 @@ export const ReplayFrame = forwardRef<HTMLDivElement, Props>(function ReplayFram
           {open ? "Hide raw output" : "Show raw output"}
         </button>
         <div id={id} className={styles.raw} hidden={!open}>
+          {rawNote ? <p className={styles.caption}>{rawNote}</p> : null}
           <pre className="mono">{raw}</pre>
           <CopyButton text={raw} label={label ? `${label}, raw output` : "the raw output"} className={styles.rawCopy} />
         </div>
