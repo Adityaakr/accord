@@ -4,8 +4,9 @@ import { CopyButton } from "../../components/CopyButton"
 import { DOC_IMAGES } from "../../content/docs/images"
 import type { DocBlock, DocImage } from "../../content/docs/types"
 import { HeroPreview } from "../../components/HeroPreview"
-import { KitFigure } from "../../components/KitFigure"
-import gatesSvg from "../../assets/diagrams/gates.svg?raw"
+import { GatesFlow } from "../../components/GatesFlow"
+import { Replay, canReplay } from "../../components/replay/Replay"
+import { Snippet, OutputLines, StepFlow } from "../../components/replay/CodeFlow"
 import tl from "../../styles/Timeline.module.css"
 import styles from "./Docs.module.css"
 
@@ -47,11 +48,15 @@ export function Block({ b }: { b: DocBlock }) {
     case "figure":
       return (
         <figure className={styles.figure}>
-          {b.figure === "hero" ? <div className={styles.heroFrame}><HeroPreview /></div> : <KitFigure svg={gatesSvg} minWidth={680} />}
+          {b.figure === "hero" ? <div className={styles.heroFrame}><HeroPreview /></div> : <GatesFlow />}
           <figcaption><Inline text={b.caption} /></figcaption>
         </figure>
       )
     case "code":
+      if (b.replay && canReplay(b.replay, b.code)) return <Replay kind={b.replay} code={b.code} label={b.label} caption={b.caption} />
+      if (b.flow) return <StepFlow code={b.code} label={b.label} start={b.flowStart} caption={b.caption ? <Inline text={b.caption} /> : undefined} steps={b.flow.map((f) => ({ cmd: f.cmd, href: f.href, state: f.state, see: <Inline text={f.see} /> }))} />
+      if (b.output) return <OutputLines code={b.code} label={b.label} caption={b.caption ? <Inline text={b.caption} /> : undefined} />
+      if (!b.replay) return <Snippet code={b.code} label={b.label} caption={b.caption ? <Inline text={b.caption} /> : undefined} />
       return (
         <div className={styles.code}>
           {b.label ? <p className={styles.codeLabel}><span>{b.label}</span><CopyButton text={b.code} label={b.label} /></p> : null}

@@ -35,7 +35,11 @@ export type DocBlock =
   | { kind: "p"; text: string }
   | { kind: "rows"; label?: string; rows: DocRow[] }
   | { kind: "steps"; label?: string; steps: { title: string; body?: string; see?: string; image?: DocImage }[] }
-  | { kind: "code"; label?: string; code: string; caption?: string }
+  /** `replay`: draw the block as a structured replay (make attack, make atlas) with the raw text behind a toggle */
+  /** `output`: printed output, revealed line by line. `flow`: a command sequence as steps (each step's command, a line
+      of what you see, a6's transaction, the agreement state after it), starting from `flowStart`. Otherwise the
+      block's commands type in. */
+  | { kind: "code"; label?: string; code: string; caption?: string; replay?: "attack" | "atlas"; output?: boolean; flow?: { cmd: string; see: string; href?: string; state?: string }[]; flowStart?: string }
   | { kind: "image"; image: DocImage }
   | { kind: "note"; text: string }
   /** two narrow screenshots side by side, one figure */
