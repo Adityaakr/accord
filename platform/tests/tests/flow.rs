@@ -5,6 +5,7 @@
 use accord_sandbox::*;
 use anyhow::Result;
 use near_workspaces::types::NearToken;
+use near_workspaces::AccountId;
 use serde_json::json;
 
 const ITEM: u128 = 12_000_000;
@@ -439,5 +440,96 @@ async fn atlas_period_eligible_then_paid_and_strict_withheld() -> Result<()> {
         .must(&env.keeper, "close_period", json!({"period": 0}))
         .await?;
     assert_eq!(events(&r, "period_closed")[0]["outcome"], "Withheld");
+    Ok(())
+}
+
+/// Two factories, two tokens (accord-v2 with the test token, accord-usdc with Circle's USDC on testnet): an
+/// agreement keeps its own factory's token for life, the other token cannot fund it, and its payment moves only
+/// its own token and is counted by its own factory.
+#[tokio::test]
+async fn a_second_factory_settles_in_its_own_token() -> Result<()> {
+    let env = Env::new().await?;
+    let (usdc, second) = env.second_factory().await?;
+    let params = demo_params();
+    let deal = env
+        .create_on(
+            second.id(),
+            "procurement",
+            "Liquidity reporting integration",
+            &params,
+        )
+        .await?;
+    assert!(deal.id.as_str().ends_with(&format!(".{}", second.id())));
+    let a = deal.get().await?;
+    assert_eq!(a["factory"], second.id().as_str());
+    assert_eq!(
+        a["token"],
+        usdc.id().as_str(),
+        "the agreement copied its factory's token"
+    );
+    deal.to_executing(&procurement_terms(usdc.id(), &params))
+        .await?;
+
+    // The first factory's token is not this agreement's token: the agreement is not even registered with it, so the
+    // transfer fails in that token, nothing is funded and the buyer keeps it.
+    env.mint(env.buyer.id(), 40_000_000).await?;
+    let wrong = env
+        .buyer
+        .call(env.token.id(), "ft_transfer_call")
+        .args_json(json!({"receiver_id": deal.id, "amount": "40000000", "msg": "fund"}))
+        .deposit(NearToken::from_yoctonear(1))
+        .gas(tgas(100))
+        .transact()
+        .await?;
+    assert!(
+        events(&wrong, "funded").is_empty(),
+        "the other token funded it"
+    );
+    assert_eq!(deal.get().await?["funded"], "0");
+    assert_eq!(
+        env.balance(env.buyer.id()).await?,
+        40_000_000,
+        "the other token stayed with the buyer"
+    );
+
+    let r = deal.fund_with(usdc.id(), 40_000_000).await?;
+    assert_eq!(events(&r, "funded")[0]["amount"], "36000000");
+    deal.authorise(env.recipient.id()).await?;
+    let agent = deal.install_agent().await?;
+    deal.deliver_and_accept(1).await?;
+    let r = deal.pay(&agent, 1, ITEM, env.recipient.id()).await?;
+    assert_eq!(act_outcome(&r)?, "sent");
+    assert_eq!(env.balance_in(usdc.id(), env.recipient.id()).await?, ITEM);
+    assert_eq!(
+        env.balance(env.recipient.id()).await?,
+        0,
+        "no test token moved"
+    );
+
+    let stats = |f: AccountId| {
+        let w = &env.worker;
+        let (recipient, buyer) = (env.recipient.id().clone(), env.buyer.id().clone());
+        async move {
+            w.view(&f, "recipient_stats")
+                .args_json(json!({"account": recipient, "buyer": buyer}))
+                .await?
+                .json::<serde_json::Value>()
+        }
+    };
+    assert_eq!(stats(second.id().clone()).await?["all"]["payments"], 1);
+    assert_eq!(stats(env.factory.id().clone()).await?["all"]["payments"], 0);
+    let on_second: bool = env
+        .worker
+        .view(second.id(), "is_agreement")
+        .args_json(json!({"account": deal.id}))
+        .await?
+        .json()?;
+    let on_first: bool = env
+        .worker
+        .view(env.factory.id(), "is_agreement")
+        .args_json(json!({"account": deal.id}))
+        .await?
+        .json()?;
+    assert!(on_second && !on_first);
     Ok(())
 }

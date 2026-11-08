@@ -213,7 +213,25 @@ impl Env {
     }
 
     async fn setup_factory(&self) -> Result<()> {
-        let f = &self.factory;
+        self.setup_factory_on(&self.factory, self.token.id()).await
+    }
+
+    /// A second factory that settles in a second token (as `accord-usdc.testnet` settles in Circle's USDC next to
+    /// `accord-v2.testnet`'s test token): the same code, keeper and release, only the token differs.
+    pub async fn second_factory(&self) -> Result<(Account, Account)> {
+        let token = sub(&self.root, "usdc", 10).await?;
+        token
+            .deploy(&wasm("test-token")?)
+            .await?
+            .into_result()
+            .map_err(|e| anyhow!("{e:?}"))?;
+        ok(token.call(token.id(), "new").transact().await?)?;
+        let factory = sub(&self.root, "accord-usdc", 60).await?;
+        self.setup_factory_on(&factory, token.id()).await?;
+        Ok((token, factory))
+    }
+
+    async fn setup_factory_on(&self, f: &Account, token: &AccountId) -> Result<()> {
         f.deploy(&wasm("factory-mock")?)
             .await?
             .into_result()
@@ -221,7 +239,7 @@ impl Env {
         ok(f.call(f.id(), "new")
             .args_json(json!({
                 "config": {
-                    "owner": f.id(), "token": self.token.id(), "outlayer": "outlayer.test.near",
+                    "owner": f.id(), "token": token, "outlayer": "outlayer.test.near",
                     "keeper": self.keeper.id(), "create_deposit": CREATE_DEPOSIT.as_yoctonear().to_string(),
                     "demo_allowed": true,
                 },
@@ -284,9 +302,14 @@ impl Env {
     }
 
     pub async fn balance(&self, of: &AccountId) -> Result<u128> {
+        self.balance_in(self.token.id(), of).await
+    }
+
+    /// `of`'s balance in a given token (the second factory's token, for one).
+    pub async fn balance_in(&self, token: &AccountId, of: &AccountId) -> Result<u128> {
         let v: String = self
             .worker
-            .view(self.token.id(), "ft_balance_of")
+            .view(token, "ft_balance_of")
             .args_json(json!({"account_id": of}))
             .await?
             .json()?;
@@ -304,9 +327,20 @@ impl Env {
         title: &str,
         params: &Params,
     ) -> Result<Deal<'_>> {
+        self.create_on(self.factory.id(), kind, title, params).await
+    }
+
+    /// The buyer creates an agreement on a given factory.
+    pub async fn create_on(
+        &self,
+        factory: &AccountId,
+        kind: &str,
+        title: &str,
+        params: &Params,
+    ) -> Result<Deal<'_>> {
         let r = ok(self
             .buyer
-            .call(self.factory.id(), "create_agreement")
+            .call(factory, "create_agreement")
             .args_json(json!({"args": {
                 "kind": kind, "title": title,
                 "vendor": self.vendor.id(), "vendor_authority": self.authority.id(),
@@ -478,10 +512,20 @@ impl Deal<'_> {
     }
 
     pub async fn fund(&self, amount: u128) -> Result<ExecutionFinalResult> {
+        self.fund_with(self.env.token.id(), amount).await
+    }
+
+    /// Mints `amount` of `token` to the buyer and sends it to the agreement with `ft_transfer_call(…, "fund")`.
+    /// The result is the raw outcome: a token other than the agreement's own is returned, not an error here.
+    pub async fn fund_with(&self, token: &AccountId, amount: u128) -> Result<ExecutionFinalResult> {
         let e = self.env;
-        e.mint(e.buyer.id(), amount).await?;
+        ok(e.root
+            .call(token, "mint")
+            .args_json(json!({"account_id": e.buyer.id(), "amount": amount.to_string()}))
+            .transact()
+            .await?)?;
         ok(e.buyer
-            .call(e.token.id(), "ft_transfer_call")
+            .call(token, "ft_transfer_call")
             .args_json(json!({"receiver_id": self.id, "amount": amount.to_string(), "msg": "fund"}))
             .deposit(NearToken::from_yoctonear(1))
             .gas(tgas(100))
