@@ -16,7 +16,7 @@ export default async function Seal({ params }: { params: Promise<{ id: string }>
   return (
     <div className="container">
       <PageHead
-        eyebrow={<><Link href={`/agreements/${id}`} className="small link">{id}</Link><Pill>{a.kind === "market-making" ? "Accord Atlas" : "procurement"}</Pill></>}
+        eyebrow={<><Link href={`/agreements/${id}`} className="small link">{id}</Link><Pill>{a.kind === "market-making" ? "market making" : "vendor contract"}</Pill></>}
         title="Seal your mandate"
         lead="Write what your company will accept. It is encrypted in this browser to the Sealed Table's enclave key; the chain stores only the ciphertext and its hash. The other company never sees your numbers."
       />

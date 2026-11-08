@@ -1,0 +1,63 @@
+/* Home: flat and dense on elevation tokens; teal marks a pass, red only a refusal. */
+.welcome { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 48px; align-items: center; padding: 40px 0; }
+.welcomeText { display: flex; flex-direction: column; gap: 18px; }
+.points { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; color: var(--text-medium); }
+.points li { display: flex; gap: 10px; align-items: baseline; }
+.tick { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 3px var(--teal-wash); transform: translateY(-2px); }
+
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 32px 0 24px; }
+.head > div { display: flex; flex-direction: column; gap: 6px; }
+.primary { display: inline-flex; align-items: center; padding: 9px 14px; border-radius: var(--radius); background: var(--white); color: var(--on-white); font-weight: 500; white-space: nowrap; transition: box-shadow 0.3s var(--ease); }
+.primary:hover { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); }
+
+.needs { margin-bottom: 16px; border-radius: var(--radius-lg); border: 1px solid var(--teal-line); background: linear-gradient(180deg, rgba(145, 207, 181, 0.06), rgba(145, 207, 181, 0.015)), var(--elevation-strong); }
+.needsHead { display: flex; align-items: center; gap: 10px; padding: 16px 20px 12px; }
+.count { min-width: 22px; height: 22px; display: inline-grid; place-items: center; padding: 0 6px; border-radius: 999px; background: var(--teal-wash); color: var(--teal); font-size: 12px; }
+.quiet { padding: 0 20px 18px; color: var(--text-weak); }
+.needList { display: flex; flex-direction: column; }
+.need { display: grid; grid-template-columns: 180px minmax(0, 1fr) minmax(0, 220px) 20px; gap: 16px; align-items: center; padding: 12px 20px; border-top: 1px solid var(--hairline); transition: background-color 0.2s var(--ease); }
+.need:hover { background: rgba(255, 255, 255, 0.03); }
+.need:hover .arrow { color: var(--teal); transform: translateX(2px); }
+.needAction { font-weight: 500; color: var(--text-strong); }
+.needDetail { color: var(--text-weak); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.needRoom { color: var(--text-medium); font-size: 13px; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.arrow { color: var(--text-faint); transition: color 0.2s var(--ease), transform 0.2s var(--ease); }
+
+.tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; margin-bottom: 36px; border-radius: var(--radius-lg); overflow: hidden; background: var(--hairline); border: 1px solid var(--hairline); }
+.tile { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px 18px; background: var(--elevation-strong); min-width: 0; }
+.value { font-family: var(--font-mono); font-size: 22px; letter-spacing: -0.02em; color: var(--text-strong); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.refusal { color: var(--refusal); }
+.line { font-size: 12.5px; line-height: 1.45; color: var(--text-weak); }
+
+.sectionHead { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+.rooms { display: flex; flex-direction: column; border-top: 1px solid var(--hairline); }
+.room { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr) minmax(0, 1fr) 110px; gap: 20px; align-items: center; padding: 14px 12px; margin: 0 -12px; border-bottom: 1px solid var(--hairline); border-radius: 6px; transition: background-color 0.2s var(--ease); }
+.room:hover { background: var(--elevation-strong); }
+.roomMain { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.roomMain .small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.roomMeta { display: flex; gap: 6px; flex-wrap: wrap; }
+.roomState { display: flex; justify-content: flex-end; }
+
+.ghost { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 28px; border-radius: var(--radius-lg); border: 1px dashed var(--hairline-strong); }
+.ghostSteps { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.ghostSteps span { padding: 3px 9px; border-radius: 999px; border: 1px dashed var(--hairline-strong); font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); }
+
+.error { display: flex; flex-direction: column; gap: 6px; padding: 20px; margin-bottom: 16px; border-radius: var(--radius); border: 1px solid var(--hairline-strong); }
+.loading { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.loading span { height: 64px; border-radius: var(--radius-lg); background: linear-gradient(90deg, var(--elevation-strong), var(--elevation-medium), var(--elevation-strong)); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+.source { margin-top: 20px; }
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .loading span { animation: none; } }
+
+@media (max-width: 1199.98px) {
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .welcome { grid-template-columns: 1fr; gap: 28px; }
+}
+@media (max-width: 809.98px) {
+  .head { flex-direction: column; align-items: flex-start; }
+  .tiles { grid-template-columns: 1fr; }
+  .need { grid-template-columns: minmax(0, 1fr) 20px; }
+  .needDetail, .needRoom { grid-column: 1; text-align: left; white-space: normal; }
+  .room { grid-template-columns: minmax(0, 1fr) auto; }
+  .roomMeta { grid-column: 1 / -1; }
+}

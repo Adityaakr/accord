@@ -57,7 +57,7 @@ export function NewAgreementForm({ network }: { network: string }) {
           <div className={styles.choices} role="radiogroup" aria-label="Agreement type">
             <Choice on={kind === "procurement"} onClick={() => setKind("procurement")} title="Procurement"
               text="Milestones paid when the buyer accepts a delivery, or when the acceptance window lapses without a dispute." />
-            <Choice on={kind === "market-making"} onClick={() => setKind("market-making")} title="Accord Atlas"
+            <Choice on={kind === "market-making"} onClick={() => setKind("market-making")} title="Market making"
               text="A liquidity retainer paid per period when enough hidden-time observations of the venue pass the agreed conditions." />
           </div>
         </Panel>
