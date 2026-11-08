@@ -1,0 +1,130 @@
+/* The docs site (/docs, /docs/*): a three-column shell (sidebar, page, "On this page") in the timeline language.
+   Rows, groups, numbers and links are styles/Timeline.module.css; this file is the shell and the docs blocks. */
+
+.page { width: 100%; display: flex; flex-direction: column; align-items: center; }
+
+.shell {
+  width: 100%;
+  max-width: 1280px;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 720px) 180px;
+  justify-content: center;
+  gap: 56px;
+  padding: 48px 32px 112px;
+}
+
+/* Sidebar */
+.sidebar, .toc { position: sticky; top: 96px; align-self: start; max-height: calc(100vh - 120px); overflow-y: auto; scrollbar-width: none; }
+.sidebar::-webkit-scrollbar, .toc::-webkit-scrollbar { display: none; }
+.sideNav { display: flex; flex-direction: column; gap: 22px; }
+.sideGroup ul, .toc ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.sideLabel { margin: 0 0 8px; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-weak); }
+.sideLink { display: block; padding: 5px 10px; margin-left: -10px; border-radius: 6px; font-size: 14px; color: var(--text-medium); text-decoration: none; transition: color 0.16s ease, background-color 0.16s ease; }
+.sideLink:hover { color: var(--text-strong); }
+.sideActive { color: var(--text-strong); background: rgba(var(--ink-rgb), 0.06); }
+.sideLink:focus, .tocLink:focus { outline: none; }
+.sideLink:focus-visible, .tocLink:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 2px; }
+
+/* "On this page" */
+.toc ul { gap: 8px; padding-left: 12px; border-left: 1px solid var(--hairline); }
+.tocLink { position: relative; display: block; font-size: 13px; line-height: 1.4; color: var(--text-weak); text-decoration: none; }
+.tocLink:hover { color: var(--text-strong); }
+.tocActive { color: var(--text-strong); }
+.tocActive::before { content: ""; position: absolute; left: -13px; top: 0; bottom: 0; width: 1px; background: var(--teal); }
+
+/* The page */
+.content { min-width: 0; display: flex; flex-direction: column; gap: 44px; }
+.crumbs { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--text-weak); }
+.crumbs a { color: var(--text-medium); text-decoration: none; }
+.crumbs a:hover { color: var(--text-strong); }
+.crumbHere { color: var(--text-strong); }
+.header { display: flex; flex-direction: column; gap: 16px; margin-top: -20px; padding-bottom: 28px; border-bottom: 1px solid var(--hairline); }
+.title { margin: 0; text-wrap: balance; }
+.lead { margin: 0; color: var(--text-medium); }
+.headerActions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+.section { display: flex; flex-direction: column; gap: 18px; scroll-margin-top: 96px; }
+.h2 { margin: 0; }
+.anchorLink { color: var(--text-strong); text-decoration: none; }
+.anchorLink:hover { color: var(--teal); }
+.p { margin: 0; font-size: 15px; line-height: 1.65; color: var(--text-medium); }
+.p :global(code.mono), .rowMain :global(code.mono), .callout :global(code.mono), .claim :global(code.mono), .limit :global(code.mono), .caption :global(code.mono) { font-size: 0.86em; color: var(--text-strong); background: none; padding: 0; }
+.callout { margin: 0; padding: 2px 0 2px 16px; border-left: 2px solid var(--teal); font-size: 14px; line-height: 1.6; color: var(--text-medium); }
+
+/* Rows: number, name over its detail, an optional mono value right */
+li.docRow { grid-template-columns: 28px minmax(0, 1fr) auto; align-items: baseline; padding: 10px 0; }
+li.stepRow { grid-template-columns: 28px minmax(0, 1fr); align-items: baseline; padding: 12px 0; }
+.rowMain { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.rowBody { font-size: 14px; line-height: 1.6; color: var(--text-medium); }
+.rowDetail { font-size: 13.5px; line-height: 1.55; color: var(--text-weak); }
+.seeLabel { font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-weak); }
+.overviewLink { display: inline-flex; align-items: center; width: fit-content; font-size: 15px; color: var(--text-strong); text-decoration: none; }
+.overviewLink :global(.arrow-icon) { color: var(--teal); }
+.overviewLink:hover { color: var(--teal); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Claims beside their limits */
+li.claimRow { grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1fr); align-items: baseline; column-gap: 20px; padding: 10px 0; }
+.claim { font-size: 14px; line-height: 1.55; color: var(--text-strong); }
+.limit { font-size: 13.5px; line-height: 1.55; color: var(--text-medium); }
+
+/* Code: mono, scrolls inside itself */
+.code { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.codeLabel { display: flex; justify-content: space-between; align-items: center; margin: 0; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-weak); }
+.codeBody { position: relative; min-width: 0; border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+.codeBody pre { margin: 0; padding: 14px 40px 14px 0; overflow-x: auto; font-size: 12.5px; line-height: 1.7; color: var(--text-strong); white-space: pre; }
+.codeCopy { position: absolute; top: 12px; right: 4px; }
+.caption { margin: 0; font-size: 13px; line-height: 1.55; color: var(--text-weak); }
+
+/* Screenshots: a 1px hairline frame, the site's radius */
+.figure { margin: 8px 0 4px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.figure img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--hairline); background: var(--elevation-strong); }
+.figureNarrow { max-width: 360px; }
+.figure figcaption { font-size: 13px; line-height: 1.5; color: var(--text-weak); }
+
+/* Previous / next */
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 24px; border-top: 1px solid var(--hairline); }
+.pagerLink { display: flex; flex-direction: column; gap: 4px; padding: 4px 0; color: var(--text-strong); text-decoration: none; font-size: 15px; }
+.pagerLink:hover { color: var(--teal); }
+.pagerNext { text-align: right; align-items: flex-end; }
+.pagerLabel { font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-weak); }
+
+/* Mobile bar and drawer */
+.mobileBar { display: none; }
+.menuButton { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--hairline); background: none; color: var(--text-strong); font: inherit; font-size: 14px; cursor: pointer; }
+.menuButton:focus { outline: none; }
+.menuButton:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 2px; }
+.mobileTitle { font-size: 13.5px; color: var(--text-weak); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drawerScrim { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, 0.45); }
+.drawer { position: absolute; top: 0; left: 0; bottom: 0; width: min(320px, 86vw); overflow-y: auto; padding: 20px 24px 40px; background: var(--background); border-right: 1px solid var(--hairline); display: flex; flex-direction: column; gap: 20px; }
+.drawerClose { align-self: flex-end; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--hairline); background: none; color: var(--text-medium); font: inherit; font-size: 13px; cursor: pointer; }
+
+@media (max-width: 1279.98px) {
+  .shell { grid-template-columns: 200px minmax(0, 720px); gap: 48px; padding: 40px 24px 96px; }
+  .toc { display: none; }
+}
+@media (max-width: 1023.98px) {
+  .shell { grid-template-columns: minmax(0, 720px); gap: 20px; padding: 24px 24px 88px; }
+  .sidebar { display: none; }
+  .mobileBar { display: flex; align-items: center; gap: 12px; position: sticky; top: 64px; z-index: 5; padding: 10px 0; background: var(--background); border-bottom: 1px solid var(--hairline); }
+  .header { margin-top: 0; }
+}
+@media (max-width: 809.98px) {
+  .shell { padding: 16px 16px 72px; }
+  .content { gap: 36px; }
+  li.docRow { grid-template-columns: 24px minmax(0, 1fr); }
+  li.docRow > :last-child { grid-column: 2; text-align: left; }
+  li.stepRow { grid-template-columns: 24px minmax(0, 1fr); }
+  li.claimRow { grid-template-columns: 24px minmax(0, 1fr); }
+  li.claimRow .limit { grid-column: 2; }
+  .pager { grid-template-columns: 1fr; }
+  .pagerNext { text-align: left; align-items: flex-start; }
+}
+
+/* Two narrow screenshots side by side (stacked on a phone) */
+.pair { margin: 8px 0 4px; display: flex; flex-direction: column; gap: 8px; }
+.pairImages { display: grid; grid-template-columns: repeat(2, minmax(0, 300px)); gap: 16px; align-items: start; }
+.pairImages img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--hairline); }
+.pair figcaption { font-size: 13px; line-height: 1.5; color: var(--text-weak); }
+/* The home hero's product view, framed like a screenshot */
+.heroFrame { overflow: hidden; border-radius: 12px; border: 1px solid var(--hairline); }
+@media (max-width: 809.98px) { .pairImages { grid-template-columns: minmax(0, 300px); } }

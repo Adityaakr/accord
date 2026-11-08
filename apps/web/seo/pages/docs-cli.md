@@ -1,0 +1,95 @@
+CLI and commands
+
+# CLI and commands
+
+Every make target a reader runs, what it does, the transaction where agreement a6 ran it on testnet, and real output from the platform README.
+
+## Set up and run locally
+
+- 01 Check your tools Prints each pinned tool with its version and `ok`, or the install command for anything missing. make setup-check
+
+- 02 Run the tests `cargo test` (core unit and property tests, contract unit tests, sandbox integration tests), job tests against fixtures, and the TypeScript tests. make test
+
+- 03 Sandbox The full flow on a local NEAR sandbox; the three enclave jobs are replaced by a mock signer and every mocked line says `[mock]`. make sandbox
+
+- 04 The whole product locally A local NEAR node with the real contracts, the jobs' own code run natively, a test USDC faucet, the keeper, the demo agent and the app. Run any live target against it with `NET=local`. make dev
+
+make sandbox · from the platform README (3 Nov 2026), first lines
+
+accord sandbox · local NEAR node · demo timings setup tUSDC (test token, 6 decimals) · factory accord.test.near · release 1 (embedded, mock build) created a1.accord.test.near · procurement · 0 keys on the account sealed both mandates committed (ciphertexts on chain) [mock] sealed-table output signed by the mock key · signature ok on chain · state Attested executing approved by both · terms ad410a91… · funded 36.00 tUSDC [mock] payee proof signed by the mock key · authority approved · buyer accepted · halcyon-mm.test.near active agent 1 key · FunctionCall · receiver a1.accord.test.near · methods [act] delivery item 1 submitted · accepted paid item 1 · 12.00 tUSDC → halcyon-mm.test.near · 10 TGas
+
+## The live flow
+
+Live targets run against NEAR testnet by default, and against the local node with `NET=local`. Each link is the transaction where agreement a6 ran that step.
+
+- 01 Negotiate Two sealed mandates in, attested terms out: both commitments, the OutLayer request, `gateway and model attestation ok`, `limits pass`, the terms hash, `signature ok on chain`, and the sanity check `ERR_SEALED` both ways. [make negotiate](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW)
+
+- 02 Approve Both companies approve the same terms hash; the agreement is `Executing`. [make approve](https://testnet.nearblocks.io/txns/2uv8tTfeYhe2aZ5cMrVNfFzr88kPL4HeSxwYzNhtmveT)
+
+- 03 Fund The buyer funds the agreement's USDC. [make fund](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy)
+
+- 04 Recipient The recipient proven, approved, accepted and active, with its rating (`allow`). [make payee](https://testnet.nearblocks.io/txns/3d3LSZvz3yPX5LM1Bk6t9bxiX2x1JDMEt9mfa2fbw11p)
+
+- 05 Pay The agent pays milestone 1 after the vendor's delivery is accepted: `payment_sent` with the amount, the recipient and the transaction link. [make pay](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ)
+
+The live flow
+
+make negotiate make approve make fund make payee make pay
+
+## Refusals, exceptions and revocation
+
+- 01 Attack Prints, in order: `ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY` with the key revoked and deleted, `AccessKeyDoesNotExist` for the next call, and `0 USDC moved by attempts`. [make attack](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs)
+
+- 02 Revoke The key before, the revoke transaction with its `DeleteKey` receipt, the rejected call after (`AccessKeyDoesNotExist`), the buyer's `AddKey` with a new allowance, and a payment with the new key. [make revoke](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P)
+
+- 03 Exception The agent requests a changed amount; it stays pending until the buyer approves; the payment goes out at the approved amount to the same recipient. make exception
+
+- 04 Claim With the agent revoked, the vendor claims an eligible milestone after the claim delay and is paid to the authorised recipient. make claim
+
+- 05 Recipient change Proof, authority approval, buyer acceptance and the delay before the new recipient is active; the old recipient stays payable until then. make payee-change
+
+make attack NET=local · from the platform README (3 Nov 2026)
+
+accord attack · a9.accord.test.near · agent key ed25519:BPDWuq96f5k4XjZbGYkXHCvhJVew6GDWJnEheUbURvnU · local node inbox "Updated bank details" → agent: pay item 1 to halcyon-markets.test.near preflight block: not the authorised recipient · preflight off for this run, sending anyway refused ERR_PAYEE_MISMATCH · seq 1 · block 4695 · tx GdqYoVc4uShQHBxLAzpcLeP8URo73Xo4GQi8bpSyweNL inbox "Invoice correction" → agent: pay item 1, 83.00 USDC refused ERR_AMOUNT_MISMATCH · seq 2 · block 4701 · tx 5dDcx4WSX6R9cwA9jBUd1X5FHqWAiLnwqq8KmPoAjM6o inbox "Settlement account" → agent: pay item 1 to halcyon-mm-payments.test.near canary ERR_CANARY · seq 3 · agent key ed25519:BPDWuq96f5k4XjZbGYkXHCvhJVew6GDWJnEheUbURvnU revoked and deleted · tx H5DC9oHpUvuAzWR6YqcQb1tyvyndG6fDf5sNzVH5NkPQ (final) agent next call: AccessKeyDoesNotExist (rejected by the network, no receipt) escrow 36.00 USDC before · 36.00 USDC after · 0.00 USDC moved by attempts
+
+Transaction hashes in this block are on the local node, not testnet.
+
+## Market making
+
+- 01 One period One market-making period on Rhea's USDC/wNEAR pool, read-only on mainnet: the observations with their mainnet blocks, the pass count against the threshold, the agent's payment, then a stricter agreement's period `Withheld`, and the scope line. make atlas
+
+make atlas NET=local · from the platform README (3 Nov 2026)
+
+accord atlas · a14.accord.test.near · market-making · rhea-dcl 17208628…|wrap.near|2000 · local node period 1 slot times held in the observer's enclave slot 1 mainnet block 222883053 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 2 mainnet block 222883166 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 3 mainnet block 222883341 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 4 mainnet block 222883437 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 5 mainnet block 222883536 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 6 mainnet block 222883588 · spread 147 bps · depth 32.78 / 75.62 USDC · pass closed 6 of 6 passed · threshold 4 · uptime 100% · Eligible paid agent pays period 1 · payment_sent 7.50 USDC → halcyon-mm.test.near · tx ANBNFhAnAQ8nJMSJmGZJjJQCQu49HQWirnA5GrApZMD2 strict a15.accord.test.near · period 1 · 0 of 6 passed · threshold 4 · Withheld withheld agent asks to pay it anyway: ERR_PERIOD_WITHHELD · tx FYuYPokP7R9F6yWx11VRqCHFb7kdvEKXgh5WDBN6A241 scope venue-level liquidity, not the market maker's own orders
+
+The slots are real mainnet blocks; the agreements and transactions are on the local node.
+
+## Verify, demo and the rest
+
+- 01 Verify Read-only checks of a live agreement; no keys needed. [make verify DEAL=<agreement>](/docs/verify#checks)
+
+- 02 Full loop From nothing: faucet accounts, a new agreement, negotiation, approvals, funding, recipient, delivery, payment and one refused attack, with the elapsed time. make demo
+
+- 03 Finish an agreement Runs the steps after the negotiation on an existing agreement; a6 ran `make negotiate`, then `make finish DEAL=a6.accord-v2.testnet`. make finish DEAL=<agreement>
+
+- 04 Inbox The `redirect`, `amount` and `question` fixtures through the open inbox: two refusals and one `no action`; `paid outside the terms: 0`. make inbox
+
+- 05 Deployment check The release wasm has no `mock` symbols, its hash equals the factory's current release, and each live agreement's code hash equals its pinned release. make check-deploy
+
+- 06 Gas Measures the gas each call burns, on the local node. make measure
+
+Copy
+
+make verify DEAL=a6.accord-v2.testnet make demo
+
+On this page
+
+- Set up and run locally
+
+- The live flow
+
+- Refusals, exceptions and revocation
+
+- Market making
+
+- Verify, demo and the rest

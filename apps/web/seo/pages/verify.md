@@ -18,11 +18,11 @@ Live from testnet 5 of 5 ok
 
 - 05 Record Executing · [16.50 of 35.50 paid](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ) · [1 refusal](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs) ok
 
-Sealed outcome, model attestation and release attestation are checked by make verify and in the app. [Open in the app](/app/verify/a6.accord-v2.testnet)[The command](/docs#commands)
+Sealed outcome, model attestation and release attestation are checked by make verify and in the app. [Open in the app](/app/verify/a6.accord-v2.testnet)[The command](/docs/cli)
 
 Full check · make verify
 
-[make verify DEAL=a6.accord-v2.testnet](/docs#commands)
+[make verify DEAL=a6.accord-v2.testnet](/docs/cli)
 
 - 01 Contract code [Matches the published release](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh) ok
 

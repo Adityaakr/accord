@@ -1,5 +1,5 @@
 {
   "title": "Accord: Documentation",
-  "description": "Accord documentation: the commands that run a deal room, the agreement contract's methods, and how to check each part yourself on NEAR testnet.",
+  "description": "Accord documentation: a quickstart on NEAR testnet, the concepts, how it runs on NEAR, the commands, the contracts and endpoints, and how to verify an agreement yourself.",
   "ld": []
 }

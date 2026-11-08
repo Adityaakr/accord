@@ -123,14 +123,14 @@ export function Verify() {
             <p className={tl.note}>
               Sealed outcome, model attestation and release attestation are checked by <span className="mono">make verify</span> and in the app.{" "}
               <a href={LINKS.appVerify(id)} className={tl.noteLink}>Open in the app<Arrow /></a>
-              <Link to="/docs#commands" className={tl.noteLink}>The command<Arrow /></Link>
+              <Link to="/docs/cli" className={tl.noteLink}>The command<Arrow /></Link>
             </p>
           </div>
 
           <div className={tl.group}>
             <p className={tl.groupLabel}><span>Full check · <span className={tl.lower}>make verify</span></span></p>
             <div className={tl.cmdRow}>
-              <Link to="/docs#commands" className={`${tl.cmd} ${tl.link}`}><span className={tl.prompt} aria-hidden="true">$</span>{VERIFY_COMMAND}<Arrow /></Link>
+              <Link to="/docs/cli" className={`${tl.cmd} ${tl.link}`}><span className={tl.prompt} aria-hidden="true">$</span>{VERIFY_COMMAND}<Arrow /></Link>
               <CopyButton text={VERIFY_COMMAND} label="the make verify command" />
             </div>
             <ol className={tl.rows}>

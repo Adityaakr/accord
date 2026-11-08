@@ -13,6 +13,7 @@ import { Payee } from "./pages/Payee"
 import { MarketMaking } from "./pages/MarketMaking"
 import { Security } from "./pages/Security"
 import { Docs } from "./pages/Docs"
+import { DocPage } from "./pages/docs/DocPage"
 import { Research } from "./pages/Research"
 import { Record } from "./pages/Record"
 import { Verify } from "./pages/Verify"
@@ -61,6 +62,7 @@ export function App() {
           <Route path="/atlas" element={<MarketMaking />} />
           <Route path="/security" element={<Security />} />
           <Route path="/docs" element={<Docs />} />
+          <Route path="/docs/:slug" element={<DocPage />} />
           <Route path="/research" element={<Research />} />
           <Route path="/demo" element={<Navigate to="/#testnet" replace />} />
           <Route path="/record" element={<Record />} />

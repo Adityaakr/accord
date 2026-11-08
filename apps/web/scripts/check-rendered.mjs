@@ -4,7 +4,7 @@
 import { chromium } from "/Users/adityakrx/.npm/_npx/e41f203b7505f1fb/node_modules/playwright/index.mjs"
 
 const BASE = process.argv[2] ?? "http://localhost:5180"
-const ROUTES = ["/", "/product", "/product/sealed-table", "/product/payee", "/use-cases/market-making", "/atlas", "/security", "/docs", "/research", "/record", "/404", "/privacy-policy", "/contact"]
+const ROUTES = ["/", "/product", "/product/sealed-table", "/product/payee", "/use-cases/market-making", "/atlas", "/security", "/docs", "/docs/quickstart", "/docs/concepts", "/docs/agreement-types", "/docs/near", "/docs/verify", "/docs/cli", "/docs/contracts", "/docs/security", "/docs/references", "/research", "/record", "/404", "/privacy-policy", "/contact"]
 const TRUST_WORDS = ["secure", "trustless", "bank-grade", "military-grade", "ai-powered", "seamless", "revolutionary"]
 const RETIRED = [
   "agreement layer", "hand your agent a budget", "the deal is the account", "the slow middle", "negotiated blind",
