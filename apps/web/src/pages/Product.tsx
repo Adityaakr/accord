@@ -109,8 +109,8 @@ export function Product() {
       {/* A3 premise: three Content Cards (Features FfCn55RGg) */}
       <section id="premise" className={`section ${styles.block}`}>
         <div className={styles.cards}>
-          {CARDS.map((c) => (
-            <ContentCard key={c.title} className={styles.card} visual={<ProductShot variant={c.shot} />} title={c.title} description={c.description} appear={appear(c.delay)} />
+          {CARDS.map((c, i) => (
+            <ContentCard key={c.title} step={String(i + 1).padStart(2, "0")} className={styles.card} visual={<ProductShot variant={c.shot} />} title={c.title} description={c.description} appear={appear(c.delay)} />
           ))}
         </div>
       </section>

@@ -8,17 +8,23 @@ Your negotiating limits, the terms you approve and the destination of your money
 
 > Illustrative: A buyer's sealed mandate: limits stay hidden; only the sealed mandate and its commitment hash go on NEAR.
 
+01
+
 ## Negotiate with confidential mandates
 
 Give your agent the budget, requirements and limits it needs to negotiate, without directly sharing those instructions with the counterparty.
 
 > Illustrative: Proposed terms awaiting approval from both companies.
 
+02
+
 ## Approve what becomes policy
 
 Review the proposed agreement together. Its supported payment conditions become checks on what the agent can authorize.
 
 > Illustrative: A payment request checked against the approved terms before it is paid.
+
+03
 
 ## Keep the payment connected to the deal
 

@@ -85,3 +85,11 @@
 /* Spec §1.7: hover lifts the edge to White at 30%, 120ms, drawn inset so nothing shifts */
 .card { outline: 1px solid transparent; outline-offset: -1px; transition: outline-color 120ms ease; }
 .card:hover { outline-color: rgba(var(--ink-rgb), 0.3); }
+
+/* Timeline style (`step`): no panel behind the text, the image framed by one hairline, a mono number for the indicator */
+.plain { overflow: visible; border-radius: 0; }
+.plain, .plain:hover { box-shadow: none; }
+.plain .image { border-radius: 12px; border: 1px solid var(--hairline); }
+.plain .container { background: none; padding: 20px 0 0; }
+.plain .heading { align-items: baseline; }
+.step { flex: none; font-size: 11.5px; color: var(--text-weak); }

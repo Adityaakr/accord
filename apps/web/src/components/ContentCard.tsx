@@ -23,10 +23,12 @@ type Props = {
   className?: string
   /** The instance's own appearEffect (ComponentInstanceNode level), if any */
   appear?: AppearEffect
+  /** Timeline style: no panel behind the text, a framed image, and this mono number in place of the indicator */
+  step?: string
 }
 
-export function ContentCard({ image, visual, alt = "", title, description, className = "", appear }: Props) {
-  const cls = `${styles.card} ${className}`
+export function ContentCard({ image, visual, alt = "", title, description, className = "", appear, step }: Props) {
+  const cls = `${styles.card} ${step ? styles.plain : ""} ${className}`
   /* A string stays the template's single <p>; marked-up copy may carry its own <p>s, so it gets a <div> wrapper */
   const Description = typeof description === "string" ? "p" : "div"
   const inner = (
@@ -36,7 +38,7 @@ export function ContentCard({ image, visual, alt = "", title, description, class
       </div>
       <div className={styles.container}>
         <div className={styles.heading}>
-          <span className={styles.indicator} aria-hidden="true" />
+          {step ? <span className={`mono ${styles.step}`}>{step}</span> : <span className={styles.indicator} aria-hidden="true" />}
           <h2 className={`t-h4 ${styles.title}`}>{title}</h2>
         </div>
         <Description className={`t-body-lg ${styles.description}`}>{description}</Description>
