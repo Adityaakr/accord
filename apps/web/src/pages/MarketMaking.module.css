@@ -169,3 +169,10 @@
 }
 .cards > * { position: relative; z-index: 1; }
 @media (max-width: 809.98px) { .cards::before { display: none; } }
+
+/* The evidence chain and the observations as timeline rows (styles/Timeline.module.css) */
+li.chainRow { grid-template-columns: 28px minmax(0, 1fr); align-items: baseline; padding: 10px 0; }
+.chainMain { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.chainText { font-size: 14px; line-height: 1.6; color: var(--text-medium); }
+@media (max-width: 809.98px) { li.chainRow { grid-template-columns: 24px minmax(0, 1fr); } }
+li.chainRow > :first-child { align-self: baseline; }

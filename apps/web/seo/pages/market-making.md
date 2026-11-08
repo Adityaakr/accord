@@ -38,30 +38,20 @@ Measurement record
 
 Review the observed spread, depth and availability for each measurement window, alongside the result produced by the agreed rules.
 
-01
+### The evidence chain
 
-Approved conditions
+- 01 Approved conditions The venue, maximum spread, minimum depth, two-sided quoting, slots per period and how many must pass, approved by both companies.
 
-02
+- 02 Observation slot One reading of the venue's public liquidity, at a time drawn inside the observer's enclave.
 
-Observation slot
+- 03 Attestation Each observation is signed by the observer's enclave and checked by the agreement before it is recorded.
 
-03
+- 04 Period decision When the approved measurement and release rules are satisfied, the period's payment becomes eligible.
 
-Attestation
+- 05 Payment on NEAR USDC from the agreement's own account to the authorised recipient, or a refusal on the record.
 
-04
+### Observations
 
-Period decision
+No market-making observations are recorded on NEAR testnet yet.
 
-05
-
-Payment on NEAR
-
-Recorded demonstration. These observations are not live.
-
-No observations yet
-
-Last updated: 8 Nov 2026, 17:04 UTC
-
-[Review a measurement record](/record)
+[Inspect the testnet record](/record)
