@@ -9,6 +9,8 @@
   background: linear-gradient(135deg, var(--stage-a) 0%, var(--stage-b) 45%, var(--stage-c) 100%);
   border: 1px solid rgba(var(--ink-rgb), 0.06);
 }
+/* compact: the card fills the stage, with a thin band of weave around it */
+.compact { padding: 20px; }
 .tall { min-height: min(640px, calc(100vh - 160px)); }
 .weave {
   position: absolute; inset: 0; z-index: -1;
@@ -26,4 +28,4 @@
     radial-gradient(40% 35% at 10% 90%, rgba(var(--teal-rgb), 0.1), transparent 70%);
 }
 .inner { width: 100%; display: grid; place-items: center; }
-@media (max-width: 809.98px) { .stage { padding: 24px 12px; border-radius: 16px; } }
+@media (max-width: 809.98px) { .stage { padding: 24px 12px; border-radius: 16px; } .compact { padding: 12px; } }
