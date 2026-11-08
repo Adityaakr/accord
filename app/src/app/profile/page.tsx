@@ -36,7 +36,7 @@ export default function Profile() {
         <div><dt>Signed in with</dt><dd>{w.method ? METHOD[w.method] : "Unknown"}</dd></div>
         <div><dt>Network</dt><dd className="mono">{w.network}</dd></div>
         <div><dt>Factory</dt><dd className="mono">{c.factory}</dd></div>
-        <div><dt>Keys</dt><dd>Your keys stay in your wallet. Accord never holds a key that can approve terms or move funds.</dd></div>
+        <div><dt>Keys</dt><dd>{w.method === "sandbox" ? "This is a throwaway sandbox key on this machine. On testnet and mainnet your keys stay in your own wallet." : "Your keys stay in your wallet. Accord never holds a key that can approve terms or move funds."}</dd></div>
       </dl>
       <div className={styles.actions}>
         <button type="button" className={styles.secondary} onClick={() => void w.disconnect()}>Disconnect</button>
