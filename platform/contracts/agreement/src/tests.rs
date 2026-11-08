@@ -992,3 +992,66 @@ fn no_view_exposes_a_mandate_in_plaintext() {
 }
 
 mod act_fuzz;
+
+// ---------------------------------------------------------------------------------------------------------------
+// Audit fixes (9 Nov 2026, DECISIONS.md section 25). Each test asserts the fixed behaviour.
+// ---------------------------------------------------------------------------------------------------------------
+
+fn panics<R>(f: impl FnOnce() -> R) -> bool {
+    std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)).is_err()
+}
+
+/// L2-1: the keeper's F1 path turned any bytes into a failed attempt; three garbage submissions ended the
+/// negotiation in `NoDeal`. Fixed: an output that does not fully verify is refused (`ERR_BAD_OUTPUT`) before any
+/// state changes, so no attempt is counted. (`submit_sealed_result` is compiled only with the `f1` feature; the
+/// release build has none.)
+#[test]
+fn audit_keeper_garbage_is_refused_and_burns_no_attempt() {
+    let mut a = new_agreement(Kind::Procurement);
+    commit_both(&mut a);
+    call("anyone.testnet", None, T0, vec![]);
+    let _ = a.start_negotiation();
+    for garbage in ["not a signed output", "{}"] {
+        call("accord-keeper.testnet", None, T0 + 1, vec![]);
+        assert!(panics(|| a.submit_sealed_result(garbage.into())));
+    }
+    // A validly signed infrastructure outcome is not a verified result either.
+    let infra = sign(
+        SEALED,
+        json!({"mode": "negotiate", "agreement": me(), "request_nonce": nonce(&a), "release": 1,
+               "buyer_commitment": "11".repeat(32), "vendor_commitment": "22".repeat(32),
+               "outcome": "infrastructure", "error": "x"}),
+    );
+    call("accord-keeper.testnet", None, T0 + 1, vec![]);
+    assert!(panics(|| a.submit_sealed_result(infra.to_string())));
+    assert!(matches!(
+        a.negotiation,
+        Negotiation::Requested { attempt: 1, .. }
+    ));
+    assert_eq!(a.state, State::Sealed);
+}
+
+/// L2-1: a garbage submission ahead of the real callback used to discard a valid outcome.
+#[test]
+fn audit_keeper_garbage_cannot_discard_the_real_answer() {
+    let mut a = new_agreement(Kind::Procurement);
+    commit_both(&mut a);
+    call("anyone.testnet", None, T0, vec![]);
+    let _ = a.start_negotiation();
+    let n = nonce(&a);
+    let out = sealed_output(&a, &procurement_terms());
+    call("accord-keeper.testnet", None, T0 + 1, vec![]);
+    assert!(panics(|| a.submit_sealed_result("{}".into())));
+    call(
+        me().as_str(),
+        None,
+        T0 + 30,
+        vec![PromiseResult::Successful(out.to_string().into_bytes())],
+    );
+    a.on_sealed_result(n);
+    assert_eq!(
+        a.state,
+        State::Attested,
+        "the valid signed terms were thrown away"
+    );
+}

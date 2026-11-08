@@ -160,17 +160,31 @@ impl Agreement {
         self.handle_sealed(output, &request_nonce);
     }
 
-    /// Fallback F1: the keeper submits the signed output when the callback cannot carry it. Same checks.
+    /// Fallback F1: the keeper submits the signed output when the callback cannot carry it. Only an output that
+    /// fully verifies against the current nonce (terms or a final no-deal) is accepted; anything else panics
+    /// `ERR_BAD_OUTPUT` before any state changes, so the keeper cannot burn an attempt. F1 is not in use (the
+    /// callback carries the output), so this is compiled only with the `f1` feature and never into a release:
+    /// with S1 not enforced, a keeper could request its own run for the live nonce and submit whichever signed
+    /// outcome it prefers (`make check-deploy` refuses a release wasm that carries it).
+    #[cfg(any(test, feature = "f1"))]
     pub fn submit_sealed_result(&mut self, output: String) {
         require(
             env::predecessor_account_id() == self.cfg().keeper,
             "ERR_NOT_KEEPER",
         );
+        require(self.state == State::Sealed, "ERR_WRONG_STATE");
         let Negotiation::Requested { request_nonce, .. } = self.negotiation else {
             env::panic_str("ERR_WRONG_STATE")
         };
+        let nonce = to_hex(&request_nonce);
         let parsed = signed::parse_output(output.as_bytes());
-        self.handle_sealed(parsed, &to_hex(&request_nonce));
+        require(
+            parsed
+                .as_ref()
+                .is_some_and(|o| self.check_sealed(o, &nonce).is_ok()),
+            "ERR_BAD_OUTPUT",
+        );
+        self.handle_sealed(parsed, &nonce);
     }
 
     #[cfg(feature = "mock")]

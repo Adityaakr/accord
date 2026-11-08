@@ -13,6 +13,9 @@ crate-type = ["cdylib", "rlib"]
 # Sandbox only: `submit_mock_*` methods that feed a signed job output in without an OutLayer request.
 # `make check-deploy` proves a release wasm has none of them.
 mock = []
+# Fallback F1 (ARCHITECTURE.md 8.4): the keeper's `submit_sealed_result`. Not in use and never in a release build;
+# `make check-deploy` refuses a release wasm that carries it.
+f1 = []
 
 [dependencies]
 near-sdk = "=5.30.0"
