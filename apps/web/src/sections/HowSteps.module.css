@@ -1,172 +1,184 @@
-/* How it works (#how): the template section rhythm, the stepper (hairline + 14×8 pills, H6 titles) and one detail
-   panel in the template card (Elevation Strong, radius 4). Teal marks progress and passes; refusal red only for
-   refusals. Six steps across on desktop, three × two on tablet, a horizontal scroller on phone. */
+/* How it works: the use-case cards' visual language. Step cards (radius 14) select one large card (radius 20,
+   Elevation Strong with the soft top light and hairline border); its right half is the teal stage (weave + glow)
+   holding the step's drawing and the floating agreement record. Teal for passes; refusal red only for refusals. */
 .section {
   gap: 48px;
   padding: 72px 0;
   justify-content: center;
   scroll-margin-top: 40px;
+  --px-hi: #ffffff; --px-mid: #c9ccd1; --px-lo: #7d838b;
+  --teal-rgb: 145, 207, 181;
 }
-.flow { width: 100%; }
+:global([data-theme="light"]) .section { --px-hi: #5a5f66; --px-mid: #2b2e33; --px-lo: #0e0f11; --teal-rgb: 36, 133, 102; }
+.flow, .flowInner { width: 100%; display: flex; flex-direction: column; gap: 16px; }
 
-/* ---------- the stepper ---------- */
-.steps {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  column-gap: 24px;
-  width: 100%;
-  margin-bottom: 24px;
-}
+/* ---------- the step cards ---------- */
+.steps { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; width: 100%; }
 .step {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
-  padding: 0 0 4px;
+  padding: 14px 14px 16px;
+  border-radius: 14px;
   text-align: left;
-  background: none;
-  border: 0;
+  font: inherit;
   color: inherit;
   cursor: pointer;
-  font: inherit;
+  overflow: hidden;
+  background: linear-gradient(170deg, rgba(var(--ink-rgb), 0.04), rgba(var(--ink-rgb), 0.01) 60%), var(--elevation-strong);
+  border: 1px solid rgba(var(--ink-rgb), 0.08);
+  transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
-/* each step draws its segment of the hairline through the pill's centre, across the gap to the next step */
-.step::before {
-  content: "";
-  position: absolute;
-  top: 3.5px;
-  left: 0;
-  right: -24px;
-  height: 1px;
-  background: var(--hairline);
+.step:hover { border-color: rgba(var(--ink-rgb), 0.2); transform: translateY(-2px); }
+.active {
+  border-color: rgba(var(--teal-rgb), 0.55);
+  background:
+    radial-gradient(90% 120% at 80% 0%, rgba(var(--teal-rgb), 0.12), transparent 70%),
+    repeating-linear-gradient(135deg, rgba(var(--teal-rgb), 0.06) 0 1px, transparent 1px 4px),
+    var(--elevation-strong);
 }
-.step:last-child::before { right: 0; }
-.done::before { background: rgba(145, 207, 181, 0.45); }
-:global([data-theme="light"]) .done::before { background: rgba(36, 133, 102, 0.45); }
+.step:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 3px; }
+.stepTop { display: flex; align-items: center; gap: 8px; width: 100%; margin-bottom: 4px; }
+.tile { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: rgba(var(--ink-rgb), 0.05); border: 1px solid rgba(var(--ink-rgb), 0.1); }
+.active .tile { border-color: rgba(var(--teal-rgb), 0.45); background: rgba(var(--teal-rgb), 0.08); }
+.num { font-size: 12px; color: var(--text-weak); background: none; padding: 0; }
+.doneTick { margin-left: auto; color: var(--teal); font-size: 12px; }
+.stepTitle { font-family: "Host Grotesk", sans-serif; font-size: 16px; font-weight: 500; letter-spacing: -0.02em; color: var(--text-medium); }
+.active .stepTitle, .step:hover .stepTitle { color: var(--text-strong); }
+.short { font-size: 12.5px; line-height: 1.4; color: var(--text-weak); }
+.timer { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--teal); transform-origin: left; animation: timer 7s linear forwards; }
 
-/* the auto-advance timer runs along the active step's segment */
-.timer {
-  position: absolute;
-  top: 3px;
-  left: 0;
-  right: -24px;
-  height: 2px;
-  background: var(--teal);
-  transform-origin: left;
-  animation: timer 6.5s linear forwards;
-}
-.step:last-child .timer { right: 0; }
-
-.node {
-  position: relative;
-  z-index: 1;
-  display: block;
-  width: 14px;
-  height: 8px;
-  margin-bottom: 12px;
-  border-radius: 9999px;
-  background: rgba(var(--ink-rgb), 0.35);
-  transition: background-color 120ms ease;
-}
-.done .node { background: rgba(145, 207, 181, 0.7); }
-.active .node, .step:hover .node { background: var(--white); }
-
-.heading { color: var(--text-medium); transition: color 120ms ease; }
-.active .heading, .step:hover .heading { color: var(--text-strong); }
-.num { font-weight: 400; }
-.short { color: var(--text-weak); }
-.active .short { color: var(--text-medium); }
-
-.step { outline: none; }
-.step:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 6px; border-radius: 2px; }
-
-/* ---------- the panel ---------- */
+/* ---------- the large card ---------- */
 .panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 32px;
-  padding: 32px;
-  border-radius: 4px;
-  background: var(--elevation-strong);
-  animation: panelIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: 28px;
+  padding: 28px;
+  border-radius: 20px;
+  background: linear-gradient(170deg, rgba(var(--ink-rgb), 0.05), rgba(var(--ink-rgb), 0.012) 55%), var(--elevation-strong);
+  border: 1px solid rgba(var(--ink-rgb), 0.08);
+  animation: panelIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .panel[hidden] { display: none; }
 
-.text { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.text { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 6px 4px; }
+.textHead { display: flex; align-items: center; gap: 12px; }
+.tileLg { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: rgba(var(--ink-rgb), 0.05); border: 1px solid rgba(var(--ink-rgb), 0.1); }
 .kicker { font-size: 12px; letter-spacing: 0.04em; color: var(--text-weak); background: none; padding: 0; }
-.title { font-family: "Host Grotesk", sans-serif; font-weight: 500; font-size: 24px; line-height: 1.25; letter-spacing: -0.02em; color: var(--text-strong); text-wrap: balance; }
-.body { font-size: 15px; line-height: 1.6; color: var(--text-medium); max-width: 58ch; }
-
-.facts { display: flex; flex-direction: column; gap: 10px; margin: 8px 0 0; }
-.facts > div { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; padding-top: 10px; border-top: 1px solid rgba(var(--ink-rgb), 0.07); }
+.title { font-family: "Host Grotesk", sans-serif; font-weight: 400; font-size: 28px; line-height: 1.18; letter-spacing: -0.03em; color: var(--text-strong); text-wrap: balance; }
+.body { font-size: 15px; line-height: 1.6; color: var(--text-medium); max-width: 58ch; text-wrap: pretty; }
+.facts { display: flex; flex-direction: column; margin: 6px 0 0; }
+.facts > div { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-top: 1px solid rgba(var(--ink-rgb), 0.07); }
 .facts dt { font-size: 12px; letter-spacing: 0.02em; color: var(--text-weak); padding-top: 2px; }
 .facts dd { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-strong); }
 .never dd { color: var(--text-medium); }
 
-/* the agreement record */
+/* the stage: the use-case cards' teal weave and glow, with the drawing and the floating record */
+.stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 22px 22px 22px;
+  border-radius: 16px;
+  background:
+    radial-gradient(80% 70% at 75% 10%, rgba(var(--teal-rgb), 0.12), transparent 70%),
+    repeating-linear-gradient(135deg, rgba(var(--teal-rgb), 0.06) 0 1px, transparent 1px 4px);
+  border: 1px solid rgba(var(--teal-rgb), 0.12);
+}
+.art { display: block; width: 100%; max-width: 480px; height: auto; margin: 0 auto; overflow: visible; font-family: var(--mono); }
+
 .record {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-  padding: 20px;
-  border-radius: 4px;
-  background: rgba(var(--ink-rgb), 0.025);
-  border: 1px solid rgba(var(--ink-rgb), 0.07);
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: var(--elevation-strong);
+  border: 1px solid rgba(var(--ink-rgb), 0.1);
+  box-shadow: 0 22px 44px -22px rgba(0, 0, 0, 0.75);
   font-family: var(--mono);
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.5;
 }
+:global([data-theme="light"]) .record { box-shadow: 0 22px 44px -24px rgba(20, 30, 25, 0.25); }
 .recordHead { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--text-weak); }
-.state { padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(145, 207, 181, 0.5); color: var(--text-strong); background: rgba(145, 207, 181, 0.08); white-space: nowrap; }
-:global([data-theme="light"]) .state { border-color: rgba(36, 133, 102, 0.5); background: rgba(36, 133, 102, 0.08); }
+.state { padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(var(--teal-rgb), 0.5); color: var(--text-strong); background: rgba(var(--teal-rgb), 0.08); white-space: nowrap; }
 .lines { display: flex; flex-direction: column; }
-.line { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid rgba(var(--ink-rgb), 0.06); }
+.line { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 9px 0; border-bottom: 1px solid rgba(var(--ink-rgb), 0.06); }
 .line:last-child { border-bottom: 0; }
 .lk { color: var(--text-weak); white-space: nowrap; }
 .pass { color: var(--text-strong); text-align: right; }
 .pass::before { content: "✓"; color: var(--teal); margin-right: 8px; }
 .weak { color: var(--text-weak); text-align: right; }
 .refuse { color: var(--refusal); background: var(--refusal-bg); padding: 2px 8px; border-radius: 4px; font-size: 11.5px; }
-.track { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: auto; }
+.track { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
 .track i { height: 3px; border-radius: 2px; background: rgba(var(--ink-rgb), 0.1); }
 .track .trackOn { background: var(--teal); }
 .illus { font-size: 11px; color: var(--text-weak); }
 
+/* ---------- drawing parts ---------- */
+.stroke { fill: none; stroke: rgba(var(--ink-rgb), 0.55); stroke-width: 1.4; stroke-linecap: round; }
+.node { fill: rgba(var(--ink-rgb), 0.05); stroke: rgba(var(--ink-rgb), 0.28); }
+.enclave { fill: rgba(var(--teal-rgb), 0.08); stroke: rgba(var(--teal-rgb), 0.6); stroke-width: 1.2; }
+.badge { fill: rgba(var(--teal-rgb), 0.14); stroke: rgba(var(--teal-rgb), 0.6); }
+.bubble { fill: rgba(var(--ink-rgb), 0.05); stroke: rgba(var(--ink-rgb), 0.2); }
+.bubbleOn { fill: rgba(var(--teal-rgb), 0.16); stroke: rgba(var(--teal-rgb), 0.7); }
+.dash { fill: none; stroke: rgba(var(--ink-rgb), 0.3); stroke-dasharray: 3 4; }
+.solid { fill: none; stroke: rgba(var(--ink-rgb), 0.4); stroke-width: 1.4; }
+.base { stroke: rgba(var(--ink-rgb), 0.15); }
+.tick { fill: none; stroke: var(--teal); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.cross { fill: none; stroke: var(--refusal); stroke-width: 2; stroke-linecap: round; }
+.bar { fill: none; stroke: rgba(var(--ink-rgb), 0.3); stroke-dasharray: 3 3; }
+.barOn { fill: rgba(var(--teal-rgb), 0.3); stroke: rgba(var(--teal-rgb), 0.75); }
+.coin { fill: var(--teal); }
+.recLine { fill: rgba(var(--ink-rgb), 0.12); }
+.lbl { font-size: 10.5px; fill: rgba(var(--ink-rgb), 0.5); letter-spacing: 0.02em; }
+.lblOn { font-size: 11px; fill: var(--teal); }
+.lblRefuse { font-size: 10.5px; fill: var(--refusal); }
+.val { font-size: 11.5px; fill: var(--text-strong); }
+
+/* motion: paths draw, groups fade and rise in order, bars grow from the base */
+.d { stroke-dasharray: 260; stroke-dashoffset: 260; animation: draw 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards; }
+.dash.d { stroke-dasharray: 3 4; stroke-dashoffset: 0; animation: fadeIn 0.8s ease 0.2s both; }
+.f { opacity: 0; animation: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; animation-delay: calc(0.15s + var(--i, 0) * 0.14s); }
+.grow { transform-box: fill-box; transform-origin: bottom; transform: scaleY(0); animation: grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; animation-delay: calc(0.1s + var(--i, 0) * 0.09s); }
+
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes grow { to { transform: scaleY(1); } }
 @keyframes timer { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-@keyframes panelIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes panelIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
-@media (prefers-reduced-motion: reduce) { .panel, .timer { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .panel, .timer, .d, .f, .grow { animation: none; }
+  .d { stroke-dashoffset: 0; }
+  .f { opacity: 1; }
+  .grow { transform: none; }
+  .step:hover { transform: none; }
+}
 
-/* ---------- Tablet: three steps per row ---------- */
+/* ---------- Tablet: three step cards a row; the card stacks ---------- */
 @media (max-width: 1199.98px) {
   .section { gap: 40px; padding: 72px 24px; }
-  .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 28px; }
-  .step:nth-child(3n)::before, .step:nth-child(3n) .timer { right: 0; }
+  .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .panel { grid-template-columns: 1fr; }
 }
 
-/* ---------- Phone: the stepper scrolls sideways inside its own row; the panel stacks ---------- */
+/* ---------- Phone: the step cards scroll sideways; the card stacks ---------- */
 @media (max-width: 809.98px) {
   .section { gap: 32px; padding: 72px 16px; }
-  .steps {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    margin: 0 0 20px;
-    scroll-padding-left: 0;
-  }
+  .steps { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; gap: 8px; }
   .steps::-webkit-scrollbar { display: none; }
-  .step { flex: 0 0 150px; scroll-snap-align: start; }
-  .step::before, .timer { right: -20px; }
-  .step:nth-child(3n)::before, .step:nth-child(3n) .timer { right: -20px; }
-  .step:last-child::before, .step:last-child .timer { right: 0; }
-  .panel { padding: 20px 16px; gap: 20px; }
-  .title { font-size: 20px; }
+  .step { flex: 0 0 148px; scroll-snap-align: start; }
+  .panel { padding: 18px 16px; gap: 18px; border-radius: 16px; }
+  .title { font-size: 22px; }
+  .stage { padding: 16px 14px; }
   .facts > div { grid-template-columns: 1fr; gap: 2px; }
   .line { flex-direction: column; align-items: flex-start; gap: 4px; }
   .pass, .weak { text-align: left; }

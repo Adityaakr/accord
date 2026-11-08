@@ -166,7 +166,7 @@ export type PixelName = keyof typeof MAPS
 export function PixelIcon({ name, size = 40 }: { name: PixelName; size?: number }) {
   const id = `px-${useId().replace(/:/g, "")}`
   const rows = MAPS[name]
-  const top = (16 - rows.length) / 2
+  const top = Math.floor((16 - rows.length) / 2) // whole pixels: a half-pixel offset vanishes under crispEdges at small sizes
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden="true" shapeRendering="crispEdges" style={{ display: "block", flex: "none" }}>
       <defs>

@@ -35,6 +35,8 @@ const ITEMS: Item[] = [
     role: "Attested enclaves for the Sealed Table, the recipient binding and the market observer." },
   { name: "USDC", mark: <span className={styles.coin}><Usdc /></span>,
     role: "Settlement on NEAR as a NEP-141 token, paid only by the contract from each agreement's own account." },
+  { name: "NEAR Intents", mark: <img className={styles.tile} src="/assets/logos/near-intents.png" alt="" width={32} height={32} loading="lazy" />,
+    role: "Planned: funding an agreement from other chains through NEAR Intents' 1Click API." },
   { name: "Rhea", mark: <span className={`${styles.tile} ${styles.tileDark}`}><img src="/assets/logos/rhea.svg" alt="" width={22} height={20} loading="lazy" /></span>,
     role: "The USDC/wNEAR pool the market-making observer reads at hidden times." },
 ]
@@ -62,7 +64,7 @@ export function BuiltOn() {
         </div>
       </Appear>
 
-      <p className={styles.note}>Accord builds on these networks and services; it does not claim a partnership with them.</p>
+      <p className={styles.note}>Accord builds on these networks and services; it does not claim a partnership with them. NEAR Intents, for funding from other chains, is planned.</p>
     </section>
   )
 }

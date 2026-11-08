@@ -36,9 +36,11 @@ A payment becomes eligible only when the agreed evidence or acceptance is record
 
 - USDC : Settlement on NEAR as a NEP-141 token, paid only by the contract from each agreement's own account.
 
+- NEAR Intents : Planned: funding an agreement from other chains through NEAR Intents' 1Click API.
+
 - Rhea : The USDC/wNEAR pool the market-making observer reads at hidden times.
 
-Accord builds on these networks and services; it does not claim a partnership with them.
+Accord builds on these networks and services; it does not claim a partnership with them. NEAR Intents, for funding from other chains, is planned.
 
 ## Built for commerce in stablecoins.
 
@@ -186,17 +188,17 @@ How it works
 
 One agreement from sealed limits to a settled payment, in six steps. The example is the market-making room above.
 
-- `01` · Sealed Each side seals its limits
+- 01 Sealed Each side seals its limits
 
-- `02` · Attested Agents negotiate in the enclave
+- 02 Attested Agents negotiate in the enclave
 
-- `03` · Approved Both companies approve and fund
+- 03 Approved Both companies approve and fund
 
-- `04` · Executing The agent pays inside the rules
+- 04 Executing The agent pays inside the rules
 
-- `05` · Checked Evidence decides each payment
+- 05 Checked Evidence decides each payment
 
-- `06` · Settled Paid, recorded, checkable
+- 06 Settled Paid, recorded, checkable
 
 Step 01 of 06
 
