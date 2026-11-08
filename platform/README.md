@@ -14,7 +14,7 @@ Whose server do your agents meet on? Companies already let software negotiate fo
 
 ### In the browser, on NEAR testnet (about 3 minutes, nothing to install)
 
-Open `<site>/app/try-it` (locally: `http://localhost:3300/app/try-it`). Everything there is NEAR testnet with test
+Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it) (locally: `http://localhost:3100/app/try-it`). Everything there is NEAR testnet with test
 USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, with its authority
 `halcyon-auth.testnet`), and the agent is a demo agent run by Accord for test rooms; both are labelled in the room.
 
@@ -50,9 +50,25 @@ the demo agent's key is derived per room and signs `act` itself, never through t
 
 Three ways, cheapest first. None needs our keys.
 
-1. **Read-only check of a live agreement** (about a minute, no account): `make verify DEAL=<live agreement>`. Testnet agreements follow the first release; see "Status" below.
+1. **Read-only check of a live agreement** (about a minute, no account): `ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a6.accord-v2.testnet` after `pnpm install` (with a `.env` that sets `ACCORD_FACTORY`, plain `make verify DEAL=a6.accord-v2.testnet`). Output below.
 2. **Full flow on a local NEAR sandbox** (no network; the enclave jobs are replaced by a mock signer and every mocked line says `[mock]`): `make sandbox`
-3. **Full live loop on testnet** (faucet accounts, under two minutes): `make demo`, after the first release.
+3. **Full live loop on testnet** (faucet accounts, under two minutes): `make demo`. The procurement flow ran on testnet on release 3 as `a6.accord-v2.testnet` (`make negotiate`, then `make finish DEAL=a6.accord-v2.testnet`; every transaction in `DECISIONS.md` section 21).
+
+`make verify` on the testnet agreement, from a real run on 9 Nov 2026 (the nonce is fresh on every run):
+
+```
+accord verify · a6.accord-v2.testnet
+  code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok
+  keys      0 key · none · no full access · ok
+  sealed    outcome signature ok · commitments match · agreement matches · ok
+  release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · attestation record check pending probe 0.3 · not checked
+  model     z-ai/glm-5.3-flash · report fetched with fresh nonce aacb63ef… · nonce bound in the report · TDX quote and GPU evidence: not checked here (make probe-ai) · ok
+  payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
+  record    1 payments · 1 refusals (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
+verify: 6 checks ok · 1 not checked
+```
+
+`release` stays `not checked` until `outlayer-verify` is installed (`BLOCKED.md`). `keys` reads `0 key` because a6's agent was revoked.
 
 `make sandbox`, from a real run on 3 Nov 2026:
 
@@ -125,7 +141,7 @@ accord attack · a9.accord.test.near · agent key ed25519:BPDWuq96f5k4XjZbGYkXHC
   escrow    36.00 USDC before · 36.00 USDC after · 0.00 USDC moved by attempts
 ```
 
-`make demo NET=local` runs the whole loop from fresh accounts (recipient proven on the app's demo domain) in 14 s. The other targets: `make negotiate`, `make approve`, `make fund`, `make payee`, `make pay`, `make revoke`, `make claim`, `make exception`, `make payee-change`, `make inbox`, `make measure`. Their blocks are defined in `INTERFACES.md` section 10; the testnet runs are pasted here after the first release.
+`make demo NET=local` runs the whole loop from fresh accounts (recipient proven on the app's demo domain) in 14 s. The other targets: `make negotiate`, `make approve`, `make fund`, `make payee`, `make pay`, `make revoke`, `make claim`, `make exception`, `make payee-change`, `make inbox`, `make measure`. Their blocks are defined in `INTERFACES.md` section 10. On testnet the same targets run without `NET=local`; the testnet transactions for `a6.accord-v2.testnet` are in `DECISIONS.md` section 21 and in the table under "Status".
 
 ## What the agent's key can and cannot do
 
@@ -194,7 +210,7 @@ The app's server never sees a mandate and no route accepts one (`app/tests/no-ma
    agent ──act (one function-call key)──▶ six gates ──ft_transfer──▶ authorised recipient
 ```
 
-The full design is in `ARCHITECTURE.md`; every method, event and printed line is in `INTERFACES.md`.
+The full design is in `ARCHITECTURE.md`; every method, event and printed line is in `INTERFACES.md`. Diagrams of the system, the lifecycle, a deal and the `act` gates are in the [root README](../README.md#how-it-works); their Excalidraw sources are in [`docs/diagrams/`](../docs/diagrams).
 
 ```
 crates/accord-core      pure rules: types, the six gates, limit checks, Atlas slot times and rule, JCS
@@ -213,7 +229,22 @@ tests/                  sandbox suite, make sandbox, make serve
 
 ## Status
 
-Built and tested on 3 Nov 2026: the contracts (53 unit tests on the mocked chain including a 400-sequence `act` fuzz test, 12 sandbox tests on a real local node, `make sandbox`), the three enclave jobs (fixture tests, and run natively against a local node), the SDK, CLI and MCP server, the app, the agent with the `/try` re-arm, the keeper, and every live target on a local node (`make dev`, then `NET=local`). The first testnet release waits on the OutLayer setup, testnet NEAR and USDC drips (`BLOCKED.md`); the live negotiation with a real model waits on NEAR AI credits.
+Built and tested on 3 Nov 2026: the contracts (53 unit tests on the mocked chain including a 400-sequence `act` fuzz test, 12 sandbox tests on a real local node, `make sandbox`), the three enclave jobs (fixture tests, and run natively against a local node), the SDK, CLI and MCP server, the app, the agent with the `/try` re-arm, the keeper, and every live target on a local node (`make dev`, then `NET=local`). Live on NEAR testnet since 8 Nov 2026: factory `accord-v2.testnet` on release `3` (Sealed Table build `7c832ce9…`, pubkey runs `13682`, `13672`, `13683`), test USDC `tusdc.accord-v1.testnet`, relayer `relay.accord-v2.testnet`, the three jobs as OutLayer projects `accord-v1.testnet/accord-{sealed-table,payee,observer}`, and the app with `/app/try-it` at https://accordweb-production.up.railway.app/app. Market making on testnet waits on an OutLayer payment key (`BLOCKED.md`); it runs end to end on a local node.
+
+Agreement `a6.accord-v2.testnet` ran the full procurement flow on release 3, with the real NEAR AI model (`z-ai/glm-5.3-flash`) negotiating inside OutLayer's enclave (`QUOTE → COUNTER → FINAL → ACCEPT`, `35.50` tUSDC in 3 items, 59 s):
+
+| Step | Transaction |
+| --- | --- |
+| Mandates sealed (buyer, vendor) | [Ek9Zr1wj…](https://testnet.nearblocks.io/txns/Ek9Zr1wjD6nrWaKHFak8UDv5Jwbaacqrdh1huNp6qwAk), [2Zq8pfNo…](https://testnet.nearblocks.io/txns/2Zq8pfNoa1dFzMLAy79aGyek72q3LGcrvRqAjYABisKZ) |
+| Negotiated in the Sealed Table | [GfX5qKq3…](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW) |
+| Approvals (buyer, vendor) | [H6cMyE6k…](https://testnet.nearblocks.io/txns/H6cMyE6kzs9SdrC4yaP7CvnDxJqH4NSx7ivKeu2rBHSg), [2uv8tTfe…](https://testnet.nearblocks.io/txns/2uv8tTfeYhe2aZ5cMrVNfFzr88kPL4HeSxwYzNhtmveT) |
+| Funded `35.50` | [2CeFB18j…](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy) |
+| Recipient: Payee proof, authority, buyer | [6koRbw5Q…](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6), [FBQnqtKX…](https://testnet.nearblocks.io/txns/FBQnqtKXs5B5zn1A4F1yCDUmACYMqsi2zM2uez6YxDis), [3d3LSZvz…](https://testnet.nearblocks.io/txns/3d3LSZvz3yPX5LM1Bk6t9bxiX2x1JDMEt9mfa2fbw11p) |
+| Agent key installed | [EUJ86tSV…](https://testnet.nearblocks.io/txns/EUJ86tSVNuYsgtMVYYZZ9CYbsJmY6jCKm1Uew5doPU1C) |
+| Item 1 paid, `16.50` to `halcyon-mm.testnet` | [2k57zg7i…](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ) |
+| `13.00` to `halcyon-markets.testnet` refused, `ERR_PAYEE_MISMATCH` | [AB9HLnWv…](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs) |
+| Revoked; the next call fails with `AccessKeyDoesNotExist` | [4ervNQdj…](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P) |
+| Release 3 published | [7m8pj7u2…](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh) |
 
 ## Business model (hypothesis)
 
