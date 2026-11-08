@@ -95,7 +95,12 @@ async function main() {
   if (!(await view("release", { version: VERSION }))) {
     const code = wasm("agreement");
     const hash = baseEncode(sha256(code));
-    if (MODE === "Global") {
+    // A later release with unchanged agreement code reuses the global contract an earlier release published
+    // (publishing it again costs about 50 NEAR for nothing).
+    const earlier = VERSION > 1 ? await view<{ code_hash: string }>("release", { version: VERSION - 1 }) : null;
+    if (MODE === "Global" && earlier?.code_hash === hash) {
+      console.log(`  global contract   ${hash} · already published by release ${VERSION - 1}`);
+    } else if (MODE === "Global") {
       const r = await factory.signAndSendTransaction({
         receiverId: FACTORY, actions: [actions.deployGlobalContract(code, "codeHash")], waitUntil: "FINAL",
       });
