@@ -22,7 +22,6 @@
   color: var(--text-weak);
   font-size: 12px;
 }
-.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 3px var(--teal-wash); }
 
 .sidebar {
   position: sticky;
@@ -34,11 +33,12 @@
   height: calc(100vh - 60px);
   padding: 24px 12px;
   border-right: 1px solid var(--hairline);
+  background: var(--background);
   overflow-y: auto;
 }
 .group { display: flex; flex-direction: column; gap: 2px; }
 .bottom { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--hairline); }
-.pendingDot { width: 7px; height: 7px; margin-left: auto; border-radius: 999px; background: var(--teal); box-shadow: 0 0 0 3px var(--teal-wash); }
+.pending { margin-left: auto; font-size: 11px; font-weight: 400; color: var(--teal); }
 
 /* workspace switcher */
 .switcher { position: relative; }
@@ -68,9 +68,12 @@
   transition: color 0.2s var(--ease), background-color 0.2s var(--ease);
 }
 .side svg { flex: none; opacity: 0.85; }
-.side:hover { color: var(--text-strong); background: rgba(var(--ink-rgb), 0.03); }
-.on { color: var(--text-strong); background: var(--elevation-medium); }
-.on::before { content: ""; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: var(--teal); }
+.side > :not(.pill) { position: relative; z-index: 1; }
+.side:hover { color: var(--text-strong); }
+.side:not(.on):hover { background: rgba(var(--ink-rgb), 0.03); }
+.on { color: var(--text-strong); }
+/* the active pill: a soft filled surface that slides between items (motion layoutId) */
+.pill { position: absolute; inset: 0; z-index: 0; border-radius: 8px; background: var(--elevation-strong); box-shadow: 0 1px 0 rgba(var(--ink-rgb), 0.04), 0 6px 18px -12px rgba(var(--shadow-rgb), 0.45); border: 1px solid var(--hairline); }
 
 @media (max-width: 1023.98px) {
   .network { display: none; }
@@ -99,7 +102,6 @@
   .switchSub { display: none; }
   .menu { position: fixed; left: 16px; right: 16px; top: 112px; }
   .groupLabel { display: none; }
-  .on::before { display: none; }
 }
 
 .search { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; border-radius: var(--radius); border: 1px solid var(--hairline-strong); color: var(--text-weak); font-size: 13px; transition: color 0.2s var(--ease), border-color 0.2s var(--ease); }

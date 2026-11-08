@@ -7,6 +7,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { LogoMark } from "./LogoMark";
 import { PixelIcon } from "./PixelIcon";
 import { ThemeToggle } from "./theme/Theme";
@@ -56,10 +57,7 @@ export function Nav({ network }: { network: string }) {
             <span className={styles.searchText}>Search</span>
             <kbd className={styles.searchKbd}>⌘K</kbd>
           </button>
-          <span className={`mono ${styles.network}`} title="Network this app reads and writes">
-            <span className={styles.dot} aria-hidden="true" />
-            {network}
-          </span>
+          <span className={`mono ${styles.network}`} title="Network this app reads and writes">{network}</span>
           <WalletButton />
         </div>
       </div>
@@ -73,18 +71,22 @@ export function Sidebar() {
   const o = useOrg();
   const { ws, choose } = useWorkspace();
   const [open, setOpen] = useState(false);
+  const reduce = useReducedMotion() ?? false;
+  /* the active item sits on a soft pill that slides between items */
+  const Pill = () => <motion.span layoutId="side-pill" className={styles.pill} transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 520, damping: 40, mass: 0.8 }} />;
   const link = (l: NavItem) => {
     // rooms open filtered to this person and this workspace's role
     const href = l.href === "/rooms" && w.accountId ? `/rooms?party=${encodeURIComponent(w.accountId)}${ws.role ? `&role=${ws.role}` : ""}` : l.href;
     const on = l.match(path);
     return (
       <Link key={l.href + l.label} href={href} className={`${styles.side} ${on ? styles.on : ""}`} aria-current={on ? "page" : undefined}>
+        {on ? <Pill /> : null}
         <Icon name={l.icon} />
         <span>{l.label}</span>
       </Link>
     );
   };
-  // Settings carries a small dot until the organisation is confirmed and set up
+  // Settings says "Set up" until the organisation is confirmed and set up
   const orgPending = Boolean(w.accountId) && !o.checking && (!o.session || (o.data && !o.data.org));
   const settingsOn = path.startsWith("/settings") || path.startsWith("/onboarding");
   return (
@@ -112,11 +114,13 @@ export function Sidebar() {
       <div className={styles.group}>{ws.nav.map(link)}</div>
       <div className={`${styles.group} ${styles.bottom}`}>
         <Link href="/settings" className={`${styles.side} ${settingsOn ? styles.on : ""}`} aria-current={settingsOn ? "page" : undefined}>
+          {settingsOn ? <Pill /> : null}
           <Icon name="settings" />
           <span>Settings</span>
-          {orgPending ? <span className={styles.pendingDot} title="Confirm it's you to set up your organisation" /> : null}
+          {orgPending ? <span className={styles.pending} title="Confirm it's you to set up your organisation">Set up</span> : null}
         </Link>
         <Link href="/profile" className={`${styles.side} ${path.startsWith("/profile") ? styles.on : ""}`}>
+          {path.startsWith("/profile") ? <Pill /> : null}
           <Icon name="profile" />
           <span>Profile</span>
         </Link>
