@@ -8,6 +8,9 @@ import type { VerifyReport } from "@accord/sdk";
 import { Panel, Pill } from "@/components/ui";
 import styles from "./verified.module.css";
 
+// "partial": part of the check ran and passed, the rest was not run here (the detail says which); muted amber
+const LABEL: Record<string, string> = { ok: "passed", fail: "failed", partial: "partial", not_checked: "not checked" };
+
 function freshNonce(): string {
   return Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) => b.toString(16).padStart(2, "0")).join("");
 }
@@ -48,11 +51,14 @@ export function VerifiedPanel({ agreement, model }: { agreement: string; model: 
         <ul className={styles.checks}>
           {report.checks.map((c) => (
             <li key={c.name} className={styles.check}>
-              <span className={`${styles.mark} ${styles[c.status]}`} aria-label={c.status === "ok" ? "passed" : c.status === "fail" ? "failed" : "not checked"}>
-                {c.status === "ok" ? "✓" : c.status === "fail" ? "✕" : "–"}
+              <span className={`${styles.mark} ${styles[c.status]}`} aria-label={LABEL[c.status] ?? "not checked"}>
+                {c.status === "ok" ? "✓" : c.status === "fail" ? "✕" : c.status === "partial" ? "◐" : "–"}
               </span>
               <div className={styles.checkText}>
-                <span className="h5">{c.name}</span>
+                <span className={styles.checkHead}>
+                  <span className="h5">{c.name}</span>
+                  {c.status === "partial" && <span className={`mono ${styles.partialLabel}`}>partial</span>}
+                </span>
                 <span className="small">{c.detail}</span>
               </div>
             </li>
