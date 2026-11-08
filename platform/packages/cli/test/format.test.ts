@@ -66,7 +66,8 @@ describe("check output", () => {
     expect(lines).toContain("    authorised        false        agreement current recipient");
     expect(lines).toContain("    code_changed_30d  unavailable  unavailable: no archival RPC");
     expect(lines).toContain("    reports           2            factory reports");
-    expect(lines.filter((l) => l.startsWith("    "))).toHaveLength(10);
+    expect(lines).toContain("    foreign_reports   0            factory reports, other buyers");
+    expect(lines.filter((l) => l.startsWith("    "))).toHaveLength(11);
     expect(lines.at(-1)).toBe("check: block");
   });
 });
