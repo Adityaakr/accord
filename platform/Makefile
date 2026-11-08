@@ -11,7 +11,7 @@ define todo
 endef
 
 help:
-	@grep -E '^[a-z-]+:' Makefile | sed 's/:.*//' | tr '\n' ' '; echo
+	@grep -E '^[a-z-]+:' Makefile | grep -v '^atlas:' | sed 's/:.*//' | tr '\n' ' '; echo
 
 setup-check: ; @bash scripts/setup-check.sh
 ci: wasm ; @cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && pnpm -r typecheck && pnpm -r --filter './packages/*' --filter './services/*' --filter @accord/app test
@@ -36,7 +36,9 @@ revoke: ; @$(LIVE) revoke
 claim: ; @$(LIVE) claim
 exception: ; @$(LIVE) exception
 payee-change: ; @$(LIVE) payee-change
-atlas: ; @$(LIVE) atlas
+market-making: ; @$(LIVE) market-making
+# hidden alias kept so recorded `make atlas` runs still reproduce (the old name, retired 8 Nov 2026)
+atlas: ; @$(LIVE) market-making
 verify: ; @pnpm --silent --filter @accord/cli dev -- verify --agreement $(DEAL)
 demo: ; @$(LIVE) demo
 finish: ; @DEAL=$(DEAL) $(LIVE) finish
@@ -46,4 +48,4 @@ inbox: ; @$(LIVE) inbox
 release-check: ; $(call todo,7.4 make release-check)
 submission-check: ; $(call todo,8.2 make submission-check)
 
-.PHONY: help setup-check ci test wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate approve fund payee pay attack revoke claim exception payee-change atlas verify demo measure demo-reset inbox release-check submission-check
+.PHONY: help setup-check ci test wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate approve fund payee pay attack revoke claim exception payee-change market-making atlas verify demo measure demo-reset inbox release-check submission-check

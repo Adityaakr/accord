@@ -11,7 +11,7 @@ const TARGETS: Record<string, () => Promise<{ run: Run }>> = {
   negotiate: () => import("./targets/negotiate.js"),
   attack: () => import("./targets/attack.js"),
   revoke: () => import("./targets/revoke.js"),
-  atlas: () => import("./targets/atlas.js"),
+  "market-making": () => import("./targets/market-making.js"),
   demo: () => import("./targets/demo.js"),
   finish: () => import("./targets/finish.js"),
   inbox: () => import("./targets/inbox.js"),
@@ -25,7 +25,10 @@ const TARGETS: Record<string, () => Promise<{ run: Run }>> = {
   "payee-change": step("payeeChange"),
 };
 
-const name = process.argv[2] ?? "";
+// `atlas` is the retired name of `market-making` (8 Nov 2026), kept as a hidden alias for recorded runs.
+const ALIASES: Record<string, string> = { atlas: "market-making" };
+const arg = process.argv[2] ?? "";
+const name = ALIASES[arg] ?? arg;
 const load = TARGETS[name];
 if (!load) {
   console.error(`usage: make <${Object.keys(TARGETS).join("|")}> [NET=local]`);

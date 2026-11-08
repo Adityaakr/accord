@@ -1,6 +1,6 @@
-// `make atlas` (PROGRESS 3.7): two market-making agreements on Rhea's mainnet pool. The observer measures each
-// hidden slot from the first final mainnet block after it; the period closes on the rule; the agent can pay the
-// passing period and cannot pay the withheld one. About seven minutes on demo timings (a six-minute period).
+// `make market-making` (PROGRESS 3.7; `make atlas` is its retired alias): two market-making agreements on Rhea's
+// mainnet pool. The observer measures each hidden slot from the first final mainnet block after it; the period closes
+// on the rule; the agent can pay the passing period and cannot pay the withheld one. About seven minutes on demo timings (a six-minute period).
 
 import type { AgreementView, AtlasTerms } from "@accord/sdk";
 import { observationOf, observerFor, slotsToAsk, type AskObserver } from "../../../../services/keeper/src/observe.js";
@@ -62,11 +62,11 @@ export async function run(w: World): Promise<void> {
   if (!w.observer) throw new Error("no observer: set OUTLAYER_OWNER and OUTLAYER_PAYMENT_KEY (BLOCKED.md, probe 0.3)");
   const ask = observerFor(w.observer);
   // One after the other: each funds from the same buyer balance.
-  const room = await open(w, "NEAR/USDC liquidity", PRESETS.atlas);
+  const room = await open(w, "NEAR/USDC liquidity", PRESETS.marketMaking);
   const strict = await open(w, "NEAR/USDC liquidity, strict", PRESETS.strict);
   const venue = room.atlas.venue.RheaDcl;
   const [hash, ...rest] = venue.pool_id.split("|");
-  header("atlas", room.id, ` · market-making · rhea-dcl ${hash!.slice(0, 8)}…|${rest.join("|")}`, w);
+  header("market-making", room.id, ` · rhea-dcl ${hash!.slice(0, 8)}…|${rest.join("|")}`, w);
   line("period 1", w.network === "sandbox"
     ? "slot times held by the observer (local node: a fixed test seed, not an enclave)"
     : "slot times held in the observer's enclave");

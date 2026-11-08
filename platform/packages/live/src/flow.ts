@@ -40,7 +40,7 @@ export function client(w: World, role: Role, id: string): AgreementClient {
 
 export const PRESETS = {
   procurement: { buyer: "northwind/procurement.buyer.json", vendor: "halcyon/procurement.vendor.json" },
-  atlas: { buyer: "northwind/market-making.buyer.json", vendor: "halcyon/market-making.vendor.json" },
+  marketMaking: { buyer: "northwind/market-making.buyer.json", vendor: "halcyon/market-making.vendor.json" },
   strict: { buyer: "northwind/market-making.buyer.strict.json", vendor: "halcyon/market-making.vendor.strict.json" },
   try: { buyer: "northwind/try.buyer.json", vendor: "halcyon/try.vendor.json" },
 } as const;
