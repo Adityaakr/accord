@@ -146,7 +146,7 @@ export function Actions({
       for (const it of items.filter((i) => a.kind === "procurement" && (i.status === "Open" || i.status === "Disputed"))) {
         add(`d-${it.id}`, <Btn busy={busy} label={`Deliver item ${it.id}`} onClick={open(`Deliver item ${it.id}`, async () => {
           const evidence = Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) => b.toString(16).padStart(2, "0")).join("");
-          return client.submitDelivery(it.id, evidence, `${location.origin}/deliveries/${a.account}/${it.id}`);
+          return client.submitDelivery(it.id, evidence, `${location.origin}${withBase(`/deliveries/${a.account}/${it.id}`)}`);
         })} />);
       }
       for (const it of items.filter((i) => (i.status === "Eligible" || i.status === "Reserved") && i.eligible_at && now >= i.eligible_at + a.params.claim_delay_secs)) {

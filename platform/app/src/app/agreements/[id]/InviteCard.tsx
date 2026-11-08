@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import styles from "./invite.module.css";
+import { withBase } from "@/lib/basePath";
 
 export function InviteCard({ room, buyer, vendor, authority }: { room: string; buyer: string; vendor: string; authority: string }) {
   const w = useWallet();
@@ -20,7 +21,7 @@ export function InviteCard({ room, buyer, vendor, authority }: { room: string; b
   }, [room]);
   if (!mounted || hidden || w.accountId !== buyer) return null;
 
-  const url = `${window.location.origin}/agreements/${room}`;
+  const url = `${window.location.origin}${withBase(`/agreements/${room}`)}`;
   const copy = async (text: string, what: string) => {
     try { await navigator.clipboard.writeText(text); setCopied(what); setTimeout(() => setCopied(null), 1600); } catch { /* clipboard blocked */ }
   };
