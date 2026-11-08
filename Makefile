@@ -39,6 +39,7 @@ payee-change: ; @$(LIVE) payee-change
 atlas: ; @$(LIVE) atlas
 verify: ; @pnpm --silent --filter @accord/cli dev -- verify --agreement $(DEAL)
 demo: ; @$(LIVE) demo
+finish: ; @DEAL=$(DEAL) $(LIVE) finish
 measure: ; @$(LIVE) measure
 demo-reset: ; $(call todo,7.1 make demo-reset)
 inbox: ; @$(LIVE) inbox

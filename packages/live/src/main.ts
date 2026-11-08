@@ -13,6 +13,7 @@ const TARGETS: Record<string, () => Promise<{ run: Run }>> = {
   revoke: () => import("./targets/revoke.js"),
   atlas: () => import("./targets/atlas.js"),
   demo: () => import("./targets/demo.js"),
+  finish: () => import("./targets/finish.js"),
   inbox: () => import("./targets/inbox.js"),
   measure: () => import("./targets/measure.js"),
   approve: step("approve"),
