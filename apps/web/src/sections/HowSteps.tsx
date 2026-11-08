@@ -129,7 +129,7 @@ export function HowSteps() {
                 go(n); tabs.current[n]?.focus()
               }}>
               <PixelIcon name={s.icon} size={22} />
-              <span className={ab.useLabel}><span className={styles.tabNum}>{s.n}</span>{s.title}</span>
+              <span className={ab.useLabel}><span className={styles.tabNum}>{s.n}</span> {s.title}</span>
               {k === active && !reduce ? <span className={styles.tabBar} aria-hidden="true" style={{ transform: `scaleX(${progress})` }} /> : null}
             </button>
           ))}

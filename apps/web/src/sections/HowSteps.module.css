@@ -4,7 +4,7 @@
 .section { gap: 40px; padding: 72px 0; justify-content: center; scroll-margin-top: 40px; --px-hi: #ffffff; --px-mid: #c9ccd1; --px-lo: #7d838b; }
 :global([data-theme="light"]) .section { --px-hi: #5a5f66; --px-mid: #2b2e33; --px-lo: #0e0f11; }
 .flow { width: 100%; display: flex; flex-direction: column; gap: 16px; }
-.tabNum { font-family: var(--mono); font-size: 11.5px; color: var(--text-weak); margin-right: 8px; }
+.tabNum { font-family: var(--mono); font-size: 11.5px; color: var(--text-weak); margin-right: 4px; }
 
 .stack { display: grid; width: 100%; justify-items: center; }
 .card {

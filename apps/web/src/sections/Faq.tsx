@@ -89,7 +89,7 @@ const COLUMN_2: Item[] = [
     delay: 0.5,
     title: "Is it live?",
     description:
-      "Accord runs on NEAR testnet, with payments in testnet USDC on NEAR. The demonstration agreements on this page are live unless marked recorded. Mainnet follows an audit.",
+      "Not yet. Accord is pre-launch: it is built and tested end to end on a local NEAR node, and the NEAR testnet release is pending. The demonstration on this page shows recorded runs until then. Mainnet follows an audit.",
   },
 ]
 

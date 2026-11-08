@@ -188,17 +188,17 @@ How it works
 
 One agreement from sealed limits to a settled payment, in six steps. Every agreement type runs the same way; only the terms and the evidence change.
 
-- 01Sealed
+- 01 Sealed
 
-- 02Attested
+- 02 Attested
 
-- 03Approved
+- 03 Approved
 
-- 04Executing
+- 04 Executing
 
-- 05Checked
+- 05 Checked
 
-- 06Settled
+- 06 Settled
 
 Step 01 of 06 · Sealed
 

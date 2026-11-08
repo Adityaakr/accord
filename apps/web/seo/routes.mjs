@@ -4,7 +4,7 @@ export const SITE_URL = (process.env.SITE_URL || "https://accordweb-production.u
 
 export const ROUTES = [
   { path: "/", slug: "home", name: "Home", priority: 1.0, changefreq: "weekly",
-    summary: "What Accord is, the six agreement types it controls, market-making agreements, how a deal room works, why now, the demonstration, privacy, research and FAQ." },
+    summary: "What Accord is and what it is built on, the six agreement types, market-making agreements, how a deal room works in six steps, the seven core controls, use cases, why now, the demonstration, privacy, research and FAQ." },
   { path: "/use-cases/market-making", slug: "market-making", name: "Market-making agreements", priority: 0.9, changefreq: "weekly",
     summary: "Retainers tied to agreed liquidity conditions; scheduled observations decide whether each payment is eligible." },
   { path: "/product", slug: "product", name: "Product", priority: 0.8, changefreq: "monthly",
@@ -26,7 +26,7 @@ export const ROUTES = [
   { path: "/join", slug: "join", name: "Request early access", priority: 0.7, changefreq: "monthly",
     summary: "Pre-launch: request early access as a token project, a market maker or an integration partner." },
   { path: "/record", slug: "record", name: "Public record", priority: 0.5, changefreq: "daily",
-    summary: "Agreements, payments and refusals on NEAR testnet." },
+    summary: "Agreements, payments and refusals from the Accord demonstration, each refusal with its recorded reason." },
   { path: "/demo", slug: "demo", name: "Demonstration", priority: 0.4, changefreq: "monthly",
     summary: "The Accord demonstration." },
   { path: "/contact", slug: "contact", name: "Contact", priority: 0.3, changefreq: "yearly",

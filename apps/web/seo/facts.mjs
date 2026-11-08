@@ -1,12 +1,12 @@
 /* The facts agents and answer engines read about Accord, in one place: llms.txt, llms-full.txt, /facts.json and the
    home page's JSON-LD (ItemList of use cases, DefinedTermSet glossary) are all built from here by scripts/prerender.mjs.
-   Keep every line inside what is built: status "demo" means shown in the demonstration on NEAR testnet, "planned"
-   means designed and not built. Refusal codes are the contract's own (accord-core RefusalCode). */
+   Keep every line inside what is built: status "demo" means built and shown in the demonstration (run end to end on a
+   local NEAR node; the testnet release is pending, per ~/accord-app PROGRESS.md), "planned" means designed, not built. Refusal codes are the contract's own (accord-core RefusalCode). */
 
 export const ONE_LINE = "Accord is the private deal room and control plane for agent-to-agent commerce: agents negotiate privately, both companies approve the terms, and a NEAR contract enforces who can authorise payments, who can receive them, how much can be paid and what evidence is required."
 
 export const STATUS = {
-  network: "NEAR testnet",
+  network: "NEAR. Built and tested end to end on a local NEAR node; the NEAR testnet release is pending",
   settlement: "USDC on NEAR (NEP-141), from each agreement's own account",
   mainnet: "Follows an audit; not live",
   stage: "Pre-launch: early access by request at /join",
@@ -59,11 +59,13 @@ export const ANSWERS = [
   { q: "What is Accord?", a: ONE_LINE },
   { q: "How does Accord stop an AI agent from paying the wrong account?", a: "The agent cannot change the recipient. Payee binds the recipient to a domain the vendor controls and the buyer accepted, and the Agreement controls contract refuses any payment to another account with ERR_PAYEE_MISMATCH, whatever the agent was instructed." },
   { q: "Can the other company see my price limit?", a: "No. Each company's mandate is encrypted in the browser and readable only inside the attested enclave where the agents negotiate. Only the agreed terms and an attestation come out; only a commitment hash of each mandate goes on NEAR." },
-  { q: "What blockchain and currency does Accord use?", a: "NEAR. Payments settle in USDC on NEAR (NEP-141) from each agreement's own account. Accord currently runs on NEAR testnet; mainnet follows an audit." },
+  { q: "What blockchain and currency does Accord use?", a: "NEAR. Payments settle in USDC on NEAR (NEP-141) from each agreement's own account. Accord is pre-launch: built and tested on a local NEAR node, with the testnet release pending and mainnet after an audit." },
   { q: "What kinds of agreements does Accord support?", a: "Six agreement types share the same controls: market-making agreements and vendor contracts (in the demonstration), and agent-to-agent services, security remediation, infrastructure service agreements and grants (planned)." },
   { q: "How are market makers paid in Accord?", a: "A retainer period is paid only if enough observations of the venue's public liquidity, taken at hidden times, meet the agreed spread, depth and two-sided quoting. Otherwise the payment is withheld for both parties to review." },
   { q: "What happens if an agent is compromised?", a: "Its instructions can change, but its payment authority cannot: every payment must match the approved milestone, amount and recipient or it is refused and recorded. The buyer can revoke the agent's key in one transaction." },
-  { q: "Is Accord live?", a: "Accord runs on NEAR testnet with testnet USDC. It is pre-launch; early access is by request. Mainnet follows an audit." },
+  { q: "Is Accord live?", a: "Not yet. Accord is pre-launch: it is built and tested end to end on a local NEAR node, the NEAR testnet release is pending, and mainnet follows an audit. Early access is by request." },
+  { q: "How does a deal room work?", a: "In six steps: each company seals its limits; the agents negotiate inside an attested enclave and only the agreed terms come out; both companies approve, the recipient is bound and the buyer funds a USDC escrow; the agent pays through one method, act, and anything off the terms is refused; the agreed evidence decides whether each payment is eligible; eligible payments settle to the approved recipient and the record stays checkable." },
+  { q: "What is Accord built on?", a: "NEAR (the agreement contract, escrow and record), NEAR AI Cloud (private inference for the negotiating agents), OutLayer (attested enclaves), USDC on NEAR (settlement) and Rhea (the pool the market-making observer reads). Funding from other chains through NEAR Intents is planned. No partnership is claimed." },
 ]
 
 /* Names people or models may meet that refer to Accord */
@@ -72,4 +74,35 @@ export const NAMING = [
   "Sealed Table, Agreement controls, Payee and Evidence checks are parts of Accord, not separate products.",
   "Accord is not a wallet or an exchange. Agreement funds are USDC in the agreement's own NEAR account, whose code is pinned by hash and has no full-access key; only the contract can send it, and only through `act`.",
   "Accord does not verify that a company legally exists, prove a negotiation was fair, or prove external data is true; see /security for each limit.",
+]
+
+/* How a deal room works: the six steps on the home page (HowSteps), for HowTo data and llms.txt */
+export const HOW_STEPS = [
+  { name: "Sealed", text: "Each company sets its limits in the browser and seals them; a mandate is encrypted to a key that exists only inside the Sealed Table's enclave. On NEAR: the ciphertext and its commitment hash." },
+  { name: "Attested", text: "Both companies' agents negotiate inside the Sealed Table; code checks every proposal against both mandates' hard limits, and only the agreed terms come out, with an attestation." },
+  { name: "Approved", text: "People at both companies approve the terms; Payee binds the recipient (domain proof, settlement authority, buyer acceptance); the buyer funds the agreement's USDC escrow on NEAR." },
+  { name: "Executing", text: "The buyer's agent holds one key that can call one method, act; a payment must match the approved milestone, amount and recipient, or it is refused and recorded (for example ERR_PAYEE_MISMATCH)." },
+  { name: "Checked", text: "A payment becomes eligible only when the agreed evidence is recorded: observations at hidden times, delivery acceptance or a named reviewer's approval; otherwise it is withheld for review." },
+  { name: "Settled", text: "Eligible payments complete to the authorised recipient in USDC; the buyer decides exceptions and can revoke the agent's key in one transaction; the record stays checkable with make verify." },
+]
+
+/* Core features: the seven controls on the home page (CoreFeatures) */
+export const CONTROLS = [
+  { name: "Confidential negotiation", text: "Limits are sealed in the browser and agents negotiate inside an attested enclave; only the agreed terms and an attestation come out." },
+  { name: "One key, one method", text: "The buyer's agent holds a FunctionCall key that can call act on one contract and nothing else." },
+  { name: "Every payment checked", text: "Each payment must match the approved milestone, amount and recipient; anything else is refused with a recorded reason." },
+  { name: "A recipient that cannot be redirected", text: "The vendor proves its domain, its settlement authority approves the account and the buyer accepts it; a message cannot change it." },
+  { name: "Evidence before release", text: "A payment becomes eligible only when the agreed evidence is recorded; otherwise it is withheld." },
+  { name: "Stop the agent in one transaction", text: "revoke_agent deletes the agent's key; later calls fail with AccessKeyDoesNotExist; payments already made stay paid." },
+  { name: "Checkable from public data", text: "make verify checks the contract code, the agent key, the recipient proof and the record with no keys; the enclave release check follows the testnet release." },
+]
+
+/* Built on: the strip under the hero. No partnership is claimed. */
+export const BUILT_ON = [
+  { name: "NEAR", role: "The agreement contract, its escrowed USDC and the on-chain record of every payment and refusal." },
+  { name: "NEAR AI Cloud", role: "Private inference for the negotiating agents; each response's signature is checked in the enclave." },
+  { name: "OutLayer", role: "Attested enclaves for the Sealed Table, the recipient binding and the market observer." },
+  { name: "USDC on NEAR", role: "Settlement as a NEP-141 token, paid only by the contract from each agreement's own account." },
+  { name: "NEAR Intents", role: "Planned: funding an agreement from other chains through the 1Click API." },
+  { name: "Rhea", role: "The USDC/wNEAR pool the market-making observer reads at hidden times." },
 ]

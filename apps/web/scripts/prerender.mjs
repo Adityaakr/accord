@@ -9,7 +9,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { ROUTES, SITE_URL } from "../seo/routes.mjs"
-import { ANSWERS, GLOSSARY, NAMING, ONE_LINE, STATUS, USE_CASES } from "../seo/facts.mjs"
+import { ANSWERS, BUILT_ON, CONTROLS, GLOSSARY, HOW_STEPS, NAMING, ONE_LINE, STATUS, USE_CASES } from "../seo/facts.mjs"
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const DIST = join(ROOT, "dist")
@@ -72,8 +72,8 @@ const APP = {
   "@context": "https://schema.org", "@type": "SoftwareApplication", "@id": `${SITE_URL}/#software`,
   name: "Accord", applicationCategory: "BusinessApplication", applicationSubCategory: "Agent payments and negotiation infrastructure",
   operatingSystem: "Web", url: `${SITE_URL}/`, description: ABOUT, image: OG_IMAGE,
-  featureList: ["Confidential negotiation between agents in an attested enclave (Sealed Table)", "Approved terms enforced by a NEAR contract on every payment (Agreement controls)", "Recipient authorisation bound to a domain the vendor controls (Payee)", "One-transaction revocation of the agent's key", "Settlement in USDC on NEAR", "Market-making agreements: retainers paid on observed spread, depth and two-sided quoting"],
-  offers: { "@type": "Offer", name: "Developer preview", price: "0", priceCurrency: "USD", availability: "https://schema.org/PreOrder", description: "Free testnet access, coming soon. Planned: Accord Teams (subscription) and market-making agreements (per monitored market). No percentage-based Accord fee on payment amounts; production prices published before launch." },
+  featureList: CONTROLS.map((c) => `${c.name}: ${c.text}`),
+  offers: { "@type": "Offer", name: "Developer preview", price: "0", priceCurrency: "USD", availability: "https://schema.org/PreOrder", description: "Free access for developers, coming soon. Planned: Accord Teams (subscription) and market-making agreements (per monitored market). No percentage-based Accord fee on payment amounts; production prices published before launch." },
   publisher: { "@id": `${SITE_URL}/#organization` },
 }
 
@@ -90,6 +90,15 @@ const GLOSSARY_SET = {
   "@context": "https://schema.org", "@type": "DefinedTermSet", "@id": `${SITE_URL}/#glossary`, name: "Accord glossary",
   hasDefinedTerm: GLOSSARY.map((g) => ({ "@type": "DefinedTerm", name: g.term, description: g.def.replace(/`/g, ""), inDefinedTermSet: `${SITE_URL}/#glossary` })),
 }
+const HOW_TO = {
+  "@context": "https://schema.org", "@type": "HowTo", "@id": `${SITE_URL}/#how`, name: "How a deal room works",
+  description: "One agreement from sealed limits to a settled payment, in six steps. Every agreement type runs the same way; only the terms and the evidence change.",
+  step: HOW_STEPS.map((h, i) => ({ "@type": "HowToStep", position: i + 1, name: h.name, text: h.text, url: `${SITE_URL}/#how` })),
+}
+const CONTROL_LIST = {
+  "@context": "https://schema.org", "@type": "ItemList", "@id": `${SITE_URL}/#features`, name: "Seven controls between an agent and the money",
+  itemListElement: CONTROLS.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, description: c.text, url: `${SITE_URL}/#features` })),
+}
 const RUNTIME_DUPES = ["Organization", "SoftwareApplication", "WebSite", "WebPage", "BreadcrumbList"]
 
 function render(route, target = route) {
@@ -101,7 +110,7 @@ function render(route, target = route) {
   const ld = [ORG, WEBSITE, APP,
     { "@context": "https://schema.org", "@type": "WebPage", "@id": `${url}#webpage`, url, name: title, description, isPartOf: { "@id": `${SITE_URL}/#website` }, about: { "@id": `${SITE_URL}/#software` }, primaryImageOfPage: OG_IMAGE, dateModified: TODAY, inLanguage: "en" },
     { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: c.url })) },
-    ...(target.path === "/" ? [USE_CASE_LIST, GLOSSARY_SET] : []),
+    ...(target.path === "/" ? [USE_CASE_LIST, HOW_TO, CONTROL_LIST, GLOSSARY_SET] : []),
     ...(meta.ld || []).map((s) => { try { return JSON.parse(s) } catch { return null } }).filter((o) => o && !RUNTIME_DUPES.includes(o["@type"])),
   ].filter((o, i, all) => all.findIndex((x) => x["@type"] === o["@type"] && (x["@id"] || "") === (o["@id"] || "")) === i)
   const head = [
@@ -137,7 +146,7 @@ function render(route, target = route) {
 ${md ? mdToHtml(md) : `<h1>${esc(title)}</h1><p>${esc(description)}</p>`}
 </main>
 <nav aria-label="Site"><h2>Pages</h2><ul>${nav}</ul></nav>
-<footer><p>${esc(ABOUT)}</p><p>Runs on NEAR testnet. Mainnet follows an audit. <a href="/llms.txt">llms.txt</a> · <a href="/sitemap.xml">Sitemap</a></p></footer>
+<footer><p>${esc(ABOUT)}</p><p>Pre-launch: built and tested on a local NEAR node; testnet release pending; mainnet follows an audit. <a href="/llms.txt">llms.txt</a> · <a href="/sitemap.xml">Sitemap</a></p></footer>
 </div></div>`
 
   let html = TEMPLATE
@@ -185,16 +194,29 @@ ${ABOUT}
 Key facts:
 - Parts: Sealed Table (confidential negotiation in an attested enclave), Agreement controls (approved terms enforced by a NEAR contract), Payee (recipient authorisation), Evidence checks (a payment becomes eligible only when the agreed evidence or acceptance is recorded).
 - The buyer's agent holds one key that can call one method, \`act\`; payments that do not match the approved terms are refused with a recorded reason (for example ERR_PAYEE_MISMATCH, ERR_AMOUNT_MISMATCH).
-- Network: NEAR testnet. Settlement: USDC on NEAR (NEP-141). Mainnet follows an audit.
+- Status: pre-launch. Built and tested end to end on a local NEAR node; the NEAR testnet release is pending; mainnet follows an audit. Settlement: USDC on NEAR (NEP-141).
 - Agreement types: market-making agreements (demo), vendor contracts and renewals (demo), security remediation, infrastructure service agreements, agent-to-agent services, grants and funded milestones (planned).
-- Pricing (planned): Developer preview with free testnet access (coming soon); Accord Teams, a subscription; market-making agreements, per monitored market. No percentage-based Accord fee on payment amounts. Production prices published before launch; network and third-party fees may apply.
+- Pricing (planned): Developer preview with free access (coming soon); Accord Teams, a subscription; market-making agreements, per monitored market. No percentage-based Accord fee on payment amounts. Production prices published before launch; network and third-party fees may apply.
 - Every claim is stated with its limit on the Security page; findings cited on the Research page are the authors' own.
 
 ## Agreement types
 
-Same controls in every type; the commercial fields and the evidence accepted change. "demo": shown in the demonstration on NEAR testnet. "planned": designed, not built.
+Same controls in every type; the commercial fields and the evidence accepted change. "demo": built and shown in the demonstration (local NEAR node). "planned": designed, not built.
 
 ${USE_CASES.map((u) => `- **${u.name}** (${u.status}): ${u.outcome} ${u.how} Evidence: ${u.evidence}.${u.limit ? ` Limit: ${u.limit}` : ""}`).join("\n")}
+
+## How a deal room works (six steps)
+
+${HOW_STEPS.map((h, i) => `${i + 1}. **${h.name}**: ${h.text}`).join("\n")}
+
+## Core features (seven controls)
+
+${CONTROLS.map((c) => `- **${c.name}**: ${c.text}`).join("\n")}
+
+## Built on
+
+${BUILT_ON.map((b) => `- **${b.name}**: ${b.role}`).join("\n")}
+No partnership with these projects is claimed.
 
 ## Glossary
 
@@ -229,6 +251,7 @@ write(join(DIST, "facts.json"), JSON.stringify({
   name: "Accord", url: `${SITE_URL}/`, tagline: TAGLINE, summary: ONE_LINE, updated: TODAY, status: STATUS,
   parts: GLOSSARY.filter((g) => ["Sealed Table", "Agreement controls", "Payee", "Evidence checks"].includes(g.term)),
   agreement_types: USE_CASES.map((u) => ({ ...u, url: abs(u.url) })),
+  how_a_deal_room_works: HOW_STEPS, core_controls: CONTROLS, built_on: BUILT_ON,
   glossary: GLOSSARY, answers: ANSWERS, naming: NAMING,
   pages: pages.map((r) => ({ name: r.name, url: `${SITE_URL}${r.path}`, markdown: `${SITE_URL}/${r.slug}.md`, summary: r.summary })),
   index: { llms: `${SITE_URL}/llms.txt`, llms_full: `${SITE_URL}/llms-full.txt`, sitemap: `${SITE_URL}/sitemap.xml` },
