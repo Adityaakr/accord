@@ -39,9 +39,9 @@ type V = [number, number]
 /* ---------- the hero's path: segments between contact points ---------- */
 const P: Record<string, V> = {
   b0: [212, 104], b1: [236, 104], v0: [212, 160], v1: [236, 160],
-  sA: [606, 150], sB: [500, 150],
+  sA: [606, 168], sB: [500, 168],
   c0: [728, 51], c1: [778, 121], c2: [828, 191], c3: [878, 261],
-  r1: [586, 424], r2: [586, 469], r3: [586, 514],
+  act: [673, 462],
   ch0: [218, 446], ch1: [470, 439],
   btn: [68, 627],
 }
@@ -52,13 +52,18 @@ const PATH: Seg[] = [
   S(1.3, 1.75, "hop", "b1", "v0", 26), S(1.75, 1.9, "hold", "v0"), S(1.9, 2.3, "slide", "v0", "v1"), S(2.3, 2.5, "hold", "v1"),
   S(2.5, 3.1, "hop", "v1", "sA", 74), S(3.1, 3.4, "hold", "sA"), S(3.4, 4.7, "spring", "sA", "sB"), S(4.7, 5.4, "hold", "sB"),
   S(5.4, 6.1, "hop", "sB", "c0", 70), S(6.1, 6.7, "hop", "c0", "c1", 34), S(6.7, 7.3, "hop", "c1", "c2", 34), S(7.3, 7.9, "hop", "c2", "c3", 34),
-  S(7.9, 8.9, "hop", "c3", "r1", 46), S(8.9, 9.4, "hold", "r1"), S(9.4, 10.0, "slide", "r1", "r2"), S(10.0, 10.4, "hold", "r2"),
-  S(10.4, 11.0, "slide", "r2", "r3"), S(11.0, 11.5, "hold", "r3"), S(11.5, 12.2, "hop", "r3", "ch0", 80),
+  S(7.9, 8.9, "hop", "c3", "act", 46), S(8.9, 11.5, "hold", "act"), S(11.5, 12.2, "hop", "act", "ch0", 90),
   S(12.2, 14.4, "chart", "ch0", "ch1"), S(14.4, 14.6, "hold", "ch1"), S(14.6, 15.3, "hop", "ch1", "btn", 70),
   S(15.3, 17.4, "hold", "btn"), S(17.4, 20.6, "hop", "btn", "b0", 260), S(20.6, DUR, "hold", "b0"),
 ]
-const CONTACTS = [0, 1.75, 3.1, 6.1, 6.7, 7.3, 7.9, 8.9, 12.2, 15.3, 20.6, DUR]
+/* contacts: landings, plus the act() gate pulsing as each request passes through it */
+const CONTACTS = [0, 1.75, 3.1, 6.1, 6.7, 7.3, 7.9, 8.9, 9.42, 10.12, 10.82, 12.2, 15.3, 20.6, DUR]
 const chartY = (x: number) => 446 - 12 * Math.sin(((x - 218) / 252) * Math.PI * 1.5) - 6 * ((x - 218) / 252)
+
+const cubicAt = (p: number[][], k: number): V => {
+  const m = 1 - k
+  return [0, 1].map((j) => m * m * m * p[0][j] + 3 * m * m * k * p[1][j] + 3 * m * k * k * p[2][j] + k * k * k * p[3][j]) as V
+}
 
 function hero(t: number): { x: number; y: number; sx: number; sy: number } {
   const s = PATH.find((p) => t >= p.a && t < p.b) ?? PATH[PATH.length - 1]
@@ -80,7 +85,7 @@ function hero(t: number): { x: number; y: number; sx: number; sy: number } {
 }
 
 /* ---------- the camera: an anchor per station, eased between, then the reveal ---------- */
-const A = { s1: [150, 130, 1.3], s2: [490, 128, 1.25], s3: [800, 175, 1.05], s4: [722, 466, 1.22], s5: [335, 466, 1.2], s6: [296, 626, 0.92], rv: [480, 330, 0.4] }
+const A = { s1: [150, 130, 1.3], s2: [490, 142, 1.22], s3: [880, 196, 1.0], s4: [748, 466, 0.97], s5: [335, 466, 1.2], s6: [296, 626, 0.92], rv: [480, 330, 0.4] }
 const camKeys = (i: number) => [
   [0, A.s1[i]], [2.5, A.s1[i]], [3.1, A.s2[i]], [5.4, A.s2[i]], [6.3, A.s3[i]], [8.3, A.s3[i]], [9.1, A.s4[i]], [11.4, A.s4[i]],
   [12.2, A.s5[i]], [14.5, A.s5[i]], [15.3, A.s6[i]], [17.3, A.s6[i]], [18.3, A.rv[i]], [19.9, A.rv[i]], [20.8, A.s1[i]], [DUR, A.s1[i]],
@@ -147,18 +152,18 @@ function Slider({ t, h }: { t: number; h: { x: number; y: number } }) {
   const att = spring(t - 4.9, 13, 0.85) * r
   return (
     <g>
-      <Card x={340} y={56} w={310} h={150} title="Sealed Table" lit={att} />
-      <rect x={370} y={96} width={190} height={14} rx={4} className={styles.zone} />
-      <text x={376} y={107} className={styles.zoneText}>buyer limit · sealed</text>
-      <rect x={430} y={178} width={190} height={14} rx={4} className={styles.zone} />
-      <text x={614} y={189} className={styles.zoneText} textAnchor="end">vendor limit · sealed</text>
-      <rect x={370} y={147} width={250} height={6} rx={3} className={styles.trackLine} />
-      <rect x={430} y={147} width={130} height={6} rx={3} className={styles.overlap} />
-      <rect x={Math.min(x, 606)} y={147} width={Math.max(0, 620 - Math.min(x, 606))} height={6} rx={3} className={styles.fill} style={{ opacity: onTrack || (t >= 5.4 && r > 0.5) ? 1 : 0 }} />
-      {!onTrack ? <circle cx={x} cy={150} r={10} className={styles.slot} /> : null}
-      <g transform={`translate(${x} 122)`} style={{ opacity: onTrack ? 1 : 0 }}>
-        <rect x={-62} y={-12} width={124} height={22} rx={11} className={inside ? styles.tipOn : styles.tip} />
-        <text y={3} textAnchor="middle" className={inside ? styles.tipTextOn : styles.tipText}>{inside ? "inside both limits" : "outside buyer limit"}</text>
+      <Card x={340} y={56} w={310} h={178} title="Sealed Table" lit={att} />
+      <rect x={370} y={98} width={190} height={16} rx={4} className={styles.zone} />
+      <text x={378} y={110} className={styles.zoneText}>buyer limit · sealed</text>
+      <rect x={370} y={165} width={250} height={6} rx={3} className={styles.trackLine} />
+      <rect x={430} y={165} width={130} height={6} rx={3} className={styles.overlap} />
+      <rect x={Math.min(x, 606)} y={165} width={Math.max(0, 620 - Math.min(x, 606))} height={6} rx={3} className={styles.fill} style={{ opacity: onTrack || (t >= 5.4 && r > 0.5) ? 1 : 0 }} />
+      <rect x={430} y={196} width={190} height={16} rx={4} className={styles.zone} />
+      <text x={612} y={208} className={styles.zoneText} textAnchor="end">vendor limit · sealed</text>
+      {!onTrack ? <circle cx={x} cy={168} r={10} className={styles.slot} /> : null}
+      <g transform={`translate(${x} 138)`} style={{ opacity: onTrack ? 1 : 0 }}>
+        <rect x={-62} y={-11} width={124} height={22} rx={11} className={inside ? styles.tipOn : styles.tip} />
+        <text y={4} textAnchor="middle" className={inside ? styles.tipTextOn : styles.tipText}>{inside ? "inside both limits" : "outside buyer limit"}</text>
       </g>
       <g style={{ opacity: clamp(att * 1.3), transform: `translate(0px, ${(1 - att) * 6}px)` }}>
         <rect x={548} y={68} width={84} height={22} rx={11} className={styles.pill} />
@@ -168,6 +173,15 @@ function Slider({ t, h }: { t: number; h: { x: number; y: number } }) {
     </g>
   )
 }
+
+/* Circle's USDC mark, from Circle's SVG (2000 × 2000) */
+const USDC = (
+  <>
+    <path d="M1000 2000c554.17 0 1000-445.83 1000-1000S1554.17 0 1000 0 0 445.83 0 1000s445.83 1000 1000 1000z" fill="#2775ca" />
+    <path d="M1275 1158.33c0-145.83-87.5-195.83-262.5-216.66-125-16.67-150-50-150-108.34s41.67-95.83 125-95.83c75 0 116.67 25 137.5 87.5 4.17 12.5 16.67 20.83 29.17 20.83h66.66c16.67 0 29.17-12.5 29.17-29.16v-4.17c-16.67-91.67-91.67-162.5-187.5-170.83v-100c0-16.67-12.5-29.17-33.33-33.34h-62.5c-16.67 0-29.17 12.5-33.34 33.34v95.83c-125 16.67-204.16 100-204.16 204.17 0 137.5 83.33 191.66 258.33 212.5 116.67 20.83 154.17 45.83 154.17 112.5s-58.34 112.5-137.5 112.5c-108.34 0-145.84-45.84-158.34-108.34-4.16-16.66-16.66-25-29.16-25h-70.84c-16.66 0-29.16 12.5-29.16 29.17v4.17c16.66 104.16 83.33 179.16 220.83 200v100c0 16.66 12.5 29.16 33.33 33.33h62.5c16.67 0 29.17-12.5 33.34-33.33v-100c125-20.84 208.33-108.34 208.33-220.84z" fill="#fff" />
+    <path d="M787.5 1595.83c-325-116.66-491.67-479.16-370.83-800 62.5-175 200-308.33 370.83-370.83 16.67-8.33 25-20.83 25-41.67V325c0-16.67-8.33-29.17-25-33.33-4.17 0-12.5 0-16.67 4.16-395.83 125-612.5 545.84-487.5 941.67 75 233.33 254.17 412.5 487.5 487.5 16.67 8.33 33.34 0 37.5-16.67 4.17-4.16 4.17-8.33 4.17-16.66v-58.34c0-12.5-12.5-29.16-25-37.5zM1229.17 295.83c-16.67-8.33-33.34 0-37.5 16.67-4.17 4.17-4.17 8.33-4.17 16.67v58.33c0 16.67 12.5 33.33 25 41.67 325 116.66 491.67 479.16 370.83 800-62.5 175-200 308.33-370.83 370.83-16.67 8.33-25 20.83-25 41.67V1700c0 16.67 8.33 29.17 25 33.33 4.17 0 12.5 0 16.67-4.16 395.83-125 612.5-545.84 487.5-941.67-75-237.5-258.34-416.67-487.5-491.67z" fill="#fff" />
+  </>
+)
 
 const NOTES = [
   { title: "Buyer", body: "Approved the terms" },
@@ -186,11 +200,17 @@ function Notes({ t }: { t: number }) {
         const push = t >= HITS[i] ? Math.exp(-(t - HITS[i]) * 18) * Math.sin((t - HITS[i]) * 30) * 3 : 0
         return (
           <g key={n.title} style={{ opacity: clamp(k * 1.4), transform: `translate(0px, ${push + (1 - k) * 8}px)` }}>
-            <rect x={x} y={y} width={210} height={54} rx={14} className={styles.card} />
-            <rect x={x + 12} y={y + 13} width={28} height={28} rx={8} className={i === 3 ? styles.appIconUsdc : styles.appIcon} />
-            {i === 3 ? <text x={x + 26} y={y + 31.5} textAnchor="middle" className={styles.appGlyph}>$</text> : <Tick x={x + 26} y={y + 27} k={seg(t, HITS[i], HITS[i] + 0.3)} c={styles.tickDark} />}
+            <rect x={x} y={y} width={236} height={54} rx={14} className={styles.card} />
+            {i === 3 ? (
+              <g transform={`translate(${x + 12} ${y + 13}) scale(0.014)`}>{USDC}</g>
+            ) : (
+              <>
+                <rect x={x + 12} y={y + 13} width={28} height={28} rx={8} className={styles.appIcon} />
+                <Tick x={x + 26} y={y + 27} k={seg(t, HITS[i], HITS[i] + 0.3)} c={styles.tickDark} />
+              </>
+            )}
             <text x={x + 50} y={y + 24} className={styles.noteTitle}>{n.title}</text>
-            <text x={x + 198} y={y + 24} className={styles.noteNow} textAnchor="end">now</text>
+            <text x={x + 224} y={y + 24} className={styles.noteNow} textAnchor="end">now</text>
             <text x={x + 50} y={y + 41} className={styles.noteBody}>{n.body}</text>
           </g>
         )
@@ -200,26 +220,43 @@ function Notes({ t }: { t: number }) {
 }
 
 const ROWS = [
-  { req: "Approved account", ok: true, out: "within the terms", at: 9.0 },
-  { req: "New account", ok: false, out: "ERR_PAYEE_MISMATCH", at: 9.95 },
-  { req: "Different amount", ok: false, out: "ERR_AMOUNT_MISMATCH", at: 10.95 },
+  { req: "Approved account", ok: true, out: "within the terms", at: 9.2 },
+  { req: "New account", ok: false, out: "ERR_PAYEE_MISMATCH", at: 9.9 },
+  { req: "Different amount", ok: false, out: "ERR_AMOUNT_MISMATCH", at: 10.6 },
 ]
+const rowY = (i: number) => 410 + i * 46
+/* a request's route: from the agent into the gate, then along its branch to its row */
+const branch = (i: number): number[][] => [[620, 462], [636, 462], [630, rowY(i) + 19], [652, rowY(i) + 19]]
 function Requests({ t }: { t: number }) {
   const r = undo(t, 3)
+  const gateOn = ease(seg(t, 8.9, 9.1)) * r
+  /* drawn in station-local units, placed 80 to the right of the evidence card */
   return (
-    <g>
-      <Card x={560} y={372} w={330} h={176} title="act() · payment requests" />
+    <g transform="translate(80 0)">
+      <Card x={440} y={372} w={460} h={184} title="act() · payment requests" />
+      {/* the agent and the gate the hero sits in */}
+      <rect x={456} y={447} width={64} height={30} rx={15} className={styles.agentPill} />
+      <text x={488} y={466} className={styles.rowText} textAnchor="middle">agent</text>
+      <line x1={520} y1={462} x2={566} y2={462} className={styles.wire} />
+      <rect x={566} y={440} width={54} height={44} rx={12} className={styles.gate} style={{ stroke: `rgba(145,207,181,${0.2 + 0.5 * gateOn})` }} />
+      <text x={593} y={432} className={styles.zoneText} textAnchor="middle" style={{ opacity: gateOn }}>act()</text>
       {ROWS.map((row, i) => {
-        const y = 409 + i * 45
-        const k = ease(seg(t, row.at, row.at + 0.3)) * r
+        const y = rowY(i)
+        const go = seg(t, row.at, row.at + 0.62)
+        const toGate = ease(seg(go, 0, 0.42)), out = ease(seg(go, 0.42, 1))
+        const reach = row.ok ? out : Math.min(out, 0.62)
+        const [bx, by] = go < 0.42 ? [lerp(520, 590, toGate), 462] : cubicAt(branch(i), reach)
+        const live = go > 0 && go < 1 && r > 0.5
+        const k = ease(seg(t, row.at + 0.6, row.at + 0.9)) * r
+        const pathD = `M620 462 C ${branch(i)[1].join(" ")}, ${branch(i)[2].join(" ")}, ${branch(i)[3].join(" ")}`
         return (
           <g key={row.req}>
-            <rect x={572} y={y} width={306} height={36} rx={10} className={row.ok ? styles.rowOk : styles.rowBad} style={{ opacity: k }} />
-            <text x={604} y={y + 22} className={styles.rowText}>{row.req}</text>
-            <g style={{ opacity: k }}>
-              {row.ok ? <Tick x={864} y={y + 17} k={k} /> : <Cross x={864} y={y + 18} k={k} />}
-              <text x={850} y={y + 22} className={row.ok ? styles.outOk : styles.outBad} textAnchor="end">{row.out}</text>
-            </g>
+            <path d={pathD} className={styles.wire} style={{ strokeDasharray: 60, strokeDashoffset: 60 * (1 - ease(seg(t, row.at + 0.2, row.at + 0.45)) * r) }} />
+            <circle cx={bx} cy={by} r={4} className={row.ok ? styles.packet : styles.packetBad} style={{ opacity: live ? 1 : 0 }} />
+            <rect x={652} y={y} width={234} height={38} rx={10} className={row.ok ? styles.rowOk : styles.rowBad} style={{ opacity: 0.25 + 0.75 * k }} />
+            <text x={666} y={y + 16} className={styles.rowText}>{row.req}</text>
+            <text x={666} y={y + 30} className={row.ok ? styles.outOk : styles.outBad} style={{ opacity: k }}>{row.out}</text>
+            <g style={{ opacity: k }}>{row.ok ? <Tick x={866} y={y + 19} k={k} /> : <Cross x={866} y={y + 19} k={k} />}</g>
           </g>
         )
       })}
@@ -289,7 +326,9 @@ function Release({ t }: { t: number }) {
 export function Course({ t, boost = 1 }: { t: number; boost?: number }) {
   const h = hero(t)
   const rev = revealOf(t)
-  const z = camZ(t) * lerp(boost, 1, rev), cx = camX(t), cy = camY(t)
+  /* the wide Executing station keeps the plain framing even on narrow screens */
+  const b = kf([[0, boost], [8.3, boost], [9.1, 1], [11.4, 1], [12.2, boost], [DUR, boost]])(t)
+  const z = camZ(t) * lerp(b, 1, rev), cx = camX(t), cy = camY(t)
   const w = VW / z, hh = VH / z
   const hs = 1 + 1.3 * rev // the hero stays the brightest thing when the camera pulls out
   return (
