@@ -60,6 +60,11 @@ export function Nav({ network }: { network: string }) {
           <span className={styles.word}>Accord</span>
         </Link>
         <div className={styles.right}>
+          <button type="button" className={styles.search} onClick={() => window.dispatchEvent(new Event("accord:command"))} aria-label="Search and jump (Command K)">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5" /><path d="m10.5 10.5 3 3" /></svg>
+            <span className={styles.searchText}>Search</span>
+            <kbd className={styles.searchKbd}>⌘K</kbd>
+          </button>
           <span className={`mono ${styles.network}`} title="Network this app reads and writes">
             <span className={styles.dot} aria-hidden="true" />
             {network}

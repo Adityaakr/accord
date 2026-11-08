@@ -97,7 +97,7 @@ export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys,
           </span>
         )}
         {isBuyer && status === "active" ? (
-          <span className={styles.revoke}><HoldButton label="Hold to revoke" onConfirm={() => void revoke()} /></span>
+          <span id="revoke" className={styles.revoke}><HoldButton label="Hold to revoke" onConfirm={() => void revoke()} /></span>
         ) : null}
         {mounted && !w.accountId && status === "active" ? <Link className={styles.signin} href="/signin">Sign in as the buyer to revoke</Link> : null}
       </div>

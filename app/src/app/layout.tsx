@@ -6,6 +6,7 @@ import { WalletProvider } from "@/components/wallet/WalletProvider";
 import { OrgProvider } from "@/components/org/OrgProvider";
 import { AppConfigProvider } from "@/components/AppConfig";
 import { LogoMark } from "@/components/LogoMark";
+import { CommandBar } from "@/components/command/CommandBar";
 import { config } from "@/server/accord";
 import "./globals.css";
 import styles from "./layout.module.css";
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <WalletProvider network={c.label}>
         <OrgProvider>
           <a href="#main" className="visually-hidden">Skip to content</a>
+          <CommandBar />
           <Nav network={c.label} />
           {c.network === "sandbox" && (
             <div className={styles.banner} role="note">

@@ -23,7 +23,11 @@
 .dotBad { background: var(--refusal); box-shadow: 0 0 0 3px var(--refusal-bg); }
 .dotNone { border: 1px dashed var(--text-weak); }
 .tx { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-weak); }
-.revoke { margin-left: auto; }
+.revoke { margin-left: auto; scroll-margin-top: 120px; border-radius: var(--radius); }
+/* arriving from the command bar (#revoke): point at the control; the hold still decides */
+.revoke:target { animation: point 1.6s var(--ease) 2; }
+@keyframes point { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 4px var(--refusal-bg); } }
+@media (prefers-reduced-motion: reduce) { .revoke:target { animation: none; box-shadow: 0 0 0 3px var(--refusal-bg); } }
 .signin { margin-left: auto; font-size: 12.5px; color: var(--text-weak); text-decoration: underline; text-underline-offset: 3px; }
 .error { font-family: var(--font-mono); font-size: 12px; color: var(--refusal); }
 
