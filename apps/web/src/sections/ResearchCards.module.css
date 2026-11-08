@@ -3,8 +3,9 @@
 .layout { width: 100%; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 40px; align-items: center; }
 
 .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border-top: 1px solid var(--hairline); }
-.item { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; padding: 20px 0; border-bottom: 1px solid var(--hairline); opacity: 0.5; transition: opacity 0.3s ease; cursor: default; }
-.itemOn { opacity: 1; }
+.item { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; padding: 20px 0; border-bottom: 1px solid var(--hairline); cursor: default; }
+/* a source not in view steps back through its finding's tone; every line keeps 4.5:1 */
+.item:not(.itemOn) .finding { color: var(--text-medium); }
 .num { font-family: var(--mono); font-size: 12px; color: var(--text-weak); padding-top: 3px; }
 .itemOn .num { color: var(--teal); }
 .itemBody { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -38,7 +39,7 @@
 .chrome { display: flex; align-items: center; gap: 10px; height: 30px; padding: 0 12px; background: #ececee; border-bottom: 1px solid #dcdce0; }
 .dots { display: flex; gap: 5px; }
 .dots i { width: 8px; height: 8px; border-radius: 999px; background: #c8c8cc; }
-.url { flex: 1; text-align: center; font-size: 11px; color: #6b6f76; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 34px; }
+.url { flex: 1; text-align: center; font-size: 11px; color: #4f5359; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 34px; }
 .shot { display: block; width: 100%; aspect-ratio: 1100 / 640; object-fit: cover; object-position: top; }
 .chip {
   position: absolute; left: 14px; bottom: 14px;

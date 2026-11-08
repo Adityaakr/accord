@@ -27,10 +27,13 @@
   display: flex; align-items: center; gap: 10px;
   padding: 11px 12px; border-radius: 10px;
   border: 1px solid rgba(var(--ink-rgb), 0.08); background: transparent; color: inherit; cursor: pointer; text-align: left;
-  opacity: 0.6; transition: opacity 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+  transition: background 0.25s ease, border-color 0.25s ease;
 }
-.use:hover { opacity: 0.9; }
-.useOn { opacity: 1; background: rgba(var(--ink-rgb), 0.05); border-color: rgba(var(--ink-rgb), 0.16); }
+/* a tab not chosen steps back through its icon and its label's tone, not the whole tab, so its words keep 4.5:1 */
+.use > svg, .use > canvas, .use > img { opacity: 0.55; transition: opacity 0.25s ease; }
+.use:not(.useOn) .useLabel { color: var(--text-medium); }
+.use:hover > svg, .use:hover > canvas, .use:hover > img, .useOn > svg, .useOn > canvas, .useOn > img { opacity: 1; }
+.useOn { background: rgba(var(--ink-rgb), 0.05); border-color: rgba(var(--ink-rgb), 0.16); }
 .use:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 2px; }
 .useLabel { font-size: 13.5px; letter-spacing: -0.01em; color: var(--text-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 

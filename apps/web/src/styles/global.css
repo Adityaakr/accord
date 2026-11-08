@@ -76,7 +76,7 @@ input, textarea, select { font: inherit; }
 :root {
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --refusal: rgb(255, 34, 68);              /* only for a refusal, a canary trip, a revocation */
-  --refusal-bg: rgba(255, 34, 68, 0.15);
+  --refusal-bg: rgba(255, 34, 68, 0.07); /* a refusal code on its wash keeps 4.5:1 (0.15 measured 3.7) */
   --hairline: rgba(255, 255, 255, 0.08);
   /* Theme plumbing: --ink-rgb is the foreground channel for every translucent line or wash;
      --on-white is text set on the inverse surface (var(--white)); --on-accent is text on an accent fill. */
@@ -98,9 +98,9 @@ input, textarea, select { font: inherit; }
   --token-7a4abf4f-f022-4317-96d1-4d64f8c7d124: rgba(14, 15, 17, 0.78); /* Text Medium */
   --token-b2053b36-5d12-43b8-aed4-e0c7e448eba2: rgba(14, 15, 17, 0.62); /* Text Weak */
   --token-cecf886f-35d1-4207-a045-acf7164ed7a9: rgb(17, 18, 20);     /* "White": the inverse surface */
-  --token-d3ad1a85-5cfb-4d75-889e-ca3d50af2039: rgb(36, 133, 102);   /* Teal, deepened for contrast on white */
+  --token-d3ad1a85-5cfb-4d75-889e-ca3d50af2039: rgb(28, 112, 85);    /* Teal, deepened for 4.5:1 on the light background (rgb(36, 133, 102) measured 4.2) */
   --refusal: rgb(208, 20, 54);
-  --refusal-bg: rgba(208, 20, 54, 0.1);
+  --refusal-bg: rgba(208, 20, 54, 0.05);
   --hairline: rgba(14, 15, 17, 0.1);
   --ink-rgb: 14, 15, 17;
   --on-white: #ffffff;
