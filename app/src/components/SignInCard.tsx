@@ -1,18 +1,18 @@
 "use client";
 
-// The one way in: a work email (NEAR Auth, a non-custodial MPC account with gas paid by Accord) or the person's own
-// NEAR wallet through HOT Connect. Email sign-in is shown as available only when its testnet credentials are set
-// (NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID); until then it says so plainly instead of offering a flow that does not work.
+// The one way in: a work email (NEAR Auth, a non-custodial MPC account; Accord's relayer funds new accounts and pays
+// the signing call) or the person's own NEAR wallet through HOT Connect. Email sign-in runs on testnet with NEAR Auth's
+// shared testnet client (or NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID); elsewhere it says so plainly.
 // On the local sandbox the wallet choice becomes "Act as…" a sandbox principal.
 
 import { useWallet } from "./wallet/WalletProvider";
 import styles from "./SignInCard.module.css";
 
-const EMAIL_READY = Boolean(process.env.NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID);
 const WALLETS = ["Meteor", "Intear", "Ledger", "Nightly", "WalletConnect"];
 
 export function SignInCard({ title = "Sign in to Accord" }: { title?: string }) {
   const w = useWallet();
+  const emailReady = w.connectEmail !== null;
   return (
     <div className={styles.card}>
       <div className={styles.head}>
@@ -20,14 +20,14 @@ export function SignInCard({ title = "Sign in to Accord" }: { title?: string }) 
         <p className={styles.lead}>Every signature that moves money happens in your own account. Accord never holds a key that can.</p>
       </div>
 
-      <button type="button" className={styles.email} disabled={!EMAIL_READY} aria-describedby="email-note">
+      <button type="button" className={styles.email} disabled={!emailReady || w.connecting} aria-describedby="email-note" onClick={() => void w.connectEmail?.()}>
         <MailIcon />
-        <span>Continue with work email</span>
+        <span>{w.connecting ? "Opening NEAR Auth…" : "Continue with work email"}</span>
       </button>
       <p id="email-note" className={styles.note}>
-        {EMAIL_READY
-          ? "A NEAR account is created for you through NEAR Auth. No seed phrase; Accord pays the gas."
-          : "Email sign-in opens with the NEAR Auth testnet credentials. Use a wallet for now."}
+        {emailReady
+          ? "NEAR Auth creates a NEAR account for you. No seed phrase; Accord covers its first gas. Sealing limits still needs a wallet."
+          : "Email sign-in runs on NEAR testnet. Use a wallet here."}
       </p>
 
       <div className={styles.or}><span>or</span></div>

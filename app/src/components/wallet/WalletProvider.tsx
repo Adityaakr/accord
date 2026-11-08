@@ -8,7 +8,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { fromBase64, toTxResult, type Signer, type TxResult } from "@accord/sdk";
 
 export type WalletKind = "near-connect" | "sandbox";
-/** How the person signed in: their own NEAR wallet, NEAR Auth email (not wired yet), or a local sandbox key. */
+/** How the person signed in: their own NEAR wallet, NEAR Auth email (testnet), or a local sandbox key. */
 export type SignInMethod = "wallet" | "email" | "sandbox";
 
 export interface WalletState {
@@ -20,6 +20,10 @@ export interface WalletState {
   connecting: boolean;
   error: string | null;
   connect: (sandboxRole?: string) => Promise<void>;
+  /** NEAR Auth email sign-in (testnet only); null where it is not offered. */
+  connectEmail: (() => Promise<void>) | null;
+  /** For an email session: proves the account to the server with the Auth0 ID token instead of a signed message. */
+  proveEmail: (() => Promise<string>) | null;
   disconnect: () => Promise<void>;
   sandboxPrincipals: { role: string; account: string }[];
 }
@@ -108,6 +112,8 @@ export function WalletProvider({ network, children }: { network: string; childre
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sandboxPrincipals, setSandboxPrincipals] = useState<{ role: string; account: string }[]>([]);
+  const [via, setVia] = useState<"wallet" | "email" | null>(null);
+  const emailOffered = kind !== "sandbox" && chain === "testnet";
 
   useEffect(() => {
     if (kind === "sandbox") {
@@ -138,13 +144,22 @@ export function WalletProvider({ network, children }: { network: string; childre
         const id = accounts[0]?.accountId ?? null;
         setAccountId(id);
         setSigner(id ? connectorSigner(wallet, id) : null);
+        setVia(id ? "wallet" : null);
       });
       try {
         const { wallet, accounts } = await c.getConnectedWallet();
         const id = accounts[0]?.accountId ?? null;
-        if (live && id) { setAccountId(id); setSigner(connectorSigner(wallet, id)); }
+        if (live && id) { setAccountId(id); setSigner(connectorSigner(wallet, id)); setVia("wallet"); return; }
       } catch {
         // no wallet connected yet
+      }
+      // No wallet: an email (NEAR Auth) session may still be open in this browser.
+      if (chain === "testnet") {
+        const fa = await import("./fastauth");
+        if (live && (await fa.emailSignedIn())) {
+          const { accountId: id, signer: s } = await fa.emailSigner();
+          if (live) { setAccountId(id); setSigner(s); setVia("email"); }
+        }
       }
     })();
     return () => { live = false; };
@@ -171,20 +186,59 @@ export function WalletProvider({ network, children }: { network: string; childre
     }
   }, [kind, connector, sandboxPrincipals]);
 
+  const connectEmail = useCallback(async () => {
+    setError(null);
+    setConnecting(true);
+    try {
+      const fa = await import("./fastauth");
+      await fa.emailLogin();
+      const { accountId: id, signer: s } = await fa.emailSigner();
+      // The server verifies the login, derives the same account from the MPC contract and funds it once if it is new.
+      const r = await fetch("/api/fastauth/session", {
+        method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ idToken: await fa.emailIdToken() }),
+      });
+      const b = (await r.json()) as { account?: string; error?: string };
+      if (!r.ok || b.account !== id) throw new Error(b.error ?? "the server derived a different account; sign in again");
+      setAccountId(id);
+      setSigner(s);
+      setVia("email");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setConnecting(false);
+    }
+  }, []);
+
+  const proveEmail = useCallback(async () => {
+    const fa = await import("./fastauth");
+    const r = await fetch("/api/fastauth/session", {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ idToken: await fa.emailIdToken() }),
+    });
+    const b = (await r.json()) as { account?: string; error?: string };
+    if (!r.ok || !b.account) throw new Error(b.error ?? `HTTP ${r.status}`);
+    return b.account;
+  }, []);
+
   const disconnect = useCallback(async () => {
-    if (kind === "sandbox") {
+    if (via === "email") {
+      await (await import("./fastauth")).emailLogout();
+    } else if (kind === "sandbox") {
       try { localStorage.removeItem("accord-sandbox-principal"); } catch { /* nothing stored */ }
     } else {
       await connector?.disconnect().catch(() => undefined);
     }
     setAccountId(null);
     setSigner(null);
-  }, [kind, connector]);
+    setVia(null);
+  }, [kind, connector, via]);
 
-  const method: SignInMethod | null = accountId ? (kind === "sandbox" ? "sandbox" : "wallet") : null;
+  const method: SignInMethod | null = accountId ? (kind === "sandbox" ? "sandbox" : via === "email" ? "email" : "wallet") : null;
   const value = useMemo<WalletState>(() => ({
-    kind, method, network, accountId, signer, connecting, error, connect, disconnect, sandboxPrincipals,
-  }), [kind, method, network, accountId, signer, connecting, error, connect, disconnect, sandboxPrincipals]);
+    kind, method, network, accountId, signer, connecting, error, connect,
+    connectEmail: emailOffered ? connectEmail : null,
+    proveEmail: via === "email" ? proveEmail : null,
+    disconnect, sandboxPrincipals,
+  }), [kind, method, network, accountId, signer, connecting, error, connect, emailOffered, connectEmail, via, proveEmail, disconnect, sandboxPrincipals]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

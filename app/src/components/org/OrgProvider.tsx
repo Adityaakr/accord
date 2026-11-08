@@ -87,6 +87,14 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   useEffect(() => { void reload(); }, [reload]);
 
   const confirm = useCallback(async () => {
+    if (w.proveEmail) {
+      // Email (NEAR Auth) users prove the account with their verified login instead of a signed message.
+      setConfirming(true);
+      setError(null);
+      try { setProven(await w.proveEmail()); return true; }
+      catch (e) { setError((e as Error).message); return false; }
+      finally { setConfirming(false); }
+    }
     if (!w.accountId || !w.signer?.signMessage) { setError("Connect a wallet that can sign messages first."); return false; }
     setConfirming(true);
     setError(null);
@@ -109,7 +117,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     } finally {
       setConfirming(false);
     }
-  }, [w.accountId, w.signer]);
+  }, [w.accountId, w.signer, w.proveEmail]);
 
   const send = useCallback(async (url: string, method: string, body?: unknown) => {
     const r = await fetch(url, { method, headers: { "content-type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
