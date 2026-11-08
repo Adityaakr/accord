@@ -36,7 +36,7 @@ The reason behind each claim is on [/security](/security).
 
 - 02 Factory key The factory keeps its full-access key during the hackathon so fixes can ship. It cannot touch an existing agreement.
 
-- 03 Test token Settlement uses the repository's test token, not Circle's testnet USDC. [tusdc.accord-v1.testnet](https://testnet.nearblocks.io/address/tusdc.accord-v1.testnet)
+- 03 Test token The default factory and the full flow on a6 settle in the repository's test token. Circle's testnet USDC settles on the second factory, `accord-usdc.testnet`, where no agreement has been funded yet. [tusdc.accord-v1.testnet](https://testnet.nearblocks.io/address/tusdc.accord-v1.testnet)
 
 - 04 Release attestation `make verify` on a6 did not check the enclave release: it needs the outlayer-verify tool. [not checked](/docs/verify#a6-result)
 
