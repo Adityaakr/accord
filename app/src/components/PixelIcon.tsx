@@ -159,11 +159,50 @@ const MAPS = {
     "X..............X",
     "XXXXXXXXXXXXXXXX",
   ],
+  lock: [
+    ".....XXXXXX.....",
+    "....XX....XX....",
+    "....X......X....",
+    "....X......X....",
+    "..XXXXXXXXXXXX..",
+    "..XXXXXXXXXXXX..",
+    "..XXXXX..XXXXX..",
+    "..XXXXX..XXXXX..",
+    "..XXXXXX.XXXXX..",
+    "..XXXXXXXXXXXX..",
+    "..XXXXXXXXXXXX..",
+  ],
+  unlock: [
+    ".....XXXXXX.....",
+    "....XX....XX....",
+    "....X......X....",
+    "....X...........",
+    "..XXXXXXXXXXXX..",
+    "..X..........X..",
+    "..X....XX....X..",
+    "..X....XX....X..",
+    "..X.....X....X..",
+    "..X..........X..",
+    "..XXXXXXXXXXXX..",
+  ],
+  check: [
+    "..............XX",
+    ".............XX.",
+    "............XX..",
+    "...........XX...",
+    "XX........XX....",
+    ".XX......XX.....",
+    "..XX....XX......",
+    "...XX..XX.......",
+    "....XXXX........",
+    ".....XX.........",
+  ],
 } as const
 
 export type PixelName = keyof typeof MAPS
 
-export function PixelIcon({ name, size = 40 }: { name: PixelName; size?: number }) {
+/** tone "teal" tints the metal for a passed or sealed state; the default is brushed silver. */
+export function PixelIcon({ name, size = 40, tone = "metal" }: { name: PixelName; size?: number; tone?: "metal" | "teal" }) {
   const id = `px-${useId().replace(/:/g, "")}`
   const rows = MAPS[name]
   const top = Math.floor((16 - rows.length) / 2) // whole pixels: a half-pixel offset vanishes under crispEdges at small sizes
@@ -171,9 +210,9 @@ export function PixelIcon({ name, size = 40 }: { name: PixelName; size?: number 
     <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden="true" shapeRendering="crispEdges" style={{ display: "block", flex: "none" }}>
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="0" y2="16" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="var(--px-hi, #ffffff)" />
-          <stop offset="0.5" stopColor="var(--px-mid, #c9ccd1)" />
-          <stop offset="1" stopColor="var(--px-lo, #7d838b)" />
+          <stop offset="0" stopColor={tone === "teal" ? "var(--px-teal-hi, #d8f1e7)" : "var(--px-hi, #ffffff)"} />
+          <stop offset="0.5" stopColor={tone === "teal" ? "var(--teal)" : "var(--px-mid, #c9ccd1)"} />
+          <stop offset="1" stopColor={tone === "teal" ? "var(--px-teal-lo, #4c8a73)" : "var(--px-lo, #7d838b)"} />
         </linearGradient>
       </defs>
       <g fill={`url(#${id})`}>

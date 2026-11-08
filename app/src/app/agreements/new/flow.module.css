@@ -26,6 +26,7 @@
 .typePlanned { opacity: 0.55; cursor: not-allowed; }
 .typeTop { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px; }
 .tile { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: rgba(var(--ink-rgb), 0.05); border: 1px solid var(--hairline-strong); }
+.tileGap { margin-right: 8px; vertical-align: middle; }
 .tileSm { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; background: rgba(var(--ink-rgb), 0.05); border: 1px solid var(--hairline); margin-right: 8px; vertical-align: middle; }
 .planned { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px dashed var(--hairline-strong); color: var(--text-weak); }
 .check { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 999px; background: var(--teal-wash); color: var(--teal); font-size: 12px; }

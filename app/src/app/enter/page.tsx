@@ -10,11 +10,11 @@ import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import type { Portfolio } from "@/server/data";
 import { LogoMark } from "@/components/LogoMark";
-import { PixelIcon } from "@/components/PixelIcon";
 import { ThemeToggle } from "@/components/theme/Theme";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { WORKSPACES, useWorkspace, type WorkspaceId } from "@/components/workspace/Workspace";
 import styles from "./enter.module.css";
+import { IconTile } from "@/components/IconTile";
 
 export default function Enter() {
   const w = useWallet();
@@ -68,7 +68,7 @@ export default function Enter() {
               <motion.li key={x.id} initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.06 + i * 0.05, ease: [0.2, 0.8, 0.3, 1] }}>
                 <button type="button" className={`${styles.card} ${x.planned ? styles.subdued : ""}`} onClick={() => go(x.id)}>
                   <span className={styles.cardTop}>
-                    <span className={styles.tile}><PixelIcon name={x.icon} size={20} /></span>
+                    <IconTile name={x.icon} size={40} />
                     {note ? <span className={styles.note}>{note}</span> : null}
                   </span>
                   <span className={styles.name}>{x.name}<span className={styles.arrow} aria-hidden="true">→</span></span>

@@ -10,8 +10,9 @@ import { useRouter } from "next/navigation";
 import { Accord, AccordError, formatUnits, type Kind, type Params } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { useAppConfig } from "@/components/AppConfig";
-import { PixelIcon, type PixelName } from "@/components/PixelIcon";
+import type { PixelName } from "@/components/PixelIcon";
 import styles from "./flow.module.css";
+import { IconTile } from "@/components/IconTile";
 
 const DEMO: Params = {
   mode: "demo", timelock_secs: 120, claim_delay_secs: 120, grace_secs: 600, min_acceptance_window_secs: 60,
@@ -139,7 +140,7 @@ export function NewRoomFlow({ network, deposit, demoAllowed }: { network: string
                     className={`${styles.type} ${on ? styles.typeOn : ""} ${planned ? styles.typePlanned : ""}`}
                     onClick={() => { setTypeId(t.id); setTitle(""); setBrief(""); setError(null); }}>
                     <span className={styles.typeTop}>
-                      <span className={styles.tile}><PixelIcon name={t.icon} size={22} /></span>
+                      <IconTile name={t.icon} size={40} />
                       {planned ? <span className={styles.planned}>Planned</span> : on ? <span className={styles.check} aria-hidden="true">✓</span> : null}
                     </span>
                     <span className={styles.typeTitle}>{t.title}</span>
@@ -212,7 +213,7 @@ export function NewRoomFlow({ network, deposit, demoAllowed }: { network: string
             <h2 id="t-review" className={styles.h}>Review before you sign</h2>
             <p className={styles.lead}>Creating the room makes it its own NEAR account with the release's code and no key of its own. Nothing is negotiated or paid yet.</p>
             <dl className={styles.review}>
-              <div><dt>Type</dt><dd><span className={styles.tileSm}><PixelIcon name={type.icon} size={16} /></span>{type.title}</dd></div>
+              <div><dt>Type</dt><dd><IconTile name={type.icon} size={24} className={styles.tileGap} />{type.title}</dd></div>
               <div><dt>Title</dt><dd>{title.trim()}</dd></div>
               <div><dt>Buyer</dt><dd className="mono">{w.accountId ?? "sign in"}</dd></div>
               <div><dt>Vendor</dt><dd className="mono">{vendor}{domain ? <span className={styles.faint}> · {domain}</span> : null}</dd></div>

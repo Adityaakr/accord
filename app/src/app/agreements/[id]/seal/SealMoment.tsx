@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import { Stage } from "@/components/Stage";
 import styles from "./seal.module.css";
+import { IconTile } from "@/components/IconTile";
 
 export function SealMoment({ rows, commitment, txHash, role }: {
   rows: { label: string; value: string }[]; commitment: string; txHash: string; role: string;
@@ -19,9 +20,7 @@ export function SealMoment({ rows, commitment, txHash, role }: {
     <Stage>
       <div className={`${styles.momentCard} ${go ? styles.go : ""}`}>
         <div className={styles.momentHead}>
-          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className={styles.momentLock} aria-hidden="true">
-            <rect x="3" y="7" width="10" height="7" rx="2" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
-          </svg>
+          <IconTile name="lock" size={28} tone="teal" />
           <span className={styles.momentTitle}>Sealed as the {role}</span>
         </div>
         <ul className={styles.momentRows}>

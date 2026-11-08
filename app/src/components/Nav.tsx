@@ -9,13 +9,13 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { LogoMark } from "./LogoMark";
-import { PixelIcon } from "./PixelIcon";
 import { ThemeToggle } from "./theme/Theme";
 import { useOrg } from "./org/OrgProvider";
 import { WORKSPACES, useWorkspace, type NavItem } from "./workspace/Workspace";
 import { WalletButton } from "./wallet/WalletButton";
 import { useWallet } from "./wallet/WalletProvider";
 import styles from "./Nav.module.css";
+import { IconTile } from "@/components/IconTile";
 
 /* 16-px line icons, one stroke weight */
 const ICONS = {
@@ -93,7 +93,7 @@ export function Sidebar() {
     <nav className={styles.sidebar} aria-label="Main">
       <div className={styles.switcher}>
         <button type="button" className={styles.switch} onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-haspopup="menu">
-          <span className={styles.switchIcon}><PixelIcon name={ws.icon} size={18} /></span>
+          <IconTile name={ws.icon} size={32} />
           <span className={styles.switchText}><span className={styles.switchName}>{ws.name}</span><span className={styles.switchSub}>workspace</span></span>
           <Icon name="switch" />
         </button>
@@ -102,7 +102,7 @@ export function Sidebar() {
             {WORKSPACES.map((x) => (
               <button key={x.id} type="button" role="menuitemradio" aria-checked={x.id === ws.id} className={`${styles.menuItem} ${x.id === ws.id ? styles.menuOn : ""}`}
                 onClick={() => { choose(x.id); setOpen(false); }}>
-                <PixelIcon name={x.icon} size={16} />
+                <IconTile name={x.icon} size={26} />
                 <span>{x.name}</span>
                 {x.planned ? <span className={styles.menuTag}>Planned</span> : null}
               </button>
