@@ -175,3 +175,117 @@ fn review_ids_not_reused_and_store_pubkey_gated() {
     }));
     assert!(r.is_err(), "only registered agreements report");
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// Audit fixes (9 Nov 2026, DECISIONS.md section 25). Each asserts the fixed behaviour.
+// ---------------------------------------------------------------------------------------------------------------
+
+/// The actions of the receipts the last call scheduled.
+fn actions() -> Vec<near_sdk::mock::MockAction> {
+    near_sdk::test_utils::get_created_receipts()
+        .into_iter()
+        .flat_map(|r| r.actions)
+        .collect()
+}
+
+/// L2-5 (finding 9): the settlement authority must be a different key from the vendor ("a change by one key alone"
+/// is ruled out, ARCHITECTURE.md sections 3 and 12). The factory never checked it.
+#[test]
+fn audit_the_vendor_may_not_be_its_own_authority() {
+    let mut f = factory();
+    ctx("buyer.testnet", NearToken::from_near(2), vec![]);
+    let mut a = valid_args("vendor.testnet");
+    a.vendor_authority = acc("vendor.testnet");
+    let r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f.create_agreement(a)));
+    assert!(r.is_err(), "vendor == vendor_authority was accepted");
+}
+
+/// L3-F1 (finding 9): `params` was forwarded raw to `new`, so unknown padding passed the factory's typed check and
+/// could make `new` (30 Tgas) run out of gas after the record was written. Fixed: the typed params are forwarded.
+#[test]
+fn audit_only_the_typed_params_reach_the_agreement() {
+    let mut f = factory();
+    ctx("buyer.testnet", NearToken::from_near(2), vec![]);
+    let mut a = valid_args("vendor.testnet");
+    a.params["pad"] = json!(vec![0u8; 1000]);
+    let _ = f.create_agreement(a);
+    let init = actions()
+        .into_iter()
+        .find_map(|a| match a {
+            near_sdk::mock::MockAction::FunctionCallWeight {
+                method_name, args, ..
+            } if method_name == b"new" => Some(String::from_utf8(args).unwrap()),
+            _ => None,
+        })
+        .expect("new is called");
+    assert!(!init.contains("pad"), "unknown params were forwarded");
+    assert!(init.contains("\"refusal_limit\":5"));
+}
+
+/// L3-F2 (finding 9): every creation grew the factory's storage at the factory's expense (the whole deposit went
+/// to the agreement). Fixed: the factory keeps the stake for what the creation stores, its callback included, and
+/// passes the rest on.
+#[test]
+fn audit_creation_storage_is_paid_by_the_caller() {
+    let mut f = factory();
+    let before = env::storage_usage();
+    let deposit = NearToken::from_near(2);
+    ctx("buyer.testnet", deposit, vec![]);
+    let _ = f.create_agreement(valid_args("vendor.testnet"));
+    let sent = actions()
+        .into_iter()
+        .find_map(|a| match a {
+            near_sdk::mock::MockAction::Transfer { deposit, .. } => Some(deposit),
+            _ => None,
+        })
+        .expect("the batch transfers the deposit");
+    ctx(
+        FACTORY,
+        NearToken::from_near(0),
+        vec![PromiseResult::Successful(vec![])],
+    );
+    let _ = f.on_agreement_created(1, U128(sent.as_yoctonear()));
+    f.agreements.flush();
+    f.registry.flush();
+    f.by_party.flush();
+    let grew = u128::from(env::storage_usage() - before);
+    let kept = deposit.as_yoctonear() - sent.as_yoctonear();
+    assert!(
+        kept >= grew * env::storage_byte_cost().as_yoctonear(),
+        "factory stored {grew} bytes and kept {kept} yocto"
+    );
+    assert!(
+        sent >= NearToken::from_millinear(1_900),
+        "the agreement still gets almost all of it"
+    );
+}
+
+/// A failed creation refunds what the agreement would have received; the factory keeps the stake for the record
+/// it wrote (ids are never reused).
+#[test]
+fn audit_a_failed_creation_refunds_all_but_the_record_stake() {
+    let mut f = factory();
+    ctx("buyer.testnet", NearToken::from_near(2), vec![]);
+    let _ = f.create_agreement(valid_args("vendor.testnet"));
+    let sent = actions()
+        .into_iter()
+        .find_map(|a| match a {
+            near_sdk::mock::MockAction::Transfer { deposit, .. } => Some(deposit),
+            _ => None,
+        })
+        .unwrap();
+    ctx(
+        FACTORY,
+        NearToken::from_near(0),
+        vec![PromiseResult::Failed],
+    );
+    let _ = f.on_agreement_created(1, U128(sent.as_yoctonear()));
+    let refund = actions()
+        .into_iter()
+        .find_map(|a| match a {
+            near_sdk::mock::MockAction::Transfer { deposit, .. } => Some(deposit),
+            _ => None,
+        })
+        .unwrap();
+    assert_eq!(refund, sent);
+}

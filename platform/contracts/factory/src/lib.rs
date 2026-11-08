@@ -15,6 +15,9 @@ const TGAS: u64 = 1_000_000_000_000;
 const MAX_REPORTS: usize = 32;
 /// One agreement can name at most this many accounts in reports, so no buyer can grow the factory's state at will.
 const MAX_REPORTS_PER_AGREEMENT: u32 = 64;
+/// Storage the creation callback writes (the registry entry and three `by_party` lists), charged up front with the
+/// record's own bytes so the factory never pays for a creation.
+const CALLBACK_STORAGE_BYTES: u64 = 512;
 /// What the keyless releases account starts with: its storage and a few `pubkey` runs.
 const RELEASES_FUNDING: NearToken = NearToken::from_near(2);
 
@@ -385,6 +388,7 @@ impl Factory {
     #[payable]
     pub fn create_agreement(&mut self, args: CreateArgs) -> Promise {
         let deposit = env::attached_deposit();
+        let storage_before = env::storage_usage();
         require(
             deposit.as_yoctonear() >= self.config.create_deposit.0,
             "ERR_LOW_DEPOSIT",
@@ -422,8 +426,11 @@ impl Factory {
             "ERR_TOO_LARGE",
         );
         let buyer = env::predecessor_account_id();
+        // Three different accounts: a recipient change needs the vendor and its settlement authority, two keys.
         require(
-            buyer != args.vendor && buyer != args.vendor_authority,
+            buyer != args.vendor
+                && buyer != args.vendor_authority
+                && args.vendor != args.vendor_authority,
             "ERR_PARTIES",
         );
         let id = self.agreements.len() as u64 + 1;
@@ -442,6 +449,13 @@ impl Factory {
             created_at: env::block_timestamp() / 1_000_000_000,
         };
         self.agreements.push(record.clone());
+        self.agreements.flush();
+        // The caller pays for what this creation stores in the factory (the record now, the registry and party
+        // lists in the callback); the agreement gets the rest.
+        let stored = env::storage_usage().saturating_sub(storage_before) + CALLBACK_STORAGE_BYTES;
+        let charge = env::storage_byte_cost().saturating_mul(u128::from(stored));
+        require(deposit > charge, "ERR_LOW_DEPOSIT");
+        let deposit = deposit.saturating_sub(charge);
         let job = |j: &JobRelease| json!({"project": j.project, "wasm_hash": j.wasm_hash, "signing_pubkey": j.signing_pubkey});
         // `new` re-checks the live minimums on the params (Params::check_mode) and panics otherwise.
         let init = json!({"args": {
@@ -451,7 +465,9 @@ impl Factory {
             "token": self.config.token, "outlayer": self.config.outlayer, "keeper": self.config.keeper,
             "sealed_table": job(&release.sealed_table), "payee_job": job(&release.payee),
             "observer_job": job(&release.observer), "model": release.model,
-            "canaries": args.canaries, "params": args.params,
+            // the typed params, never the raw JSON: unknown fields could make `new` run out of gas after the record
+            // is written
+            "canaries": args.canaries, "params": params,
         }});
         let mut batch = Promise::new(account.clone())
             .create_account()
