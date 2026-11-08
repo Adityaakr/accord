@@ -17,7 +17,7 @@ export function allow(key: string, max: number, windowMs: number): boolean {
 export function sameOriginJson(req: Request): string | null {
   if (!(req.headers.get("content-type") ?? "").includes("application/json")) return "JSON only";
   const origin = req.headers.get("origin");
-  const host = req.headers.get("host");
+  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
   if (origin && host && new URL(origin).host !== host) return "cross-origin request";
   return null;
 }

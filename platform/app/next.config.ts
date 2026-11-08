@@ -21,6 +21,9 @@ const config: NextConfig = {
   // A second instance (e.g. a testnet app beside the sandbox dev server) builds into its own directory.
   distDir: process.env.NEXT_DIST_DIR || ".next",
   output: "standalone",
+  // Served under a path prefix so it can sit behind the website at <site>/app (NEXT_PUBLIC_BASE_PATH="" to disable).
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? "/app",
+  env: { NEXT_PUBLIC_BASE_PATH: process.env.NEXT_PUBLIC_BASE_PATH ?? "/app" },
   // The repository root carries its own CLAUDE.md and AGENTS.md for evaluators; Next must not write others.
   agentRules: false,
 };

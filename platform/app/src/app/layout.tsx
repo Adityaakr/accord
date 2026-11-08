@@ -8,6 +8,7 @@ import { Chrome } from "@/components/Chrome";
 import { WorkspaceProvider } from "@/components/workspace/Workspace";
 import { THEME_SCRIPT } from "@/components/theme/Theme";
 import { config } from "@/server/accord";
+import { BasePathFetch } from "@/components/BasePathFetch";
 import "./globals.css";
 
 const host = Host_Grotesk({ subsets: ["latin"], variable: "--font-host-grotesk", display: "swap" });
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>
+        <BasePathFetch />
         <AppConfigProvider value={{ network: c.network, rpc: c.rpc, factory: c.factory, explorer: c.explorer }}>
         <WalletProvider network={c.label}>
         <OrgProvider>

@@ -16,6 +16,7 @@ import { Panel } from "@/components/ui";
 import { agreementClient, errorText, txLine } from "@/components/me/client";
 import { can, useOrg, type Capability } from "@/components/org/OrgProvider";
 import styles from "./actions.module.css";
+import { withBase } from "@/lib/basePath";
 
 type Role = "buyer" | "vendor" | "authority" | "viewer";
 
@@ -73,7 +74,7 @@ export function Actions({
     // Sealing and negotiation.
     // Once both sides have sealed (Ready, Requested or Done) there is nothing left to seal.
     if (party && a.state === "Sealed" && a.negotiation === "AwaitingMandates") {
-      add("seal", <a className={styles.btn} href={`/agreements/${a.account}/seal`}>Seal your mandate</a>);
+      add("seal", <a className={styles.btn} href={withBase(`/agreements/${a.account}/seal`)}>Seal your mandate</a>);
     }
     if (a.state === "Sealed" && typeof a.negotiation === "object" && "Ready" in a.negotiation) {
       add("negotiate", <Btn busy={busy} label="Start the negotiation" onClick={open("Start the negotiation", () => client.startNegotiation())} />);

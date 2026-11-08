@@ -4,6 +4,7 @@ import { ledger } from "@/server/ledger";
 import { Account, PageHead, Panel, Pill, Usdc, Hash } from "@/components/ui";
 import styles from "../pages.module.css";
 import rstyles from "./record.module.css";
+import { withBase } from "@/lib/basePath";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Record" };
@@ -24,7 +25,7 @@ export default async function Record({ searchParams }: { searchParams: Promise<{
       <PageHead
         title="Record"
         lead={scope === "org" ? "Every payout, refusal and refund in the rooms where a member of your organisation is a party, read from the agreements' own accounts." : "Every payout, refusal and refund across the deal rooms, read from the agreements' own accounts. The amounts are public on NEAR, as with any stablecoin payment."}
-        aside={l.unavailable ? undefined : <a className={styles.button} href={csv}>Download CSV</a>}
+        aside={l.unavailable ? undefined : <a className={styles.button} href={withBase(csv)}>Download CSV</a>}
       />
       <nav className={rstyles.scopes} aria-label="Record scope">
         <Link href="/record" className={`${rstyles.scope} ${scope === "public" ? rstyles.scopeOn : ""}`} aria-current={scope === "public" ? "page" : undefined}>Public ledger</Link>
