@@ -1,0 +1,166 @@
+/* The control plane as gates. Hairline chrome on the kit plate: one rail, hairline chevrons, mono error codes in the
+   weak text colour, dotted drops to the refusal log. Teal marks a gate passed and the payment; the refusal red marks
+   only a refusal (the log, its drops, a refused gate). States change colour and opacity only, never size.
+   Base layout is the vertical stack (rail down the left, log to the right); a plate 1000px or wider lays the gates out
+   in a row with the log underneath. */
+.plate {
+  --bg: var(--elevation-strong);
+  --line: rgba(var(--ink-rgb), 0.16);
+  --line-strong: rgba(var(--ink-rgb), 0.34);
+  --teal-soft: color-mix(in srgb, var(--teal) 16%, transparent);
+  --teal-line: color-mix(in srgb, var(--teal) 70%, transparent);
+  --red-line: color-mix(in srgb, var(--refusal) 38%, transparent);
+  --ease: cubic-bezier(0.12, 0.23, 0.5, 1);
+  container-type: inline-size;
+  width: 100%;
+  border-radius: 4px;
+  background: var(--bg);
+  padding: 28px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-family: "Host Grotesk", sans-serif;
+}
+
+.kicker { margin: 0; font-size: 12px; letter-spacing: 0.02em; color: var(--text-weak); }
+.request { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.call { font-family: var(--mono); font-size: 13px; color: var(--text-strong); }
+.from { font-size: 13px; color: var(--text-weak); }
+.foot { margin: 0; font-size: 13px; line-height: 1.55; color: var(--text-weak); max-width: 760px; }
+
+/* ---------- flow: vertical base ---------- */
+.flow {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(112px, 30%);
+  column-gap: 0;
+  padding-top: 22px;
+}
+.gates { display: contents; list-style: none; margin: 0; padding: 0; }
+
+.origin { position: absolute; left: 6.5px; top: 0; width: 5px; height: 5px; border-radius: 50%; background: var(--line-strong); }
+.rail { position: absolute; left: 8.5px; top: 5px; width: 1px; height: 17px; background: var(--line); }
+
+.gate, .pay {
+  position: relative;
+  grid-column: 1;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) minmax(16px, 28px);
+  grid-template-areas: "node name drop" ". codes .";
+  column-gap: 12px;
+  row-gap: 6px;
+  padding-bottom: 18px;
+  min-width: 0;
+}
+.pay { grid-template-areas: "node name" ". note"; grid-template-columns: 18px minmax(0, 1fr); padding-bottom: 0; }
+/* the rail segment from this gate to the next */
+.gate::before {
+  content: "";
+  position: absolute;
+  left: 8.5px; top: 8px; bottom: -8px; width: 1px;
+  background: var(--line);
+  transition: background 0.35s var(--ease);
+}
+.gate[data-state="lit"]::before { background: var(--teal-line); }
+
+.node { grid-area: node; position: relative; z-index: 1; display: block; width: 18px; height: 16px; }
+.node svg { display: block; width: 18px; height: 16px; overflow: visible; }
+.node path { fill: var(--bg); stroke: var(--line-strong); stroke-width: 1; stroke-linejoin: round; transition: fill 0.35s var(--ease), stroke 0.35s var(--ease); }
+.gate[data-state="lit"] .node path { fill: var(--teal-soft); stroke: var(--teal); }
+.gate[data-state="stop"] .node path { fill: var(--refusal-bg); stroke: var(--refusal); }
+
+.payNode { display: grid; place-items: center; }
+.payNode > span { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--teal-line); background: var(--bg); transition: background 0.35s var(--ease), border-color 0.35s var(--ease); }
+.pay[data-state="paid"] .payNode > span { background: var(--teal); border-color: var(--teal); }
+
+.name { grid-area: name; align-self: center; font-size: 14px; font-weight: 500; line-height: 16px; letter-spacing: -0.01em; color: var(--text-medium); transition: color 0.35s var(--ease); }
+.gate[data-state="lit"] .name { color: var(--text-strong); }
+.gate[data-state="stop"] .name { color: var(--refusal); }
+.pay .name { color: var(--teal); }
+.payNote { grid-area: note; font-family: var(--mono); font-size: 11px; color: var(--text-weak); }
+
+.codes { grid-area: codes; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.code, .note {
+  justify-self: start;
+  width: max-content;
+  max-width: 100%;
+  margin-left: -4px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-weak);
+  white-space: nowrap;
+  transition: color 0.35s var(--ease), background-color 0.35s var(--ease);
+}
+.note { opacity: 0.7; font-family: inherit; font-size: 12px; }
+.code.hit { color: var(--refusal); background: var(--refusal-bg); }
+
+/* dotted drop into the log: a stub to the right in the stack, a line down in the row */
+.drop { grid-area: drop; align-self: start; margin-top: 7.5px; height: 0; border-top: 1px dotted var(--red-line); transition: border-color 0.35s var(--ease); margin-right: 0; }
+.gate[data-state="stop"] .drop { border-color: var(--refusal); }
+
+.log {
+  grid-column: 2;
+  grid-row: 1 / 7;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--red-line);
+  border-radius: 6px;
+  min-width: 0;
+}
+.logTitle { font-size: 13px; font-weight: 600; color: var(--refusal); }
+.logBody { display: grid; font-size: 12.5px; line-height: 1.5; }
+.logRest, .logEntry { grid-area: 1 / 1; transition: opacity 0.45s var(--ease), filter 0.45s var(--ease); }
+.logRest { color: var(--text-weak); }
+.logEntry { color: var(--text-medium); opacity: 0; filter: blur(6px); }
+.logEntry code { display: block; font-family: var(--mono); font-size: 11.5px; color: var(--refusal); }
+.log[data-state="entry"] .logRest { opacity: 0; filter: blur(6px); }
+.log[data-state="entry"] .logEntry { opacity: 1; filter: blur(0); }
+
+/* the request, and the refusal falling into the log */
+.token, .dropDot { position: absolute; left: 0; top: 0; z-index: 2; border-radius: 50%; pointer-events: none; will-change: transform, opacity, filter; }
+.token { width: 10px; height: 10px; margin: -5px 0 0 -5px; background: var(--teal); box-shadow: 0 0 0 4px var(--teal-soft); opacity: 0; transition: background 0.25s var(--ease), box-shadow 0.25s var(--ease); }
+.tokenStop { background: var(--refusal); box-shadow: 0 0 0 4px var(--refusal-bg); }
+.dropDot { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: var(--refusal); opacity: 0; }
+
+/* Narrow stack: a little tighter */
+@container (max-width: 420px) {
+  .gate { column-gap: 10px; }
+  .code { font-size: 10.5px; }
+  .flow { grid-template-columns: minmax(0, 1fr) minmax(104px, 32%); }
+  .log { padding: 10px 10px; }
+}
+
+/* Mid widths: the codes sit beside the gate name */
+@container (min-width: 640px) and (max-width: 999.98px) {
+  .gate { grid-template-columns: 18px 140px minmax(0, 1fr) minmax(16px, 40px); grid-template-areas: "node name codes drop"; align-items: start; }
+  .gate .name { align-self: start; margin-top: 1px; }
+  .codes { flex-direction: row; flex-wrap: wrap; gap: 2px 14px; padding-top: 0; }
+  .code, .note { margin-left: 0; }
+}
+
+/* ---------- flow: the row ---------- */
+@container (min-width: 1000px) {
+  .flow { grid-template-columns: repeat(6, minmax(0, 1fr)) minmax(0, 0.8fr); grid-template-rows: auto auto; padding: 0 0 0 26px; }
+  .origin { left: 0; top: 5.5px; }
+  .rail { left: 5px; top: 8px; width: 21px; height: 1px; }
+  .gate, .pay { grid-column: auto; grid-row: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 0; padding: 0 10px 0 0; }
+  .gate::before { left: 9px; right: -9px; top: 8px; bottom: auto; width: auto; height: 1px; }
+  .name { align-self: flex-start; margin-top: 14px; }
+  .codes { margin-top: 8px; }
+  .code { font-size: 10.5px; }
+  .drop { flex: 1; align-self: flex-start; min-height: 22px; margin: 8px 0 0 8.5px; height: auto; width: 0; border-top: 0; border-left: 1px dotted var(--red-line); }
+  .payNote { margin-top: 4px; }
+  .log { grid-column: 1 / 7; grid-row: 2; flex-direction: row; align-items: baseline; gap: 14px; margin: 0; }
+  .logEntry code { display: inline; margin-right: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gate::before, .node path, .payNode > span, .name, .code, .note, .drop, .logRest, .logEntry, .token { transition: none; }
+}

@@ -8,7 +8,7 @@ import { Mono } from "../components/Mono"
 import { LINKS } from "../content/links"
 import { KitFigure } from "../components/KitFigure"
 import { AttackScene } from "../components/AttackScene"
-import gatesSvg from "../assets/diagrams/gates.svg?raw"
+import { GatesFlow } from "../components/GatesFlow"
 import visibilitySvg from "../assets/diagrams/visibility.svg?raw"
 import styles from "./Security.module.css"
 import { NearAiLogo } from "../components/NearAiLogo"
@@ -204,7 +204,7 @@ export function Security() {
 
         <Appear className={styles.block} effect={blockAppear("0s")}>
           <h2 className={`t-h4 ${styles.subheading}`}>Claims and their limits</h2>
-          <KitFigure svg={gatesSvg} minWidth={720} />
+          <GatesFlow />
           <Table head={CLAIMS_HEAD} rows={CLAIMS} label="Claims and their limits" />
         </Appear>
 
