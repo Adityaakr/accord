@@ -2,7 +2,7 @@
 // sealing sanity check, printed as INTERFACES.md section 10 shows.
 
 import { deriveDocKey, sealedCheck, verifyEd25519 } from "@accord/sdk";
-import { create, header, line, negotiate, PRESETS, sealBoth, short, usdc } from "../flow.js";
+import { create, header, line, negotiate, procurementPreset, sealBoth, short, usdc } from "../flow.js";
 import type { World } from "../world.js";
 
 const ROUNDS: Record<number, string> = {
@@ -19,7 +19,7 @@ export async function run(w: World): Promise<void> {
   const started = Date.now();
   const id = await create(w, "procurement", "Liquidity reporting integration");
   header("negotiate", id, " · procurement", w);
-  const sealed = await sealBoth(w, id, PRESETS.procurement);
+  const sealed = await sealBoth(w, id, procurementPreset(w));
   const c = await w.reader.agreement(id).commitments();
   line("buyer", `commitment ${short(sealed.buyer.commitment)} · ciphertext ${kb(c.buyer!.ciphertext)} on chain`);
   line("vendor", `commitment ${short(sealed.vendor.commitment)} · ciphertext ${kb(c.vendor!.ciphertext)} on chain`);

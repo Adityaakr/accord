@@ -3,7 +3,7 @@
 
 import { formatNear, TGAS, type TxResult } from "@accord/sdk";
 import {
-  approveBoth, authorise, client, create, deliverAndAccept, fundTotal, installAgent, negotiate, PRESETS, say, sealBoth,
+  approveBoth, authorise, client, create, deliverAndAccept, fundTotal, installAgent, negotiate, procurementPreset, say, sealBoth,
 } from "../flow.js";
 import type { World } from "../world.js";
 
@@ -14,7 +14,7 @@ export async function run(w: World): Promise<void> {
   say(`accord measure · ${id}${w.suffix}`);
   const storage = async () => (await w.reader.chain.account(id)).storage_usage;
   const created = await storage();
-  const sealed = await sealBoth(w, id, PRESETS.procurement);
+  const sealed = await sealBoth(w, id, procurementPreset(w));
   void sealed;
   const deal = w.reader.agreement(id);
   const start = await client(w, "keeper", id).startNegotiation();

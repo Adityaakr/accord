@@ -3,14 +3,14 @@
 
 import {
   activate, approveBoth, authorise, client, create, deliverAndAccept, escrow, executingProcurement, fundTotal,
-  header, line, negotiate, PRESETS, sealBoth, sleep, usdc, waitFor,
+  header, line, negotiate, procurementPreset, sealBoth, sleep, usdc, waitFor,
 } from "../flow.js";
 import { preflight } from "@accord/sdk";
 import type { World } from "../world.js";
 
 async function attested(w: World, title: string): Promise<string> {
   const id = await create(w, "procurement", title);
-  await sealBoth(w, id, PRESETS.procurement);
+  await sealBoth(w, id, procurementPreset(w));
   const a = await negotiate(w, id);
   if (a.state !== "Attested") throw new Error(`${id}: ${a.state} after the negotiation`);
   return id;

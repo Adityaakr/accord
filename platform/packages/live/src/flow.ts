@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { KeyPair } from "near-api-js";
 import {
-  DEMO_PARAMS, KeySigner, formatUnits, shortHash, type AgreementClient, type AgreementView, type Kind, type Mandate,
+  DEMO_PARAMS, KNOWN_FACTORIES, KeySigner, formatUnits, shortHash, type AgreementClient, type AgreementView, type Kind, type Mandate,
   type TxResult,
 } from "@accord/sdk";
 import { repoRoot, type Role, type World } from "./world.js";
@@ -43,7 +43,15 @@ export const PRESETS = {
   marketMaking: { buyer: "northwind/market-making.buyer.json", vendor: "halcyon/market-making.vendor.json" },
   strict: { buyer: "northwind/market-making.buyer.strict.json", vendor: "halcyon/market-making.vendor.strict.json" },
   try: { buyer: "northwind/try.buyer.json", vendor: "halcyon/try.vendor.json" },
+  /** Sized for Circle's testnet USDC: its faucet gives about 20 USDC per address every 1 to 2 hours. */
+  usdcProcurement: { buyer: "northwind/usdc-procurement.buyer.json", vendor: "halcyon/usdc-procurement.vendor.json" },
 } as const;
+
+/** The procurement preset for this world's token: the Circle-sized one when it settles in Circle's USDC. */
+export function procurementPreset(w: World): { buyer: string; vendor: string } {
+  const circle = KNOWN_FACTORIES[w.network]?.find((f) => f.label.startsWith("Circle"))?.token;
+  return circle && w.token === circle ? PRESETS.usdcProcurement : PRESETS.procurement;
+}
 
 export async function create(w: World, kind: Kind, title: string): Promise<string> {
   // The factory's creation deposit (8 NEAR embedded, 2 NEAR global) plus about 6 NEAR for gas and storage after it.
@@ -148,7 +156,7 @@ export interface Ready { id: string; agent: Agent; total: bigint; recipient: str
 /** A procurement agreement from nothing to `Executing`, funded, with an active recipient and an agent key. */
 export async function executingProcurement(w: World, title: string): Promise<Ready> {
   const id = await create(w, "procurement", title);
-  await sealBoth(w, id, PRESETS.procurement);
+  await sealBoth(w, id, procurementPreset(w));
   const a = await negotiate(w, id);
   if (a.state !== "Attested") throw new Error(`${id}: ${a.state} after the negotiation`);
   await approveBoth(w, id);

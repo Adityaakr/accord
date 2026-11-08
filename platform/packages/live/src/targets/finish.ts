@@ -23,8 +23,10 @@ export async function run(w: World): Promise<void> {
   const terms = (await w.reader.agreement(id).terms())!;
   line("terms", `${usdc(terms.total)} · ${terms.items.length} items · ${a.terms_hash}`);
 
-  if (a.state === "Attested") {
-    await approveBoth(w, id);
+  if (a.state === "Attested") await approveBoth(w, id);
+  a = await w.reader.agreement(id).get();
+  // Funded once, whether the approvals ran here or earlier (an agreement approved before its buyer held the token).
+  if (BigInt(a.funded) < BigInt(a.total)) {
     const { total, tx } = await fundTotal(w, id);
     line("funded", `${usdc(total)} · ${link(tx.txHash)}`);
   }

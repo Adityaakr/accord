@@ -42,10 +42,18 @@ atlas: ; @$(LIVE) market-making
 verify: ; @pnpm --silent --filter @accord/cli dev -- verify --agreement $(DEAL)
 demo: ; @$(LIVE) demo
 finish: ; @DEAL=$(DEAL) $(LIVE) finish
+# Circle USDC on testnet: the same targets on the second factory, which settles in Circle's USDC (DECISIONS.md 24).
+# The buyer (BUYER_ACCOUNT) needs the terms' total in Circle USDC first: https://faucet.circle.com, network NEAR Testnet.
+USDC_FACTORY ?= accord-usdc.testnet
+USDC_TOKEN ?= 3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af
+USDC_ENV = ACCORD_FACTORY=$(USDC_FACTORY) ACCORD_TOKEN=$(USDC_TOKEN) ACCORD_FACTORY_USDC=$(USDC_FACTORY)
+negotiate-usdc: ; @$(USDC_ENV) $(LIVE) negotiate
+finish-usdc: ; @$(USDC_ENV) DEAL=$(DEAL) $(LIVE) finish
+verify-usdc: ; @$(USDC_ENV) pnpm --silent --filter @accord/cli dev -- verify --agreement $(DEAL)
 measure: ; @$(LIVE) measure
 demo-reset: ; $(call todo,7.1 make demo-reset)
 inbox: ; @$(LIVE) inbox
 release-check: ; $(call todo,7.4 make release-check)
 submission-check: ; $(call todo,8.2 make submission-check)
 
-.PHONY: help setup-check ci test wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate approve fund payee pay attack revoke claim exception payee-change market-making atlas verify demo measure demo-reset inbox release-check submission-check
+.PHONY: help setup-check ci test wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate negotiate-usdc finish-usdc verify-usdc approve fund payee pay attack revoke claim exception payee-change market-making atlas verify demo measure demo-reset inbox release-check submission-check

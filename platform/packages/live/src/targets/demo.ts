@@ -6,7 +6,7 @@ import { sha256 } from "@noble/hashes/sha2";
 import { utf8ToBytes } from "@noble/hashes/utils";
 import { KeySigner, toBase64 } from "@accord/sdk";
 import {
-  activate, approveBoth, client, create, deliverAndAccept, fundTotal, installAgent, negotiate, PRESETS, say, sealBoth,
+  activate, approveBoth, client, create, deliverAndAccept, fundTotal, installAgent, negotiate, procurementPreset, say, sealBoth,
   usdc, waitFor,
 } from "../flow.js";
 import type { Principal, World } from "../world.js";
@@ -45,7 +45,7 @@ export async function run(base: World): Promise<void> {
 
   const id = await create(w, "procurement", "Liquidity reporting integration");
   at("created", `${id} · demo timings`);
-  await sealBoth(w, id, PRESETS.procurement);
+  await sealBoth(w, id, procurementPreset(w));
   at("sealed", "both mandates committed");
 
   // The recipient is proven while the Sealed Table negotiates.
