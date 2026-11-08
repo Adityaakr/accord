@@ -42,10 +42,11 @@ Two companies' agents negotiate inside an attested enclave from sealed mandates.
 6. [Testnet proof](#testnet-proof)
 7. [Where each attack stops](#where-each-attack-stops)
 8. [Claims and their limits](#claims-and-their-limits)
-9. [Repository map](#repository-map)
-10. [Run locally](#run-locally)
-11. [Deployment](#deployment)
-12. [Built with](#built-with)
+9. [Security audit](#security-audit)
+10. [Repository map](#repository-map)
+11. [Run locally](#run-locally)
+12. [Deployment](#deployment)
+13. [Built with](#built-with)
 
 ## The problem
 
@@ -81,7 +82,7 @@ flowchart TB
 
     subgraph NEAR["NEAR testnet"]
         REL["Relayer<br/>relay.accord-v2.testnet"]
-        FAC["Factory<br/>accord-v2.testnet · release 3"]
+        FAC["Factory<br/>accord-v2.testnet · release 4"]
         AGR{{"Agreement controls<br/>a&lt;n&gt;.accord-v2.testnet<br/>USDC escrow · terms · recipient · refusal log"}}
         TOK["tusdc.accord-v1.testnet<br/>NEP-141 test USDC"]
     end
@@ -271,15 +272,15 @@ The server side is [`platform/app/src/server/demo.ts`](platform/app/src/server/d
 
 ### Settle in Circle USDC (testnet)
 
-A second factory, `accord-usdc.testnet`, runs the same release 3 (global contract `8wMuMRre…`, the same job builds and keys) and settles in Circle's USDC on NEAR testnet, `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (6 decimals). Each agreement copies its factory's token at creation and keeps it for life, so `a<n>.accord-usdc.testnet` takes only Circle USDC and `a<n>.accord-v2.testnet` only test USDC. `/app/try-it` defaults to test USDC from the app's faucet; Circle USDC is offered next to it where the server sets `ACCORD_FACTORY_USDC`.
+A second factory, `accord-usdc.testnet`, runs the same code as `accord-v2.testnet` (release 3 at first, release 4 since 9 Nov 2026; the same job builds and keys) and settles in Circle's USDC on NEAR testnet, `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (6 decimals). Each agreement copies its factory's token at creation and keeps it for life, so `a<n>.accord-usdc.testnet` takes only Circle USDC and `a<n>.accord-v2.testnet` only test USDC. `/app/try-it` defaults to test USDC from the app's faucet; Circle USDC is offered next to it where the server sets `ACCORD_FACTORY_USDC`.
 
 | Do | See |
 | --- | --- |
 | Get Circle testnet USDC at https://faucet.circle.com, network `NEAR Testnet`, your account as the address | about `20 USDC` per address every 1 to 2 hours |
-| `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as `ACCORD_FACTORY=accord-usdc.testnet make verify`) | `code hash 8wMuMRre… = release 3 (global by hash)` · `keys from pubkey run 13909` · `verify: 4 checks ok · 1 partial · 2 not checked` (no recipient or payment yet) |
+| `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as `ACCORD_FACTORY=accord-usdc.testnet make verify`) | `code hash 8wMuMRre… = release 3 (global by hash)` · `keys from pubkey run 13909` · `verify: 5 checks ok · 1 partial · 1 not checked` |
 | `make negotiate-usdc`, then `make finish-usdc DEAL=<agreement>` once the buyer holds the terms' total | the same blocks as `make negotiate` and `make finish`, with Circle USDC; the presets fit one faucet drip (buyer ceiling `18`, vendor floor `12`) |
 
-`a1.accord-usdc.testnet` reached `Attested` on 9 Nov 2026 (`14.00 USDC` in 3 items, `QUOTE → COUNTER → ACCEPT`, glm-5.3-flash in OutLayer's enclave) and both parties approved; it is not funded yet. Transactions: `DECISIONS.md` section 24.
+`a1.accord-usdc.testnet` (release 3) was negotiated on 9 Nov 2026 (`14.00 USDC` in 3 items, `QUOTE → COUNTER → ACCEPT`, glm-5.3-flash in OutLayer's enclave), approved, funded, paid `5.00` and refused a redirect, then revoked: [Circle USDC proof](#circle-usdc). Transactions: `platform/DECISIONS.md` sections 24 and 26.
 
 ## Verify any agreement
 
@@ -354,7 +355,7 @@ An account that is not an Accord agreement answers `404` with `{"error":"<accoun
 
 ## Testnet proof
 
-Agreement [`a6.accord-v2.testnet`](https://testnet.nearblocks.io/address/a6.accord-v2.testnet) ran the full flow on 8 Nov 2026, on release 3 of factory `accord-v2.testnet`. The Sealed Table negotiation used the real NEAR AI model (`z-ai/glm-5.3-flash`) inside OutLayer's attested enclave: `QUOTE → COUNTER → FINAL → ACCEPT`, `35.50` tUSDC in 3 items. Settlement is a test USDC token.
+Agreement [`a6.accord-v2.testnet`](https://testnet.nearblocks.io/address/a6.accord-v2.testnet) ran the full flow on 8 Nov 2026, on release 3 of factory `accord-v2.testnet`. It is the original walkthrough; the proofs on release 4 and in Circle USDC follow it. The Sealed Table negotiation used the real NEAR AI model (`z-ai/glm-5.3-flash`) inside OutLayer's attested enclave: `QUOTE → COUNTER → FINAL → ACCEPT`, `35.50` tUSDC in 3 items. Settlement is a test USDC token.
 
 | # | Step | Transaction |
 | --- | --- | --- |
@@ -372,9 +373,38 @@ Agreement [`a6.accord-v2.testnet`](https://testnet.nearblocks.io/address/a6.acco
 | 11 | Redirect to `halcyon-markets.testnet` refused: `ERR_PAYEE_MISMATCH`, nothing sent | [`AB9HLnWv…`](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs) |
 | 12 | Buyer revokes the agent; its next call fails with `AccessKeyDoesNotExist` | [`4ervNQdj…`](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P) |
 
+### Release 4 (audit fixes)
+
+The audited agreement code (`ECgsrZwy…`, global contract `R2qxw4u5…`) is release 4 on both factories since 9 Nov 2026: `accord-v2.testnet` ([publish](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU), [set current](https://testnet.nearblocks.io/txns/J9uADVqQSkY6f1uMYbMbWoPnB4oiwuS3CtLayKojtgeC)) and `accord-usdc.testnet` ([publish](https://testnet.nearblocks.io/txns/GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai), [set current](https://testnet.nearblocks.io/txns/5D9LxPuU4phUXTgRawd97TmhZPGiPjWzSPWCYXJteoLJ)). Agreements created before keep release 3 (code pinned by hash), so a6 above is unchanged. The proofs ran again on new release 4 agreements of `accord-v2.testnet` (test USDC):
+
+| Proof | Agreement | Result | Transaction |
+| --- | --- | --- | --- |
+| Negotiate | [`a10`](https://testnet.nearblocks.io/address/a10.accord-v2.testnet) | Attested in 64 s, `33.00 USDC` in 3 items, attestation ok, `ERR_SEALED` both ways | in the `make negotiate` output |
+| Fund | `a10` | `33.00 USDC` escrowed | [`2mBhRNnX…`](https://testnet.nearblocks.io/txns/2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22) |
+| Pay | `a10` | item 1, `12.00 USDC` to `halcyon-mm.testnet` | [`Bs5dVpr6…`](https://testnet.nearblocks.io/txns/Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm) |
+| Redirect refused | `a10` | `ERR_PAYEE_MISMATCH` | [`51TQ8no9…`](https://testnet.nearblocks.io/txns/51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu) |
+| Attack | [`a11`](https://testnet.nearblocks.io/address/a11.accord-v2.testnet) | `ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY` revokes and deletes the key; `0.00` moved | [`HvwpdKDs…`](https://testnet.nearblocks.io/txns/HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv), [`3cTDxHzV…`](https://testnet.nearblocks.io/txns/3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh), [`DPpVoMX9…`](https://testnet.nearblocks.io/txns/DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT) |
+| Revoke | [`a13`](https://testnet.nearblocks.io/address/a13.accord-v2.testnet) | `DeleteKey`; the next call fails with `AccessKeyDoesNotExist`; a new key pays item 2 | [`8b8FC1He…`](https://testnet.nearblocks.io/txns/8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3), [`DfgMURQA…`](https://testnet.nearblocks.io/txns/DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT), [`24mdebXg…`](https://testnet.nearblocks.io/txns/24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe) |
+| Verify | `a10` | `code = release 4` · `5 ok · 1 partial · 1 not checked` | `ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a10.accord-v2.testnet` |
+
+The first `make revoke` run (a12) stopped at its last step: the script paid item 2 at a fixed `12.00` while the negotiated amount differed, and the contract refused it with `ERR_AMOUNT_MISMATCH`. The live targets now pay each item at its negotiated amount.
+
+### Circle USDC
+
+Agreement [`a1.accord-usdc.testnet`](https://testnet.nearblocks.io/address/a1.accord-usdc.testnet), created on release 3 of the second factory, ran a deal in Circle's testnet USDC on 9 Nov 2026:
+
+| Step | Result | Transaction |
+| --- | --- | --- |
+| Fund | `14.00 USDC` (Circle) escrowed | [`4gPohYYM…`](https://testnet.nearblocks.io/txns/4gPohYYMokgQcPcgNhX3tCTTXjA35AfuKkpGs1SpS2no) |
+| Pay | `5.00 USDC` to `halcyon-mm.testnet` | [`E127BGy3…`](https://testnet.nearblocks.io/txns/E127BGy3Tw6PmhE9JcoFr7vQsKTiHNevTTiAxEjJGWK2) |
+| Redirect refused | `ERR_PAYEE_MISMATCH` | [`9rgsBFA2…`](https://testnet.nearblocks.io/txns/9rgsBFA26yedWuEEJk77sKBDrDGS9mHn9BFMknCaP8BB) |
+| Revoke | the agent's next call fails with `AccessKeyDoesNotExist` | [`FTigDebs…`](https://testnet.nearblocks.io/txns/FTigDebs1kZjLpTN8nC8SZWp4dMM1ChuUyR211JZnzuW) |
+| Verify | release 3 · `5 ok · 1 partial · 1 not checked` | `make verify-usdc DEAL=a1.accord-usdc.testnet` |
+
 | Infrastructure | Account or link |
 | --- | --- |
-| Factory | [`accord-v2.testnet`](https://testnet.nearblocks.io/address/accord-v2.testnet), release `3` ([publish tx](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh)) |
+| Factory | [`accord-v2.testnet`](https://testnet.nearblocks.io/address/accord-v2.testnet), release `4` ([publish tx](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)); release `3` ([publish tx](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh)) for a6 |
+| Circle USDC factory | [`accord-usdc.testnet`](https://testnet.nearblocks.io/address/accord-usdc.testnet), release `4` ([publish tx](https://testnet.nearblocks.io/txns/GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai)); token `3e2210e1…afcb8af` (Circle USDC, 6 decimals) |
 | Test USDC | [`tusdc.accord-v1.testnet`](https://testnet.nearblocks.io/address/tusdc.accord-v1.testnet) (NEP-141, 6 decimals) |
 | Relayer | `relay.accord-v2.testnet` ([a relayed tx](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC)) |
 | OutLayer jobs | Sealed Table, Payee and observer, as OutLayer projects `accord-v1.testnet/accord-{sealed-table,payee,observer}`; release 3 pubkey runs `13682`, `13672`, `13683` |
@@ -382,7 +412,7 @@ Agreement [`a6.accord-v2.testnet`](https://testnet.nearblocks.io/address/a6.acco
 | Demo accounts | vendor `halcyon-demo.testnet`, authority `halcyon-auth.testnet`, recipient `halcyon-mm.testnet` |
 | Demo vendor's domain | `accordweb-production.up.railway.app`, Accord's own site, serving the Payee file ([`/.well-known/accord.json`](https://accordweb-production.up.railway.app/.well-known/accord.json)) for Halcyon, a fictional company. A real vendor serves the same file on its own domain |
 
-Sources: [`apps/web/src/content/testnet.ts`](apps/web/src/content/testnet.ts) and [`platform/DECISIONS.md`](platform/DECISIONS.md) section 21. Market-making agreements run end to end on a local node; on testnet they wait on an OutLayer payment key ([`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md)).
+Sources: [`apps/web/src/content/testnet.ts`](apps/web/src/content/testnet.ts) and [`platform/DECISIONS.md`](platform/DECISIONS.md) sections 21, 24 and 26. Market-making agreements run end to end on a local node; on testnet they wait on an OutLayer payment key ([`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md)).
 
 ## Where each attack stops
 
@@ -407,6 +437,12 @@ Verbatim from [`platform/GOAL.md`](platform/GOAL.md). Every public statement abo
 | A market-making agreement's payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception | Each slot's time is drawn inside the observer's enclave from a seed generated there; the observation is taken at the first NEAR mainnet block after that time, signed by the observer's key, and checked by the contract against the agreed spread, depth and two-sided quoting; anyone can recompute it from an archival node | A market-making agreement's observer measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment |
 
 The site's [/security](https://accordweb-production.up.railway.app/security) page shows the same table.
+
+## Security audit
+
+Five independent audit lenses (the payment path; authorisation and keys; creation and code integrity; funds; the enclave jobs), with two skeptics reproducing each finding as a test, found 1 High and 5 Medium issues (one of them Medium-Low), plus 4 Low. The High one was a close-refund drain: a deposit sent during `close` could make the refund to the buyer spend the vendor's reserve; the refund is now capped at the ledger while anything is owed to the vendor. Every fix went in test first (the test failed for the reason named, then passed) and the tests stay in the suite. The contract and factory fixes are live as release 4 on both testnet factories ([proofs](#release-4-audit-fixes)).
+
+Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is partial. The jobs now serve only factory agreements in code, but those job builds are not deployed yet (release 4 runs release 3's job builds), and S1 itself needs the seed's access condition in OutLayer, which only its dashboard can set and which is not set yet. Every finding, fix, test and commit: [`platform/DECISIONS.md`](platform/DECISIONS.md) section 25.
 
 ## Repository map
 
