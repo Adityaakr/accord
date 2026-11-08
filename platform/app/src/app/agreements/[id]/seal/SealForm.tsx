@@ -9,7 +9,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Accord, AccordError, formatUnits, parseUnits, type Kind, type Mandate } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
-import { EMAIL_CANNOT_SEAL } from "@/components/wallet/fastauth";
 import { useAppConfig } from "@/components/AppConfig";
 import { Panel, Pill } from "@/components/ui";
 import type { Preset } from "@/server/presets";
@@ -99,20 +98,6 @@ export function SealForm({
   }
   if (!role) {
     return <Panel title="Not a party"><p className="body"><AccountId id={w.accountId} /> is neither the buyer nor the vendor of this agreement.</p></Panel>;
-  }
-
-  // Email (NEAR Auth) sign-in cannot seal: its signatures are public, so they cannot protect the mandate's document key.
-  if (w.method === "email") {
-    return (
-      <div className={styles.layout}>
-        <div className={styles.main}>
-          <Panel title="Seal with a wallet" eyebrow="email sign-in">
-            <p className="weak">{EMAIL_CANNOT_SEAL}</p>
-            <p className="weak">Connect Meteor, Intear, Nightly, Ledger or WalletConnect from the sign-in page to seal. You can approve and fund from either.</p>
-          </Panel>
-        </div>
-      </div>
-    );
   }
 
   return (

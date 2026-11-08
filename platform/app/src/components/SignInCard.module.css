@@ -14,7 +14,7 @@
 .head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
 .title { font-size: 22px; letter-spacing: -0.03em; color: var(--text-strong); }
 .lead { font-size: 13.5px; line-height: 1.55; color: var(--text-weak); }
-.email, .wallet {
+.wallet {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -26,13 +26,8 @@
 }
 .wallet { background: var(--white); color: var(--on-white); }
 .wallet:hover:not(:disabled) { box-shadow: 0 0 0 2px rgba(var(--ink-rgb), 0.45); }
-.email { background: rgba(var(--ink-rgb), 0.04); border: 1px solid var(--hairline-strong); color: var(--text-strong); }
-.email:hover:not(:disabled) { background: rgba(var(--ink-rgb), 0.07); }
-.email:disabled { color: var(--text-faint); cursor: not-allowed; border-style: dashed; }
 .wallet:disabled { opacity: 0.7; cursor: progress; }
 .note { font-size: 12.5px; line-height: 1.5; color: var(--text-faint); text-align: center; }
-.or { display: flex; align-items: center; gap: 12px; color: var(--text-faint); font-size: 12px; margin: 4px 0; }
-.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--hairline); }
 .sandbox { display: flex; flex-direction: column; gap: 10px; }
 .roles { display: flex; flex-direction: column; gap: 6px; }
 .role { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--hairline-strong); text-align: left; font-weight: 500; }
@@ -40,4 +35,4 @@
 .role span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
 .error { font-size: 12.5px; color: var(--text-medium); text-align: center; }
 
-.hint { margin-top: -6px; font-size: 12px; color: var(--text-faint); text-align: center; }
+.hint { margin-top: -8px; font-size: 12px; color: var(--text-faint); text-align: center; }
