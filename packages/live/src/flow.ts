@@ -46,8 +46,9 @@ export const PRESETS = {
 } as const;
 
 export async function create(w: World, kind: Kind, title: string): Promise<string> {
-  // The creation deposit (8 NEAR) plus gas for the steps after it.
-  await w.gas(w.principals.buyer.account, 20);
+  // The factory's creation deposit (8 NEAR embedded, 2 NEAR global) plus about 6 NEAR for gas and storage after it.
+  const deposit = BigInt((await w.reader.config()).create_deposit);
+  await w.gas(w.principals.buyer.account, Number(deposit / 10n ** 24n) + 6);
   const { agreement } = await w.as("buyer").createAgreement({
     kind, title, vendor: w.principals.vendor.account, vendor_authority: w.principals.authority.account,
     canaries: w.canaries, params: DEMO_PARAMS,

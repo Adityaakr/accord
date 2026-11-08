@@ -64,6 +64,13 @@ async function main() {
     console.log(`  releases          releases.${FACTORY} (no key)`);
   } else {
     console.log(`  factory           already initialised · owner ${config.owner}`);
+    // redeploy the factory's code (state kept) when the local build differs from what is on chain
+    const acct = (await provider.query({ request_type: "view_account", account_id: FACTORY, finality: "final" })) as unknown as { code_hash: string };
+    const local = baseEncode(sha256(wasm("factory")));
+    if (acct.code_hash !== local) {
+      const r = await factory.signAndSendTransaction({ receiverId: FACTORY, actions: [actions.deployContract(wasm("factory"))], waitUntil: "FINAL" });
+      console.log(`  factory           code updated ${acct.code_hash.slice(0, 8)}… → ${local.slice(0, 8)}… · tx ${(r as { transaction: { hash: string } }).transaction.hash}`);
+    }
   }
 
   const pending = await view<Record<string, unknown>>("pending_pubkeys");
@@ -74,11 +81,13 @@ async function main() {
       const file = `${repoRoot()}/target/wasm32-wasip2/release/accord-${j}.wasm`;
       return [j, sha256(readFileSync(file)).toString("hex")];
     }));
-    await call("request_pubkeys", {
+    // one job per transaction: each releases call needs ~190 Tgas (OutLayer request plus callback)
+    const projects: Record<string, { project: string; version_key: string }> = {
       sealed_table: { project: `${owner}/accord-sealed-table`, version_key: hashes["sealed-table"] },
       payee: { project: `${owner}/accord-payee`, version_key: hashes.payee },
       observer: { project: `${owner}/accord-observer`, version_key: hashes.observer },
-    }, 300n);
+    };
+    for (const job of missing) await call("request_pubkey", { job, project: projects[job] }, 300n);
     console.log("  pubkeys           requested through the releases account; run again once all three are stored");
     return;
   }

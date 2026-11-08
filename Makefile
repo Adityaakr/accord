@@ -37,7 +37,7 @@ claim: ; @$(LIVE) claim
 exception: ; @$(LIVE) exception
 payee-change: ; @$(LIVE) payee-change
 atlas: ; @$(LIVE) atlas
-verify: ; @pnpm --silent --filter @accord/cli dev -- verify $(DEAL)
+verify: ; @pnpm --silent --filter @accord/cli dev -- verify --agreement $(DEAL)
 demo: ; @$(LIVE) demo
 measure: ; @$(LIVE) measure
 demo-reset: ; $(call todo,7.1 make demo-reset)
