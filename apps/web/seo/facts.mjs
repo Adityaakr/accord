@@ -19,7 +19,7 @@ export const USE_CASES = [
     outcome: "Pay a market maker for liquidity that showed up.",
     how: "A retainer is paid for a period only if enough observations of the venue's public liquidity, taken at hidden times inside an agreed schedule, meet the agreed spread, depth and two-sided quoting. In the demonstration, 4 of 6 readings of Rhea's USDC/wNEAR pool must pass.",
     evidence: "Attested observations of the pool's public liquidity",
-    limit: "Public order-book observations measure the venue's liquidity, not the hired market maker's own contribution. Verification with the market maker's authenticated account data is planned." },
+    limit: "Public order-book observations measure the venue's liquidity, not the hired market maker's own contribution. Verification with the market maker's authenticated account data is planned. Its recorded runs are on a local node reading real NEAR mainnet blocks; no market-making observation is recorded on NEAR testnet yet." },
   { id: "vendor-contracts", name: "Vendor contracts and renewals", status: "demo", url: "/#use-cases",
     outcome: "Let an agent pay invoices it cannot redirect.",
     how: "Invoices clear against approved milestones once delivery is accepted. A message asking the agent to pay a new account is refused by the contract (ERR_PAYEE_MISMATCH), whatever the agent was told.",
@@ -64,15 +64,20 @@ export const ANSWERS = [
   { q: "What kinds of agreements does Accord support?", a: "Six agreement types share the same controls: market-making agreements and vendor contracts (in the demonstration), and agent-to-agent services, security remediation, infrastructure service agreements and grants (planned)." },
   { q: "How are market makers paid in Accord?", a: "A retainer period is paid only if enough observations of the venue's public liquidity, taken at hidden times, meet the agreed spread, depth and two-sided quoting. Otherwise the payment is withheld for both parties to review." },
   { q: "What happens if an agent is compromised?", a: "Its instructions can change, but its payment authority cannot: every payment must match the approved milestone, amount and recipient or it is refused and recorded. The buyer can revoke the agent's key in one transaction." },
-  { q: "How do I test Accord myself?", a: "Open /app/try-it and follow five steps: connect a NEAR testnet wallet (Meteor or Intear), get 2.5 testnet NEAR and 100 test USDC from the faucet, open a deal room against Accord's demo vendor (halcyon-demo.testnet), seal your limits (40 tUSDC ceiling, 2 to 4 items), then watch the demo counterparty negotiate in the Sealed Table, approve and deliver while you approve, fund and accept. A demo agent run by Accord for the test room pays the due item to the proven recipient, the contract refuses a payment to a new account with ERR_PAYEE_MISMATCH, and you revoke the agent key. Everything is on NEAR testnet with test USDC." },
+  { q: "How do I test Accord myself?", a: STATUS.howToTest },
   { q: "Is Accord live?", a: "On NEAR testnet, yes. Accord is deployed there (factory accord-v2.testnet, release 3). The full flow ran there on agreement a6.accord-v2.testnet: sealed limits, the Sealed Table negotiation by the real NEAR AI model inside OutLayer's attested enclave, approvals, funding, a payment, a refused redirect (ERR_PAYEE_MISMATCH) and a revocation. Settlement on testnet uses a test USDC token. Mainnet follows an audit." },
   { q: "How does a deal room work?", a: "In six steps: each company seals its limits; the agents negotiate inside an attested enclave and only the agreed terms come out; both companies approve, the recipient is bound and the buyer funds a USDC escrow; the agent pays through one method, act, and anything off the terms is refused; the agreed evidence decides whether each payment is eligible; eligible payments settle to the approved recipient and the record stays checkable." },
+  { q: "How is Accord different from a wallet spending limit or an allowlist?", a: "The limits come from a negotiated agreement both companies approved, not from a setting one side controls. The terms (items, amounts, evidence and recipient) are fixed in the agreement's own NEAR account, the agent's only key can call one method, act, and the recipient is bound to the vendor's domain, approved by its settlement authority and accepted by the buyer. Limit: Accord bounds what the agent can pay; it does not make the agent's judgement better." },
+  { q: "What is private and what is public?", a: "Private: each company's mandate (its limits) and the negotiation transcript stay inside attested enclaves; the commercial terms document is encrypted to the two parties. Public: the enforced schedule (amounts, dates, recipient), every payment and every refusal are on NEAR, as with any stablecoin payment. Limit: privacy rests on the enclave hardware (Intel TDX, NVIDIA confidential computing), OutLayer's keystore governance and the deployer never rebinding the seed to another build." },
+  { q: "What stops a fooled agent from paying the wrong account?", a: "The contract, not the agent. Every act call must match the approved item, amount, evidence and recipient; a payment to any other account is refused with ERR_PAYEE_MISMATCH and recorded, and a changed amount with ERR_AMOUNT_MISMATCH. Agreement a6.accord-v2.testnet recorded such a refusal on testnet. Limit: the agent can still be fooled into asking; a payment inside the terms goes through." },
+  { q: "Which wallets can I sign in with?", a: "External NEAR wallets only, through HOT Connect: Meteor, Intear, Ledger, Nightly or WalletConnect, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas. There is no email sign-in, and Accord never holds your wallet's keys." },
+  { q: "What is not done yet?", a: "Mainnet (it follows an audit), market-making observations on testnet (market making runs end to end on a local node reading real NEAR mainnet blocks; on testnet it waits on an OutLayer payment key), the four planned agreement types, funding from other chains through NEAR Intents, a legal KYB check, and verification with a market maker's own account data." },
   { q: "What is Accord built on?", a: "NEAR (the agreement contract, escrow and record), NEAR AI Cloud (private inference for the negotiating agents), OutLayer (attested enclaves), USDC on NEAR (settlement) and Rhea (the pool the market-making observer reads). Funding from other chains through NEAR Intents is planned. No partnership is claimed." },
 ]
 
 /* Names people or models may meet that refer to Accord */
 export const NAMING = [
-  "\"Accord Atlas\" was an earlier name for market-making agreements in Accord; /atlas redirects to /use-cases/market-making. Accord is one product.",
+  "Accord is one product. Market-making agreements are one of its six agreement types, not a separate product; old links to /atlas redirect to /use-cases/market-making.",
   "Sealed Table, Agreement controls, Payee and Evidence checks are parts of Accord, not separate products.",
   "Accord is not a wallet or an exchange. Agreement funds are USDC in the agreement's own NEAR account, whose code is pinned by hash and has no full-access key; only the contract can send it, and only through `act`.",
   "Accord does not verify that a company legally exists, prove a negotiation was fair, or prove external data is true; see /security for each limit.",
@@ -107,4 +112,59 @@ export const BUILT_ON = [
   { name: "USDC on NEAR", role: "Settlement as a NEP-141 token, paid only by the contract from each agreement's own account." },
   { name: "NEAR Intents", role: "Planned: funding an agreement from other chains through the 1Click API." },
   { name: "Rhea", role: "The USDC/wNEAR pool the market-making observer reads at hidden times." },
+]
+
+/* /app/try-it, step by step: HowTo data on /docs/quickstart and the "Try it" section of llms.txt. Each step is do X, see Y. */
+export const TRY_STEPS = [
+  { name: "Connect a NEAR wallet", do: "Open /app/try-it and connect a NEAR testnet wallet through HOT Connect (Meteor or Intear send through Accord's relayer, so you pay no gas).", see: "Step 1 marked done with your account name." },
+  { name: "Get test funds", do: "Get test funds from the faucet (once a day per account).", see: "Your balance reads 2.50 NEAR and 100 tUSDC, with both faucet transactions linked." },
+  { name: "Create the deal room", do: "Create the room, prefilled against Accord's demo vendor halcyon-demo.testnet; your wallet signs create_agreement on the factory accord-v2.testnet with a 2 NEAR deposit, returned when the room closes.", see: "A new agreement account such as a8.accord-v2.testnet, in state Sealed." },
+  { name: "Seal your limits", do: "Seal the Northwind preset (40 tUSDC ceiling, 2 to 4 items); it is encrypted in your browser to the Sealed Table.", see: "The demo counterparty seals its own mandate and the negotiation runs; the state moves from Sealed to Attested." },
+  { name: "Approve, fund and accept", do: "Approve the terms, fund the escrow, accept the recipient and the first delivery.", see: "The recipient halcyon-mm.testnet proven on the vendor's domain, approved by its authority and active once you accept it." },
+  { name: "Let the demo agent pay", do: "Start the demo agent; your wallet signs install_agent_key, one function-call key that can call act and nothing else.", see: "Paid item 1 to halcyon-mm.testnet, with the act transaction linked." },
+  { name: "Try a redirect", do: "Ask the agent to pay a new account.", see: "ERR_PAYEE_MISMATCH: the contract refused it, recorded the refusal and moved nothing." },
+  { name: "Revoke the key", do: "Revoke the agent from the room header.", see: "Agent revoked; its next call is rejected by the network (AccessKeyDoesNotExist)." },
+  { name: "Check it from public data", do: "Open /verify and enter your agreement account (or open /verify?agreement=<account>).", see: "Five checks run in the browser with no account and no keys; /record shows agreement a6's 12 transactions." },
+]
+
+/* The six claims (platform/GOAL.md "Claims and their limits"), shortened; /security shows the full table. */
+export const CLAIMS = [
+  { claim: "Each company's mandate is readable only inside attested enclaves.", limit: "Under the hardware's trust assumptions (Intel TDX, NVIDIA confidential computing) and OutLayer's keystore governance. The deployer owns the seed and the factory account and could rebind the seed to another build. Prompts reach the model through NEAR AI's attested gateway over TLS. The browser trusts the code the app serves; the CLI is the alternative." },
+  { claim: "The approved terms are the agent's only authority.", limit: "The agent's judgement is bounded, not protected: it can still be fooled into asking. Attestation proves which code produced the terms, not that the deal was good; people decide that when they approve." },
+  { claim: "Payments go only to the authorised recipient.", limit: "Authorisation proves control of the domain and the settlement authority's approval, not that the company legally exists. A legal KYB check is a later integration." },
+  { claim: "Revoking ends the agent's authority in one transaction.", limit: "A payment already made stays made. A call that reached the chain before the revoke still runs, with every check. Revoking never cancels what the vendor has earned." },
+  { claim: "Negotiation is private; settlement is public.", limit: "The enforced schedule (amounts, dates, recipient) and every payment are public on NEAR, as with any stablecoin payment." },
+  { claim: "A market-making agreement's payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception.", limit: "The observer measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed. A slot nobody polls in time counts as unobserved, and an undecided period goes to the buyer, not to payment." },
+]
+
+/* What is not built or not live yet. Said plainly so no reader assumes it. */
+export const NOT_DONE = [
+  "Mainnet: Accord runs on NEAR testnet only; mainnet follows an audit.",
+  "Market making on testnet: it runs end to end on a local node reading real NEAR mainnet blocks; on testnet it waits on an OutLayer payment key, and no market-making observation is recorded on testnet yet.",
+  "Four agreement types are planned, not built: agent-to-agent services, security remediation, infrastructure service agreements, and grants and funded milestones.",
+  "Funding an agreement from other chains through NEAR Intents is planned.",
+  "A legal KYB check of the vendor is a later integration; Payee proves domain control and the authority's approval only.",
+  "Verifying a market maker's own contribution with its authenticated account data is planned.",
+  "The SDK, MCP server and CLI are not published to npm; they run from the Accord repository, which is not public yet.",
+  "Production prices are published before launch; testnet use is free with test funds.",
+]
+
+/* The accounts on NEAR testnet, for agents that want to look them up */
+export const ACCOUNTS = [
+  { role: "Factory (release 3)", account: "accord-v2.testnet" },
+  { role: "Agreement that ran the full flow on 8 Nov 2026", account: "a6.accord-v2.testnet" },
+  { role: "Test USDC (tUSDC, NEP-141, 6 decimals)", account: "tusdc.accord-v1.testnet" },
+  { role: "Relayer", account: "relay.accord-v2.testnet" },
+  { role: "OutLayer", account: "outlayer.testnet" },
+  { role: "Demo vendor (Accord's own account)", account: "halcyon-demo.testnet" },
+  { role: "Demo vendor's settlement authority", account: "halcyon-auth.testnet" },
+  { role: "Demo vendor's authorised recipient", account: "halcyon-mm.testnet" },
+]
+
+/* How an agent integrates. Only what exists in platform/packages; none of it is published to npm yet. */
+export const FOR_AGENTS = [
+  { name: "MCP server (@accord/mcp)", text: "stdio by default, or streamable HTTP at /mcp with --http <port>. Read tools need no key: accord_list_agreements, accord_get_agreement, accord_due_items, accord_preflight, accord_refusals, accord_receipts, accord_verify. accord_pay and accord_request_exception need the agent's function-call key (ACCORD_AGENT_KEY); accord_pay runs preflight first and the contract checks again. Principal tools (accord_seal_mandate, accord_approve_terms, accord_submit_delivery, accord_propose_recipient) are off unless ACCORD_PRINCIPAL_KEY and ACCORD_PRINCIPAL_ACCOUNT are set; a key is never a tool argument." },
+  { name: "SDK (@accord/sdk)", text: "TypeScript on near-api-js: agreements, sealing a mandate, the agent's act, preflight and verify." },
+  { name: "CLI (accord)", text: "Every step of an agreement from a terminal (create, seal, negotiate, approve, fund, recipient, deliver, pay, agent revoke, verify and more); read-only commands (show, refusals, receipts, check, verify, watch) need no key. make verify DEAL=<account> checks any agreement from public data." },
+  { name: "Without code", text: "Read /llms.txt, /facts.json, or any page as Markdown (add .md to its path, or send Accept: text/markdown). /verify?agreement=<account> checks an agreement in the browser; testnet.nearblocks.io shows every transaction." },
 ]

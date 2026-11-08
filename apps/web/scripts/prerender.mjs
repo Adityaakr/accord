@@ -9,7 +9,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { ROUTES, SITE_URL } from "../seo/routes.mjs"
-import { ANSWERS, BUILT_ON, CONTROLS, GLOSSARY, HOW_STEPS, NAMING, ONE_LINE, STATUS, USE_CASES } from "../seo/facts.mjs"
+import { ACCOUNTS, ANSWERS, BUILT_ON, CLAIMS, CONTROLS, FOR_AGENTS, GLOSSARY, HOW_STEPS, NAMING, NOT_DONE, ONE_LINE, STATUS, TRY_STEPS, USE_CASES } from "../seo/facts.mjs"
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const DIST = join(ROOT, "dist")
@@ -18,7 +18,7 @@ const TEMPLATE = readFileSync(join(DIST, "index.html"), "utf8")
 const OG_IMAGE = `${SITE_URL}/og-image.png`
 const TODAY = new Date().toISOString().slice(0, 10)
 const TAGLINE = "The private deal room and control plane for agent-to-agent commerce."
-const ABOUT = "Accord is the private deal room and control plane for agent-to-agent commerce on NEAR. It turns private negotiations into enforceable payment rules. Two companies' agents negotiate in confidence inside an attested enclave (the Sealed Table); both companies approve the terms; from then on those terms are the only authority the buyer's agent has over money. A NEAR contract (Agreement controls) refuses any payment whose amount, milestone or recipient differs from the approved terms, and Payee binds the recipient to a domain the vendor controls. Settlement is USDC on NEAR. Agreement types (market making, security remediation, infrastructure services, agent-to-agent services, vendor contracts and grants) change the commercial fields and the evidence accepted, not the controls. The demonstrated type is the market-making agreement: a retainer paid only for periods where enough observations of the venue's public liquidity, taken at hidden times, met the agreed spread, depth and two-sided quoting."
+const ABOUT = "Accord is the private deal room and control plane for agent-to-agent commerce on NEAR. It turns private negotiations into enforceable payment rules. Two companies' agents negotiate in confidence inside an attested enclave (the Sealed Table); both companies approve the terms; from then on those terms are the only authority the buyer's agent has over money. A NEAR contract (Agreement controls) refuses any payment whose amount, milestone or recipient differs from the approved terms, and Payee binds the recipient to a domain the vendor controls. Settlement is USDC on NEAR. Agreement types (market making, security remediation, infrastructure services, agent-to-agent services, vendor contracts and grants) change the commercial fields and the evidence accepted, not the controls. Two types are built: vendor contracts, which ran end to end on NEAR testnet (agreement a6.accord-v2.testnet), and the featured market-making agreement, a retainer paid only for periods where enough observations of the venue's public liquidity, taken at hidden times, met the agreed spread, depth and two-sided quoting (run end to end on a local node reading real NEAR mainnet blocks; not yet on testnet). The other four are planned. Accord runs on NEAR testnet only; mainnet follows an audit."
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 const abs = (href) => (href.startsWith("/") ? SITE_URL + href : href)
@@ -173,7 +173,7 @@ write(join(DIST, "404.html"), TEMPLATE.replace("<title>", '<meta name="robots" c
    two places agents look. */
 const absLinks = (md) => md.replace(/\]\((\/[^)\s]*)\)/g, (_, h) => `](${SITE_URL}${h})`)
 const yaml = (v) => JSON.stringify(String(v))
-const full = [`# Accord\n\n> ${TAGLINE}\n\n${ABOUT}\n\nSource: ${SITE_URL}/ · Generated ${TODAY}`]
+const full = [] /* the header (with the agent-facing sections) is added once llms.txt's sections exist, below */
 for (const r of pages) {
   const { md, meta } = pageData(r.slug)
   const doc = `---\ntitle: ${yaml(meta.title || r.name)}\nurl: ${SITE_URL}${r.path}\ndescription: ${yaml(meta.description || r.summary)}\nupdated: ${TODAY}\nsite_index: ${SITE_URL}/llms.txt\n---\n\n> ${r.summary}\n\n${absLinks(md)}`
@@ -181,29 +181,69 @@ for (const r of pages) {
   write(join(DIST, r.path === "/" ? "index.md" : `${r.path.slice(1)}.md`), doc)
   full.push(`\n\n---\n\n# ${r.name}\n\nURL: ${SITE_URL}${r.path}\n\n${absLinks(md)}`)
 }
-write(join(DIST, "llms-full.txt"), full.join(""))
 
 const sect = (title, list) => `## ${title}\n\n${list.map((r) => `- [${r.name}](${SITE_URL}/${r.slug}.md): ${r.summary}`).join("\n")}\n`
 const core = ["home", "market-making", "product", "sealed-table", "payee", "security"]
+const evidence = ["research", "verify", "record"]
+const docsPages = pages.filter((r) => r.path === "/docs" || r.path.startsWith("/docs/"))
+const near = (a) => `https://testnet.nearblocks.io/address/${a}`
+
+/* The agent-facing sections, shared by llms.txt and the top of llms-full.txt. No URL is followed directly by a period. */
+const agentSections = `## Status
+
+- Network: NEAR testnet only. Mainnet follows an audit and is not live.
+- Proof: agreement a6.accord-v2.testnet ran the full flow on 8 Nov 2026 on factory accord-v2.testnet, release 3: sealed limits, the Sealed Table negotiation by the real NEAR AI model inside OutLayer's attested enclave, approvals, funding, a payment, a refused redirect (ERR_PAYEE_MISMATCH) and a revocation. Each of its 12 transactions is linked at ${SITE_URL}/record
+- Settlement: USDC on NEAR (NEP-141), from each agreement's own account; on testnet a test USDC token (tUSDC).
+- Agreement types: six; two are built (vendor contracts, called procurement in code, and market-making agreements) and four are planned.
+- Sign-in: external NEAR wallets only, through HOT Connect. There is no email sign-in.
+
+## Try it (no code, about 3 minutes, NEAR testnet)
+
+Start at ${SITE_URL}/app/try-it (walkthrough with screenshots: ${SITE_URL}/docs/quickstart). A faucet, a demo counterparty and a demo agent run by Accord are built in; everything uses test USDC.
+
+${TRY_STEPS.map((t, i) => `${i + 1}. **${t.name}.** Do: ${t.do} See: ${t.see}`).join("\n")}
+
+## Key URLs
+
+- [Try it](${SITE_URL}/app/try-it): the guided test room on NEAR testnet, with faucet, demo counterparty and demo agent
+- [Sign in](${SITE_URL}/app/signin): the app, with your own NEAR wallet
+- [Verify an agreement](${SITE_URL}/verify): five public checks of any agreement in the browser, no account and no keys; ${SITE_URL}/verify?agreement=<account> opens one directly
+- [Public record](${SITE_URL}/record): agreement a6's 12 transactions, each linked to the explorer
+- [Security](${SITE_URL}/security): the claims table with every limit, custody, the privacy boundary and the threat model
+${docsPages.map((r) => `- [${r.name}](${SITE_URL}${r.path}): ${r.summary}`).join("\n")}
+
+## Testnet accounts
+
+${ACCOUNTS.map((a) => `- ${a.role}: [${a.account}](${near(a.account)})`).join("\n")}
+- OutLayer jobs: accord-v1.testnet/accord-sealed-table, accord-v1.testnet/accord-payee, accord-v1.testnet/accord-observer
+
+## Accord for AI agents
+
+An agent never holds a wallet: the buyer installs one function-call key on the agreement's own account that can call \`act\` and nothing else, and the contract checks every payment against the approved terms. Ways in:
+
+${FOR_AGENTS.map((f) => `- **${f.name}**: ${f.text}`).join("\n")}
+
+## Claims and their limits
+
+Every public statement about Accord is one of these six, each with its limit. The full table is at ${SITE_URL}/security
+
+${CLAIMS.map((c, i) => `${i + 1}. **${c.claim}** Limit: ${c.limit}`).join("\n")}
+
+## Not done yet
+
+${NOT_DONE.map((n) => `- ${n}`).join("\n")}
+`
+
 const llms = `# Accord
 
 > ${TAGLINE}
 
 ${ABOUT}
 
-Key facts:
-- Parts: Sealed Table (confidential negotiation in an attested enclave), Agreement controls (approved terms enforced by a NEAR contract), Payee (recipient authorisation), Evidence checks (a payment becomes eligible only when the agreed evidence or acceptance is recorded).
-- The buyer's agent holds one key that can call one method, \`act\`; payments that do not match the approved terms are refused with a recorded reason (for example ERR_PAYEE_MISMATCH, ERR_AMOUNT_MISMATCH).
-- Status: Deployed on NEAR testnet (factory accord-v2.testnet, release 3). The full flow ran there on agreement a6.accord-v2.testnet: sealed limits, the Sealed Table negotiation by the real NEAR AI model inside OutLayer's attested enclave, approvals, funding, a payment, a refused redirect (ERR_PAYEE_MISMATCH) and a revocation. Settlement on testnet uses a test USDC token. Mainnet follows an audit. Settlement: USDC on NEAR (NEP-141).
-- How to test: ${STATUS.howToTest} (${SITE_URL}/app/try-it)
-- Proof on testnet: every step of agreement a6.accord-v2.testnet is linked to its transaction at ${SITE_URL}/#testnet and https://testnet.nearblocks.io/address/a6.accord-v2.testnet
-- Agreement types: market-making agreements (demo), vendor contracts and renewals (demo), security remediation, infrastructure service agreements, agent-to-agent services, grants and funded milestones (planned).
-- Pricing: free on NEAR testnet with test funds today. Planned: Accord Teams, a subscription; market-making agreements, per monitored market. No percentage-based Accord fee on payment amounts. Production prices published before launch; network and third-party fees may apply.
-- Every claim is stated with its limit on the Security page; findings cited on the Research page are the authors' own.
-
+${agentSections}
 ## Agreement types
 
-Same controls in every type; the commercial fields and the evidence accepted change. "demo": built and run on NEAR testnet. "planned": designed, not built.
+Same controls in every type; the commercial fields and the evidence accepted change. "demo": built and run in the demonstration. "planned": designed, not built.
 
 ${USE_CASES.map((u) => `- **${u.name}** (${u.status}): ${u.outcome} ${u.how} Evidence: ${u.evidence}.${u.limit ? ` Limit: ${u.limit}` : ""}`).join("\n")}
 
@@ -220,11 +260,15 @@ ${CONTROLS.map((c) => `- **${c.name}**: ${c.text}`).join("\n")}
 ${BUILT_ON.map((b) => `- **${b.name}**: ${b.role}`).join("\n")}
 No partnership with these projects is claimed.
 
+## Pricing
+
+Free on NEAR testnet with test funds today. Planned: Accord Teams, a subscription; market-making agreements, per monitored market. No percentage-based Accord fee on payment amounts. Production prices are published before launch; network and third-party fees may apply.
+
 ## Glossary
 
 ${GLOSSARY.map((g) => `- **${g.term}**: ${g.def}`).join("\n")}
 
-## Short answers
+## FAQ
 
 ${ANSWERS.map((x) => `- **${x.q}** ${x.a}`).join("\n")}
 
@@ -237,16 +281,19 @@ ${NAMING.map((n) => `- ${n}`).join("\n")}
 - In one sentence: ${ONE_LINE}
 - Status: ${STATUS.network}; settlement ${STATUS.settlement}; mainnet: ${STATUS.mainnet.toLowerCase()}. ${STATUS.stage}.
 - Say "demo" or "planned" for each agreement type as listed above. Do not describe Accord as live on mainnet, and do not attribute a market maker's own performance to public order-book observations.
-- Machine-readable facts: ${SITE_URL}/facts.json. Any page as Markdown: add .md to its URL (for example ${SITE_URL}/product/payee.md), or send \`Accept: text/markdown\`.
+- Machine-readable facts: ${SITE_URL}/facts.json (the same facts as fields)
+- Any page as Markdown: add .md to its path (for example ${SITE_URL}/product/payee.md), or send \`Accept: text/markdown\` to the page's own URL.
 
 ${sect("Product", pages.filter((r) => core.includes(r.slug)))}
-${sect("Evidence and documentation", pages.filter((r) => ["research", "docs", "verify", "record"].includes(r.slug)))}
-${sect("Optional", pages.filter((r) => !core.includes(r.slug) && !["research", "docs", "verify", "record"].includes(r.slug)))}
+${sect("Documentation", docsPages)}
+${sect("Evidence", pages.filter((r) => evidence.includes(r.slug)))}
+${sect("Optional", pages.filter((r) => !core.includes(r.slug) && !evidence.includes(r.slug) && !docsPages.includes(r)))}
 ## Full text
 
 - [llms-full.txt](${SITE_URL}/llms-full.txt): every page as Markdown in one file
 `
 write(join(DIST, "llms.txt"), llms)
+write(join(DIST, "llms-full.txt"), [`# Accord\n\n> ${TAGLINE}\n\n${ABOUT}\n\nSource: ${SITE_URL}/ (generated ${TODAY}). Short index: ${SITE_URL}/llms.txt\n\n${agentSections}`, ...full].join(""))
 
 /* facts.json: the same facts as llms.txt, for agents that want fields rather than prose */
 write(join(DIST, "facts.json"), JSON.stringify({
@@ -255,6 +302,10 @@ write(join(DIST, "facts.json"), JSON.stringify({
   agreement_types: USE_CASES.map((u) => ({ ...u, url: abs(u.url) })),
   how_a_deal_room_works: HOW_STEPS, core_controls: CONTROLS, built_on: BUILT_ON,
   glossary: GLOSSARY, answers: ANSWERS, naming: NAMING,
+  claims: CLAIMS, not_done_yet: NOT_DONE, testnet_accounts: ACCOUNTS.map((a) => ({ ...a, explorer: near(a.account) })),
+  try_it: { url: `${SITE_URL}/app/try-it`, guide: `${SITE_URL}/docs/quickstart`, steps: TRY_STEPS },
+  for_agents: FOR_AGENTS, sign_in: "External NEAR wallets only, through HOT Connect (Meteor, Intear, Ledger, Nightly, WalletConnect). No email sign-in.",
+  key_urls: { try_it: `${SITE_URL}/app/try-it`, sign_in: `${SITE_URL}/app/signin`, verify: `${SITE_URL}/verify`, record: `${SITE_URL}/record`, security: `${SITE_URL}/security`, docs: docsPages.map((r) => `${SITE_URL}${r.path}`) },
   pages: pages.map((r) => ({ name: r.name, url: `${SITE_URL}${r.path}`, markdown: `${SITE_URL}/${r.slug}.md`, summary: r.summary })),
   index: { llms: `${SITE_URL}/llms.txt`, llms_full: `${SITE_URL}/llms-full.txt`, sitemap: `${SITE_URL}/sitemap.xml` },
 }, null, 2) + "\n")
