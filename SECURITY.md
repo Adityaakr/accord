@@ -4,7 +4,7 @@ Accord runs on NEAR testnet. There is no mainnet deployment and no audit yet; ma
 
 ## Reporting a vulnerability
 
-Please report privately through GitHub: **Security → Report a vulnerability** on this repository. Do not open a public issue.
+Please report privately. Open a private security advisory (**Security → Advisories → Report a vulnerability**) if it is enabled on this repository; otherwise contact the maintainer through the GitHub profile [github.com/Adityaakr](https://github.com/Adityaakr) and ask for a private channel. Do not open a public issue.
 
 Include what you found, how to reproduce it and what an attacker could do with it. We aim to acknowledge reports within three working days.
 
