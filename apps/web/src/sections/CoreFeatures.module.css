@@ -26,8 +26,9 @@
   position: relative;
   display: grid;
   place-items: center;
+  height: 300px;
   margin: -24px -24px 0;
-  padding: 22px;
+  padding: 24px;
   border-radius: 4px 4px 0 0;
   background:
     radial-gradient(70% 80% at 70% 15%, rgba(145, 207, 181, 0.1), transparent 70%),
@@ -62,7 +63,7 @@
   .grid { grid-template-columns: 1fr; gap: 12px; }
   .wide { grid-column: auto; }
   .card { padding: 20px 16px; }
-  .stage { margin: -20px -16px 0; padding: 16px 12px; }
+  .stage { height: auto; margin: -20px -16px 0; padding: 28px 14px; }
   .flow { grid-template-columns: 1fr; justify-items: start; }
   .arrow { display: none; }
 }
