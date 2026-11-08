@@ -1,5 +1,5 @@
 {
   "title": "Accord: Payee",
-  "description": "Recipient authorisation: domain proof, settlement authority approval and buyer acceptance.",
+  "description": "Payee pays only a recipient the vendor proved through its domain, its settlement authority approved and the buyer accepted. A message cannot change it.",
   "ld": []
 }

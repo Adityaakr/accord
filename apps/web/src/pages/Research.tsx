@@ -167,7 +167,7 @@ const QUESTIONS: Question[] = [
         blocks: [
           {
             label: ESTABLISHES,
-            text: "in May 2026 an attacker replied to Grok on X with a message in Morse code. Grok translated it; the translation was an instruction to send 3 billion DRB tokens to the attacker's address, and Bankr's bot executed it from a Grok-linked wallet, on Base according to Cointelegraph. Reported values run from $150,000 to $174,000, and Giskard reports that about 80 percent was later returned. Both accounts say that an NFT sent to the wallet beforehand had widened what the bot was allowed to do.",
+            text: "in May 2026 an attacker replied to Grok on X with a message in Morse code. Grok translated it; the translation was an instruction to send 3 billion DRB tokens to the attacker's address, and Bankr's bot executed it from a Grok-linked wallet. Reported values run from $150,000 to $174,000, and Giskard reports that about 80 percent was later returned. Both accounts say that an NFT sent to the wallet beforehand had widened what the bot was allowed to do.",
           },
           {
             label: NOT_ESTABLISHES,
@@ -674,7 +674,7 @@ function Blocks({ blocks }: { blocks: Block[] }) {
 const CARD_APPEAR: AppearEffect = { ...DEFAULT_APPEAR, threshold: 0.1 }
 
 export function Research() {
-  usePageMeta("Accord: Research", "The research behind the room, source by source.")
+  usePageMeta("Accord: Research", "Every source behind Accord's design, by the question it answers: what each establishes, what it does not, and the design decision it informs.")
   return (
     <div className={styles.page}>
       <PageHero pill="Research" title="The research behind the room." lead={HERO_LEAD} />

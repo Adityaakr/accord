@@ -46,7 +46,7 @@ function Column({ title, items }: { title: string; items: Item[] }) {
   if (!items.length) return null
   return (
     <div className={styles.column}>
-      <h6 className={`t-h6 ${styles.columnTitle}`}>{title}</h6>
+      <h2 className={`t-h6 ${styles.columnTitle}`}>{title}</h2>
       <div className={styles.items}>{items.map((it) => <ItemLink key={it.key} it={it} />)}</div>
     </div>
   )

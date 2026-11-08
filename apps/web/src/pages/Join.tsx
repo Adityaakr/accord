@@ -75,7 +75,7 @@ function JoinForm() {
 }
 
 export function Join() {
-  usePageMeta("Accord: Request early access", LEAD)
+  usePageMeta("Accord: Request early access", "Accord is pre-launch. Request early access as a token project, market maker, integration partner, vendor or buyer; your position stays sealed.")
   return (
     <div className={styles.page}>
       <PageHero pill="Early access" title="Request early access." lead={LEAD} />

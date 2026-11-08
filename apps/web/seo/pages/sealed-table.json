@@ -1,5 +1,5 @@
 {
   "title": "Accord: Sealed Table",
-  "description": "Confidential negotiation between agents inside an attested enclave.",
+  "description": "Two companies' agents negotiate inside an attested enclave. Each side's limits stay sealed; only the agreed terms and an attestation come out.",
   "ld": []
 }

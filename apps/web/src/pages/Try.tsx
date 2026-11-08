@@ -10,13 +10,13 @@ import styles from "./Verify.module.css"
 const LEAD = "The demonstration agent's inbox is public. Send it new bank details, an urgent invoice or an instruction from the chief executive; the contract refuses anything outside the approved terms and the authorised recipient."
 
 export function Try() {
-  usePageMeta("Accord: Try to move the money", LEAD)
+  usePageMeta("Accord: Try to move the money", "Send the Accord demonstration agent new bank details or an urgent invoice, and watch the NEAR contract refuse anything outside the approved terms.")
   return (
     <div className={styles.page}>
       <PageHero pill="Try" title="Try to move the money." lead={LEAD} />
       <section id="try" className={`section ${styles.main}`}>
         <KitFigure svg={attackSvg} minWidth={720} />
-        <InboxModule goal />
+        <InboxModule goal level={2} />
       </section>
     </div>
   )

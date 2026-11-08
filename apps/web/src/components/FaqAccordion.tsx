@@ -87,7 +87,7 @@ export function FaqAccordion({ title, description, inView, delay, open, onToggle
       >
         {/* Heading XA17B0zuW */}
         <div className={styles.heading}>
-          <h6 className={`t-h6 ${styles.title}`}>{title}</h6>
+          <h3 className={`t-h6 ${styles.title}`}>{title}</h3>
           {/* Icon irCj4PG3r */}
           <span className={styles.icon} aria-hidden="true">
             {/* Indicator kb6lbcCf0 */}

@@ -10,19 +10,19 @@ Accord turns private negotiations into enforceable payment rules. Agents negotia
 
 > Illustrative Accord product: the deal-room list, a market-making agreement shown as its seven-step pipeline from sealed mandates to the USDC transfer on NEAR, and the agreement's activity: a refused payment, a missed observation slot and a settled period.
 
-###### Sealed Table
+## Sealed Table
 
 Agents negotiate in confidence. Only the agreed terms and a proof come out.
 
-###### Agreement controls
+## Agreement controls
 
 The contract enforces the terms. Any payment that doesn't match is refused.
 
-###### Payee
+## Payee
 
 Payments go only to a recipient the vendor has proven and the buyer accepted.
 
-###### Evidence checks
+## Evidence checks
 
 A payment becomes eligible only when the agreed evidence or acceptance is recorded.
 
@@ -304,27 +304,27 @@ Privacy and control
 
 ## What stays private, what is public, and what Accord does not do.
 
-##### Private to each company
+### Private to each company
 
 Its mandate (on chain only as ciphertext) and the negotiation; only the terms, hashes and an attestation leave the enclave.
 
-##### Visible to both companies
+### Visible to both companies
 
 The approved terms, the schedule, every payment, exception and refusal.
 
-##### Public
+### Public
 
 The payment schedule the contract enforces, the authorised recipient and the payments themselves, as with any stablecoin payment.
 
-##### No recall
+### No recall
 
 Accord does not reverse a payment once it is made; revocation stops the agent, and a payment already made went to the authorised recipient at the approved amount.
 
-##### Not legal identity
+### Not legal identity
 
 It does not verify that a company legally exists; Payee establishes control of a domain and approval by the recipient's authority.
 
-##### Not fairness or truth
+### Not fairness or truth
 
 It does not prove that a negotiation was fair or that external data is truthful; attestation shows which code ran on which inputs.
 
@@ -404,18 +404,18 @@ FAQ
 
 ## Questions.
 
-###### Who can see my mandate?
+### Who can see my mandate?
 
-###### What if the model negotiates badly?
+### What if the model negotiates badly?
 
-###### What if my agent is tricked?
+### What if my agent is tricked?
 
-###### Our vendor really did change banks. What happens?
+### Our vendor really did change banks. What happens?
 
-###### How does a market-making agreement decide whether a period pays?
+### How does a market-making agreement decide whether a period pays?
 
-###### Can we use Accord if the other side has no agent?
+### Can we use Accord if the other side has no agent?
 
-###### What does it cost?
+### What does it cost?
 
-###### Is it live?
+### Is it live?

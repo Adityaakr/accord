@@ -1,5 +1,5 @@
 {
-  "title": "Accord: Verify this agreement",
-  "description": "One command checks a live agreement from public data, with no keys: the contract code, the agreement's keys, the Sealed Table release, the sealed outcome, the model attestation, the recipient and the record.",
+  "title": "Accord: Verify an agreement",
+  "description": "One command checks a live Accord agreement from public data, with no keys: contract code, keys, the Sealed Table release, attestation and recipient.",
   "ld": []
 }

@@ -46,7 +46,7 @@ function DemoCard() {
 }
 
 export function Demo() {
-  usePageMeta("Accord: Demonstration", "Watch the Accord demonstration.")
+  usePageMeta("Accord: Demonstration", "Watch an Accord deal room end to end: negotiate, approve, observe, hold, refuse a redirected payment, then pay the approved recipient.")
   return (
     <div className={styles.page}>
       <PageHero

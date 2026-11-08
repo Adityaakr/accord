@@ -159,7 +159,7 @@ function Table({ head, rows, label }: { head: string[]; rows: Row[]; label: stri
 const blockAppear = (delay: `${number}s`) => ({ ...appear(delay), threshold: 0.2 })
 
 export function Security() {
-  usePageMeta("Accord: Security", "What stays private, what is public, and what Accord does not do.")
+  usePageMeta("Accord: Security", "Every Accord claim with its limit: custody of agreement funds, what stays private, what is public, and where each attack on a paying agent stops.")
   return (
     <div className={styles.page}>
       <PageHero

@@ -178,7 +178,7 @@ Cointelegraph Magazine, Dilip Kumar Patairya, 13 May 2026, [cointelegraph.com/ma
 
 What it establishes
 
-in May 2026 an attacker replied to Grok on X with a message in Morse code. Grok translated it; the translation was an instruction to send 3 billion DRB tokens to the attacker's address, and Bankr's bot executed it from a Grok-linked wallet, on Base according to Cointelegraph. Reported values run from $150,000 to $174,000, and Giskard reports that about 80 percent was later returned. Both accounts say that an NFT sent to the wallet beforehand had widened what the bot was allowed to do.
+in May 2026 an attacker replied to Grok on X with a message in Morse code. Grok translated it; the translation was an instruction to send 3 billion DRB tokens to the attacker's address, and Bankr's bot executed it from a Grok-linked wallet. Reported values run from $150,000 to $174,000, and Giskard reports that about 80 percent was later returned. Both accounts say that an NFT sent to the wallet beforehand had widened what the bot was allowed to do.
 
 More
 

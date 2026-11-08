@@ -20,7 +20,7 @@ export function ActionCard({ icon, title, description, className = "" }: Props) 
     <div className={`${styles.card} ${className}`}>
       <div className={styles.title}>
         <span className={styles.icon} aria-hidden="true">{icon}</span>
-        <h6 className={`t-h6 ${styles.heading}`}>{title}</h6>
+        <h2 className={`t-h6 ${styles.heading}`}>{title}</h2>
       </div>
       <p className={`t-body-sm ${styles.description}`}>{description}</p>
     </div>

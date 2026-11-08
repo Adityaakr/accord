@@ -1,5 +1,6 @@
 import { usePageMeta } from "../lib/meta"
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react"
+import { useRef, useState, type FormEvent, type ReactNode } from "react"
+import { Link } from "react-router-dom"
 import { motion, useInView, type Transition } from "motion/react"
 import { Appear, EASE_APPEAR, EASE_UI, toTransition, type FramerTween } from "../lib/motion"
 import { Dots } from "../components/Dots"
@@ -83,41 +84,45 @@ function MailsIcon() {
     </svg>
   )
 }
-function PhoneCallIcon() {
-  return (
-    <svg {...iconProps}>
-      <path d="M14.05 2a9 9 0 0 1 8 7.94" />
-      <path d="M14.05 6A5 5 0 0 1 18 10" />
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-    </svg>
-  )
-}
 
 /* FormSelectNode MqTZJAWLQ options (formSelectOptions) */
 const SUBJECTS = [
   { value: "", title: "Select…", disabled: true },
-  { value: "Customer support", title: "Customer support" },
-  { value: "Investment options", title: "Investment options" },
-  { value: "Partnership & Business Inquiries", title: "Partnership & Business Inquiries" },
+  { value: "Early access", title: "Early access" },
+  { value: "Market-making agreements", title: "Market-making agreements" },
+  { value: "Integration or partnership", title: "Integration or partnership" },
+  { value: "Security", title: "Security" },
+  { value: "Press", title: "Press" },
   { value: "Other", title: "Other" },
 ]
 
-export function Contact() {
-  usePageMeta("Accord: Contact", "Get in touch with the Accord team.")
-  const [buttonState, setButtonState] = useState<FormButtonState>("default")
-  const [subject, setSubject] = useState("")
-  const timer = useRef<number | null>(null)
-  useEffect(() => () => { if (timer.current) window.clearTimeout(timer.current) }, [])
+/* The team's address (.env VITE_CONTACT_EMAIL). Unset: no address is shown and the form is disabled with a pointer to
+   /join, so a message is never silently dropped. Set: the form opens the visitor's email app addressed to it. */
+const CONTACT_EMAIL = (import.meta.env as Record<string, string | undefined>).VITE_CONTACT_EMAIL ?? ""
 
-  /* Form EA0JgLfRv: formSubmitButtonId GSGU3hc0J, formButtonPendingVariant Loading (CqDOqLP8H),
-     formButtonSuccessVariant Success (lZoMH0RkI). Framer Forms posts to its own backend; we simulate it. */
+function ShieldIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  )
+}
+
+export function Contact() {
+  usePageMeta("Accord: Contact", "Contact the Accord team about early access, market-making agreements, integrations, security or press. Accord is pre-launch and runs on NEAR testnet.")
+  const [sent, setSent] = useState(false)
+  const [subject, setSubject] = useState("")
+  const buttonState: FormButtonState = !CONTACT_EMAIL ? "disabled" : sent ? "success" : "default"
+
+  /* The form opens the visitor's email app with the message filled in; nothing is sent until they send it there */
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    if (buttonState === "loading") return
-    // TODO: wire submit endpoint: new FormData(e.currentTarget) holds
-    // "First name", "Last name", "Email", "Phone", "Subject", "Message"
-    setButtonState("loading")
-    timer.current = window.setTimeout(() => setButtonState("success"), 1000)
+    if (!CONTACT_EMAIL) return
+    const d = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>
+    const body = `${d["First name"]} ${d["Last name"]}\n${d.Email}${d.Phone ? `\n${d.Phone}` : ""}\n\n${d.Message}`
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Accord: ${d.Subject}`)}&body=${encodeURIComponent(body)}`
+    setSent(true)
   }
 
   return (
@@ -136,7 +141,7 @@ export function Contact() {
         {/* Title arEJg_OLP: H1, Text Strong, word reveal delay 0.1s, 0.8s/word, stagger 0.04s */}
         <WordReveal as="h1" className={`t-h1 ${styles.heading}`} text="Get in touch with us" delay={0.1} duration={0.8} stagger={0.04} />
         {/* Description yzoU7K91a: Body Large, Text Medium, left, word reveal delay 0.2s, 0.6s/word, stagger 0.04s */}
-        <WordReveal as="p" className={`t-body-lg ${styles.description}`} text="We’re here to help and answer any questions you may have." delay={0.2} duration={0.6} stagger={0.04} />
+        <WordReveal as="p" className={`t-body-lg ${styles.description}`} text="Questions about Accord, early access or an agreement type? Write to us." delay={0.2} duration={0.6} stagger={0.04} />
       </div>
 
       {/* Content ton4m9Ta_: vertical, gap 16, overflow clip, align center, justify center, width 1fr */}
@@ -151,12 +156,13 @@ export function Contact() {
             </div>
             {/* Text kZQsGzYul: vertical gap 8, width 1fr */}
             <div className={styles.cardText}>
-              <h5 className={`t-h5 ${styles.cardTitle}`}>Email us</h5>
+              <h2 className={`t-h5 ${styles.cardTitle}`}>{CONTACT_EMAIL ? "Email us" : "Early access"}</h2>
               <p className={`t-body-sm ${styles.cardDescription}`}>
-                Have a question? Our team is ready to help, contact us at{" "}
-                <a href="mailto:contact@accord.com" target="_blank" rel="noopener" className="ls-link-inline">
-                  contact@accord.com
-                </a>
+                {CONTACT_EMAIL ? (
+                  <>Write to{" "}<a href={`mailto:${CONTACT_EMAIL}`} className="ls-link-inline">{CONTACT_EMAIL}</a></>
+                ) : (
+                  <>Accord is pre-launch. To join a deal room, <Link to="/join" className="ls-link-inline">request early access</Link>.</>
+                )}
               </p>
             </div>
           </Mount>
@@ -164,16 +170,13 @@ export function Contact() {
           <Mount className={styles.card} delay="0.1s">
             {/* Icon GswGvCcsR */}
             <div className={styles.iconCircle}>
-              <PhoneCallIcon />
+              <ShieldIcon />
             </div>
-            {/* Text gA1FQQJi_ */}
             <div className={styles.cardText}>
-              <h5 className={`t-h5 ${styles.cardTitle}`}>Contact team</h5>
+              <h2 className={`t-h5 ${styles.cardTitle}`}>Check it yourself</h2>
               <p className={`t-body-sm ${styles.cardDescription}`}>
-                Prefer to talk instead? You can now easily reach our team at{" "}
-                <a href="tel:+1 (234) 567 890" target="_blank" rel="noopener" className="ls-link-inline">
-                  +1 (234) 567 890
-                </a>
+                Each claim and its limit is on <Link to="/security" className="ls-link-inline">Security</Link>; commands are in the{" "}
+                <Link to="/docs" className="ls-link-inline">Docs</Link>.
               </p>
             </div>
           </Mount>
@@ -184,8 +187,10 @@ export function Contact() {
         <Mount as="section" className={styles.formCard} delay="0.2s">
           {/* Title qi266Z9YY: vertical gap 8, justify end */}
           <div className={styles.formTitle}>
-            <h5 className={`t-h5 ${styles.formHeading}`}>Fill out the form</h5>
-            <p className={`t-body-sm ${styles.formDescription}`}>After you submit the form, our team will reach out to you as quickly as possible.</p>
+            <h2 className={`t-h5 ${styles.formHeading}`}>Fill out the form</h2>
+            <p className={`t-body-sm ${styles.formDescription}`}>
+              {CONTACT_EMAIL ? "Submitting opens your email app with the message filled in; nothing is sent until you send it there." : "The form opens once our inbox is connected. Until then, request early access on the early-access page."}
+            </p>
           </div>
 
           {/* Form EA0JgLfRv: vertical, gap 20 (Phone 16), overflow hidden, align start, width 1fr */}
@@ -211,13 +216,13 @@ export function Contact() {
               <label className={styles.field}>
                 <p className={`t-body-sm ${styles.fieldLabel}`}>Email*</p>
                 {/* Ou8RZy7PO */}
-                <input className={styles.input} type="email" name="Email" placeholder="jane@accord.com" required />
+                <input className={styles.input} type="email" name="Email" placeholder="jane@company.com" required />
               </label>
               {/* xOM9JFFLb */}
               <label className={styles.field}>
                 <p className={`t-body-sm ${styles.fieldLabel}`}>Phone</p>
                 {/* CR_xyCA37 */}
-                <input className={styles.input} type="tel" name="Phone" placeholder="+ 1 (234) 567 890" />
+                <input className={styles.input} type="tel" name="Phone" placeholder="Optional" />
               </label>
             </div>
             {/* P_FZgaNG9 */}
@@ -245,7 +250,8 @@ export function Contact() {
               <textarea className={`${styles.input} ${styles.textarea}`} name="Message" placeholder="Type your message..." required />
             </label>
             {/* GSGU3hc0J: Form Button instance */}
-            <FormButton state={buttonState} className={styles.submit} />
+            <FormButton state={buttonState} label="Write the email" className={styles.submit} />
+            <p className={`t-body-sm ${styles.formDescription}`} role="status">{sent ? "Your email app has the message ready to send." : ""}</p>
           </form>
         </Mount>
       </div>

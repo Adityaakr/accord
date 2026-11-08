@@ -35,7 +35,7 @@ export function IconCard({ icon, title, description, extra, id, className = "", 
         </span>
       </div>
       <div className={styles.text}>
-        <h5 className={`t-h5 ${styles.title}`}>{title}</h5>
+        <h3 className={`t-h5 ${styles.title}`}>{title}</h3>
         <p className={`t-body-lg ${styles.description}`}>{description}</p>
       </div>
       {extra}

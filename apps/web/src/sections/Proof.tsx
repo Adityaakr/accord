@@ -81,7 +81,8 @@ function PanelLabel({ v }: { v: LiveValues | null }) {
 }
 
 /* Left panel: the agreement page from the app on testnet */
-function AgreementPanel({ v }: { v: LiveValues | null }) {
+function AgreementPanel({ v, level = 3 }: { v: LiveValues | null; level?: 2 | 3 }) {
+  const H = level === 2 ? "h2" : "h3"
   const a = v?.agreement
   const payeeKnown = !!a && a.payee.domain !== ""
   /* A state is highlighted only for a real agreement; the bundled snapshot carries a placeholder id and no state of its own. */
@@ -89,7 +90,7 @@ function AgreementPanel({ v }: { v: LiveValues | null }) {
   return (
     <article className={styles.panel} aria-labelledby="record-agreement-title">
       <header className={styles.panelHead}>
-        <h3 id="record-agreement-title" className={`t-h6 ${styles.panelTitle}`}>Agreement</h3>
+        <H id="record-agreement-title" className={`t-h6 ${styles.panelTitle}`}>Agreement</H>
         <div className={styles.panelMeta}>
           {a && !isPlaceholder(a.id) && a.id !== "" ? <Mono className={styles.panelId}>{a.id}</Mono> : null}
           <PanelLabel v={v} />
@@ -196,7 +197,8 @@ function RefusalLine({ r, isNew, reduce }: { r: Refusal; isNew: boolean; reduce:
 }
 
 /* Right panel: the counters, then the refusal log (newest first, a polite live region) */
-function RefusalPanel({ v, limit }: { v: LiveValues | null; limit: number }) {
+function RefusalPanel({ v, limit, level = 3 }: { v: LiveValues | null; limit: number; level?: 2 | 3 }) {
+  const H = level === 2 ? "h2" : "h3"
   const reduce = useReducedMotion() ?? false
   const sorted = v ? [...v.refusals].sort((x, y) => Date.parse(y.at) - Date.parse(x.at)).slice(0, limit) : []
   /* Stable keys: timestamp + reason + sender, suffixed by occurrence so identical refusals keep distinct identities */
@@ -216,7 +218,7 @@ function RefusalPanel({ v, limit }: { v: LiveValues | null; limit: number }) {
   return (
     <article className={styles.panel} aria-labelledby="record-refusal-title">
       <header className={styles.panelHead}>
-        <h3 id="record-refusal-title" className={`t-h6 ${styles.panelTitle}`}>Refusal log</h3>
+        <H id="record-refusal-title" className={`t-h6 ${styles.panelTitle}`}>Refusal log</H>
         <PanelLabel v={v} />
       </header>
       {v ? <Counters v={v} /> : null}
@@ -340,9 +342,11 @@ type InboxModuleProps = {
   agreement?: boolean
   /** Print the GOAL.md sentence under the form (spec v6.6: on /try; on the homepage Why now's worst case carries it). */
   goal?: boolean
+  /** Heading level of the two panels: 3 under the homepage section's H2, 2 on /try where the page H1 sits above */
+  level?: 2 | 3
 }
 
-export function InboxModule({ limit = 10, agreement = true, goal = false }: InboxModuleProps) {
+export function InboxModule({ limit = 10, agreement = true, goal = false, level = 3 }: InboxModuleProps) {
   const live = useLive()
   return (
     <div className={styles.module}>
@@ -359,8 +363,8 @@ export function InboxModule({ limit = 10, agreement = true, goal = false }: Inbo
       <div className={styles.record}>
         {API && live?.source === "last-known" ? <p className={`t-body-sm ${styles.weak}`}>{DATA_UNAVAILABLE}</p> : null}
         <Appear className={`${styles.panels} ${agreement ? "" : styles.panelsSingle}`} effect={appearTall("0.2s")}>
-          {agreement ? <AgreementPanel v={live} /> : null}
-          <RefusalPanel v={live} limit={limit} />
+          {agreement ? <AgreementPanel v={live} level={level} /> : null}
+          <RefusalPanel v={live} limit={limit} level={level} />
         </Appear>
       </div>
     </div>

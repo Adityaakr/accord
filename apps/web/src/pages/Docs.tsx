@@ -145,7 +145,7 @@ function CopyButton({ text }: { text: string }) {
 const blockAppear = (delay: `${number}s`) => ({ ...appear(delay), threshold: 0.2 })
 
 export function Docs() {
-  usePageMeta("Accord: Documentation", "Commands, contract methods and how to check each part of a deal room.")
+  usePageMeta("Accord: Documentation", "Accord documentation: the commands that run a deal room, the agreement contract's methods, and how to check each part yourself on NEAR testnet.")
   return (
     <div className={styles.page}>
       <PageHero

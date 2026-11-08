@@ -37,7 +37,7 @@ export function ContentCard({ image, visual, alt = "", title, description, class
       <div className={styles.container}>
         <div className={styles.heading}>
           <span className={styles.indicator} aria-hidden="true" />
-          <h4 className={`t-h4 ${styles.title}`}>{title}</h4>
+          <h2 className={`t-h4 ${styles.title}`}>{title}</h2>
         </div>
         <Description className={`t-body-lg ${styles.description}`}>{description}</Description>
       </div>

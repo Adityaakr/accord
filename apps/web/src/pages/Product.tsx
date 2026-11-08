@@ -92,7 +92,7 @@ const CARDS = [
 ] as const
 
 export function Product() {
-  usePageMeta("Accord: Product", "Negotiation, approval and payment in one deal room.")
+  usePageMeta("Accord: Product", "How Accord works: agents negotiate in the Sealed Table, both companies approve the terms, and Agreement controls and Payee govern every USDC payment.")
   return (
     <div className={styles.page}>
       <PageHero

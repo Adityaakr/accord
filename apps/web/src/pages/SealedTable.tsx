@@ -39,7 +39,7 @@ function Row({ id, shot, imageSide, title, paragraphs }: RowProps) {
   const content = (
     <Appear effect={slide(imageSide === "left" ? 100 : -100)} className={styles.content}>
       <div className={styles.rowText}>
-        <h3 className={`t-h3 ${styles.rowTitle}`}>{title}</h3>
+        <h2 className={`t-h3 ${styles.rowTitle}`}>{title}</h2>
         {paragraphs.map((p, j) => (
           <p key={j} className={`t-body-lg ${styles.rowBody}`}>{p}</p>
         ))}
@@ -55,7 +55,7 @@ function Row({ id, shot, imageSide, title, paragraphs }: RowProps) {
 }
 
 export function SealedTable() {
-  usePageMeta("Accord: Sealed Table", "Confidential negotiation between agents inside an attested enclave.")
+  usePageMeta("Accord: Sealed Table", "Two companies' agents negotiate inside an attested enclave. Each side's limits stay sealed; only the agreed terms and an attestation come out.")
   return (
     <div className={styles.page}>
       <PageHero

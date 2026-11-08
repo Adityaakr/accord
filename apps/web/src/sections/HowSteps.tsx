@@ -64,9 +64,9 @@ export function HowSteps() {
             <span className={styles.node} aria-hidden="true" />
             {/* Action card (BE0Kc14HI) geometry: vertical, gap 8; H6 title row; Body Small description */}
             <div className={styles.card}>
-              <h6 className={`t-h6 ${styles.heading}`}>
+              <h3 className={`t-h6 ${styles.heading}`}>
                 <Mono className={styles.num}>{s.n}</Mono> · {s.title}
-              </h6>
+              </h3>
               <p className={`t-body-sm ${styles.body}`}>{s.body}</p>
             </div>
           </Appear>

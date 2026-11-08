@@ -8,7 +8,7 @@ Ten messages an hour per visitor · Testnet USDC on NEAR · This public room re-
 
 A successful attempt can only ever produce a payment to the authorised recipient at the approved amount.
 
-### Agreement
+## Agreement
 
 - `Sealed`
 
@@ -30,6 +30,6 @@ Last transfer
 
 No entries yet
 
-### Refusal log
+## Refusal log
 
 Refused attempts appear here, newest first, once the demonstration inbox opens.

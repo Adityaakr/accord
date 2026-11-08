@@ -108,7 +108,7 @@ function LookupForm() {
 const stepAppear = (i: number) => ({ ...appear(`${Math.min(i, 3) * 0.05}s` as `${number}s`), threshold: 0.2 })
 
 export function Verify() {
-  usePageMeta("Accord: Verify this agreement", LEAD)
+  usePageMeta("Accord: Verify an agreement", "One command checks a live Accord agreement from public data, with no keys: contract code, keys, the Sealed Table release, attestation and recipient.")
   return (
     <div className={styles.page}>
       <PageHero pill="Verify" title="Verify this agreement." lead={LEAD} />

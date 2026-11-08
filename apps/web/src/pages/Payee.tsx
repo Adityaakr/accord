@@ -38,7 +38,7 @@ function Row({ id, shot, imageSide, title, paragraphs }: RowProps) {
   const content = (
     <Appear effect={slide(imageSide === "left" ? 100 : -100)} className={styles.content}>
       <div className={styles.rowText}>
-        <h3 className={`t-h3 ${styles.rowTitle}`}>{title}</h3>
+        <h2 className={`t-h3 ${styles.rowTitle}`}>{title}</h2>
         {paragraphs.map((p, j) => (
           <p key={j} className={`t-body-lg ${styles.rowBody}`}>{p}</p>
         ))}
@@ -54,7 +54,7 @@ function Row({ id, shot, imageSide, title, paragraphs }: RowProps) {
 }
 
 export function Payee() {
-  usePageMeta("Accord: Payee", "Recipient authorisation: domain proof, settlement authority approval and buyer acceptance.")
+  usePageMeta("Accord: Payee", "Payee pays only a recipient the vendor proved through its domain, its settlement authority approved and the buyer accepted. A message cannot change it.")
   return (
     <div className={styles.page}>
       <PageHero

@@ -39,7 +39,7 @@ const SECTION_APPEAR = toTransition({ type: "tween", ease: EASE_UI, duration: "0
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <motion.div className={styles.sectionBlock} initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={SECTION_APPEAR}>
-      <h5 className={`t-h5 ${styles.sectionTitle}`}>{title}</h5>
+      <h2 className={`t-h5 ${styles.sectionTitle}`}>{title}</h2>
       {children}
     </motion.div>
   )
@@ -51,7 +51,7 @@ function Body({ children }: { children: ReactNode }) {
 }
 
 export function PrivacyPolicy() {
-  usePageMeta("Accord: Privacy", "What this site stores and for how long.")
+  usePageMeta("Accord: Privacy policy", "What the Accord website collects, where it goes and what it never does: no analytics, no tracking cookies, and only what you choose to send.")
   return (
     <div className={styles.page}>
       {/* Main R7DaFnuPM */}
@@ -61,7 +61,7 @@ export function PrivacyPolicy() {
           {/* Tag gxZFQKKDY: appearEffect onInView, threshold 0.5, {opacity 0, y 32}, tween 1s [0.12,0.23,0.5,1] */}
           <Appear className={styles.tag}>
             <div className={styles.indicator} />
-            <p className={`t-body-sm ${styles.tagText}`}>February 17, 2026</p>
+            <p className={`t-body-sm ${styles.tagText}`}>8 November 2026</p>
           </Appear>
           {/* Title cxHZaenz6: textEffect delay 0.1s, 0.8s per word, stagger 0.04s */}
           <WordReveal as="h1" className={`t-h1 ${styles.title}`} text="Privacy policy" delay={0.1} duration={0.8} stagger={0.04} />
@@ -69,81 +69,56 @@ export function PrivacyPolicy() {
           <WordReveal
             as="p"
             className={`t-body-lg ${styles.description}`}
-            text="Welcome to Accord. This Privacy policy explains how we collect, use, and protect your personal information when you use our website."
+            text="What this website collects, where it goes and what it never does. Accord is pre-launch; this page covers the site, not the product."
             delay={0.2}
             duration={0.6}
             stagger={0.04}
           />
         </div>
 
-        {/* Sections ytF4ldnHg */}
+        {/* Sections ytF4ldnHg: rewritten 8 Nov 2026 to describe what this site actually does (it replaced the template's
+            account, newsletter and cookie text, none of which applied). Keep it in step with the code: forms in
+            pages/Join.tsx and pages/Contact.tsx, the inbox in lib/live.ts, the theme in components/ThemeToggle.tsx. */}
         <div className={styles.sections}>
-          {/* Section oPzH_1zRb */}
-          <Section title="1. Information We Collect">
-            {/* Paragraph T3DsQ_FFH */}
-            <div className={styles.paragraph}>
-              <Body>1.1 Personal Information</Body>
-              <Body>We may collect personal information, such as your name, email address, and other contact details when you voluntarily provide it to us. For example, when you register for an account, subscribe to newsletters, or contact us through the website.</Body>
-            </div>
-            {/* Paragraph jRZukmTyJ */}
-            <div className={styles.paragraph}>
-              <Body>1.2 Usage Information</Body>
-              <Body>We may collect information about your use of the website, including your IP address, browser type, device information, and pages visited. This information helps us analyze trends, administer the site, and improve user experience.</Body>
-            </div>
-          </Section>
-
-          {/* Section k_wmZeEvV: Description GGd3bVymh: TextBlock p + TextBulletList (4 items) */}
-          <Section title="2. How We Use Your Information">
+          <Section title="1. What this site collects">
             <div className={`t-body-sm ${styles.rich}`}>
-              <p>We use the collected information for various purposes, including:</p>
+              <p>Only what you choose to send:</p>
               <ul>
-                <li>Providing and maintaining the website</li>
-                <li>Communicating with you about your account and our services</li>
-                <li>Sending newsletters, promotional materials, and other information you request</li>
-                <li>Analyzing website usage and improving our services</li>
+                <li>The early-access request on /join: your organisation, role, a contact and your message.</li>
+                <li>The contact form: your name, email, optional phone, subject and message.</li>
+                <li>The demonstration inbox on /try: the sender, subject and text of the message you send to the demonstration agent.</li>
               </ul>
             </div>
           </Section>
 
-          {/* Section jCurdaEKI */}
-          <Section title="3. Sharing Your Information">
-            <Body>We do not sell, trade, or otherwise transfer your personal information to third parties without your consent, except as described in this Privacy Policy. We may share information with trusted third-party service providers who assist us in operating our website or conducting our business.</Body>
+          <Section title="2. Where it goes">
+            <div className={`t-body-sm ${styles.rich}`}>
+              <ul>
+                <li>Early-access requests go to Accord's request store, or, before that store is live, open in your own email app addressed to us. Nothing is sent until you press send there.</li>
+                <li>Contact messages open in your own email app addressed to us.</li>
+                <li>Messages to the demonstration inbox are public: the agent reads them and every refusal is shown on /try and /record. Do not put personal information in them.</li>
+              </ul>
+            </div>
           </Section>
 
-          {/* Section rLNTiQCpE */}
-          <Section title="4. Cookies and Similar Technologies">
-            <Body>We use cookies and similar technologies to enhance your experience on our website. You can control cookies through your browser settings, but disabling them may affect your ability to use certain features of the site.</Body>
+          <Section title="3. What we do not do">
+            <Body>This site has no analytics, no advertising and no tracking cookies, and we do not sell or share what you send. Agreements, payments and refusals in the demonstration are on NEAR testnet, which is public by design.</Body>
           </Section>
 
-          {/* Section VloRP64Ls */}
-          <Section title="5. Your Choices">
-            <Body>You can manage your communication preferences by unsubscribing from newsletters or adjusting your account settings. You may also contact us to update or delete your personal information.</Body>
+          <Section title="4. Your browser and our host">
+            <Body>Your browser keeps one setting for this site, the light or dark theme, in local storage; clear your site data to remove it. Fonts load from Google Fonts, which receives your IP address when they load. Our hosting provider may keep standard request logs, such as IP address and time, to run and protect the service.</Body>
           </Section>
 
-          {/* Section s9y6sEjuq */}
-          <Section title="6. Security">
-            <Body>We take reasonable measures to protect the security of your personal information. However, no method of transmission over the internet or electronic storage is without risk. Therefore, we cannot guarantee absolute security.</Body>
+          <Section title="5. How long we keep it">
+            <Body>Early-access requests and contact messages are kept while we discuss your request, and deleted when you ask. Demonstration inbox messages stay on the public record of the demonstration.</Body>
           </Section>
 
-          {/* Section LCfTnTwn5 */}
-          <Section title="7. Children's Privacy">
-            <Body>Our website is not directed to individuals under the age of 18. If you become aware that a child has provided us with personal information, please contact us, and we will take steps to remove such information.</Body>
+          <Section title="6. Your choices">
+            <Body>Ask us to see, correct or delete anything you sent through the contact page. This site is not directed to children.</Body>
           </Section>
 
-          {/* Section nb6OzCIqh */}
-          <Section title="8. Changes to This Privacy Policy">
-            <Body>We may update this Privacy Policy periodically. We will notify you of any changes by posting the new Privacy Policy on this page. Your continued use of the website after such modifications will constitute your acknowledgment of the modified Privacy Policy.</Body>
-          </Section>
-
-          {/* Section hRvTx2mba: Description i7cmmEuAf: linkStylePreset FTn6Ho50C ("Link inline"),
-              run link mailto:contact@accord.com, openInNewTab */}
-          <Section title="9. Contact Us">
-            <Body>
-              If you have questions, contact us at{" "}
-              <a href="mailto:contact@accord.com" target="_blank" rel="noopener noreferrer" className="ls-link-inline">
-                contact@accord.com
-              </a>
-            </Body>
+          <Section title="7. Changes">
+            <Body>When this policy changes, the date at the top of the page changes with it.</Body>
           </Section>
         </div>
       </section>

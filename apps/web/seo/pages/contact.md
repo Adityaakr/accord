@@ -2,16 +2,16 @@ Contact us
 
 # Get in touch with us
 
-We’re here to help and answer any questions you may have.
+Questions about Accord, early access or an agreement type? Write to us.
 
-##### Email us
+## Early access
 
-Have a question? Our team is ready to help, contact us at [contact@accord.com](mailto:contact@accord.com)
+Accord is pre-launch. To join a deal room, [request early access](/join).
 
-##### Contact team
+## Check it yourself
 
-Prefer to talk instead? You can now easily reach our team at [+1 (234) 567 890](tel:+1 (234) 567 890)
+Each claim and its limit is on [Security](/security); commands are in the [Docs](/docs).
 
-##### Fill out the form
+## Fill out the form
 
-After you submit the form, our team will reach out to you as quickly as possible.
+The form opens once our inbox is connected. Until then, request early access on the early-access page.

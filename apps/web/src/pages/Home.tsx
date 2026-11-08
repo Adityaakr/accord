@@ -20,7 +20,7 @@ import styles from "./Home.module.css"
    6a Why now (WhyNow: FBI figures, AttackScene) · 6b Security demonstration (Proof: image row + module) · 7 Privacy and control (Benefits icon cards) ·
    8 The research behind the room (ResearchCards) · 8b In their words (Reviews: owner's choice, real photos + source links) · (8c Pricing removed 31 Oct 2026; the FAQ keeps the cost answer) · 9 FAQ (the closing seats section was removed 31 Oct 2026) */
 export function Home() {
-  usePageMeta("Accord: the private deal room and control plane for agent-to-agent commerce", "Accord turns private negotiations between agents into enforceable payment rules. Both companies approve the terms, and a NEAR contract enforces who pays, who receives, how much and on what evidence.")
+  usePageMeta("Accord: Deal room and control plane for agent-to-agent commerce", "Agents negotiate privately, both companies approve the terms, and a NEAR contract enforces who pays, who receives, how much and on what evidence.")
   return (
     <div className={styles.page}>
       <Hero />

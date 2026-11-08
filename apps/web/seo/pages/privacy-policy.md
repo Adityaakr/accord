@@ -1,55 +1,43 @@
-February 17, 2026
+8 November 2026
 
 # Privacy policy
 
-Welcome to Accord. This Privacy policy explains how we collect, use, and protect your personal information when you use our website.
+What this website collects, where it goes and what it never does. Accord is pre-launch; this page covers the site, not the product.
 
-##### 1. Information We Collect
+## 1. What this site collects
 
-1.1 Personal Information
+Only what you choose to send:
 
-We may collect personal information, such as your name, email address, and other contact details when you voluntarily provide it to us. For example, when you register for an account, subscribe to newsletters, or contact us through the website.
+- The early-access request on /join: your organisation, role, a contact and your message.
 
-1.2 Usage Information
+- The contact form: your name, email, optional phone, subject and message.
 
-We may collect information about your use of the website, including your IP address, browser type, device information, and pages visited. This information helps us analyze trends, administer the site, and improve user experience.
+- The demonstration inbox on /try: the sender, subject and text of the message you send to the demonstration agent.
 
-##### 2. How We Use Your Information
+## 2. Where it goes
 
-We use the collected information for various purposes, including:
+- Early-access requests go to Accord's request store, or, before that store is live, open in your own email app addressed to us. Nothing is sent until you press send there.
 
-- Providing and maintaining the website
+- Contact messages open in your own email app addressed to us.
 
-- Communicating with you about your account and our services
+- Messages to the demonstration inbox are public: the agent reads them and every refusal is shown on /try and /record. Do not put personal information in them.
 
-- Sending newsletters, promotional materials, and other information you request
+## 3. What we do not do
 
-- Analyzing website usage and improving our services
+This site has no analytics, no advertising and no tracking cookies, and we do not sell or share what you send. Agreements, payments and refusals in the demonstration are on NEAR testnet, which is public by design.
 
-##### 3. Sharing Your Information
+## 4. Your browser and our host
 
-We do not sell, trade, or otherwise transfer your personal information to third parties without your consent, except as described in this Privacy Policy. We may share information with trusted third-party service providers who assist us in operating our website or conducting our business.
+Your browser keeps one setting for this site, the light or dark theme, in local storage; clear your site data to remove it. Fonts load from Google Fonts, which receives your IP address when they load. Our hosting provider may keep standard request logs, such as IP address and time, to run and protect the service.
 
-##### 4. Cookies and Similar Technologies
+## 5. How long we keep it
 
-We use cookies and similar technologies to enhance your experience on our website. You can control cookies through your browser settings, but disabling them may affect your ability to use certain features of the site.
+Early-access requests and contact messages are kept while we discuss your request, and deleted when you ask. Demonstration inbox messages stay on the public record of the demonstration.
 
-##### 5. Your Choices
+## 6. Your choices
 
-You can manage your communication preferences by unsubscribing from newsletters or adjusting your account settings. You may also contact us to update or delete your personal information.
+Ask us to see, correct or delete anything you sent through the contact page. This site is not directed to children.
 
-##### 6. Security
+## 7. Changes
 
-We take reasonable measures to protect the security of your personal information. However, no method of transmission over the internet or electronic storage is without risk. Therefore, we cannot guarantee absolute security.
-
-##### 7. Children's Privacy
-
-Our website is not directed to individuals under the age of 18. If you become aware that a child has provided us with personal information, please contact us, and we will take steps to remove such information.
-
-##### 8. Changes to This Privacy Policy
-
-We may update this Privacy Policy periodically. We will notify you of any changes by posting the new Privacy Policy on this page. Your continued use of the website after such modifications will constitute your acknowledgment of the modified Privacy Policy.
-
-##### 9. Contact Us
-
-If you have questions, contact us at [contact@accord.com](mailto:contact@accord.com)
+When this policy changes, the date at the top of the page changes with it.
