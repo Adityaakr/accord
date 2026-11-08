@@ -11,6 +11,7 @@ import { useAppConfig } from "@/components/AppConfig";
 import { Panel, Pill } from "@/components/ui";
 import type { Preset } from "@/server/presets";
 import styles from "../../form.module.css";
+import { SealMoment } from "./SealMoment";
 
 const AMOUNT_KEYS = /total|retainer|depth_quote/;
 const LIMIT_LABELS: Record<string, string> = {
@@ -114,6 +115,10 @@ export function SealForm({
               <pre className={styles.shared}>{JSON.stringify(preset.mandate.shared, null, 2)}</pre>
             </Panel>
 
+            {done ? (
+              <SealMoment role={role} commitment={done.commitment} txHash={done.txHash}
+                rows={Object.entries(limits).map(([k, v]) => ({ label: LIMIT_LABELS[k] ?? k, value: v }))} />
+            ) : (
             <Panel title="Your limits" eyebrow="private: only your negotiator and the code checks see them" aside={<Pill tone="teal">sealed</Pill>}>
               <div className={styles.limits}>
                 {Object.entries(limits).map(([k, v]) => (
@@ -126,9 +131,10 @@ export function SealForm({
                 ))}
               </div>
             </Panel>
+            )}
 
             <Panel title="Instructions to your negotiator" eyebrow="private">
-              <textarea className={styles.textarea} value={text} onChange={(e) => setInstructions(e.target.value)} maxLength={600} />
+              <textarea className={styles.textarea} value={text} onChange={(e) => setInstructions(e.target.value)} maxLength={600} disabled={!!done} />
             </Panel>
           </>
         )}

@@ -12,7 +12,8 @@ export function SourceLine({ label, block, at }: { label: string; block: number;
   const secs = Math.max(0, Math.round((now - at) / 1000));
   const age = secs < 90 ? `${secs} s ago` : secs < 5400 ? `${Math.round(secs / 60)} min ago` : `${Math.round(secs / 3600)} h ago`;
   return (
-    <span className="small mono" title={`Read at block ${block}`}>
+    // the age is a live clock: server and browser render it a moment apart, so a one-second difference is expected
+    <span className="small mono" title={`Read at block ${block}`} suppressHydrationWarning>
       {label} · block {block.toLocaleString("en-US")} · {age}
     </span>
   );
