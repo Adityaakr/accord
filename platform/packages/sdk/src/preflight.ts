@@ -49,10 +49,12 @@ export async function preflight(
   } catch {
     exists = false;
   }
+  // The agreement's own factory keeps its reports, blocklist and payment statistics.
+  const own = accord.onFactory(a.factory);
   const [reports, blockedUrl, stats] = await Promise.all([
-    accord.reports(recipient).catch(() => []),
-    accord.blocked(recipient).catch(() => null),
-    accord.recipientStats(recipient, a.buyer).catch(() => null),
+    own.reports(recipient).catch(() => []),
+    own.blocked(recipient).catch(() => null),
+    own.recipientStats(recipient, a.buyer).catch(() => null),
   ]);
   const signals: Signals = {
     exists,

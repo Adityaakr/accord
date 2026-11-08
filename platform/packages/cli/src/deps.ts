@@ -39,7 +39,11 @@ export function realDeps(o: RealDepsOptions): Deps {
       archivalRpc: o.env.NEAR_ARCHIVAL_RPC_URL || undefined,
       approvalsUrl: o.env.ACCORD_APPROVALS_URL || undefined,
     }),
-    verify: (agreement) => verify(accord, agreement, { nearAiKey: o.env.NEARAI_API_KEY || undefined }),
+    // An agreement of either configured factory (ACCORD_FACTORY, ACCORD_FACTORY_USDC) or a known one verifies.
+    verify: (agreement) => verify(accord, agreement, {
+      nearAiKey: o.env.NEARAI_API_KEY || undefined,
+      factories: [o.env.ACCORD_FACTORY_USDC ?? ""],
+    }),
     sealedCheck: async (agreement, other) => {
       const s = needSigner();
       const docKey = await deriveDocKey(s, agreement);

@@ -5,6 +5,7 @@ import { ed25519 } from "@noble/curves/ed25519";
 import { baseDecode } from "near-api-js";
 import { bytesToHex, randomBytes } from "@noble/hashes/utils";
 import type { Accord } from "./accord.js";
+import { KNOWN_FACTORIES } from "./chain.js";
 import { signedBytes } from "./hash.js";
 import { fromBase64 } from "./bytes.js";
 
@@ -51,7 +52,7 @@ export function verifyEd25519(output: Record<string, unknown>, publicKey: string
 export async function verify(
   accord: Accord,
   agreement: string,
-  opts: { nonce?: string; nearAiKey?: string } = {},
+  opts: { nonce?: string; nearAiKey?: string; factories?: string[] } = {},
 ): Promise<VerifyReport> {
   const deal = accord.agreement(agreement);
   let a: Awaited<ReturnType<typeof deal.get>>;
@@ -61,15 +62,23 @@ export async function verify(
     if (NOT_AN_AGREEMENT.test((e as Error).message ?? "")) throw new NotAnAgreementError(agreement);
     throw e;
   }
-  const release = await accord.release(a.release);
+  // The agreement's own factory (each factory pins one token), which must be a known Accord factory that
+  // registered this account; its release is the one the code and the keys are checked against.
+  const known = knownFactories(accord, opts.factories);
+  const own = accord.onFactory(a.factory);
+  const registered = await own.chain.view<boolean>(a.factory, "is_agreement", { account: agreement }).catch(() => false);
+  const factoryNote = !known.includes(a.factory)
+    ? ` · factory ${a.factory} is not a known Accord factory`
+    : registered ? "" : ` · not registered by factory ${a.factory}`;
+  const release = await own.release(a.release);
   const checks: Check[] = [];
   const add = (name: string, status: CheckStatus, detail: string) => checks.push({ name, status, detail });
 
   // code: the account runs exactly the release's code.
   const acct = await accord.chain.account(agreement);
   const running = acct.global_contract_hash ?? acct.code_hash;
-  add("code", running === release.code_hash ? "ok" : "fail",
-    `code hash ${running.slice(0, 8)}… ${running === release.code_hash ? "=" : "≠"} release ${release.version} (${release.mode === "Global" ? "global by hash" : "embedded"}) · no deploy method`);
+  add("code", running === release.code_hash && !factoryNote ? "ok" : "fail",
+    `code hash ${running.slice(0, 8)}… ${running === release.code_hash ? "=" : "≠"} release ${release.version} (${release.mode === "Global" ? "global by hash" : "embedded"}) · no deploy method${factoryNote}`);
 
   // keys: at most one FunctionCall key for `act` on the account itself; never full access.
   const keys = await accord.chain.accessKeys(agreement);
@@ -136,6 +145,12 @@ export async function verify(
     failed: checks.filter((c) => c.status === "fail").length,
     notChecked: checks.filter((c) => c.status === "not_checked").length,
   };
+}
+
+/** The factories `verify` accepts: this client's factory, the network's known ones, and any the caller adds. */
+export function knownFactories(accord: Accord, factories: string[] = []): string[] {
+  const known = (KNOWN_FACTORIES[accord.network] ?? []).map((f) => f.factory);
+  return [...new Set([accord.factory, ...known, ...factories.filter(Boolean)])];
 }
 
 const NEAR_AI = "https://cloud-api.near.ai/v1";

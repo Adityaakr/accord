@@ -5,6 +5,18 @@ import { Account, JsonRpcProvider, KeyPair, KeyPairSigner, actions, type KeyPair
 import type { AccordEvent } from "./types.js";
 import { fromBase64, utf8 } from "./bytes.js";
 
+/**
+ * The Accord factories deployed per network (DECISIONS.md sections 18 and 24). Each factory pins one settlement
+ * token; an agreement copies it at creation and keeps it for life. `verify` accepts an agreement whose own factory
+ * is on this list (or on the list the caller passes) and reads that factory's release.
+ */
+export const KNOWN_FACTORIES: Record<string, { factory: string; token: string; label: string }[]> = {
+  testnet: [
+    { factory: "accord-v2.testnet", token: "tusdc.accord-v1.testnet", label: "Test USDC" },
+    { factory: "accord-usdc.testnet", token: "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af", label: "Circle USDC (testnet)" },
+  ],
+};
+
 export const RPC: Record<string, { rpc: string; fallback: string; explorer: string }> = {
   testnet: {
     rpc: "https://test.rpc.fastnear.com",

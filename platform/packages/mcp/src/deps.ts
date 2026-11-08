@@ -17,14 +17,19 @@ export function realDeps(env: Env): McpDeps {
   const factory = env.ACCORD_FACTORY;
   if (!factory) throw new Error("ACCORD_FACTORY is not set");
   const accord = new Accord({ network, factory, rpc: env.NEAR_RPC_URL || undefined });
+  // An optional second factory that settles in Circle USDC; its agreements are listed and verified too.
+  const second = env.ACCORD_FACTORY_USDC && env.ACCORD_FACTORY_USDC !== factory ? env.ACCORD_FACTORY_USDC : "";
   const deps: McpDeps = {
-    listAgreements: (party) => accord.listAgreements({ party }),
+    listAgreements: async (party) => [
+      ...(await accord.listAgreements({ party })),
+      ...(second ? await accord.onFactory(second).listAgreements({ party }) : []),
+    ],
     agreement: (id) => accord.agreement(id),
     preflight: (agreement, recipient) => preflight(accord, agreement, recipient, {
       archivalRpc: env.NEAR_ARCHIVAL_RPC_URL || undefined,
       approvalsUrl: env.ACCORD_APPROVALS_URL || undefined,
     }),
-    verify: (agreement) => verify(accord, agreement, { nearAiKey: env.NEARAI_API_KEY || undefined }),
+    verify: (agreement) => verify(accord, agreement, { nearAiKey: env.NEARAI_API_KEY || undefined, factories: [second] }),
   };
   if (env.ACCORD_AGENT_KEY && env.AGENT_AGREEMENT) {
     if (network === "mainnet") throw new Error("the agent signs on testnet only");

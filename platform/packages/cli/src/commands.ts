@@ -443,8 +443,9 @@ const recycle: Handler = async (ctx) => {
   const signer = ctx.deps.signer;
   if (!signer || signer.role !== "recipient") throw new Error("recycle signs as the recipient (RECIPIENT_ACCOUNT, RECIPIENT_KEY)");
   const agreementFlag = flagString(ctx.args, "agreement");
-  const token = flagString(ctx.args, "token") ?? ctx.env.ACCORD_TOKEN
-    ?? (agreementFlag ? (await ctx.deps.agreement(agreementFlag).get()).token : undefined);
+  // The agreement's own token comes before ACCORD_TOKEN: each factory settles in its own token.
+  const token = flagString(ctx.args, "token")
+    ?? (agreementFlag ? (await ctx.deps.agreement(agreementFlag).get()).token : undefined) ?? ctx.env.ACCORD_TOKEN;
   if (!token) throw new Error("missing --token (or ACCORD_TOKEN, or --agreement to read it from)");
   const to = flagString(ctx.args, "to") ?? ctx.env.BUYER_ACCOUNT;
   if (!to) throw new Error("missing --to (or BUYER_ACCOUNT)");

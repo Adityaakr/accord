@@ -41,6 +41,12 @@ export class Accord {
     return new Accord({ network: this.network, factory: this.factory, rpc: this.chain.rpcUrl, signer });
   }
 
+  /** The same network, chain and signer on another factory: an agreement's own, read from its state. */
+  onFactory(factory: string): Accord {
+    if (factory === this.factory) return this;
+    return new Accord({ network: this.network, factory, rpc: this.chain.rpcUrl, signer: this.signer });
+  }
+
   agreement(account: string): AgreementClient {
     return new AgreementClient(this, account);
   }
@@ -128,7 +134,8 @@ export class AgreementClient {
   async sealMandate(mandate: Mandate, opts: { role: Role; docKey?: DocKey }): Promise<{ commitment: string; txHash: string }> {
     const signer = this.accord.need();
     const a = await this.get();
-    const release = await this.accord.release(a.release);
+    // The mandate key of the agreement's own factory's release, whichever factory this client was built for.
+    const release = await this.accord.onFactory(a.factory).release(a.release);
     const docKey = opts.docKey ?? (await deriveDocKey(signer, this.id));
     const sealed = seal({
       agreement: this.id, role: opts.role, party: signer.accountId, release: a.release, mandate,
