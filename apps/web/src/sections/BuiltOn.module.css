@@ -15,7 +15,7 @@
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
 }
-.track { display: flex; width: max-content; animation: run 40s linear infinite; }
+.track { display: flex; width: max-content; animation: run 66s linear infinite; }
 .marquee:hover .track, .marquee:focus-within .track { animation-play-state: paused; }
 .list { display: flex; flex: none; list-style: none; margin: 0; padding: 0; }
 
@@ -23,6 +23,7 @@
 .markWrap { display: inline-flex; }
 .tile { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; overflow: hidden; flex: none; }
 .tileNear { background: #fff; color: #000; font-size: 18px; }
+.tileLight { background: #fff; border: 1px solid rgba(var(--ink-rgb), 0.12); }
 .tileDark { background: #0b0d0c; border: 1px solid rgba(var(--ink-rgb), 0.12); }
 .coin { display: inline-flex; width: 32px; height: 32px; }
 .svgMark { width: 100%; height: 100%; }
@@ -38,13 +39,13 @@
   .marquee { -webkit-mask-image: none; mask-image: none; }
   .track { animation: none; width: 100%; }
   .copy { display: none; }
-  .list { flex-wrap: wrap; padding-left: 24px; }
+  .list { flex: 1 1 auto; min-width: 0; flex-wrap: wrap; padding-left: 24px; }
   .item { padding: 24px 48px 24px 0; }
 }
 @media (max-width: 1199.98px) { .section { padding: 32px 24px 48px; } }
 @media (max-width: 809.98px) {
   .section { padding: 24px 16px 40px; gap: 16px; }
-  .track { animation-duration: 30s; }
+  .track { animation-duration: 50s; }
   .item { gap: 10px; padding: 28px 44px 28px 0; }
   .tile, .coin { width: 26px; height: 26px; }
   .name, .nearai { font-size: 20px; }

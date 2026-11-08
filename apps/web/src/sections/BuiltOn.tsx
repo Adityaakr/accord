@@ -5,8 +5,9 @@ import styles from "./BuiltOn.module.css"
 
 /* Home · Built on (#built-on), directly under the hero (8 Nov 2026, from Adi's reference: a logo line). A plain label,
    then a moving line over a faint column grid: each item is the project's own mark and its name, large. Marks are the
-   official artwork: USDC is Circle's coin (inline, from Circle's SVG), OutLayer's and Rhea's are their site icons
-   (public/assets/logos), NEAR and NEAR AI come from the existing components. Each item's role in Accord sits in the
+   official artwork: USDC is Circle's coin (inline, from Circle's SVG), OutLayer's, Rhea's, NEAR Builders' and
+   Intear's are their site icons, HOT's and Meteor's the icons their wallets publish in the HOT Connect wallet manifest
+   (all in public/assets/logos), NEAR and NEAR AI come from the existing components. Each item's role in Accord sits in the
    DOM for screen readers and agents; the visible line shows names only. Two copies make the loop (the second is
    hidden); hover or focus pauses; reduced motion stands still and wraps. The note says no partnership is claimed. */
 
@@ -39,6 +40,14 @@ const ITEMS: Item[] = [
     role: "Planned: funding an agreement from other chains through NEAR Intents' 1Click API." },
   { name: "Rhea", mark: <span className={`${styles.tile} ${styles.tileDark}`}><img src="/assets/logos/rhea.svg" alt="" width={22} height={20} loading="lazy" /></span>,
     role: "The USDC/wNEAR pool the market-making observer reads at hidden times." },
+  { name: "HOT Wallet", mark: <img className={styles.tile} src="/assets/logos/hot-wallet.png" alt="" width={32} height={32} loading="lazy" />,
+    role: "Wallet sign-in in the Accord app: HOT Connect (@hot-labs/near-connect) lists the NEAR wallets a principal can use." },
+  { name: "Meteor Wallet", mark: <span className={`${styles.tile} ${styles.tileLight}`}><img src="/assets/logos/meteor-wallet.svg" alt="" width={24} height={24} loading="lazy" /></span>,
+    role: "A NEAR wallet for the Accord app; on testnet it signs delegate actions that Accord's relayer sends, so the user pays no gas." },
+  { name: "Intear Wallet", mark: <span className={`${styles.tile} ${styles.tileLight}`}><img src="/assets/logos/intear-wallet.svg" alt="" width={24} height={24} loading="lazy" /></span>,
+    role: "A NEAR wallet for the Accord app; on testnet it signs delegate actions that Accord's relayer sends, so the user pays no gas." },
+  { name: "NEAR Builders", mark: <img className={styles.tile} src="/assets/logos/near-builders.png" alt="" width={32} height={32} loading="lazy" />,
+    role: "The NEAR builder community; Accord was built with its build resources." },
 ]
 
 function Row({ it }: { it: Item }) {
