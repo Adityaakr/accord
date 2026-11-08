@@ -5,7 +5,8 @@ import { PageHero } from "../components/PageHero"
 import { Button } from "../components/Button"
 import { LINKS } from "../content/links"
 import { usePageMeta } from "../lib/meta"
-import styles from "./Verify.module.css"
+import tl from "../styles/Timeline.module.css"
+import styles from "./Join.module.css"
 
 /* /join, "How to start" (8 Nov 2026; was an early-access request form). The steps a company takes in the app, the
    same numbered chain as /verify, and a way in: the app when it is hosted (VITE_APP_URL), otherwise the live testnet
@@ -25,33 +26,35 @@ export function Join() {
   usePageMeta("Accord: How to start", "Start with Accord on NEAR testnet: sign in with a NEAR wallet or work email, choose a workspace, create a deal room and invite your counterparty.")
   return (
     <div className={styles.page}>
-      <PageHero pill="Start" title="How to start." lead={LEAD} />
+      <PageHero centered pill="Start" title="How to start." lead={LEAD} />
       <section id="join" className={`section ${styles.main}`}>
-        <div className={styles.block}>
-          <h2 className={`t-h4 ${styles.subheading}`}>Five steps, in the app.</h2>
-          <ol className={styles.steps}>
-            {STEPS.map((s, i) => (
-              <Appear key={s.title} as="li" className={styles.step} effect={{ ...appear(`${i * 0.05}s` as `${number}s`), threshold: 0.2 }}>
-                <div className={styles.stepHead}>
-                  <span className={`mono ${styles.stepNo}`}>{String(i + 1).padStart(2, "0")}</span>
-                  <h3 className={`t-h5 ${styles.stepTitle}`}>{s.title}</h3>
-                </div>
-                <p className={`t-body-sm ${styles.stepText}`}>{s.text}</p>
-              </Appear>
-            ))}
-          </ol>
-        </div>
-        <Appear as="div" className={styles.card} effect={{ ...appear("0s"), threshold: 0.2 }}>
-          <h2 className={`t-h5 ${styles.cardTitle}`}>Open the app</h2>
-          <p className={`t-body-sm ${styles.weak}`}>
-            The app runs on NEAR testnet. Settlement uses a test USDC token, so nothing here moves real money. The guided path funds your account from a faucet and opens a room against Accord&apos;s demo vendor.
-          </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 8 }}>
-            <Button variant="primary" href={LINKS.openDealRoom}>Open the app</Button>
-            <Button variant="secondary" href={LINKS.tryDeal}>Try a deal in 3 minutes</Button>
-            <Button variant="secondary" href={LINKS.docs}>Run it from the docs</Button>
+        <Appear as="div" className={tl.column} effect={{ ...appear("0s"), threshold: 0.1 }}>
+          <div className={tl.group}>
+            <h2 className={tl.groupLabel}><span>Five steps, in the app</span></h2>
+            <ol className={tl.rows}>
+              {STEPS.map((s, i) => (
+                <li key={s.title} className={`${tl.row} ${styles.step}`}>
+                  <span className={`mono ${tl.num}`}>{String(i + 1).padStart(2, "0")}</span>
+                  <span className={styles.stepMain}>
+                    <span className={tl.name}>{s.title}</span>
+                    <span className={styles.stepText}>{s.text}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
           </div>
-          <p className={`t-body-sm ${styles.weak}`}>Questions? <Link to={LINKS.contact} className="ls-link-inline">Contact the team</Link>.</p>
+          <div className={tl.group}>
+            <h2 className={tl.groupLabel}><span>Open the app</span><span className={tl.groupMeta}>NEAR testnet · test USDC</span></h2>
+            <p className={tl.note}>
+              Settlement uses a test USDC token, so nothing here moves real money. The guided path funds your account from a faucet and opens a room against Accord&apos;s demo vendor.
+            </p>
+            <div className={styles.actions}>
+              <Button variant="primary" href={LINKS.openDealRoom}>Open the app</Button>
+              <Button variant="secondary" href={LINKS.tryDeal}>Try a deal in 3 minutes</Button>
+              <Button variant="secondary" href="/docs/quickstart">Read the quickstart</Button>
+            </div>
+            <p className={tl.note}>Questions? <Link to={LINKS.contact} className={tl.noteLink}>Contact the team</Link></p>
+          </div>
         </Appear>
       </section>
     </div>

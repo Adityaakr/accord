@@ -4,7 +4,7 @@ Start
 
 Accord runs on NEAR testnet. Sign in with a NEAR wallet or a work email, choose how you use it, and open a deal room with your counterparty.
 
-## Five steps, in the app.
+## Five steps, in the app
 
 - 01 Sign in Connect a NEAR wallet (Meteor, Intear, Ledger, Nightly) or continue with a work email through NEAR Auth. Every signature that moves money happens in your own account.
 
@@ -16,10 +16,10 @@ Accord runs on NEAR testnet. Sign in with a NEAR wallet or a work email, choose 
 
 - 05 Fund and run The buyer funds the escrow in USDC on NEAR. The agent pays only what the terms allow; anything else is refused and recorded.
 
-## Open the app
+## Open the app NEAR testnet · test USDC
 
-The app runs on NEAR testnet. Settlement uses a test USDC token, so nothing here moves real money. The guided path funds your account from a faucet and opens a room against Accord's demo vendor.
+Settlement uses a test USDC token, so nothing here moves real money. The guided path funds your account from a faucet and opens a room against Accord's demo vendor.
 
-[Open the app](/app/signin) [Try a deal in 3 minutes](/app/try-it) [Run it from the docs](/docs)
+[Open the app](/app/signin) [Try a deal in 3 minutes](/app/try-it) [Read the quickstart](/docs/quickstart)
 
-Questions? [Contact the team](/contact).
+Questions? [Contact the team](/contact)
