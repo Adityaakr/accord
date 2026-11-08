@@ -62,6 +62,28 @@ Not stopped by the contract: a person approving the wrong terms, or a payment th
 
 ## Claims and their limits
 
+The control plane as gates · every request, the same order, no gate skipped
+
+`act(Pay{item, amount, recipient})` from the agent's one key, which can call this one method
+
+- Key and state ERR_REVOKED ERR_NOT_EXECUTING other keys: rejected
+
+- Recipient ERR_CANARY → revoke ERR_NO_RECIPIENT ERR_PAYEE_MISMATCH
+
+- Item ERR_UNKNOWN_ITEM ERR_ALREADY_PAID
+
+- Evidence ERR_NOT_DUE ERR_PERIOD_WITHHELD
+
+- Amount ERR_AMOUNT_MISMATCH ERR_CAP_EXCEEDED ERR_INSUFFICIENT_FUNDS
+
+- Lock ERR_IN_FLIGHT
+
+- Pay ft_transfer, locked
+
+Public refusal log every refusal is an on-chain event with its reason · nothing was sent
+
+The agent cannot reorder, skip or argue with a gate. Humans change the inputs (approve an exception, accept a new recipient); the gates stay the same.
+
 | We claim | Because | Limit, stated next to it |
 | --- | --- | --- |
 | Each company's mandate is readable only inside attested enclaves | The browser encrypts the mandate to a key derived from a seed generated inside the Sealed Table's enclave, bound to its release build and readable only by runs an agreement requests or that publish the key's public half; the chain holds the ciphertext and a commitment hash; the two negotiators run on NEAR AI Cloud models in TEEs, and the gateway's and the model's attestations are verified with a fresh nonce | Under the hardware's trust assumptions (Intel TDX, NVIDIA confidential computing) and OutLayer's keystore governance. The deployer owns the seed and the factory account, and could rebind the seed to another build or request extra runs. Prompts reach the model through NEAR AI's attested gateway over TLS (TLS binding is not checked from inside the job), unless end-to-end encryption to the model shipped (2.3b). The browser trusts the code the app serves; the CLI is the alternative. The ciphertext stays on chain. The final terms reveal that each side accepted them, as any signed deal does. A negotiator can concede in words; code checks the numbers |

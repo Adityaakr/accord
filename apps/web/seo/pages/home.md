@@ -40,6 +40,14 @@ A payment becomes eligible only when the agreed evidence or acceptance is record
 
 - Rhea : The USDC/wNEAR pool the market-making observer reads at hidden times.
 
+- HOT Wallet : Wallet sign-in in the Accord app: HOT Connect (@hot-labs/near-connect) lists the NEAR wallets a principal can use.
+
+- Meteor Wallet : A NEAR wallet for the Accord app; on testnet it signs delegate actions that Accord's relayer sends, so the user pays no gas.
+
+- Intear Wallet : A NEAR wallet for the Accord app; on testnet it signs delegate actions that Accord's relayer sends, so the user pays no gas.
+
+- NEAR Builders : The NEAR builder community; Accord was built with its build resources.
+
 Accord builds on these networks and services; it does not claim a partnership with them. NEAR Intents, for funding from other chains, is planned.
 
 ## Built for commerce in stablecoins.
