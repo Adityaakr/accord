@@ -3,7 +3,7 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(8, 10, 9, 0.82);
+  background: rgba(var(--bg-rgb), 0.82);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--hairline);
@@ -37,6 +37,23 @@
   overflow-y: auto;
 }
 .group { display: flex; flex-direction: column; gap: 2px; }
+.bottom { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--hairline); }
+.pendingDot { width: 7px; height: 7px; margin-left: auto; border-radius: 999px; background: var(--teal); box-shadow: 0 0 0 3px var(--teal-wash); }
+
+/* workspace switcher */
+.switcher { position: relative; }
+.switch { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--hairline); background: var(--elevation-strong); color: var(--text-weak); text-align: left; transition: border-color 0.2s var(--ease); }
+.switch:hover { border-color: var(--hairline-strong); color: var(--text-strong); }
+.switchIcon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: rgba(var(--ink-rgb), 0.05); flex: none; }
+.switchText { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.2; }
+.switchName { color: var(--text-strong); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.switchSub { font-size: 11.5px; color: var(--text-faint); }
+.menu { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 6px); display: flex; flex-direction: column; gap: 2px; padding: 6px; border-radius: 12px; background: var(--elevation-strong); border: 1px solid var(--hairline-strong); box-shadow: 0 24px 48px -24px rgba(var(--shadow-rgb), 0.55); }
+.menuItem { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; color: var(--text-medium); text-align: left; }
+.menuItem:hover, .menuOn { background: var(--elevation-medium); color: var(--text-strong); }
+.menuTag { margin-left: auto; font-size: 10.5px; color: var(--text-faint); }
+.menuAll { padding: 8px 10px 4px; font-size: 12.5px; color: var(--text-weak); border-top: 1px solid var(--hairline); margin-top: 4px; }
+.menuAll:hover { color: var(--text-strong); }
 .groupLabel { padding: 0 10px 6px; font-size: 12px; color: var(--text-faint); }
 .side {
   position: relative;
@@ -51,7 +68,7 @@
   transition: color 0.2s var(--ease), background-color 0.2s var(--ease);
 }
 .side svg { flex: none; opacity: 0.85; }
-.side:hover { color: var(--text-strong); background: rgba(255, 255, 255, 0.03); }
+.side:hover { color: var(--text-strong); background: rgba(var(--ink-rgb), 0.03); }
 .on { color: var(--text-strong); background: var(--elevation-medium); }
 .on::before { content: ""; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: var(--teal); }
 
@@ -70,12 +87,17 @@
     padding: 8px 16px;
     border-right: 0;
     border-bottom: 1px solid var(--hairline);
-    background: rgba(8, 10, 9, 0.92);
+    background: rgba(var(--bg-rgb), 0.92);
     overflow-x: auto;
     scrollbar-width: none;
   }
   .sidebar::-webkit-scrollbar { display: none; }
   .group { flex-direction: row; }
+  .bottom { margin-top: 0; padding-top: 0; border-top: 0; }
+  .switcher { flex: none; }
+  .switch { padding: 4px 8px; }
+  .switchSub { display: none; }
+  .menu { position: fixed; left: 16px; right: 16px; top: 112px; }
   .groupLabel { display: none; }
   .on::before { display: none; }
 }

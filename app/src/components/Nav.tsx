@@ -1,33 +1,20 @@
 "use client";
 
-// The app shell's navigation: a slim top bar (brand, network, the signed-in person) and a left sidebar with the
-// product's sections (PLATFORM.md §6). Sections not built yet open a "Coming next" page that says what they will
-// hold, so no link is dead. On a phone the sidebar becomes one scrolling row under the bar.
+// The app shell's navigation: a slim top bar (brand, search, network, the signed-in person) and a left sidebar that
+// belongs to the workspace in use (Buyer, Vendor, Settlement authority, Reviewer, Auditor): its switcher at the top,
+// only that role's sections, then Settings, Profile and the theme. On a phone the sidebar becomes one scrolling row.
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { LogoMark } from "./LogoMark";
+import { PixelIcon } from "./PixelIcon";
+import { ThemeToggle } from "./theme/Theme";
+import { useOrg } from "./org/OrgProvider";
+import { WORKSPACES, useWorkspace, type NavItem } from "./workspace/Workspace";
 import { WalletButton } from "./wallet/WalletButton";
 import { useWallet } from "./wallet/WalletProvider";
 import styles from "./Nav.module.css";
-
-type Item = { href: string; label: string; match: (p: string) => boolean; icon: keyof typeof ICONS };
-
-const PRODUCT: Item[] = [
-  { href: "/", label: "Home", match: (p) => p === "/", icon: "home" },
-  { href: "/rooms", label: "Deal rooms", match: (p) => p.startsWith("/rooms") || p.startsWith("/agreements"), icon: "rooms" },
-  { href: "/approvals", label: "Approvals", match: (p) => p.startsWith("/approvals"), icon: "approvals" },
-  { href: "/agents", label: "Agents", match: (p) => p.startsWith("/agents"), icon: "agents" },
-  { href: "/recipients", label: "Recipients", match: (p) => p.startsWith("/recipients"), icon: "recipients" },
-  { href: "/record", label: "Record", match: (p) => p.startsWith("/record"), icon: "record" },
-  { href: "/settings", label: "Settings", match: (p) => p.startsWith("/settings") || p.startsWith("/profile"), icon: "settings" },
-];
-const TOOLS: Item[] = [
-  { href: "/atlas", label: "Market making", match: (p) => p.startsWith("/atlas"), icon: "chart" },
-  { href: "/verify", label: "Verify", match: (p) => p.startsWith("/verify"), icon: "verify" },
-  { href: "/payee", label: "Payee check", match: (p) => p.startsWith("/payee"), icon: "recipients" },
-  { href: "/try", label: "Try the demo", match: (p) => p.startsWith("/try"), icon: "try" },
-];
 
 /* 16-px line icons, one stroke weight */
 const ICONS = {
@@ -41,6 +28,10 @@ const ICONS = {
   chart: <path d="M3 13V9M6.5 13V6M10 13V8M13.5 13V3.5" />,
   verify: <><path d="M8 2 13 4v4c0 3-2.2 5-5 6-2.8-1-5-3-5-6V4z" /><path d="m6 8 1.5 1.5L10.5 6.5" /></>,
   try: <path d="M5 3.5v9l7.5-4.5z" />,
+  deliveries: <><path d="M2.5 5.5 8 2.5l5.5 3v5L8 13.5l-5.5-3z" /><path d="M2.5 5.5 8 8.5l5.5-3M8 8.5v5" /></>,
+  payout: <><rect x="2" y="4" width="12" height="8.5" rx="1.8" /><path d="M2 7h12M4.5 10h2.5" /></>,
+  profile: <><circle cx="8" cy="6" r="2.6" /><path d="M3 13.5c.8-2.3 2.7-3.4 5-3.4s4.2 1.1 5 3.4" /></>,
+  switch: <path d="m5 6.5 3-3 3 3M5 9.5l3 3 3-3" />,
 };
 
 function Icon({ name }: { name: keyof typeof ICONS }) {
@@ -79,23 +70,57 @@ export function Nav({ network }: { network: string }) {
 export function Sidebar() {
   const path = usePathname() ?? "/";
   const w = useWallet();
-  const link = (l: Item) => {
-    // Deal rooms opens on the signed-in person's own rooms
-    const href = l.href === "/rooms" && w.accountId ? `/rooms?party=${encodeURIComponent(w.accountId)}` : l.href;
+  const o = useOrg();
+  const { ws, choose } = useWorkspace();
+  const [open, setOpen] = useState(false);
+  const link = (l: NavItem) => {
+    // rooms open filtered to this person and this workspace's role
+    const href = l.href === "/rooms" && w.accountId ? `/rooms?party=${encodeURIComponent(w.accountId)}${ws.role ? `&role=${ws.role}` : ""}` : l.href;
     const on = l.match(path);
     return (
-      <Link key={l.href} href={href} className={`${styles.side} ${on ? styles.on : ""}`} aria-current={on ? "page" : undefined}>
+      <Link key={l.href + l.label} href={href} className={`${styles.side} ${on ? styles.on : ""}`} aria-current={on ? "page" : undefined}>
         <Icon name={l.icon} />
         <span>{l.label}</span>
       </Link>
     );
   };
+  // Settings carries a small dot until the organisation is confirmed and set up
+  const orgPending = Boolean(w.accountId) && !o.checking && (!o.session || (o.data && !o.data.org));
+  const settingsOn = path.startsWith("/settings") || path.startsWith("/onboarding");
   return (
     <nav className={styles.sidebar} aria-label="Main">
-      <div className={styles.group}>{PRODUCT.map(link)}</div>
-      <div className={styles.group}>
-        <span className={styles.groupLabel}>Tools</span>
-        {TOOLS.map(link)}
+      <div className={styles.switcher}>
+        <button type="button" className={styles.switch} onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-haspopup="menu">
+          <span className={styles.switchIcon}><PixelIcon name={ws.icon} size={18} /></span>
+          <span className={styles.switchText}><span className={styles.switchName}>{ws.name}</span><span className={styles.switchSub}>workspace</span></span>
+          <Icon name="switch" />
+        </button>
+        {open && (
+          <div className={styles.menu} role="menu">
+            {WORKSPACES.map((x) => (
+              <button key={x.id} type="button" role="menuitemradio" aria-checked={x.id === ws.id} className={`${styles.menuItem} ${x.id === ws.id ? styles.menuOn : ""}`}
+                onClick={() => { choose(x.id); setOpen(false); }}>
+                <PixelIcon name={x.icon} size={16} />
+                <span>{x.name}</span>
+                {x.planned ? <span className={styles.menuTag}>Planned</span> : null}
+              </button>
+            ))}
+            <Link href="/enter" className={styles.menuAll} onClick={() => setOpen(false)}>Compare workspaces</Link>
+          </div>
+        )}
+      </div>
+      <div className={styles.group}>{ws.nav.map(link)}</div>
+      <div className={`${styles.group} ${styles.bottom}`}>
+        <Link href="/settings" className={`${styles.side} ${settingsOn ? styles.on : ""}`} aria-current={settingsOn ? "page" : undefined}>
+          <Icon name="settings" />
+          <span>Settings</span>
+          {orgPending ? <span className={styles.pendingDot} title="Confirm it's you to set up your organisation" /> : null}
+        </Link>
+        <Link href="/profile" className={`${styles.side} ${path.startsWith("/profile") ? styles.on : ""}`}>
+          <Icon name="profile" />
+          <span>Profile</span>
+        </Link>
+        <ThemeToggle />
       </div>
     </nav>
   );
