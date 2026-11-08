@@ -25,6 +25,7 @@ const LIMIT_LABELS: Record<string, string> = {
   max_spread_bps: "Widest spread we accept (bps)", tightest_spread_bps: "Tightest spread we promise (bps)",
   min_depth_quote: "Least depth each side", max_depth_quote: "Most depth we promise", depth_band_bps: "Depth band (bps)",
   min_slots: "Fewest slots per period", min_threshold: "Lowest pass threshold", max_threshold: "Highest pass threshold",
+  min_depth_band_bps: "Narrowest depth band we accept (bps)",
 };
 
 type Draft = Record<string, string>;

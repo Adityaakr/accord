@@ -356,13 +356,13 @@ Market-making, buyer and vendor:
 { "kind": "market-making", "role": "vendor",
   "shared": { "capabilities": "…" },
   "limits": { "min_retainer_per_period": "5000000", "tightest_spread_bps": 45, "max_depth_quote": "<from probe 0.7>",
-              "max_threshold": 5 },
+              "max_threshold": 5, "min_depth_band_bps": 100 },
   "instructions": "…" }
 ```
 
 ### 6.3 Within-limits rules (`limits::within`)
 
-Procurement, buyer: `total ≤ max_total`; `items ≤ max_items`; every `due_offset_secs ≤ duration_secs ≤ max_duration_secs`; `acceptance_window_secs ≥ min_acceptance_window_secs`. Vendor: `total ≥ min_total`; `min_items ≤ items ≤ max_items`; every `due_offset_secs ≥ min_due_offset_secs`; `acceptance_window_secs ≤ max_acceptance_window_secs`. Market-making, buyer: `retainer ≤ max_retainer_per_period`; `periods ≤ limits.periods`; `period_secs` equal; `max_spread_bps ≤ limits.max_spread_bps`; `min_depth_quote ≥ limits.min_depth_quote`; `slots ≥ min_slots`; `threshold ≥ min_threshold`; the venue equals the shared venue. Vendor: `retainer ≥ min_retainer_per_period`; `max_spread_bps ≥ tightest_spread_bps`; `min_depth_quote ≤ max_depth_quote`; `threshold ≤ max_threshold`. Both: amounts sum exactly; the acceptance window within the agreement's params.
+Procurement, buyer: `total ≤ max_total`; `items ≤ max_items`; every `due_offset_secs ≤ duration_secs ≤ max_duration_secs`; `acceptance_window_secs ≥ min_acceptance_window_secs`. Vendor: `total ≥ min_total`; `min_items ≤ items ≤ max_items`; every `due_offset_secs ≥ min_due_offset_secs`; `acceptance_window_secs ≤ max_acceptance_window_secs`. Market-making, buyer: `retainer ≤ max_retainer_per_period`; `periods ≤ limits.periods`; `period_secs` equal; `max_spread_bps ≤ limits.max_spread_bps`; `min_depth_quote ≥ limits.min_depth_quote`; `slots ≥ min_slots`; `threshold ≥ min_threshold`; the venue equals the shared venue. Vendor: `retainer ≥ min_retainer_per_period`; `max_spread_bps ≥ tightest_spread_bps`; `min_depth_quote ≤ max_depth_quote`; `threshold ≤ max_threshold`; `depth_band_bps ≥ min_depth_band_bps` (optional, `0` when absent, 9 Nov 2026). Both: amounts sum exactly; the acceptance window within the agreement's params.
 
 ### 6.4 Negotiator message (structured output, `starter/jobs/sealed-table/prompts/message.schema.json`)
 

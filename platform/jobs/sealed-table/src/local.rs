@@ -164,7 +164,7 @@ impl LocalNegotiator {
                     pass_threshold: v.max_threshold.min(6),
                     max_spread_bps: v.tightest_spread_bps.saturating_mul(2),
                     min_depth_quote: (v.max_depth_quote / 2).to_string(),
-                    depth_band_bps: 200,
+                    depth_band_bps: 200u32.max(v.min_depth_band_bps),
                 };
                 Ok(self.propose(
                     "QUOTE",
@@ -214,7 +214,8 @@ impl LocalNegotiator {
                 let inside = amount(&a.retainer_per_period) >= v.min_retainer_per_period
                     && a.max_spread_bps >= v.tightest_spread_bps
                     && amount(&a.min_depth_quote) <= v.max_depth_quote
-                    && a.pass_threshold <= v.max_threshold;
+                    && a.pass_threshold <= v.max_threshold
+                    && a.depth_band_bps >= v.min_depth_band_bps;
                 if inside && may("ACCEPT") {
                     return Ok(Self::reply("ACCEPT", "We can meet these conditions."));
                 }
@@ -226,6 +227,7 @@ impl LocalNegotiator {
                     .min(v.max_depth_quote)
                     .to_string();
                 a.pass_threshold = a.pass_threshold.min(v.max_threshold);
+                a.depth_band_bps = a.depth_band_bps.max(v.min_depth_band_bps);
                 Ok(self.propose(
                     "FINAL",
                     terms(a),

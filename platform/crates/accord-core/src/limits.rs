@@ -67,6 +67,10 @@ pub struct MarketMakingVendor {
     #[serde(with = "u128_str")]
     pub max_depth_quote: Amount,
     pub max_threshold: u8,
+    /// The narrowest depth band the vendor accepts: a band of a few bps makes "depth within the band" near zero, so
+    /// every slot would fail `min_depth_quote`. Optional so mandates sealed before 9 Nov 2026 keep their meaning.
+    #[serde(default)]
+    pub min_depth_band_bps: u32,
 }
 
 /// The buyer's shared venue, which market-making terms must name exactly.
@@ -159,6 +163,7 @@ fn within_inner(t: &Terms, m: &Mandate) -> Result<bool, LimitFailure> {
                 && a.max_spread_bps >= l.tightest_spread_bps
                 && a.min_depth_quote <= l.max_depth_quote
                 && a.pass_threshold <= l.max_threshold
+                && a.depth_band_bps >= l.min_depth_band_bps
         }
     })
 }
@@ -230,6 +235,27 @@ mod tests {
             json!({"min_retainer_per_period": "5000000",
             "tightest_spread_bps": 45, "max_depth_quote": "3000000000", "max_threshold": 5}),
         )
+    }
+
+    /// Audit L5 L1 (finding 10): a 1 bps band makes "depth within the band" close to zero, so every slot fails
+    /// `min_depth_quote`, yet the vendor's mandate had no field bounding the band from below. Fixed: the vendor's
+    /// optional `min_depth_band_bps` floor; a mandate without it keeps its old meaning (no floor).
+    #[test]
+    fn audit_the_vendor_can_floor_the_depth_band() {
+        let mut t = fixtures::market_making();
+        t.atlas.as_mut().unwrap().depth_band_bps = 1;
+        let mut floored = mv();
+        floored.limits["min_depth_band_bps"] = json!(100);
+        assert!(
+            !within(&t, &floored),
+            "a 1 bps band passed the vendor's floor"
+        );
+        assert!(
+            within(&t, &mv()),
+            "a mandate without the floor keeps its meaning"
+        );
+        t.atlas.as_mut().unwrap().depth_band_bps = 100;
+        assert!(within(&t, &floored));
     }
 
     #[test]
