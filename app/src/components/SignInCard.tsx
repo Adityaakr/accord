@@ -62,7 +62,10 @@ export function SignInCard({ title = "Sign in to Accord" }: { title?: string }) 
             <WalletIcon />
             <span>{w.connecting && !emailBusy ? "Opening your wallet…" : "Connect a NEAR wallet"}</span>
           </button>
-          <p className={styles.note}>{WALLETS.join(" · ")} on {w.network}</p>
+          <p className={styles.note}>{`${WALLETS.slice(0, -1).join(", ")} or ${WALLETS[WALLETS.length - 1]}`} on {w.network}</p>
+          {w.network === "testnet" ? (
+            <p className={styles.hint}>On testnet, Meteor and Intear send through Accord&apos;s relayer; other wallets send through their own network connection.</p>
+          ) : null}
         </>
       )}
       {w.error && <p className={styles.error} role="alert">{w.error}</p>}
