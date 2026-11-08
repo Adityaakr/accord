@@ -438,7 +438,7 @@ export const DOC_PAGES: DocPage[] = [
         title: "In the browser",
         blocks: [
           { kind: "p", text: "[/verify](/verify) runs five public checks on any agreement id, live from NEAR testnet: the agreement, the contract code, the access keys, the recipient and the record. No account, no keys." },
-          { kind: "image", image: { id: "verify", alt: "The site's /verify page checking a6.accord-v2.testnet: five live rows read from testnet (agreement, contract code, access keys, recipient, record) each marked ok, then the full make verify result with 6 of 7 ok.", caption: "/verify on a6.accord-v2.testnet." } },
+          { kind: "image", image: { id: "verify", alt: "The site's /verify page checking a6.accord-v2.testnet: five live rows read from testnet (agreement, contract code, access keys, recipient, record) each marked ok, then the full make verify result: 5 ok, 1 partial, 1 not checked.", caption: "/verify on a6.accord-v2.testnet." } },
           { kind: "note", text: "The sealed outcome, the model attestation and the release attestation are checked by `make verify` and in the app, not by /verify." },
         ],
       },

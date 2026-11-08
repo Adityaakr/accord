@@ -85,6 +85,7 @@ input, textarea, select { font: inherit; }
   --on-accent: rgb(8, 10, 9);
   --h1-sheen-a: #ffffff;
   --h1-sheen-b: #b9bec5;
+  --partial: rgb(212, 177, 68); /* muted amber for a partial check (7.9:1 on the background) */
   color-scheme: dark;
 }
 /* ---------- Light theme (toggle in the nav; stored per visitor) ---------- */
@@ -106,6 +107,7 @@ input, textarea, select { font: inherit; }
   --on-accent: #ffffff;
   --h1-sheen-a: rgb(14, 15, 17);
   --h1-sheen-b: rgb(92, 98, 106);
+  --partial: rgb(120, 88, 0); /* 5.3:1 on the light background */
   color-scheme: light;
 }
 .mono {

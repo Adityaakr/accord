@@ -31,6 +31,8 @@
 .ok { color: var(--teal); }
 .bad, .refused { color: var(--refusal); }
 .weak { color: var(--text-weak); }
+/* partial: some of a check ran and passed, the rest was not run here; muted amber, never teal or red */
+.partial { color: var(--partial); }
 .strong { color: var(--text-strong); }
 .sep { color: var(--text-weak); margin: 0 6px; }
 

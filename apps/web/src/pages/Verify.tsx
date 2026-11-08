@@ -5,7 +5,7 @@ import { Arrow } from "../components/Arrow"
 import { QuietLink } from "../components/QuietLink"
 import { CopyButton } from "../components/CopyButton"
 import { LINKS } from "../content/links"
-import { CHECKS, TESTNET, VERIFY_RAW } from "../content/testnet"
+import { CHECKS, TESTNET, VERIFY_RAW, checkSummary, type CheckStatus } from "../content/testnet"
 import { ROWS, hashOf, normaliseId, verifyAgreement, type Result, type Row, type RowKey, type Seg } from "../lib/nearVerify"
 import { usePageMeta } from "../lib/meta"
 import tl from "../styles/Timeline.module.css"
@@ -23,7 +23,7 @@ const blank = (): Row[] => ROWS.map((r) => ({ ...r, value: [], result: "loading"
 
 export function Status({ result }: { result: Result }) {
   if (result === "loading") return <span className={`mono ${tl.status} ${tl.shimmer}`}>reading</span>
-  const cls = result === "ok" ? tl.ok : result === "not ok" ? tl.bad : tl.weak
+  const cls = result === "ok" ? tl.ok : result === "not ok" ? tl.bad : result === "partial" ? tl.partial : tl.weak
   return <span className={`mono ${tl.status} ${cls}`}>{result}</span>
 }
 
@@ -124,6 +124,10 @@ export function Verify() {
   const recorded = full.state === "recorded"
   const fullId = recorded ? TESTNET.agreement : id
   const fullCommand = `make verify DEAL=${fullId}`
+  const failedLive = full.state === "live" ? full.checks.filter((c) => liveResult(c.status) === "not ok").length : 0
+  const fullSummary = full.state === "live"
+    ? [checkSummary(full.checks.filter((c) => liveResult(c.status) !== "not ok").map((c) => ({ status: liveResult(c.status) as CheckStatus }))), failedLive ? `${failedLive} failed` : ""].filter(Boolean).join(" · ")
+    : checkSummary(CHECKS)
 
   return (
     <div className={styles.page}>
@@ -181,7 +185,7 @@ export function Verify() {
             <p className={tl.groupLabel}>
               <span>Full check · <span className={tl.lower}>make verify</span></span>
               <span className={tl.groupMeta} aria-live="polite">
-                {full.state === "loading" ? "reading" : full.state === "live" ? `${full.ok} of ${full.checks.length} ok · live` : `Recorded for ${TESTNET.agreement}`}
+                {full.state === "loading" ? "reading" : full.state === "live" ? `${fullSummary} · live` : `Recorded for ${TESTNET.agreement}`}
               </span>
             </p>
             {recorded && id !== TESTNET.agreement ? (
@@ -218,7 +222,7 @@ export function Verify() {
                           </>
                         )}
                       </span>
-                      <Status result={full.state === "loading" ? "loading" : c.ok ? "ok" : "not checked"} />
+                      <Status result={full.state === "loading" ? "loading" : c.status} />
                     </li>
                   ))}
             </ol>
@@ -227,9 +231,7 @@ export function Verify() {
           {full.state === "loading" ? null : (
             <details className={`${tl.foot} ${styles.foot}`}>
               <summary>
-                <span className={`mono ${tl.ok}`}>
-                  {full.state === "live" ? `${full.ok} of ${full.checks.length} ok` : `${CHECKS.filter((c) => c.ok).length} of ${CHECKS.length} ok`}
-                </span>
+                <span className="mono">{fullSummary}</span>
                 <span className={styles.sep} aria-hidden="true">·</span>
                 <span className={styles.headValue}>
                   <QuietLink href={`https://testnet.nearblocks.io/address/${fullId}`} className={styles.footLink}>{fullId}</QuietLink>

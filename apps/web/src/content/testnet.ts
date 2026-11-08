@@ -48,16 +48,22 @@ export const INFRA = [
 ]
 
 /* make verify on a6, as it printed (9 Nov 2026): each check with what it means in plain words */
-export type Check = { id: string; name: string; meaning: string; ok: boolean; href: string }
+export type CheckStatus = "ok" | "partial" | "not checked"
+export type Check = { id: string; name: string; meaning: string; status: CheckStatus; href: string }
 export const CHECKS: Check[] = [
-  { id: "code", name: "Contract code", meaning: "Matches the published release", ok: true, href: TESTNET.releaseUrl },
-  { id: "keys", name: "Agreement keys", meaning: "No full-access key", ok: true, href: `${acct("a6.accord-v2.testnet")}?tab=accesskeys` },
-  { id: "sealed", name: "Sealed outcome", meaning: "Signed inside the enclave", ok: true, href: tx("GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW") },
-  { id: "release", name: "Enclave release", meaning: "Needs the outlayer-verify tool", ok: false, href: "https://app.outlayer.ai/docs/trust-verification" },
-  { id: "model", name: "Model attestation", meaning: "The real model, fresh nonce bound; hardware quote not checked here", ok: true, href: "https://testnet-api.outlayer.ai/attestations/13596" },
-  { id: "payee", name: "Recipient", meaning: "Proven on the vendor's domain", ok: true, href: tx("6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6") },
-  { id: "record", name: "Record", meaning: "Payments match the receipts", ok: true, href: tx("2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ") },
+  { id: "code", name: "Contract code", meaning: "Matches the published release", status: "ok", href: TESTNET.releaseUrl },
+  { id: "keys", name: "Agreement keys", meaning: "No full-access key", status: "ok", href: `${acct("a6.accord-v2.testnet")}?tab=accesskeys` },
+  { id: "sealed", name: "Sealed outcome", meaning: "Signed inside the enclave", status: "ok", href: tx("GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW") },
+  { id: "release", name: "Enclave release", meaning: "Needs the outlayer-verify tool", status: "not checked", href: "https://app.outlayer.ai/docs/trust-verification" },
+  { id: "model", name: "Model attestation", meaning: "The real model, fresh nonce bound; hardware quote not checked here", status: "partial", href: "https://testnet-api.outlayer.ai/attestations/13596" },
+  { id: "payee", name: "Recipient", meaning: "Proven on the vendor's domain", status: "ok", href: tx("6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6") },
+  { id: "record", name: "Record", meaning: "Payments match the receipts", status: "ok", href: tx("2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ") },
 ]
+/** "5 ok · 1 partial · 1 not checked": the counts make verify prints, in its order */
+export const checkSummary = (checks: { status: CheckStatus }[]) => {
+  const n = (s: CheckStatus) => checks.filter((c) => c.status === s).length
+  return [`${n("ok")} ok`, n("partial") ? `${n("partial")} partial` : "", n("not checked") ? `${n("not checked")} not checked` : ""].filter(Boolean).join(" · ")
+}
 export const VERIFY_COMMAND = "make verify DEAL=a6.accord-v2.testnet"
 export const VERIFY_RAW = `accord verify · a6.accord-v2.testnet
 code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok

@@ -3,7 +3,7 @@ import { Arrow } from "../components/Arrow"
 import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { SectionHeading } from "../components/SectionHeading"
 import { LINKS } from "../content/links"
-import { CHECKS, FLOW, INFRA, PHASES, TESTNET } from "../content/testnet"
+import { CHECKS, checkSummary, FLOW, INFRA, PHASES, TESTNET } from "../content/testnet"
 import styles from "./LiveTestnet.module.css"
 
 /* Home · Live on NEAR testnet (#testnet), 8 Nov 2026. The full flow of one agreement, each step linked to its
@@ -19,7 +19,6 @@ const rise = (delay: `${number}s`): AppearEffect => ({
 })
 
 export function LiveTestnet() {
-  const ok = CHECKS.filter((c) => c.ok).length
   return (
     <section id="testnet" className={`section ${styles.section}`}>
       <SectionHeading
@@ -57,7 +56,7 @@ export function LiveTestnet() {
         <p className={styles.verify}>
           <span className="mono">make verify</span>
           <span className={styles.sep} aria-hidden="true">·</span>
-          <span className={styles.verifyResult}>{ok} of {CHECKS.length} checks ok</span>
+          <span className={styles.verifyResult}>{checkSummary(CHECKS)}</span>
           <span className={styles.sep} aria-hidden="true">·</span>
           <Link to="/verify" className={styles.footLink}>See the checks<Arrow /></Link>
         </p>
