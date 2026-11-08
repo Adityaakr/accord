@@ -6,12 +6,13 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Accord, AccordError, parseUnits, formatUnits,
+  parseUnits, formatUnits,
   type AgreementView, type ExceptionView, type ItemView, type PeriodView, type RecipientVersion,
 } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { useAppConfig } from "@/components/AppConfig";
 import { Panel, Pill } from "@/components/ui";
+import { agreementClient, errorText, txLine } from "@/components/me/client";
 import styles from "./actions.module.css";
 
 type Role = "buyer" | "vendor" | "authority" | "viewer";
@@ -33,23 +34,16 @@ export function Actions({
     : w.accountId === a.vendor ? "vendor"
     : w.accountId === a.vendor_authority ? "authority" : "viewer";
 
-  const client = useMemo(() => {
-    if (!w.signer) return null;
-    return new Accord({ network: cfg.network === "sandbox" ? "sandbox" : "testnet", factory: cfg.factory, rpc: cfg.rpc, signer: w.signer })
-      .agreement(a.account);
-  }, [w.signer, cfg, a.account]);
+  const client = useMemo(() => (w.signer ? agreementClient(w.signer, cfg, a.account) : null), [w.signer, cfg, a.account]);
 
   async function run(label: string, fn: () => Promise<{ txHash?: string } | unknown>) {
     setBusy(label);
     setResult(null);
     try {
-      const r = (await fn()) as { txHash?: string; status?: string; code?: string };
-      const tail = r?.code ? ` · ${r.code}` : r?.status ? ` · ${r.status}` : "";
-      setResult({ ok: !r?.code, text: `${label}${tail}${r?.txHash ? ` · tx ${r.txHash.slice(0, 10)}…` : ""}` });
+      setResult(txLine(label, await fn()));
       router.refresh();
     } catch (e) {
-      const msg = e instanceof AccordError ? e.code ?? e.message : (e as Error).message;
-      setResult({ ok: false, text: `${label}: ${msg}` });
+      setResult({ ok: false, text: `${label}: ${errorText(e)}` });
     } finally {
       setBusy(null);
     }
