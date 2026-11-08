@@ -49,11 +49,43 @@ The website's server (`apps/web/scripts/serve.mjs`) then proxies `/app` and `/ap
 `https://accordweb-production.up.railway.app/app` opens the app. Without `APP_ORIGIN`, `/app` shows a short
 "starting up" page that links to Verify.
 
-## 3. Optional services
+## 3. Keeper and demo agent
 
-The keeper (`services/keeper`) and the demo agent (`services/agent`) run the scheduled steps and the `/try` room.
-They are not needed to use the app. To add one: a service from this repo with root directory `platform`, start command
-`pnpm --filter @accord/keeper start` (or `@accord/agent`), and the variables listed in `.env.example`.
+The keeper (`services/keeper`) starts negotiations, activates recipients, polls the observer and closes periods and
+agreements. The demo agent (`services/agent`) answers the public `/try` room's inbox with its one key and, with
+`AGENT_REARM=on`, keeps that room open (a new key after a revocation, a new room when one is used up). Neither is
+needed for `/app/try-it`, where each room runs its own demo agent. Each is one more service from the same repository:
+
+1. **New → GitHub repo → this repository**; keep the root directory at `/`. The same `Dockerfile` builds the platform
+   and runs `pnpm --filter @accord/$ACCORD_SERVICE start` when `ACCORD_SERVICE` is set.
+2. No public domain and no healthcheck path: neither service listens on a port. Each writes a heartbeat to the
+   shared Postgres every loop (`keeper`, `agent`, and `rearm` from the re-arm), which `/app/status` reads.
+3. **Variables** (names only; values from your local `.env`):
+
+| Variable | Keeper | Agent | Reuse the app's value |
+|---|---|---|---|
+| `ACCORD_SERVICE` | `keeper` | `agent` | no |
+| `ACCORD_NETWORK` | `testnet` | `testnet` | yes |
+| `ACCORD_FACTORY` | `accord-v2.testnet` | `accord-v2.testnet` | yes (the services default to an older factory, so set it) |
+| `NEAR_RPC_URL` | optional | optional | yes |
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` | `${{Postgres.DATABASE_URL}}` | yes: the same Postgres as the app, or `/app/status` sees no heartbeat |
+| `KEEPER_ACCOUNT`, `KEEPER_KEY` | required | required with the re-arm (it starts the room's negotiation and activates its recipient) | no |
+| `OUTLAYER_OWNER`, `OUTLAYER_PAYMENT_KEY` | optional: observer polling for market making (`BLOCKED.md`); off without them | | no |
+| `OUTLAYER_API_URL`, `OUTLAYER_OBSERVER_PROJECT` | optional | | no |
+| `AGENT_REARM` | | `on` | no |
+| `TRY_BUYER_ACCOUNT`, `TRY_BUYER_KEY` | | required with the re-arm | no |
+| `TRY_VENDOR_ACCOUNT`, `TRY_VENDOR_KEY` | | required with the re-arm | no |
+| `TRY_AUTHORITY_ACCOUNT`, `TRY_AUTHORITY_KEY` | | required with the re-arm | no |
+| `TRY_RECIPIENT_ACCOUNT` | | required with the re-arm | no |
+| `ACCORD_TOKEN` | | `tusdc.accord-v1.testnet` | yes |
+| `DEMO_VENDOR_DOMAIN` | | required with the re-arm: the domain whose `/.well-known/accord.json` lists `TRY_RECIPIENT_ACCOUNT` | no |
+| `APP_URL` | | optional: the app's URL | no |
+| `BUYER_ACCOUNT`, `BUYER_KEY` | | optional: funds new rooms with test USDC | no |
+| `TRY_MAX_ROOMS_PER_DAY`, `TRY_ITEM_INTERVAL_SECS`, `TRY_REARM_SECS` | | optional | no |
+| `AGENT_PREFLIGHT` | | optional (`on`) | no |
+| `AGENT_AGREEMENT`, `ACCORD_AGENT_KEY` | | optional: one fixed agreement instead of, or as well as, the re-arm | no |
+
+4. Deploy, then open `/app/status`: the keeper's and the agent's heartbeats appear within a minute.
 
 ## Notes
 

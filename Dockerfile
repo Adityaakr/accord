@@ -1,10 +1,13 @@
 # One Dockerfile for both Railway services, chosen by the service's own variables:
 # - the website service (no ACCORD_NETWORK): install, typecheck, Vite build, pre-render, then the dependency-free
 #   static server on $PORT (apps/web/scripts/serve.mjs), with /healthz;
-# - the app service (ACCORD_NETWORK set, e.g. testnet): the Next.js app in platform/ under /app on $PORT.
+# - the app service (ACCORD_NETWORK set, e.g. testnet): the Next.js app in platform/ under /app on $PORT;
+# - a platform service (ACCORD_SERVICE=keeper or agent): the same platform build, running
+#   `pnpm --filter @accord/$ACCORD_SERVICE start` (no HTTP port; it writes heartbeats to DATABASE_URL).
 # Railway builds this file directly, so a deploy never depends on Railway's builder tool being downloadable.
 # No secrets at build time: every key is a runtime variable.
 ARG ACCORD_NETWORK
+ARG ACCORD_SERVICE
 
 FROM node:22-alpine AS web-build
 WORKDIR /app
@@ -57,5 +60,17 @@ WORKDIR /repo/app
 EXPOSE 3100
 CMD ["sh", "-c", "pnpm exec next start -p ${PORT:-3100}"]
 
-# ---- pick one: target (website) or target-app (app) ----
-FROM target${ACCORD_NETWORK:+-app}
+# ---- the keeper or the demo agent (platform/services), from the same build as the app ----
+FROM node:24-alpine AS target-app-svc
+WORKDIR /repo
+RUN corepack enable
+ARG ACCORD_SERVICE
+ENV NODE_ENV=production ACCORD_SERVICE=$ACCORD_SERVICE
+COPY --from=app-build /repo /repo
+CMD ["sh", "-c", "case \"$ACCORD_SERVICE\" in keeper|agent) exec pnpm --filter \"@accord/$ACCORD_SERVICE\" start ;; *) echo \"ACCORD_SERVICE must be keeper or agent, not '$ACCORD_SERVICE'\" >&2; exit 1 ;; esac"]
+
+# ACCORD_SERVICE without ACCORD_NETWORK: the same service (it defaults to testnet).
+FROM target-app-svc AS target-svc
+
+# ---- pick one: target (website), target-app (app), target-app-svc or target-svc (keeper or agent) ----
+FROM target${ACCORD_NETWORK:+-app}${ACCORD_SERVICE:+-svc}
