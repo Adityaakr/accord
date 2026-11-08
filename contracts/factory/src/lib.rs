@@ -236,6 +236,28 @@ impl Factory {
         }
     }
 
+    /// One job's `pubkey` run per transaction. The releases account attaches 150 Tgas to OutLayer plus a 40 Tgas
+    /// callback, so three requests cannot share one 300 Tgas transaction (`request_pubkeys` gives each 90 Tgas and
+    /// runs out of gas on testnet). Owner only; the input stays fixed in the releases contract.
+    pub fn request_pubkey(&mut self, job: String, project: JobProject) {
+        self.require_owner();
+        require(
+            ["sealed_table", "payee", "observer"].contains(&job.as_str()),
+            "ERR_UNKNOWN_JOB",
+        );
+        Promise::new(releases_account())
+            .function_call(
+                "request_pubkey",
+                serde_json::to_vec(
+                    &json!({"job": job, "project": project.project, "version_key": project.version_key}),
+                )
+                .unwrap(),
+                NearToken::from_yoctonear(0),
+                gas(260),
+            )
+            .detach();
+    }
+
     /// From `releases.<factory>` only: one job's signed `pubkey` output, stored as pending.
     pub fn store_pubkey(
         &mut self,

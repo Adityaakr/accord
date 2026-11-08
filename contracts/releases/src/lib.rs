@@ -41,6 +41,8 @@ impl Releases {
         assert!(JOBS.contains(&job.as_str()), "ERR_UNKNOWN_JOB");
         let args = json!({
             "source": {"Project": {"project_id": project, "version_key": version_key}},
+            // the project owner's secrets (the job's PROTECTED_ seed); without a reference OutLayer attaches none
+            "secrets_ref": {"account_id": project.split('/').next().unwrap_or_default(), "profile": "default"},
             "resource_limits": {"max_instructions": 10_000_000_000u64, "max_memory_mb": 128, "max_execution_seconds": 30},
             "input_data": json!({"mode": "pubkey"}).to_string(),
             "response_format": "Json",

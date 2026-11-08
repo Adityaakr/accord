@@ -26,6 +26,9 @@ pub(crate) fn request_job(
 ) -> Promise {
     let args = json!({
         "source": {"Project": {"project_id": job.project, "version_key": job.wasm_hash}},
+        // the project owner's secrets (the job's PROTECTED_ seed, NEARAI_API_KEY); without a reference OutLayer
+        // attaches none and the job reports its seed as not set
+        "secrets_ref": {"account_id": job.project.split('/').next().unwrap_or_default(), "profile": "default"},
         "resource_limits": {
             "max_instructions": 100_000_000_000u64,
             "max_memory_mb": 256,
