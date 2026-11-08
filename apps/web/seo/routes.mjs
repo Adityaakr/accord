@@ -52,5 +52,6 @@ export const ROUTES = [
   { path: "/sealed-table", alias: "/product/sealed-table" },
   { path: "/payee", alias: "/product/payee" },
   { path: "/atlas", alias: "/use-cases/market-making" },
-  { path: "/demo", alias: "/" },
+  /* /demo is retired: the server answers 301 to /#testnet; the pre-rendered file is a noindex redirect page */
+  { path: "/demo", alias: "/", redirect: "/#testnet" },
 ]

@@ -175,13 +175,23 @@ ${md ? mdToHtml(md) : `<h1>${esc(title)}</h1><p>${esc(description)}</p>`}
   return html
 }
 
+/* A retired path: a noindex page that sends browsers and crawlers on (the server also answers 301) */
+const redirectPage = (to) => `<!doctype html>
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Accord: moved</title><meta name="robots" content="noindex, follow" /><link rel="canonical" href="${abs(to.split("#")[0])}" />
+<meta http-equiv="refresh" content="0; url=${to}" /></head>
+<body><p>This page moved: <a href="${to}">${abs(to)}</a></p></body></html>
+`
 const write = (p, s) => { mkdirSync(dirname(p), { recursive: true }); writeFileSync(p, s) }
 const pages = ROUTES.filter((r) => !r.alias)
 for (const r of ROUTES) {
   const target = r.alias ? pages.find((p) => p.path === r.alias) : r
   const file = r.path === "/" ? join(DIST, "index.html") : join(DIST, r.path.slice(1), "index.html")
-  write(file, render(r, target))
+  write(file, r.redirect ? redirectPage(r.redirect) : render(r, target))
 }
+
+/* Old and retired paths, for the server's 301s (scripts/serve.mjs reads this file; the pre-rendered pages stay as a fallback) */
+write(join(DIST, "redirects.json"), JSON.stringify(Object.fromEntries(ROUTES.filter((r) => r.alias).map((r) => [r.path, r.redirect || r.alias])), null, 2) + "\n")
 
 /* 404: the app shell (React shows the not-found page), never indexed */
 write(join(DIST, "404.html"), TEMPLATE.replace("<title>", '<meta name="robots" content="noindex" />\n    <title>'))

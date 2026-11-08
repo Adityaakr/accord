@@ -6,7 +6,7 @@
    /app and /app/* go to the Accord app service when APP_ORIGIN is set (see platform/DEPLOY.md). */
 import { createServer, request as httpRequest } from "node:http"
 import { request as httpsRequest } from "node:https"
-import { createReadStream, statSync } from "node:fs"
+import { createReadStream, readFileSync, statSync } from "node:fs"
 import { extname, join, normalize, resolve, sep, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -81,6 +81,10 @@ function fileFor(urlPath) {
   return null
 }
 
+/* Old and retired paths answer 301 to their main page (dist/redirects.json, written by the pre-render from seo/routes.mjs) */
+let REDIRECTS = {}
+try { REDIRECTS = JSON.parse(readFileSync(join(DIST, "redirects.json"), "utf8")) } catch { /* none */ }
+
 const APP_ONLY = /^\/(signin|try-it|rooms|agreements|enter|profile|settings|onboarding|approvals|deliveries|invite|recipients|payout|agents|market-making)(\/|$)/
 
 const server = createServer((req, res) => {
@@ -89,6 +93,13 @@ const server = createServer((req, res) => {
   /* App-only paths typed or linked without the /app prefix (e.g. /signin): send them to the app */
   if (APP_ONLY.test(path)) {
     res.writeHead(308, { Location: "/app" + (req.url || "/"), ...HEADERS }).end()
+    return
+  }
+  const moved = REDIRECTS[path.replace(/\/$/, "") || "/"]
+  if (moved && (req.method === "GET" || req.method === "HEAD")) {
+    const q = (req.url || "").includes("?") ? (req.url || "").slice((req.url || "").indexOf("?")) : ""
+    const [p, h] = moved.split("#")
+    res.writeHead(301, { Location: p + q + (h ? `#${h}` : ""), "Cache-Control": "public, max-age=3600", ...HEADERS }).end()
     return
   }
   if (req.method !== "GET" && req.method !== "HEAD") {
