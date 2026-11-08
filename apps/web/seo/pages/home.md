@@ -528,9 +528,13 @@ Paid, refused, revoked
 
 make verify 5 ok · 1 partial · 1 not checked [See the checks](/verify)
 
+Re-run on release 4 (audit fixes): [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet) Circle USDC: [a1.accord-usdc](https://testnet.nearblocks.io/address/a1.accord-usdc.testnet) [Every transaction](/record)
+
 - [Factory](https://testnet.nearblocks.io/address/accord-v2.testnet)
 
 - [Release 3](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh)
+
+- [Release 4](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)
 
 - [Relayer tx](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC)
 

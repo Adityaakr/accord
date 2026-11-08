@@ -4,6 +4,8 @@ Verify
 
 Check any Accord agreement from public data. No account, no keys.
 
+Examples
+
 Agreement [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
 
 Live from testnet 5 of 5 ok

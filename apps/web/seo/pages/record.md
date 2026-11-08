@@ -58,4 +58,32 @@ Agreement [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord
 
 - 01 ERR_PAYEE_MISMATCH 13.00 USDC to [halcyon-markets.testnet](https://testnet.nearblocks.io/address/halcyon-markets.testnet)·17:04:30 UTC·[tx](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs)
 
-release 3 · test USDC [Factory](https://testnet.nearblocks.io/address/accord-v2.testnet) [Release 3](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh) [Relayer tx](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC) [Attestations](https://testnet-api.outlayer.ai/attestations/13596) [Verify it](/verify)
+## Latest on release 4 [verify a10](/verify?agreement=a10.accord-v2.testnet)
+
+- 01 Negotiated in the enclave [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)·33.00 USDC · 3 items·[account](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)
+
+- 02 Buyer funds the escrow [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)·33.00 USDC·[tx](https://testnet.nearblocks.io/txns/2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22)
+
+- 03 Agent pays item 1 [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)·12.00 USDC·[tx](https://testnet.nearblocks.io/txns/Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm)
+
+- 04 A redirected payment is refused [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)·ERR_PAYEE_MISMATCH·[tx](https://testnet.nearblocks.io/txns/51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu)
+
+- 05 Attack: redirect, altered amount, canary [a11](https://testnet.nearblocks.io/address/a11.accord-v2.testnet)·0.00 moved · key deleted·[tx 1](https://testnet.nearblocks.io/txns/HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv)·[tx 2](https://testnet.nearblocks.io/txns/3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh)·[tx 3](https://testnet.nearblocks.io/txns/DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT)
+
+- 06 Revoke, then a new key pays item 2 [a13](https://testnet.nearblocks.io/address/a13.accord-v2.testnet)·AccessKeyDoesNotExist·[tx 1](https://testnet.nearblocks.io/txns/8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3)·[tx 2](https://testnet.nearblocks.io/txns/DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT)·[tx 3](https://testnet.nearblocks.io/txns/24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe)
+
+Release 4 carries the audit fixes and is current on both factories since 9 Nov 2026 ([published](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)); agreements created before it, a6 among them, keep release 3. The proofs ran again on new agreements a10, a11 and a13.
+
+## Circle USDC [verify a1](/verify?agreement=a1.accord-usdc.testnet)
+
+- 01 Buyer funds the escrow 14.00 USDC·[tx](https://testnet.nearblocks.io/txns/4gPohYYMokgQcPcgNhX3tCTTXjA35AfuKkpGs1SpS2no)
+
+- 02 Agent pays item 1 5.00 USDC·[tx](https://testnet.nearblocks.io/txns/E127BGy3Tw6PmhE9JcoFr7vQsKTiHNevTTiAxEjJGWK2)
+
+- 03 A redirected payment is refused ERR_PAYEE_MISMATCH·[tx](https://testnet.nearblocks.io/txns/9rgsBFA26yedWuEEJk77sKBDrDGS9mHn9BFMknCaP8BB)
+
+- 04 Buyer revokes the agent AccessKeyDoesNotExist·[tx](https://testnet.nearblocks.io/txns/FTigDebs1kZjLpTN8nC8SZWp4dMM1ChuUyR211JZnzuW)
+
+The second factory, accord-usdc.testnet, settles in Circle's testnet USDC. Agreement a1 was created on its release 3.
+
+release 3 · test USDC [Factory](https://testnet.nearblocks.io/address/accord-v2.testnet) [Release 3](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh) [Release 4](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU) [Relayer tx](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC) [Attestations](https://testnet-api.outlayer.ai/attestations/13596) [Verify it](/verify)

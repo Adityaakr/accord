@@ -98,6 +98,16 @@ The agent cannot reorder, skip or argue with a gate. Humans change the inputs (a
 
 - 06 A market-making agreement's payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception Because Each slot's time is drawn inside the observer's enclave from a seed generated there; the observation is taken at the first NEAR mainnet block after that time, signed by the observer's key, and checked by the contract against the agreed spread, depth and two-sided quoting; anyone can recompute it from an archival node Limit, stated next to it A market-making agreement's observer measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment
 
+## Audit
+
+- 01 Five independent audit lenses (the payment path; authorisation and keys; creation and code integrity; funds; the enclave jobs), with two skeptics reproducing each finding as a test, found 1 High and 5 Medium issues (one of them Medium-Low), plus 4 Low.
+
+- 02 The High one: a deposit sent during `close` could make the refund to the buyer spend the vendor's reserve. The refund is now capped at the ledger while anything is owed to the vendor.
+
+- 03 Every fix went in test first: the test failed for the reason named, then passed, and stays in the suite. The contract and factory fixes are live as release 4 on both testnet factories since 9 Nov 2026, and the proofs ran again on new agreements (a10, a11, a13; see the [record](/record)). Agreements created before keep release 3.
+
+- 04 Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is partial. The jobs now serve only factory agreements in code, but those job builds are not deployed yet, and S1 itself needs the seed's access condition in OutLayer, which is not set yet. Details: [DECISIONS.md section 25](https://github.com/Adityaakr/accord/blob/main/platform/DECISIONS.md#25-audit-fixes-and-release-4-9-nov-2026).
+
 ## What the keeper can and cannot do
 
 - 01 It can start negotiations whose commitments are both in, activate recipients whose delay has passed, poll the observer for each open slot and submit what it signs, close finished periods and drive `close()` for ended agreements.

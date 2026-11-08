@@ -8,21 +8,27 @@ The accounts and endpoints Accord uses on NEAR testnet, and the agreement contra
 
 - 01 Factory [accord-v2.testnet](https://testnet.nearblocks.io/address/accord-v2.testnet)
 
-- 02 Release [release 3](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh)
+- 02 Release The audit fixes, current since 9 Nov 2026 ([set current](https://testnet.nearblocks.io/txns/J9uADVqQSkY6f1uMYbMbWoPnB4oiwuS3CtLayKojtgeC)). Release 3: [publish](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh). [release 4](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)
 
-- 03 Agreement Ran the full flow on 8 Nov 2026; see [/record](/record). [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
+- 03 Agreement Ran the full flow on 8 Nov 2026 on release 3; see [/record](/record). [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
 
-- 04 Token Test USDC, 6 decimals. [tusdc.accord-v1.testnet](https://testnet.nearblocks.io/address/tusdc.accord-v1.testnet)
+- 04 Agreement on release 4 Negotiated, funded, paid item 1 and refused a redirect on 9 Nov 2026: [fund](https://testnet.nearblocks.io/txns/2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22), [pay](https://testnet.nearblocks.io/txns/Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm), [refused](https://testnet.nearblocks.io/txns/51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu). [a10.accord-v2.testnet](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)
 
-- 05 OutLayer [outlayer.testnet](https://testnet.nearblocks.io/address/outlayer.testnet)
+- 05 Circle USDC factory Settles in Circle's testnet USDC (`3e2210e1…afcb8af`); release 4 current ([publish](https://testnet.nearblocks.io/txns/GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai), [set current](https://testnet.nearblocks.io/txns/5D9LxPuU4phUXTgRawd97TmhZPGiPjWzSPWCYXJteoLJ)). [accord-usdc.testnet](https://testnet.nearblocks.io/address/accord-usdc.testnet)
 
-- 06 Attestations `/attestations/<id>` returns the TDX quote for that run. [testnet-api.outlayer.ai](https://testnet-api.outlayer.ai/attestations/13596)
+- 06 Circle USDC agreement Release 3. [Funded](https://testnet.nearblocks.io/txns/4gPohYYMokgQcPcgNhX3tCTTXjA35AfuKkpGs1SpS2no) `14.00 USDC`, [paid](https://testnet.nearblocks.io/txns/E127BGy3Tw6PmhE9JcoFr7vQsKTiHNevTTiAxEjJGWK2) `5.00`, [refused](https://testnet.nearblocks.io/txns/9rgsBFA26yedWuEEJk77sKBDrDGS9mHn9BFMknCaP8BB) a redirect, [revoked](https://testnet.nearblocks.io/txns/FTigDebs1kZjLpTN8nC8SZWp4dMM1ChuUyR211JZnzuW). [a1.accord-usdc.testnet](https://testnet.nearblocks.io/address/a1.accord-usdc.testnet)
 
-- 07 Relayer Linked: a transaction it relayed. [relay.accord-v2.testnet](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC)
+- 07 Token Test USDC, 6 decimals. [tusdc.accord-v1.testnet](https://testnet.nearblocks.io/address/tusdc.accord-v1.testnet)
 
-- 08 NEAR RPC [rpc.testnet.near.org](https://docs.near.org/api/rpc/providers)
+- 08 OutLayer [outlayer.testnet](https://testnet.nearblocks.io/address/outlayer.testnet)
 
-- 09 Explorer [testnet.nearblocks.io](https://testnet.nearblocks.io)
+- 09 Attestations `/attestations/<id>` returns the TDX quote for that run. [testnet-api.outlayer.ai](https://testnet-api.outlayer.ai/attestations/13596)
+
+- 10 Relayer Linked: a transaction it relayed. [relay.accord-v2.testnet](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC)
+
+- 11 NEAR RPC [rpc.testnet.near.org](https://docs.near.org/api/rpc/providers)
+
+- 12 Explorer [testnet.nearblocks.io](https://testnet.nearblocks.io)
 
 ## Factory methods
 

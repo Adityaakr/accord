@@ -229,7 +229,10 @@ const agentSections = `Source code (MIT): ${REPO} · Machine-readable facts: ${S
 
 - Network: NEAR testnet only. Mainnet follows an audit and is not live.
 - Proof: agreement a6.accord-v2.testnet ran the full flow on 8 Nov 2026 on factory accord-v2.testnet, release 3: sealed limits, the Sealed Table negotiation by the real NEAR AI model inside OutLayer's attested enclave, approvals, funding, a payment, a refused redirect (ERR_PAYEE_MISMATCH) and a revocation. Each of its 12 transactions is linked at ${SITE_URL}/record
-- Settlement: USDC on NEAR (NEP-141), from each agreement's own account; on testnet a test USDC token (tUSDC).
+- ${STATUS.release4}
+- ${STATUS.circleUsdc}
+- Audit: ${STATUS.audit}
+- Settlement: USDC on NEAR (NEP-141), from each agreement's own account; on testnet a test USDC token (tUSDC) on accord-v2.testnet, and Circle's testnet USDC on accord-usdc.testnet.
 - Agreement types: six; two are built (vendor contracts, called procurement in code, and market-making agreements) and four are planned.
 - Sign-in: external NEAR wallets only, through HOT Connect. There is no email sign-in.
 

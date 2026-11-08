@@ -16,6 +16,12 @@ On agreement a6
 
 `make verify DEAL=a6.accord-v2.testnet`
 
+Other agreements to check
+
+- 01 Release 4 The audit fixes. `ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a10.accord-v2.testnet` prints `code = release 4 · 5 ok · 1 partial · 1 not checked`. JSON: `/app/api/verify/a10.accord-v2.testnet`. [a10.accord-v2.testnet](/verify?agreement=a10.accord-v2.testnet)
+
+- 02 Circle USDC The second factory, on release 3. `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as `ACCORD_FACTORY=accord-usdc.testnet make verify`). JSON: `/app/api/verify/a1.accord-usdc.testnet`. [a1.accord-usdc.testnet](/verify?agreement=a1.accord-usdc.testnet)
+
 ## What each check means
 
 - 01 Contract code The account's code hash equals the published release (`8wMuMRre…` = release 3, global by hash), and the code has no deploy method. [ok](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh)

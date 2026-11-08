@@ -8,7 +8,7 @@ The factory and agreement contracts, the three OutLayer enclave jobs, NEAR AI Cl
 
 - 01 Factory Publishes releases and creates agreements. It cannot call, upgrade or drain an existing agreement. [accord-v2.testnet](https://testnet.nearblocks.io/address/accord-v2.testnet)
 
-- 02 Release One agreement code hash per release, published as a NEP-591 global contract and referenced by hash (`8wMuMRre…`), so it cannot change. Every agreement on the release uses it; an agreement keeps its release for life. [release 3](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh)
+- 02 Release One agreement code hash per release, published as a NEP-591 global contract and referenced by hash, so it cannot change. Every agreement on the release uses it; an agreement keeps its release for life. Release 4 (`ECgsrZwy…`, the audit fixes) is current on both factories since 9 Nov 2026; a6 and the agreements before it keep release 3 (`8wMuMRre…`). [release 4](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)
 
 - 03 Agreement account Created in one batch (`CreateAccount`, `Transfer`, `UseGlobalContract`, `FunctionCall new`) with no `AddKey`, so it starts with no keys. It has no method that deploys code and never holds a full-access key. [a<id>.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
 
@@ -44,7 +44,7 @@ Limit: TLS binding is not checked from inside the job. Prompts reach the model t
 
 - 01 Token on testnet A 6-decimal NEP-141 test token (open mint, capped at 1,000 per call), used because the testnet USDC faucets were down on 8 Nov 2026. [tusdc.accord-v1.testnet](https://testnet.nearblocks.io/address/tusdc.accord-v1.testnet)
 
-- 02 Settle in Circle USDC (testnet) A second factory on the same release 3 settles in Circle's testnet USDC (`3e2210e1…afcb8af`, 6 decimals). Get it at [faucet.circle.com](https://faucet.circle.com), network NEAR Testnet: about `20 USDC` per address every 1 to 2 hours. Each agreement keeps its factory's token for life; try-it defaults to test USDC. `a1.accord-usdc.testnet` is negotiated and approved, not funded yet. [accord-usdc.testnet](https://testnet.nearblocks.io/address/accord-usdc.testnet)
+- 02 Settle in Circle USDC (testnet) A second factory on the same release 3 settles in Circle's testnet USDC (`3e2210e1…afcb8af`, 6 decimals). Get it at [faucet.circle.com](https://faucet.circle.com), network NEAR Testnet: about `20 USDC` per address every 1 to 2 hours. Each agreement keeps its factory's token for life; try-it defaults to test USDC. `a1.accord-usdc.testnet` ran a full deal in it: funded `14.00 USDC`, paid `5.00` to `halcyon-mm.testnet`, refused a redirect and revoked the agent; see [/record](/record). [accord-usdc.testnet](https://testnet.nearblocks.io/address/accord-usdc.testnet)
 
 - 03 Fund The buyer sends USDC into the agreement's own account; the escrow is credited up to the terms total and NEP-141 returns any excess. [ft_transfer_call · fund](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy)
 
