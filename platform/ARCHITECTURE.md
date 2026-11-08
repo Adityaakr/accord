@@ -115,7 +115,7 @@ Sealed ──(both commitments, start_negotiation, signed outcome)──▶ Atte
 | Pay | Agent | `act(Pay{item, amount, recipient})` | Six gates, then `ft_transfer` with a lock | `act_refused` or `payment_sent`, then `payment_settled` / `payment_failed` |
 | Exception | Agent or vendor asks, buyer decides | `act(RequestException{…})`, `request_exception(…)`, `approve_exception`, `reject_exception` | A one-off change for one item: a new amount within the total, and optionally waiving its evidence; never a recipient change | `exception_*` |
 | Claim | Vendor | `claim(item)` | After `claim_delay_secs` past eligibility, the vendor pulls an eligible payment to the authorised recipient, agent or no agent; an item `close` set aside stays claimable after `Settled` | `payment_sent` (`via: claim`) |
-| Close | Anyone after the end; or both parties by `mutual_close` | `close()` | Pays eligible items, sets aside any it cannot pay for the vendor's claim, refunds the rest of the real token balance to the buyer, `Settled` | `payment_sent` (`via: close`), `item_reserved`, `settled` |
+| Close | Anyone after the end; or both parties by `mutual_close` | `close()` | Pays eligible items, sets aside any it cannot pay for the vendor's claim, refunds the rest to the buyer (the real token balance when nothing is owed to the vendor, else never more than the ledger's `funded - paid - reserved`; a later `close` sweeps what is left once nothing is owed), `Settled`, and deletes the agent's key | `payment_sent` (`via: close`), `item_reserved`, `settled` |
 
 ## 6. The payment path
 
