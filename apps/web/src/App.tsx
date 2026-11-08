@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react"
-import { Routes, Route, useLocation } from "react-router-dom"
+import { Routes, Route, Navigate, useLocation } from "react-router-dom"
 import Lenis from "lenis"
 import { Nav } from "./components/Nav"
 import { Footer } from "./components/Footer"
@@ -14,7 +14,6 @@ import { MarketMaking } from "./pages/MarketMaking"
 import { Security } from "./pages/Security"
 import { Docs } from "./pages/Docs"
 import { Research } from "./pages/Research"
-import { Demo } from "./pages/Demo"
 import { Record } from "./pages/Record"
 import { Verify } from "./pages/Verify"
 import { Join } from "./pages/Join"
@@ -63,7 +62,7 @@ export function App() {
           <Route path="/security" element={<Security />} />
           <Route path="/docs" element={<Docs />} />
           <Route path="/research" element={<Research />} />
-          <Route path="/demo" element={<Demo />} />
+          <Route path="/demo" element={<Navigate to="/#testnet" replace />} />
           <Route path="/record" element={<Record />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/join" element={<Join />} />

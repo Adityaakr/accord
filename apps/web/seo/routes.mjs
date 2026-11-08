@@ -27,8 +27,6 @@ export const ROUTES = [
     summary: "Sign in with a NEAR wallet or a work email, choose a workspace, create a deal room and invite the counterparty, on NEAR testnet." },
   { path: "/record", slug: "record", name: "Public record", priority: 0.5, changefreq: "daily",
     summary: "Agreements, payments and refusals from the Accord demonstration, each refusal with its recorded reason." },
-  { path: "/demo", slug: "demo", name: "Demonstration", priority: 0.4, changefreq: "monthly",
-    summary: "The Accord demonstration." },
   { path: "/contact", slug: "contact", name: "Contact", priority: 0.3, changefreq: "yearly",
     summary: "Get in touch with the Accord team." },
   { path: "/privacy-policy", slug: "privacy-policy", name: "Privacy", priority: 0.2, changefreq: "yearly",
@@ -36,4 +34,5 @@ export const ROUTES = [
   { path: "/sealed-table", alias: "/product/sealed-table" },
   { path: "/payee", alias: "/product/payee" },
   { path: "/atlas", alias: "/use-cases/market-making" },
+  { path: "/demo", alias: "/" },
 ]

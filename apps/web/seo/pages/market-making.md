@@ -4,7 +4,7 @@ Use case · Market-making agreements
 
 Agree on the market conditions to measure, inspect the observations, and apply the results to the payment rules in the deal room.
 
-[Explore an example agreement](/record) [Watch the walkthrough](/demo)
+[Explore an example agreement](/record) [Try a deal](/app/try-it)
 
 > Illustrative: The liquidity conditions both sides approved before the engagement.
 
@@ -62,6 +62,6 @@ Recorded demonstration. These observations are not live.
 
 No observations yet
 
-Last updated: 29 Oct 2026, 00:00 UTC
+Last updated: 8 Nov 2026, 17:04 UTC
 
 [Review a measurement record](/record)

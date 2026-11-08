@@ -24,8 +24,9 @@ export const LINKS = {
   recipientProfile: app ? `${app}/payee` : "/product/payee",
   app,
   /* site routes */
-  demo: "/demo",
-  securityDemo: "/demo#security",
+  /* /demo is retired (it redirects to /#testnet); `demo` stays only until the hero CTA rework drops it */
+  demo: "/#testnet",
+  tryDeal: `${app}/try-it`,
   record: "/record",
   product: "/product",
   sealedTable: "/product/sealed-table",
