@@ -232,43 +232,43 @@ $20.9B
 
 Up from `$6.9B` in 2021[2](/research#ic3-2023)
 
-Lost to business email compromise, 2025[1](/research#ic3-2025)
+Stablecoin transactions in a year[3](/research#a16z-state-of-crypto-2025)
 
-$3.0B
+$46T
 
-24,768 complaints about messages that redirect or request a payment.
+`$9T` once bots and inflated activity are filtered out.
 
-US organisations hit by business email compromise, 2025[3](/research#afp-2026)
+Stablecoins in circulation, November 2026[4](/research#defillama-stablecoins)
+
+$292B
+
+US-dollar stablecoins, by DefiLlama's daily count.
+
+Exposed to business email compromise, 2013 to 2023[5](/research#ic3-bec-psa-2024)
+
+$55.5B
+
+`305,033` incidents reported to the FBI.
+
+US organisations hit by business email compromise, 2025[6](/research#afp-2026)
 
 74%
 
 `76%` faced attempted or actual payments fraud.
 
-FBI complaints that referenced AI, 2025[1](/research#ic3-2025)
-
-22,364
-
-`$893M` in losses.
-
-Prompt injections that still worked on a browser agent[4](/research#anthropic-chrome)
-
-11.2%
-
-With the maker's mitigations, in 123 tests. `23.6%` without.
-
-Stolen in crypto, 2025[5](/research#chainalysis-2025)
-
-$3.4B
-
-One exchange breach was `$1.5B` of it.
-
-US fraud losses generative AI could enable by 2027[6](/research#deloitte-genai-fraud)
+US fraud losses generative AI could enable by 2027[7](/research#deloitte-genai-fraud)
 
 $40B
 
 A forecast, up from `$12.3B` in 2023.
 
-Sources: FBI Internet Crime Complaint Center, reports for [2025](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf) and [2023](https://ic3.gov/annualreport/reports/2023_ic3report.pdf); AFP Payments Fraud and Control Survey 2026; Anthropic, August 2025; Chainalysis, December 2025; Deloitte, May 2024 (forecast). Each is on [Research](/research#attack-trends).
+Prompt injections that still worked on a browser agent[8](/research#anthropic-chrome)
+
+11.2%
+
+With the maker's mitigations, in 123 tests. `23.6%` without.
+
+Sources: FBI Internet Crime Complaint Center, reports for [2025](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf) and [2023](https://ic3.gov/annualreport/reports/2023_ic3report.pdf) and its September 2024 notice; a16z crypto, State of Crypto 2025; DefiLlama, 8 November 2026; AFP Payments Fraud and Control Survey 2026; Deloitte, May 2024 (forecast); Anthropic, August 2025. Each is on [Research](/research#attack-trends).
 
 Worst case
 
@@ -288,7 +288,7 @@ Where each attack stops · the agent is assumed to follow every message it reads
 
 Not stopped by the contract: a person approving the wrong terms, or a payment the terms already allow. Those stay with people, on the record.
 
-Where each attack stops. Each attack ends at a check in code; the tags give the closest entry in the OWASP Top 10 for Agentic Applications.[7](/research#owasp-agentic-2026)
+Where each attack stops. Each attack ends at a check in code; the tags give the closest entry in the OWASP Top 10 for Agentic Applications.[9](/research#owasp-agentic-2026)
 
 Try to move the money ↓
 

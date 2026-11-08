@@ -4,11 +4,11 @@ Research
 
 Accord's design responds to problems that researchers, standards bodies, payment networks and practitioners have documented. This page lists those sources by the question each one answers, states what each establishes and what it does not, and names the design decision it informs. Findings are the authors' own; the connection to Accord is ours. Nothing here implies that any author or organisation has reviewed or endorsed Accord.
 
-6 questions, 25 sources. Choose a floor to read its sources.
+6 questions, 28 sources. Choose a floor to read its sources.
 
 Floor 06 · Attacks
 
-## How often do these attacks happen, and are they growing?
+## How much money is at stake, how often do these attacks happen, and are they growing?
 
 [ic3.gov PDF Internet Crime Report 2025](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf)
 
@@ -49,6 +49,66 @@ whether the growth reflects more crime, more reporting, or both.
 #### Design decision it informs
 
 none on its own; it dates the trend shown on the homepage.
+
+[a16zfrontier.com Document State of Crypto 2025](https://a16zfrontier.com/posts/article/state-of-crypto-report-2025/)
+
+### State of Crypto 2025.
+
+a16z crypto, 22 October 2025. Annual industry report. [Source ↗](https://a16zfrontier.com/posts/article/state-of-crypto-report-2025/)
+
+What it establishes
+
+stablecoins did $46 trillion in total transaction volume in the year to the report, up 106%; $9 trillion on an adjusted basis that filters out bots and inflated activity, more than five times PayPal's throughput and more than half of Visa's. Total stablecoin supply was over $300 billion.
+
+More
+
+#### What it does not establish
+
+retail payment volume: the unadjusted figure is mostly financial flows, which the report says is not an apples-to-apples comparison with card networks.
+
+#### Design decision it informs
+
+Accord settles in USDC, the stablecoin businesses already hold, rather than a new token.
+
+[stablecoins.llama.fi Document Stablecoin circulation](https://stablecoins.llama.fi/stablecoincharts/all)
+
+### Stablecoin circulation.
+
+DefiLlama, daily stablecoin data, read 8 November 2026. Public on-chain dataset. [Source ↗](https://stablecoins.llama.fi/stablecoincharts/all)
+
+What it establishes
+
+about $292 billion of US-dollar stablecoins in circulation on 8 November 2026.
+
+More
+
+#### What it does not establish
+
+how much of it is used for commerce, or by agents.
+
+#### Design decision it informs
+
+none on its own; it sizes the money that already moves the way Accord settles.
+
+[ic3.gov Document Business Email Compromise: The $55 Billion Scam](https://www.ic3.gov/PSA/2024/PSA240911)
+
+### Business Email Compromise: The $55 Billion Scam.
+
+FBI Internet Crime Complaint Center, public service announcement I-091124-PSA, 11 September 2024. Statistics from filings with financial institutions, October 2013 to December 2023. [Source ↗](https://www.ic3.gov/PSA/2024/PSA240911)
+
+What it establishes
+
+305,033 domestic and international incidents and $55,499,915,582 in exposed dollar loss from business email compromise between October 2013 and December 2023.
+
+More
+
+#### What it does not establish
+
+realised losses: exposed loss includes attempted amounts, and only reported incidents are counted.
+
+#### Design decision it informs
+
+a payment destination in Accord never comes from a message; it is fixed when both companies approve the terms.
 
 [financialprofessionals.org Document 2026 AFP Payments Fraud and Control Survey](https://www.financialprofessionals.org/about/learn-more/press-releases/Details/over-75-percent-of-us-firms-experienced-payments-fraud-in-2025-while-ai-adoption-for-fraud-mitigation-lags/)
 

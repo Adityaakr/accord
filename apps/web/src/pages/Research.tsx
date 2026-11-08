@@ -50,7 +50,7 @@ const QUESTIONS: Question[] = [
   {
     id: "attack-trends",
     short: "Attacks",
-    question: "How often do these attacks happen, and are they growing?",
+    question: "How much money is at stake, how often do these attacks happen, and are they growing?",
     sources: [
       {
         id: "ic3-2025",
@@ -84,6 +84,39 @@ const QUESTIONS: Question[] = [
           },
           { label: NOT_ESTABLISHES, text: "whether the growth reflects more crime, more reporting, or both." },
           { label: INFORMS, text: "none on its own; it dates the trend shown on the homepage." },
+        ],
+      },
+      {
+        id: "a16z-state-of-crypto-2025",
+        title: "State of Crypto 2025.",
+        who: "a16z crypto, 22 October 2025. Annual industry report.",
+        url: "https://a16zfrontier.com/posts/article/state-of-crypto-report-2025/",
+        blocks: [
+          { label: ESTABLISHES, text: "stablecoins did $46 trillion in total transaction volume in the year to the report, up 106%; $9 trillion on an adjusted basis that filters out bots and inflated activity, more than five times PayPal's throughput and more than half of Visa's. Total stablecoin supply was over $300 billion." },
+          { label: NOT_ESTABLISHES, text: "retail payment volume: the unadjusted figure is mostly financial flows, which the report says is not an apples-to-apples comparison with card networks." },
+          { label: INFORMS, text: "Accord settles in USDC, the stablecoin businesses already hold, rather than a new token." },
+        ],
+      },
+      {
+        id: "defillama-stablecoins",
+        title: "Stablecoin circulation.",
+        who: "DefiLlama, daily stablecoin data, read 8 November 2026. Public on-chain dataset.",
+        url: "https://stablecoins.llama.fi/stablecoincharts/all",
+        blocks: [
+          { label: ESTABLISHES, text: "about $292 billion of US-dollar stablecoins in circulation on 8 November 2026." },
+          { label: NOT_ESTABLISHES, text: "how much of it is used for commerce, or by agents." },
+          { label: INFORMS, text: "none on its own; it sizes the money that already moves the way Accord settles." },
+        ],
+      },
+      {
+        id: "ic3-bec-psa-2024",
+        title: "Business Email Compromise: The $55 Billion Scam.",
+        who: "FBI Internet Crime Complaint Center, public service announcement I-091124-PSA, 11 September 2024. Statistics from filings with financial institutions, October 2013 to December 2023.",
+        url: "https://www.ic3.gov/PSA/2024/PSA240911",
+        blocks: [
+          { label: ESTABLISHES, text: "305,033 domestic and international incidents and $55,499,915,582 in exposed dollar loss from business email compromise between October 2013 and December 2023." },
+          { label: NOT_ESTABLISHES, text: "realised losses: exposed loss includes attempted amounts, and only reported incidents are counted." },
+          { label: INFORMS, text: "a payment destination in Accord never comes from a message; it is fixed when both companies approve the terms." },
         ],
       },
       {
