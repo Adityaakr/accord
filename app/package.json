@@ -17,6 +17,7 @@
     "@fast-auth-near/javascript-provider": "^1.4.1",
     "@hot-labs/near-connect": "0.12.0",
     "@noble/hashes": "1.8.0",
+    "borsh": "2.0.0",
     "buffer": "6.0.3",
     "motion": "12.23.24",
     "near-api-js": "7.3.1",
