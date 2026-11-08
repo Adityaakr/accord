@@ -3,6 +3,7 @@
    which wins for what runs on NEAR testnet (8 Nov 2026). Inline marks: `code` and [label](href) only (types.ts). */
 import type { DocPage } from "./types"
 import { TESTNET, VERIFY_COMMAND, VERIFY_RAW, acct, tx } from "../testnet"
+import { LINKS } from "../links"
 
 /* a6's transactions, from FLOW and INFRA in testnet.ts */
 const A6 = {
@@ -808,6 +809,21 @@ export const DOC_PAGES: DocPage[] = [
     title: "References",
     summary: "The official documentation behind each part of Accord, the NEAR standards it uses, and the primary sources for the problem it addresses.",
     sections: [
+      {
+        id: "source",
+        title: "Source code",
+        blocks: [
+          {
+            kind: "rows",
+            rows: [
+              { name: "Accord repository", value: "github.com/Adityaakr/accord", href: LINKS.repo, detail: "Contracts, enclave jobs, SDK, MCP server, CLI, app and this website. MIT licence." },
+              { name: "Claims and their limits", value: "platform/GOAL.md", href: `${LINKS.repo}/blob/main/platform/GOAL.md`, detail: "The source of truth for every claim on this site." },
+              { name: "Interfaces", value: "platform/INTERFACES.md", href: `${LINKS.repo}/blob/main/platform/INTERFACES.md`, detail: "Every method, event, error, job schema, SDK call, MCP tool and CLI command." },
+              { name: "MCP server, SDK and CLI", value: "platform/packages", href: `${LINKS.repo}/tree/main/platform/packages`, detail: "`@accord/mcp`, `@accord/sdk` and `accord`; run from a clone, not published to npm." },
+            ],
+          },
+        ],
+      },
       {
         id: "official",
         title: "Official references",

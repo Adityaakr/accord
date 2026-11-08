@@ -9,7 +9,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { ROUTES, SITE_URL } from "../seo/routes.mjs"
-import { ACCOUNTS, ANSWERS, BUILT_ON, CLAIMS, CONTROLS, FOR_AGENTS, GLOSSARY, HOW_STEPS, NAMING, NOT_DONE, ONE_LINE, STATUS, TRY_STEPS, USE_CASES } from "../seo/facts.mjs"
+import { ACCOUNTS, ANSWERS, BUILT_ON, CLAIMS, CONTROLS, FOR_AGENTS, GLOSSARY, HOW_STEPS, NAMING, NOT_DONE, ONE_LINE, REPO, STATUS, TRY_STEPS, USE_CASES } from "../seo/facts.mjs"
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const DIST = join(ROOT, "dist")
@@ -65,7 +65,7 @@ const pageData = (slug) => {
 
 const ORG = {
   "@context": "https://schema.org", "@type": "Organization", "@id": `${SITE_URL}/#organization`,
-  name: "Accord", url: `${SITE_URL}/`, logo: `${SITE_URL}/assets/favicon-dark.png`, description: TAGLINE,
+  name: "Accord", url: `${SITE_URL}/`, logo: `${SITE_URL}/assets/favicon-dark.png`, description: TAGLINE, sameAs: [REPO],
 }
 const WEBSITE = { "@context": "https://schema.org", "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: "Accord", url: `${SITE_URL}/`, description: TAGLINE, publisher: { "@id": `${SITE_URL}/#organization` }, inLanguage: "en" }
 const APP = {
@@ -75,7 +75,13 @@ const APP = {
   featureList: CONTROLS.map((c) => `${c.name}: ${c.text}`),
   isAccessibleForFree: true,
   offers: { "@type": "Offer", name: "NEAR testnet", url: `${SITE_URL}/app/try-it`, price: "0", priceCurrency: "USD", availability: "https://schema.org/InStock", description: "Free on NEAR testnet with test USDC: open /app/try-it with a NEAR wallet. Mainnet follows an audit. Planned: Accord Teams (subscription) and market-making agreements (per monitored market). No percentage-based Accord fee on payment amounts; production prices are published before launch." },
-  publisher: { "@id": `${SITE_URL}/#organization` },
+  publisher: { "@id": `${SITE_URL}/#organization` }, sameAs: [REPO],
+}
+/* The public source: the contracts, enclave jobs, SDK, MCP server, CLI, app and this site */
+const SOURCE = {
+  "@context": "https://schema.org", "@type": "SoftwareSourceCode", "@id": `${SITE_URL}/#source`, name: "Accord source code",
+  codeRepository: REPO, url: REPO, license: "https://opensource.org/licenses/MIT", programmingLanguage: ["Rust", "TypeScript"],
+  runtimePlatform: "NEAR", targetProduct: { "@id": `${SITE_URL}/#software` }, author: { "@id": `${SITE_URL}/#organization` },
 }
 
 /* Home: the six agreement types as an ItemList, and the glossary as a DefinedTermSet */
@@ -118,7 +124,7 @@ function render(route, target = route) {
   const title = meta.title || `Accord: ${target.name}`
   const description = meta.description || target.summary
   const crumbs = [{ name: "Accord", url: `${SITE_URL}/` }, ...(isDoc(target) ? [{ name: docsHome().name, url: `${SITE_URL}/docs` }] : []), ...(target.path === "/" ? [] : [{ name: target.name.replace(/^Docs: /, ""), url }])]
-  const ld = [ORG, WEBSITE, APP,
+  const ld = [ORG, WEBSITE, APP, SOURCE,
     { "@context": "https://schema.org", "@type": "WebPage", "@id": `${url}#webpage`, url, name: title, description, isPartOf: { "@id": `${SITE_URL}/#website` }, about: { "@id": `${SITE_URL}/#software` }, primaryImageOfPage: OG_IMAGE, dateModified: TODAY, inLanguage: "en" },
     { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: c.url })) },
     ...(target.path === "/" ? [USE_CASE_LIST, HOW_TO, CONTROL_LIST, GLOSSARY_SET] : []),
@@ -164,7 +170,7 @@ function render(route, target = route) {
 ${md ? mdToHtml(md) : `<h1>${esc(title)}</h1><p>${esc(description)}</p>`}
 </main>
 <nav aria-label="Site"><h2>Pages</h2><ul>${nav}</ul></nav>
-<footer><p>${esc(ABOUT)}</p><p>Live on NEAR testnet (factory accord-v2.testnet); the full flow ran on agreement a6.accord-v2.testnet; mainnet follows an audit. <a href="/llms.txt">llms.txt</a> · <a href="/sitemap.xml">Sitemap</a></p></footer>
+<footer><p>${esc(ABOUT)}</p><p>Live on NEAR testnet (factory accord-v2.testnet); the full flow ran on agreement a6.accord-v2.testnet; mainnet follows an audit. <a href="/llms.txt">llms.txt</a> · <a href="/sitemap.xml">Sitemap</a> · <a href="${REPO}">GitHub</a></p></footer>
 </div></div>`
 
   let html = TEMPLATE
@@ -217,7 +223,9 @@ const docsPages = pages.filter((r) => r.path === "/docs" || r.path.startsWith("/
 const near = (a) => `https://testnet.nearblocks.io/address/${a}`
 
 /* The agent-facing sections, shared by llms.txt and the top of llms-full.txt. No URL is followed directly by a period. */
-const agentSections = `## Status
+const agentSections = `Source code (MIT): ${REPO} · Machine-readable facts: ${SITE_URL}/facts.json · Every page as Markdown: ${SITE_URL}/llms-full.txt
+
+## Status
 
 - Network: NEAR testnet only. Mainnet follows an audit and is not live.
 - Proof: agreement a6.accord-v2.testnet ran the full flow on 8 Nov 2026 on factory accord-v2.testnet, release 3: sealed limits, the Sealed Table negotiation by the real NEAR AI model inside OutLayer's attested enclave, approvals, funding, a payment, a refused redirect (ERR_PAYEE_MISMATCH) and a revocation. Each of its 12 transactions is linked at ${SITE_URL}/record
@@ -247,7 +255,7 @@ ${ACCOUNTS.map((a) => `- ${a.role}: [${a.account}](${near(a.account)})`).join("\
 
 ## Accord for AI agents
 
-An agent never holds a wallet: the buyer installs one function-call key on the agreement's own account that can call \`act\` and nothing else, and the contract checks every payment against the approved terms. Ways in:
+An agent never holds a wallet: the buyer installs one function-call key on the agreement's own account that can call \`act\` and nothing else, and the contract checks every payment against the approved terms. The code is at ${REPO} (packages: ${REPO}/tree/main/platform/packages). Ways in:
 
 ${FOR_AGENTS.map((f) => `- **${f.name}**: ${f.text}`).join("\n")}
 
@@ -325,7 +333,7 @@ write(join(DIST, "llms-full.txt"), [`# Accord\n\n> ${TAGLINE}\n\n${ABOUT}\n\nSou
 
 /* facts.json: the same facts as llms.txt, for agents that want fields rather than prose */
 write(join(DIST, "facts.json"), JSON.stringify({
-  name: "Accord", url: `${SITE_URL}/`, tagline: TAGLINE, summary: ONE_LINE, updated: TODAY, status: STATUS,
+  name: "Accord", url: `${SITE_URL}/`, repository: REPO, license: "MIT", tagline: TAGLINE, summary: ONE_LINE, updated: TODAY, status: STATUS,
   parts: GLOSSARY.filter((g) => ["Sealed Table", "Agreement controls", "Payee", "Evidence checks"].includes(g.term)),
   agreement_types: USE_CASES.map((u) => ({ ...u, url: abs(u.url) })),
   how_a_deal_room_works: HOW_STEPS, core_controls: CONTROLS, built_on: BUILT_ON,

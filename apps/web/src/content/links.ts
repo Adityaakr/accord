@@ -39,7 +39,8 @@ export const LINKS = {
   contact: "/contact",
   privacy: "/privacy-policy",
   /* external, optional */
-  repo: env.VITE_REPO_URL ?? "",
+  /* the public repository; VITE_REPO_URL overrides it (an unset Docker build arg is empty, so || keeps the default) */
+  repo: env.VITE_REPO_URL || "https://github.com/Adityaakr/accord",
   demoVideo: env.VITE_DEMO_VIDEO_URL ?? "",
   xPost: env.VITE_X_POST_URL ?? "",
   contractId: env.VITE_CONTRACT_ID ?? "",

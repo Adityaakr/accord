@@ -4,6 +4,16 @@ References
 
 The official documentation behind each part of Accord, the NEAR standards it uses, and the primary sources for the problem it addresses.
 
+## Source code
+
+- 01 Accord repository Contracts, enclave jobs, SDK, MCP server, CLI, app and this website. MIT licence. [github.com/Adityaakr/accord](https://github.com/Adityaakr/accord)
+
+- 02 Claims and their limits The source of truth for every claim on this site. [platform/GOAL.md](https://github.com/Adityaakr/accord/blob/main/platform/GOAL.md)
+
+- 03 Interfaces Every method, event, error, job schema, SDK call, MCP tool and CLI command. [platform/INTERFACES.md](https://github.com/Adityaakr/accord/blob/main/platform/INTERFACES.md)
+
+- 04 MCP server, SDK and CLI `@accord/mcp`, `@accord/sdk` and `accord`; run from a clone, not published to npm. [platform/packages](https://github.com/Adityaakr/accord/tree/main/platform/packages)
+
 ## Official references
 
 - 01 NEAR access keys A function-call key is limited to one receiver and a list of methods, cannot attach a deposit, and spends gas from a fixed allowance. [docs.near.org](https://docs.near.org/protocol/accounts-contracts/access-keys)
@@ -75,6 +85,8 @@ NEAR AI Cloud
 - 04 NEAR Intents confidential execution It does not hide data an application publishes or an ordinary transfer on the destination chain; the reason Accord makes no claim of private settlement. [intents.near.org](https://intents.near.org/confidential)
 
 On this page
+
+- Source code
 
 - Official references
 

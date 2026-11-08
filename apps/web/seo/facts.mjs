@@ -13,6 +13,9 @@ export const STATUS = {
   howToTest: "Open /app/try-it and follow five steps: connect a NEAR testnet wallet (Meteor or Intear), get 2.5 testnet NEAR and 100 test USDC from the faucet, open a deal room against Accord's demo vendor (halcyon-demo.testnet), seal your limits (40 tUSDC ceiling, 2 to 4 items), then watch the demo counterparty negotiate in the Sealed Table, approve and deliver while you approve, fund and accept. A demo agent run by Accord for the test room pays the due item to the proven recipient, the contract refuses a payment to a new account with ERR_PAYEE_MISMATCH, and you revoke the agent key. Everything is on NEAR testnet with test USDC.",
 }
 
+/* The public source repository (MIT). VITE_REPO_URL can point the site's links elsewhere; agents get this one. */
+export const REPO = "https://github.com/Adityaakr/accord"
+
 /* The six agreement types. Same controls in every one; the commercial fields and the evidence accepted change. */
 export const USE_CASES = [
   { id: "market-making", name: "Market-making agreements", status: "demo", url: "/use-cases/market-making",
@@ -145,7 +148,7 @@ export const NOT_DONE = [
   "Funding an agreement from other chains through NEAR Intents is planned.",
   "A legal KYB check of the vendor is a later integration; Payee proves domain control and the authority's approval only.",
   "Verifying a market maker's own contribution with its authenticated account data is planned.",
-  "The SDK, MCP server and CLI are not published to npm; they run from the Accord repository, which is not public yet.",
+  "The SDK, MCP server and CLI are not published to npm; they run from a clone of the repository (https://github.com/Adityaakr/accord), under platform/packages.",
   "Production prices are published before launch; testnet use is free with test funds.",
 ]
 
@@ -161,10 +164,11 @@ export const ACCOUNTS = [
   { role: "Demo vendor's authorised recipient", account: "halcyon-mm.testnet" },
 ]
 
-/* How an agent integrates. Only what exists in platform/packages; none of it is published to npm yet. */
+/* How an agent integrates. Only what exists in platform/packages (https://github.com/Adityaakr/accord/tree/main/platform/packages); none of it is published to npm yet. */
 export const FOR_AGENTS = [
-  { name: "MCP server (@accord/mcp)", text: "stdio by default, or streamable HTTP at /mcp with --http <port>. Read tools need no key: accord_list_agreements, accord_get_agreement, accord_due_items, accord_preflight, accord_refusals, accord_receipts, accord_verify. accord_pay and accord_request_exception need the agent's function-call key (ACCORD_AGENT_KEY); accord_pay runs preflight first and the contract checks again. Principal tools (accord_seal_mandate, accord_approve_terms, accord_submit_delivery, accord_propose_recipient) are off unless ACCORD_PRINCIPAL_KEY and ACCORD_PRINCIPAL_ACCOUNT are set; a key is never a tool argument." },
+  { name: "Source", text: "Clone https://github.com/Adityaakr/accord (MIT) and run pnpm install in platform/. Read-only check of the testnet agreement, no keys: ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a6.accord-v2.testnet (it prints verify: <n> checks ok). The MCP server, SDK and CLI live in platform/packages; methods, tools and commands are specified in platform/INTERFACES.md." },
+  { name: "MCP server (@accord/mcp)", text: "pnpm --filter @accord/mcp dev from platform/ with ACCORD_FACTORY=accord-v2.testnet; stdio by default, or streamable HTTP at /mcp with --http <port>. Read tools need no key: accord_list_agreements, accord_get_agreement, accord_due_items, accord_preflight, accord_refusals, accord_receipts, accord_verify. accord_pay and accord_request_exception need the agent's function-call key (ACCORD_AGENT_KEY with AGENT_AGREEMENT); accord_pay runs preflight first and the contract checks again. Principal tools (accord_seal_mandate, accord_approve_terms, accord_submit_delivery, accord_propose_recipient) are off unless ACCORD_PRINCIPAL_KEY and ACCORD_PRINCIPAL_ACCOUNT are set; a key is never a tool argument." },
   { name: "SDK (@accord/sdk)", text: "TypeScript on near-api-js: agreements, sealing a mandate, the agent's act, preflight and verify." },
-  { name: "CLI (accord)", text: "Every step of an agreement from a terminal (create, seal, negotiate, approve, fund, recipient, deliver, pay, agent revoke, verify and more); read-only commands (show, refusals, receipts, check, verify, watch) need no key. make verify DEAL=<account> checks any agreement from public data." },
+  { name: "CLI (accord)", text: "Every step of an agreement from a terminal (create, seal, negotiate, approve, fund, recipient, deliver, pay, agent revoke, verify and more); read-only commands (show, refusals, receipts, check, verify, watch) need no key. Run it with pnpm --filter @accord/cli dev -- <command>; make verify DEAL=<account> checks any agreement from public data." },
   { name: "Without code", text: "Read /llms.txt, /facts.json, or any page as Markdown (add .md to its path, or send Accept: text/markdown). /verify?agreement=<account> checks an agreement in the browser; testnet.nearblocks.io shows every transaction." },
 ]
