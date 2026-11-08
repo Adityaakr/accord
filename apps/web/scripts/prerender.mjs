@@ -200,7 +200,7 @@ for (const r of ROUTES) {
 write(join(DIST, "redirects.json"), JSON.stringify(Object.fromEntries(ROUTES.filter((r) => r.alias).map((r) => [r.path, r.redirect || r.alias])), null, 2) + "\n")
 
 /* 404: the app shell (React shows the not-found page), never indexed */
-write(join(DIST, "404.html"), TEMPLATE.replace("<title>", '<meta name="robots" content="noindex" />\n    <title>'))
+write(join(DIST, "404.html"), TEMPLATE.replace(/\s*<script type="application\/ld\+json">[\s\S]*?<\/script>/g, "").replace("<title>", '<meta name="robots" content="noindex" />\n    <title>'))
 
 /* Markdown copies of every page, llms.txt and llms-full.txt. Links are absolute so a copy read on its own still
    resolves. Each page is written at /<slug>.md and at its own path plus .md (/product/payee.md, /index.md), the
