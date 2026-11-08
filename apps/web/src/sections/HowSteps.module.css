@@ -120,3 +120,12 @@
   .line { flex-direction: column; align-items: flex-start; gap: 3px; }
   .pass, .weak { text-align: left; }
 }
+
+/* timeline drawings: colours only (motion is computed per frame in HowSteps) */
+.packet { fill: var(--teal); filter: drop-shadow(0 0 4px rgba(145, 207, 181, 0.7)); }
+.packetBad { fill: #e5a27e; }
+.strike { stroke: rgba(var(--ink-rgb), 0.45); stroke-width: 1.2; }
+.fillBar { fill: var(--teal); }
+.nodeOn { fill: rgba(var(--tl), 0.14); stroke: rgba(var(--tl), 0.7); transition: fill 0.4s ease, stroke 0.4s ease; }
+.lockOff .stroke { stroke: rgba(var(--ink-rgb), 0.55); transition: stroke 0.3s ease; }
+.lockOn .stroke { stroke: var(--teal); transition: stroke 0.3s ease; }

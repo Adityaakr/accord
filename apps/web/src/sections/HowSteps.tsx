@@ -73,122 +73,247 @@ const STEPS: Step[] = [
   },
 ]
 
-/* ---------- the drawings, one per step (360 × 150): .d paths draw in, .f groups rise in order (--i) ---------- */
-const Lock = ({ x, y }: { x: number; y: number }) => (
-  <g transform={`translate(${x} ${y})`}>
+/* ---------- the drawings: each a pure function of t, the seconds since its step opened ----------
+   Motion follows the motion-graphics principles (github.com/Barty-Bart/motion-graphics, explainer-default): damped
+   springs that settle without bounce, one beat at a time, an object travelling through the workflow, nothing busy.
+   viewBox 360 × 150, every drawing centred on x = 180. */
+const clamp = (x: number, a = 0, b = 1) => Math.min(b, Math.max(a, x))
+const ease = (x: number) => (x = clamp(x), x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2)
+const seg = (t: number, a: number, b: number) => clamp((t - a) / (b - a))
+const lerp = (a: number, b: number, k: number) => a + (b - a) * k
+/* damped spring step 0 → 1 (w speed, z damping; z near 1 settles with no visible bounce) */
+function spring(t: number, w = 14, z = 0.86) {
+  if (t <= 0) return 0
+  const wd = w * Math.sqrt(1 - z * z)
+  return 1 - Math.exp(-z * w * t) * (Math.cos(wd * t) + ((z * w) / wd) * Math.sin(wd * t))
+}
+/* a group that springs in at time a: fades, rises 6px, scales from 0.92 around its own centre */
+const pop = (t: number, a: number, cx: number, cy: number) => {
+  const k = spring(t - a)
+  return { opacity: clamp(k * 1.4), transform: `translate(${cx}px, ${cy + (1 - k) * 6}px) scale(${0.92 + 0.08 * k}) translate(${-cx}px, ${-cy}px)` }
+}
+const fade = (t: number, a: number, d = 0.4) => ({ opacity: ease(seg(t, a, a + d)) })
+/* stroke that draws over [a, a + d] */
+const draw = (t: number, a: number, d = 0.6, len = 300) => ({ strokeDasharray: len, strokeDashoffset: len * (1 - ease(seg(t, a, a + d))) })
+const cubic = (p: number[][], k: number) => {
+  const m = 1 - k
+  return [0, 1].map((j) => m * m * m * p[0][j] + 3 * m * m * k * p[1][j] + 3 * m * k * k * p[2][j] + k * k * k * p[3][j])
+}
+
+const Lock = ({ x, y, shut, on }: { x: number; y: number; shut: number; on: boolean }) => (
+  <g transform={`translate(${x} ${y})`} className={on ? styles.lockOn : styles.lockOff}>
     <rect x="-7" y="-2" width="14" height="11" rx="2.5" className={styles.stroke} />
-    <path d="M-4 -2v-3.5a4 4 0 0 1 8 0V-2" className={styles.stroke} />
+    <path d="M-4 -2v-3.5a4 4 0 0 1 8 0V-2" className={styles.stroke} style={{ transform: `translateY(${-3 * (1 - shut)}px)` }} />
   </g>
 )
-const Check = ({ x, y }: { x: number; y: number }) => <path d={`M${x - 6} ${y}l4 4 8-9`} className={`${styles.tick} ${styles.d}`} />
-const Cross = ({ x, y }: { x: number; y: number }) => <path d={`M${x - 5} ${y - 5}l10 10M${x + 5} ${y - 5}l-10 10`} className={styles.cross} />
-const i = (n: number) => ({ ["--i" as string]: n })
+const Check = ({ x, y, k }: { x: number; y: number; k: number }) => (
+  <path d={`M${x - 6} ${y}l4 4 8-9`} className={styles.tick} style={{ strokeDasharray: 24, strokeDashoffset: 24 * (1 - ease(k)) }} />
+)
+const Cross = ({ x, y, k }: { x: number; y: number; k: number }) => (
+  <path d={`M${x - 5} ${y - 5}l10 10M${x + 5} ${y - 5}l-10 10`} className={styles.cross} style={{ opacity: ease(k), transform: `scale(${0.6 + 0.4 * spring(k * 0.6)})`, transformOrigin: `${x}px ${y}px` }} />
+)
 
-const ART: Record<string, ReactNode> = {
-  "01": (
+function Sealed({ t }: { t: number }) {
+  const shut = ease(seg(t, 1.9, 2.3))
+  const pulse = t > 2.6 ? (Math.sin((t - 2.6) * 2.4) + 1) / 2 : 0
+  return (
     <>
       {[70, 290].map((x, k) => (
-        <g key={x} className={styles.f} style={i(k)}>
+        <g key={x} style={pop(t, 0.2 + k * 0.25, x, 66)}>
           <circle cx={x} cy="66" r="28" className={styles.node} />
-          <Lock x={x} y={64} />
+          <Lock x={x} y={64} shut={shut} on={shut > 0.5} />
           <text x={x} y="118" className={styles.lbl} textAnchor="middle">{k ? "vendor limits" : "buyer limits"}</text>
         </g>
       ))}
-      <path d="M100 66 H 148 M212 66 H 260" className={`${styles.dash} ${styles.d}`} />
-      <g className={styles.f} style={i(2)}>
-        <rect x="150" y="34" width="60" height="64" rx="12" className={styles.enclave} />
-        <Lock x={180} y={64} />
+      <path d="M100 66 H 148" className={styles.dash} style={fade(t, 0.8)} />
+      <path d="M260 66 H 212" className={styles.dash} style={fade(t, 0.8)} />
+      {/* each mandate travels into the enclave as ciphertext */}
+      {[[100, 148], [260, 212]].map(([a, b], k) => {
+        const p = ease(seg(t, 1.2 + k * 0.15, 1.9 + k * 0.15))
+        return <circle key={k} cx={lerp(a, b, p)} cy="66" r="3.5" className={styles.packet} style={{ opacity: p > 0 && p < 1 ? 1 : 0 }} />
+      })}
+      <g style={pop(t, 0.9, 180, 66)}>
+        <rect x="150" y="34" width="60" height="64" rx="12" className={styles.enclave} style={{ strokeOpacity: 0.55 + 0.45 * pulse }} />
+        <Lock x={180} y={64} shut={shut} on={shut > 0.5} />
         <text x="180" y="118" className={styles.lbl} textAnchor="middle">enclave key</text>
       </g>
     </>
-  ),
-  "02": (
+  )
+}
+
+function Attested({ t }: { t: number }) {
+  const reject = ease(seg(t, 1.3, 1.7))
+  const k1 = spring(t - 0.5), k2 = spring(t - 1.9)
+  return (
     <>
-      <rect x="20" y="12" width="236" height="112" rx="16" className={styles.enclave} />
-      <text x="36" y="34" className={styles.lbl}>sealed table · enclave</text>
-      <g className={styles.f} style={i(0)}>
-        <rect x="36" y="48" width="150" height="24" rx="12" className={styles.bubble} />
-        <text x="111" y="64" className={styles.val} textAnchor="middle">offer · outside a limit</text>
+      <g style={fade(t, 0.1)}>
+        <rect x="16" y="14" width="240" height="112" rx="16" className={styles.enclave} />
+        <text x="32" y="36" className={styles.lbl}>sealed table · enclave</text>
       </g>
-      <g className={styles.f} style={i(1)}>
-        <rect x="94" y="82" width="150" height="24" rx="12" className={styles.bubbleOn} />
-        <text x="169" y="98" className={styles.val} textAnchor="middle">offer · inside both</text>
+      <g style={{ opacity: clamp(k1 * 1.4) * (1 - 0.55 * reject), transform: `translateX(${(1 - k1) * -14}px)` }}>
+        <rect x="32" y="50" width="176" height="26" rx="13" className={styles.bubble} />
+        <text x="120" y="67" className={styles.val} textAnchor="middle">offer · outside a limit</text>
+        <line x1="44" y1="63" x2={lerp(44, 196, reject)} y2="63" className={styles.strike} />
       </g>
-      <path d="M256 68 H 286" className={`${styles.solid} ${styles.d}`} />
-      <g className={styles.f} style={i(2)}>
-        <circle cx="312" cy="68" r="22" className={styles.badge} />
-        <Check x={312} y={68} />
-        <text x="312" y="110" className={styles.lblOn} textAnchor="middle">attested</text>
+      <g style={{ opacity: clamp(k2 * 1.4), transform: `translateX(${(1 - k2) * 14}px)` }}>
+        <rect x="66" y="86" width="176" height="26" rx="13" className={styles.bubbleOn} />
+        <text x="154" y="103" className={styles.val} textAnchor="middle">offer · inside both</text>
+      </g>
+      <path d="M256 70 H 288" className={styles.solid} style={draw(t, 2.6, 0.4, 40)} />
+      <g style={pop(t, 2.9, 314, 70)}>
+        <circle cx="314" cy="70" r="22" className={styles.badge} />
+        <Check x={314} y={70} k={seg(t, 3.1, 3.5)} />
+        <text x="314" y="112" className={styles.lblOn} textAnchor="middle">attested</text>
       </g>
     </>
-  ),
-  "03": (
+  )
+}
+
+function Approved({ t }: { t: number }) {
+  const fill = ease(seg(t, 2.7, 3.6))
+  const routes = [[[110, 70], [110, 90], [160, 90], [168, 102]], [[250, 70], [250, 90], [200, 90], [192, 102]]]
+  return (
     <>
       {[[110, "buyer"], [250, "vendor"]].map(([x, l], k) => (
-        <g key={String(l)} className={styles.f} style={i(k)}>
+        <g key={String(l)} style={pop(t, 0.25 + k * 0.6, Number(x), 30)}>
           <circle cx={Number(x)} cy="30" r="17" className={styles.badge} />
-          <Check x={Number(x)} y={30} />
+          <Check x={Number(x)} y={30} k={seg(t, 0.5 + k * 0.6, 0.9 + k * 0.6)} />
           <text x={Number(x)} y="62" className={styles.lbl} textAnchor="middle">{String(l)} approves</text>
         </g>
       ))}
-      <path d="M110 70 C 110 90, 160 90, 168 102 M250 70 C 250 90, 200 90, 192 102" className={`${styles.dash} ${styles.d}`} />
-      <g className={styles.f} style={i(2)}>
+      <path d="M110 70 C 110 90, 160 90, 168 102 M250 70 C 250 90, 200 90, 192 102" className={styles.dash} style={fade(t, 1.4)} />
+      {routes.map((r, k) => {
+        const p = ease(seg(t, 1.8 + k * 0.12, 2.6 + k * 0.12))
+        const [x, y] = cubic(r, p)
+        return <circle key={k} cx={x} cy={y} r="3.5" className={styles.packet} style={{ opacity: p > 0 && p < 1 ? 1 : 0 }} />
+      })}
+      <g style={pop(t, 1.6, 180, 120)}>
         <rect x="124" y="102" width="112" height="36" rx="10" className={styles.enclave} />
-        <text x="180" y="124" className={styles.val} textAnchor="middle">escrow · USDC</text>
+        <rect x="132" y="128" width={96 * fill} height="3" rx="1.5" className={styles.fillBar} />
+        <text x="180" y="122" className={styles.val} textAnchor="middle">escrow · USDC</text>
       </g>
     </>
-  ),
-  "04": (
-    <>
-      <g className={styles.f} style={i(0)}>
+  )
+}
+
+/* three requests leave the agent, pass act() and take their branch: one through, two stopped */
+const BRANCH = [
+  [[192, 60], [210, 60], [212, 26], [228, 26]],
+  [[192, 72], [204, 72], [216, 72], [228, 72]],
+  [[192, 84], [210, 84], [212, 118], [228, 118]],
+]
+function Executing({ t }: { t: number }) {
+  const outs = [
+    { y: 26, label: "approved account", ok: true },
+    { y: 72, label: "new account", ok: false },
+    { y: 118, label: "different amount", ok: false },
+  ]
+  return (
+    <g transform="translate(-7 0)">
+      <g style={pop(t, 0.15, 43, 72)}>
         <rect x="8" y="52" width="70" height="40" rx="10" className={styles.node} />
         <text x="43" y="76" className={styles.val} textAnchor="middle">agent</text>
       </g>
-      <path d="M78 72 H 112" className={`${styles.solid} ${styles.d}`} />
-      <g className={styles.f} style={i(1)}>
+      <path d="M78 72 H 112" className={styles.solid} style={draw(t, 0.4, 0.35, 40)} />
+      <g style={pop(t, 0.6, 152, 72)}>
         <rect x="112" y="48" width="80" height="48" rx="12" className={styles.enclave} />
         <text x="152" y="77" className={styles.val} textAnchor="middle">act()</text>
       </g>
-      <path d="M192 60 C 212 60, 214 26, 234 26 M192 72 H 234 M192 84 C 212 84, 214 118, 234 118" className={`${styles.solid} ${styles.d}`} />
-      <g className={styles.f} style={i(2)}><Check x={244} y={26} /><text x="256" y="30" className={styles.lblOn}>approved account</text></g>
-      <g className={styles.f} style={i(3)}><Cross x={244} y={72} /><text x="256" y="76" className={styles.lblRefuse}>new account</text></g>
-      <g className={styles.f} style={i(4)}><Cross x={244} y={118} /><text x="256" y="122" className={styles.lblRefuse}>different amount</text></g>
-    </>
-  ),
-  "05": (
-    <>
-      <line x1="40" y1="56" x2="320" y2="56" className={styles.dash} />
-      <text x="320" y="48" className={styles.lbl} textAnchor="end">agreed condition</text>
-      {[1, 1, 0, 1, 1, 0].map((p, k) => {
-        const h = p ? 70 + (k % 2) * 8 : 34
-        return <rect key={k} x={52 + k * 44} y={128 - h} width="24" height={h} rx="6" className={`${p ? styles.barOn : styles.bar} ${styles.grow}`} style={i(k)} />
+      {outs.map((o, k) => {
+        const a = 1.0 + k * 1.05 // each request's start
+        const toAct = ease(seg(t, a, a + 0.45)), onBranch = ease(seg(t, a + 0.45, a + 0.85))
+        const [bx, by] = onBranch > 0 ? cubic(BRANCH[k], o.ok ? onBranch : Math.min(onBranch, 0.7)) : [lerp(78, 192, toAct), 72]
+        const live = toAct > 0 && onBranch < 1
+        const land = seg(t, a + 0.85, a + 1.15)
+        return (
+          <g key={k}>
+            <path d={`M192 ${o.y === 72 ? 72 : o.y === 26 ? 60 : 84} C ${BRANCH[k][1].join(" ")}, ${BRANCH[k][2].join(" ")}, ${BRANCH[k][3].join(" ")}`} className={styles.solid} style={draw(t, a + 0.45, 0.4, 60)} />
+            <circle cx={bx} cy={by} r="4" className={o.ok ? styles.packet : styles.packetBad} style={{ opacity: live ? 1 : 0 }} />
+            {o.ok ? <Check x={240} y={o.y} k={land} /> : <Cross x={240} y={o.y} k={land} />}
+            <text x="252" y={o.y + 4} className={o.ok ? styles.lblOn : styles.lblRefuse} style={fade(t, a + 0.95, 0.35)}>{o.label}</text>
+          </g>
+        )
       })}
-      <line x1="40" y1="128" x2="320" y2="128" className={styles.base} />
-      <text x="40" y="146" className={styles.lbl}>evidence recorded</text>
-      <text x="320" y="146" className={styles.lblOn} textAnchor="end">enough passed · eligible</text>
-    </>
-  ),
-  "06": (
+    </g>
+  )
+}
+
+function Checked({ t }: { t: number }) {
+  const bars = [1, 1, 0, 1, 1, 0]
+  const x0 = 47 // six 26px bars with 22px gaps, centred on 180
+  const passed = bars.filter((p, k) => p && t > 0.7 + k * 0.38 + 0.3).length
+  return (
     <>
-      <g className={styles.f} style={i(0)}>
+      <line x1="30" y1="128" x2="330" y2="128" className={styles.base} style={fade(t, 0.1)} />
+      <line x1="30" y1="54" x2="330" y2="54" className={styles.dash} style={fade(t, 0.3)} />
+      <text x="330" y="46" className={styles.lbl} textAnchor="end" style={fade(t, 0.4)}>agreed condition</text>
+      {bars.map((p, k) => {
+        const a = 0.7 + k * 0.38
+        const h = (p ? 76 + (k % 2) * 6 : 36) * spring(t - a, 13, 0.9)
+        const x = x0 + k * 48
+        return (
+          <g key={k}>
+            <rect x={x} y={128 - h} width="26" height={Math.max(0, h)} rx="6" className={p ? styles.barOn : styles.bar} />
+            <g style={fade(t, a + 0.3, 0.3)}>{p ? <Check x={x + 13} y={128 - 76 - (k % 2) * 6 + 16} k={seg(t, a + 0.3, a + 0.6)} /> : <Cross x={x + 13} y={110} k={seg(t, a + 0.3, a + 0.6)} />}</g>
+          </g>
+        )
+      })}
+      <text x="30" y="146" className={styles.lbl}>{passed} of 6 passed</text>
+      <text x="330" y="146" className={styles.lblOn} textAnchor="end" style={fade(t, 3.2)}>enough passed · eligible</text>
+    </>
+  )
+}
+
+function Settled({ t }: { t: number }) {
+  const path = [[108, 72], [160, 20], [210, 20], [252, 72]]
+  const first = ease(seg(t, 1.0, 2.0))
+  const loop = t > 3.4 ? ((t - 3.4) % 2.6) / 2.6 : -1
+  const k = loop >= 0 ? ease(loop) : first
+  const [cx, cy] = cubic(path, k)
+  const arrived = seg(t, 1.95, 2.3)
+  return (
+    <>
+      <g style={pop(t, 0.15, 66, 72)}>
         <rect x="24" y="50" width="84" height="44" rx="12" className={styles.enclave} />
         <text x="66" y="77" className={styles.val} textAnchor="middle">contract</text>
       </g>
-      <path d="M108 72 C 160 20, 210 20, 252 72" className={`${styles.solid} ${styles.d}`} />
-      <circle r="6" className={styles.coin}><animateMotion dur="2.4s" repeatCount="indefinite" path="M108 72 C 160 20, 210 20, 252 72" /></circle>
-      <g className={styles.f} style={i(1)}>
-        <rect x="252" y="50" width="88" height="44" rx="12" className={styles.node} />
+      <path d="M108 72 C 160 20, 210 20, 252 72" className={styles.solid} style={draw(t, 0.5, 0.6, 200)} />
+      <circle cx={cx} cy={cy} r="7" className={styles.coin} style={{ opacity: (t > 1.0 && first < 1) || (loop > 0.02 && loop < 0.98) ? 1 : 0 }} />
+      <text x="180" y="18" className={styles.lblOn} textAnchor="middle" style={fade(t, 1.0)}>USDC</text>
+      <g style={pop(t, 0.4, 296, 72)}>
+        <rect x="252" y="50" width="88" height="44" rx="12" className={arrived > 0.5 ? styles.nodeOn : styles.node} />
         <text x="296" y="77" className={styles.val} textAnchor="middle">recipient</text>
-        <circle cx="340" cy="50" r="10" className={styles.badge} />
-        <Check x={340} y={50} />
       </g>
-      <text x="180" y="20" className={styles.lblOn} textAnchor="middle">USDC</text>
-      <g className={styles.f} style={i(2)}>
-        {[0, 1, 2].map((k) => <rect key={k} x={100 + k * 58} y="118" width="48" height="6" rx="3" className={styles.recLine} />)}
-        <text x="180" y="146" className={styles.lbl} textAnchor="middle">on the public record</text>
+      <g style={pop(t, 2.0, 336, 50)}>
+        <circle cx="336" cy="50" r="10" className={styles.badge} />
+        <Check x={336} y={50} k={seg(t, 2.15, 2.5)} />
       </g>
+      {[0, 1, 2].map((j) => <rect key={j} x={100 + j * 58} y="118" width={48 * ease(seg(t, 2.5 + j * 0.2, 2.9 + j * 0.2))} height="6" rx="3" className={styles.recLine} />)}
+      <text x="180" y="146" className={styles.lbl} textAnchor="middle" style={fade(t, 3.0)}>on the public record</text>
     </>
-  ),
+  )
+}
+
+const ART: Record<string, (p: { t: number }) => ReactNode> = { "01": Sealed, "02": Attested, "03": Approved, "04": Executing, "05": Checked, "06": Settled }
+
+/* seconds since the step opened, ticking every frame while it is the active step; reduced motion: the end state */
+function useClock(on: boolean, reduce: boolean) {
+  const [t, setT] = useState(reduce ? 99 : 0)
+  useEffect(() => {
+    if (reduce) { setT(99); return }
+    if (!on) { setT(0); return }
+    let raf = 0
+    const start = performance.now()
+    const tick = (now: number) => { setT((now - start) / 1000); raf = requestAnimationFrame(tick) }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [on, reduce])
+  return t
+}
+function Art({ n, on, reduce }: { n: string; on: boolean; reduce: boolean }) {
+  const t = useClock(on, reduce)
+  const View = ART[n]
+  return <svg viewBox="0 0 360 150" className={styles.art} aria-hidden="true"><View t={t} /></svg>
 }
 
 export function HowSteps() {
@@ -261,7 +386,7 @@ export function HowSteps() {
 
                 <div className={styles.console}>
                   <div className={ab.room}><span>Deal room · step {s.n} of 06</span><span className={styles.state}>{s.state}</span></div>
-                  <svg viewBox="0 0 360 150" className={styles.art} aria-hidden="true">{ART[s.n]}</svg>
+                  <Art n={s.n} on={k === active} reduce={reduce} />
                   <div className={styles.record}>
                     {s.record.map((l) => (
                       <div key={l.k} className={styles.line}>
