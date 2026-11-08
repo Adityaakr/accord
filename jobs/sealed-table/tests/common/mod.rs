@@ -3,6 +3,7 @@
 
 use accord_core::hash::sha256;
 use accord_core::limits::Role;
+use accord_core::Kind;
 use accord_sealed_table::attest::{Attestation, PartResult};
 use accord_sealed_table::host::{Host, HttpRequest, HttpResponse, Method};
 use accord_sealed_table::nearai::ResponseRecord;
@@ -202,7 +203,7 @@ impl ScriptedAi {
 }
 
 impl Negotiator for ScriptedAi {
-    fn ask(&mut self, side: Role, messages: &[Chat]) -> Result<String, String> {
+    fn ask(&mut self, side: Role, _kind: Kind, messages: &[Chat]) -> Result<String, String> {
         self.seen.borrow_mut().push((side, messages.to_vec()));
         self.answers
             .borrow_mut()

@@ -82,7 +82,7 @@ impl Ai for NearAi<'_> {
 }
 
 impl Negotiator for NearAi<'_> {
-    fn ask(&mut self, _side: Role, messages: &[Chat]) -> Result<String, String> {
+    fn ask(&mut self, _side: Role, kind: Kind, messages: &[Chat]) -> Result<String, String> {
         let body = json!({
             "model": self.model,
             "messages": messages,
@@ -90,7 +90,7 @@ impl Negotiator for NearAi<'_> {
             "temperature": TEMPERATURE,
             "max_tokens": MAX_TOKENS,
             "reasoning_effort": REASONING_EFFORT,
-            "response_format": protocol::response_format(),
+            "response_format": protocol::response_format(kind),
         });
         let bytes = serde_json::to_vec(&body).map_err(|e| e.to_string())?;
         let c = nearai::complete(self.host, self.api_key, &self.model, bytes, &self.verified)?;

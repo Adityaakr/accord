@@ -184,7 +184,8 @@ pub struct Chat {
 /// Whoever answers for a side: NEAR AI in the job ([`crate::run::NearAiNegotiator`]), a script in tests.
 /// `Err` is an infrastructure failure (the call or its verification failed) and ends the run.
 pub trait Negotiator {
-    fn ask(&mut self, side: Role, messages: &[Chat]) -> Result<String, String>;
+    /// `kind` is the agreement's: the answer's schema allows `atlas` only in the form that kind accepts.
+    fn ask(&mut self, side: Role, kind: Kind, messages: &[Chat]) -> Result<String, String>;
 }
 
 #[derive(Serialize, Clone, Debug, PartialEq, Eq)]
@@ -299,7 +300,7 @@ impl Table<'_> {
             },
         ];
         for attempt in 0..2 {
-            let content = neg.ask(side, &messages)?;
+            let content = neg.ask(side, self.ctx.kind, &messages)?;
             let problem = match parse_message(&content) {
                 None => "it is not one JSON object matching the schema".to_string(),
                 Some(m) if !allowed.contains(&m.kind.as_str()) => {
@@ -419,13 +420,22 @@ impl Table<'_> {
     }
 }
 
-/// The message schema as NEAR AI's `response_format` takes it.
-pub fn response_format() -> Value {
+/// The message schema as NEAR AI's `response_format` takes it, narrowed to the agreement's kind: `terms.atlas` must be
+/// `null` in procurement and the object in market making. With both branches open, the model filled `atlas` in a
+/// procurement quote on every try, `to_terms` refused it, and the vendor walked away in round 1 (testnet
+/// `a3.accord-v2.testnet`, 8 Nov 2026).
+pub fn response_format(kind: Kind) -> Value {
     let mut schema: Value =
         serde_json::from_str(MESSAGE_SCHEMA).expect("message.schema.json parses");
     if let Value::Object(m) = &mut schema {
         m.remove("$schema");
         m.remove("title");
     }
+    let atlas = &mut schema["$defs"]["terms"]["properties"]["atlas"];
+    let branch = match kind {
+        Kind::Procurement => 0,
+        Kind::MarketMaking => 1,
+    };
+    *atlas = atlas["anyOf"][branch].take();
     json!({"type": "json_schema", "json_schema": {"name": "accord_message", "strict": true, "schema": schema}})
 }

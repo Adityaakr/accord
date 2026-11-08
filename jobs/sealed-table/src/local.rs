@@ -318,7 +318,7 @@ fn allowed_types(messages: &[Chat]) -> Vec<String> {
 }
 
 impl Negotiator for LocalNegotiator {
-    fn ask(&mut self, side: Role, messages: &[Chat]) -> Result<String, String> {
+    fn ask(&mut self, side: Role, _kind: Kind, messages: &[Chat]) -> Result<String, String> {
         self.asked += 1;
         self.answer(side, &allowed_types(messages))
     }

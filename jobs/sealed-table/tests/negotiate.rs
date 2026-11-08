@@ -414,3 +414,15 @@ fn pubkey_output_passes_the_factorys_checks() {
     assert_eq!(out["mandate_pubkey"].as_str().unwrap().len(), 66);
     assert_eq!(key, keys::signing_key(&test_seed()).verifying_key());
 }
+
+/// The answer's schema follows the agreement's kind: procurement allows only `"atlas": null`, market making only the
+/// object (a procurement quote with `atlas` filled ended `a3.accord-v2.testnet` in WALK_AWAY, 8 Nov 2026).
+#[test]
+fn response_format_narrows_atlas_to_the_kind() {
+    use accord_sealed_table::protocol::response_format;
+    let atlas = |k| response_format(k)["json_schema"]["schema"]["$defs"]["terms"]["properties"]["atlas"].clone();
+    assert_eq!(atlas(Kind::Procurement), serde_json::json!({"type": "null"}));
+    let mm = atlas(Kind::MarketMaking);
+    assert_eq!(mm["type"], "object");
+    assert!(mm.get("anyOf").is_none());
+}
