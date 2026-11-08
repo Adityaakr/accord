@@ -189,7 +189,7 @@ Root struct under `1 KB`; every variable collection in `near_sdk::store` (sectio
 
 | Method | Caller | Deposit | Gas | Effect | Panics |
 | --- | --- | --- | --- | --- | --- |
-| `commit_mandate(commitment: String, ciphertext: Base64VecU8, doc_pubkey: String, doc_key_signer: PublicKey)` | buyer or vendor | 0 | 30 T | Stored for the caller's role; storage paid from the agreement's balance; replaceable while `AwaitingMandates` or `Ready` | `ERR_NOT_PARTY`, `ERR_WRONG_STATE`, `ERR_TOO_LARGE` (> 8 KB), `ERR_LOW_BALANCE` |
+| `commit_mandate(commitment: String, ciphertext: Base64VecU8, doc_pubkey: String, doc_key_signer: PublicKey)` | buyer or vendor | 0 | 30 T | Stored for the caller's role; storage paid from the agreement's balance; replaceable while `AwaitingMandates`, or `Ready` before the first attempt (one negotiation per pair of commitments, retries included) | `ERR_NOT_PARTY`, `ERR_WRONG_STATE`, `ERR_TOO_LARGE` (> 8 KB), `ERR_LOW_BALANCE` |
 | `start_negotiation()` | anyone | 0 | ≥ 280 T | Requires both commitments and `Ready`; panics if prepaid gas is below `280 TGas`; `request_execution` with `{mode, agreement, request_nonce}`, then `on_sealed_result` | `ERR_WRONG_STATE`, `ERR_LOW_GAS`, `ERR_LOW_BALANCE` |
 | `on_sealed_result(request_nonce)` | private (the agreement's own `.then`) | | 60 T | `ARCHITECTURE.md` 8.4 | |
 | `submit_sealed_result(output: SealedOutput)` | keeper | 0 | 100 T | Only under fallback F1, which is not in use: compiled only with the `f1` cargo feature, never into a release (`make check-deploy` refuses it). Once per nonce; the output must fully verify (terms or a final no-deal for the current nonce) before any state changes | `ERR_NOT_KEEPER`, `ERR_WRONG_STATE`, `ERR_BAD_OUTPUT` |

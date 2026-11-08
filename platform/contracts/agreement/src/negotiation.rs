@@ -47,7 +47,8 @@ pub(crate) fn request_job(
 
 #[near]
 impl Agreement {
-    /// Stores the caller's sealed mandate. No deposit: the agreement's balance pays the storage.
+    /// Stores the caller's sealed mandate. No deposit: the agreement's balance pays the storage. Replaceable only
+    /// until the first attempt runs: one negotiation per pair of commitments, retries included.
     pub fn commit_mandate(
         &mut self,
         commitment: String,
@@ -60,7 +61,7 @@ impl Agreement {
         require(
             matches!(
                 self.negotiation,
-                Negotiation::AwaitingMandates | Negotiation::Ready { .. }
+                Negotiation::AwaitingMandates | Negotiation::Ready { attempts: 0 }
             ),
             "ERR_WRONG_STATE",
         );

@@ -65,11 +65,15 @@ fn limits_parse(m: &Mandate) -> bool {
     }
 }
 
+/// A compressed secp256k1 public key in lowercase hex that is a point on the curve. The format alone is not enough:
+/// an off-curve key would only fail when the agreed document is encrypted to it, after the negotiation ran, and
+/// that retryable failure would tell its sender "a deal existed inside my limits".
 fn is_doc_key(s: &str) -> bool {
     s.len() == 66
         && (s.starts_with("02") || s.starts_with("03"))
         && s.bytes()
             .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
+        && hex::decode(s).is_ok_and(|b| k256::PublicKey::from_sec1_bytes(&b).is_ok())
 }
 
 /// Opens one side's envelope and checks it against the on-chain record and the agreement's state.

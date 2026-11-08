@@ -1055,3 +1055,54 @@ fn audit_keeper_garbage_cannot_discard_the_real_answer() {
         "the valid signed terms were thrown away"
     );
 }
+
+/// L5 (finding 4): after a signed `infrastructure` outcome the agreement is `Ready` again, and a party used to be able
+/// to replace its commitment, so the next attempt negotiated a different pair (a buyer could probe with an off-curve
+/// doc key, learn "a deal existed", and retune). Fixed: one negotiation per pair of commitments, so a mandate is
+/// final once an attempt has run; the retry uses the same pair.
+#[test]
+fn audit_a_mandate_cannot_be_replaced_after_an_attempt() {
+    let mut a = new_agreement(Kind::Procurement);
+    commit_both(&mut a);
+    // Before any attempt a party may still replace its mandate.
+    call(BUYER, None, T0, vec![]);
+    a.commit_mandate(
+        "11".repeat(32),
+        Base64VecU8(vec![1, 2, 3]),
+        "02".to_string() + &"ab".repeat(32),
+        pk([4; 32]),
+    );
+    call("accord-keeper.testnet", None, T0, vec![]);
+    let _ = a.start_negotiation();
+    let out = sign(
+        SEALED,
+        json!({"mode": "negotiate", "agreement": me(), "request_nonce": nonce(&a), "release": 1,
+               "buyer_commitment": "11".repeat(32), "vendor_commitment": "22".repeat(32),
+               "outcome": "infrastructure", "error": "document encryption: InvalidPublicKey"}),
+    );
+    call(
+        me().as_str(),
+        None,
+        T0 + 1,
+        vec![PromiseResult::Successful(out.to_string().into_bytes())],
+    );
+    a.on_sealed_result(nonce(&a));
+    assert_eq!(a.negotiation, Negotiation::Ready { attempts: 1 });
+    call(BUYER, None, T0 + 2, vec![]);
+    assert!(
+        panics(|| a.commit_mandate(
+            "33".repeat(32),
+            Base64VecU8(vec![9]),
+            "02".to_string() + &"cd".repeat(32),
+            pk([4; 32]),
+        )),
+        "the buyer replaced its mandate after a completed attempt"
+    );
+    // The retry runs on the same pair.
+    call("accord-keeper.testnet", None, T0 + 3, vec![]);
+    let _ = a.start_negotiation();
+    assert!(matches!(
+        a.negotiation,
+        Negotiation::Requested { attempt: 2, .. }
+    ));
+}
