@@ -152,7 +152,7 @@ From BLOCKED.md, plus the new platform:
 | 1 | Yes to creating the testnet accounts and keys (`make setup`; keys stay in the gitignored `.env`, never printed) | Deployer, buyer, vendor, authority, keeper, demo accounts |
 | 2 | About 90 testnet NEAR: ~60 in `accord-v1.testnet` for the global release, ~12 factory, ~15 buyer | The faucet rate-limits; release 1 (PROGRESS 2.7) |
 | 3 | Testnet USDC: Circle faucet (check NEAR is listed) or near-faucet.io, ~70 to the buyer and one drip to the /try buyer | Funding escrow |
-| 4 | NEAR AI Cloud credits or a spending limit at cloud.near.ai (completions return HTTP 402 today); rotate the key | Live negotiation |
+| 4 | NEAR AI Cloud credits or a spending limit at cloud.near.ai (completions return HTTP 402 today) | Live negotiation |
 | 5 | OutLayer: install `outlayer-cli`, `outlayer login testnet` as `accord-v1.testnet` | Enclave jobs: Sealed Table, Payee proof, observer |
 | 6 | (none: email sign-in was removed on 9 Nov 2026) | |
 | 7 | Railway: app, agent, keeper and Postgres services with variables; the app's public host | Running it for others |

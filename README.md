@@ -9,7 +9,7 @@
 Agreements negotiated in private, enforced in public.
 
 [Site](https://accordweb-production.up.railway.app) ·
-[Try a deal](#try-it-in-3-minutes-on-testnet) ·
+[Try a deal](https://accordweb-production.up.railway.app/app/try-it) ·
 [Verify](https://accordweb-production.up.railway.app/verify) ·
 [Record](https://accordweb-production.up.railway.app/record) ·
 [Docs](https://accordweb-production.up.railway.app/docs)
@@ -228,13 +228,13 @@ Source: [`platform/ARCHITECTURE.md`](platform/ARCHITECTURE.md) section 6. Five r
 ## Try it in 3 minutes on testnet
 
 > [!NOTE]
-> The app service behind `/app` on the live site is not deployed yet: `https://accordweb-production.up.railway.app/app/try-it` answers `503` with a short "starting up" page that links to `/verify`. Until it is, the transactions below show this exact path run on 8 Nov 2026, and [Verify any agreement](#verify-any-agreement) works today with no account. To run the page yourself, start the app ([Run locally](#run-locally)) and open http://localhost:3100/app/try-it; the faucet, demo counterparty and demo agent need the `FAUCET_*`, `DEMO_*` and `RELAYER_*` variables named in [`platform/.env.example`](platform/.env.example).
+> The app is live at https://accordweb-production.up.railway.app/app/try-it (since 9 Nov 2026). The transactions below show this exact path run on 8 Nov 2026, and [Verify any agreement](#verify-any-agreement) works with no account. To run the page yourself instead, start the app ([Run locally](#run-locally)) and open http://localhost:3100/app/try-it; the faucet, demo counterparty and demo agent need the `FAUCET_*`, `DEMO_*` and `RELAYER_*` variables named in [`platform/.env.example`](platform/.env.example).
 
-Open `/app/try-it`. Everything there is NEAR testnet with test USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, authority `halcyon-auth.testnet`) and the agent is a demo agent run by Accord for test rooms; both are labelled in the room.
+Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it). Everything there is NEAR testnet with test USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, authority `halcyon-auth.testnet`) and the agent is a demo agent run by Accord for test rooms; both are labelled in the room.
 
 | # | Do | See |
 | --- | --- | --- |
-| 1 | Sign in with Meteor or Intear on testnet | `01 Connect a wallet` marked done, with your account |
+| 1 | **Connect a NEAR wallet**: a NEAR testnet wallet such as Meteor or Intear | `01 Connect a wallet` marked done, with your account |
 | 2 | **Get test funds** | `0.00 NEAR` becomes `2.50 NEAR · 100.00 tUSDC`, both faucet transactions linked |
 | 3 | **Create the room** | `Your room is a8.accord-v2.testnet: My first deal room.` (your number will differ) |
 | 4 | **Seal your mandate** with the Northwind preset (`40` tUSDC ceiling, 2 to 4 items) | In the Demo counterparty panel: `Sealed the vendor's mandate (Halcyon procurement preset)`, then `Started the negotiation in the Sealed Table`; the state moves `Sealed` to `Attested` |

@@ -16,14 +16,10 @@ observer through OutLayer's HTTPS API, which needs `OUTLAYER_PAYMENT_KEY` in `.e
 Testnet pages behind sign-in need a real wallet (Meteor or Intear). Sign in once at
 http://localhost:3200/signin as `northwind-demo.testnet`; the public Verify page needs no sign-in.
 
-## Rotate the NEAR AI key after the hackathon
-
-The key in `.env` was pasted into a chat on 3 Nov. After 14 Nov, create a new key at https://cloud.near.ai, put it in `.env` and in the Sealed Table's OutLayer secret, and delete the old one.
-
 ## 4.7: Railway for the hosted app, agent and keeper
 
-The website is live at https://accordweb-production.up.railway.app. The app service is not deployed yet, so `/app` answers
-`503` with a "starting up" page; the current steps are in `DEPLOY.md`.
+The website is live at https://accordweb-production.up.railway.app. **App part done (9 Nov 2026):** the app service is
+deployed and `/app/try-it` answers at https://accordweb-production.up.railway.app/app/try-it. Still open: the agent (with re-arm) and keeper services; the steps are in `DEPLOY.md`.
 
 1. Create a Railway project with four services from this repository: `app` (`pnpm --filter @accord/app build && pnpm --filter @accord/app start`), `agent` (`pnpm --filter @accord/agent start`, `AGENT_REARM=on`), `keeper` (`pnpm --filter @accord/keeper start`) and a Postgres plugin.
 2. Set on all three: `ACCORD_NETWORK=testnet`, `ACCORD_FACTORY`, `NEAR_RPC_URL`, `DATABASE_URL` (from the plugin). On the agent: the `TRY_*` accounts and keys. On the keeper: `KEEPER_ACCOUNT`, `KEEPER_KEY`, `OUTLAYER_OWNER`, `OUTLAYER_PAYMENT_KEY` (the observer runs through OutLayer's HTTPS API). On the app: `INBOX_DAILY_SALT` (any random string), `APP_URL` (its own public URL).
