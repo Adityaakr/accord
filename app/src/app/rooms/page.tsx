@@ -1,3 +1,4 @@
+import { shortAccount } from "@/components/account/short"
 import Link from "next/link";
 import { roomTable, type RoomRow } from "@/server/data";
 import { PageHead, Usdc } from "@/components/ui";
@@ -50,7 +51,7 @@ export default async function Rooms({ searchParams }: { searchParams: Promise<{ 
       <PageHead
         eyebrow={data ? <SourceLine {...data.source} /> : null}
         title={party ? (role === "vendor" ? "Rooms you sell in" : role === "authority" ? "Rooms you authorise" : role === "buyer" ? "Rooms you buy in" : "Your deal rooms") : "All deal rooms"}
-        lead={party ? <>Rooms where <span className="mono">{party}</span> is {role === "vendor" ? "the vendor" : role === "authority" ? "the vendor's settlement authority" : role === "buyer" ? "the buyer" : "the buyer, the vendor or the vendor's authority"}. <Link href="/rooms" className="weak">See every room on the factory</Link>.</> : "Every deal room on the factory. Each is its own NEAR account; the terms both companies approved decide what the buyer's agent may pay."}
+        lead={party ? <>Rooms where <span className="mono" title={party}>{shortAccount(party)}</span> is {role === "vendor" ? "the vendor" : role === "authority" ? "the vendor's settlement authority" : role === "buyer" ? "the buyer" : "the buyer, the vendor or the vendor's authority"}. <Link href="/rooms" className="weak">See every room on the factory</Link>.</> : "Every deal room on the factory. Each is its own NEAR account; the terms both companies approved decide what the buyer's agent may pay."}
         aside={!role || role === "buyer" ? <Link href="/agreements/new" className={styles.primary}>New deal room</Link> : null}
       />
 
