@@ -68,7 +68,7 @@ accord verify · a6.accord-v2.testnet
 verify: 5 checks ok · 1 partial · 1 not checked
 ```
 
-`model` is `partial`: the nonce is bound in the attestation report, but the hardware quote and GPU evidence are not checked here (`make probe-ai` checks them). `release` stays `not checked` until `outlayer-verify` is installed (`BLOCKED.md`). `keys` reads `0 key` because a6's agent was revoked.
+`model` is `partial`: the nonce is bound in the attestation report, but the hardware quote and GPU evidence are not checked here (`make probe-ai` checks them). `release` stays `not checked` until `outlayer-verify` is installed (`docs/build/BLOCKED.md`). `keys` reads `0 key` because a6's agent was revoked.
 
 `make sandbox`, from a real run on 3 Nov 2026 (the market-making line was then labelled `atlas`; the sandbox now prints `market`):
 
@@ -229,7 +229,7 @@ tests/                  sandbox suite, make sandbox, make serve
 
 ## Status
 
-Built on 3 Nov 2026 and tested again on 9 Nov 2026: the contracts (55 agreement unit tests pass on the mocked chain, 1 ignored, including a 400-sequence `act` fuzz test; 12 sandbox tests pass on a real local node, 1 ignored, which reads mainnet; `make sandbox`), the three enclave jobs (fixture tests, and run natively against a local node), the SDK, CLI and MCP server, the app, the agent with the `/try` re-arm, the keeper, and every live target on a local node (`make dev`, then `NET=local`). Live on NEAR testnet since 8 Nov 2026: factory `accord-v2.testnet` on release `3` (Sealed Table build `7c832ce9…`, pubkey runs `13682`, `13672`, `13683`), test USDC `tusdc.accord-v1.testnet`, relayer `relay.accord-v2.testnet`, the three jobs as OutLayer projects `accord-v1.testnet/accord-{sealed-table,payee,observer}`, and the app with `/app/try-it` at https://accordweb-production.up.railway.app/app. Market making on testnet waits on an OutLayer payment key (`BLOCKED.md`); it runs end to end on a local node.
+Built on 3 Nov 2026 and tested again on 9 Nov 2026: the contracts (55 agreement unit tests pass on the mocked chain, 1 ignored, including a 400-sequence `act` fuzz test; 12 sandbox tests pass on a real local node, 1 ignored, which reads mainnet; `make sandbox`), the three enclave jobs (fixture tests, and run natively against a local node), the SDK, CLI and MCP server, the app, the agent with the `/try` re-arm, the keeper, and every live target on a local node (`make dev`, then `NET=local`). Live on NEAR testnet since 8 Nov 2026: factory `accord-v2.testnet` on release `3` (Sealed Table build `7c832ce9…`, pubkey runs `13682`, `13672`, `13683`), test USDC `tusdc.accord-v1.testnet`, relayer `relay.accord-v2.testnet`, the three jobs as OutLayer projects `accord-v1.testnet/accord-{sealed-table,payee,observer}`, and the app with `/app/try-it` at https://accordweb-production.up.railway.app/app. Market making on testnet waits on an OutLayer payment key (`docs/build/BLOCKED.md`); it runs end to end on a local node.
 
 Agreement `a6.accord-v2.testnet` ran the full procurement flow on release 3, with the real NEAR AI model (`z-ai/glm-5.3-flash`) negotiating inside OutLayer's enclave (`QUOTE → COUNTER → FINAL → ACCEPT`, `35.50` tUSDC in 3 items, 59 s):
 

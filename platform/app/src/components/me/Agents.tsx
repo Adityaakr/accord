@@ -1,6 +1,6 @@
 "use client";
 
-// Agents (PLATFORM.md §6): every agent key across the rooms this account buys in. Each key can call act() on its
+// Agents (docs/build/PLATFORM.md §6): every agent key across the rooms this account buys in. Each key can call act() on its
 // own agreement and nothing else. Revoke is hold-to-confirm; the key is read back from chain first, then the row
 // collapses to the network's answer.
 

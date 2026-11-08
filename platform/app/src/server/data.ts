@@ -45,7 +45,7 @@ export async function room(id: string): Promise<Room> {
   return { view, terms, items, refusals: refusals.reverse(), recipients, exceptions, periods, observations, receipts, commitments, source: src };
 }
 
-// ---------- Home: one person's rooms, what needs them, and the numbers (PLATFORM.md §7) ----------
+// ---------- Home: one person's rooms, what needs them, and the numbers (docs/build/PLATFORM.md §7) ----------
 
 export type Role = "buyer" | "vendor" | "authority";
 
@@ -197,7 +197,7 @@ export async function portfolio(account: string): Promise<Portfolio> {
   return out;
 }
 
-// ---------- Approvals, Agents, Recipients (PLATFORM.md §6): read models across one person's rooms ----------
+// ---------- Approvals, Agents, Recipients (docs/build/PLATFORM.md §6): read models across one person's rooms ----------
 
 export type ApprovalKind = "seal" | "terms" | "recipient-approve" | "recipient-accept" | "delivery" | "exception" | "period";
 
@@ -377,7 +377,7 @@ export async function recipients(account: string): Promise<{ account: string; ro
   return { account, rows, source: src };
 }
 
-// ---------- Deal rooms table (PLATFORM.md §6): one row per room with its step and what is next ----------
+// ---------- Deal rooms table (docs/build/PLATFORM.md §6): one row per room with its step and what is next ----------
 
 export interface RoomRow {
   account: string;

@@ -1,6 +1,6 @@
 "use client";
 
-// Recipients (PLATFORM.md §6): every account the rooms pay, how it was bound, and any change in progress with its
+// Recipients (docs/build/PLATFORM.md §6): every account the rooms pay, how it was bound, and any change in progress with its
 // timelock. The buyer or the vendor's settlement authority can cancel a pending change (cancel_recipient_change).
 
 import Link from "next/link";

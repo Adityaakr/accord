@@ -91,7 +91,7 @@
 }
 @media (prefers-reduced-motion: reduce) { .refusal { animation: none; } }
 
-/* tabs (PLATFORM.md §6): a flat row under the header; the active tab carries the teal underline */
+/* tabs (docs/build/PLATFORM.md §6): a flat row under the header; the active tab carries the teal underline */
 .tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin: 0 0 20px; border-bottom: 1px solid var(--hairline); }
 .tabs::-webkit-scrollbar { display: none; }
 .tab { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 12px 14px; font-size: 13.5px; color: var(--text-weak); white-space: nowrap; transition: color 0.2s var(--ease); }

@@ -70,7 +70,7 @@ needed for `/app/try-it`, where each room runs its own demo agent. Each is one m
 | `NEAR_RPC_URL` | optional | optional | yes |
 | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` | `${{Postgres.DATABASE_URL}}` | yes: the same Postgres as the app, or `/app/status` sees no heartbeat |
 | `KEEPER_ACCOUNT`, `KEEPER_KEY` | required | required with the re-arm (it starts the room's negotiation and activates its recipient) | no |
-| `OUTLAYER_OWNER`, `OUTLAYER_PAYMENT_KEY` | optional: observer polling for market making (`BLOCKED.md`); off without them | | no |
+| `OUTLAYER_OWNER`, `OUTLAYER_PAYMENT_KEY` | optional: observer polling for market making (`docs/build/BLOCKED.md`); off without them | | no |
 | `OUTLAYER_API_URL`, `OUTLAYER_OBSERVER_PROJECT` | optional | | no |
 | `AGENT_REARM` | | `on` | no |
 | `TRY_BUYER_ACCOUNT`, `TRY_BUYER_KEY` | | required with the re-arm | no |

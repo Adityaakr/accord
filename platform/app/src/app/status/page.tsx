@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { config, source } from "@/server/accord";
 import { heartbeats } from "@/server/store";
 import { PageHead, Panel, Pill } from "@/components/ui";
@@ -39,10 +40,16 @@ export default async function Status() {
                 <span className="h5">{s.label}</span>
                 <span className="small">{s.what}</span>
               </div>
-              <Pill tone={ok ? "teal" : age === null ? "muted" : "warn"}>{age === null ? "no heartbeat" : ok ? `${age} s ago` : `${Math.round(age / 60)} min ago`}</Pill>
+              <Pill tone={ok ? "teal" : "muted"}>{age === null ? "not running on this deployment" : ok ? `${age} s ago` : `last seen ${Math.round(age / 60)} min ago`}</Pill>
             </div>
           );
         })}
+        {SERVICES.every((s) => !beats.some((b) => b.service === s.id)) && (
+          <p className="small" style={{ paddingTop: 14 }}>
+            These three are not deployed here yet, so the always-open public room at <Link className="link" href="/try">/try</Link> is paused.
+            Agreements and their contracts do not depend on them, and <Link className="link" href="/try-it">your own deal room</Link> runs its demo agent in the room itself.
+          </p>
+        )}
       </Panel>
     </div>
   );

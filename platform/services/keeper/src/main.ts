@@ -56,7 +56,7 @@ async function main() {
   const ask = cfg.observer ? observerFor(cfg.observer) : undefined;
   console.log(cfg.observer
     ? `  observer  ${cfg.observer.kind === "local" ? cfg.observer.url : `${cfg.observer.api}/call/${cfg.observer.owner}/${cfg.observer.project}`}`
-    : "  observer  polling off: set OUTLAYER_OWNER and OUTLAYER_PAYMENT_KEY (BLOCKED.md, probe 0.3)");
+    : "  observer  polling off: set OUTLAYER_OWNER and OUTLAYER_PAYMENT_KEY (docs/build/BLOCKED.md, probe 0.3)");
   for (;;) {
     const actions: string[] = [];
     try {

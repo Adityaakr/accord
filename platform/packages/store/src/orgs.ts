@@ -1,4 +1,4 @@
-// Organisations (PLATFORM.md section 4): a company, its members and their roles, invitations and an audit log.
+// Organisations (docs/build/PLATFORM.md section 4): a company, its members and their roles, invitations and an audit log.
 // Off chain and advisory: a role decides what the app shows a member, never what the contract allows; every money
 // action is still signed by the person's own account. Nothing here holds a key or a sealed figure. An invitation is
 // stored as the sha256 of its token only, so the stored data cannot be turned back into a working link.

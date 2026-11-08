@@ -54,7 +54,7 @@ export function Chrome({ network, factory, sandbox, children }: { network: strin
             <Link href="/status">Status</Link>
             <Link href="/docs">Docs</Link>
             <Link href="/try-it">Try a deal</Link>
-            <Link href="/try">Public demo room</Link>
+            <Link href="/try">Recorded attack</Link>
             <a href="https://accordweb-production.up.railway.app" target="_blank" rel="noreferrer">accord site</a>
           </nav>
           <span className="small mono">{network} · factory {factory}</span>

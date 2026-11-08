@@ -1,6 +1,6 @@
 "use client";
 
-// The guided way to open a deal room (PLATFORM.md §5, buyer steps 4 and 5): pick the agreement type, write the brief
+// The guided way to open a deal room (docs/build/PLATFORM.md §5, buyer steps 4 and 5): pick the agreement type, write the brief
 // in plain language, name the counterparty by domain, then review what the factory will charge before the wallet
 // signs. Creation is the existing SDK call; the room opens with an invitation card for the counterparty.
 // The brief stays in this browser: it is the buyer's own instruction and is never published.

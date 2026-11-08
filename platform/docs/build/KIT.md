@@ -1,5 +1,7 @@
 # KIT.md: the Accord build kit (v7), read this first
 
+Since 9 Nov 2026 (`PROGRESS.md` 7.3) this file and the other build-process files live in `platform/docs/build/`; the product docs (`GOAL.md`, `ARCHITECTURE.md`, `INTERFACES.md`, `DECISIONS.md`, `DEPLOY.md`, `CHANGELOG.md`, `HACKATHON.md`) and the build rules `CLAUDE.md` stay at `platform/`.
+
 This kit is everything needed to build Accord end to end for NEAR HACKATHON (development closes 14 Nov 2026, 23:59 UTC) with Claude Code doing the building and Adi doing only what needs a human. Every decision that matters is written down; the build agent executes the files in order, keeps every claim true, and stops at the points that need Adi.
 
 If two files disagree, the order of authority is: `HACKATHON.md` (the organisers' rules), then `DECISIONS.md` (verified facts and spec changes), then `GOAL.md` (what ships and the claims), then `INTERFACES.md`, then `ARCHITECTURE.md`, then everything else.

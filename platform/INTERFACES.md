@@ -605,7 +605,7 @@ Run `npx @accord/mcp` (stdio) or `npx @accord/mcp --http 8787`. Tools:
 
 ## 14. App routes and HTTP API
 
-Pages: `/` (deal rooms), `/agreements/new`, `/agreements/[id]` (deal room: the four-state strip, terms, recipient, items, exceptions, the refusal log as a live region, receipts, the keys panel, agent approvals, the Verified panel), `/agreements/[id]/invoice` (`WIN_PLAN.md` lever 4: the items as an invoice with amounts, due dates and the Fund button; the 1Click quote once lever 9 ships), `/market-making` (alias `/atlas`), `/payee` (file generator and checker), `/try` (the open inbox), `/verify` and `/verify/[id]`, `/record` (ledger), `/join`, `/docs`, `/status`.
+Pages: `/` (deal rooms), `/agreements/new`, `/agreements/[id]` (deal room: the four-state strip, terms, recipient, items, exceptions, the refusal log as a live region, receipts, the keys panel, agent approvals, the Verified panel), `/agreements/[id]/invoice` (`docs/build/WIN_PLAN.md` lever 4: the items as an invoice with amounts, due dates and the Fund button; the 1Click quote once lever 9 ships), `/market-making` (alias `/atlas`), `/payee` (file generator and checker), `/try` (the open inbox), `/verify` and `/verify/[id]`, `/record` (ledger), `/join`, `/docs`, `/status`.
 
 | Route | Method | Returns | Notes |
 | --- | --- | --- | --- |

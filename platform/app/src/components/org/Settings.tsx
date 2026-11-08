@@ -1,6 +1,6 @@
 "use client";
 
-// Settings (PLATFORM.md section 6): the organisation and its domain, members and roles, notification choices,
+// Settings (docs/build/PLATFORM.md section 6): the organisation and its domain, members and roles, notification choices,
 // developers (connecting an agent through MCP) and billing. Roles are advisory: they shape what each member is
 // shown; the contract checks every signer, and every money action is signed in a member's own wallet.
 

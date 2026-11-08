@@ -1,6 +1,6 @@
 "use client";
 
-// The seal (PLATFORM.md §8, a signature moment). Once the mandate is sealed in this browser, each limit's number
+// The seal (docs/build/PLATFORM.md §8, a signature moment). Once the mandate is sealed in this browser, each limit's number
 // resolves through a blur into a slice of the commitment hash and its field locks; the whole moment takes about
 // 600 ms and plays once. Reduced motion shows the end state. The numbers never leave the browser: what replaces
 // them is the public commitment.

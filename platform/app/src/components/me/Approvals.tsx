@@ -1,6 +1,6 @@
 "use client";
 
-// Approvals (PLATFORM.md §6): every decision waiting on the signed-in account across its rooms, newest first.
+// Approvals (docs/build/PLATFORM.md §6): every decision waiting on the signed-in account across its rooms, newest first.
 // Each action opens the confirm step, which reads the decision back from chain before the wallet signs.
 // Keyboard: J and K move, Enter opens the room, A opens the approve step for the selected row.
 

@@ -1,6 +1,6 @@
 "use client";
 
-// Negotiation tab (PLATFORM.md §8, a signature moment): one card on the website's teal stage. The buyer and the vendor
+// Negotiation tab (docs/build/PLATFORM.md §8, a signature moment): one card on the website's teal stage. The buyer and the vendor
 // sit in two columns whose rows line up (a shared grid with subgrid rows); the Sealed Table sits between them. The
 // contract exposes the negotiation's state, both commitments and the agreed terms, not the turns, so this shows
 // exactly that. Motion, one idea per state: waiting, the centre breathes; requested, a light travels from each side

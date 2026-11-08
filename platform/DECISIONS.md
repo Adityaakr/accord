@@ -252,7 +252,7 @@ Also: the observer's replay fixtures keyed view calls by the raw `args_base64`, 
 
 ## 16. The local node stands in for testnet (3 Nov)
 
-Testnet is blocked on OutLayer, NEAR and USDC (BLOCKED.md), so the product runs end to end on a local NEAR node first, with as little replaced as possible:
+Testnet is blocked on OutLayer, NEAR and USDC (docs/build/BLOCKED.md), so the product runs end to end on a local NEAR node first, with as little replaced as possible:
 
 - **What is real.** The four contracts (the `-mock` agreement build, whose only additions are `submit_mock_*` and skipping the OutLayer requests; `make check-deploy` proves the release build has neither); the three jobs' code, run natively from the same crates the enclave builds, with seeds that derive keys exactly as deployed; mandates sealed with eciesjs to the Sealed Table's derived key and opened by the Rust job; every signature checked by the contract; the observer reading real NEAR mainnet blocks.
 - **What is replaced, and labelled.** The model: `jobs/sealed-table/src/local.rs`, a deterministic negotiator inside both mandates' limits; its outputs carry `model.local`, `make negotiate` and Verify say "no model ran". OutLayer's delivery: a watcher submits job outputs through `submit_mock_*` as the keeper. The domains: the vendor's `accord.json` is served from memory, and `demo.accord.local` forwards to the app's demo-domain route. Faucets: test USDC mint and NEAR top-ups from the node's root.
@@ -374,7 +374,7 @@ Kept as stated limits: an item can be reopened from `AssumedPaid` by one excepti
 - Claim 6 now reads "A market-making agreement's payment becomes eligible only when the agreed observations pass,
   unless the buyer approves an exception", matching the site's `/security`.
 - Gate G-Atlas (6 Nov) did not pass on testnet: market making on testnet waits on an OutLayer payment key
-  (`BLOCKED.md`). The testnet proof and the video lead with procurement (`a6.accord-v2.testnet`, section 21).
+  (`docs/build/BLOCKED.md`). The testnet proof and the video lead with procurement (`a6.accord-v2.testnet`, section 21).
 
 ## 23. Sign-in: external NEAR wallets only (9 Nov 2026)
 

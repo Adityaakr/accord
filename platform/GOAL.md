@@ -1,10 +1,10 @@
 # GOAL.md: Accord, end to end (v7, 31 Oct 2026)
 
-v7 replaces the Base-rail kit (v4 to v6). Settlement is NEAR-native: each agreement is its own NEAR account holding USDC (NEP-141), and the buyer's agent holds one function-call key on that account. The "Claims and their limits" table below is the source of truth for every sentence in the README, the app, `DEMO.md`, `SUBMISSION.md` and the website copy. Nothing anywhere may be stronger than it. `ARCHITECTURE.md` explains how it works; `INTERFACES.md` defines every method, type, event, error, job schema, SDK call, MCP tool, CLI command and printed line; `PROGRESS.md` is the order of work.
+v7 replaces the Base-rail kit (v4 to v6). Settlement is NEAR-native: each agreement is its own NEAR account holding USDC (NEP-141), and the buyer's agent holds one function-call key on that account. The "Claims and their limits" table below is the source of truth for every sentence in the README, the app, `docs/build/DEMO.md`, `docs/build/SUBMISSION.md` and the website copy. Nothing anywhere may be stronger than it. `ARCHITECTURE.md` explains how it works; `INTERFACES.md` defines every method, type, event, error, job schema, SDK call, MCP tool, CLI command and printed line; `docs/build/PROGRESS.md` is the order of work.
 
 ## The goal
 
-Ship Accord as a working, reproducible product on NEAR testnet and submit it before 14 Nov 2026 23:59 UTC in the tracks `security` (lead), `privacy`, `agents` and `business`, plus any track in `SUBMISSION.md` whose lever passes. Adi's standing aim is the grand prize and track prizes, and a product that keeps going after the hackathon. Judges cannot run what they cannot reproduce, and Claude Code and Codex screen every entry first (HACKATHON.md Q-017), so reproducibility is part of the product.
+Ship Accord as a working, reproducible product on NEAR testnet and submit it before 14 Nov 2026 23:59 UTC in the tracks `security` (lead), `privacy`, `agents` and `business`, plus any track in `docs/build/SUBMISSION.md` whose lever passes. Adi's standing aim is the grand prize and track prizes, and a product that keeps going after the hackathon. Judges cannot run what they cannot reproduce, and Claude Code and Codex screen every entry first (HACKATHON.md Q-017), so reproducibility is part of the product.
 
 Positioning, fixed:
 
@@ -53,7 +53,7 @@ Withdrawn and never written, in any wording, in any file: "keys die on NEAR and 
 - Settlement: USDC on NEAR testnet, Circle's contract `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (confirmed by check 0.6). The reproducible path for judges can use `tUSDC`, a 6-decimal NEP-141 test token the setup deploys, labelled as such everywhere it appears.
 - Negotiation protocol: the vendor's negotiator quotes; the buyer's negotiator accepts or counters once with its reasons; the vendor accepts or makes a final offer; the buyer accepts or walks away. Code checks every proposal against both mandates, and the accepted terms once more. Each negotiator is a NEAR AI Cloud completion built from its own mandate and the other side's `shared` part only. Agents bring mandates, not conversations: no agent ever talks to the other side directly.
 - Humans set the constraints: each company writes its mandate, both approve the terms, the buyer accepts the recipient and approves exceptions, and `revoke_agent` is the kill switch.
-- The live testnet demo leads with procurement: agreement `a6.accord-v2.testnet` ran the full flow on release 3 (8 Nov 2026). Market making runs end to end on a local node with real mainnet observations; on testnet it waits on an OutLayer payment key (`BLOCKED.md`), and the site says no observation is recorded on testnet yet. Both types ship.
+- The live testnet demo leads with procurement: agreement `a6.accord-v2.testnet` ran the full flow on release 3 (8 Nov 2026). Market making runs end to end on a local node with real mainnet observations; on testnet it waits on an OutLayer payment key (`docs/build/BLOCKED.md`), and the site says no observation is recorded on testnet yet. Both types ship.
 - Market-making v1 limits, said wherever market making appears: venue-level liquidity, not the market maker's own orders; retainer-only engagements (no loan-plus-option structures); one venue per agreement; slots are minutes in the demo and hours in production, set in the terms.
 
 ## Definition of done
@@ -78,10 +78,10 @@ Every line passes on a fresh clone by a reader who has never spoken to us. "Prin
 | `make verify DEAL=<account>` | Needs no keys. Checks the code hash, the key list (one `FunctionCall` key or none, no full access), the Sealed Table signature and its attested key, the NEAR AI attestation with a fresh nonce, the commitments, the recipient chain, and the payment and refusal events; prints `verify: <n> checks ok` |
 | `make demo` | From nothing: faucet accounts, a new agreement, negotiation, approvals, funding, recipient, delivery, payment, one refused attack; prints the elapsed time, under `2:00` |
 | `make inbox` | The `redirect`, `amount` and `question` fixtures through the `/try` form: two refusals and one `no action`; the attempt counter increments; `paid outside the terms: 0` |
-| `make release-check` | The checks in `SUBMISSION.md` "Release check" pass |
+| `make release-check` | The checks in `docs/build/SUBMISSION.md` "Release check" pass |
 | README | Follows "README requirements" below; every "see" line matches real output; the claims table, the custody table, the privacy boundary and the "What the agent's key can and cannot do" section are present; `LICENSE` (MIT) present |
 | Hosted demo | The app is deployed with one agreement in each state and one live market-making agreement; `/status` green; up through 25 Nov |
-| Video | Follows `DEMO.md`; posted by Adi on X with "built at NEAR HACKATHON", @NEARProtocol and #NEARHackathon |
+| Video | Follows `docs/build/DEMO.md`; posted by Adi on X with "built at NEAR HACKATHON", @NEARProtocol and #NEARHackathon |
 | Repository | Public by 14 Nov 23:59 UTC with `main` as the default branch; the build kit moved to `docs/build/` and a short evaluator `CLAUDE.md` and `AGENTS.md` at the root (PROGRESS 7.3); tag `hackathon-submission` on the submitted commit |
 | Submission | `201` from the API after Adi confirms the printed payload |
 
@@ -103,7 +103,7 @@ The organisers' prompts say to keep the requirements and the checkpoint. Each on
 | `agents` | Negotiation: counter once with reasoning, then accept or walk away | The Sealed Table protocol (quote, counter with reasons, final, accept or walk away) | `make negotiate`; the terms show `rounds: 4` or fewer |
 | `agents` | Payments in USDC or NEAR | USDC (NEP-141) | `make pay` |
 | `agents` | A receipt for every task: what, from whom, price, whether the work passed | Every payment is a receipt: item, deliverable hash, acceptance, amount, recipient, transaction | `/record`, `/record.csv`, `accord receipts <deal>` |
-| `agents` | Agent Market: how jobs are posted and paid programmatically; say so if there is no public way | Checked in PROGRESS 0.9; `WIN_PLAN.md` lever 7 | `DECISIONS.md` |
+| `agents` | Agent Market: how jobs are posted and paid programmatically; say so if there is no public way | Checked in PROGRESS 0.9; `docs/build/WIN_PLAN.md` lever 7 | `DECISIONS.md` |
 | `agents` | Checkpoint: how the agent holds its keys and what it cannot do without the human | README section "What the agent's key can and cannot do" | README |
 | `business` | Humans only set the constraints; a kill switch they can flip at any time | Mandates, approvals, exceptions; `revoke_agent` | `make revoke` |
 | `business` | The agent's own NEAR account; never a full-access key in plain text; OutLayer custody or a scoped function-call key | Each agreement account is the agent's working account for that agreement, holding no full-access key; the agent's only credential is a scoped function-call key on it, stored only in the agent's environment | README; `make verify` |
@@ -128,7 +128,7 @@ Three ways to check Accord, in the README in this order, from cheapest to fulles
 Written for Claude Code and Codex first (Q-017), and for a person second. No marketing, and no statements quoted from members of the jury. In this order:
 
 1. Title and the headline; one paragraph on what it is; the thesis line.
-2. The problem, opening with the question "Whose server do your agents meet on?", in five sentences with three sources from `REFERENCES.md`.
+2. The problem, opening with the question "Whose server do your agents meet on?", in five sentences with three sources from `docs/build/REFERENCES.md`.
 3. Try it: the three judge paths, then numbered "do X, see Y" steps 1 to 10 for the live flow, each "see" quoting the literal output.
 4. What the agent's key can and cannot do (the security prompt's checkpoint, in plain words).
 5. Claims and their limits (verbatim), custody table, privacy boundary, "What we keep".
@@ -141,4 +141,4 @@ Written for Claude Code and Codex first (Q-017), and for a person second. No mar
 
 ## Non-goals for v1
 
-Mainnet, any mainnet signing, a token, a marketplace, legal KYB, confidential settlement, a second settlement rail in the core, cross-chain payments beyond the dry quotes in `WIN_PLAN.md`, multi-venue market-making agreements, loan-plus-option market-making structures, agent-to-agent free-form chat outside the Sealed Table.
+Mainnet, any mainnet signing, a token, a marketplace, legal KYB, confidential settlement, a second settlement rail in the core, cross-chain payments beyond the dry quotes in `docs/build/WIN_PLAN.md`, multi-venue market-making agreements, loan-plus-option market-making structures, agent-to-agent free-form chat outside the Sealed Table.

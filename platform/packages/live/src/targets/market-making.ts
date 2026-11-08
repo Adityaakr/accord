@@ -59,7 +59,7 @@ async function observePeriod(w: World, room: Room, ask: AskObserver, print: bool
 }
 
 export async function run(w: World): Promise<void> {
-  if (!w.observer) throw new Error("no observer: set OUTLAYER_OWNER and OUTLAYER_PAYMENT_KEY (BLOCKED.md, probe 0.3)");
+  if (!w.observer) throw new Error("no observer: set OUTLAYER_OWNER and OUTLAYER_PAYMENT_KEY (docs/build/BLOCKED.md, probe 0.3)");
   const ask = observerFor(w.observer);
   // One after the other: each funds from the same buyer balance.
   const room = await open(w, "NEAR/USDC liquidity", PRESETS.marketMaking);

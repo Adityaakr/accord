@@ -1,6 +1,6 @@
 # ARCHITECTURE.md: how Accord fits together, and why
 
-Read `GOAL.md` first for what ships and the claims it must keep. This file is the design: components, accounts and keys, the lifecycle, each part in depth, the invariants, the threat model, failure handling and costs. `INTERFACES.md` has the exact signatures. Where this file names a value that must be checked against live docs (a contract id, an SDK version), `PROGRESS.md` Phase 0 verifies it and records the answer in `DECISIONS.md`; `DECISIONS.md` wins over this file. Revised on 31 Oct after an independent review (`DECISIONS.md` section 10 lists what changed).
+Read `GOAL.md` first for what ships and the claims it must keep. This file is the design: components, accounts and keys, the lifecycle, each part in depth, the invariants, the threat model, failure handling and costs. `INTERFACES.md` has the exact signatures. Where this file names a value that must be checked against live docs (a contract id, an SDK version), `docs/build/PROGRESS.md` Phase 0 verifies it and records the answer in `DECISIONS.md`; `DECISIONS.md` wins over this file. Revised on 31 Oct after an independent review (`DECISIONS.md` section 10 lists what changed).
 
 ## 1. The system at a glance
 
@@ -259,7 +259,7 @@ The mainnet block height, hash and time are recorded with the metrics. Anyone ca
 
 ### 9.4 What market-making agreements do not claim
 
-It measures the venue's liquidity, not which market maker provided it; DCL positions are per account, which could make attribution possible later (`WIN_PLAN.md` lever 6), and until a separate claim ships nothing says the observer attributes liquidity. It is a pool with concentrated liquidity and limit orders, not a central limit order book, and the copy says "liquidity" rather than "order book". Retainer-only. It does not claim the slot times are hidden from the deployer: the deployer owns `PROTECTED_OBSERVER_SEED` and could rebind it to a build that prints future slot times (claim 6's limit).
+It measures the venue's liquidity, not which market maker provided it; DCL positions are per account, which could make attribution possible later (`docs/build/WIN_PLAN.md` lever 6), and until a separate claim ships nothing says the observer attributes liquidity. It is a pool with concentrated liquidity and limit orders, not a central limit order book, and the copy says "liquidity" rather than "order book". Retainer-only. It does not claim the slot times are hidden from the deployer: the deployer owns `PROTECTED_OBSERVER_SEED` and could rebind it to a build that prints future slot times (claim 6's limit).
 
 ## 10. Keeper
 
@@ -401,7 +401,7 @@ with a global release only the state counts, about `0.1 NEAR`.
 
 ## 19. Releases and upgrades
 
-A release is: the agreement wasm hash, the three job builds (wasm hashes) with their seed bindings, the jobs' signing public keys and the mandate public key from `pubkey` runs the releases account requested, the attestation task ids that prove them, and the model id. During development the jobs use dev seeds bound to the project, which change nothing on chain; release 1 is cut after the jobs stop changing (`PROGRESS.md` 2.7): fresh `PROTECTED_` seeds are generated and bound to those exact builds, the releases account requests the `pubkey` runs, and `publish_release` records everything. New agreements pin the current release; existing agreements keep theirs for life. There is no migration path for a live agreement, on purpose. `make check-deploy` compares every hash.
+A release is: the agreement wasm hash, the three job builds (wasm hashes) with their seed bindings, the jobs' signing public keys and the mandate public key from `pubkey` runs the releases account requested, the attestation task ids that prove them, and the model id. During development the jobs use dev seeds bound to the project, which change nothing on chain; release 1 is cut after the jobs stop changing (`docs/build/PROGRESS.md` 2.7): fresh `PROTECTED_` seeds are generated and bound to those exact builds, the releases account requests the `pubkey` runs, and `publish_release` records everything. New agreements pin the current release; existing agreements keep theirs for life. There is no migration path for a live agreement, on purpose. `make check-deploy` compares every hash.
 
 ## 20. Deployment
 

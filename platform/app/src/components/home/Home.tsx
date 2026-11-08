@@ -1,6 +1,6 @@
 "use client";
 
-// Home, per workspace (PLATFORM.md §7, simplified after Aditya's review): one clear next step at the top with at most
+// Home, per workspace (docs/build/PLATFORM.md §7, simplified after Aditya's review): one clear next step at the top with at most
 // two more behind "more"; then at most three numbers in a quiet row; then the workspace's rooms. Everything is read
 // from contract views through /api/me and filtered to the workspace's role; nothing here signs. "Customise" shows,
 // hides and reorders the three modules, remembered per account and workspace in this browser.

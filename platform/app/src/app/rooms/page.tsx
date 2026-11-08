@@ -10,7 +10,7 @@ import styles from "./rooms.module.css";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Deal rooms" };
 
-// Deal rooms (PLATFORM.md §6): the signed-in person's rooms (?party=, set by the sidebar) or every room on the factory,
+// Deal rooms (docs/build/PLATFORM.md §6): the signed-in person's rooms (?party=, set by the sidebar) or every room on the factory,
 // one row each with its seven-step pipeline, money and what waits. Filters live in the URL.
 const TYPES = [["all", "All types"], ["market-making", "Market making"], ["procurement", "Vendor contracts"]] as const;
 const STATES = [["all", "Any state"], ["open", "In negotiation"], ["executing", "Executing"], ["needs", "Needs you"], ["ended", "Ended"]] as const;

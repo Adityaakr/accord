@@ -141,7 +141,7 @@ export function world(): World {
     canaries: (env.CANARY_ACCOUNTS || "").split(",").map((s) => s.trim()).filter(Boolean),
     domain: env.DEMO_VENDOR_DOMAIN || "",
     explorer: "https://testnet.nearblocks.io",
-    // Test USDC on testnet comes from Circle's faucet into the buyer (BLOCKED.md); a fresh `make demo` account is
+    // Test USDC on testnet comes from Circle's faucet into the buyer (docs/build/BLOCKED.md); a fresh `make demo` account is
     // registered with the token and given what it needs from the buyer's balance.
     fund: async (account, amount) => {
       const token = env.ACCORD_TOKEN || "";
@@ -149,7 +149,7 @@ export function world(): World {
       if (have >= amount) return;
       const funder = p("BUYER");
       if (account === funder.account) {
-        throw new Error(`${account} holds ${have} base units of ${token}, needs ${amount}: drip test USDC at https://faucet.circle.com (BLOCKED.md)`);
+        throw new Error(`${account} holds ${have} base units of ${token}, needs ${amount}: drip test USDC at https://faucet.circle.com (docs/build/BLOCKED.md)`);
       }
       const from = new KeySigner(funder.account, funder.key, testnetReader.chain);
       await from.call(token, "storage_deposit", { account_id: account, registration_only: true }, { gas: 30n * TGAS, deposit: 1_250_000_000_000_000_000_000n });

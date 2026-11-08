@@ -24,7 +24,7 @@ import { Activity, type Event } from "./Activity";
 import { currentStep } from "./pipeline";
 import styles from "./room.module.css";
 
-/* The room's tabs (PLATFORM.md §6). The tab lives in the URL (?tab=) so it survives the live refresh and can be
+/* The room's tabs (docs/build/PLATFORM.md §6). The tab lives in the URL (?tab=) so it survives the live refresh and can be
    linked; without one the room opens where its state is: negotiation while sealing, terms while attested, activity
    while executing, funds once settled. */
 const TABS = [

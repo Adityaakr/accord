@@ -1,4 +1,4 @@
-// The room's seven steps (PLATFORM.md §6), derived only from contract state. A step is reached when the chain says
+// The room's seven steps (docs/build/PLATFORM.md §6), derived only from contract state. A step is reached when the chain says
 // so; nothing here is inferred from time or guessed.
 
 import type { AgreementView, ItemView, PeriodView } from "@accord/sdk";

@@ -180,7 +180,7 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
         </Row>
       </ol>
       <p className="small">
-        Prefer to read first? <Link className="link" href="/verify">Check any agreement yourself</Link> or open the <Link className="link" href="/try">public demo room</Link>.
+        Prefer to read first? <Link className="link" href="/verify">Check any agreement yourself</Link> or see <Link className="link" href="/try">the attack recorded on testnet</Link>.
         {" "}<button type="button" className="link small" onClick={() => { try { if (w.accountId) localStorage.removeItem(`${ROOM_KEY}:${w.accountId}`); } catch { /* */ } setRoom(null); router.refresh(); }}>Start over with a new room</button>
       </p>
     </div>

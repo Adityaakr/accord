@@ -300,7 +300,7 @@ accord verify · a6.accord-v2.testnet
 verify: 5 checks ok · 1 partial · 1 not checked
 ```
 
-The nonce is fresh on every run. `model` is `partial`: the report is fetched with that nonce and the nonce is bound in it, but the hardware quote and GPU evidence are not checked by `make verify` (`make probe-ai` checks them, with a NEAR AI key). `release` is `not checked` until the `outlayer-verify` tool is installed ([`platform/BLOCKED.md`](platform/BLOCKED.md)). `keys` reads `0 key` because a6's agent was revoked.
+The nonce is fresh on every run. `model` is `partial`: the report is fetched with that nonce and the nonce is bound in it, but the hardware quote and GPU evidence are not checked by `make verify` (`make probe-ai` checks them, with a NEAR AI key). `release` is `not checked` until the `outlayer-verify` tool is installed ([`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md)). `keys` reads `0 key` because a6's agent was revoked.
 
 </details>
 
@@ -370,7 +370,7 @@ Agreement [`a6.accord-v2.testnet`](https://testnet.nearblocks.io/address/a6.acco
 | Demo accounts | vendor `halcyon-demo.testnet`, authority `halcyon-auth.testnet`, recipient `halcyon-mm.testnet` |
 | Demo vendor's domain | `accordweb-production.up.railway.app`, Accord's own site, serving the Payee file ([`/.well-known/accord.json`](https://accordweb-production.up.railway.app/.well-known/accord.json)) for Halcyon, a fictional company. A real vendor serves the same file on its own domain |
 
-Sources: [`apps/web/src/content/testnet.ts`](apps/web/src/content/testnet.ts) and [`platform/DECISIONS.md`](platform/DECISIONS.md) section 21. Market-making agreements run end to end on a local node; on testnet they wait on an OutLayer payment key ([`platform/BLOCKED.md`](platform/BLOCKED.md)).
+Sources: [`apps/web/src/content/testnet.ts`](apps/web/src/content/testnet.ts) and [`platform/DECISIONS.md`](platform/DECISIONS.md) section 21. Market-making agreements run end to end on a local node; on testnet they wait on an OutLayer payment key ([`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md)).
 
 ## Where each attack stops
 

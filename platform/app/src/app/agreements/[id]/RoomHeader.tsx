@@ -1,6 +1,6 @@
 "use client";
 
-// The deal room's header (PLATFORM.md §6): the seven-step pipeline from contract state, the agent's status, and a
+// The deal room's header (docs/build/PLATFORM.md §6): the seven-step pipeline from contract state, the agent's status, and a
 // Revoke control that stays in view for the buyer. Revoke is hold-to-confirm; the key is read back from chain first,
 // and the header then says what the network will do with the next call.
 
