@@ -2,11 +2,11 @@ Start
 
 # How to start.
 
-Accord runs on NEAR testnet. Sign in with a NEAR wallet or a work email, choose how you use it, and open a deal room with your counterparty.
+Accord runs on NEAR testnet. Sign in with your own NEAR wallet, choose how you use it, and open a deal room with your counterparty.
 
 ## Five steps, in the app
 
-- 01 Sign in Connect a NEAR wallet (Meteor, Intear, Ledger, Nightly) or continue with a work email through NEAR Auth. Every signature that moves money happens in your own account.
+- 01 Sign in Connect a NEAR wallet: Meteor, Intear, Ledger, Nightly or WalletConnect on testnet. Every signature that moves money happens in your own account.
 
 - 02 Choose a workspace Buyer, vendor or settlement authority. Each workspace shows only what that role needs; switch at any time.
 

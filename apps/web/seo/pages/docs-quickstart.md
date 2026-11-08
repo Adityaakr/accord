@@ -8,7 +8,7 @@ Run one deal on NEAR testnet at /app/try-it in about 3 minutes: sign in, get tes
 
 - 01 Network Everything on this path is testnet with a test USDC token. Nothing here moves real money. NEAR testnet
 
-- 02 Sign-in A NEAR testnet wallet (switch it to testnet), or your email through NEAR Auth. Meteor and Intear send through Accord's relayer, so you pay no gas. Meteor · Intear · email
+- 02 Sign-in Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas. Meteor · Intear · Ledger · Nightly · WalletConnect
 
 - 03 Test funds The faucet tops your account up once a day per account. The room's `2 NEAR` deposit is returned when it closes. 2.50 NEAR · 100 tUSDC
 
@@ -16,11 +16,11 @@ Run one deal on NEAR testnet at /app/try-it in about 3 minutes: sign in, get tes
 
 - 05 Time about 3 minutes
 
-Sealing a mandate needs a wallet signature (NEP-413) to derive your document key. Email accounts can approve and fund; for sealing, the app asks you to seal with a wallet.
+Sealing a mandate takes a wallet signature (NEP-413) that derives your document key, so the key never leaves your browser.
 
 ## Sign in and open a room
 
-- 01 Open [/app/try-it](/app/try-it) and sign in with Meteor or Intear on testnet, or your email. You see Step 1 marked done with your account name. `/app/try-it` before sign-in. Each step turns to done as you go.
+- 01 Open [/app/try-it](/app/try-it) and sign in with Meteor or Intear on testnet. You see Step 1 marked done with your account name. `/app/try-it` before sign-in. Each step turns to done as you go.
 
 - 02 Get test funds. You see Your balance reads `2.50 NEAR` and `100 tUSDC`, with both faucet transactions linked.
 

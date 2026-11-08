@@ -41,13 +41,13 @@ export const DOC_PAGES: DocPage[] = [
             kind: "rows",
             rows: [
               { name: "Network", value: "NEAR testnet", detail: "Everything on this path is testnet with a test USDC token. Nothing here moves real money." },
-              { name: "Sign-in", value: "Meteor · Intear · email", detail: "A NEAR testnet wallet (switch it to testnet), or your email through NEAR Auth. Meteor and Intear send through Accord's relayer, so you pay no gas." },
+              { name: "Sign-in", value: "Meteor · Intear · Ledger · Nightly · WalletConnect", detail: "Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas." },
               { name: "Test funds", value: "2.50 NEAR · 100 tUSDC", detail: "The faucet tops your account up once a day per account. The room's `2 NEAR` deposit is returned when it closes." },
               { name: "Counterparty", value: "halcyon-demo.testnet", href: acct("halcyon-demo.testnet"), detail: "Accord's demo vendor, with its authority `halcyon-auth.testnet`. The demo vendor and the demo agent are Accord's own testnet accounts, labelled in the room." },
               { name: "Time", value: "about 3 minutes" },
             ],
           },
-          { kind: "note", text: "Sealing a mandate needs a wallet signature (NEP-413) to derive your document key. Email accounts can approve and fund; for sealing, the app asks you to seal with a wallet." },
+          { kind: "note", text: "Sealing a mandate takes a wallet signature (NEP-413) that derives your document key, so the key never leaves your browser." },
         ],
       },
       {
@@ -58,9 +58,9 @@ export const DOC_PAGES: DocPage[] = [
             kind: "steps",
             steps: [
               {
-                title: "Open [/app/try-it](/app/try-it) and sign in with Meteor or Intear on testnet, or your email.",
+                title: "Open [/app/try-it](/app/try-it) and sign in with Meteor or Intear on testnet.",
                 see: "Step 1 marked done with your account name.",
-                image: { id: "tryit-signed-out", alt: "The /app/try-it page before sign-in: five numbered steps, the first one, Connect a wallet, offering Meteor, Intear or email sign-in.", caption: "`/app/try-it` before sign-in. Each step turns to done as you go." },
+                image: { id: "tryit-signed-out", alt: "The /app/try-it page before sign-in: five numbered steps, the first one, Connect a wallet, offering Meteor or Intear.", caption: "`/app/try-it` before sign-in. Each step turns to done as you go." },
               },
               {
                 title: "Get test funds.",

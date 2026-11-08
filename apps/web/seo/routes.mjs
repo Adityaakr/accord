@@ -42,7 +42,7 @@ export const ROUTES = [
   { path: "/try", slug: "try", name: "Try to move the money", priority: 0.6, changefreq: "monthly",
     summary: "The open demonstration inbox: send the agent an attack and watch the contract refuse it." },
   { path: "/join", slug: "join", name: "How to start", priority: 0.7, changefreq: "monthly",
-    summary: "Sign in with a NEAR wallet or a work email, choose a workspace, create a deal room and invite the counterparty, on NEAR testnet." },
+    summary: "Sign in with a NEAR wallet, choose a workspace, create a deal room and invite the counterparty, on NEAR testnet." },
   { path: "/record", slug: "record", name: "Public record", priority: 0.5, changefreq: "daily",
     summary: "Agreements, payments and refusals from the Accord demonstration, each refusal with its recorded reason." },
   { path: "/contact", slug: "contact", name: "Contact", priority: 0.3, changefreq: "yearly",

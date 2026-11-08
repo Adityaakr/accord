@@ -12,10 +12,10 @@ import styles from "./Join.module.css"
    same numbered chain as /verify, and a way in: the app when it is hosted (VITE_APP_URL), otherwise the live testnet
    agreement and the docs to run it yourself. No waitlist. */
 
-const LEAD = "Accord runs on NEAR testnet. Sign in with a NEAR wallet or a work email, choose how you use it, and open a deal room with your counterparty."
+const LEAD = "Accord runs on NEAR testnet. Sign in with your own NEAR wallet, choose how you use it, and open a deal room with your counterparty."
 
 const STEPS = [
-  { title: "Sign in", text: "Connect a NEAR wallet (Meteor, Intear, Ledger, Nightly) or continue with a work email through NEAR Auth. Every signature that moves money happens in your own account." },
+  { title: "Sign in", text: "Connect a NEAR wallet: Meteor, Intear, Ledger, Nightly or WalletConnect on testnet. Every signature that moves money happens in your own account." },
   { title: "Choose a workspace", text: "Buyer, vendor or settlement authority. Each workspace shows only what that role needs; switch at any time." },
   { title: "Create a deal room", text: "Pick the agreement type, write the brief and name the vendor and its settlement authority. The room becomes its own NEAR account." },
   { title: "Invite your counterparty", text: "Share the room link. Each side seals its limits in its own browser; the agents negotiate inside the Sealed Table and both companies approve the terms." },
@@ -23,7 +23,7 @@ const STEPS = [
 ]
 
 export function Join() {
-  usePageMeta("Accord: How to start", "Start with Accord on NEAR testnet: sign in with a NEAR wallet or work email, choose a workspace, create a deal room and invite your counterparty.")
+  usePageMeta("Accord: How to start", "Start with Accord on NEAR testnet: sign in with a NEAR wallet, choose a workspace, create a deal room and invite your counterparty.")
   return (
     <div className={styles.page}>
       <PageHero centered pill="Start" title="How to start." lead={LEAD} />
