@@ -2,20 +2,22 @@
 
 Each entry names the `PROGRESS.md` item it blocks. Remove an entry when it is done.
 
-## 0.2 and 2.3: NEAR AI Cloud credits (completions return HTTP 402) · now the only blocker for the testnet flow
+## 2.8 and 3.4: OutLayer's testnet keystore is down (not Adi's to fix; recorded so the rerun is one command)
 
-8 Nov: release 1 is live on testnet (`accord-v2.testnet`). The keeper's `start_negotiation` on `a1.accord-v2.testnet`
-(tx `7qa1KeESA1Wwj5jQHmLbxwmntk7qVkKiqzPhesBNjFxP`) ran the Sealed Table in OutLayer's enclave with its seed and the
-NEAR AI key attached; the job read both sealed mandates from chain and returned a signed `"outcome": "infrastructure"`
-because NEAR AI answered `HTTP 402 no_limit_configured`. Approve, fund, pay, attack and revoke on testnet all start from
-attested terms, so they wait on this.
+8 Nov, from about 20:30 local: every OutLayer job that needs a secret fails before the code starts with
+`Decrypt failed: every keystore instance is unreachable`. Seen on the Sealed Table (request 13608 for
+`a3.accord-v2.testnet` and its retry, tx `6JpBYBC2…`) and on the Payee job's pubkey probes (txs `2DoUyM1s…`,
+`6bzvTbXp…`). The NEAR AI credits blocker is gone: the new key answers, and release 2 (DECISIONS 19) fixes the
+token budget that made `a2` walk away. `a3.accord-v2.testnet` is sealed with one negotiation attempt left.
 
-The key in `.env` works for attestation (gateway TDX, model TDX, GPU and nonce binding all verified live on 3 Nov), but every chat completion returns `HTTP 402 no_limit_configured`: "No spending limit configured. Please contact support to set up credits."
+When the keystore answers again (a `request_pubkey` for `payee` no longer logs the error):
 
-1. Sign in at https://cloud.near.ai with the account that owns the key.
-2. Add credits (the NEAR Builders offer, or buy `$10`) or set a spending limit for the key.
-3. Tell me; I rerun `make probe-ai`, then `make negotiate` on testnet (the room's negotiation can be retried on
-   `a1.accord-v2.testnet` too) and the rest of the flow (`make approve fund payee pay attack revoke`).
+```
+make finish DEAL=a3.accord-v2.testnet NET=testnet   # negotiate, approve, fund, Payee proof, pay, attack, revoke
+make verify DEAL=a3.accord-v2.testnet
+```
+
+If a3's last attempt is spent, create a fresh agreement in the app (or `make negotiate NET=testnet`) and pass its id.
 
 ## Rotate the NEAR AI key after the hackathon
 
@@ -30,6 +32,8 @@ The key in `.env` was pasted into a chat on 3 Nov. After 14 Nov, create a new ke
 ## Optional: `outlayer-verify` (0.3 f, `make verify` "release" line)
 
 `outlayer-cli` 0.2.2 is installed and logged in on testnet as `accord-v1.testnet` (8 Nov). The verifier was not installed:
+the agent's install from git was refused by the session's permission policy (code from an outside repository), so
+Adi runs it once in a terminal:
 
 ```
 cargo install --git https://github.com/out-layer/outlayer-verify outlayer-verify

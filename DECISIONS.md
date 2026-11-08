@@ -296,3 +296,26 @@ Kept as stated limits: an item can be reopened from `AssumedPaid` by one excepti
 - **Live flow:** `create` sized its buyer check for embedded (20 NEAR); it now reads the factory's `create_deposit`
   and adds 6 NEAR. `make verify DEAL=` passed the agreement positionally; it now passes `--agreement`.
 
+
+## 19. Testnet release 2 (8 Nov): the Sealed Table on a reasoning model
+
+- **Why a2.accord-v2.testnet ended WALK_AWAY.** With working NEAR AI credits the run reached the model and both responses
+  verified, but the vendor's QUOTE never parsed: `completion_tokens` was exactly 2 × 700. The models NEAR AI serves in
+  TEEs (glm-5.3-flash, DeepSeek-V4.1-Flash, Qwen3.8-27B, all checked) reason before answering and the reasoning counts
+  against `max_tokens`, so every turn stopped on `length` with no message and the protocol walked away after two
+  attempts. Reproduced outside the enclave with the real vendor prompt, schema and fixture mandate.
+- **Fix:** the job sends `reasoning_effort: "low"` and `max_tokens` 2500 (low effort answered a valid QUOTE in about
+  370 tokens). New Sealed Table build `1099138a…`, uploaded to FastFS and deployed as a new version of
+  `accord-v1.testnet/accord-sealed-table`; its secret row moved with `outlayer secrets access --build` (the seed is
+  kept, so the signing key is unchanged).
+- **Release 2** on `accord-v2.testnet`: pubkey runs 13604 (sealed table), 13605 (payee), 13606 (observer); publish
+  https://testnet.nearblocks.io/txns/4XjUxvwJa8qkSa5qwZENqqoYJ6Cu8QYiFASmequkg6wa, current
+  https://testnet.nearblocks.io/txns/Ce2DBJq6UYUjyceWPkpYhcZghghe4PrXb4ggxrbYfdbb. The agreement code is unchanged, so
+  the global contract from release 1 (`8wMuMRre…`) is reused; `make deploy-testnet` now skips republishing it.
+- **Payee domain on testnet:** `DEMO_VENDOR_DOMAIN=accordweb-production.up.railway.app`; the website serves
+  `fixtures/companies/halcyon/accord.json` at `/.well-known/accord.json` (glassbook commit 1e6f349). It is not in the
+  job's `DEMO_DOMAINS`, so proofs carry `demo_domain: false`; the recipients and authorities are the real testnet
+  accounts it lists.
+- **OutLayer keystore outage:** two runs for a3.accord-v2.testnet (requests 13608 and the retry) failed before the job
+  started with "Decrypt failed: every keystore instance is unreachable"; OutLayer's API had been redeployed minutes
+  earlier. The contract recorded `negotiation_failed` (attempt 1, 2) and the fee was refunded.
