@@ -69,7 +69,7 @@ export function PrivacyPolicy() {
           <WordReveal
             as="p"
             className={`t-body-lg ${styles.description}`}
-            text="What this website collects, where it goes and what it never does. Accord is pre-launch; this page covers the site, not the product."
+            text="What this website collects, where it goes and what it never does. This page covers the site, not the product."
             delay={0.2}
             duration={0.6}
             stagger={0.04}
@@ -102,7 +102,7 @@ export function PrivacyPolicy() {
           </Section>
 
           <Section title="3. What we do not do">
-            <Body>This site has no analytics, no advertising and no tracking cookies, and we do not sell or share what you send. Once the demonstration runs on NEAR testnet, its agreements, payments and refusals are public there by design.</Body>
+            <Body>This site has no analytics, no advertising and no tracking cookies, and we do not sell or share what you send. Agreements, payments and refusals on NEAR testnet are public there by design.</Body>
           </Section>
 
           <Section title="4. Your browser and our host">

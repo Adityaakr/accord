@@ -31,7 +31,7 @@ const AFTER: NavItem[] = [
 ]
 const GITHUB: NavItem | null = LINKS.repo ? { label: "GitHub", href: LINKS.repo, external: true, icon: true } : null
 const PHONE_EXTRA: NavItem[] = [
-  { label: "Join", href: LINKS.join },
+  { label: "Start", href: LINKS.join },
   { label: "Record", href: LINKS.record },
 ]
 

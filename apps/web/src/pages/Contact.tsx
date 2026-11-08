@@ -88,7 +88,7 @@ function MailsIcon() {
 /* FormSelectNode MqTZJAWLQ options (formSelectOptions) */
 const SUBJECTS = [
   { value: "", title: "Select…", disabled: true },
-  { value: "Early access", title: "Early access" },
+  { value: "Getting started", title: "Getting started" },
   { value: "Market-making agreements", title: "Market-making agreements" },
   { value: "Integration or partnership", title: "Integration or partnership" },
   { value: "Security", title: "Security" },
@@ -110,7 +110,7 @@ function ShieldIcon() {
 }
 
 export function Contact() {
-  usePageMeta("Accord: Contact", "Contact the Accord team about early access, market-making agreements, integrations, security or press. Accord is pre-launch; the NEAR testnet release is pending.")
+  usePageMeta("Accord: Contact", "Contact the Accord team about market-making agreements, integrations, security or press. Accord runs on NEAR testnet.")
   const [sent, setSent] = useState(false)
   const [subject, setSubject] = useState("")
   const buttonState: FormButtonState = !CONTACT_EMAIL ? "disabled" : sent ? "success" : "default"
@@ -141,7 +141,7 @@ export function Contact() {
         {/* Title arEJg_OLP: H1, Text Strong, word reveal delay 0.1s, 0.8s/word, stagger 0.04s */}
         <WordReveal as="h1" className={`t-h1 ${styles.heading}`} text="Get in touch with us" delay={0.1} duration={0.8} stagger={0.04} />
         {/* Description yzoU7K91a: Body Large, Text Medium, left, word reveal delay 0.2s, 0.6s/word, stagger 0.04s */}
-        <WordReveal as="p" className={`t-body-lg ${styles.description}`} text="Questions about Accord, early access or an agreement type? Write to us." delay={0.2} duration={0.6} stagger={0.04} />
+        <WordReveal as="p" className={`t-body-lg ${styles.description}`} text="Questions about Accord or an agreement type? Write to us." delay={0.2} duration={0.6} stagger={0.04} />
       </div>
 
       {/* Content ton4m9Ta_: vertical, gap 16, overflow clip, align center, justify center, width 1fr */}
@@ -156,12 +156,12 @@ export function Contact() {
             </div>
             {/* Text kZQsGzYul: vertical gap 8, width 1fr */}
             <div className={styles.cardText}>
-              <h2 className={`t-h5 ${styles.cardTitle}`}>{CONTACT_EMAIL ? "Email us" : "Early access"}</h2>
+              <h2 className={`t-h5 ${styles.cardTitle}`}>{CONTACT_EMAIL ? "Email us" : "Getting started"}</h2>
               <p className={`t-body-sm ${styles.cardDescription}`}>
                 {CONTACT_EMAIL ? (
                   <>Write to{" "}<a href={`mailto:${CONTACT_EMAIL}`} className="ls-link-inline">{CONTACT_EMAIL}</a></>
                 ) : (
-                  <>Accord is pre-launch. To join a deal room, <Link to="/join" className="ls-link-inline">request early access</Link>.</>
+                  <>Accord runs on NEAR testnet. To start a deal room, see <Link to="/join" className="ls-link-inline">how to start</Link>.</>
                 )}
               </p>
             </div>

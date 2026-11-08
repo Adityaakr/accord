@@ -100,7 +100,7 @@ export function Product() {
         title="A deal needs more than a conversation."
         lead="Your negotiating limits, the terms you approve and the destination of your money belong to the same decision. Accord keeps them connected in one deal room."
         actions={[
-          { label: "Open a deal room", href: LINKS.openDealRoom, variant: "primary" },
+          { label: LINKS.app ? "Open a deal room" : "See it on testnet", href: LINKS.app ? LINKS.newDealRoom : LINKS.testnet, variant: "primary" },
           { label: "Inspect an agreement", href: LINKS.record, variant: "secondary" },
         ]}
       />

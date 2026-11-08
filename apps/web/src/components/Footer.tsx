@@ -25,7 +25,8 @@ const BUILD: Item[] = [
   ...(LINKS.contractId ? [{ key: "contract", label: "Testnet contract", href: `https://testnet.nearblocks.io/address/${LINKS.contractId}`, external: true }] : []),
   { key: "record", label: "Record page", href: LINKS.record },
   { key: "verify", label: "Verify an agreement", href: LINKS.verify },
-  { key: "join", label: "Join a deal room", href: LINKS.join },
+  { key: "join", label: "How to start", href: LINKS.join },
+  { key: "testnet", label: "Live on testnet", href: LINKS.testnet },
 ]
 const WATCH: Item[] = [
   ...(LINKS.demoVideo ? [{ key: "video", label: "Demonstration video", href: LINKS.demoVideo, external: true }] : []),

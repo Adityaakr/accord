@@ -2,14 +2,18 @@
    render them only when set (`LINKS.repo && <a …>`); never show a placeholder URL.
    .env: VITE_APP_URL, VITE_REPO_URL, VITE_DEMO_VIDEO_URL, VITE_CONTRACT_ID, VITE_X_POST_URL */
 const env = import.meta.env as Record<string, string | undefined>
-const app = env.VITE_APP_URL ?? ""
+/* The app is served at <site>/app (the website proxies it; platform/DEPLOY.md). VITE_APP_URL overrides it. */
+const app = env.VITE_APP_URL ?? "/app"
 
-/** Primary CTA: the app route once it is live; until then (pre-launch) an early-access request on /join. */
-export const PRIMARY_CTA = app ? "Open a deal room" : "Request early access"
+/** Primary CTA: the app once it is hosted (VITE_APP_URL); until then, the testnet proof and how to start on /join. */
+export const PRIMARY_CTA = app ? "Open the app" : "See it on testnet"
 
 export const LINKS = {
   /* app routes (fall back to the demo page while the app is unavailable) */
-  openDealRoom: app ? `${app}/agreements/new` : "/join",
+  openDealRoom: app ? `${app}/signin` : "/#testnet",
+  newDealRoom: app ? `${app}/agreements/new` : "/join",
+  appVerify: (id: string) => (app ? `${app}/verify/${id}` : `/verify#${id}`),
+  testnet: "/#testnet",
   useCases: "/#use-cases",
   exampleAgreement: "/#market-making",
   marketMaking: "/use-cases/market-making",
