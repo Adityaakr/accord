@@ -2,6 +2,34 @@
 
 Each entry names the `PROGRESS.md` item it blocks. Remove an entry when it is done.
 
+## 2.7 (S1) and audit finding 5: new job builds, and the seed condition only the dashboard can set
+
+Added 9 Nov 2026 (DECISIONS.md 25). The job code on `main` (commit e12adb2 and 8d53aee) serves only agreements of
+`accord-v2.testnet` and `accord-usdc.testnet` (`a<n>.<factory>`, the agreement's own view, the factory's
+`is_agreement`) and turns an off-curve doc key into a final `BAD_INPUT`. The deployed builds (sealed table `7c832ce9…`,
+payee `24071443…`, observer `8240179a…`) do not have it until these steps run. The job cannot enforce S1 itself:
+OutLayer gives a job `NEAR_SENDER_ID` = the transaction's signer (https://app.outlayer.ai/docs/https-api, "Environment
+Variables in WASM"), never the contract that called `request_execution`, so only the secret's access condition can
+restrict who runs `negotiate`.
+
+1. Build the three jobs: `cd platform && cargo build --release --target wasm32-wasip2 -p accord-sealed-table -p accord-payee -p accord-observer`;
+   note each `sha256` of `target/wasm32-wasip2/release/accord-{sealed-table,payee,observer}.wasm`.
+2. Upload each to FastFS and deploy it as a new version of its project (`accord-v1.testnet/accord-sealed-table`,
+   `accord-v1.testnet/accord-payee`, `accord-v1.testnet/accord-observer`), the way builds `1099138a…` and `7c832ce9…`
+   went up (DECISIONS.md 19 and 21).
+3. Move every secret row to the new build with `outlayer secrets access --build <new sha256>` (the `PROTECTED_*_SEED`
+   values are kept, so the signing keys and the mandate key do not change).
+4. In the OutLayer dashboard (the CLI 0.2.2 has no Account Pattern), on the Sealed Table's `PROTECTED_SEALED_SEED` and
+   `NEARAI_API_KEY`, and on the Payee's `PROTECTED_PAYEE_SEED`, set the condition, with **Direct calls only** ticked:
+   `(Account Pattern ^a[0-9]+\.(accord-v2|accord-usdc)\.testnet$ OR Whitelist releases.accord-v2.testnet,
+   releases.accord-usdc.testnet) AND One build only <new sha256>`. If the panel offers only one pattern, use
+   `^(a[0-9]+|releases)\.(accord-v2|accord-usdc)\.testnet$`. Leave the observer's seed as it is (`allow-all` and the
+   build lock): the keeper asks it over HTTPS, and every caller gets the identical signed observation.
+5. Tell me the three new hashes. I publish release 5 on both factories with them (`RELEASE_MODE=global RELEASE_VERSION=5
+   make deploy-testnet`, then the same with `ACCORD_FACTORY=accord-usdc.testnet FACTORY_KEY=$FACTORY_USDC_KEY`), check
+   with a run requested directly (not by an agreement) that OutLayer refuses it before the code starts, run
+   `make negotiate`, and then drop the testnet sentence from claim 1's limit (GOAL.md and every copy of the table).
+
 ## 3.7: market making on testnet needs an OutLayer payment key
 
 The full procurement flow runs on testnet (`a6.accord-v2.testnet`, DECISIONS 21). `make market-making NET=testnet` asks the
