@@ -15,8 +15,8 @@ export interface Preset {
 
 const LABELS: Record<string, string> = {
   "procurement": "Procurement",
-  "market-making": "Accord Atlas",
-  "market-making.strict": "Accord Atlas, stricter spread",
+  "market-making": "Market making",
+  "market-making.strict": "Market making, stricter spread",
   "try": "The /try room",
 };
 

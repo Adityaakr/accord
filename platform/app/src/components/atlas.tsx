@@ -1,4 +1,4 @@
-// Accord Atlas building blocks, shared by the console (/atlas) and the market-making deal rooms: the agreed
+// Market-making building blocks, shared by the console (/market-making, alias /atlas) and the market-making deal rooms: the agreed
 // conditions, each period's slots, and the observations the contract accepted, each linked to its mainnet block.
 
 import Link from "next/link";

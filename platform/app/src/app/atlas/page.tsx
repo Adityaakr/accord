@@ -8,7 +8,7 @@ import { Empty, PageHead, Panel, Pill, StatePill, Usdc } from "@/components/ui";
 import styles from "./atlas.module.css";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Accord Atlas" };
+export const metadata = { title: "Market-making agreements" };
 
 function Figure({ label, value, note }: { label: string; value: React.ReactNode; note?: React.ReactNode }) {
   return (
@@ -20,7 +20,7 @@ function Figure({ label, value, note }: { label: string; value: React.ReactNode;
   );
 }
 
-export default async function Atlas() {
+export default async function MarketMaking() {
   const c = await atlasConsole().catch(() => null);
   const latest = c?.latest ?? null;
   const pool = c?.rooms[0]?.atlas.venue.RheaDcl;
@@ -30,7 +30,7 @@ export default async function Atlas() {
     <div className="container">
       <AutoRefresh seconds={15} />
       <PageHead
-        eyebrow={<Pill tone="purple">Accord Atlas · liquidity agreements</Pill>}
+        eyebrow={<Pill tone="purple">Market-making agreements · liquidity conditions</Pill>}
         title="Pay a market maker for the liquidity the pool actually had."
         lead="A project and its market maker agree a spread, a depth and two-sided quoting. At hidden times an observer reads the venue on NEAR mainnet and signs what it saw; a period's retainer becomes payable only when enough slots pass."
         aside={c && <SourceLine {...c.source} />}
@@ -70,7 +70,7 @@ export default async function Atlas() {
 
       <h2 className={`h3 ${styles.sectionTitle}`}>Agreements</h2>
       {!c || c.rooms.length === 0 ? (
-        <Empty>No Accord Atlas agreements yet. <Link className="link" href="/agreements/new">Create one</Link> with the market-making presets.</Empty>
+        <Empty>No market-making agreements yet. <Link className="link" href="/agreements/new">Create one</Link> with the market-making presets.</Empty>
       ) : (
         <div className={styles.rooms}>
           {c.rooms.map((r) => {
@@ -119,7 +119,7 @@ export default async function Atlas() {
         </Panel>
       </div>
 
-      <Panel title="What Accord Atlas does not claim" className={styles.note}>
+      <Panel title="What market-making agreements do not claim" className={styles.note}>
         <ul className={styles.bullets}>
           <li>It measures the venue&apos;s liquidity, not the market maker&apos;s own orders.</li>
           <li>Retainer-only engagements; no loan-plus-option structures. One venue per agreement.</li>

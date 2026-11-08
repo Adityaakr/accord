@@ -1,4 +1,4 @@
-// The Accord Atlas console's read model: every market-making agreement with its conditions, periods and the
+// The market-making console's read model: every market-making agreement with its conditions, periods and the
 // observations recorded on chain, plus the totals and the latest reading across them. Contract views only; the
 // app never reads the venue itself, so every number here is one the observer signed and the contract accepted.
 

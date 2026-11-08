@@ -14,7 +14,7 @@ import { useWorkspace } from "./workspace/Workspace";
 import styles from "./Chrome.module.css";
 
 const FULL = ["/signin", "/enter"];
-const PUBLIC = ["/verify", "/record", "/docs", "/status", "/try", "/join", "/atlas", "/payee", "/invite"];
+const PUBLIC = ["/verify", "/record", "/docs", "/status", "/try", "/join", "/market-making", "/atlas", "/payee", "/invite"];
 
 export function Chrome({ network, factory, sandbox, children }: { network: string; factory: string; sandbox: boolean; children: ReactNode }) {
   const path = usePathname() ?? "/";

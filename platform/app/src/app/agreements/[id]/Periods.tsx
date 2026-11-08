@@ -2,7 +2,7 @@ import type { AtlasTerms, PeriodView, StoredObservation } from "@accord/sdk";
 import { ObservationLog, PeriodGrid } from "@/components/atlas";
 import { Empty, Panel } from "@/components/ui";
 
-/** Accord Atlas in a deal room: each period's slots, then every observation the contract accepted. */
+/** A market-making deal room: each period's slots, then every observation the contract accepted. */
 export function Periods({
   periods, observations, atlas, now,
 }: { periods: PeriodView[]; observations: StoredObservation[][]; atlas: AtlasTerms; now: number }) {
@@ -15,7 +15,7 @@ export function Periods({
       >
         <PeriodGrid periods={periods} observations={observations} atlas={atlas} now={now} />
         <p className="small" style={{ marginTop: 14 }}>
-          Numbers in the slots are the spread in basis points. Atlas measures the venue&apos;s liquidity, not the market
+          Numbers in the slots are the spread in basis points. The observer measures the venue&apos;s liquidity, not the market
           maker&apos;s own orders.
         </p>
       </Panel>

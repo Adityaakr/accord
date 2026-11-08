@@ -3,14 +3,14 @@ import { atlasConsole } from "@/server/atlas";
 import { Pill } from "./ui";
 import styles from "./atlasband.module.css";
 
-/** The home page's line into Accord Atlas: the latest mainnet reading and how the liquidity agreements stand. */
+/** The home page's line into market-making agreements: the latest mainnet reading and how the liquidity agreements stand. */
 export async function AtlasBand() {
   const c = await atlasConsole().catch(() => null);
   if (!c || c.rooms.length === 0) return null;
   const o = c.latest?.observation;
   return (
-    <Link href="/atlas" className={styles.band}>
-      <Pill tone="purple">Accord Atlas</Pill>
+    <Link href="/market-making" className={styles.band}>
+      <Pill tone="purple">Market making</Pill>
       <span className={styles.text}>
         {o ? (
           <>Rhea NEAR/USDC at mainnet block <span className="mono">{o.venue_block.height.toLocaleString("en-US")}</span>: spread{" "}
