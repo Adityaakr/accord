@@ -9,7 +9,7 @@
 Agreements negotiated in private, enforced in public.
 
 [Site](https://accordweb-production.up.railway.app) ·
-[Try a deal](https://accordweb-production.up.railway.app/app/try-it) ·
+[Try a deal](#try-it-in-3-minutes-on-testnet) ·
 [Verify](https://accordweb-production.up.railway.app/verify) ·
 [Record](https://accordweb-production.up.railway.app/record) ·
 [Docs](https://accordweb-production.up.railway.app/docs)
@@ -227,7 +227,10 @@ Source: [`platform/ARCHITECTURE.md`](platform/ARCHITECTURE.md) section 6. Five r
 
 ## Try it in 3 minutes on testnet
 
-Open **[/app/try-it](https://accordweb-production.up.railway.app/app/try-it)**. Everything there is NEAR testnet with test USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, authority `halcyon-auth.testnet`) and the agent is a demo agent run by Accord for test rooms; both are labelled in the room.
+> [!NOTE]
+> The app service behind `/app` on the live site is not deployed yet: `https://accordweb-production.up.railway.app/app/try-it` answers `503` with a short "starting up" page that links to `/verify`. Until it is, the transactions below show this exact path run on 8 Nov 2026, and [Verify any agreement](#verify-any-agreement) works today with no account. To run the page yourself, start the app ([Run locally](#run-locally)) and open http://localhost:3100/app/try-it; the faucet, demo counterparty and demo agent need the `FAUCET_*`, `DEMO_*` and `RELAYER_*` variables named in [`platform/.env.example`](platform/.env.example).
+
+Open `/app/try-it`. Everything there is NEAR testnet with test USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, authority `halcyon-auth.testnet`) and the agent is a demo agent run by Accord for test rooms; both are labelled in the room.
 
 | # | Do | See |
 | --- | --- | --- |
@@ -351,9 +354,9 @@ Verbatim from [`platform/GOAL.md`](platform/GOAL.md). Every public statement abo
 | Payments go only to the authorised recipient | The recipient is a NEAR account listed in a file on the vendor's domain, fetched inside an enclave; the vendor's settlement authority approves it on chain and the buyer accepts it; a change needs all three again and a 24-hour delay | Authorisation proves control of the domain and the authority's approval, not that the company legally exists. A legal KYB check is a later integration |
 | Revoking ends the agent's authority in one transaction | `revoke_agent` marks the agent's key revoked, so the contract refuses it from that receipt on, and deletes it from the agreement account in the same transaction; the account has no other key, so after the deletion lands (about one block) anything the agent signs is rejected by the network before it reaches the contract | A payment already made stays made, and it went to the authorised recipient at the approved amount. A call that reached the chain before the revoke still runs, with every check. Revoking never cancels what the vendor has earned: an eligible payment stays claimable by the vendor |
 | Negotiation is private; settlement is public | Mandates and the transcript stay inside enclaves; only the terms, commitment hashes, a transcript hash and attestation references leave; the commercial terms document is encrypted to the two parties | The enforced schedule (amounts, dates, recipient) and every payment are public on NEAR, as with any stablecoin payment |
-| An Accord Atlas payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception | Each slot's time is drawn inside the observer's enclave from a seed generated there; the observation is taken at the first NEAR mainnet block after that time, signed by the observer's key, and checked by the contract against the agreed spread, depth and two-sided quoting; anyone can recompute it from an archival node | Atlas measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment |
+| A market-making agreement's payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception | Each slot's time is drawn inside the observer's enclave from a seed generated there; the observation is taken at the first NEAR mainnet block after that time, signed by the observer's key, and checked by the contract against the agreed spread, depth and two-sided quoting; anyone can recompute it from an archival node | A market-making agreement's observer measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment |
 
-"Accord Atlas" in the last row is the kit's earlier name for market-making agreements in Accord; the site's [/security](https://accordweb-production.up.railway.app/security) page says "A market-making agreement's payment".
+The site's [/security](https://accordweb-production.up.railway.app/security) page shows the same table.
 
 ## Repository map
 
@@ -377,9 +380,10 @@ Verbatim from [`platform/GOAL.md`](platform/GOAL.md). Every public statement abo
 │   └── *.md                  GOAL, ARCHITECTURE, INTERFACES, DECISIONS, PROGRESS, DEPLOY, CLAUDE
 ├── docs/
 │   ├── diagrams/             Excalidraw sources with SVG and PNG exports
-│   ├── product/              product notes (GOAL, PROGRESS, REFERENCES copies)
-│   ├── website/              website copy and specs
+│   ├── product/              a pointer to the product kit in platform/
+│   ├── website/              website copy and specs as written, dated
 │   └── hackathon/            the organisers' HACKATHON.md
+├── AGENTS.md, CLAUDE.md     notes for evaluating agents: layout, judge paths, where the claims are
 ├── .github/workflows/ci.yml  website: typecheck, copy rules, references, build
 ├── Dockerfile, railway.json  the website's Railway build
 └── package.json              npm workspace for apps/*
@@ -417,8 +421,9 @@ corepack enable && pnpm install
 | `make test` | `cargo test` for the workspace, then the package, service and app tests |
 | `make attack NET=local` | `ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY` with the key revoked and deleted, then `AccessKeyDoesNotExist`, and `0.00 USDC moved by attempts` |
 | `make demo NET=local` | The whole loop from fresh accounts (14 s on 3 Nov 2026) |
+| `make market-making NET=local` | Two market-making agreements on Rhea's USDC/wNEAR pool, observed at real mainnet blocks: one period `Eligible` and paid, the stricter one `Withheld` and refused `ERR_PERIOD_WITHHELD` |
 
-Every live target (`negotiate`, `approve`, `fund`, `payee`, `pay`, `attack`, `revoke`, `claim`, `exception`, `payee-change`, `atlas`, `demo`, `inbox`) runs against testnet without `NET=local`, using the accounts and keys named in `platform/.env.example`. Their printed lines are defined in [`platform/INTERFACES.md`](platform/INTERFACES.md) section 10; recorded runs are in [`platform/README.md`](platform/README.md).
+Every live target (`negotiate`, `approve`, `fund`, `payee`, `pay`, `attack`, `revoke`, `claim`, `exception`, `payee-change`, `market-making`, `demo`, `inbox`) runs against testnet without `NET=local`, using the accounts and keys named in `platform/.env.example`. Their printed lines are defined in [`platform/INTERFACES.md`](platform/INTERFACES.md) section 10; recorded runs are in [`platform/README.md`](platform/README.md).
 
 ## Deployment
 
