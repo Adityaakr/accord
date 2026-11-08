@@ -19,12 +19,14 @@ type Props = {
   accent?: Accent
   /** max-width of the heading column; template default 480 */
   wide?: boolean
+  /** Centre the pill, heading and lead on the section axis */
+  centered?: boolean
   className?: string
 }
 
-export function SectionHeading({ eyebrow, title, lead, accent = "white", wide, className = "" }: Props) {
+export function SectionHeading({ eyebrow, title, lead, accent = "white", wide, centered, className = "" }: Props) {
   return (
-    <div className={`${styles.heading} ${wide ? styles.wide : ""} ${className}`}>
+    <div className={`${styles.heading} ${wide ? styles.wide : ""} ${centered ? styles.centered : ""} ${className}`}>
       <Appear className={styles.tag} effect={appear("0s")}>
         <span className={styles.indicator} style={{ background: `var(--${accent})` }} aria-hidden="true" />
         <p className="t-body-sm">{eyebrow}</p>

@@ -1,6 +1,6 @@
 /* The timeline language shared by /verify, /record, /try's record and /docs (the home "Live on NEAR testnet"
    section's style): one centred column, a head line with one hairline under it, groups with quiet small-caps labels,
-   borderless rows with a numbered gutter on a hairline spine, mono values and results right-aligned, and quiet links
+   borderless rows with a numbered gutter (no spine line), mono values and results right-aligned, and quiet links
    (the value text is the link; its arrow sits at low opacity until hover). Red only for refusals and revocation, or a
    check that really failed. */
 
@@ -16,13 +16,12 @@
 .groupMeta { text-transform: none; letter-spacing: 0; font-family: var(--mono); font-size: 11.5px; }
 
 .rows { list-style: none; margin: 0; padding: 0; position: relative; }
-.rows::before { content: ""; position: absolute; left: 13px; top: 14px; bottom: 14px; width: 1px; background: var(--hairline); }
 /* Four columns: number, name, value, result. `.rowWide` drops the result column; `.rowText` lets a prose value wrap left-aligned. */
 .row { position: relative; display: grid; grid-template-columns: 28px 150px minmax(0, 1fr) 84px; align-items: center; column-gap: 16px; min-height: 40px; }
 .rowWide { grid-template-columns: 28px 150px minmax(0, 1fr); }
 .rowText { align-items: baseline; padding: 9px 0; }
 .rowText .value { text-align: left; }
-.num { position: relative; z-index: 1; justify-self: start; align-self: center; font-size: 11.5px; color: var(--text-weak); background: var(--background); padding: 2px 0; }
+.num { position: relative; z-index: 1; justify-self: start; align-self: center; font-size: 11.5px; color: var(--text-weak); }
 .rowText .num { align-self: baseline; }
 .name { font-size: 15px; color: var(--text-strong); }
 .value { min-width: 0; font-size: 12px; color: var(--text-medium); text-align: right; overflow-wrap: anywhere; }
@@ -82,8 +81,7 @@
   .value, .meaning { grid-column: 2; grid-row: 2; text-align: left; }
   .stepper { justify-content: flex-start; }
   .status { grid-column: 3; grid-row: 1 / span 2; }
-  .rows::before { left: 11px; }
-  .groupLabel, .note, .cmdRow { padding-left: 36px; }
+    .groupLabel, .note, .cmdRow { padding-left: 36px; }
   .pre { padding-left: 36px; }
 }
 

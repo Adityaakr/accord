@@ -1,9 +1,9 @@
 /* Home · Live on NEAR testnet: one vertical timeline in four phases on a quiet surface, no boxed sub-cards, no row
-   highlight. Columns: number, step, detail, tx, aligned across every phase. A hairline spine runs down the numbers.
+   highlight. Columns: number, step, detail, tx, aligned across every phase. No spine: the numbers alone carry the order.
    Red only for the refusal and the revocation. */
-.section { gap: 40px; padding: 72px 0; scroll-margin-top: 40px; }
+.section { align-items: center; gap: 40px; padding: 72px 0; scroll-margin-top: 40px; }
 
-.timeline { width: 100%; max-width: 820px; display: flex; flex-direction: column; gap: 28px; }
+.timeline { width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 28px; }
 .head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--hairline); }
 .headLabel { font-size: 13px; color: var(--text-weak); }
 .headLink { font-size: 12.5px; color: var(--text-medium); text-decoration: none; }
@@ -12,10 +12,9 @@
 .phase { display: flex; flex-direction: column; gap: 6px; }
 .phaseLabel { font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-weak); padding-left: 44px; }
 .steps { list-style: none; margin: 0; padding: 0; position: relative; }
-.steps::before { content: ""; position: absolute; left: 13px; top: 14px; bottom: 14px; width: 1px; background: var(--hairline); }
 
 .row { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto 52px; align-items: center; column-gap: 16px; min-height: 40px; }
-.num { position: relative; z-index: 1; justify-self: start; font-size: 11.5px; color: var(--text-weak); background: var(--background); padding: 2px 0; }
+.num { position: relative; z-index: 1; justify-self: start; font-size: 11.5px; color: var(--text-weak); }
 .name { font-size: 15px; color: var(--text-strong); }
 .detail { font-size: 12px; color: var(--text-medium); white-space: nowrap; text-align: right; }
 .refused { color: var(--refusal); }
@@ -24,7 +23,7 @@
 .tx:focus { outline: none; }
 .tx:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 3px; border-radius: 3px; }
 
-.foot { width: 100%; max-width: 820px; display: flex; flex-direction: column; gap: 10px; padding-top: 20px; border-top: 1px solid var(--hairline); }
+.foot { width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 10px; padding-top: 20px; border-top: 1px solid var(--hairline); }
 .verify { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-size: 14px; color: var(--text-medium); }
 .verify :global(.mono) { font-size: 12.5px; color: var(--text-strong); }
 .sep { color: var(--text-weak); }
@@ -38,7 +37,7 @@
 .infra a span { margin-left: 2px; }
 .infra a:hover { color: var(--text-strong); }
 
-.cta { color: var(--text-strong); }
+.cta { width: 100%; max-width: 760px; color: var(--text-strong); }
 
 @media (max-width: 1199.98px) { .section { padding: 72px 24px; } }
 @media (max-width: 809.98px) {
@@ -47,6 +46,5 @@
   .row { grid-template-columns: 24px minmax(0, 1fr) 40px; grid-template-rows: auto auto; row-gap: 0; column-gap: 12px; padding: 7px 0; min-height: 0; }
   .detail { grid-column: 2; grid-row: 2; text-align: left; }
   .tx { grid-column: 3; grid-row: 1 / span 2; }
-  .steps::before { left: 11px; }
-  .phaseLabel { padding-left: 36px; }
+    .phaseLabel { padding-left: 36px; }
 }

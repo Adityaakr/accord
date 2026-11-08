@@ -26,6 +26,7 @@ export function LiveTestnet() {
         eyebrow="Live on NEAR testnet"
         accent="teal"
         wide
+        centered
         title="One agreement, every step on chain."
         lead={<p>Twelve steps of a real agreement, each one a transaction you can open.</p>}
       />
