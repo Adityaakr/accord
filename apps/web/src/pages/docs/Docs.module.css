@@ -128,3 +128,4 @@ li.claimRow { grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1fr); align-i
 /* The home hero's product view, framed like a screenshot */
 .heroFrame { overflow: hidden; border-radius: 12px; border: 1px solid var(--hairline); }
 @media (max-width: 809.98px) { .pairImages { grid-template-columns: minmax(0, 300px); } }
+li.docRow > :first-child, li.stepRow > :first-child, li.claimRow > :first-child { align-self: baseline; }
