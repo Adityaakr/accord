@@ -427,7 +427,8 @@ fn review_cancelled_agreement_strands_the_creation_deposit() {
 // What held
 // ---------------------------------------------------------------------------------------------------------------
 
-/// A signed answer for attempt 1 cannot settle attempt 2 (nonce check), and attempts are not reset by re-sealing.
+/// A signed answer for attempt 1 cannot settle attempt 2 (nonce check). Since the 9 Nov 2026 audit (finding 4) a
+/// mandate cannot be re-sealed once an attempt ran, so attempts can never be reset by re-sealing either.
 #[test]
 fn review_old_attempt_output_is_ignored_and_attempts_survive_recommit() {
     let mut a = new_agreement(Kind::Procurement);
@@ -439,7 +440,11 @@ fn review_old_attempt_output_is_ignored_and_attempts_survive_recommit() {
     let n = nonce(&a);
     a.on_sealed_result(n);
     assert_eq!(a.negotiation, Negotiation::Ready { attempts: 1 });
-    commit_both(&mut a); // re-seal both
+    let err = panics(|| commit_both(&mut a));
+    assert!(
+        err.is_some_and(|e| e.contains("ERR_WRONG_STATE")),
+        "re-sealing after an attempt is refused"
+    );
     assert_eq!(a.negotiation, Negotiation::Ready { attempts: 1 });
     call("accord-keeper.testnet", T0 + 2, vec![]);
     let _ = a.start_negotiation();
