@@ -8,13 +8,13 @@ Check any Accord agreement from public data with one command and no keys, or run
 
 make verify
 
-make verify DEAL=<agreement>
+`make verify DEAL=<agreement>`
 
 Needs no account and no keys. Reads NEAR testnet, the release, OutLayer and NEAR AI's attestation report.
 
 On agreement a6
 
-make verify DEAL=a6.accord-v2.testnet
+`make verify DEAL=a6.accord-v2.testnet`
 
 ## What each check means
 
@@ -36,7 +36,23 @@ make verify DEAL=a6.accord-v2.testnet
 
 make verify DEAL=a6.accord-v2.testnet · 8 Nov 2026
 
-accord verify · a6.accord-v2.testnet code code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok keys 0 key · none · no full access · ok sealed outcome signature ok · commitments match · agreement matches · ok release sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · … · not checked model z-ai/glm-5.3-flash · fresh nonce 9debe4c3… · nonce bound in the report · ok payee halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · ok record 1 payments · 1 refusals · 0 exceptions · receipts match paid · ok verify: 6 checks ok · 1 not checked
+accord verify · a6.accord-v2.testnet
+
+- code code hash 8wMuMRre… = release 3 (global by hash) · no deploy method ok
+
+- keys 0 key · none · no full access ok
+
+- sealed outcome signature ok · commitments match · agreement matches ok
+
+- release sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · … not checked
+
+- model z-ai/glm-5.3-flash · fresh nonce 9debe4c3… · nonce bound in the report ok
+
+- payee halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key ok
+
+- record 1 payments · 1 refusals · 0 exceptions · receipts match paid ok
+
+- verify: 6 checks ok · 1 not checked
 
 6 checks ok, 1 not checked: the enclave release check needs the outlayer-verify tool, which was not installed for this run. See [OutLayer trust and verification](https://app.outlayer.ai/docs/trust-verification).
 

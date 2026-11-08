@@ -84,6 +84,28 @@ Refusal codes, in gate order
 
 - 13 6 · Payment in flight Another payment holds the lock until its callback returns. ERR_IN_FLIGHT
 
+The control plane as gates · every request, the same order, no gate skipped
+
+`act(Pay{item, amount, recipient})` from the agent's one key, which can call this one method
+
+- Key and state ERR_REVOKED ERR_NOT_EXECUTING other keys: rejected
+
+- Recipient ERR_CANARY → revoke ERR_NO_RECIPIENT ERR_PAYEE_MISMATCH
+
+- Item ERR_UNKNOWN_ITEM ERR_ALREADY_PAID
+
+- Evidence ERR_NOT_DUE ERR_PERIOD_WITHHELD
+
+- Amount ERR_AMOUNT_MISMATCH ERR_CAP_EXCEEDED ERR_INSUFFICIENT_FUNDS
+
+- Lock ERR_IN_FLIGHT
+
+- Pay ft_transfer, locked
+
+Public refusal log every refusal is an on-chain event with its reason · nothing was sent
+
+The agent cannot reorder, skip or argue with a gate. Humans change the inputs (approve an exception, accept a new recipient); the gates stay the same.
+
 Every `act` request passes the same gates in the same order; the first one that fails names the refusal, and nothing is sent.
 
 On this page

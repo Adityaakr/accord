@@ -16,7 +16,25 @@ Every make target a reader runs, what it does, the transaction where agreement a
 
 make sandbox · from the platform README (3 Nov 2026), first lines
 
-accord sandbox · local NEAR node · demo timings setup tUSDC (test token, 6 decimals) · factory accord.test.near · release 1 (embedded, mock build) created a1.accord.test.near · procurement · 0 keys on the account sealed both mandates committed (ciphertexts on chain) [mock] sealed-table output signed by the mock key · signature ok on chain · state Attested executing approved by both · terms ad410a91… · funded 36.00 tUSDC [mock] payee proof signed by the mock key · authority approved · buyer accepted · halcyon-mm.test.near active agent 1 key · FunctionCall · receiver a1.accord.test.near · methods [act] delivery item 1 submitted · accepted paid item 1 · 12.00 tUSDC → halcyon-mm.test.near · 10 TGas
+accord sandbox · local NEAR node · demo timings
+
+- setup tUSDC (test token, 6 decimals) · factory accord.test.near · release 1 (embedded, mock build)
+
+- created a1.accord.test.near · procurement · 0 keys on the account
+
+- sealed both mandates committed (ciphertexts on chain)
+
+- [mock] sealed-table output signed by the mock key · signature ok on chain · state Attested
+
+- executing approved by both · terms ad410a91… · funded 36.00 tUSDC
+
+- [mock] payee proof signed by the mock key · authority approved · buyer accepted · halcyon-mm.test.near active
+
+- agent 1 key · FunctionCall · receiver a1.accord.test.near · methods [act]
+
+- delivery item 1 submitted · accepted
+
+- paid item 1 · 12.00 tUSDC → halcyon-mm.test.near · 10 TGas
 
 ## The live flow
 
@@ -34,7 +52,17 @@ Live targets run against NEAR testnet by default, and against the local node wit
 
 The live flow
 
-make negotiate make approve make fund make payee make pay
+agreement state Sealed Attested Executing
+
+- 01 `make negotiate` Two sealed mandates in, attested terms out. [a6](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW)
+
+- 02 `make approve` Both companies approve the same terms hash; the agreement is `Executing`. [a6](https://testnet.nearblocks.io/txns/2uv8tTfeYhe2aZ5cMrVNfFzr88kPL4HeSxwYzNhtmveT)
+
+- 03 `make fund` The buyer funds the agreement's USDC. [a6](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy)
+
+- 04 `make payee` The recipient proven, approved, accepted and active, with its rating (`allow`). [a6](https://testnet.nearblocks.io/txns/3d3LSZvz3yPX5LM1Bk6t9bxiX2x1JDMEt9mfa2fbw11p)
+
+- 05 `make pay` The agent pays milestone 1 after the vendor's delivery is accepted. [a6](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ)
 
 ## Refusals, exceptions and revocation
 
@@ -50,9 +78,19 @@ make negotiate make approve make fund make payee make pay
 
 make attack NET=local · from the platform README (3 Nov 2026)
 
-accord attack · a9.accord.test.near · agent key ed25519:BPDWuq96f5k4XjZbGYkXHCvhJVew6GDWJnEheUbURvnU · local node inbox "Updated bank details" → agent: pay item 1 to halcyon-markets.test.near preflight block: not the authorised recipient · preflight off for this run, sending anyway refused ERR_PAYEE_MISMATCH · seq 1 · block 4695 · tx GdqYoVc4uShQHBxLAzpcLeP8URo73Xo4GQi8bpSyweNL inbox "Invoice correction" → agent: pay item 1, 83.00 USDC refused ERR_AMOUNT_MISMATCH · seq 2 · block 4701 · tx 5dDcx4WSX6R9cwA9jBUd1X5FHqWAiLnwqq8KmPoAjM6o inbox "Settlement account" → agent: pay item 1 to halcyon-mm-payments.test.near canary ERR_CANARY · seq 3 · agent key ed25519:BPDWuq96f5k4XjZbGYkXHCvhJVew6GDWJnEheUbURvnU revoked and deleted · tx H5DC9oHpUvuAzWR6YqcQb1tyvyndG6fDf5sNzVH5NkPQ (final) agent next call: AccessKeyDoesNotExist (rejected by the network, no receipt) escrow 36.00 USDC before · 36.00 USDC after · 0.00 USDC moved by attempts
+a9.accord.test.near · local node agent key ed25519:BPDWuq…RvnU revoked and deleted escrow 36.00 USDC 36.00 USDC before 36.00 USDC after 0.00 USDC moved by attempts
+
+- 01 inbox “Updated bank details” agent pay item 1 to halcyon-markets.test.near contract `ERR_PAYEE_MISMATCH` nothing sent seq 1 block 4695 GdqYoV…weNL
+
+- 02 inbox “Invoice correction” agent pay item 1, 83.00 USDC contract `ERR_AMOUNT_MISMATCH` nothing sent seq 2 block 4701 5dDcx4…jM6o
+
+- 03 inbox “Settlement account” agent pay item 1 to halcyon-mm-payments.test.near canary `ERR_CANARY` nothing sent seq 3 agent key ed25519:BPDWuq…RvnU revoked and deleted H5DC9o…NkPQ (final)
+
+- agent next call `AccessKeyDoesNotExist` rejected by the network, no receipt
 
 Transaction hashes in this block are on the local node, not testnet.
+
+accord attack · a9.accord.test.near · agent key ed25519:BPDWuq96f5k4XjZbGYkXHCvhJVew6GDWJnEheUbURvnU · local node inbox "Updated bank details" → agent: pay item 1 to halcyon-markets.test.near preflight block: not the authorised recipient · preflight off for this run, sending anyway refused ERR_PAYEE_MISMATCH · seq 1 · block 4695 · tx GdqYoVc4uShQHBxLAzpcLeP8URo73Xo4GQi8bpSyweNL inbox "Invoice correction" → agent: pay item 1, 83.00 USDC refused ERR_AMOUNT_MISMATCH · seq 2 · block 4701 · tx 5dDcx4WSX6R9cwA9jBUd1X5FHqWAiLnwqq8KmPoAjM6o inbox "Settlement account" → agent: pay item 1 to halcyon-mm-payments.test.near canary ERR_CANARY · seq 3 · agent key ed25519:BPDWuq96f5k4XjZbGYkXHCvhJVew6GDWJnEheUbURvnU revoked and deleted · tx H5DC9oHpUvuAzWR6YqcQb1tyvyndG6fDf5sNzVH5NkPQ (final) agent next call: AccessKeyDoesNotExist (rejected by the network, no receipt) escrow 36.00 USDC before · 36.00 USDC after · 0.00 USDC moved by attempts
 
 ## Market making
 
@@ -60,9 +98,39 @@ Transaction hashes in this block are on the local node, not testnet.
 
 make atlas NET=local · from the platform README (3 Nov 2026)
 
-accord atlas · a14.accord.test.near · market-making · rhea-dcl 17208628…|wrap.near|2000 · local node period 1 slot times held in the observer's enclave slot 1 mainnet block 222883053 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 2 mainnet block 222883166 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 3 mainnet block 222883341 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 4 mainnet block 222883437 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 5 mainnet block 222883536 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 6 mainnet block 222883588 · spread 147 bps · depth 32.78 / 75.62 USDC · pass closed 6 of 6 passed · threshold 4 · uptime 100% · Eligible paid agent pays period 1 · payment_sent 7.50 USDC → halcyon-mm.test.near · tx ANBNFhAnAQ8nJMSJmGZJjJQCQu49HQWirnA5GrApZMD2 strict a15.accord.test.near · period 1 · 0 of 6 passed · threshold 4 · Withheld withheld agent asks to pay it anyway: ERR_PERIOD_WITHHELD · tx FYuYPokP7R9F6yWx11VRqCHFb7kdvEKXgh5WDBN6A241 scope venue-level liquidity, not the market maker's own orders
+a14.accord.test.near · market-making · rhea-dcl 17208628…|wrap.near|2000 · local node
+
+period 1 6 of 6 passed
+
+slot times held in the observer's enclave
+
+- slot 1 pass mainnet block 222883053 spread 147 bps depth 32.78 / 75.62 USDC
+
+- slot 2 pass mainnet block 222883166 spread 147 bps depth 32.78 / 75.62 USDC
+
+- slot 3 pass mainnet block 222883341 spread 147 bps depth 32.78 / 75.62 USDC
+
+- slot 4 pass mainnet block 222883437 spread 147 bps depth 32.78 / 75.62 USDC
+
+- slot 5 pass mainnet block 222883536 spread 147 bps depth 32.78 / 75.62 USDC
+
+- slot 6 pass mainnet block 222883588 spread 147 bps depth 32.78 / 75.62 USDC
+
+closed · 6 of 6 passed · threshold 4 · uptime 100% Eligible
+
+agent pays period 1 · payment_sent 7.50 USDC → halcyon-mm.test.near ANBNFh…ZMD2
+
+a15.accord.test.near · period 1
+
+0 of 6 passed · threshold 4 Withheld
+
+agent asks to pay it anyway `ERR_PERIOD_WITHHELD` FYuYPo…A241
+
+scope · venue-level liquidity, not the market maker's own orders
 
 The slots are real mainnet blocks; the agreements and transactions are on the local node.
+
+accord atlas · a14.accord.test.near · market-making · rhea-dcl 17208628…|wrap.near|2000 · local node period 1 slot times held in the observer's enclave slot 1 mainnet block 222883053 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 2 mainnet block 222883166 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 3 mainnet block 222883341 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 4 mainnet block 222883437 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 5 mainnet block 222883536 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 6 mainnet block 222883588 · spread 147 bps · depth 32.78 / 75.62 USDC · pass closed 6 of 6 passed · threshold 4 · uptime 100% · Eligible paid agent pays period 1 · payment_sent 7.50 USDC → halcyon-mm.test.near · tx ANBNFhAnAQ8nJMSJmGZJjJQCQu49HQWirnA5GrApZMD2 strict a15.accord.test.near · period 1 · 0 of 6 passed · threshold 4 · Withheld withheld agent asks to pay it anyway: ERR_PERIOD_WITHHELD · tx FYuYPokP7R9F6yWx11VRqCHFb7kdvEKXgh5WDBN6A241 scope venue-level liquidity, not the market maker's own orders
 
 ## Verify, demo and the rest
 
@@ -80,7 +148,7 @@ The slots are real mainnet blocks; the agreements and transactions are on the lo
 
 Copy
 
-make verify DEAL=a6.accord-v2.testnet make demo
+`make verify DEAL=a6.accord-v2.testnet` `make demo`
 
 On this page
 
