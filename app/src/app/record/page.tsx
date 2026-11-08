@@ -1,31 +1,43 @@
 import Link from "next/link";
-import { accord, config } from "@/server/accord";
+import { config } from "@/server/accord";
+import { ledger } from "@/server/ledger";
 import { Account, PageHead, Panel, Pill, Usdc, Hash } from "@/components/ui";
 import styles from "../pages.module.css";
+import rstyles from "./record.module.css";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Record" };
 
-export default async function Record() {
-  const a = accord();
+export default async function Record({ searchParams }: { searchParams: Promise<{ scope?: string }> }) {
   const c = config();
-  const records = await a.listAgreements({ limit: 100 }).catch(() => []);
-  const rows = (await Promise.all(records.map(async (r) => {
-    const [receipts, view] = await Promise.all([a.agreement(r.account).receipts().catch(() => []), a.agreement(r.account).get().catch(() => null)]);
-    return { r, receipts, view };
-  })));
+  const scope = (await searchParams).scope === "org" ? "org" : "public";
+  const l = await ledger(scope);
+  const rows = l.rooms.map(({ record, receipts, view }) => ({ r: record, receipts, view }));
   const payments = rows.flatMap(({ r, receipts }) => receipts.map((x) => ({ ...x, agreement: r.account }))).sort((x, y) => y.at - x.at);
   const paid = payments.reduce((s, p) => s + BigInt(p.amount), 0n);
   const refused = rows.reduce((s, x) => s + (x.view?.refusals ?? 0), 0);
   const refunded = rows.reduce((s, x) => s + BigInt(x.view?.refunded ?? "0"), 0n);
+  const csv = scope === "org" ? "/api/record.csv?scope=org" : "/api/record.csv";
 
   return (
     <div className="container">
       <PageHead
         title="Record"
-        lead="Every payout, refusal and refund across the deal rooms, read from the agreements' own accounts. The amounts are public on NEAR, as with any stablecoin payment."
-        aside={<a className={styles.button} href="/api/record.csv">Download CSV</a>}
+        lead={scope === "org" ? "Every payout, refusal and refund in the rooms where a member of your organisation is a party, read from the agreements' own accounts." : "Every payout, refusal and refund across the deal rooms, read from the agreements' own accounts. The amounts are public on NEAR, as with any stablecoin payment."}
+        aside={l.unavailable ? undefined : <a className={styles.button} href={csv}>Download CSV</a>}
       />
+      <nav className={rstyles.scopes} aria-label="Record scope">
+        <Link href="/record" className={`${rstyles.scope} ${scope === "public" ? rstyles.scopeOn : ""}`} aria-current={scope === "public" ? "page" : undefined}>Public ledger</Link>
+        <Link href="/record?scope=org" className={`${rstyles.scope} ${scope === "org" ? rstyles.scopeOn : ""}`} aria-current={scope === "org" ? "page" : undefined}>Your organisation</Link>
+        {l.org ? <span className={rstyles.scopeNote}>{l.org.name} · {l.rooms.length} room{l.rooms.length === 1 ? "" : "s"} · {l.org.members.length} member{l.org.members.length === 1 ? "" : "s"}</span> : null}
+      </nav>
+      {l.unavailable ? (
+        <div className={rstyles.gate}>
+          <p className="h5">{l.unavailable === "no_session" ? "Confirm it is you to see your organisation's record" : "You are not in an organisation yet"}</p>
+          <p className="small">{l.unavailable === "no_session" ? "One signature in your wallet, no transaction and no fee. Then the record shows every room where a member of your organisation is a party." : "Create one, or join with an invitation, and the record gathers every room your members are part of."}</p>
+          <Link href={l.unavailable === "no_session" ? "/settings" : "/onboarding"} className={styles.button}>{l.unavailable === "no_session" ? "Open Settings" : "Set up your organisation"}</Link>
+        </div>
+      ) : (<>
       <div className={styles.cols3} style={{ marginBottom: 32 }}>
         <Panel title="Paid out"><span className="h2"><Usdc amount={paid} /></span><span className="small">{payments.length} payments, each to an authorised recipient</span></Panel>
         <Panel title="Refused"><span className="h2 num">{refused}</span><span className="small">requests the terms did not allow</span></Panel>
@@ -52,6 +64,7 @@ export default async function Record() {
           </table>
         </div>
       </Panel>
+      </>)}
     </div>
   );
 }
