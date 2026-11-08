@@ -66,7 +66,7 @@ export function SealedTable() {
           "Sealed Table brings both mandates into an approved confidential execution process. Agents propose terms. Deterministic checks evaluate the supported hard limits. Both parties approve the agreement before it becomes payment policy.",
         ]}
         actions={[
-          { label: LINKS.app ? "Open a deal room" : "See it on testnet", href: LINKS.app ? LINKS.newDealRoom : LINKS.testnet, variant: "primary" },
+          { label: "Open a deal room", href: LINKS.newDealRoom, variant: "primary" },
           { label: "Inspect a negotiation", href: LINKS.record, variant: "secondary" },
         ]}
       />

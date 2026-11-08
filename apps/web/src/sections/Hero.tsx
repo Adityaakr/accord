@@ -6,7 +6,7 @@ import { Link } from "react-router-dom"
 import { Button } from "../components/Button"
 import { Dots } from "../components/Dots"
 import { ActionCard, ActionCardIcon, type IconPath } from "../components/ActionCard"
-import { LINKS, PRIMARY_CTA } from "../content/links"
+import { LINKS, PRIMARY_CTA, TRY_CTA } from "../content/links"
 import { HeroPreview } from "../components/HeroPreview"
 import { LogoMark } from "../components/Logo"
 import { NearLogo } from "../components/NearLogo"
@@ -129,8 +129,7 @@ const ACCENT = new Set([H1_WORDS.indexOf("deal"), H1_WORDS.indexOf("room"), H1_W
 const headlineWord = (i: number) => (ACCENT.has(i) ? styles.h1Accent : i > H1_BREAK_AFTER ? styles.h1Soft : undefined)
 const LEAD = "Accord turns private negotiations into enforceable payment rules. Agents negotiate within each business’s confidential limits. Both parties approve the terms, and the contract enforces who can authorise payments, who can receive them, how much can be paid and what evidence is required."
 /* The line under the buttons links to the demonstration (it replaced the Accord Atlas announcement, 8 Nov 2026) */
-const DEMO_TITLE = "From private negotiation to controlled payment."
-const DEMO_TEXT = "Negotiate, approve, observe, hold, refuse a redirected payment, then pay the approved recipient."
+const PROOF_LINK = "Every step of a live testnet agreement, on chain"
 
 export function Hero() {
   return (
@@ -172,20 +171,19 @@ export function Hero() {
             </Mount>
             {/* Kt0jRKddM: Button Secondary (T_m9VlS9B), appear onMount y24 1.4s delay 0.6s */}
             <Mount y={24} delay="0.6s">
-              <Button variant="secondary" href={LINKS.exampleAgreement}>
-                See an agreement in action
+              <Button variant="secondary" href={LINKS.tryDeal}>
+                {TRY_CTA}
               </Button>
             </Mount>
           </div>
 
           {/* The demonstration, below the buttons: the hero reads headline, lead, actions, then the walkthrough */}
           <Mount y={16} delay="0.7s" className={styles.announce}>
-            <Link to={LINKS.demo} className={styles.announceLink}>
-              <LogoMark size={22} />
+            <Link to={LINKS.testnet} className={styles.announceLink}>
+              <LogoMark size={18} />
               <span className={styles.announceBody}>
-                <span className={styles.announceName}>{DEMO_TITLE}</span>
+                <span className={styles.announceQuiet}>{PROOF_LINK}</span>
                 <Arrow className={styles.announceArrow} />
-                <span className={styles.announceSub}>{DEMO_TEXT}</span>
               </span>
             </Link>
           </Mount>

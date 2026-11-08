@@ -144,6 +144,18 @@ function CopyButton({ text }: { text: string }) {
    the effect itself (y 32, 1s, EASE_APPEAR) is the template's. */
 const blockAppear = (delay: `${number}s`) => ({ ...appear(delay), threshold: 0.2 })
 
+/* The guided testnet path (<site>/app/try-it), as "do X, see Y" */
+const TRY_STEPS = [
+  { do: "Open /app/try-it and sign in with Meteor or Intear on testnet, or your email.", see: "step 1 marked done with your account name." },
+  { do: "Get test funds.", see: "your balance reads 2.50 NEAR and 100 tUSDC, with both faucet transactions linked." },
+  { do: "Create the room (prefilled against halcyon-demo.testnet).", see: "a new agreement account such as a8.accord-v2.testnet, in state Sealed." },
+  { do: "Seal your mandate with the Northwind preset: 40 tUSDC ceiling, 2 to 4 items.", see: "the Demo counterparty panel seals the vendor's mandate and starts the negotiation; the state moves Sealed, then Attested." },
+  { do: "Approve the terms, fund the escrow, accept the recipient and the first delivery.", see: "the counterparty approves, proposes halcyon-mm.testnet, the Payee job proves it on the vendor's domain, its authority approves, and once you accept it the recipient is active; the vendor then submits delivery for item 1." },
+  { do: "Start the demo agent, then let it pay the due item.", see: "Paid item 1: <amount> tUSDC to halcyon-mm.testnet, the active recipient, with the act transaction linked (the amount is what the negotiated terms say; 15.00 on a8)." },
+  { do: "Ask the agent to pay a new account.", see: "ERR_PAYEE_MISMATCH: the contract refused it and recorded the refusal. Nothing moves; the refusal appears in the room's activity." },
+  { do: "Revoke the key from the room header.", see: "Agent revoked · next call rejected by the network. Starting the demo agent again installs a new key." },
+]
+
 export function Docs() {
   usePageMeta("Accord: Documentation", "Accord documentation: the commands that run a deal room, the agreement contract's methods, and how to check each part yourself on NEAR testnet.")
   return (
@@ -159,6 +171,22 @@ export function Docs() {
 
       {/* The developer blocks: the NEAR table, the "not yet" note, the commands block, the references, the repository button */}
       <section id="near" className={`section ${styles.main}`}>
+        <Appear className={styles.block} effect={blockAppear("0s")}>
+          <h2 id="try" className={`t-h4 ${styles.subheading}`}>Try it on testnet</h2>
+          <ol className={styles.tryList}>
+            {TRY_STEPS.map((t) => (
+              <li key={t.do} className="t-body-sm">
+                <span className={styles.tryDo}>{t.do}</span>
+                <span className={styles.trySee}>You see: {t.see}</span>
+              </li>
+            ))}
+          </ol>
+          <div className={styles.tryActions}>
+            <Button variant="primary" href={LINKS.tryDeal}>Try a deal in 3 minutes</Button>
+          </div>
+          <p className={`t-body-sm ${styles.refNote}`}>NEAR testnet with test USDC. Nothing here moves real money; the demo vendor and the demo agent are Accord&apos;s own testnet accounts, labelled in the room.</p>
+        </Appear>
+
         <Appear className={styles.block} effect={blockAppear("0s")}>
           <h2 className={`t-h4 ${styles.subheading}`}>What NEAR does here, and what it does not yet.</h2>
           <div className="table-wrap">

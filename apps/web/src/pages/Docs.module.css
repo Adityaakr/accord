@@ -145,3 +145,8 @@
 }
 /* The NEAR AI Cloud row: the logo stands in for the words "NEAR AI" */
 .pieceLogo { display: inline-flex; align-items: baseline; gap: 0.3em; white-space: nowrap; }
+.tryList { display: flex; flex-direction: column; gap: 12px; margin: 0; padding-left: 1.4em; list-style: decimal; color: var(--text-medium); }
+.tryList li { display: flex; flex-direction: column; gap: 2px; }
+.tryDo { color: var(--text-strong); }
+.trySee { color: var(--text-weak); }
+.tryActions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }

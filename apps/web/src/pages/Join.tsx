@@ -4,7 +4,6 @@ import { appear } from "../components/SectionHeading"
 import { PageHero } from "../components/PageHero"
 import { Button } from "../components/Button"
 import { LINKS } from "../content/links"
-import { TESTNET } from "../content/testnet"
 import { usePageMeta } from "../lib/meta"
 import styles from "./Verify.module.css"
 
@@ -43,14 +42,13 @@ export function Join() {
           </ol>
         </div>
         <Appear as="div" className={styles.card} effect={{ ...appear("0s"), threshold: 0.2 }}>
-          <h2 className={`t-h5 ${styles.cardTitle}`}>{LINKS.app ? "Open the app" : "See it running first"}</h2>
+          <h2 className={`t-h5 ${styles.cardTitle}`}>Open the app</h2>
           <p className={`t-body-sm ${styles.weak}`}>
-            {LINKS.app
-              ? "The app runs on NEAR testnet. Settlement uses a test USDC token, so nothing here moves real money."
-              : <>The full flow already ran on testnet: agreement <a href={TESTNET.agreementUrl} target="_blank" rel="noreferrer" className="mono">{TESTNET.agreement}</a>, every step linked to its transaction.</>}
+            The app runs on NEAR testnet. Settlement uses a test USDC token, so nothing here moves real money. The guided path funds your account from a faucet and opens a room against Accord&apos;s demo vendor.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 8 }}>
-            {LINKS.app ? <Button variant="primary" href={LINKS.openDealRoom}>Open the app</Button> : <Button variant="primary" href={LINKS.testnet}>See the testnet agreement</Button>}
+            <Button variant="primary" href={LINKS.openDealRoom}>Open the app</Button>
+            <Button variant="secondary" href={LINKS.tryDeal}>Try a deal in 3 minutes</Button>
             <Button variant="secondary" href={LINKS.docs}>Run it from the docs</Button>
           </div>
           <p className={`t-body-sm ${styles.weak}`}>Questions? <Link to={LINKS.contact} className="ls-link-inline">Contact the team</Link>.</p>

@@ -6,6 +6,28 @@ Inspect how confidential mandates become approved terms, how payment requests ar
 
 Start with the reference flow, reproduce a refusal, and follow a payment through its lifecycle.
 
+## Try it on testnet
+
+- Open /app/try-it and sign in with Meteor or Intear on testnet, or your email. You see: step 1 marked done with your account name.
+
+- Get test funds. You see: your balance reads 2.50 NEAR and 100 tUSDC, with both faucet transactions linked.
+
+- Create the room (prefilled against halcyon-demo.testnet). You see: a new agreement account such as a8.accord-v2.testnet, in state Sealed.
+
+- Seal your mandate with the Northwind preset: 40 tUSDC ceiling, 2 to 4 items. You see: the Demo counterparty panel seals the vendor's mandate and starts the negotiation; the state moves Sealed, then Attested.
+
+- Approve the terms, fund the escrow, accept the recipient and the first delivery. You see: the counterparty approves, proposes halcyon-mm.testnet, the Payee job proves it on the vendor's domain, its authority approves, and once you accept it the recipient is active; the vendor then submits delivery for item 1.
+
+- Start the demo agent, then let it pay the due item. You see: Paid item 1: <amount> tUSDC to halcyon-mm.testnet, the active recipient, with the act transaction linked (the amount is what the negotiated terms say; 15.00 on a8).
+
+- Ask the agent to pay a new account. You see: ERR_PAYEE_MISMATCH: the contract refused it and recorded the refusal. Nothing moves; the refusal appears in the room's activity.
+
+- Revoke the key from the room header. You see: Agent revoked · next call rejected by the network. Starting the demo agent again installs a new key.
+
+[Try a deal in 3 minutes](/app/try-it)
+
+NEAR testnet with test USDC. Nothing here moves real money; the demo vendor and the demo agent are Accord's own testnet accounts, labelled in the room.
+
 ## What NEAR does here, and what it does not yet.
 
 | Piece | What it protects | How you check it |

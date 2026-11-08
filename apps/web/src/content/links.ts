@@ -5,13 +5,14 @@ const env = import.meta.env as Record<string, string | undefined>
 /* The app is served at <site>/app (the website proxies it; platform/DEPLOY.md). VITE_APP_URL overrides it. */
 const app = env.VITE_APP_URL ?? "/app"
 
-/** Primary CTA: the app once it is hosted (VITE_APP_URL); until then, the testnet proof and how to start on /join. */
-export const PRIMARY_CTA = app ? "Open the app" : "See it on testnet"
+/** Primary CTA: always the app (<site>/app/signin). The guided testnet path is LINKS.tryDeal. */
+export const PRIMARY_CTA = "Open the app"
+export const TRY_CTA = "Try a deal in 3 minutes"
 
 export const LINKS = {
-  /* app routes (fall back to the demo page while the app is unavailable) */
-  openDealRoom: app ? `${app}/signin` : "/#testnet",
-  newDealRoom: app ? `${app}/agreements/new` : "/join",
+  /* app routes */
+  openDealRoom: `${app}/signin`,
+  newDealRoom: `${app}/agreements/new`,
   appVerify: (id: string) => (app ? `${app}/verify/${id}` : `/verify#${id}`),
   testnet: "/#testnet",
   useCases: "/#use-cases",

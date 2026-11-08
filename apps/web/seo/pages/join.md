@@ -18,8 +18,8 @@ Accord runs on NEAR testnet. Sign in with a NEAR wallet or a work email, choose 
 
 ## Open the app
 
-The app runs on NEAR testnet. Settlement uses a test USDC token, so nothing here moves real money.
+The app runs on NEAR testnet. Settlement uses a test USDC token, so nothing here moves real money. The guided path funds your account from a faucet and opens a room against Accord's demo vendor.
 
-[Open the app](/app/signin) [Run it from the docs](/docs)
+[Open the app](/app/signin) [Try a deal in 3 minutes](/app/try-it) [Run it from the docs](/docs)
 
 Questions? [Contact the team](/contact).
