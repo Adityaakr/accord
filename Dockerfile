@@ -1,7 +1,12 @@
-# Accord website. Railway builds this Dockerfile directly, so a deploy never depends on Railway's builder tool
-# (railpack) being downloadable at build time. Build: install, typecheck, Vite build, pre-render. Run: the
-# dependency-free static server on $PORT (apps/web/scripts/serve.mjs), with /healthz.
-FROM node:22-alpine AS build
+# One Dockerfile for both Railway services, chosen by the service's own variables:
+# - the website service (no ACCORD_NETWORK): install, typecheck, Vite build, pre-render, then the dependency-free
+#   static server on $PORT (apps/web/scripts/serve.mjs), with /healthz;
+# - the app service (ACCORD_NETWORK set, e.g. testnet): the Next.js app in platform/ under /app on $PORT.
+# Railway builds this file directly, so a deploy never depends on Railway's builder tool being downloadable.
+# No secrets at build time: every key is a runtime variable.
+ARG ACCORD_NETWORK
+
+FROM node:22-alpine AS web-build
 WORKDIR /app
 
 # Build-time configuration: Railway passes service variables to declared build args. All optional.
@@ -23,11 +28,35 @@ RUN npm ci --no-audit --no-fund
 COPY . .
 RUN npm run build
 
-FROM node:22-alpine
+FROM node:22-alpine AS target
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=build /app/package.json ./package.json
-COPY --from=build /app/apps/web/scripts/serve.mjs ./apps/web/scripts/serve.mjs
-COPY --from=build /app/apps/web/dist ./apps/web/dist
+COPY --from=web-build /app/package.json ./package.json
+COPY --from=web-build /app/apps/web/scripts/serve.mjs ./apps/web/scripts/serve.mjs
+COPY --from=web-build /app/apps/web/dist ./apps/web/dist
 EXPOSE 8080
 CMD ["node", "apps/web/scripts/serve.mjs"]
+
+# ---- the app (platform/, Next.js under /app) ----
+FROM node:24-alpine AS app-build
+WORKDIR /repo
+RUN corepack enable
+ARG NEXT_PUBLIC_BASE_PATH=/app
+ARG NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID
+ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID=$NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID \
+    NEXT_TELEMETRY_DISABLED=1
+COPY platform/ .
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @accord/app run build
+
+FROM node:24-alpine AS target-app
+WORKDIR /repo
+RUN corepack enable
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
+COPY --from=app-build /repo /repo
+WORKDIR /repo/app
+EXPOSE 3100
+CMD ["sh", "-c", "pnpm exec next start -p ${PORT:-3100}"]
+
+# ---- pick one: target (website) or target-app (app) ----
+FROM target${ACCORD_NETWORK:+-app}
