@@ -84,7 +84,7 @@ function toMarkdown() {
   }
   walk(root)
   const dedup = out.filter((l, i) => l !== out[i - 1])
-  const ld = [...document.querySelectorAll('script[type="application/ld+json"]')].map((s) => s.textContent)
+  const ld = [...document.querySelectorAll('script[type="application/ld+json"]:not([data-prerender])')].map((s) => s.textContent)
   return { md: dedup.join("\n\n"), ld, title: document.title, description: document.querySelector('meta[name="description"]')?.content || "" }
 }
 

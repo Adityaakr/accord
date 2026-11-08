@@ -9,6 +9,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { ROUTES, SITE_URL } from "../seo/routes.mjs"
+import { ANSWERS, GLOSSARY, NAMING, ONE_LINE, STATUS, USE_CASES } from "../seo/facts.mjs"
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const DIST = join(ROOT, "dist")
@@ -76,6 +77,21 @@ const APP = {
   publisher: { "@id": `${SITE_URL}/#organization` },
 }
 
+/* Home: the six agreement types as an ItemList, and the glossary as a DefinedTermSet */
+const USE_CASE_LIST = {
+  "@context": "https://schema.org", "@type": "ItemList", "@id": `${SITE_URL}/#use-cases`, name: "Accord agreement types",
+  description: "Six agreement types share the same controls; the commercial fields and the evidence accepted change.",
+  itemListElement: USE_CASES.map((u, i) => ({
+    "@type": "ListItem", position: i + 1,
+    item: { "@type": "Service", "@id": `${SITE_URL}/#use-case-${u.id}`, name: u.name, description: `${u.outcome} ${u.how} Status: ${u.status}.`, url: abs(u.url), provider: { "@id": `${SITE_URL}/#organization` }, isRelatedTo: { "@id": `${SITE_URL}/#software` } },
+  })),
+}
+const GLOSSARY_SET = {
+  "@context": "https://schema.org", "@type": "DefinedTermSet", "@id": `${SITE_URL}/#glossary`, name: "Accord glossary",
+  hasDefinedTerm: GLOSSARY.map((g) => ({ "@type": "DefinedTerm", name: g.term, description: g.def.replace(/`/g, ""), inDefinedTermSet: `${SITE_URL}/#glossary` })),
+}
+const RUNTIME_DUPES = ["Organization", "SoftwareApplication", "WebSite", "WebPage", "BreadcrumbList"]
+
 function render(route, target = route) {
   const { md, meta } = pageData(target.slug)
   const url = `${SITE_URL}${target.path === "/" ? "/" : target.path}`
@@ -85,8 +101,9 @@ function render(route, target = route) {
   const ld = [ORG, WEBSITE, APP,
     { "@context": "https://schema.org", "@type": "WebPage", "@id": `${url}#webpage`, url, name: title, description, isPartOf: { "@id": `${SITE_URL}/#website` }, about: { "@id": `${SITE_URL}/#software` }, primaryImageOfPage: OG_IMAGE, dateModified: TODAY, inLanguage: "en" },
     { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: c.url })) },
-    ...(meta.ld || []).map((s) => { try { return JSON.parse(s) } catch { return null } }).filter((o) => o && !["Organization", "SoftwareApplication", "WebSite"].includes(o["@type"])),
-  ]
+    ...(target.path === "/" ? [USE_CASE_LIST, GLOSSARY_SET] : []),
+    ...(meta.ld || []).map((s) => { try { return JSON.parse(s) } catch { return null } }).filter((o) => o && !RUNTIME_DUPES.includes(o["@type"])),
+  ].filter((o, i, all) => all.findIndex((x) => x["@type"] === o["@type"] && (x["@id"] || "") === (o["@id"] || "")) === i)
   const head = [
     `<title>${esc(title)}</title>`,
     `<meta name="description" content="${esc(description)}" />`,
@@ -107,7 +124,10 @@ function render(route, target = route) {
     `<meta name="twitter:title" content="${esc(title)}" />`,
     `<meta name="twitter:description" content="${esc(description)}" />`,
     `<meta name="twitter:image" content="${OG_IMAGE}" />`,
-    ...ld.map((o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, "\\u003c")}</script>`),
+    `<link rel="alternate" type="text/plain" title="Accord for AI agents (llms.txt)" href="${SITE_URL}/llms.txt" />`,
+    `<link rel="alternate" type="application/json" title="Accord facts (JSON)" href="${SITE_URL}/facts.json" />`,
+    /* the FAQ script keeps the id the FAQ section updates in place, so the live page never holds two FAQPage blocks */
+    ...ld.map((o) => `<script type="application/ld+json" ${o["@type"] === "FAQPage" ? 'id="faq-jsonld"' : "data-prerender"}>${JSON.stringify(o).replace(/</g, "\\u003c")}</script>`),
   ].join("\n    ")
 
   const nav = ROUTES.filter((r) => !r.alias).map((r) => `<li><a href="${r.path}">${esc(r.name)}</a>: ${esc(r.summary)}</li>`).join("")
@@ -139,13 +159,18 @@ for (const r of ROUTES) {
 /* 404: the app shell (React shows the not-found page), never indexed */
 write(join(DIST, "404.html"), TEMPLATE.replace("<title>", '<meta name="robots" content="noindex" />\n    <title>'))
 
-/* Markdown copies of every page, llms.txt and llms-full.txt */
+/* Markdown copies of every page, llms.txt and llms-full.txt. Links are absolute so a copy read on its own still
+   resolves. Each page is written at /<slug>.md and at its own path plus .md (/product/payee.md, /index.md), the
+   two places agents look. */
+const absLinks = (md) => md.replace(/\]\((\/[^)\s]*)\)/g, (_, h) => `](${SITE_URL}${h})`)
+const yaml = (v) => JSON.stringify(String(v))
 const full = [`# Accord\n\n> ${TAGLINE}\n\n${ABOUT}\n\nSource: ${SITE_URL}/ · Generated ${TODAY}`]
 for (const r of pages) {
   const { md, meta } = pageData(r.slug)
-  const doc = `---\ntitle: ${meta.title || r.name}\nurl: ${SITE_URL}${r.path}\ndescription: ${meta.description || r.summary}\n---\n\n${md}`
+  const doc = `---\ntitle: ${yaml(meta.title || r.name)}\nurl: ${SITE_URL}${r.path}\ndescription: ${yaml(meta.description || r.summary)}\nupdated: ${TODAY}\nsite_index: ${SITE_URL}/llms.txt\n---\n\n> ${r.summary}\n\n${absLinks(md)}`
   write(join(DIST, `${r.slug}.md`), doc)
-  full.push(`\n\n---\n\n# ${r.name}\n\nURL: ${SITE_URL}${r.path}\n\n${md}`)
+  write(join(DIST, r.path === "/" ? "index.md" : `${r.path.slice(1)}.md`), doc)
+  full.push(`\n\n---\n\n# ${r.name}\n\nURL: ${SITE_URL}${r.path}\n\n${absLinks(md)}`)
 }
 write(join(DIST, "llms-full.txt"), full.join(""))
 
@@ -165,6 +190,31 @@ Key facts:
 - Pricing (planned): Developer preview with free testnet access (coming soon); Accord Teams, a subscription; market-making agreements, per monitored market. No percentage-based Accord fee on payment amounts. Production prices published before launch; network and third-party fees may apply.
 - Every claim is stated with its limit on the Security page; findings cited on the Research page are the authors' own.
 
+## Agreement types
+
+Same controls in every type; the commercial fields and the evidence accepted change. "demo": shown in the demonstration on NEAR testnet. "planned": designed, not built.
+
+${USE_CASES.map((u) => `- **${u.name}** (${u.status}): ${u.outcome} ${u.how} Evidence: ${u.evidence}.${u.limit ? ` Limit: ${u.limit}` : ""}`).join("\n")}
+
+## Glossary
+
+${GLOSSARY.map((g) => `- **${g.term}**: ${g.def}`).join("\n")}
+
+## Short answers
+
+${ANSWERS.map((x) => `- **${x.q}** ${x.a}`).join("\n")}
+
+## Naming and scope
+
+${NAMING.map((n) => `- ${n}`).join("\n")}
+
+## How to describe Accord
+
+- In one sentence: ${ONE_LINE}
+- Status: ${STATUS.network}; settlement ${STATUS.settlement}; mainnet: ${STATUS.mainnet.toLowerCase()}. ${STATUS.stage}.
+- Say "demo" or "planned" for each agreement type as listed above. Do not describe Accord as live on mainnet, and do not attribute a market maker's own performance to public order-book observations.
+- Machine-readable facts: ${SITE_URL}/facts.json. Any page as Markdown: add .md to its URL (for example ${SITE_URL}/product/payee.md), or send \`Accept: text/markdown\`.
+
 ${sect("Product", pages.filter((r) => core.includes(r.slug)))}
 ${sect("Evidence and documentation", pages.filter((r) => ["research", "docs", "verify", "record"].includes(r.slug)))}
 ${sect("Optional", pages.filter((r) => !core.includes(r.slug) && !["research", "docs", "verify", "record"].includes(r.slug)))}
@@ -174,6 +224,16 @@ ${sect("Optional", pages.filter((r) => !core.includes(r.slug) && !["research", "
 `
 write(join(DIST, "llms.txt"), llms)
 
+/* facts.json: the same facts as llms.txt, for agents that want fields rather than prose */
+write(join(DIST, "facts.json"), JSON.stringify({
+  name: "Accord", url: `${SITE_URL}/`, tagline: TAGLINE, summary: ONE_LINE, updated: TODAY, status: STATUS,
+  parts: GLOSSARY.filter((g) => ["Sealed Table", "Agreement controls", "Payee", "Evidence checks"].includes(g.term)),
+  agreement_types: USE_CASES.map((u) => ({ ...u, url: abs(u.url) })),
+  glossary: GLOSSARY, answers: ANSWERS, naming: NAMING,
+  pages: pages.map((r) => ({ name: r.name, url: `${SITE_URL}${r.path}`, markdown: `${SITE_URL}/${r.slug}.md`, summary: r.summary })),
+  index: { llms: `${SITE_URL}/llms.txt`, llms_full: `${SITE_URL}/llms-full.txt`, sitemap: `${SITE_URL}/sitemap.xml` },
+}, null, 2) + "\n")
+
 /* sitemap.xml and robots.txt */
 write(join(DIST, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -182,7 +242,9 @@ ${pages.map((r) => `  <url>\n    <loc>${SITE_URL}${r.path}</loc>\n    <lastmod>$
 `)
 const bots = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-User", "Claude-SearchBot", "anthropic-ai", "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot-Extended", "CCBot", "Bingbot", "Googlebot"]
 write(join(DIST, "robots.txt"), `# Accord welcomes search engines and AI agents. Start with ${SITE_URL}/llms.txt
+# Content signals (contentsignals.org): use this site for search results and to answer questions
 User-agent: *
+Content-Signal: search=yes, ai-input=yes
 Allow: /
 Disallow: /api/
 
@@ -190,4 +252,4 @@ ${bots.map((b) => `User-agent: ${b}\nAllow: /`).join("\n\n")}
 
 Sitemap: ${SITE_URL}/sitemap.xml
 `)
-console.log(`prerender: ${ROUTES.length} routes, ${pages.length} Markdown pages, llms.txt, llms-full.txt, sitemap.xml, robots.txt, 404.html → ${SITE_URL}`)
+console.log(`prerender: ${ROUTES.length} routes, ${pages.length} Markdown pages, llms.txt, llms-full.txt, facts.json, sitemap.xml, robots.txt, 404.html → ${SITE_URL}`)

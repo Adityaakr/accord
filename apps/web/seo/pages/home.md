@@ -184,17 +184,41 @@ Use cases
 
 Negotiate privately, approve the terms and define what must happen before money moves. Each card names what it runs on.
 
-- Pay a market maker for liquidity that showed up A project renews an 18,500 USDC retainer. Each period pays only if four of six readings of the pool, taken at hidden times, meet the agreed spread and depth. runs on Rhea pool OutLayer NEAR NEAR
+### Pay a market maker for liquidity that showed up
 
-- Let an agent pay invoices it cannot redirect Invoices clear against approved milestones once delivery is accepted. A message asking to pay a new account is refused by the contract, whatever the agent was told. runs on Payee USDC NEAR NEAR
+A project renews an 18,500 USDC retainer. Each period pays only if four of six readings of the pool, taken at hidden times, meet the agreed spread and depth.
 
-- Negotiate a renewal without showing your ceiling Both companies' agents bargain inside an enclave. Each side's limit stays sealed; only the agreed terms and an attestation come out for both to approve. runs on Sealed Table NEAR AI OutLayer
+Status: demo. Runs on the Rhea pool, OutLayer and NEAR.
 
-- Planned Pay for a security fix only when the checks pass The researcher's fee is agreed before work starts and stays in escrow until the agreed checks pass on the patch and the named reviewer approves it. runs on Agreement controls USDC
+### Let an agent pay invoices it cannot redirect
 
-- Planned Hold a month of capacity that missed its levels Monthly GPU capacity pays in full when availability and latency meet the agreed levels. A shortfall follows the agreed rule, and the provider can dispute the reading. runs on Agreement controls USDC
+Invoices clear against approved milestones once delivery is accepted. A message asking to pay a new account is refused by the contract, whatever the agent was told.
 
-- Planned Release a grant when the reviewers sign off Each tranche moves only when two of three named reviewers accept the milestone, and only to the account the grantee has proven it controls. runs on Payee USDC
+Status: demo. Runs on Payee, USDC and NEAR.
+
+### Negotiate a renewal without showing your ceiling
+
+Both companies' agents bargain inside an enclave. Each side's limit stays sealed; only the agreed terms and an attestation come out for both to approve.
+
+Status: demo. Runs on Sealed Table, NEAR AI and OutLayer.
+
+### Planned: Pay for a security fix only when the checks pass
+
+The researcher's fee is agreed before work starts and stays in escrow until the agreed checks pass on the patch and the named reviewer approves it.
+
+Status: planned. Runs on Agreement controls and USDC.
+
+### Planned: Hold a month of capacity that missed its levels
+
+Monthly GPU capacity pays in full when availability and latency meet the agreed levels. A shortfall follows the agreed rule, and the provider can dispute the reading.
+
+Status: planned. Runs on Agreement controls and USDC.
+
+### Planned: Release a grant when the reviewers sign off
+
+Each tranche moves only when two of three named reviewers accept the milestone, and only to the account the grantee has proven it controls.
+
+Status: planned. Runs on Payee and USDC.
 
 Any agreement with approved terms, agreed evidence and an authorised recipient works the same way.
 

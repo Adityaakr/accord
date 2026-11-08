@@ -23,7 +23,7 @@ const rise = (delay: `${number}s`): AppearEffect => ({
 type Rail = "near" | "usdc" | "nearai" | "outlayer" | "rhea" | "payee" | "controls" | "sealed"
 function RailMark({ r }: { r: Rail }) {
   switch (r) {
-    case "near": return <span className={styles.rail}><NearLogo variant="mono" />NEAR</span>
+    case "near": return <span className={styles.rail}><span aria-hidden="true"><NearLogo variant="mono" /></span>NEAR</span>
     case "nearai": return <span className={styles.rail}><NearAiLogo className={styles.nearai} /></span>
     case "usdc": return <span className={styles.rail}><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true"><circle cx="8" cy="8" r="6.6" /><path d="M9.8 6.1c-.3-.6-1-1-1.8-1-1 0-1.8.6-1.8 1.4 0 1.9 3.7 1 3.7 2.9 0 .8-.8 1.4-1.9 1.4-.8 0-1.5-.4-1.8-1M8 4v8" strokeLinecap="round" /></svg>USDC</span>
     case "outlayer": return <span className={styles.rail}><i className={styles.railDot} />OutLayer</span>
@@ -33,6 +33,12 @@ function RailMark({ r }: { r: Rail }) {
     case "sealed": return <span className={styles.rail}><LogoMark size={13} />Sealed Table</span>
   }
 }
+
+const RAIL_NAME: Record<Rail, string> = {
+  near: "NEAR", usdc: "USDC", nearai: "NEAR AI", outlayer: "OutLayer", rhea: "the Rhea pool",
+  payee: "Payee", controls: "Agreement controls", sealed: "Sealed Table",
+}
+const listOf = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`)
 
 /* ---------- the corner drawings: drawn on a 200 × 200 grid, shown through the window x 24–186, y 76–174 ---------- */
 const T = "var(--teal)"
@@ -157,23 +163,26 @@ export function UseCases() {
         lead={<p>Negotiate privately, approve the terms and define what must happen before money moves. Each card names what it runs on.</p>}
       />
 
-      <ul className={styles.grid}>
+      {/* Each card is an article: crawlers and agents read the status, the title, the text and what it runs on as
+          separate, labelled lines; the visual pill and logo row are hidden from them and from screen readers. */}
+      <div className={styles.grid}>
         {CARDS.map((c, i) => (
-          <Appear key={c.title} as="li" className={styles.card} effect={rise(`${(i % 3) * 0.08}s` as `${number}s`)}>
+          <Appear key={c.title} as="article" className={styles.card} effect={rise(`${(i % 3) * 0.08}s` as `${number}s`)}>
             <span className={styles.art}>{c.art}</span>
-            <span className={styles.top}>
+            <span className={styles.top} aria-hidden="true">
               <span className={styles.tile}><PixelIcon name={c.icon} size={22} /></span>
               {c.planned ? <span className={styles.planned}>Planned</span> : null}
             </span>
-            <h3 className={styles.title}>{c.title}</h3>
+            <h3 className={styles.title}>{c.planned ? <span className={styles.sr}>Planned: </span> : null}{c.title}</h3>
             <p className={styles.text}>{c.text}</p>
-            <p className={styles.runs}>
+            <p className={styles.sr}>{`Status: ${c.planned ? "planned" : "demo"}. Runs on ${listOf(c.runs.map((r) => RAIL_NAME[r]))}.`}</p>
+            <p className={styles.runs} aria-hidden="true">
               <span className={styles.by}>runs on</span>
               {c.runs.map((r) => <RailMark key={r} r={r} />)}
             </p>
           </Appear>
         ))}
-      </ul>
+      </div>
 
       <p className={styles.foot}>Any agreement with approved terms, agreed evidence and an authorised recipient works the same way.</p>
     </section>

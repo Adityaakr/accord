@@ -21,6 +21,7 @@ const PRODUCT: Item[] = [
 const BUILD: Item[] = [
   ...(LINKS.repo ? [{ key: "github", label: "GitHub", href: LINKS.repo, external: true }] : []),
   { key: "docs", label: "Documentation", href: LINKS.docs },
+  { key: "agents", label: "For AI agents", href: "/llms.txt", external: true },
   ...(LINKS.contractId ? [{ key: "contract", label: "Testnet contract", href: `https://testnet.nearblocks.io/address/${LINKS.contractId}`, external: true }] : []),
   { key: "record", label: "Record page", href: LINKS.record },
   { key: "verify", label: "Verify an agreement", href: LINKS.verify },

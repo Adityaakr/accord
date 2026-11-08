@@ -53,7 +53,10 @@ const server = createServer((req, res) => {
     res.writeHead(200, { "Content-Type": "text/plain", "Cache-Control": "no-store" }).end("ok")
     return
   }
-  let f = fileFor(req.url || "/")
+  /* Agents that ask for Markdown (Accept: text/markdown) get the page's Markdown copy at the same URL */
+  const pathOnly = (req.url || "/").split("?")[0].replace(/\/$/, "") || "/"
+  const wantsMd = /text\/markdown/.test(req.headers.accept || "") && !extname(pathOnly)
+  let f = (wantsMd && fileFor(pathOnly === "/" ? "/index.md" : `${pathOnly}.md`)) || fileFor(req.url || "/")
   let status = 200
   // Every public route is pre-rendered to its own index.html. Anything else is a real 404: the app shell from
   // 404.html (React shows the not-found page, and it is marked noindex), so crawlers never index soft 404s.
@@ -66,11 +69,15 @@ const server = createServer((req, res) => {
     return
   }
   const ext = extname(f.path)
+  /* Every page points agents to its Markdown copy and to the site's llms.txt */
+  const mdLink = status === 200 && ext === ".html" ? `<${pathOnly === "/" ? "/index.md" : `${pathOnly}.md`}>; rel="alternate"; type="text/markdown", ` : ""
   const hashed = f.path.includes(`${sep}assets${sep}`) && /-[A-Za-z0-9_-]{8,}\.(js|css)$/.test(f.path)
   res.writeHead(status, {
     "Content-Type": TYPES[ext] || "application/octet-stream",
     "Content-Length": f.size,
     "Cache-Control": hashed ? "public, max-age=31536000, immutable" : ext === ".html" || ext === ".md" || ext === ".txt" || ext === ".xml" ? "public, max-age=0, must-revalidate" : "public, max-age=3600",
+    ...(ext === ".md" ? { Vary: "Accept" } : {}),
+    ...(ext === ".html" ? { Link: `${mdLink}</llms.txt>; rel="describedby"; type="text/plain"`, Vary: "Accept" } : {}),
     ...HEADERS,
   })
   if (req.method === "HEAD") { res.end(); return }

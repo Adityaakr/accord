@@ -9,7 +9,7 @@
 }
 :global([data-theme="light"]) .section { --px-hi: #5a5f66; --px-mid: #2b2e33; --px-lo: #0e0f11; }
 
-.grid { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.grid { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 
 .card {
   position: relative;
@@ -76,6 +76,9 @@
 .rail svg { flex: none; }
 .railDot { width: 7px; height: 7px; border-radius: 2px; border: 1px solid var(--text-weak); }
 .nearai { font-size: 15px; }
+
+/* read by screen readers, crawlers and agents; not drawn */
+.sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 .foot { width: 100%; text-align: center; font-size: 14px; color: var(--text-weak); }
 
