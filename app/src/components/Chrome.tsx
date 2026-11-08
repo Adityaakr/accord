@@ -45,7 +45,7 @@ export function Chrome({ network, factory, sandbox, children }: { network: strin
       )}
       <div className={styles.shell}>
         <Sidebar />
-        <main id="main" className={styles.main}>{children}</main>
+        <main id="main" className={`${styles.main} texture`}><div key={path} className="page-in">{children}</div></main>
       </div>
       <footer className={styles.footer}>
         <div className={`container ${styles.footerInner}`}>

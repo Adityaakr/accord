@@ -89,6 +89,41 @@ input, textarea, select { font: inherit; color: inherit; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 ::selection { background: var(--teal-line); }
 
+/* The website's teal weave, as a quiet texture: diagonal hairlines over a soft teal gradient. --weave-a sets the
+   line strength (the page background is very low; full stages are higher). Cards stay solid surfaces on top. */
+:root { --weave-a: 0.07; --weave-glow: 0.07; }
+:root[data-theme="light"] { --weave-a: 0.09; --weave-glow: 0.1; }
+.texture {
+  background:
+    radial-gradient(60% 50% at 85% 0%, rgba(var(--teal-rgb), var(--weave-glow)), transparent 70%),
+    radial-gradient(50% 45% at 0% 100%, rgba(var(--teal-rgb), calc(var(--weave-glow) * 0.7)), transparent 70%),
+    repeating-linear-gradient(135deg, rgba(var(--teal-rgb), var(--weave-a)) 0 1px, transparent 1px 4px),
+    var(--background);
+}
+.texture-strong {
+  background:
+    radial-gradient(55% 45% at 80% 5%, rgba(var(--teal-rgb), 0.16), transparent 70%),
+    radial-gradient(45% 40% at 5% 95%, rgba(var(--teal-rgb), 0.12), transparent 70%),
+    repeating-linear-gradient(135deg, rgba(var(--teal-rgb), 0.16) 0 1px, transparent 1px 3px),
+    linear-gradient(135deg, var(--stage-a) 0%, var(--stage-b) 45%, var(--stage-c) 100%);
+}
+
+/* page enter: a 6px rise and fade, once per navigation */
+@keyframes page-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.page-in { animation: page-in 0.45s var(--ease) both; }
+/* List stagger: each of the first ten rows rises in 40ms after the one before. */
+.stagger > * { animation: page-in 0.4s var(--ease) both; }
+.stagger > :nth-child(2) { animation-delay: 40ms; } .stagger > :nth-child(3) { animation-delay: 80ms; }
+.stagger > :nth-child(4) { animation-delay: 120ms; } .stagger > :nth-child(5) { animation-delay: 160ms; }
+.stagger > :nth-child(6) { animation-delay: 200ms; } .stagger > :nth-child(7) { animation-delay: 240ms; }
+.stagger > :nth-child(8) { animation-delay: 280ms; } .stagger > :nth-child(9) { animation-delay: 320ms; }
+.stagger > :nth-child(n+10) { animation-delay: 360ms; }
+/* Hover lift for cards that are links. */
+.lift { transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s var(--ease); }
+.lift:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.55); }
+[data-theme="light"] .lift:hover { box-shadow: 0 14px 30px -20px rgba(20, 30, 25, 0.28); }
+@media (prefers-reduced-motion: reduce) { .page-in, .stagger > * { animation: none; } .lift, .lift:hover { transition: none; transform: none; } }
+
 /* Type scale: the site's presets */
 .h1, .h2, .h3, .h4, .h5 { letter-spacing: -0.04em; line-height: 110%; color: var(--text-strong); }
 .h1 { font-size: 40px; font-weight: 400; }
