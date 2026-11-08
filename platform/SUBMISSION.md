@@ -56,9 +56,9 @@ Accord is the private deal room and control plane for agent-to-agent commerce. E
 
 Both companies approve the terms. The agreement then lives in its own NEAR sub-account holding USDC. The buyer's agent gets one function-call key on it, able to call one method, act. The contract pays only an item that is due on the agreed evidence, at the approved amount, to the authorised recipient (domain proof, vendor authority, buyer acceptance; changes wait 24 hours). Anything else is refused on chain; a canary request deletes the key; the buyer can delete it in one transaction; the vendor can still claim what it earned.
 
-Accord Atlas, the first application, pays market-making retainers only for periods where enough hidden-time samples of Rhea's USDC/wNEAR pool met the agreed spread and depth, unless the buyer approves an exception.
+Market-making agreements pay market-making retainers only for periods where enough hidden-time samples of Rhea's USDC/wNEAR pool met the agreed spread and depth, unless the buyer approves an exception.
 
-Limits we state: the enclaves are trusted hardware, and the deployer owns their seeds and could rebind them; prompts reach the models through NEAR AI's attested gateway; terms and payments are public on NEAR; authorisation proves domain control, not legal existence; Atlas measures the pool, not who supplied the liquidity.
+Limits we state: the enclaves are trusted hardware, and the deployer owns their seeds and could rebind them; prompts reach the models through NEAR AI's attested gateway; terms and payments are public on NEAR; authorisation proves domain control, not legal existence; the market-making observer measures the pool, not who supplied the liquidity.
 
 NEAR is load-bearing: function-call keys, sub-accounts with pinned code, NEP-141 USDC, OutLayer and NEAR AI Cloud. Everything runs on testnet; the README has do-X-see-Y steps, and anyone can try to make the agent pay them at /try.
 ```

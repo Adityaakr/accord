@@ -10,7 +10,7 @@ This is the contract between the parts. Change it before changing code, in the s
 - Canonical JSON: RFC 8785 (JCS). Rust `serde_jcs`, TypeScript `canonicalize`; `crates/accord-core/tests/jcs_vectors.json` holds vectors both must reproduce byte for byte (PROGRESS 1.1). Signatures are always over the raw JCS bytes.
 - Errors that panic (malformed input, wrong caller) are strings `ERR_<NAME>`. Refusals from `act`, `claim` and `close` never panic; they return `Refused` and emit `act_refused`.
 - Events: NEP-297, `standard: "accord"`, `version: "1.0.0"`, one event per log line, each under `2 KB`.
-- Accounts in examples: factory `accord-v1.testnet`; agreements `a<id>.accord-v1.testnet`; buyer `northwind-demo.testnet`; vendor `halcyon-demo.testnet`; authority `halcyon-auth.testnet`; recipient `halcyon-mm.testnet`; keeper `accord-keeper.testnet`; canaries `halcyon-mm-payments.testnet`, `halcyon-treasury.testnet`; attacker lookalike `halcyon-markets.testnet`. `make setup` adds a suffix if a name is taken and records the real names in `DECISIONS.md`.
+- Accounts in examples: factory `accord-v2.testnet`; agreements `a<id>.accord-v2.testnet`; buyer `northwind-demo.testnet`; vendor `halcyon-demo.testnet`; authority `halcyon-auth.testnet`; recipient `halcyon-mm.testnet`; keeper `accord-keeper.testnet`; canaries `halcyon-mm-payments.testnet`, `halcyon-treasury.testnet`; attacker lookalike `halcyon-markets.testnet`. `make setup` adds a suffix if a name is taken and records the real names in `DECISIONS.md`.
 
 ## 2. Repository layout
 
@@ -18,7 +18,7 @@ This is the contract between the parts. Change it before changing code, in the s
 accord/
   Cargo.toml                   workspace: crates/*, contracts/*, jobs/*
   rust-toolchain.toml          pinned (DECISIONS.md)
-  crates/accord-core/          pure logic: types, gates, limit checks, Atlas slot times and rule, JCS hashing
+  crates/accord-core/          pure logic: types, gates, limit checks, market-making slot times and rule, JCS hashing
   crates/accord-core/tests/    jcs_vectors.json, invariants.rs (proptest)
   contracts/agreement/         near-sdk contract, thin shell over accord-core
   contracts/factory/           near-sdk contract
@@ -167,7 +167,7 @@ Root struct under `1 KB`; every variable collection in `near_sdk::store` (sectio
 
 ```json
 {
-  "id": 7, "factory": "accord-v1.testnet", "release": 3,
+  "id": 7, "factory": "accord-v2.testnet", "release": 3,
   "kind": "procurement", "title": "Liquidity reporting integration",
   "buyer": "northwind-demo.testnet", "vendor": "halcyon-demo.testnet", "vendor_authority": "halcyon-auth.testnet",
   "token": "<token id>", "outlayer": "outlayer.testnet", "keeper": "accord-keeper.testnet",
@@ -217,7 +217,7 @@ Root struct under `1 KB`; every variable collection in `near_sdk::store` (sectio
 | `close_period(period: u32)` | anyone | 0 | 50 T | After the period ends plus `observation_grace_secs`: `atlas::evaluate` (a period with a logged conflict closes as `Review`); an `Eligible` period makes its item eligible | `ERR_TOO_EARLY`, `ERR_PERIOD_CLOSED` |
 | `resolve_period(period: u32, pay: bool)` | buyer | 0 | 30 T | A `Review` (or `Withheld`) period → `ResolvedPay` (item eligible) or `ResolvedClosed` | `ERR_WRONG_STATE` |
 | `mutual_close()` | buyer and vendor (the second call executes) | 0 | 100 T | As `close()`, at any time while `Executing`; items not yet eligible are not paid | |
-| `close()` | anyone after `executing_at + duration_secs + grace_secs`, once no acceptance window is open and `close_period` has run for every Atlas period | 0 | 100 T | One step per call. While an eligible item is unprocessed: pay it to the current recipient (`via: close`); with no active recipient, or when the transfer fails in the callback, mark it `Reserved`; when the escrow cannot cover it, mark it `Unfunded`. A `Review` period nobody resolved counts as not eligible. Then read `ft_balance_of(self)`, keep the reserved amounts, refund the rest to the buyer; `Settled` | `ERR_TOO_EARLY`, `ERR_WINDOW_OPEN`, `ERR_PERIOD_OPEN`; `ERR_IN_FLIGHT` as a refusal |
+| `close()` | anyone after `executing_at + duration_secs + grace_secs`, once no acceptance window is open and `close_period` has run for every market-making period | 0 | 100 T | One step per call. While an eligible item is unprocessed: pay it to the current recipient (`via: close`); with no active recipient, or when the transfer fails in the callback, mark it `Reserved`; when the escrow cannot cover it, mark it `Unfunded`. A `Review` period nobody resolved counts as not eligible. Then read `ft_balance_of(self)`, keep the reserved amounts, refund the rest to the buyer; `Settled` | `ERR_TOO_EARLY`, `ERR_WINDOW_OPEN`, `ERR_PERIOD_OPEN`; `ERR_IN_FLIGHT` as a refusal |
 | `withdraw_near()` | buyer | 0 | 30 T | After `Settled`: liquid NEAR above the storage stake to the buyer, keeping `0.05 NEAR` while any item is `Reserved` | `ERR_WRONG_STATE` |
 
 ### 4.3 Views
@@ -301,7 +301,7 @@ The releases contract (`contracts/releases`, deployed only at `releases.<factory
 ```json
 {
   "v": 1,
-  "agreement": "a7.accord-v1.testnet",
+  "agreement": "a7.accord-v2.testnet",
   "role": "buyer",
   "party": "northwind-demo.testnet",
   "release": 3,
@@ -339,7 +339,7 @@ Procurement, vendor:
   "instructions": "Hold near target; concede at most once." }
 ```
 
-Market-making (Accord Atlas), buyer and vendor:
+Market-making, buyer and vendor:
 
 ```json
 { "kind": "market-making", "role": "buyer",
@@ -386,7 +386,7 @@ Every job: reads what it needs from the agreement's state over the RPC endpoints
 
 ### 7.1 Sealed Table
 
-Input: `{"mode": "negotiate", "agreement": "a7.accord-v1.testnet", "request_nonce": "<64 hex>"}`. Everything else (status, parties, kind, release, model, params, commitments, ciphertexts) is read from state.
+Input: `{"mode": "negotiate", "agreement": "a7.accord-v2.testnet", "request_nonce": "<64 hex>"}`. Everything else (status, parties, kind, release, model, params, commitments, ciphertexts) is read from state.
 
 Output:
 
@@ -492,10 +492,10 @@ accord revoke · <agreement>
   resume    agent pays item <n> · payment_sent <amount> USDC → <recipient> · tx <hash>
 ```
 
-`make atlas`
+`make market-making`
 
 ```
-accord atlas · <agreement> · market-making · rhea-dcl <pool short id>
+accord market-making · <agreement> · rhea-dcl <pool short id>
   period 1  slot times held in the observer's enclave
   slot 1    mainnet block <h> · spread <n> bps · depth <bid> / <ask> USDC · pass | fail
   …         (one line per slot; not_yet lines are not printed)
@@ -542,7 +542,7 @@ accord demo · faucet accounts · token <USDC | tUSDC (test token, 6 decimals)>
 ## 11. SDK (`@accord/sdk`)
 
 ```ts
-const accord = new Accord({ network: "testnet", factory: "accord-v1.testnet", rpc?: string, signer?: Signer });
+const accord = new Accord({ network: "testnet", factory: "accord-v2.testnet", rpc?: string, signer?: Signer });
 
 // factory
 accord.createAgreement(args: CreateArgs, opts?: { deposit?: string }): Promise<string>        // agreement account id
@@ -550,7 +550,7 @@ accord.listAgreements(opts?: { party?: string; from?: number; limit?: number }):
 accord.release(version?: number): Promise<Release>
 
 // one agreement
-const a = accord.agreement("a7.accord-v1.testnet");
+const a = accord.agreement("a7.accord-v2.testnet");
 a.get(); a.terms(); a.items(); a.dueItems(); a.refusals(from?, limit?);
 a.recipients(); a.exceptions(); a.periods(); a.observations(period); a.receipts(); a.budget();
 a.events(opts?: { fromBlock?: number }): AsyncIterable<AccordEvent>

@@ -2,7 +2,7 @@
 
 The private deal room and control plane for agent-to-agent commerce.
 
-Two companies' agents negotiate inside attested enclaves from sealed mandates, both companies approve the signed terms, and those terms then govern what the buyer's agent may pay. Each agreement is its own NEAR account holding the USDC escrow; the agent's only credential is a function-call key on that account that can call one method, `act`, which refuses any payment that differs from the approved item, evidence, amount or recipient. Accord Atlas, the first application, applies the same agreement to market making: a period's retainer becomes payable only when hidden-time observations of the venue pass the agreed spread, depth and two-sided quoting.
+Two companies' agents negotiate inside attested enclaves from sealed mandates, both companies approve the signed terms, and those terms then govern what the buyer's agent may pay. Each agreement is its own NEAR account holding the USDC escrow; the agent's only credential is a function-call key on that account that can call one method, `act`, which refuses any payment that differs from the approved item, evidence, amount or recipient. In a market-making agreement, the featured of six agreement types, a period's retainer becomes payable only when hidden-time observations of the venue pass the agreed spread, depth and two-sided quoting.
 
 Agreements negotiated in private, enforced in public.
 
@@ -14,7 +14,7 @@ Whose server do your agents meet on? Companies already let software negotiate fo
 
 ### In the browser, on NEAR testnet (about 3 minutes, nothing to install)
 
-Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it) (locally: `http://localhost:3100/app/try-it`). Everything there is NEAR testnet with test
+Open `/app/try-it`: on the live site once the app service is deployed (until then `https://accordweb-production.up.railway.app/app/try-it` answers `503`, see `DEPLOY.md`), or locally at `http://localhost:3100/app/try-it` with the `FAUCET_*`, `DEMO_*` and `RELAYER_*` variables from `.env.example`. Everything there is NEAR testnet with test
 USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, with its authority
 `halcyon-auth.testnet`), and the agent is a demo agent run by Accord for test rooms; both are labelled in the room.
 
@@ -70,7 +70,7 @@ verify: 6 checks ok · 1 not checked
 
 `release` stays `not checked` until `outlayer-verify` is installed (`BLOCKED.md`). `keys` reads `0 key` because a6's agent was revoked.
 
-`make sandbox`, from a real run on 3 Nov 2026:
+`make sandbox`, from a real run on 3 Nov 2026 (the market-making line was then labelled `atlas`; the sandbox now prints `market`):
 
 ```
 accord sandbox · local NEAR node · demo timings
@@ -106,9 +106,9 @@ The sandbox's slot values are the venue probe's real readings of Rhea's USDC/wNE
 
 ### The whole product on your machine
 
-`make dev` starts a local NEAR node with everything around it: the real contracts, the three enclave jobs' own code run natively (only the negotiating model is replaced, by a deterministic negotiator inside both mandates' limits, and every output it signs says `model.local`), a test USDC faucet, the keeper, the demo agent with the `/try` re-arm, and the app at http://localhost:3100. Accord Atlas agreements are measured from real NEAR mainnet blocks. In a second terminal, every live target runs against it with `NET=local`; on testnet the same code runs without the flag.
+`make dev` starts a local NEAR node with everything around it: the real contracts, the three enclave jobs' own code run natively (only the negotiating model is replaced, by a deterministic negotiator inside both mandates' limits, and every output it signs says `model.local`), a test USDC faucet, the keeper, the demo agent with the `/try` re-arm, and the app at http://localhost:3100. Market-making agreements are measured from real NEAR mainnet blocks. In a second terminal, every live target runs against it with `NET=local`; on testnet the same code runs without the flag.
 
-`make atlas NET=local`, from a real run on 3 Nov 2026 (two agreements on Rhea's USDC/wNEAR pool; the slots are real mainnet blocks):
+`make market-making NET=local`, from a real run on 3 Nov 2026 (two agreements on Rhea's USDC/wNEAR pool; the slots are real mainnet blocks). The run was recorded when the target was called `make atlas`, so its first line reads `accord atlas`; today it prints `accord market-making`, and `make atlas` remains a hidden alias:
 
 ```
 accord atlas · a14.accord.test.near · market-making · rhea-dcl 17208628…|wrap.near|2000 · local node
@@ -161,7 +161,7 @@ accord attack · a9.accord.test.near · agent key ed25519:BPDWuq96f5k4XjZbGYkXHC
 | Payments go only to the authorised recipient | The recipient is a NEAR account listed in a file on the vendor's domain, fetched inside an enclave; the vendor's settlement authority approves it on chain and the buyer accepts it; a change needs all three again and a 24-hour delay | Authorisation proves control of the domain and the authority's approval, not that the company legally exists. A legal KYB check is a later integration |
 | Revoking ends the agent's authority in one transaction | `revoke_agent` marks the agent's key revoked, so the contract refuses it from that receipt on, and deletes it from the agreement account in the same transaction; the account has no other key, so after the deletion lands (about one block) anything the agent signs is rejected by the network before it reaches the contract | A payment already made stays made, and it went to the authorised recipient at the approved amount. A call that reached the chain before the revoke still runs, with every check. Revoking never cancels what the vendor has earned: an eligible payment stays claimable by the vendor |
 | Negotiation is private; settlement is public | Mandates and the transcript stay inside enclaves; only the terms, commitment hashes, a transcript hash and attestation references leave; the commercial terms document is encrypted to the two parties | The enforced schedule (amounts, dates, recipient) and every payment are public on NEAR, as with any stablecoin payment |
-| An Accord Atlas payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception | Each slot's time is drawn inside the observer's enclave from a seed generated there; the observation is taken at the first NEAR mainnet block after that time, signed by the observer's key, and checked by the contract against the agreed spread, depth and two-sided quoting; anyone can recompute it from an archival node | Atlas measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment |
+| A market-making agreement's payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception | Each slot's time is drawn inside the observer's enclave from a seed generated there; the observation is taken at the first NEAR mainnet block after that time, signed by the observer's key, and checked by the contract against the agreed spread, depth and two-sided quoting; anyone can recompute it from an archival node | A market-making agreement's observer measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment |
 
 ### Custody, per piece
 
@@ -213,7 +213,7 @@ The app's server never sees a mandate and no route accepts one (`app/tests/no-ma
 The full design is in `ARCHITECTURE.md`; every method, event and printed line is in `INTERFACES.md`. Diagrams of the system, the lifecycle, a deal and the `act` gates are in the [root README](../README.md#how-it-works); their Excalidraw sources are in [`docs/diagrams/`](../docs/diagrams).
 
 ```
-crates/accord-core      pure rules: types, the six gates, limit checks, Atlas slot times and rule, JCS
+crates/accord-core      pure rules: types, the six gates, limit checks, market-making slot times and rule, JCS
 contracts/agreement     the agreement account (Agreement controls)
 contracts/factory       creates agreements, holds releases, reports and the blocklist
 contracts/releases      the keyless account that requests the jobs' pubkey runs

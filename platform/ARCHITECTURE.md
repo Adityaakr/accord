@@ -32,7 +32,7 @@ Read `GOAL.md` first for what ships and the claims it must keep. This file is th
  App: deal rooms, Verified panel, /try inbox, /record, /verify; encrypts mandates in the browser
 ```
 
-The design rule behind every choice: the output of each step is the input the next step enforces. The Sealed Table's terms become the contract's policy; the policy names the recipient; the recipient is what revocation protects; the observer's evidence is what releases an Atlas payment.
+The design rule behind every choice: the output of each step is the input the next step enforces. The Sealed Table's terms become the contract's policy; the policy names the recipient; the recipient is what revocation protects; the observer's evidence is what releases a market-making payment.
 
 A second rule, learned from the review: an enclave job never trusts its caller's input. Every job reads what it needs from the agreement's own state, over RPC endpoints compiled into the build, so two callers asking the same question get the same signed answer, and nobody can feed a job chosen data.
 
@@ -40,7 +40,7 @@ A second rule, learned from the review: an enclave job never trusts its caller's
 
 | Component | Path | Runs | Trusted for | Never trusted for |
 | --- | --- | --- | --- | --- |
-| Core logic | `crates/accord-core` | Inside the contract and the jobs (pure Rust, no `near-sdk`) | Deterministic checks: payment gates, limit checks, Atlas slot times and pass rule, canonical hashing | Nothing outside its inputs |
+| Core logic | `crates/accord-core` | Inside the contract and the jobs (pure Rust, no `near-sdk`) | Deterministic checks: payment gates, limit checks, market-making slot times and pass rule, canonical hashing | Nothing outside its inputs |
 | Agreement contract | `contracts/agreement` | Each agreement account (one code hash per release) | Holding the escrow and enforcing the terms | It never trusts a caller's claim; it checks signatures, predecessors and its own state |
 | Factory | `contracts/factory` | The factory account | Creating agreement accounts with pinned code; publishing releases; recipient reports and the curated blocklist | It cannot call, upgrade or drain an agreement |
 | Releases account | `contracts/releases` | `releases.<factory>`, no keys | Requesting the jobs' `pubkey` runs on chain, with the input fixed in its code | It can request nothing else, which is why S1 can admit it |
@@ -57,9 +57,9 @@ A second rule, learned from the review: an enclave job never trusts its caller's
 
 | Account | Example | Keys on it | Held by | Can do |
 | --- | --- | --- | --- | --- |
-| Factory | `accord-v1.testnet` | Full access during the hackathon; in production the key is deleted after the last upgrade | Adi (`.env`, deploy machine) | Publish releases, ask the releases account for the jobs' `pubkey` runs, curate the blocklist. Cannot touch an existing agreement |
-| Releases | `releases.accord-v1.testnet` | None, ever | Nobody | Its code requests the jobs' `pubkey` runs when the factory asks, with the input fixed to `{"mode": "pubkey"}`; the only account besides agreements that S1 admits |
-| Agreement | `a7.accord-v1.testnet` | No full-access key, ever. At most one `FunctionCall` key: receiver = itself, methods = `act`, fixed allowance | The agent holds the private half | The key can call `act` and nothing else |
+| Factory | `accord-v2.testnet` | Full access during the hackathon; in production the key is deleted after the last upgrade | Adi (`.env`, deploy machine) | Publish releases, ask the releases account for the jobs' `pubkey` runs, curate the blocklist. Cannot touch an existing agreement |
+| Releases | `releases.accord-v2.testnet` | None, ever | Nobody | Its code requests the jobs' `pubkey` runs when the factory asks, with the input fixed to `{"mode": "pubkey"}`; the only account besides agreements that S1 admits |
+| Agreement | `a7.accord-v2.testnet` | No full-access key, ever. At most one `FunctionCall` key: receiver = itself, methods = `act`, fixed allowance | The agent holds the private half | The key can call `act` and nothing else |
 | Buyer | `northwind-demo.testnet` | The buyer's wallet | The buyer's people | Principal actions for the buyer |
 | Vendor | `halcyon-demo.testnet` | The vendor's wallet | The vendor's people | Principal actions for the vendor |
 | Vendor settlement authority | `halcyon-auth.testnet` | A separate wallet (in production, a multisig such as a Sputnik DAO) | The vendor's finance function | Approve a recipient |
@@ -87,7 +87,7 @@ Each agreement account is the agent's working account for that agreement: the ag
 - Pinned code: releases are NEP-591 global contracts referenced by code hash (live on testnet; `near-sdk` has `use_global_contract` since 5.17). A reference by hash cannot change; a reference by account id would follow the publisher's updates, so it is never used. The agreement has no method that deploys code, and with no full-access key nobody can deploy over it. Publishing a global contract burns `0.0001 NEAR` per byte (about `10 NEAR` for a `100 KB` wasm), so development uses the embedded mode and the hosted demo uses the global mode; `release.mode` records which.
 - State layout: the root struct stays under `1 KB` (ids, state, counters, small flags). Everything variable lives in `near_sdk::store` collections that load lazily: commitments and ciphertexts, terms, items, recipient versions, the refusal ring buffer, exceptions, observations, receipts. A call reads and writes only what it touches. `make test` includes a gas-ceiling test: a refused `act` under `15 TGas`, a paying `act` under `50 TGas`.
 - Balance: the creation deposit covers state storage (target under `40 KB`, so about `0.4 NEAR` staked at `1 NEAR` per `100 KB`), both mandates' storage (so neither party attaches a deposit), the agent's gas, OutLayer runs requested on chain (Sealed Table and Payee, about `0.01` to `0.03 NEAR` each), the account creation charge (`0.007 NEAR`) and storage deposits on the token. `get_budget()` reports what is left; the buyer tops up with a plain transfer. The liquid balance must stay above the storage stake or the agent's transactions fail with `LackBalanceForState`; every collection that can grow from outside is capped (section 6).
-- Ending: terms count time from `executing_at` (the second approval). Deliveries are accepted until `executing_at + duration_secs`, and an item can be delivered again only after a dispute, so every acceptance window has closed by `executing_at + duration_secs + acceptance_window_secs`. After `executing_at + duration_secs + grace_secs`, once no acceptance window is open and `close_period` has run for every Atlas period (anyone can call it), anyone can call `close()`. It works one item per call. Each eligible unpaid item is paid to the current recipient. An item it cannot pay (no active recipient, or the token refuses the transfer) is set aside as `Reserved`, and the vendor can still `claim` it later, after `Settled` too. An item the escrow cannot cover is recorded as `Unfunded`. A `Review` period nobody resolved counts as not eligible. Then the token balance the account actually holds (read with `ft_balance_of`, so stray deposits come back too), minus the reserved amounts, returns to the buyer, and the state becomes `Settled`. Nothing a vendor or a recipient does can hold the buyer's refund past those times. After `Settled` the buyer can `withdraw_near()` the liquid NEAR above the storage stake. Every state has a path to `Settled`, `NoDeal` or `Cancelled`.
+- Ending: terms count time from `executing_at` (the second approval). Deliveries are accepted until `executing_at + duration_secs`, and an item can be delivered again only after a dispute, so every acceptance window has closed by `executing_at + duration_secs + acceptance_window_secs`. After `executing_at + duration_secs + grace_secs`, once no acceptance window is open and `close_period` has run for every market-making period (anyone can call it), anyone can call `close()`. It works one item per call. Each eligible unpaid item is paid to the current recipient. An item it cannot pay (no active recipient, or the token refuses the transfer) is set aside as `Reserved`, and the vendor can still `claim` it later, after `Settled` too. An item the escrow cannot cover is recorded as `Unfunded`. A `Review` period nobody resolved counts as not eligible. Then the token balance the account actually holds (read with `ft_balance_of`, so stray deposits come back too), minus the reserved amounts, returns to the buyer, and the state becomes `Settled`. Nothing a vendor or a recipient does can hold the buyer's refund past those times. After `Settled` the buyer can `withdraw_near()` the liquid NEAR above the storage stake. Every state has a path to `Settled`, `NoDeal` or `Cancelled`.
 - The record: the account's state plus its NEP-297 events are the record both companies can cite. The account is never deleted in v1.
 
 ## 5. Lifecycle
@@ -228,11 +228,11 @@ All plaintext lives in the job's memory during the run and nowhere else. The tra
 
 Fallback F1 (if probe 0.3 shows the callback cannot carry a `5 KB` output): the job runs the same way but the keeper submits its signed output with `submit_sealed_result(output)`, accepted once per nonce with the same checks. Under F1 the seeds must be readable by the keeper's HTTPS calls, so the keeper could request extra runs and choose among their outcomes; claim 1's limit says so if F1 is used.
 
-## 9. Accord Atlas
+## 9. Market-making agreements
 
 ### 9.1 Terms
 
-`retainer_per_period`, `periods`, `period_secs`, `slots_per_period` (demo `6`), `pass_threshold` (demo `4`), the venue (`{kind: "rhea-dcl", network, contract, pool_id}`), and the conditions: `max_spread_bps`, `min_depth_quote` within `depth_band_bps` of the mid on each side, `require_two_sided`. Period `p` (from `0`) runs from `executing_at + p × period_secs` for `period_secs`. Each period has `slots_per_period` equal windows. Uptime, as Atlas reports it, is the share of a period's observed slots in which the pool quoted both sides within the band. It is reported beside the result, not used as the pay rule: a period pays on the number of slots that met every condition, against `pass_threshold`.
+`retainer_per_period`, `periods`, `period_secs`, `slots_per_period` (demo `6`), `pass_threshold` (demo `4`), the venue (`{kind: "rhea-dcl", network, contract, pool_id}`), and the conditions: `max_spread_bps`, `min_depth_quote` within `depth_band_bps` of the mid on each side, `require_two_sided`. Period `p` (from `0`) runs from `executing_at + p × period_secs` for `period_secs`. Each period has `slots_per_period` equal windows. Uptime, as the period reports it, is the share of a period's observed slots in which the pool quoted both sides within the band. It is reported beside the result, not used as the pay rule: a period pays on the number of slots that met every condition, against `pass_threshold`.
 
 ### 9.2 Hidden slot times, deterministic samples
 
@@ -257,9 +257,9 @@ The demo venue is Rhea's DCL pool for USDC and wNEAR on mainnet (`dclv2.ref-labs
 
 The mainnet block height, hash and time are recorded with the metrics. Anyone can recompute the observation from an archival node at that block, so the values do not depend on the enclave; the enclave adds the hidden time and the signature. The pool's fee is `0.2%`, so a round trip costs at least `40 bps`: the passing demo agreement allows `60 bps`; the stricter one (for the `Withheld` period) allows `30`, which this pool cannot meet, and is negotiated with a vendor mandate that overpromises. The data is never altered.
 
-### 9.4 What Atlas does not claim
+### 9.4 What market-making agreements do not claim
 
-It measures the venue's liquidity, not which market maker provided it; DCL positions are per account, which could make attribution possible later (`WIN_PLAN.md` lever 6), and until a separate claim ships nothing says Atlas attributes liquidity. It is a pool with concentrated liquidity and limit orders, not a central limit order book, and the copy says "liquidity" rather than "order book". Retainer-only. It does not claim the slot times are hidden from the deployer: the deployer owns `PROTECTED_OBSERVER_SEED` and could rebind it to a build that prints future slot times (claim 6's limit).
+It measures the venue's liquidity, not which market maker provided it; DCL positions are per account, which could make attribution possible later (`WIN_PLAN.md` lever 6), and until a separate claim ships nothing says the observer attributes liquidity. It is a pool with concentrated liquidity and limit orders, not a central limit order book, and the copy says "liquidity" rather than "order book". Retainer-only. It does not claim the slot times are hidden from the deployer: the deployer owns `PROTECTED_OBSERVER_SEED` and could rebind it to a build that prints future slot times (claim 6's limit).
 
 ## 10. Keeper
 
