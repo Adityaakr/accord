@@ -2,5 +2,4 @@
 .card { display: flex; flex-direction: column; gap: 14px; max-width: 720px; padding: 22px 24px; border-radius: var(--radius-lg); border: 1px dashed var(--hairline-strong); background: var(--elevation-strong); }
 .list { display: flex; flex-direction: column; gap: 10px; color: var(--text-medium); }
 .list li { display: flex; gap: 10px; align-items: baseline; }
-.dot { flex: none; width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--text-weak); transform: translateY(-2px); }
 .today { font-size: 13px; color: var(--text-weak); padding-top: 12px; border-top: 1px solid var(--hairline); }

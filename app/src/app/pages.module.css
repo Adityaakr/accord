@@ -17,8 +17,7 @@
 .row:hover { background: var(--elevation-strong); }
 .note { margin-top: 40px; }
 .bullets { display: flex; flex-direction: column; gap: 8px; color: var(--text-medium); }
-.bullets li { padding-left: 16px; position: relative; }
-.bullets li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint); }
+.bullets li { position: relative; }
 .search { display: flex; gap: 10px; max-width: 640px; }
 .input {
   flex: 1 1 auto;

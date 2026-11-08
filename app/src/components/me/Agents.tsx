@@ -66,8 +66,7 @@ export function Agents() {
                   <span className={styles.mono} title={r.key ?? undefined}>{short(r.key)}</span>
                   <span className={styles.weak}>act() on <span className="mono">{r.room}</span></span>
                 </span>
-                <span className={styles.status}>
-                  <span className={r.status === "active" && !done ? styles.dotOk : r.status === "revoked" || done ? styles.dotBad : styles.dotNone} aria-hidden="true" />
+                <span className={`${styles.status} ${r.status === "revoked" || done ? styles.refused : ""}`}>
                   {done ? "revoked" : r.status === "none" ? "no agent" : r.status}
                 </span>
                 <span className={styles.when}><span className={styles.label}>Last call</span>{r.lastCall ? ago(r.lastCall) : "no calls yet"}</span>

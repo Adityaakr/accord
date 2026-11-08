@@ -10,7 +10,7 @@ export function ConfirmYou({ why }: { why: string }) {
   const o = useOrg();
   return (
     <div className={styles.card}>
-      <div className={styles.steps}><span className={`${styles.dot} ${styles.dotOn}`} /><span>One signature, no transaction, no fee</span></div>
+      <p className={styles.steps}>One signature, no transaction, no fee</p>
       <p className={styles.cardTitle}>Confirm it&apos;s you</p>
       <p className={styles.cardLead}>{why} Your wallet signs a short message naming this account; Accord checks it against the account&apos;s keys on NEAR.</p>
       <button type="button" className={styles.primary} onClick={() => void o.confirm()} disabled={o.confirming}>

@@ -40,8 +40,7 @@
 .cols3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .note { margin-top: 16px; }
 .bullets { display: flex; flex-direction: column; gap: 8px; color: var(--text-medium); }
-.bullets li { padding-left: 16px; position: relative; }
-.bullets li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint); }
+.bullets li { position: relative; }
 
 @media (max-width: 1023.98px) {
   .cols3 { grid-template-columns: minmax(0, 1fr); }

@@ -61,7 +61,7 @@ export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys,
           const done = step > i, on = step === i;
           return (
             <li key={s} className={`${styles.step} ${done ? styles.done : ""} ${on ? styles.on : ""}`} aria-current={on ? "step" : undefined}>
-              <span className={styles.dot} aria-hidden="true">{done ? "✓" : ""}</span>
+              <span className={styles.bar} aria-hidden="true" />
               <span className={styles.name}>{s}</span>
               <span className={styles.note}>{STEP_NOTE[s]}</span>
             </li>
@@ -69,7 +69,7 @@ export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys,
         })}
         {terminal ? (
           <li className={`${styles.step} ${styles.ended}`} aria-current="step">
-            <span className={styles.dot} aria-hidden="true" />
+            <span className={styles.bar} aria-hidden="true" />
             <span className={styles.name}>{terminal === "NoDeal" ? "No deal" : "Cancelled"}</span>
             <span className={styles.note}>{terminal === "NoDeal" ? "Nothing was funded" : "Before execution"}</span>
           </li>
@@ -80,19 +80,16 @@ export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys,
         <span className={styles.agentLabel}>Agent</span>
         {status === "revoked" ? (
           <span className={styles.revokedLine}>
-            <i className={styles.dotBad} aria-hidden="true" />
             Agent revoked · next call rejected by the network
             {revoked ? <span className={styles.tx}> · tx {revoked.slice(0, 10)}…</span> : null}
             {canaryTripped && !revoked ? <span className={styles.tx}> · a canary request revoked it</span> : null}
           </span>
         ) : status === "active" ? (
           <span className={styles.activeLine}>
-            <i className={styles.dotOk} aria-hidden="true" />
             Active · can call <span className="mono">act()</span> on this agreement and nothing else
           </span>
         ) : (
           <span className={styles.noneLine}>
-            <i className={styles.dotNone} aria-hidden="true" />
             {executing ? "No agent key yet. The buyer installs it from Actions." : "No agent until the agreement is executing."}
           </span>
         )}

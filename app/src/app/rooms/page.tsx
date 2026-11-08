@@ -87,7 +87,7 @@ export default async function Rooms({ searchParams }: { searchParams: Promise<{ 
                 <th scope="col"><span className="visually-hidden">Flags</span></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="stagger">
               {rows.map((r) => {
                 const counterparty = party && r.buyer !== party ? r.buyer : r.vendor;
                 const stepName = r.terminal ? (r.terminal === "NoDeal" ? "No deal" : "Cancelled") : STEPS[r.step];

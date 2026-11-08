@@ -12,7 +12,7 @@ export function ComingNext({ title, lead, holds, today }: { title: string; lead:
       </div>
       <div className={styles.card}>
         <p className="h5">What it will hold</p>
-        <ul className={styles.list}>{holds.map((h) => <li key={h}><span className={styles.dot} aria-hidden="true" />{h}</li>)}</ul>
+        <ul className={styles.list}>{holds.map((h) => <li key={h}>{h}</li>)}</ul>
         {today && today.length > 0 && (
           <p className={styles.today}>Today: {today.map((t, i) => <span key={t.href}>{i ? " · " : ""}<Link className="link" href={t.href}>{t.label}</Link></span>)}</p>
         )}

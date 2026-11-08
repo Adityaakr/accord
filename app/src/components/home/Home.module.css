@@ -28,7 +28,6 @@
 .moreAll { display: block; padding: 12px 4px; font-size: 13px; color: var(--teal); }
 .nextEmpty { display: flex; align-items: center; gap: 14px; padding: 20px 22px; border-radius: 16px; border: 1px solid var(--hairline); background: var(--elevation-strong); color: var(--text-weak); }
 .strong { color: var(--text-strong); }
-.calmDot { width: 8px; height: 8px; border-radius: 999px; background: var(--teal); box-shadow: 0 0 0 4px var(--teal-wash); flex: none; }
 
 /* numbers: a quiet row, no boxes per tile */
 .numbers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }

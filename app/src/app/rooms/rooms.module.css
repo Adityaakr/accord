@@ -21,11 +21,11 @@
 .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 .step { display: inline-flex; flex-direction: column; gap: 6px; }
-.dots { display: inline-flex; gap: 4px; }
-.dots i { width: 9px; height: 9px; border-radius: 999px; border: 1px solid var(--hairline-strong); }
-.dots .dotDone { background: var(--teal); border-color: var(--teal); }
-.dots .dotOn { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-wash); }
-.dots .dotEnded { border-style: dashed; }
+.dots { display: inline-flex; gap: 3px; }
+.dots i { width: 12px; height: 3px; border-radius: 3px; background: rgba(var(--ink-rgb), 0.12); }
+.dots .dotDone { background: var(--teal); }
+.dots .dotOn { background: linear-gradient(90deg, var(--teal) 50%, rgba(var(--ink-rgb), 0.12) 50%); }
+.dots .dotEnded { background: repeating-linear-gradient(90deg, rgba(var(--ink-rgb), 0.25) 0 3px, transparent 3px 5px); }
 .stepName { font-size: 12.5px; color: var(--text-medium); }
 
 .next { display: inline-flex; flex-direction: column; gap: 3px; }

@@ -103,7 +103,7 @@ export function Approvals() {
       {data && (items.length === 0 ? (
         <div className={styles.empty}><p className="h5">Nothing waiting on you.</p><p className="small">Rooms move on their own until a decision is yours. <Link className="link" href="/">Back to Home</Link></p></div>
       ) : (
-        <div className={styles.table} role="list">
+        <div className={`${styles.table} stagger`} role="list">
           <div className={`${styles.tableHead} ${styles.cols5}`} aria-hidden="true"><span>Waiting</span><span>Room</span><span>Amount</span><span>Recipient</span><span /></div>
           {items.map((it, i) => {
             const [first, second] = LABELS[it.kind];

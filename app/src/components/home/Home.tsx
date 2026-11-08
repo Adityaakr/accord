@@ -119,7 +119,6 @@ function NextFor({ needs, more, setMore }: { needs: Portfolio["needs"]; more: bo
   if (!first) {
     return (
       <section className={styles.nextEmpty}>
-        <span className={styles.calmDot} aria-hidden="true" />
         <p><span className={styles.strong}>Nothing needs you right now.</span> Your rooms move on their own until a decision is yours.</p>
       </section>
     );
@@ -200,7 +199,7 @@ function Rooms({ rooms, role, account, showNew }: { rooms: PortfolioRoom[]; role
           {showNew ? <Link href="/agreements/new" className={styles.primary}>New deal room</Link> : null}
         </div>
       ) : (
-        <ul className={styles.rooms}>
+        <ul className={`${styles.rooms} stagger`}>
           {rooms.slice(0, 6).map((r) => (
             <li key={r.account}>
               <Link href={`/agreements/${r.account}`} className={styles.room}>
