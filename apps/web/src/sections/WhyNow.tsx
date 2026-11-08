@@ -10,8 +10,7 @@ import styles from "./WhyNow.module.css"
    The case in numbers, then where each attack on a paying agent ends. Built in the template's system: SectionHeading
    pill + H2, elevation-strong tiles at radius 4, Host Grotesk, JetBrains Mono for values, teal where a term is enforced,
    refusal red only for refusals. Nothing here is live: every figure carries its year and a footnote marker that opens
-   its source row on /research (ids from RESEARCH_PAGE.md Part A). It never says Accord stops cyber attacks in general,
-   and the companies in the May 2026 incident are named only on /research. */
+   its source row on /research (ids from RESEARCH_PAGE.md Part A). It never says Accord stops cyber attacks in general. */
 
 const IC3_2025 = "https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf"
 const IC3_2023 = "https://ic3.gov/annualreport/reports/2023_ic3report.pdf"
@@ -107,13 +106,6 @@ export function WhyNow() {
       </div>
 
       <Appear as="div" className={styles.copy} effect={{ ...appear("0s"), threshold: 0.3 }}>
-        <p className={`t-body-lg ${styles.body}`}>
-          Agents now read the messages. In May 2026, a wallet bot paid an attacker tokens then valued at $150,000 to $174,000 after an AI model on X
-          translated a reply written in Morse code into a transfer instruction.<Fn n={7} to="grok-bankr-incident" /> The UK's National Cyber Security
-          Centre warns that prompt injection "may never be totally mitigated" and recommends deterministic safeguards outside the model.
-          <Fn n={8} to="ncsc-prompt-injection" /> In Accord, the contract is that safeguard: it checks every payment against the approved terms and the
-          authorised recipient.
-        </p>
         <div className={styles.worst}>
           <p className={`mono ${styles.worstLabel}`}>Worst case</p>
           <p className={styles.worstText}>
@@ -126,7 +118,7 @@ export function WhyNow() {
         <AttackScene />
         <figcaption className={`t-body-sm ${styles.caption}`}>
           <span className={styles.captionLead}>Where each attack stops.</span> Each attack ends at a check in code; the tags give the closest entry in the
-          OWASP Top 10 for Agentic Applications.<Fn n={9} to="owasp-agentic-2026" />
+          OWASP Top 10 for Agentic Applications.<Fn n={7} to="owasp-agentic-2026" />
         </figcaption>
       </Appear>
 

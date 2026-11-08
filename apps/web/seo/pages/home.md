@@ -274,8 +274,6 @@ With the maker's own mitigations, in 123 tests. `23.6%` without them.
 
 Sources: AFP Payments Fraud and Control Survey 2026; Chainalysis, December 2025; Deloitte Center for Financial Services, May 2024 (forecast); Anthropic, August 2025. Details on [Research](/research#attack-trends).
 
-Agents now read the messages. In May 2026, a wallet bot paid an attacker tokens then valued at $150,000 to $174,000 after an AI model on X translated a reply written in Morse code into a transfer instruction.[7](/research#grok-bankr-incident) The UK's National Cyber Security Centre warns that prompt injection "may never be totally mitigated" and recommends deterministic safeguards outside the model.[8](/research#ncsc-prompt-injection) In Accord, the contract is that safeguard: it checks every payment against the approved terms and the authorised recipient.
-
 Worst case
 
 The most a hijacked agent can do is make a payment you already approved, to the recipient you already accepted, when it falls due.
@@ -286,7 +284,7 @@ Where each attack stops · the agent is assumed to follow every message it reads
 
 Not stopped by the contract: a person approving the wrong terms, or a payment the terms already allow. Those stay with people, on the record.
 
-Where each attack stops. Each attack ends at a check in code; the tags give the closest entry in the OWASP Top 10 for Agentic Applications.[9](/research#owasp-agentic-2026)
+Where each attack stops. Each attack ends at a check in code; the tags give the closest entry in the OWASP Top 10 for Agentic Applications.[7](/research#owasp-agentic-2026)
 
 Try to move the money ↓
 

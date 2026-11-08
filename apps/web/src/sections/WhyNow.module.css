@@ -63,7 +63,6 @@
 
 /* Body (65-character measure), then the worst-case statement */
 .copy { display: flex; flex-direction: column; gap: 32px; width: 100%; }
-.body { max-width: 65ch; color: var(--text-medium); }
 .worst { display: flex; flex-direction: column; gap: 10px; max-width: 720px; }
 .worstLabel { font-size: 12px; letter-spacing: 0.04em; color: var(--text-weak); background: none; padding: 0; }
 .worstText {
