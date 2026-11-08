@@ -2,7 +2,6 @@ import { Link } from "react-router-dom"
 import { PageHero } from "../components/PageHero"
 import { KitFigure } from "../components/KitFigure"
 import { QuietLink } from "../components/QuietLink"
-import { CopyButton } from "../components/CopyButton"
 import { LINKS } from "../content/links"
 import { acct } from "../content/testnet"
 import { RECORDED_REFUSALS } from "../content/attacks"
@@ -17,7 +16,6 @@ import styles from "./Verify.module.css"
 const LEAD = "Tell the agent to pay someone else. On NEAR testnet the demonstration agent was told to pay a new account three times, on agreements a6 and a8, and the contract refused each payment. Run the same attack in your own deal room in about three minutes."
 const GOAL_LINE = "A successful attempt can only ever produce a payment to the authorised recipient at the approved amount."
 
-const time = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }) + " UTC"
 const short = (id: string) => id.split(".")[0]
 
 export function Try() {
@@ -36,7 +34,7 @@ export function Try() {
           <div className={tl.group}>
             <h2 className={tl.groupLabel}>
               <span>Refused on testnet</span>
-              <span className={tl.groupMeta}>recorded · {RECORDED_REFUSALS.length} attempts</span>
+              <span className={tl.groupMeta}>recorded 8 Nov 2026 · {RECORDED_REFUSALS.length} attempts</span>
             </h2>
             <ol className={tl.rows}>
               {RECORDED_REFUSALS.map((r, i) => (
@@ -46,9 +44,7 @@ export function Try() {
                   <span className={`mono ${tl.value}`}>
                     <QuietLink href={acct(r.agreement)}>{short(r.agreement)}</QuietLink> item {r.item}
                     <span className={tl.sep}>·</span>{r.amount} to <QuietLink href={acct(r.to)}>{r.to}</QuietLink>
-                    <span className={tl.sep}>·</span><span className={tl.weak}>{time(r.at)}</span>
                     <span className={tl.sep}>·</span><QuietLink href={r.href} className={tl.ok}>tx</QuietLink>
-                    <CopyButton text={r.tx} label="the refused transaction hash" />
                   </span>
                 </li>
               ))}
