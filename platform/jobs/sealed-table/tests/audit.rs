@@ -91,3 +91,77 @@ fn an_off_curve_doc_key_is_bad_input_before_any_model_call() {
     assert_eq!(out["outcome"], "no_deal", "{out}");
     assert_eq!(out["no_deal_reason"], "BAD_INPUT");
 }
+
+/// L5-F2 (finding 5): any account answering `get_agreement` and `get_commitments` in the right shape used to get a
+/// full negotiation (attestation and model calls on Accord's key) and a signed output. Fixed: an account that is not
+/// `a<n>.<factory>` for a compiled factory, whose view names another factory, or that the factory did not create,
+/// gets an unsigned error before any attestation or model call.
+#[test]
+fn an_account_outside_the_factory_gets_no_negotiation() {
+    let f = sealed();
+    let secret = keys::mandate_secret(&test_seed());
+    let pk = hex::decode(keys::mandate_pubkey(&secret)).unwrap();
+    for (account, view_factory, registered) in [
+        ("evil-room.testnet", "accord-v1.testnet", true),
+        ("a7.accord-v1.testnet", "rogue.testnet", true),
+        ("a7.accord-v1.testnet", "accord-v1.testnet", false),
+    ] {
+        let src = FixtureSource::new("procurement");
+        src.agreement.borrow_mut()["account"] = json!(account);
+        src.agreement.borrow_mut()["factory"] = json!(view_factory);
+        src.registered.set(registered);
+        for role in ["buyer", "vendor"] {
+            let ct = STANDARD
+                .decode(f["procurement"][role]["ciphertext"].as_str().unwrap())
+                .unwrap();
+            let mut env: Value =
+                serde_json::from_slice(&ecies::decrypt(&secret, &ct).unwrap()).unwrap();
+            env["agreement"] = json!(account);
+            let bytes = jcs(&env);
+            src.set_commitment(
+                role,
+                &json!({
+                    "commitment": hex::encode(sha256(&bytes)),
+                    "ciphertext": STANDARD.encode(ecies::encrypt(&pk, &bytes).unwrap()),
+                    "doc_pubkey": f["procurement"][role]["doc_pubkey"],
+                }),
+            );
+        }
+        let mut ai = ScriptedAi::new(&[
+            msg(
+                "QUOTE",
+                proc_terms(38_000_000, [14_000_000, 12_000_000, 12_000_000]),
+                "q",
+            ),
+            msg("ACCEPT", Value::Null, "ok"),
+        ]);
+        let input = json!({"mode": "negotiate", "agreement": account, "request_nonce": NONCE});
+        let out = run::negotiate_with(&TestHost::offline(), &src, &input, &secrets(), &mut ai);
+        assert!(
+            !ai.attested.get(),
+            "{account} reached attestation and the model"
+        );
+        assert!(
+            out.get("sig").is_none(),
+            "{account} got a signed output: {out}"
+        );
+        assert_eq!(out["status"], "error", "{out}");
+    }
+}
+
+/// The agreement the fixtures describe is one the factory created: it still negotiates.
+#[test]
+fn a_factory_agreement_still_negotiates() {
+    let src = FixtureSource::new("procurement");
+    let mut ai = ScriptedAi::new(&[
+        msg(
+            "QUOTE",
+            proc_terms(38_000_000, [14_000_000, 12_000_000, 12_000_000]),
+            "q",
+        ),
+        msg("ACCEPT", Value::Null, "ok"),
+    ]);
+    let out = run::negotiate_with(&TestHost::offline(), &src, &input(), &secrets(), &mut ai);
+    assert!(ai.attested.get());
+    assert!(out.get("sig").is_some(), "{out}");
+}

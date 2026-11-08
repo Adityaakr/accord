@@ -34,6 +34,8 @@ pub struct Deps<'a> {
     pub retry: Duration,
     /// Pause between retries and after a rate limit (zero in tests).
     pub pause: Duration,
+    /// The factories whose agreements this job serves: `accord_jobkit::factory::FACTORIES` in the enclave build.
+    pub factories: Vec<String>,
 }
 
 impl<'a> Deps<'a> {
@@ -43,6 +45,7 @@ impl<'a> Deps<'a> {
             seed,
             retry: Duration::from_secs(15),
             pause: Duration::from_millis(500),
+            factories: accord_jobkit::factory::compiled(),
         }
     }
 }
@@ -109,6 +112,7 @@ fn read_state(rpc: &NearRpc, ask: &Ask, deps: &Deps) -> Result<(AtlasTerms, u64)
         .map(Some)
     })?
     .unwrap_or(Value::Null);
+    require_accord(rpc, &ask.agreement, &ag, deps)?;
     let executing_at = ag["executing_at"]
         .as_u64()
         .ok_or("the agreement is not executing")?;
@@ -200,6 +204,19 @@ pub fn signed_observation(o: &Observation, seed: &[u8; 32]) -> Value {
     v["mode"] = json!("observe");
     v["status"] = json!("observed");
     keys::sign(v, &keys::signing_key(seed, OBSERVER_SIGN_INFO))
+}
+
+/// Only an agreement an Accord factory created (audit L5-F2): its id, its own view and the factory's registry.
+fn require_accord(rpc: &NearRpc, agreement: &str, view: &Value, deps: &Deps) -> Result<(), String> {
+    accord_jobkit::factory::check(agreement, view, &deps.factories, |factory, args| {
+        rpc::view_json(rpc, factory, "is_agreement", args, "optimistic")
+    })
+    .map_err(|e| match e {
+        accord_jobkit::factory::Refused::NotAccord(why) => {
+            format!("not an Accord agreement: {why}")
+        }
+        accord_jobkit::factory::Refused::Unreadable(e) => e,
+    })
 }
 
 #[cfg(test)]

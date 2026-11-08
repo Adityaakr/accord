@@ -13,10 +13,10 @@ use std::sync::Arc;
 fn jobs(env: &Env) -> Arc<LocalJobs> {
     let file = domain_file(&[(env.recipient.id(), env.authority.id())]);
     let files = BTreeMap::from([(DOMAIN.to_string(), file)]);
-    Arc::new(LocalJobs::new(LocalHttp::new(
-        &env.worker.rpc_addr(),
-        files,
-    )))
+    Arc::new(LocalJobs::new(
+        LocalHttp::new(&env.worker.rpc_addr(), files),
+        env.factory.id().as_str(),
+    ))
 }
 
 async fn blocking<T: Send + 'static>(f: impl FnOnce() -> T + Send + 'static) -> T {

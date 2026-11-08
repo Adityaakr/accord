@@ -14,6 +14,7 @@ use std::time::Duration;
 
 const SEED: [u8; 32] = [0x11; 32];
 const AGREEMENT: &str = "a1.accord-v1.testnet";
+const FACTORY: &str = "accord-v1.testnet";
 /// Fixed when the fixture was recorded (3 Nov 2026), about two hours before the recording.
 const EXECUTING_AT: u64 = 1_793_653_200;
 const PERIOD_SECS: u64 = 3600;
@@ -79,6 +80,10 @@ fn slot_time(period: u32, slot: u8) -> u64 {
 
 /// A testnet where the agreement executes since `EXECUTING_AT` and the final head is at `now`.
 fn testnet(http: &FixtureHttp, now: u64) {
+    testnet_registered(http, now, true)
+}
+
+fn testnet_registered(http: &FixtureHttp, now: u64, registered: bool) {
     let terms = serde_json::to_value(terms()).unwrap();
     http.on_rpc("testnet", move |m, p| {
         if m == "block" && p["finality"] == "final" {
@@ -88,7 +93,11 @@ fn testnet(http: &FixtureHttp, now: u64) {
                 now,
             ));
         }
-        let (account, method, _) = call_of(m, p)?;
+        let (account, method, args) = call_of(m, p)?;
+        if account == FACTORY && method == "is_agreement" {
+            assert_eq!(args["account"], AGREEMENT);
+            return Some(rpc_ok(call_result(&json!(registered))));
+        }
         assert_eq!(account, AGREEMENT);
         assert_eq!(
             p["finality"], "optimistic",
@@ -97,7 +106,7 @@ fn testnet(http: &FixtureHttp, now: u64) {
         match method.as_str() {
             "get_terms" => Some(rpc_ok(call_result(&terms))),
             "get_agreement" => Some(rpc_ok(call_result(
-                &json!({"executing_at": EXECUTING_AT, "state": "Executing"}),
+                &json!({"id": 1, "factory": FACTORY, "executing_at": EXECUTING_AT, "state": "Executing"}),
             ))),
             _ => None,
         }
@@ -110,6 +119,7 @@ fn deps(http: &dyn Http) -> Deps<'_> {
         seed: SEED,
         retry: Duration::ZERO,
         pause: Duration::ZERO,
+        factories: vec![FACTORY.into()],
     }
 }
 
@@ -324,6 +334,7 @@ fn record_mainnet_fixture() {
             seed: SEED,
             retry: Duration::ZERO,
             pause: Duration::from_millis(500),
+            factories: vec![FACTORY.into()],
         },
     );
     assert_eq!(out["status"], "observed", "{out}");
@@ -333,4 +344,26 @@ fn record_mainnet_fixture() {
     );
     f["expected_output"] = out;
     std::fs::write(FIXTURE, serde_json::to_string_pretty(&f).unwrap() + "\n").unwrap();
+}
+
+/// Audit L5-F2 (finding 5): the observer serves only agreements an Accord factory created; anything else gets an
+/// unsigned error before any mainnet read.
+#[test]
+fn an_account_outside_the_factory_is_refused_before_mainnet() {
+    let t = slot_time(0, 0) + 1;
+    let http = FixtureHttp::new();
+    testnet_registered(&http, t, false);
+    let out = run(&ask(0, 0), &deps(&http));
+    assert_eq!(out["status"], "error", "{out}");
+    assert!(out.get("sig").is_none());
+    let http = FixtureHttp::new();
+    testnet(&http, t);
+    let out = run(
+        &ask(0, 0),
+        &Deps {
+            factories: vec!["accord-v2.testnet".into()],
+            ..deps(&http)
+        },
+    );
+    assert_eq!(out["status"], "error", "{out}");
 }

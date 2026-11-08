@@ -45,6 +45,8 @@ struct World {
     payments: u64,
     recipients: usize,
     factory_down: bool,
+    /// What the factory's `is_agreement` answers.
+    registered: bool,
 }
 
 impl Default for World {
@@ -62,6 +64,7 @@ impl Default for World {
             payments: 0,
             recipients: 1,
             factory_down: false,
+            registered: true,
         }
     }
 }
@@ -125,7 +128,7 @@ fn http(w: &World) -> FixtureHttp {
         if account == AGREEMENT {
             assert_eq!(p["finality"], "optimistic");
             return Some(rpc_ok(call_result(&match method.as_str() {
-                "get_agreement" => json!({"vendor_authority": AUTHORITY, "buyer": "northwind-demo.testnet",
+                "get_agreement" => json!({"id": 7, "vendor_authority": AUTHORITY, "buyer": "northwind-demo.testnet",
                                           "factory": FACTORY, "canaries": w.canaries, "state": "Executing"}),
                 "get_recipients" => Value::Array(
                     (1..=w.recipients)
@@ -136,6 +139,10 @@ fn http(w: &World) -> FixtureHttp {
             })));
         }
         if account == FACTORY {
+            if method == "is_agreement" {
+                assert_eq!(args["account"], AGREEMENT);
+                return Some(rpc_ok(call_result(&json!(w.registered))));
+            }
             if w.factory_down {
                 return Some(json!({"jsonrpc": "2.0", "id": "accord", "error": {"name": "HANDLER_ERROR", "cause": {"name": "TIMEOUT_ERROR"}}}));
             }
@@ -163,6 +170,7 @@ fn deps(http: &dyn Http) -> Deps<'_> {
         seed: SEED,
         retry: Duration::ZERO,
         pause: Duration::ZERO,
+        factories: vec![FACTORY.into()],
     }
 }
 
@@ -579,4 +587,31 @@ fn pubkey_mode_is_deterministic_and_differs_from_the_observer_key() {
         keys::signing_key(&SEED, keys::PAYEE_SIGN_INFO).verifying_key(),
         keys::signing_key(&SEED, keys::OBSERVER_SIGN_INFO).verifying_key()
     );
+}
+
+/// Audit L5-F2 (finding 5): the job serves only agreements an Accord factory created. An account its factory did
+/// not register, or one outside the compiled factories, gets an unsigned error before the domain is fetched.
+#[test]
+fn an_account_outside_the_factory_is_refused_before_any_fetch() {
+    let w = World {
+        registered: false,
+        ..World::default()
+    };
+    let h = http(&w);
+    let out = run(
+        &json!({"mode": "prove", "agreement": AGREEMENT, "version": 1}),
+        &deps(&h),
+    );
+    assert_eq!(out["status"], "error", "{out}");
+    assert!(out.get("sig").is_none());
+    let h = http(&World::default());
+    let out = run(
+        &json!({"mode": "prove", "agreement": AGREEMENT, "version": 1}),
+        &Deps {
+            factories: vec!["accord-v2.testnet".into()],
+            ..deps(&h)
+        },
+    );
+    assert_eq!(out["status"], "error", "{out}");
+    assert!(out.get("sig").is_none());
 }

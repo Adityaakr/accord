@@ -131,7 +131,7 @@ async fn main() -> Result<()> {
         &env.worker.rpc_addr(),
         BTreeMap::from([(DOMAIN.to_string(), file)]),
     );
-    let jobs = Arc::new(LocalJobs::new(http));
+    let jobs = Arc::new(LocalJobs::new(http, env.factory.id().as_str()));
     tokio::spawn(deliver_jobs(env.clone(), jobs.clone()));
     tokio::spawn(serve_http(env.clone(), jobs.clone()));
     let env: &Env = &env;

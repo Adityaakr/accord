@@ -128,6 +128,9 @@ impl Host for LocalHost<'_> {
 
 pub struct LocalJobs {
     http: LocalHttp,
+    /// The local node's factory: the jobs serve only its agreements, as the enclave build serves only the compiled
+    /// testnet factories'.
+    factories: Vec<String>,
 }
 
 /// Runs a job; a panic inside it becomes the unsigned error output the deployed job would give, never a crash.
@@ -143,8 +146,11 @@ fn guarded(mode: &str, f: impl FnOnce() -> Value) -> Value {
 }
 
 impl LocalJobs {
-    pub fn new(http: LocalHttp) -> Self {
-        Self { http }
+    pub fn new(http: LocalHttp, factory: &str) -> Self {
+        Self {
+            http,
+            factories: vec![factory.to_string()],
+        }
     }
 
     /// The Sealed Table's `negotiate` run, signed with its derived key.
@@ -157,7 +163,7 @@ impl LocalJobs {
             http: &self.http,
             start: Instant::now(),
         };
-        let src = ChainSource::new(&host);
+        let src = ChainSource::with_factories(&host, self.factories.clone());
         let input = json!({"mode": "negotiate", "agreement": agreement, "request_nonce": nonce});
         let secrets = Secrets {
             seed: SEALED_SEED,
@@ -186,6 +192,7 @@ impl LocalJobs {
             seed: PAYEE_SEED,
             retry: Duration::from_secs(5),
             pause: Duration::from_millis(300),
+            factories: self.factories.clone(),
         };
         guarded("prove", || {
             accord_payee::run(
@@ -202,6 +209,7 @@ impl LocalJobs {
             seed: OBSERVER_SEED,
             retry: Duration::from_secs(5),
             pause: Duration::from_millis(300),
+            factories: self.factories.clone(),
         };
         guarded("observe", || {
             accord_observer::run(

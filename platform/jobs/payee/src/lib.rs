@@ -41,6 +41,8 @@ pub struct Deps<'a> {
     /// How long to keep retrying state written moments earlier (up to 15 s inside the enclave).
     pub retry: Duration,
     pub pause: Duration,
+    /// The factories whose agreements this job serves: `accord_jobkit::factory::FACTORIES` in the enclave build.
+    pub factories: Vec<String>,
 }
 
 impl<'a> Deps<'a> {
@@ -50,6 +52,7 @@ impl<'a> Deps<'a> {
             seed,
             retry: Duration::from_secs(15),
             pause: Duration::from_millis(500),
+            factories: accord_jobkit::factory::compiled(),
         }
     }
 }
@@ -282,6 +285,7 @@ fn read_state(rpc: &NearRpc, agreement: &str, version: u32, deps: &Deps) -> Resu
         rpc::view_json(rpc, agreement, "get_agreement", &json!({}), "optimistic").map(Some)
     })?
     .unwrap_or(Value::Null);
+    require_accord(rpc, agreement, &ag, deps)?;
     // The version was proposed moments before the request: retry until it is visible.
     let r = rpc::retry(deps.retry, deps.pause, || {
         let list = rpc::view_json(rpc, agreement, "get_recipients", &json!({}), "optimistic")?;
@@ -454,4 +458,17 @@ fn prove(input: &Value, deps: &Deps) -> Result<Value, String> {
         out,
         &keys::signing_key(&deps.seed, PAYEE_SIGN_INFO),
     ))
+}
+
+/// Only an agreement an Accord factory created (audit L5-F2): its id, its own view and the factory's registry.
+fn require_accord(rpc: &NearRpc, agreement: &str, view: &Value, deps: &Deps) -> Result<(), String> {
+    accord_jobkit::factory::check(agreement, view, &deps.factories, |factory, args| {
+        rpc::view_json(rpc, factory, "is_agreement", args, "optimistic")
+    })
+    .map_err(|e| match e {
+        accord_jobkit::factory::Refused::NotAccord(why) => {
+            format!("not an Accord agreement: {why}")
+        }
+        accord_jobkit::factory::Refused::Unreadable(e) => e,
+    })
 }

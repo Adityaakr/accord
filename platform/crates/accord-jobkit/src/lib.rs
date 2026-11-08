@@ -4,6 +4,7 @@
 //! Every network call goes through [`http::Http`], so the job logic runs natively against fixtures in tests and
 //! inside OutLayer's `wasm32-wasip2` runtime through `wasi-http-client`.
 
+pub mod factory;
 pub mod http;
 pub mod keys;
 pub mod rpc;

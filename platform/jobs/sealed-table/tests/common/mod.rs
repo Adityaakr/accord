@@ -52,6 +52,8 @@ pub struct FixtureSource {
     pub agreement: RefCell<Value>,
     pub commitments: RefCell<Value>,
     pub reads: Cell<u32>,
+    /// What the factory's `is_agreement` answers.
+    pub registered: Cell<bool>,
 }
 
 impl FixtureSource {
@@ -64,7 +66,7 @@ impl FixtureSource {
         };
         Self {
             agreement: RefCell::new(json!({
-                "id": 7, "account": f["agreement"], "factory": "accord-v1.testnet", "release": f["release"],
+                "id": 7, "account": f["agreement"], "factory": FIXTURE_FACTORY, "release": f["release"],
                 "kind": if kind == "procurement" { "procurement" } else { "market-making" },
                 "state": "Sealed",
                 "negotiation": {"Requested": {"request_nonce": NONCE, "at": 1, "attempt": 1}},
@@ -75,6 +77,7 @@ impl FixtureSource {
                 json!({"buyer": commit(&pair["buyer"]), "vendor": commit(&pair["vendor"])}),
             ),
             reads: Cell::new(0),
+            registered: Cell::new(true),
         }
     }
 
@@ -97,7 +100,18 @@ impl StateSource for FixtureSource {
     fn ft_metadata(&self, _: &str) -> Result<Value, String> {
         Ok(json!({"spec": "ft-1.0.0", "name": "USDC", "symbol": "USDC", "decimals": 6}))
     }
+    fn factories(&self) -> Vec<String> {
+        vec![FIXTURE_FACTORY.to_string()]
+    }
+    fn is_agreement(&self, factory: &str, account: &str) -> Result<Value, String> {
+        assert_eq!(factory, FIXTURE_FACTORY);
+        assert!(account.ends_with(FIXTURE_FACTORY));
+        Ok(json!(self.registered.get()))
+    }
 }
+
+/// The factory the fixtures' agreement (`a7.accord-v1.testnet`) belongs to.
+pub const FIXTURE_FACTORY: &str = "accord-v1.testnet";
 
 type Handler = Box<dyn Fn(&HttpRequest) -> Result<HttpResponse, String>>;
 

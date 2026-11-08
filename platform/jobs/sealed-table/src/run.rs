@@ -228,8 +228,10 @@ pub fn negotiate_with(
     if ai.local() {
         out.set("local", json!(true));
     }
-    let value = run(host, src, agreement, nonce, secrets, ai, out);
-    sign(value, &key)
+    match run(host, src, agreement, nonce, secrets, ai, out) {
+        Ok(value) => sign(value, &key),
+        Err(why) => accord_jobkit::error_output("negotiate", why),
+    }
 }
 
 fn run(
@@ -239,13 +241,24 @@ fn run(
     nonce: &str,
     secrets: &Secrets,
     ai: &mut dyn Ai,
-    mut out: Out,
-) -> Value {
-    // 1. State.
+    out: Out,
+) -> Result<Value, &'static str> {
+    // 1. State, for an agreement a compiled factory created (else an unsigned error, nothing spent).
     let st: AgreementState = match state::read(host, src, agreement, nonce) {
         Ok(s) => s,
-        Err(ReadError::Infrastructure(e)) => return out.infrastructure(&e),
+        Err(ReadError::Infrastructure(e)) => return Ok(out.infrastructure(&e)),
+        Err(ReadError::NotAccord(why)) => return Err(why),
     };
+    Ok(negotiate_state(host, &st, secrets, ai, out))
+}
+
+fn negotiate_state(
+    host: &dyn Host,
+    st: &AgreementState,
+    secrets: &Secrets,
+    ai: &mut dyn Ai,
+    mut out: Out,
+) -> Value {
     out.set("release", json!(st.release));
     out.set("buyer_commitment", json!(st.buyer_commitment.commitment));
     out.set("vendor_commitment", json!(st.vendor_commitment.commitment));
@@ -254,10 +267,10 @@ fn run(
 
     // 2. Open both envelopes.
     let secret = keys::mandate_secret(&secrets.seed);
-    let opened = sealing::open(&secret, &st.buyer_commitment, Role::Buyer, &st).and_then(|b| {
+    let opened = sealing::open(&secret, &st.buyer_commitment, Role::Buyer, st).and_then(|b| {
         Ok((
             b,
-            sealing::open(&secret, &st.vendor_commitment, Role::Vendor, &st)?,
+            sealing::open(&secret, &st.vendor_commitment, Role::Vendor, st)?,
         ))
     });
     let (buyer, vendor) = match opened {
@@ -329,7 +342,7 @@ fn run(
     };
     match result.ending {
         Ending::WalkAway => no_deal(out, "WALK_AWAY", record),
-        Ending::Accepted(t) => conclude(out, &st, &ctx, &t, (&buyer, &vendor), record),
+        Ending::Accepted(t) => conclude(out, st, &ctx, &t, (&buyer, &vendor), record),
     }
 }
 

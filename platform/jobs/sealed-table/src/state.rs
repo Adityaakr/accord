@@ -4,6 +4,7 @@
 
 use crate::host::{Host, JobkitHttp};
 use accord_core::{Kind, Params};
+use accord_jobkit::factory::Refused;
 use accord_jobkit::rpc::{view_json, NearRpc, TESTNET};
 use base64::{engine::general_purpose::STANDARD, Engine};
 use serde_json::{json, Value};
@@ -39,22 +40,35 @@ pub trait StateSource {
     fn agreement(&self, account: &str) -> Result<Value, String>;
     fn commitments(&self, account: &str) -> Result<Value, String>;
     fn ft_metadata(&self, token: &str) -> Result<Value, String>;
+    /// The factories whose agreements this job serves: compiled in (`accord_jobkit::factory::FACTORIES`).
+    fn factories(&self) -> Vec<String>;
+    /// The factory's `is_agreement(account)` view.
+    fn is_agreement(&self, factory: &str, account: &str) -> Result<Value, String>;
 }
 
-/// The pinned testnet endpoints.
+/// The pinned testnet endpoints and the compiled factories.
 pub struct ChainSource<'a> {
     http: JobkitHttp<'a>,
+    factories: Vec<String>,
 }
 
 impl<'a> ChainSource<'a> {
     pub fn new(host: &'a dyn Host) -> Self {
+        Self::with_factories(host, accord_jobkit::factory::compiled())
+    }
+    /// A local node's own factory (the native runner only; the enclave build always uses [`ChainSource::new`]).
+    pub fn with_factories(host: &'a dyn Host, factories: Vec<String>) -> Self {
         Self {
             http: JobkitHttp(host),
+            factories,
         }
     }
-    fn view(&self, account: &str, method: &str) -> Result<Value, String> {
+    fn view_args(&self, account: &str, method: &str, args: &Value) -> Result<Value, String> {
         let rpc = NearRpc::new(&self.http, TESTNET, Duration::from_millis(300));
-        view_json(&rpc, account, method, &json!({}), "optimistic").map_err(|e| short_error(&e))
+        view_json(&rpc, account, method, args, "optimistic").map_err(|e| short_error(&e))
+    }
+    fn view(&self, account: &str, method: &str) -> Result<Value, String> {
+        self.view_args(account, method, &json!({}))
     }
 }
 
@@ -67,6 +81,12 @@ impl StateSource for ChainSource<'_> {
     }
     fn ft_metadata(&self, token: &str) -> Result<Value, String> {
         self.view(token, "ft_metadata")
+    }
+    fn factories(&self) -> Vec<String> {
+        self.factories.clone()
+    }
+    fn is_agreement(&self, factory: &str, account: &str) -> Result<Value, String> {
+        self.view_args(factory, "is_agreement", &json!({"account": account}))
     }
 }
 
@@ -91,6 +111,8 @@ fn short_error(e: &str) -> String {
 pub enum ReadError {
     /// A read kept failing, or the request is not (yet) in state: retryable, an infrastructure outcome.
     Infrastructure(String),
+    /// Not an agreement an Accord factory created: the job does nothing for it (an unsigned error).
+    NotAccord(&'static str),
 }
 
 fn requested_nonce(agreement: &Value) -> Option<&str> {
@@ -173,6 +195,21 @@ pub fn read(
     loop {
         match src.agreement(agreement_id) {
             Ok(a) if requested_nonce(&a) == Some(nonce) => {
+                // Before anything is spent on it: only an agreement a compiled factory created.
+                match accord_jobkit::factory::check(agreement_id, &a, &src.factories(), |f, _| {
+                    src.is_agreement(f, agreement_id)
+                }) {
+                    Ok(()) => {}
+                    Err(Refused::NotAccord(why)) => return Err(ReadError::NotAccord(why)),
+                    Err(Refused::Unreadable(e)) => {
+                        last = e;
+                        if host.millis().saturating_sub(start) >= READ_DEADLINE_MS {
+                            return Err(ReadError::Infrastructure(format!("state read: {last}")));
+                        }
+                        host.sleep(Duration::from_millis(1000));
+                        continue;
+                    }
+                }
                 let token = a.get("token").and_then(Value::as_str).unwrap_or_default();
                 let read_rest = src
                     .commitments(agreement_id)
