@@ -1,9 +1,12 @@
-import { ComingNext } from "@/components/ComingNext";
+import { Settings } from "@/components/org/Settings";
 
 export const metadata = { title: "Settings" };
+export const dynamic = "force-dynamic";
 
-export default function Page() {
-  return <ComingNext title="Settings" lead="Your organisation, its people and what each of them can sign."
-    holds={["Organisation: name and a verified domain", "Members and roles: who can seal, approve, fund, decide exceptions and revoke", "Wallets and keys: the funding account and agent keys", "Notifications: email, Slack or webhook on a refusal, a hold, an approval or a recipient change", "Developers: the MCP endpoint and API keys", "Billing"]}
-    today={[{ label: "Your profile", href: "/profile" }]} />;
+const TABS = ["organisation", "members", "notifications", "developers", "billing"] as const;
+export type SettingsTab = (typeof TABS)[number];
+
+export default async function Page({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const { tab } = await searchParams;
+  return <Settings tab={(TABS as readonly string[]).includes(tab ?? "") ? (tab as SettingsTab) : "organisation"} />;
 }
