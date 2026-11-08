@@ -81,7 +81,11 @@ export function rejectDelegate(d: DecodedDelegate, p: RelayPolicy): string | nul
     if (call.methodName !== "create_agreement") return "the relayer carries create_agreement only on the factory";
     return null;
   }
-  if (agreementPattern(p.factory).test(da.receiverId)) return null;
+  if (agreementPattern(p.factory).test(da.receiverId)) {
+    // never relay act: the contract identifies the agent by the signing key, and a relayer's key would stand in for it
+    if (call.methodName === "act") return "the relayer never carries act; the agent signs it with its own key";
+    return null;
+  }
   if (da.receiverId === p.token) {
     if (call.methodName !== "ft_transfer_call") return "the relayer carries ft_transfer_call only on the token";
     if (call.deposit !== 1n) return "ft_transfer_call takes exactly 1 yoctoNEAR";
