@@ -1,0 +1,29 @@
+[package]
+name = "accord-observer"
+description = "Accord Atlas observer: an OutLayer wasm32-wasip2 job that signs the venue's metrics at a hidden slot time"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[features]
+default = []
+# The native runner (`observer-local`) against real testnet and mainnet RPC. Never part of the wasm build.
+local = ["accord-jobkit/native"]
+
+[dependencies]
+accord-core = { path = "../../crates/accord-core" }
+accord-venue = { path = "../../crates/accord-venue" }
+accord-jobkit = { path = "../../crates/accord-jobkit" }
+serde_json.workspace = true
+
+[dev-dependencies]
+accord-jobkit = { path = "../../crates/accord-jobkit", features = ["native"] }
+
+[[bin]]
+name = "accord-observer"
+path = "src/main.rs"
+
+[[bin]]
+name = "observer-local"
+path = "src/bin/observer-local.rs"
+required-features = ["local"]

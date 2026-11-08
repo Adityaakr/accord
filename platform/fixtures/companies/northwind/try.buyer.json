@@ -1,0 +1,18 @@
+{
+  "kind": "procurement",
+  "role": "buyer",
+  "shared": {
+    "scope": "The public Accord demo room at /try: twelve small test deliveries, one at a time, so visitors can see a payment the terms allow next to the refusals.",
+    "proposed_items": [
+      { "name": "Test delivery", "deliverable": "A dated note that the room is up. Twelve of these, one an hour at most." }
+    ]
+  },
+  "limits": {
+    "max_total": "120000",
+    "target_total": "120000",
+    "max_items": 12,
+    "max_duration_secs": 604800,
+    "min_acceptance_window_secs": 60
+  },
+  "instructions": "Twelve equal items of 0.01 USDC, due one hour apart, lasting seven days. Accept those terms as they are; walk away from anything else."
+}

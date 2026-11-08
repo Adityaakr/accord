@@ -1,0 +1,24 @@
+{
+  "kind": "market-making",
+  "role": "buyer",
+  "shared": {
+    "venue": {
+      "kind": "rhea-dcl",
+      "network": "mainnet",
+      "contract": "dclv2.ref-labs.near",
+      "pool_id": "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1|wrap.near|2000"
+    },
+    "pair": "NEAR/USDC"
+  },
+  "limits": {
+    "max_retainer_per_period": "8000000",
+    "periods": 2,
+    "period_secs": 360,
+    "max_spread_bps": 30,
+    "min_depth_quote": "150000000",
+    "depth_band_bps": 200,
+    "min_slots": 6,
+    "min_threshold": 4
+  },
+  "instructions": "Only pay for a spread tighter than this pool's fee allows. This agreement exists to show a withheld period."
+}

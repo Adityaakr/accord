@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Accord negotiator message",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "terms", "reasons"],
+  "properties": {
+    "type": { "enum": ["QUOTE", "COUNTER", "FINAL", "ACCEPT", "WALK_AWAY"] },
+    "terms": { "anyOf": [ { "type": "null" }, { "$ref": "#/$defs/terms" } ] },
+    "reasons": { "type": "string", "maxLength": 600 }
+  },
+  "$defs": {
+    "amount": { "type": "string", "pattern": "^[0-9]{1,20}$" },
+    "terms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "duration_secs", "acceptance_window_secs", "items", "atlas"],
+      "properties": {
+        "total": { "$ref": "#/$defs/amount" },
+        "duration_secs": { "type": "integer", "minimum": 60, "maximum": 31536000 },
+        "acceptance_window_secs": { "type": "integer", "minimum": 60, "maximum": 2592000 },
+        "items": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "amount", "due_offset_secs"],
+            "properties": {
+              "name": { "type": "string", "maxLength": 80 },
+              "amount": { "$ref": "#/$defs/amount" },
+              "due_offset_secs": { "type": "integer", "minimum": 0, "maximum": 31536000 }
+            }
+          }
+        },
+        "atlas": {
+          "anyOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["retainer_per_period", "periods", "period_secs", "slots_per_period", "pass_threshold", "max_spread_bps", "min_depth_quote", "depth_band_bps"],
+              "properties": {
+                "retainer_per_period": { "$ref": "#/$defs/amount" },
+                "periods": { "type": "integer", "minimum": 1, "maximum": 52 },
+                "period_secs": { "type": "integer", "minimum": 60, "maximum": 2592000 },
+                "slots_per_period": { "type": "integer", "minimum": 1, "maximum": 24 },
+                "pass_threshold": { "type": "integer", "minimum": 1, "maximum": 24 },
+                "max_spread_bps": { "type": "integer", "minimum": 1, "maximum": 10000 },
+                "min_depth_quote": { "$ref": "#/$defs/amount" },
+                "depth_band_bps": { "type": "integer", "minimum": 10, "maximum": 5000 }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

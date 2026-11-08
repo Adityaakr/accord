@@ -1,0 +1,2 @@
+.toggle { display: inline-flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius); color: var(--text-weak); transition: color 0.2s var(--ease), background 0.2s var(--ease); }
+.toggle:hover { color: var(--text-strong); background: rgba(var(--ink-rgb), 0.05); }

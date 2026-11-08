@@ -1,0 +1,25 @@
+[workspace]
+resolver = "2"
+members = ["crates/accord-core", "crates/accord-venue", "crates/accord-jobkit", "contracts/probe-keys", "contracts/agreement", "contracts/factory", "contracts/releases", "contracts/test-token", "tests", "jobs/observer", "jobs/payee", "jobs/sealed-table"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+borsh = { version = "1", features = ["derive"] }
+sha2 = "0.10"
+hmac = "0.12"
+hex = "0.4"
+proptest = "1"
+
+[profile.release]
+codegen-units = 1
+opt-level = "z"
+lto = true
+debug = false
+panic = "abort"
+overflow-checks = true

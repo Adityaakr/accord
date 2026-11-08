@@ -1,0 +1,103 @@
+.head { display: flex; flex-direction: column; gap: 16px; padding: 40px 0 36px; }
+.headTop { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.titleRow { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
+/* the state: one quiet chip in sans text, teal only while money can move */
+.stateChip { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12.5px; font-weight: 500; color: var(--text-medium); background: rgba(var(--ink-rgb), 0.05); border: 1px solid var(--hairline); }
+.stateExecuting { color: var(--teal); background: var(--teal-wash); border-color: var(--teal-line); }
+.stateAttested { color: var(--text-strong); }
+.stateSettled, .stateNoDeal, .stateCancelled { color: var(--text-weak); }
+/* plain spacing between the items: a wrapped line never starts or ends on a stray separator */
+.subline { display: flex; align-items: center; gap: 6px 20px; flex-wrap: wrap; margin-bottom: 18px; }
+.subline > span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+.main, .side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.side { position: sticky; top: 84px; }
+.fade { animation: tabIn 0.42s var(--ease) both; }
+@keyframes tabIn { from { opacity: 0; filter: blur(4px); transform: translateY(4px); } to { opacity: 1; filter: none; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .fade { animation: none; } }
+
+.figures { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.figure { display: flex; flex-direction: column; gap: 6px; }
+.figureValue { font-size: 20px; color: var(--text-strong); letter-spacing: -0.02em; }
+.conditions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 14px; border-top: 1px solid var(--hairline); }
+
+.tableWrap { width: 100%; overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; text-align: left; }
+.table th {
+  padding: 10px 20px;
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--text-weak);
+  border-bottom: 1px solid var(--hairline);
+  white-space: nowrap;
+}
+.table td { padding: 13px 20px; border-bottom: 1px solid var(--hairline); color: var(--text-medium); vertical-align: middle; white-space: nowrap; }
+.table tbody tr:last-child td { border-bottom: 0; }
+.table tbody tr { transition: background-color 0.2s var(--ease); }
+.table tbody tr:hover { background: rgba(var(--ink-rgb), 0.015); }
+.pad { padding: 4px 20px 16px; }
+
+.refusalCount {
+  min-width: 26px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 7px;
+  border-radius: 999px;
+  color: var(--refusal);
+  background: var(--refusal-bg);
+  font-size: 12px;
+}
+.refusals { display: flex; flex-direction: column; }
+.refusal {
+  display: grid;
+  grid-template-columns: 40px 190px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--hairline);
+  animation: arrive 0.6s var(--ease);
+}
+.refusal:last-child { border-bottom: 0; }
+.code {
+  justify-self: start;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: var(--refusal);
+  background: var(--refusal-bg);
+  font-size: 12px;
+}
+@keyframes arrive { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+.exceptions { display: flex; flex-direction: column; gap: 12px; }
+.exception { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: var(--radius); background: var(--elevation-medium); }
+.exceptionTop { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.escrowFigure { display: flex; align-items: baseline; gap: 10px; font-size: 28px; letter-spacing: -0.02em; }
+.pending { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: var(--radius); background: var(--yellow-wash); }
+.noKey { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+
+@media (max-width: 1099.98px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .side { position: static; }
+}
+@media (max-width: 809.98px) {
+  .head { padding-top: 28px; }
+  .headTop { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .refusal { grid-template-columns: 34px minmax(0, 1fr); row-gap: 6px; padding: 12px 16px; }
+  .table th, .table td { padding-left: 16px; padding-right: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .refusal { animation: none; } }
+
+/* tabs (PLATFORM.md §6): a flat row under the header; the active tab carries the teal underline */
+.tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin: 0 0 20px; border-bottom: 1px solid var(--hairline); }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 12px 14px; font-size: 13.5px; color: var(--text-weak); white-space: nowrap; transition: color 0.2s var(--ease); }
+.tab:hover { color: var(--text-medium); }
+.tabOn { color: var(--text-strong); }
+.underline { position: absolute; left: 10px; right: 10px; bottom: -1px; height: 2px; border-radius: 2px; background: var(--teal); }
+.tabCount { min-width: 20px; height: 18px; display: inline-grid; place-items: center; padding: 0 6px; border-radius: 999px; font-family: var(--font-mono); font-size: 11px; color: var(--refusal); background: var(--refusal-bg); }
+.refusedText { color: var(--refusal); }
+.cmd { margin: 0 0 10px; padding: 12px 14px; border-radius: 10px; background: rgba(0, 0, 0, 0.3); font-family: var(--font-mono); font-size: 12.5px; color: var(--text-strong); overflow-x: auto; }

@@ -1,0 +1,20 @@
+{
+  "kind": "procurement",
+  "role": "buyer",
+  "shared": {
+    "scope": "Integrate liquidity reporting into the Northwind treasury dashboard: a data pipeline from the venue, a reporting dashboard, and a handover with documentation.",
+    "proposed_items": [
+      { "name": "Data pipeline", "deliverable": "A job that writes hourly pool snapshots to the treasury's database, with tests." },
+      { "name": "Dashboard", "deliverable": "Spread, depth and volume panels for the NEAR/USDC pool, refreshed hourly." },
+      { "name": "Handover", "deliverable": "Runbook, access transfer and a one-hour walkthrough." }
+    ]
+  },
+  "limits": {
+    "max_total": "40000000",
+    "target_total": "32000000",
+    "max_items": 4,
+    "max_duration_secs": 604800,
+    "min_acceptance_window_secs": 120
+  },
+  "instructions": "Three milestones of equal size are preferred. Delivery dates matter more than the last few dollars. Walk away rather than exceed the ceiling."
+}

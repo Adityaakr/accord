@@ -1,0 +1,18 @@
+[package]
+name = "accord-releases"
+description = "The keyless releases.<factory> account: requests the jobs' pubkey runs with the input fixed in code"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+
+[dependencies]
+near-sdk = "=5.30.0"
+serde_json.workspace = true
+
+[dev-dependencies]
+near-sdk = { version = "=5.30.0", features = ["unit-testing"] }

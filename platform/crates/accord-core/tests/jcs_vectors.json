@@ -1,0 +1,204 @@
+[
+  {
+    "name": "empty_object",
+    "input": {},
+    "jcs": "{}",
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  {
+    "name": "key_order",
+    "input": {
+      "b": 1,
+      "a": [
+        true,
+        null,
+        "x"
+      ],
+      "c": {
+        "z": 1,
+        "y": 2
+      }
+    },
+    "jcs": "{\"a\":[true,null,\"x\"],\"b\":1,\"c\":{\"y\":2,\"z\":1}}",
+    "sha256": "9a477b86a6cb8243d07b75b998233f915bd54225f826ce99149a443c5ebca207"
+  },
+  {
+    "name": "escapes",
+    "input": {
+      "s": "quote \" backslash \\ newline \n tab \t control \u0001 \u001f slash /"
+    },
+    "jcs": "{\"s\":\"quote \\\" backslash \\\\ newline \\n tab \\t control \\u0001 \\u001f slash /\"}",
+    "sha256": "f919413634aded6eb8924d87de6e6ea6b464b010b4f4e3a86c3dc0bd93f1ba34"
+  },
+  {
+    "name": "unicode",
+    "input": {
+      "é": "café",
+      "z": "€ 1",
+      "a": "日本",
+      "": "x",
+      "ẞ": "emoji 🙂"
+    },
+    "jcs": "{\"a\":\"日本\",\"z\":\"€ 1\",\"\":\"x\",\"é\":\"café\",\"ẞ\":\"emoji 🙂\"}",
+    "sha256": "afaf98a30110605302460d93a914641e83213e433dbb26a0f95d369381f75d85"
+  },
+  {
+    "name": "utf16_key_order",
+    "input": {
+      "😀": 1,
+      "�": 2,
+      "a": 3
+    },
+    "jcs": "{\"a\":3,\"😀\":1,\"�\":2}",
+    "sha256": "d25e83331df4e3944de1978a6532a3584ad61b9349746b50360508cca890f781"
+  },
+  {
+    "name": "integers",
+    "input": {
+      "zero": 0,
+      "small": 7,
+      "neg": -42,
+      "u32": 4294967295,
+      "safe": 9007199254740991
+    },
+    "jcs": "{\"neg\":-42,\"safe\":9007199254740991,\"small\":7,\"u32\":4294967295,\"zero\":0}",
+    "sha256": "3b851d55907d0932b4ee9977ee4d7a3721995c34147b902e70fe04a1d80872cb"
+  },
+  {
+    "name": "amounts_as_strings",
+    "input": {
+      "amount": "12000000",
+      "big": "340282366920938463463374607431768211455"
+    },
+    "jcs": "{\"amount\":\"12000000\",\"big\":\"340282366920938463463374607431768211455\"}",
+    "sha256": "d42c12b238cd06d62e7e079a679a32f469767f880646df809ae60c62e522d8d3"
+  },
+  {
+    "name": "nested_arrays",
+    "input": [
+      [],
+      [
+        []
+      ],
+      [
+        {
+          "b": 2,
+          "a": 1
+        }
+      ],
+      "x"
+    ],
+    "jcs": "[[],[[]],[{\"a\":1,\"b\":2}],\"x\"]",
+    "sha256": "589409a2c635bd7a174019582532e8f687ea2b92bd2fc8dc5b0829ea074faa6f"
+  },
+  {
+    "name": "params",
+    "input": {
+      "mode": "demo",
+      "timelock_secs": 120,
+      "claim_delay_secs": 120,
+      "grace_secs": 600,
+      "min_acceptance_window_secs": 60,
+      "max_acceptance_window_secs": 604800,
+      "require_two_sided": true,
+      "observation_grace_secs": 60,
+      "refusal_limit": 5,
+      "refusal_window_secs": 3600,
+      "agent_allowance": "500000000000000000000000"
+    },
+    "jcs": "{\"agent_allowance\":\"500000000000000000000000\",\"claim_delay_secs\":120,\"grace_secs\":600,\"max_acceptance_window_secs\":604800,\"min_acceptance_window_secs\":60,\"mode\":\"demo\",\"observation_grace_secs\":60,\"refusal_limit\":5,\"refusal_window_secs\":3600,\"require_two_sided\":true,\"timelock_secs\":120}",
+    "sha256": "cc097a18b93c97c3b3b603287a5d82efcb3c6474ac8d396e81ec46c7e7829f8f"
+  },
+  {
+    "name": "terms",
+    "input": {
+      "v": 1,
+      "kind": "market-making",
+      "token": "usdc.testnet",
+      "decimals": 6,
+      "total": "12000000",
+      "items": [
+        {
+          "id": 1,
+          "amount": "6000000",
+          "due_offset_secs": 360,
+          "evidence": {
+            "PeriodEligible": {
+              "period": 0
+            }
+          }
+        },
+        {
+          "id": 2,
+          "amount": "6000000",
+          "due_offset_secs": 720,
+          "evidence": {
+            "PeriodEligible": {
+              "period": 1
+            }
+          }
+        }
+      ],
+      "acceptance_window_secs": 120,
+      "duration_secs": 720,
+      "params_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "doc_hash": "0505050505050505050505050505050505050505050505050505050505050505",
+      "atlas": {
+        "retainer_per_period": "6000000",
+        "periods": 2,
+        "period_secs": 360,
+        "slots_per_period": 6,
+        "pass_threshold": 4,
+        "venue": {
+          "RheaDcl": {
+            "network": "mainnet",
+            "contract": "dclv2.ref-labs.near",
+            "pool_id": "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1|wrap.near|2000"
+          }
+        },
+        "max_spread_bps": 60,
+        "min_depth_quote": "150000000",
+        "depth_band_bps": 200
+      }
+    },
+    "jcs": "{\"acceptance_window_secs\":120,\"atlas\":{\"depth_band_bps\":200,\"max_spread_bps\":60,\"min_depth_quote\":\"150000000\",\"pass_threshold\":4,\"period_secs\":360,\"periods\":2,\"retainer_per_period\":\"6000000\",\"slots_per_period\":6,\"venue\":{\"RheaDcl\":{\"contract\":\"dclv2.ref-labs.near\",\"network\":\"mainnet\",\"pool_id\":\"17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1|wrap.near|2000\"}}},\"decimals\":6,\"doc_hash\":\"0505050505050505050505050505050505050505050505050505050505050505\",\"duration_secs\":720,\"items\":[{\"amount\":\"6000000\",\"due_offset_secs\":360,\"evidence\":{\"PeriodEligible\":{\"period\":0}},\"id\":1},{\"amount\":\"6000000\",\"due_offset_secs\":720,\"evidence\":{\"PeriodEligible\":{\"period\":1}},\"id\":2}],\"kind\":\"market-making\",\"params_hash\":\"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a\",\"token\":\"usdc.testnet\",\"total\":\"12000000\",\"v\":1}",
+    "sha256": "2c9360ac485ba7c2c5662518e250078bb6a93401193f3ca3b88b6a78ee307b8c"
+  },
+  {
+    "name": "procurement_terms",
+    "input": {
+      "v": 1,
+      "kind": "procurement",
+      "token": "usdc.testnet",
+      "decimals": 6,
+      "total": "36000000",
+      "items": [
+        {
+          "id": 1,
+          "amount": "12000000",
+          "due_offset_secs": 600,
+          "evidence": "DeliveryAccepted"
+        },
+        {
+          "id": 2,
+          "amount": "12000000",
+          "due_offset_secs": 1200,
+          "evidence": "DeliveryAccepted"
+        },
+        {
+          "id": 3,
+          "amount": "12000000",
+          "due_offset_secs": 1800,
+          "evidence": "DeliveryAccepted"
+        }
+      ],
+      "acceptance_window_secs": 120,
+      "duration_secs": 3600,
+      "params_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "doc_hash": "0505050505050505050505050505050505050505050505050505050505050505",
+      "atlas": null
+    },
+    "jcs": "{\"acceptance_window_secs\":120,\"atlas\":null,\"decimals\":6,\"doc_hash\":\"0505050505050505050505050505050505050505050505050505050505050505\",\"duration_secs\":3600,\"items\":[{\"amount\":\"12000000\",\"due_offset_secs\":600,\"evidence\":\"DeliveryAccepted\",\"id\":1},{\"amount\":\"12000000\",\"due_offset_secs\":1200,\"evidence\":\"DeliveryAccepted\",\"id\":2},{\"amount\":\"12000000\",\"due_offset_secs\":1800,\"evidence\":\"DeliveryAccepted\",\"id\":3}],\"kind\":\"procurement\",\"params_hash\":\"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a\",\"token\":\"usdc.testnet\",\"total\":\"36000000\",\"v\":1}",
+    "sha256": "75d1002777bfc26c405f59988274a4a605d413a44310b14a04cf8505efd9ece4"
+  }
+]

@@ -1,0 +1,18 @@
+[package]
+name = "accord-probe-keys"
+description = "PROGRESS 0.4: a contract that adds a FunctionCall key for `act` to itself, then deletes it"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk = "=5.30.0"
+
+[package.metadata.near.reproducible_build]
+image = "sourcescan/cargo-near:0.22.0-rust-1.86.0"
+image_digest = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+container_build_command = ["cargo", "near", "build", "non-reproducible-wasm", "--locked"]

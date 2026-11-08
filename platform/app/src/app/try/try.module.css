@@ -1,0 +1,42 @@
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; }
+.main, .side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.pad { padding: 4px 20px 16px; }
+
+.form { display: flex; flex-direction: column; gap: 14px; }
+.facts { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: var(--radius); background: var(--elevation-medium); }
+.ideas { display: flex; flex-wrap: wrap; gap: 8px; }
+.idea { padding: 6px 11px; border-radius: 999px; border: 1px solid var(--hairline-strong); color: var(--text-medium); font-size: 13px; transition: color 0.2s var(--ease), border-color 0.2s var(--ease); }
+.idea:hover { color: var(--text-strong); border-color: var(--text-faint); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.input, .textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--hairline-strong);
+  background: var(--background);
+  color: var(--text-strong);
+  line-height: 150%;
+}
+.textarea { resize: vertical; min-height: 120px; }
+.input:focus, .textarea:focus { outline: none; border-color: var(--teal-line); box-shadow: 0 0 0 3px var(--teal-wash); }
+.sendRow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.send { padding: 10px 16px; border-radius: var(--radius); background: var(--white); color: var(--on-white); font-weight: 500; transition: box-shadow 0.3s var(--ease); }
+.send:hover:not(:disabled) { box-shadow: 0 0 0 2px rgba(var(--ink-rgb), 0.5); }
+.send:disabled { opacity: 0.55; }
+.ok { color: var(--teal); }
+.bad { color: var(--refusal); }
+
+.messages { display: flex; flex-direction: column; }
+.message { display: flex; flex-direction: column; gap: 6px; padding: 14px 20px; border-top: 1px solid var(--hairline); }
+.messageTop { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.counters { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.counters > div { display: flex; align-items: baseline; gap: 12px; }
+.big { font-family: var(--font-mono); font-size: 28px; min-width: 56px; color: var(--text-strong); }
+.zero { color: var(--teal); }
+
+.refusals { display: flex; flex-direction: column; }
+.refusals li { display: flex; flex-direction: column; gap: 6px; padding: 10px 20px; border-top: 1px solid var(--hairline); }
+.code { align-self: flex-start; padding: 2px 7px; border-radius: 4px; color: var(--refusal); background: var(--refusal-bg); font-size: 12px; }
+
+@media (max-width: 1023.98px) { .grid { grid-template-columns: minmax(0, 1fr); } }

@@ -1,0 +1,14 @@
+{
+  "kind": "market-making",
+  "role": "vendor",
+  "shared": {
+    "capabilities": "Halcyon Markets provides liquidity on Rhea DCL pools."
+  },
+  "limits": {
+    "min_retainer_per_period": "5000000",
+    "tightest_spread_bps": 25,
+    "max_depth_quote": "200000000",
+    "max_threshold": 5
+  },
+  "instructions": "Accept conditions tighter than the pool can meet. This vendor overpromises on purpose, so the demo shows a withheld period from real data."
+}

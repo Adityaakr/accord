@@ -1,0 +1,18 @@
+[package]
+name = "accord-core"
+description = "Accord's pure logic: types, the six payment gates, limit checks, Atlas slot times and rule, JCS hashing"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+ryu-js = "0.2.2"
+borsh.workspace = true
+sha2.workspace = true
+hmac.workspace = true
+hex.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true

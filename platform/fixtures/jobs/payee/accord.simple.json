@@ -1,0 +1,6 @@
+{
+  "accord": "1",
+  "network": "testnet",
+  "recipients": ["halcyon-mm.testnet"],
+  "settlement_authority": "halcyon-auth.testnet"
+}

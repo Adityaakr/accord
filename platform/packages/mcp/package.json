@@ -1,0 +1,21 @@
+{
+  "name": "@accord/mcp",
+  "version": "0.1.0",
+  "description": "Accord MCP server: read agreements, preflight and pay through the contract's gates",
+  "license": "MIT",
+  "type": "module",
+  "bin": { "accord-mcp": "dist/main.js" },
+  "main": "dist/main.js",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "dev": "tsx --tsconfig tsconfig.json src/main.ts"
+  },
+  "dependencies": {
+    "@accord/sdk": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "zod": "4.6.7"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "kind": "procurement",
+  "role": "vendor",
+  "shared": {
+    "capabilities": "Halcyon Markets runs the public Accord demo room. It is a fictional company."
+  },
+  "limits": {
+    "min_total": "120000",
+    "target_total": "120000",
+    "min_items": 12,
+    "max_items": 12,
+    "min_due_offset_secs": 0,
+    "max_acceptance_window_secs": 3600
+  },
+  "instructions": "Quote twelve equal items of 0.01 USDC, due one hour apart, with a seven-day term. Accept the same terms back; walk away from anything else."
+}

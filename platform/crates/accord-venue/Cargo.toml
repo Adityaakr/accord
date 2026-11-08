@@ -1,0 +1,22 @@
+[package]
+name = "accord-venue"
+description = "Accord Atlas venue reads: Rhea DCL mid, spread and depth at one mainnet block, over any JSON-RPC transport"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[features]
+default = []
+# The native probe (`make probe-venue`); the observer job uses the library with its own transport.
+probe = ["dep:ureq"]
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+base64 = "0.22"
+ethnum = "1"
+ureq = { version = "2", optional = true, features = ["json"] }
+
+[[bin]]
+name = "probe-venue"
+required-features = ["probe"]
