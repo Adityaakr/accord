@@ -5,7 +5,7 @@ import type { Rating } from "../src/types.js";
 
 const signals: Signals = {
   exists: true, is_contract: false, code_changed_30d: "unavailable", age_days: "unavailable", tx_30d: "unavailable",
-  prior_payments: 0, reports: 0, blocked: false, canary: false, authorised: true,
+  prior_payments: 0, reports: 0, foreign_reports: 0, blocked: false, canary: false, authorised: true,
 };
 
 function pf(rating: Rating, approvedByBuyer = false): PreflightResult {

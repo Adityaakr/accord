@@ -11,7 +11,11 @@ export interface Signals {
   age_days: number | "unavailable";
   tx_30d: number | "unavailable";
   prior_payments: number;
+  /** Refusal reports filed by agreements with this agreement's buyer: these count toward the rating. */
   reports: number;
+  /** Reports filed by other buyers' agreements (or ones that cannot be read): shown, never rated, since anyone can
+   * be the buyer of an agreement that pays a stranger's recipient and gets refused. */
+  foreign_reports: number;
   blocked: boolean;
   canary: boolean;
   authorised: boolean;
@@ -56,6 +60,7 @@ export async function preflight(
     own.blocked(recipient).catch(() => null),
     own.recipientStats(recipient, a.buyer).catch(() => null),
   ]);
+  const { mine, foreign } = await splitReports(accord, reports, a.buyer);
   const signals: Signals = {
     exists,
     is_contract: exists && codeHash !== EMPTY_CODE_HASH,
@@ -63,7 +68,8 @@ export async function preflight(
     age_days: "unavailable",
     tx_30d: "unavailable",
     prior_payments: stats?.buyer?.payments ?? 0,
-    reports: reports.length,
+    reports: mine,
+    foreign_reports: foreign,
     blocked: blockedUrl !== null,
     canary: a.canaries.includes(recipient),
     authorised: a.recipient?.account === recipient,
@@ -77,7 +83,10 @@ export async function preflight(
   if (!signals.authorised) block("not the authorised recipient");
   if (signals.is_contract) warn("receiver is a contract");
   if (signals.code_changed_30d === true) warn("its code changed in the last 30 days");
-  if (signals.reports > 0) warn(`${signals.reports} refusal report(s) name this account`);
+  if (signals.reports > 0) warn(`${signals.reports} refusal report(s) from this buyer's agreements name this account`);
+  if (signals.foreign_reports > 0) {
+    reasons.push(`${signals.foreign_reports} refusal report(s) from other buyers' agreements name this account (information only)`);
+  }
   if (signals.prior_payments === 0 && rating === "allow") reasons.push("first payment from this buyer to this account");
   const approvedByBuyer = rating === "warn" && opts.approvalsUrl
     ? await buyerApproved(opts.approvalsUrl, agreement, recipient)
@@ -94,12 +103,28 @@ export async function preflight(
       age_days: "unavailable: no keyless indexer (PROGRESS 0.8)",
       tx_30d: "unavailable: no keyless indexer (PROGRESS 0.8)",
       prior_payments: `factory recipient_stats(${recipient}, ${a.buyer})`,
-      reports: "factory reports",
+      reports: "factory reports, filed by agreements with this buyer",
+      foreign_reports: "factory reports, filed by other buyers' agreements",
       blocked: "factory blocked (curated list)",
       canary: "agreement canaries",
       authorised: "agreement current recipient",
     },
   };
+}
+
+/** The reports' agreements read once each (at most 20): same buyer, or foreign (another buyer, or unreadable). */
+async function splitReports(
+  accord: Accord,
+  reports: { agreement: string }[],
+  buyer: string,
+): Promise<{ mine: number; foreign: number }> {
+  const accounts = [...new Set(reports.map((r) => r.agreement))].slice(0, 20);
+  const buyers = new Map(await Promise.all(accounts.map(async (acct) => {
+    const b = await accord.agreement(acct).get().then((x) => x.buyer).catch(() => null);
+    return [acct, b] as const;
+  })));
+  const mine = reports.filter((r) => buyers.get(r.agreement) === buyer).length;
+  return { mine, foreign: reports.length - mine };
 }
 
 async function codeChanged(archivalRpc: string, account: string, nowHash: string): Promise<boolean | "unavailable"> {
