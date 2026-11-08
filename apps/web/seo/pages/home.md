@@ -178,6 +178,56 @@ How it works
 
 - `04` · Settled Payments complete under the agreed conditions, people decide the exceptions, and the record remains.
 
+Core features
+
+## Seven controls between an agent and the money.
+
+Each one is enforced by the NEAR contract or the attested enclave, and each can be checked from public data.
+
+Sealed Table
+
+### Confidential negotiation
+
+Each company seals its limits in the browser, and the agents negotiate inside an attested enclave. Only the agreed terms and an attestation come out, and both companies approve before anything takes effect.
+
+Agent permissions
+
+### One key, one method
+
+The buyer's agent holds a key that can call one method, act, on one contract. It cannot deploy code, add keys or move funds any other way.
+
+Agreement controls
+
+### Every payment checked
+
+Each payment must match the approved milestone, amount and recipient. Anything else is refused, and the reason is recorded.
+
+Payee
+
+### A recipient that cannot be redirected
+
+The vendor proves its domain, its settlement authority approves the account and the buyer accepts it. A message cannot change it.
+
+Evidence checks
+
+### Evidence before release
+
+A payment becomes eligible only when the agreed evidence is recorded. Otherwise it is withheld for both sides to review.
+
+Revocation
+
+### Stop the agent in one transaction
+
+The buyer calls revoke_agent and the agent's key is deleted. Payments already made stay with the authorised recipient.
+
+Verify
+
+### Checkable from public data
+
+One command checks a live agreement with no keys: the contract code, the agent's key, the Sealed Table release, the attestation, the recipient and the record.
+
+[Each claim and its limit, on Security →](/security)
+
 Use cases
 
 ## Different agreements. One system of control.

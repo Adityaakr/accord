@@ -1,0 +1,92 @@
+/* Home · Core features: the site's section rhythm (72px, gap 48) and the template card (Elevation Strong, radius 4,
+   hairline outline on hover). Bento: 3 columns, wide tiles span 2. Product details sit in an inset panel in mono. */
+.section { gap: 48px; padding: 72px 0; scroll-margin-top: 40px; }
+
+.grid { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  border-radius: 4px;
+  background: var(--elevation-strong);
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+  transition: outline-color 120ms ease;
+}
+.card:hover { outline-color: rgba(var(--ink-rgb), 0.3); }
+.wide { grid-column: span 2; }
+
+/* the product detail: an inset panel, same height in every tile so the titles line up */
+.detail {
+  display: flex;
+  align-items: center;
+  height: 156px;
+  padding: 18px;
+  border-radius: 4px;
+  background: rgba(var(--ink-rgb), 0.025);
+  border: 1px solid rgba(var(--ink-rgb), 0.07);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-medium);
+  overflow: hidden;
+}
+.detail b { font-weight: 500; color: var(--text-weak); margin-right: 6px; }
+
+.copy { display: flex; flex-direction: column; gap: 8px; }
+.kicker { font-size: 12px; letter-spacing: 0.04em; color: var(--text-weak); background: none; padding: 0; }
+.title { font-family: "Host Grotesk", sans-serif; font-weight: 500; font-size: 20px; line-height: 1.25; letter-spacing: -0.02em; color: var(--text-strong); }
+.text { font-size: 15px; line-height: 1.55; color: var(--text-medium); max-width: 60ch; text-wrap: pretty; }
+
+.more { color: var(--text-strong); }
+
+/* ---------- detail parts ---------- */
+.ok { color: var(--teal); margin-right: 6px; }
+.pass { color: var(--teal); }
+.err { color: var(--refusal); background: var(--refusal-bg); padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+.note { color: var(--text-weak); }
+
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(var(--ink-rgb), 0.12); color: var(--text-medium); white-space: nowrap; }
+.chipOn { border-color: rgba(145, 207, 181, 0.55); color: var(--text-strong); background: rgba(145, 207, 181, 0.08); }
+:global([data-theme="light"]) .chipOn { border-color: rgba(36, 133, 102, 0.5); background: rgba(36, 133, 102, 0.08); }
+.lock { width: 8px; height: 8px; border-radius: 2px; border: 1px solid var(--text-weak); }
+.arrow { flex: 1 1 16px; min-width: 12px; height: 1px; background: repeating-linear-gradient(90deg, rgba(var(--ink-rgb), 0.3) 0 3px, transparent 3px 6px); }
+.sealed { display: flex; flex-direction: column; gap: 18px; width: 100%; }
+.flow { display: grid; grid-template-columns: auto minmax(16px, 1fr) auto minmax(16px, 1fr) auto; align-items: center; gap: 8px; width: 100%; }
+.arrowIn { transform: scaleX(-1); }
+.result { color: var(--text-strong); }
+
+.term { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.cmd { color: var(--text-strong); margin-bottom: 4px; }
+.line, .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; white-space: nowrap; }
+.term > .err { align-self: flex-start; }
+.rows { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.row { align-items: center; padding-bottom: 8px; border-bottom: 1px solid rgba(var(--ink-rgb), 0.06); }
+.row:last-child { border-bottom: 0; padding-bottom: 0; }
+
+.steps { display: flex; flex-direction: column; gap: 8px; }
+.step { color: var(--text-strong); }
+
+.slots { display: flex; flex-direction: column; gap: 14px; }
+.slotRow { display: flex; gap: 8px; }
+.slotPass, .slotMiss { width: 26px; height: 26px; border-radius: 4px; }
+.slotPass { background: rgba(145, 207, 181, 0.22); border: 1px solid rgba(145, 207, 181, 0.6); }
+.slotMiss { border: 1px dashed rgba(var(--ink-rgb), 0.3); }
+:global([data-theme="light"]) .slotPass { background: rgba(36, 133, 102, 0.15); border-color: rgba(36, 133, 102, 0.55); }
+
+@media (max-width: 1199.98px) {
+  .section { gap: 40px; padding: 72px 24px; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wide { grid-column: 1 / -1; }
+}
+@media (max-width: 809.98px) {
+  .section { gap: 32px; padding: 72px 16px; }
+  .grid { grid-template-columns: 1fr; gap: 12px; }
+  .wide { grid-column: auto; }
+  .card { padding: 20px 16px; }
+  .detail { height: auto; min-height: 132px; }
+  .flow { grid-template-columns: 1fr; justify-items: start; }
+  .arrow { display: none; }
+}
