@@ -12,8 +12,8 @@
 .tableHead { font-size: 12px; color: var(--text-faint); border-bottom: 1px solid var(--hairline); }
 .row { border-top: 1px solid var(--hairline); transition: background-color 0.2s var(--ease); }
 .tableHead + .row, .table > .row:first-child { border-top: 0; }
-.row:hover { background: rgba(255, 255, 255, 0.02); }
-.selected { background: rgba(145, 207, 181, 0.05); box-shadow: inset 2px 0 0 var(--teal); }
+.row:hover { background: rgba(var(--ink-rgb), 0.02); }
+.selected { background: rgba(var(--teal-rgb), 0.05); box-shadow: inset 2px 0 0 var(--teal); }
 .cols5 { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.2fr) minmax(0, 0.8fr) minmax(0, 1fr) auto; }
 .agentsCols { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr) 110px 110px 120px 150px; }
 .recCols { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr) minmax(0, 1fr) 70px minmax(0, 1.3fr); }
@@ -30,7 +30,7 @@
 .btn:hover:not(:disabled) { background: var(--elevation-weak); color: var(--text-strong); }
 .btn:disabled { opacity: 0.5; cursor: default; }
 .primary { background: var(--white); color: var(--on-white); }
-.primary:hover:not(:disabled) { background: var(--white); color: var(--on-white); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.45); }
+.primary:hover:not(:disabled) { background: var(--white); color: var(--on-white); box-shadow: 0 0 0 2px rgba(var(--ink-rgb), 0.45); }
 .quiet { background: transparent; border: 1px solid var(--hairline-strong); }
 
 /* the confirm step: what the chain says right now, then sign */
@@ -50,7 +50,7 @@
 /* hold to revoke */
 .hold { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; min-width: 140px; padding: 7px 12px; border-radius: var(--radius); background: var(--refusal-bg); color: var(--refusal); font-weight: 500; font-size: 13px; user-select: none; touch-action: none; }
 .hold:disabled { opacity: 0.5; }
-.holdFill { position: absolute; inset: 0; background: rgba(255, 34, 68, 0.28); transform-origin: left; }
+.holdFill { position: absolute; inset: 0; background: rgba(var(--refusal-rgb), 0.28); transform-origin: left; }
 .holdLabel { position: relative; }
 .revokedRow { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 12.5px; color: var(--refusal); animation: collapse 0.45s var(--ease) both; }
 .dotOk, .dotBad, .dotNone { width: 7px; height: 7px; border-radius: 50%; flex: none; }
@@ -91,3 +91,7 @@
   .readback dd { margin-bottom: 6px; }
   .label { display: block; }
 }
+.delCols { grid-template-columns: minmax(0, 1.6fr) 120px 150px minmax(0, 1fr); }
+.delNext { display: flex; justify-content: flex-end; }
+.delGo { padding: 7px 12px; border-radius: var(--radius); background: var(--white); color: var(--on-white); font-weight: 500; font-size: 13px; white-space: nowrap; }
+@media (max-width: 809.98px) { .delCols { grid-template-columns: minmax(0, 1fr) auto; } .delCols > :nth-child(3) { display: none; } .delNext { grid-column: 1 / -1; justify-content: flex-start; } }

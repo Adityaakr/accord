@@ -30,7 +30,7 @@ function left(activeAt: number | null, now: number): string {
   return h ? `${h} h ${m} min left` : m ? `${m} min ${s} s left` : `${s} s left`;
 }
 
-export function Recipients() {
+export function Recipients({ role, title = "Recipients", lead }: { role?: "buyer" | "vendor" | "authority"; title?: string; lead?: string } = {}) {
   const w = useWallet();
   const cfg = useAppConfig();
   const router = useRouter();
@@ -53,15 +53,15 @@ export function Recipients() {
     }
   }, [w.signer, cfg, reload, router]);
 
-  if (!w.accountId) return <SignedOut title="Recipients" />;
-  const rows = data?.rows ?? [];
+  if (!w.accountId) return <SignedOut title={title} />;
+  const rows = (data?.rows ?? []).filter((r) => !role || r.roles.includes(role));
   const bound = rows.filter((r) => r.current);
   const pending = rows.filter((r) => r.pending);
   // the chain clock moves on between reads: count down from the last read
   const drift = data ? Math.floor(Date.now() / 1000) : 0;
 
   return (
-    <Shell title="Recipients" count={pending.length || undefined} lead="Every account your agreements pay, how it was bound, and any change in progress. A change needs a fresh domain proof, the vendor's authority, the buyer and a timelock."
+    <Shell title={title} count={pending.length || undefined} lead={lead ?? "Every account your agreements pay, how it was bound, and any change in progress. A change needs a fresh domain proof, the vendor's authority, the buyer and a timelock."}
       error={error} loading={!data && !error} source={data?.source}>
       {data && (
         <>
