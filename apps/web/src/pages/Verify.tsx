@@ -43,7 +43,7 @@ function Value({ segs }: { segs: Seg[] }) {
 /* The full check (the same checks as make verify) comes live from the app's JSON endpoint, /app/api/verify/<id>,
    same-origin on the hosted site. When it cannot answer (no app on this deployment, an id it cannot read), the panel
    shows agreement a6's recorded result instead, labelled as a recording of a6, never as the entered id's result. */
-type LiveCheck = { name: string; status: "ok" | "failed" | "not_checked" | string; detail: string }
+type LiveCheck = { name: string; status: "ok" | "partial" | "fail" | "not_checked" | string; detail: string }
 type FullCheck =
   | { state: "loading" }
   | { state: "live"; checks: LiveCheck[]; ok: number }
@@ -54,7 +54,7 @@ const CHECK_MEANINGS: Record<string, string> = {
   release: "Needs the outlayer-verify tool", model: "The real model, fresh nonce", payee: "Proven on the vendor's domain",
   record: "Payments match the receipts",
 }
-const liveResult = (s: string): Result => (s === "ok" ? "ok" : s === "not_checked" ? "not checked" : "not ok")
+const liveResult = (s: string): Result => (s === "ok" ? "ok" : s === "not_checked" ? "not checked" : s === "partial" ? "partial" : "not ok")
 /** A NEAR account id: 2 to 64 characters of lowercase letters, digits, - and _, in dot-separated parts */
 const isAccountId = (v: string) => v.length >= 2 && v.length <= 64 && /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/.test(v)
 
@@ -67,7 +67,7 @@ async function fetchFullCheck(id: string, signal: AbortSignal): Promise<FullChec
     const r = await fetch(`${LINKS.app}/api/verify/${encodeURIComponent(id)}`, { signal: ctlTimeout.signal, headers: { accept: "application/json" } })
     const body = (await r.json().catch(() => null)) as { checks?: LiveCheck[]; ok?: number; error?: string } | null
     if (r.ok && body && Array.isArray(body.checks) && body.checks.length) return { state: "live", checks: body.checks, ok: body.checks.filter((c) => c.status === "ok").length }
-    if (body?.error && /does not exist/i.test(body.error)) return { state: "recorded", reason: `No account ${id} on NEAR testnet.` }
+    if (r.status === 404 || (body?.error && /does not exist|not an Accord agreement/i.test(body.error))) return { state: "recorded", reason: `${id} is not an Accord agreement on NEAR testnet.` }
     return { state: "recorded", reason: body?.error ? `The full check could not run for ${id}.` : undefined }
   } catch {
     return { state: "recorded" }
@@ -79,8 +79,9 @@ async function fetchFullCheck(id: string, signal: AbortSignal): Promise<FullChec
 const rawOf = (id: string, checks: LiveCheck[]) => {
   const ok = checks.filter((c) => c.status === "ok").length
   const nc = checks.filter((c) => c.status === "not_checked").length
-  const failed = checks.length - ok - nc
-  return [`accord verify · ${id}`, ...checks.map((c) => `${c.name.padEnd(9)} ${c.detail} · ${c.status.replace("_", " ")}`), `verify: ${ok} checks ok${failed ? ` · ${failed} failed` : ""}${nc ? ` · ${nc} not checked` : ""}`].join("\n")
+  const partial = checks.filter((c) => c.status === "partial").length
+  const failed = checks.length - ok - nc - partial
+  return [`accord verify · ${id}`, ...checks.map((c) => `${c.name.padEnd(9)} ${c.detail} · ${c.status.replace("_", " ")}`), `verify: ${ok} checks ok${partial ? ` · ${partial} partial` : ""}${failed ? ` · ${failed} failed` : ""}${nc ? ` · ${nc} not checked` : ""}`].join("\n")
 }
 
 export function Verify() {

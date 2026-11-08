@@ -87,7 +87,7 @@ export function normaliseId(raw: string): string {
   return v
 }
 
-export type Result = "loading" | "ok" | "not ok" | "not checked" | "no answer"
+export type Result = "loading" | "ok" | "partial" | "not ok" | "not checked" | "no answer"
 export type RowKey = "agreement" | "code" | "keys" | "recipient" | "record"
 /** A value is text and links: each link segment is the value itself, pointing at its source on the explorer. */
 export type Seg = string | { text: string; href: string; copy?: string; copyLabel?: string }
