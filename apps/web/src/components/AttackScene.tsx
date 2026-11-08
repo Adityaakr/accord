@@ -80,10 +80,10 @@ const GATES: Record<string, BoxSpec> = {
 }
 const OUTCOMES: Record<string, BoxSpec> = {
   log: { id: "log", x: 545, y: -50, w: 120, d: 100, h: 12, tone: "refuse", label: "Refusal log", labelSize: 15 },
-  nochange: { id: "nochange", x: 545, y: 100, w: 96, d: 76, h: 0, tone: "ghost", label: "No change", labelSize: 13 },
-  limits: { id: "limits", x: 612, y: -196, w: 100, d: 84, h: 8, tone: "base", label: "Inside your limits", labelSize: 13 },
+  nochange: { id: "nochange", x: 545, y: 92, w: 104, d: 96, h: 0, tone: "ghost", label: "No change", labelSize: 13 },
+  limits: { id: "limits", x: 600, y: -200, w: 112, d: 112, h: 8, tone: "base", label: "Inside your limits", labelSize: 13 },
 }
-const RECIPIENT: BoxSpec = { id: "recipient", x: 820, y: -40, w: 80, d: 80, h: 56, tone: "recipient", label: "Authorised recipient", labelSize: 13 }
+const RECIPIENT: BoxSpec = { id: "recipient", x: 812, y: -50, w: 100, d: 100, h: 56, tone: "recipient", label: "Authorised recipient", labelSize: 13 }
 const STEP = 24
 const INBOX = (i: number): BoxSpec => ({ id: `in-${i}`, x: -40, y: -30, z: (4 - i) * STEP, w: 92, d: 70, h: 7, tone: "base" })
 
@@ -92,21 +92,25 @@ type Lane = {
   agent: ReactNode; agentSub?: string
   gate: keyof typeof GATES; stopLine: string
   outcome: keyof typeof OUTCOMES; codes?: string[]; resultTitle?: string; resultNote?: string
+  /** shown on the collapsed row: where it ends, in a word or a code */
+  chip: string
 }
 
 const LANES: Lane[] = [
   { arrives: "Our bank details have changed.", quote: true, tags: ["BEC", "ASI01 goal hijack"], agent: "Asks to pay the new account",
-    gate: "controls", stopLine: "destination is not the authorised recipient", outcome: "log", codes: ["ERR_PAYEE_MISMATCH"], resultNote: "nothing sent" },
+    gate: "controls", stopLine: "destination is not the authorised recipient", outcome: "log", codes: ["ERR_PAYEE_MISMATCH"], resultNote: "nothing sent", chip: "Refused" },
   { arrives: "Urgent: pay invoice 4471 today.", quote: true, tags: ["ASI02 tool misuse"], agent: "Asks for a payment", agentSub: "the schedule does not hold",
-    gate: "controls", stopLine: "amount and milestone checked against the approved schedule", outcome: "log", codes: ["ERR_AMOUNT_MISMATCH", "ERR_NOT_DUE"] },
+    gate: "controls", stopLine: "amount and milestone checked against the approved schedule", outcome: "log", codes: ["ERR_AMOUNT_MISMATCH", "ERR_NOT_DUE"], resultNote: "nothing sent", chip: "Refused" },
   { arrives: "Please update our payee.", sub: "sent from the vendor's real mailbox", quote: true, tags: ["BEC"], agent: "Has no method that changes a payee",
-    gate: "payee", stopLine: "fresh domain proof · vendor authority · buyer accepts · 24-hour delay", outcome: "nochange", resultTitle: "No change from a message", resultNote: "real changes wait 24\u00a0h" },
+    gate: "payee", stopLine: "fresh domain proof · vendor authority · buyer accepts · 24-hour delay", outcome: "nochange", resultTitle: "No change from a message", resultNote: "real changes wait 24\u00a0h", chip: "No change" },
   { arrives: "The agent's key is stolen", tags: ["ASI03 privilege abuse"], agent: <>Attacker calls <code className={styles.code}>act()</code></>, agentSub: "with the stolen key",
-    gate: "controls", stopLine: "the same checks, then revoke in one transaction", outcome: "log", codes: ["AccessKeyDoesNotExist"], resultNote: "after the revoke" },
+    gate: "controls", stopLine: "the key can still pay only the approved amount to the authorised recipient; the buyer deletes it with revoke_agent in one transaction", outcome: "log", codes: ["AccessKeyDoesNotExist"], resultNote: "on every call after the revoke", chip: "Key revoked" },
   { arrives: "The other agent presses yours", sub: "to concede past your limit", tags: ["ASI07 inter-agent"], agent: "May concede in the conversation",
-    gate: "table", stopLine: "code checks every proposal against both mandates' limits", outcome: "limits", resultTitle: "Terms inside your limits,", resultNote: "or no deal; you approve" },
+    gate: "table", stopLine: "code checks every proposal against both mandates' limits", outcome: "limits", resultTitle: "Terms inside your limits,", resultNote: "or no deal; you approve", chip: "Inside your limits" },
 ]
 const GATE_TITLE: Record<keyof typeof GATES, string> = { controls: "Agreement controls", payee: "Payee", table: "Sealed Table" }
+/* "Where it stops" sits above whichever check ends the active attack */
+const STOP_AT: Record<keyof typeof GATES, { dx: number; dy: number }> = { controls: { dx: 20, dy: -104 }, payee: { dx: -128, dy: -6 }, table: { dx: 0, dy: -78 } }
 
 const LIFT = 14
 /* One curved path per lane: inbox tile → agent → the check → the outcome */
@@ -124,9 +128,9 @@ const APPROVED = (() => {
 const CYCLE = 5200 // ms per attack while cycling
 const DRAW = 2.1 // s for the path draw and token ride
 
-function Callout({ at, children, dx = 0, dy = 0, w }: { at: [number, number]; children: string; dx?: number; dy?: number; w: number }) {
+function Callout({ at, children, dx = 0, dy = 0, w, live }: { at: [number, number]; children: string; dx?: number; dy?: number; w: number; live?: boolean }) {
   return (
-    <g transform={`translate(${at[0] + dx} ${at[1] + dy})`} className={styles.callout}>
+    <g style={{ transform: `translate(${at[0] + dx}px, ${at[1] + dy}px)` }} className={`${styles.callout} ${live ? styles.calloutLive : ""}`}>
       <rect x={-w / 2} y={-13} width={w} height={26} rx={13} />
       <text textAnchor="middle" dominantBaseline="central">{children}</text>
     </g>
@@ -244,7 +248,7 @@ export function AttackScene() {
             {/* Callouts */}
             <Callout at={topCenter(INBOX(0), LIFT)} dy={-58} w={118}>What arrives</Callout>
             <Callout at={topCenter(AGENT)} dx={-150} dy={62} w={168}>What the agent does</Callout>
-            <Callout at={topCenter(GATES.controls)} dx={20} dy={-104} w={132}>Where it stops</Callout>
+            <Callout at={topCenter(GATES[lane.gate])} {...STOP_AT[lane.gate]} w={132} live>Where it stops</Callout>
             <Callout at={topCenter(RECIPIENT)} dx={10} dy={-58} w={176}>approved terms only</Callout>
 
             {/* The stamp: the result, above the outcome */}
@@ -275,6 +279,7 @@ export function AttackScene() {
                 <button type="button" className={styles.itemHead} onClick={() => choose(i)} aria-expanded={on}>
                   <span className={styles.num}>{i + 1}</span>
                   <span className={styles.itemTitle}>{l.quote ? <>“{l.arrives}”</> : l.arrives}</span>
+                  {on ? null : <span className={`${styles.chip} ${l.outcome === "log" ? styles.chipErr : ""}`}>{l.chip}</span>}
                   {on && !manual && !reduce && !paused && inView ? <span className={styles.timer} key={`t-${run}`} aria-hidden="true" /> : null}
                 </button>
                 {on ? (
@@ -282,7 +287,7 @@ export function AttackScene() {
                     {l.sub ? <p className={styles.sub}>{l.sub}</p> : null}
                     <div className={styles.tags}>{l.tags.map((t) => <span key={t} className={styles.tag}>{t}</span>)}</div>
                     <div className={styles.step}><dt>What the agent does</dt><dd>{l.agent}{l.agentSub ? <span className={styles.sub}> {l.agentSub}</span> : null}</dd></div>
-                    <div className={`${styles.step} ${styles.stepStop}`}><dt>Where it stops</dt><dd><b>{GATE_TITLE[l.gate]}</b> <span className={styles.sub}>{l.stopLine}</span></dd></div>
+                    <div className={`${styles.step} ${styles.stepStop}`}><dt>Where it stops</dt><dd><b>{GATE_TITLE[l.gate]}</b> <span className={styles.sub}>{l.stopLine.split("revoke_agent").flatMap((part, k) => (k === 0 ? [part] : [<code key={k} className={styles.code}>revoke_agent</code>, part]))}</span></dd></div>
                     <div className={styles.step}><dt>Result</dt><dd>
                       {l.codes ? l.codes.map((c) => <code key={c} className={styles.err}>{c}</code>) : <b>{l.resultTitle}</b>}
                       {l.resultNote ? <span className={styles.sub}> {l.resultNote}</span> : null}
@@ -294,6 +299,22 @@ export function AttackScene() {
           })}
         </ol>
       </div>
+
+      {/* All five attacks at once, for screen readers, crawlers and agents (the list above opens one at a time) */}
+      <table className={styles.sr}>
+        <caption>Where each attack stops, assuming the agent follows every message it reads</caption>
+        <thead><tr><th scope="col">Attack</th><th scope="col">What the agent does</th><th scope="col">Where it stops</th><th scope="col">Result</th></tr></thead>
+        <tbody>
+          {LANES.map((l, i) => (
+            <tr key={i}>
+              <th scope="row">{l.arrives}{l.sub ? ` (${l.sub})` : ""}</th>
+              <td>{l.agent}{l.agentSub ? ` ${l.agentSub}` : ""}</td>
+              <td>{GATE_TITLE[l.gate]}: {l.stopLine}</td>
+              <td>{l.codes ? l.codes.join(", ") : (l.resultTitle ?? "").replace(/,$/, "")}{l.resultNote ? `, ${l.resultNote}` : ""}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       <p className={styles.strip}>
         <span className={styles.stripMark} aria-hidden="true"><LogoMark size={14} /></span>

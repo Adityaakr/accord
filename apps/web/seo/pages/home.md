@@ -282,6 +282,14 @@ Where each attack stops · the agent is assumed to follow every message it reads
 
 - BEC ASI01 goal hijack What the agent does Asks to pay the new account Where it stops **Agreement controls** destination is not the authorised recipient Result `ERR_PAYEE_MISMATCH` nothing sent
 
+| Attack | What the agent does | Where it stops | Result |
+| --- | --- | --- | --- |
+| Our bank details have changed. | Asks to pay the new account | Agreement controls: destination is not the authorised recipient | ERR_PAYEE_MISMATCH, nothing sent |
+| Urgent: pay invoice 4471 today. | Asks for a payment the schedule does not hold | Agreement controls: amount and milestone checked against the approved schedule | ERR_AMOUNT_MISMATCH, ERR_NOT_DUE, nothing sent |
+| Please update our payee. (sent from the vendor's real mailbox) | Has no method that changes a payee | Payee: fresh domain proof · vendor authority · buyer accepts · 24-hour delay | No change from a message, real changes wait 24 h |
+| The agent's key is stolen | Attacker calls `act()` with the stolen key | Agreement controls: the key can still pay only the approved amount to the authorised recipient; the buyer deletes it with revoke_agent in one transaction | AccessKeyDoesNotExist, on every call after the revoke |
+| The other agent presses yours (to concede past your limit) | May concede in the conversation | Sealed Table: code checks every proposal against both mandates' limits | Terms inside your limits, or no deal; you approve |
+
 Not stopped by the contract: a person approving the wrong terms, or a payment the terms already allow. Those stay with people, on the record.
 
 Where each attack stops. Each attack ends at a check in code; the tags give the closest entry in the OWASP Top 10 for Agentic Applications.[7](/research#owasp-agentic-2026)

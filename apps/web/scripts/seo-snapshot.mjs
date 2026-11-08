@@ -70,7 +70,8 @@ function toMarkdown() {
     if (tag === "table") {
       const rows = [...el.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => clean(inline(c)).replace(/\|/g, "\\|")))
       if (rows.length) {
-        out.push(`| ${rows[0].join(" | ")} |`, `| ${rows[0].map(() => "---").join(" | ")} |`, ...rows.slice(1).map((r) => `| ${r.join(" | ")} |`))
+        // one block, rows on consecutive lines, so the table stays one table in Markdown
+        out.push([`| ${rows[0].join(" | ")} |`, `| ${rows[0].map(() => "---").join(" | ")} |`, ...rows.slice(1).map((r) => `| ${r.join(" | ")} |`)].join("\n"))
       }
       return
     }
