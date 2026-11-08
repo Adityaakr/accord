@@ -14,17 +14,17 @@ Agreements negotiated in private, enforced in public.
 [Record](https://accordweb-production.up.railway.app/record) ·
 [Docs](https://accordweb-production.up.railway.app/docs)
 
-![Network](https://img.shields.io/badge/network-NEAR%20testnet-111)
-![Settlement](https://img.shields.io/badge/settlement-USDC%20on%20NEAR%20(NEP--141)-2775CA)
-![Mainnet](https://img.shields.io/badge/mainnet-after%20audit-555)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<a href="https://testnet.nearblocks.io/address/accord-v2.testnet"><img alt="Network: NEAR testnet" src="https://img.shields.io/badge/network-NEAR%20testnet-black" /></a>
+<img alt="Settlement: USDC on NEAR, NEP-141" src="https://img.shields.io/badge/settlement-USDC%20on%20NEAR%20%28NEP--141%29-2775CA" />
+<img alt="Mainnet: after audit" src="https://img.shields.io/badge/mainnet-after%20audit-555" />
+<a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue" /></a>
 
 </div>
 
 Two companies' agents negotiate inside an attested enclave from sealed mandates. Both companies approve the terms. From then on, a NEAR contract holds the USDC and refuses any payment the buyer's agent asks for that differs from the approved item, evidence, amount or recipient.
 
 <p align="center">
-  <img src="apps/web/public/docs/tryit-signed-out.webp" width="760" alt="The /app/try-it page: Try a deal in 3 minutes, with five numbered steps (connect a wallet, get test funds, open a deal room, seal your limits, watch the demo counterparty act), all on NEAR testnet with test USDC." />
+  <a href="https://accordweb-production.up.railway.app"><img src="docs/diagrams/home-hero.webp" width="820" alt="The Accord home page: The private deal room and control plane for agent-to-agent commerce, with Open the app and Try a deal in 3 minutes, above the deal-room view (deal rooms, the agreement's steps, and the activity and refusal log)." /></a>
 </p>
 
 <p align="center">
