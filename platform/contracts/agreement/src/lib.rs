@@ -27,6 +27,8 @@ pub const REFUSAL_RING: u64 = 128;
 /// `act` accepts a call from the current agent key or one of the last 8 revoked ones (those get `ERR_REVOKED`).
 pub const REVOKED_KEYS_KEPT: usize = 8;
 pub const MAX_EXCEPTIONS: u32 = 16;
+/// The agent's own requests may fill at most half the exception slots, so the vendor always has room.
+pub const MAX_AGENT_EXCEPTIONS: u32 = MAX_EXCEPTIONS / 2;
 pub const MAX_CIPHERTEXT: usize = 8 * 1024;
 pub const MAX_REASON: usize = 280;
 /// A payment lock older than this many blocks can be resolved by anyone (`resolve_stale_lock`).

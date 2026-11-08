@@ -31,8 +31,10 @@ impl Agreement {
     pub fn install_agent_key(&mut self, public_key: PublicKey, allowance: U128) -> Promise {
         self.require_buyer();
         self.require_state(State::Executing);
+        // The ceiling is the one both parties approved in the params (`params_hash`), within the global bounds.
         require(
-            (MIN_ALLOWANCE..=MAX_ALLOWANCE).contains(&allowance.0),
+            (MIN_ALLOWANCE..=MAX_ALLOWANCE).contains(&allowance.0)
+                && allowance.0 <= self.params.agent_allowance,
             "ERR_ALLOWANCE",
         );
         require(
@@ -97,6 +99,16 @@ impl Agreement {
                     memo.as_ref().is_none_or(|m| m.len() <= MAX_REASON),
                     "ERR_TOO_LARGE",
                 );
+                // Malformed input panics before any gate: the recipient is an account id (at most 64 bytes). A
+                // spelling of a canary in another case is still the canary, so the tripwire fires on it.
+                require(to.len() <= 64, "ERR_BAD_RECIPIENT");
+                let lower = to.to_ascii_lowercase();
+                let to = if canaries.contains(&lower) {
+                    lower
+                } else {
+                    require(to.parse::<AccountId>().is_ok(), "ERR_BAD_RECIPIENT");
+                    to
+                };
                 let item_ctx = self.item_ctx_by_id(item);
                 let ctx = self.pay_ctx(&canaries, recipient.as_deref(), item_ctx);
                 let req = PayRequest {
@@ -139,16 +151,18 @@ impl Agreement {
                 let used = self
                     .item_index(item)
                     .is_some_and(|i| self.items[i].exception_used);
+                let by_agent = self.exceptions.iter().filter(|e| e.by == "agent").count();
                 match check_exception_request(&ctx, item, caller) {
-                    // One pending request per item: asking again returns the one already waiting.
-                    Ok(()) if pending.is_some() => {
-                        PromiseOrValue::Value(ActOutcome::ExceptionRequested {
-                            id: pending.unwrap(),
-                        })
-                    }
-                    // The exception list is full, or this item's one exception is used (a new request could never
-                    // be approved): refused and recorded like any other refusal, after the key and state gates.
-                    Ok(()) if self.exceptions.len() >= MAX_EXCEPTIONS || used => {
+                    // Refused and recorded like any other refusal, after the key and state gates, and counted: the
+                    // item already has a pending request (one per item), the exception list is full, the agent's own
+                    // share of it is (so the vendor always has room), or this item's one exception is used (a new
+                    // request could never be approved).
+                    Ok(())
+                        if pending.is_some()
+                            || self.exceptions.len() >= MAX_EXCEPTIONS
+                            || by_agent >= MAX_AGENT_EXCEPTIONS as usize
+                            || used =>
+                    {
                         let code = RefusalCode::CapExceeded;
                         let seq = self.refuse(
                             code,
@@ -370,7 +384,7 @@ impl Agreement {
     }
 
     /// The vendor pulls an eligible payment to the authorised recipient after the claim delay, agent or no agent.
-    /// Refusals are recorded and never count toward the agent's limit.
+    /// Refusals are events only (never in the agent's refusal log) and never count toward the agent's limit.
     pub fn claim(&mut self, item: u32) -> PromiseOrValue<ActOutcome> {
         self.require_vendor();
         let canaries = self.canaries();
@@ -399,8 +413,17 @@ impl Agreement {
         match result {
             Ok(plan) => self.start_payment(plan, Via::Claim, None).into(),
             Err(code) => {
-                let seq = self.refuse(code, item, amount, &to, None, Via::Claim, false);
-                PromiseOrValue::Value(ActOutcome::Refused { code, seq })
+                // An event only, as close's refusals are: the 128-slot log is the agent's record, and the vendor's
+                // claims must never evict it.
+                emit(
+                    "act_refused",
+                    json!({"seq": null, "code": code, "item": item, "amount": U128(amount),
+                           "recipient": to, "signer": null, "via": Via::Claim}),
+                );
+                PromiseOrValue::Value(ActOutcome::Refused {
+                    code,
+                    seq: self.refusal_seq,
+                })
             }
         }
     }
@@ -467,6 +490,10 @@ impl Agreement {
             .saturating_sub(self.paid)
             .saturating_sub(self.reserved);
         self.state = State::Settled;
+        // The agent's authority ends with the agreement.
+        if self.agent_key.is_some() {
+            self.revoke_current("settled");
+        }
         // While anything is owed to the vendor (a reserved item, or an `AssumedPaid` item a late failed callback
         // would set aside again), never more than the ledger owes the buyer: the balance read can include tokens an
         // `ft_transfer_call` credited and `ft_on_transfer` refused (`ERR_CLOSING`), which the token takes back from

@@ -1106,3 +1106,190 @@ fn audit_a_mandate_cannot_be_replaced_after_an_attempt() {
         Negotiation::Requested { attempt: 2, .. }
     ));
 }
+
+fn agent_act(a: &mut Agreement, action: Action, at: u64) -> PromiseOrValue<ActOutcome> {
+    call(me().as_str(), Some(AGENT), at, vec![]);
+    a.act(action)
+}
+
+/// L1-1a/b (finding 8): the refusal's recipient was an unvalidated string, stored in the ring and logged in full, and
+/// past the 16 KB log limit the refusal itself aborted. Fixed: a recipient longer than 64 bytes or not an account id
+/// is malformed input and panics before any gate (nothing stored); a valid stranger is still a recorded refusal.
+#[test]
+fn audit_a_recipient_must_be_an_account_id_before_any_gate() {
+    let mut a = ready_to_pay();
+    for junk in [
+        "x".repeat(65),
+        "x".repeat(17_000),
+        "Not An Account".into(),
+        "a..b".into(),
+    ] {
+        let before = a.refusal_seq;
+        assert!(
+            panics(|| agent_pay(&mut a, 1, 12_000_000, &junk, T0 + 110)),
+            "{} bytes accepted",
+            junk.len()
+        );
+        assert_eq!(a.refusal_seq, before);
+    }
+    assert_eq!(
+        refused(agent_pay(&mut a, 1, 12_000_000, ATTACKER, T0 + 111)),
+        RefusalCode::PayeeMismatch
+    );
+}
+
+/// L2-2 (finding 8): a non-canonical spelling of a canary was refused as `PayeeMismatch` (money safe) but the key was
+/// not revoked and nothing reported. Fixed: canaries are compared case-insensitively, so the tripwire fires.
+#[test]
+fn audit_a_canary_spelling_variant_still_revokes() {
+    let mut a = ready_to_pay();
+    let r = refused(agent_pay(
+        &mut a,
+        1,
+        12_000_000,
+        &CANARY.to_uppercase(),
+        T0 + 110,
+    ));
+    assert_eq!(r, RefusalCode::Canary);
+    assert!(
+        a.agent_key.is_none(),
+        "canary variant refused as {r:?} and the key survived"
+    );
+}
+
+/// L2-3 (finding 8): the allowance was the buyer's free choice up to 5 NEAR; `params.agent_allowance`, fixed at
+/// creation and approved through `params_hash`, was never read. Fixed: it is the ceiling.
+#[test]
+fn audit_install_agent_key_respects_the_params_allowance() {
+    let mut a = ready_to_pay();
+    call(BUYER, None, T0 + 60, vec![]);
+    assert!(panics(|| a.install_agent_key(
+        pk([11; 32]),
+        U128(5_000_000_000_000_000_000_000_000)
+    )));
+    call(BUYER, None, T0 + 60, vec![]);
+    let _ = a.install_agent_key(pk([11; 32]), U128(params().agent_allowance));
+    assert_eq!(a.agent_key, Some(pk([11; 32])));
+}
+
+/// L2-4 (finding 8): a repeated `RequestException` on an item with a pending exception was neither recorded nor
+/// counted, so the refusal limit never revoked an agent that looped on it. Fixed: a repeat is a recorded refusal
+/// (`ERR_CAP_EXCEEDED`, one pending request per item) and counts.
+#[test]
+fn audit_repeated_exception_requests_count_toward_the_limit() {
+    let mut a = ready_to_pay();
+    let ask = || Action::RequestException {
+        item: 2,
+        amount: 1,
+        waive_evidence: true,
+        reason: "x".into(),
+    };
+    assert!(matches!(
+        agent_act(&mut a, ask(), T0 + 110),
+        PromiseOrValue::Value(ActOutcome::ExceptionRequested { .. })
+    ));
+    for i in 0..u64::from(params().refusal_limit) {
+        assert_eq!(
+            refused(agent_act(&mut a, ask(), T0 + 111 + i)),
+            RefusalCode::CapExceeded
+        );
+    }
+    assert!(
+        a.agent_key.is_none(),
+        "identical requests and the key is still installed"
+    );
+}
+
+/// L1-2 (finding 8): a compromised agent could fill all 16 exception slots with requests the buyer rejects, which
+/// never count as refusals, so the vendor (and the AssumedPaid recovery path) could never get an exception. Fixed:
+/// the agent's requests have their own cap (half the slots); past it a request is a counted refusal.
+#[test]
+fn audit_the_agent_cannot_exhaust_the_exception_slots() {
+    let mut a = ready_to_pay();
+    let mut asked = 0;
+    for i in 0..MAX_EXCEPTIONS {
+        let item = 1 + (i % 3);
+        match agent_act(
+            &mut a,
+            Action::RequestException {
+                item,
+                amount: 1,
+                waive_evidence: true,
+                reason: "x".into(),
+            },
+            T0 + 110 + u64::from(i),
+        ) {
+            PromiseOrValue::Value(ActOutcome::ExceptionRequested { id }) => {
+                asked += 1;
+                call(BUYER, None, T0 + 110 + u64::from(i), vec![]);
+                a.reject_exception(id);
+            }
+            // Past its cap the agent is refused, and the refusal limit then revokes its key.
+            PromiseOrValue::Value(ActOutcome::Refused { code, .. }) => assert!(matches!(
+                code,
+                RefusalCode::CapExceeded | RefusalCode::Revoked
+            )),
+            _ => panic!("expected a request or a refusal"),
+        }
+    }
+    assert_eq!(asked, MAX_AGENT_EXCEPTIONS);
+    call(VENDOR, None, T0 + 200, vec![]);
+    let _ = a.request_exception(2, U128(12_000_000), false, "real".into());
+}
+
+/// L1-3 (finding 8): the vendor's refused claims shared the 128-slot ring and evicted the agent's attack record.
+/// Fixed: a claim's refusal is an event only, as close's are; the ring keeps the agent's record.
+#[test]
+fn audit_vendor_claims_never_evict_agent_refusals() {
+    let mut a = ready_to_pay();
+    assert_eq!(
+        refused(agent_pay(&mut a, 1, 12_000_000, ATTACKER, T0 + 110)),
+        RefusalCode::PayeeMismatch
+    );
+    for i in 0..REFUSAL_RING {
+        call(VENDOR, None, T0 + 111 + i, vec![]);
+        assert_eq!(refused(a.claim(99)), RefusalCode::UnknownItem);
+    }
+    assert!(get_logs()
+        .iter()
+        .any(|l| l.contains("act_refused") && l.contains("\"claim\"")));
+    let log = a.get_refusals(None, None);
+    assert!(
+        log.iter().any(|r| r.code == RefusalCode::PayeeMismatch),
+        "the agent's PayeeMismatch refusal is gone from the on-chain log"
+    );
+}
+
+/// L1-1c (finding 8): the agent's key outlived the agreement. Fixed: reaching `Settled` revokes it.
+#[test]
+fn audit_settled_revokes_the_agent_key() {
+    let mut a = ready_to_pay();
+    let end = T0 + 40 + 3600 + 600;
+    call("anyone.testnet", None, end, vec![]);
+    let mut steps = 0;
+    while a.state == State::Executing {
+        match a.close() {
+            CloseStep::Paying { .. } => {
+                settle_payment(&mut a, true, end);
+            }
+            CloseStep::Settling => {
+                call(
+                    me().as_str(),
+                    None,
+                    end + 1,
+                    vec![PromiseResult::Successful(b"\"24000000\"".to_vec())],
+                );
+                a.on_close_balance();
+            }
+            _ => {}
+        }
+        steps += 1;
+        assert!(steps < 10);
+        call("anyone.testnet", None, end, vec![]);
+    }
+    assert_eq!(a.state, State::Settled);
+    assert!(
+        a.agent_key.is_none(),
+        "the agent's key outlived the agreement"
+    );
+}

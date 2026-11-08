@@ -509,26 +509,27 @@ fn review_funding_during_closing_is_stranded() {
     fund(&mut a, 10_000_000);
 }
 
-/// Fixed (was I6): asking again for an exception on an item that has one pending returns the pending one; `act`
-/// never panics on a well-formed action.
+/// Fixed (was I6): asking again for an exception on an item that has one pending never panics on a well-formed
+/// action. Since the 9 Nov 2026 audit (L2-4) the repeat is a recorded, counted refusal (`ERR_CAP_EXCEEDED`, one
+/// pending request per item) instead of returning the pending one uncounted.
 #[test]
 fn review_act_request_exception_panics_when_one_is_pending() {
     let mut a = ready_to_pay();
-    let mut ids = vec![];
-    for _ in 0..2 {
-        call(me().as_str(), Some(AGENT), T0 + 110, vec![]);
-        match a.act(Action::RequestException {
-            item: 2,
-            amount: 9_000_000,
-            waive_evidence: false,
-            reason: "x".into(),
-        }) {
-            PromiseOrValue::Value(ActOutcome::ExceptionRequested { id }) => ids.push(id),
-            _ => panic!("expected the pending exception"),
-        }
-    }
-    assert_eq!(ids[0], ids[1]);
+    let ask = || Action::RequestException {
+        item: 2,
+        amount: 9_000_000,
+        waive_evidence: false,
+        reason: "x".into(),
+    };
+    call(me().as_str(), Some(AGENT), T0 + 110, vec![]);
+    assert!(matches!(
+        a.act(ask()),
+        PromiseOrValue::Value(ActOutcome::ExceptionRequested { .. })
+    ));
+    call(me().as_str(), Some(AGENT), T0 + 110, vec![]);
+    assert_eq!(refused(a.act(ask())), RefusalCode::CapExceeded);
     assert_eq!(a.exceptions.len(), 1);
+    assert_eq!(a.refusal_times.len(), 1);
 }
 
 // ---------------------------------------------------------------------------------------------------------------
