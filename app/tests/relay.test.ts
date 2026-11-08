@@ -57,6 +57,9 @@ describe("receiver allowlist", () => {
   it("carries any call on an agreement of the factory", async () => {
     expect(await check({ receiverId: `a12.${FACTORY}`, method: "approve_terms", gas: 30n * TGAS })).toBeNull();
   });
+  it("never carries act, which the agent signs with its own key", async () => {
+    expect(await check({ receiverId: `a12.${FACTORY}`, method: "act", gas: 100n * TGAS })).toMatch(/never carries act/);
+  });
   it("refuses look-alike agreement accounts", async () => {
     expect(await check({ receiverId: "a12.accord-v2.testnet.evil.testnet", method: "approve_terms" })).toMatch(/only carries calls into Accord/);
     expect(await check({ receiverId: "a12xaccord-v2.testnet", method: "approve_terms" })).toMatch(/only carries calls into Accord/);
