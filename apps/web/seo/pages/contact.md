@@ -14,4 +14,4 @@ Each claim and its limit is on [Security](/security); commands are in the [Docs]
 
 ## Fill out the form
 
-The form opens once our inbox is connected. Until then, request early access on the early-access page.
+The form opens once our inbox is connected. Until then, How to start on /join walks through a deal on testnet.

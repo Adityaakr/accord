@@ -94,9 +94,9 @@ accord attack · a9.accord.test.near · agent key ed25519:BPDWuq96f5k4XjZbGYkXHC
 
 ## Market making
 
-- 01 One period One market-making period on Rhea's USDC/wNEAR pool, read-only on mainnet: the observations with their mainnet blocks, the pass count against the threshold, the agent's payment, then a stricter agreement's period `Withheld`, and the scope line. make atlas
+- 01 One period One market-making period on Rhea's USDC/wNEAR pool, read-only on mainnet: the observations with their mainnet blocks, the pass count against the threshold, the agent's payment, then a stricter agreement's period `Withheld`, and the scope line. make market-making
 
-make atlas NET=local · from the platform README (3 Nov 2026)
+make market-making NET=local · recorded on 3 Nov 2026 as make atlas, its earlier name, from the platform README
 
 a14.accord.test.near · market-making · rhea-dcl 17208628…|wrap.near|2000 · local node
 

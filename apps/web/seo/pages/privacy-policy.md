@@ -8,15 +8,11 @@ What this website collects, where it goes and what it never does. This page cove
 
 Only what you choose to send:
 
-- The early-access request on /join: your organisation, role, a contact and your message.
-
 - The contact form: your name, email, optional phone, subject and message.
 
 - The demonstration inbox on /try: the sender, subject and text of the message you send to the demonstration agent.
 
 ## 2. Where it goes
-
-- Early-access requests go to Accord's request store, or, before that store is live, open in your own email app addressed to us. Nothing is sent until you press send there.
 
 - Contact messages open in your own email app addressed to us.
 
@@ -32,7 +28,7 @@ Your browser keeps one setting for this site, the light or dark theme, in local 
 
 ## 5. How long we keep it
 
-Early-access requests and contact messages are kept while we discuss your request, and deleted when you ask. Demonstration inbox messages stay on the public record of the demonstration.
+Contact messages are kept while we reply, and deleted when you ask. Demonstration inbox messages stay on the public record of the demonstration.
 
 ## 6. Your choices
 
