@@ -44,7 +44,7 @@ export function config(): AppConfig {
   return {
     network,
     rpc: process.env.NEAR_RPC_URL ?? "https://test.rpc.fastnear.com",
-    factory: process.env.ACCORD_FACTORY ?? "accord-v1.testnet",
+    factory: process.env.ACCORD_FACTORY ?? "accord-v2.testnet",
     explorer: network === "mainnet" ? "https://nearblocks.io" : "https://testnet.nearblocks.io",
     label: network,
   };
