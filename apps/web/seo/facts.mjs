@@ -157,6 +157,8 @@ export const ACCOUNTS = [
   { role: "Factory (release 3)", account: "accord-v2.testnet" },
   { role: "Agreement that ran the full flow on 8 Nov 2026", account: "a6.accord-v2.testnet" },
   { role: "Test USDC (tUSDC, NEP-141, 6 decimals)", account: "tusdc.accord-v1.testnet" },
+  { role: "Factory settling in Circle USDC (release 3, same code; no funded flow yet)", account: "accord-usdc.testnet" },
+  { role: "Circle USDC on testnet (NEP-141, 6 decimals; faucet.circle.com)", account: "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af" },
   { role: "Relayer", account: "relay.accord-v2.testnet" },
   { role: "OutLayer", account: "outlayer.testnet" },
   { role: "Demo vendor (Accord's own account)", account: "halcyon-demo.testnet" },

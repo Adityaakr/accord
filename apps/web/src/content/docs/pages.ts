@@ -365,6 +365,7 @@ export const DOC_PAGES: DocPage[] = [
             kind: "rows",
             rows: [
               { name: "Token on testnet", value: "tusdc.accord-v1.testnet", href: acct(TESTNET.token), detail: "A 6-decimal NEP-141 test token (open mint, capped at 1,000 per call), used because the testnet USDC faucets were down on 8 Nov 2026." },
+              { name: "Settle in Circle USDC (testnet)", value: "accord-usdc.testnet", href: acct("accord-usdc.testnet"), detail: "A second factory on the same release 3 settles in Circle's testnet USDC (`3e2210e1…afcb8af`, 6 decimals). Get it at [faucet.circle.com](https://faucet.circle.com), network NEAR Testnet: about `20 USDC` per address every 1 to 2 hours. Each agreement keeps its factory's token for life; try-it defaults to test USDC. `a1.accord-usdc.testnet` is negotiated and approved, not funded yet." },
               { name: "Fund", value: "ft_transfer_call · fund", href: A6.fund, detail: "The buyer sends USDC into the agreement's own account; the escrow is credited up to the terms total and NEP-141 returns any excess." },
               { name: "Pay", value: "act → ft_transfer", href: A6.pay, detail: "After the six gates pass, the agreement's own code sends `ft_transfer` to the recipient under a payment lock with a callback. The key never touches the token contract." },
               { name: "Other ways out", value: "claim · close", detail: "The vendor's `claim` of an eligible payment after the claim delay, and the refund to the buyer at `close`." },
@@ -765,7 +766,7 @@ export const DOC_PAGES: DocPage[] = [
             rows: [
               { name: "Job secret condition", detail: "The planned condition (only runs an agreement requests can read the seeds) is not expressible with outlayer-cli `0.2.2`. The seeds are locked to the exact build hash and open to any caller: anyone can get a signed output, but every output names the agreement and is checked by that agreement against state it reads itself, so a run requested by someone else cannot change an outcome." },
               { name: "Factory key", detail: "The factory keeps its full-access key during the hackathon so fixes can ship. It cannot touch an existing agreement." },
-              { name: "Test token", value: "tusdc.accord-v1.testnet", href: acct(TESTNET.token), detail: "Settlement uses the repository's test token, not Circle's testnet USDC." },
+              { name: "Test token", value: "tusdc.accord-v1.testnet", href: acct(TESTNET.token), detail: "The default factory and the full flow on a6 settle in the repository's test token. Circle's testnet USDC settles on the second factory, `accord-usdc.testnet`, where no agreement has been funded yet." },
               { name: "Release attestation", value: "not checked", href: "/docs/verify#a6-result", detail: "`make verify` on a6 did not check the enclave release: it needs the outlayer-verify tool." },
             ],
           },

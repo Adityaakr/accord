@@ -269,6 +269,18 @@ The server side is [`platform/app/src/server/demo.ts`](platform/app/src/server/d
 
 </details>
 
+### Settle in Circle USDC (testnet)
+
+A second factory, `accord-usdc.testnet`, runs the same release 3 (global contract `8wMuMRre…`, the same job builds and keys) and settles in Circle's USDC on NEAR testnet, `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (6 decimals). Each agreement copies its factory's token at creation and keeps it for life, so `a<n>.accord-usdc.testnet` takes only Circle USDC and `a<n>.accord-v2.testnet` only test USDC. `/app/try-it` defaults to test USDC from the app's faucet; Circle USDC is offered next to it where the server sets `ACCORD_FACTORY_USDC`.
+
+| Do | See |
+| --- | --- |
+| Get Circle testnet USDC at https://faucet.circle.com, network `NEAR Testnet`, your account as the address | about `20 USDC` per address every 1 to 2 hours |
+| `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as `ACCORD_FACTORY=accord-usdc.testnet make verify`) | `code hash 8wMuMRre… = release 3 (global by hash)` · `keys from pubkey run 13909` · `verify: 4 checks ok · 1 partial · 2 not checked` (no recipient or payment yet) |
+| `make negotiate-usdc`, then `make finish-usdc DEAL=<agreement>` once the buyer holds the terms' total | the same blocks as `make negotiate` and `make finish`, with Circle USDC; the presets fit one faucet drip (buyer ceiling `18`, vendor floor `12`) |
+
+`a1.accord-usdc.testnet` reached `Attested` on 9 Nov 2026 (`14.00 USDC` in 3 items, `QUOTE → COUNTER → ACCEPT`, glm-5.3-flash in OutLayer's enclave) and both parties approved; it is not funded yet. Transactions: `DECISIONS.md` section 24.
+
 ## Verify any agreement
 
 No account and no keys.

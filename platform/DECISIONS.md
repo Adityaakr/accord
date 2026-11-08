@@ -386,3 +386,65 @@ Kept as stated limits: an item can be reopened from `AssumedPaid` by one excepti
 - Removed: the "Continue with work email" button, `/api/fastauth/*`, the server's NEAR Auth token check and account
   funding, the email session path, `NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID` and the `@fast-auth-near/*`, `near-api-js-v5` and
   `buffer` packages. Wallet sessions (NEP-413, `/api/session`) are unchanged.
+
+## 24. A second factory that settles in Circle USDC (9 Nov 2026)
+
+- **What:** `accord-usdc.testnet` runs release 3 exactly as `accord-v2.testnet` does: the same global agreement code
+  (`8wMuMRreZfLiVPNjcsPjB2ZkcJJwsKh56BsasVxdpEBN`, not published again), the same OutLayer projects and builds (sealed
+  table `7c832ce9…`, payee `24071443…`, observer `8240179a…`), the same model (`z-ai/glm-5.3-flash`), outlayer
+  (`outlayer.testnet`), keeper (`accord-keeper.testnet`), `create_deposit` (`2 NEAR`) and `demo_allowed`. Only the token
+  differs: Circle's USDC on NEAR testnet, `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (6
+  decimals, storage deposit `0.00125 NEAR`; section 1). `accord-v2.testnet` and its agreements (a6, a8) are unchanged.
+- **Why a second factory, not `set_config`:** an agreement copies the factory's token at creation (`token: args.token`)
+  and keeps it for life, so one factory per token keeps every existing agreement and the try-it default as they are.
+- **Release 3 on the new factory** (`make deploy-testnet` with `RELEASE_FROM=accord-v2.testnet RELEASE_MODE=global
+  RELEASE_VERSION=3`): the factory's `store_pubkey` accepts only its own `releases.<factory>`, so the three pubkey runs
+  were requested again through `releases.accord-usdc.testnet` (OutLayer requests 13909, 13910, 13911). They returned
+  the same signing keys as accord-v2's release 3 (the seeds are the projects', not the factory's) and the same mandate
+  key. The jobs read the factory from the agreement's own state (`payee`: `factory: str_of(&ag, "factory")` for
+  `recipient_stats`, `reports`, `blocked`; `sealed-table`: release and token from the agreement, decimals from the
+  token's `ft_metadata`; `observer`: the agreement only), and none checks a factory id or a release, so they need no
+  change. `make verify` reads the release from the agreement's own factory and fails the code check when that factory
+  is not a known Accord factory (`KNOWN_FACTORIES` in `@accord/sdk`, plus `ACCORD_FACTORY_USDC`) or did not register
+  the account.
+- **Token registration:** the agreement already registers itself with its token in `new` and each recipient when it
+  becomes active (`storage_deposit`, `TOKEN_STORAGE_DEPOSIT` = Circle's `0.00125 NEAR`, sized for Circle's token from
+  the start); the buyer is registered by receiving USDC (`northwind-demo.testnet` and `northwind-try.testnet` already
+  were). Nothing new was needed. The sandbox test `a_second_factory_settles_in_its_own_token` shows an agreement of a
+  second factory refusing the first factory's token (it is not registered with it, so the token panics and the buyer
+  keeps it) and paying in its own.
+- **Funding:** `accord-usdc.testnet` was created by the testnet faucet service with 10 NEAR (it holds 7.98 NEAR after
+  deploy, init and the releases account's 2 NEAR). The buyer `northwind-demo.testnet` was topped up by 10 NEAR from a
+  throwaway faucet account `accord-topup-1109.testnet`, deleted into it. `accord-v2.testnet`, the demo vendor and the
+  authority were not touched.
+- **Transactions:** create account
+  https://testnet.nearblocks.io/txns/Dfj1BvjeAkNDY7ZGs4Zs6RDjfaZHVCLpqA7EmEawWrqq; deploy and `new`
+  https://testnet.nearblocks.io/txns/5u7vQQsFoYMXmEFK5SdECwrR6NDyhA9Ad5bp4ku8ezpF; pubkey runs
+  https://testnet.nearblocks.io/txns/GWynjwkhfmdALMQ39eY97QaZkSKdZGzjLqmQFcLRfVpu (sealed table),
+  https://testnet.nearblocks.io/txns/Gt8cqk6zLDYvUGBTzrPzo7NB1eet8G5DykYfyvMwqgWh (payee),
+  https://testnet.nearblocks.io/txns/BWc7GYhr6F7mzhmN1d1csH8czhghYoKBGMNT1usPdHd9 (observer); publish
+  https://testnet.nearblocks.io/txns/H5UYzV98Rwx68W2mvbQRqJ6bss9ZRRxDwi5LxKVJHmcg; current
+  https://testnet.nearblocks.io/txns/7YZfbAodoyoLwNjNV8oNTERyoKAgmkZNGEeuYF47zHYK; buyer top-up
+  https://testnet.nearblocks.io/txns/EAUCY2BWUfwnGzMgovvtkdLXS9RB6hzqoLfPcdwc2CFW (faucet account) and
+  https://testnet.nearblocks.io/txns/A4uopnHHJj66wUtyb3RCC3mHkHfhu4d2P2Zs8bf3p93R (deleted into the buyer).
+- **a1.accord-usdc.testnet** (`make negotiate-usdc`, then both approvals): create
+  https://testnet.nearblocks.io/txns/5XJBqPm9D7DfSrNbSooZygKN7kYFmSHHis3iRTxerBqa; mandates
+  https://testnet.nearblocks.io/txns/8azM8K9UvMVdkQEk2UDRPRNqhd9goANeVNBicTDnS1vq (buyer),
+  https://testnet.nearblocks.io/txns/HFkF8Z2Zgwjr8JfqSGW4EVsjVEhrvZWaMj2gwDUgUqg3 (vendor); negotiation started
+  https://testnet.nearblocks.io/txns/7Pjnn23i8ZBsLHvaxKPt2jP113D1ECtP4qP8SvsPfTj, glm-5.3-flash in OutLayer's enclave,
+  QUOTE → COUNTER → ACCEPT, `14.00 USDC` in 3 items, 57 s; approvals
+  https://testnet.nearblocks.io/txns/6b25czno2mFQarVTfHo1LxdsHFkUs9FjcgViVWsb38Yf (buyer),
+  https://testnet.nearblocks.io/txns/DN2EDJVhfcdUZ6zsqG8TJwD7yRGgwbsxqdfdeqgiT2s5 (vendor). The agreement is
+  registered with Circle's token. `make verify-usdc DEAL=a1.accord-usdc.testnet`: 4 checks ok · 1 partial · 2 not
+  checked (payee: no active recipient yet; release: needs `outlayer-verify`).
+- **Not done yet:** funding. Circle's faucet is a captcha form, so `northwind-demo.testnet` must receive at least
+  `14 USDC` from https://faucet.circle.com (network NEAR Testnet) before `make finish-usdc DEAL=a1.accord-usdc.testnet`
+  funds it, proves the recipient with the Payee job, pays item 1 and shows the redirect refused and the key revoked.
+- **The presets:** Circle's faucet gives about `20 USDC` per address every 1 to 2 hours, so a Circle room seals
+  `usdc-procurement` (buyer ceiling `18`, target `14`; vendor floor `12`, target `16`), in the live targets, the seal
+  page and the demo counterparty. A test USDC room keeps its presets.
+- **App:** `ACCORD_FACTORY` and `ACCORD_TOKEN` stay the default pair; `ACCORD_FACTORY_USDC` and `ACCORD_TOKEN_USDC`, when
+  set, add the Circle pair. The relayer carries `create_agreement` on either factory, calls on either factory's
+  agreements, and `ft_transfer_call` on each factory's own token (read from that factory's config) only into that
+  factory's agreements; a token into the other factory's agreement is refused. With the variables absent the app is
+  as before. Limit: the portfolio totals add test USDC and Circle USDC together.
