@@ -71,6 +71,15 @@ export async function openSession(b: { account: string; public_key: string; sign
   return { ok: true, expires: exp };
 }
 
+/** Sets the session for an account the server has already proven another way (a verified NEAR Auth login). */
+export async function openSessionFor(account: string): Promise<number> {
+  const exp = Math.floor(Date.now() / 1000) + TTL_SECS;
+  (await cookies()).set(SESSION_COOKIE, encode(account, exp), {
+    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: TTL_SECS,
+  });
+  return exp;
+}
+
 export async function closeSession() {
   (await cookies()).delete(SESSION_COOKIE);
 }
