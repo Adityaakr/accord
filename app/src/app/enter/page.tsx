@@ -4,8 +4,10 @@
 // show how many rooms; every one stays selectable. The choice is remembered and can be changed from the sidebar.
 
 import Link from "next/link";
+import { AccountId, shortAccount } from "@/components/account/AccountId";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import type { Portfolio } from "@/server/data";
 import { LogoMark } from "@/components/LogoMark";
 import { PixelIcon } from "@/components/PixelIcon";
@@ -18,6 +20,7 @@ export default function Enter() {
   const w = useWallet();
   const router = useRouter();
   const { id: current, choose } = useWorkspace();
+  const reduce = useReducedMotion() ?? false;
   const [counts, setCounts] = useState<Record<string, number> | null>(null);
 
   useEffect(() => {
@@ -42,58 +45,45 @@ export default function Enter() {
   const suggested = counts ? WORKSPACES.filter((x) => x.role && (counts[x.role] ?? 0) > 0).sort((a, b) => (counts[b.role!] ?? 0) - (counts[a.role!] ?? 0))[0]?.id : null;
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} texture-strong`}>
       <header className={styles.top}>
         <Link href="/" className={styles.brand}><LogoMark /><span>Accord</span></Link>
         <div className={styles.topRight}>
-          {w.accountId ? <span className={`mono ${styles.who}`}>{w.accountId}</span> : <Link href="/signin" className="link">Sign in</Link>}
+          {w.accountId ? <span className={`mono ${styles.who}`} title={w.accountId}>{shortAccount(w.accountId)}</span> : <Link href="/signin" className="link">Sign in</Link>}
           <ThemeToggle compact />
         </div>
       </header>
 
       <div className={styles.center}>
-        <div className={styles.intro}>
-          <h1 className={styles.title}>How are you using Accord today?</h1>
-          <p className={styles.lead}>Each workspace shows only what that role needs. You can switch at any time from the sidebar.</p>
-        </div>
+        <motion.div className={styles.intro} initial={reduce ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.2, 0.8, 0.3, 1] }}>
+          <h1 className={styles.title}>Choose a workspace</h1>
+          <p className={styles.lead}>Each one shows only what that role needs. Switch any time from the sidebar.</p>
+        </motion.div>
 
         <ul className={styles.grid}>
-          {WORKSPACES.filter((x) => x.id !== "auditor").map((x) => {
+          {WORKSPACES.filter((x) => x.id !== "auditor").map((x, i) => {
             const n = x.role && counts ? counts[x.role] ?? 0 : 0;
-            const isSuggested = x.id === suggested;
+            const note = x.planned ? "Planned" : n > 0 ? `${n} room${n === 1 ? "" : "s"}` : x.id === current ? "Last used" : x.id === suggested ? "Suggested" : "";
             return (
-              <li key={x.id}>
-                <button type="button" className={`${styles.card} ${isSuggested ? styles.suggested : ""}`} onClick={() => go(x.id)}>
+              <motion.li key={x.id} initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.06 + i * 0.05, ease: [0.2, 0.8, 0.3, 1] }}>
+                <button type="button" className={`${styles.card} ${x.planned ? styles.subdued : ""}`} onClick={() => go(x.id)}>
                   <span className={styles.cardTop}>
-                    <span className={styles.tile}><PixelIcon name={x.icon} size={22} /></span>
-                    <span className={styles.badges}>
-                      {n > 0 ? <span className={styles.count}>{n} room{n === 1 ? "" : "s"}</span> : null}
-                      {x.planned ? <span className={styles.planned}>Planned</span> : null}
-                    </span>
+                    <span className={styles.tile}><PixelIcon name={x.icon} size={20} /></span>
+                    {note ? <span className={styles.note}>{note}</span> : null}
                   </span>
-                  <span className={styles.name}>{x.name}</span>
+                  <span className={styles.name}>{x.name}<span className={styles.arrow} aria-hidden="true">→</span></span>
                   <span className={styles.line}>{x.line}</span>
-                  <span className={styles.can}>
-                    {x.can.map((c) => <span key={c} className={styles.canItem}>{c}</span>)}
-                  </span>
-                  <span className={styles.enterRow}>{isSuggested ? "Suggested for you" : x.id === current ? "Last used" : "Enter"}<span className={styles.arrow} aria-hidden="true">→</span></span>
                 </button>
-              </li>
+              </motion.li>
             );
           })}
         </ul>
 
-        {(() => {
-          const a = WORKSPACES.find((x) => x.id === "auditor")!;
-          return (
-            <button type="button" className={styles.auditor} onClick={() => go("auditor")}>
-              <span className={styles.tile}><PixelIcon name={a.icon} size={20} /></span>
-              <span className={styles.auditorText}><span className={styles.auditorName}>Just checking an agreement?</span><span className={styles.line}>Open the Auditor workspace: verify any agreement and read the public record. No account needed.</span></span>
-              <span className={styles.arrow} aria-hidden="true">→</span>
-            </button>
-          );
-        })()}
+        <button type="button" className={styles.auditor} onClick={() => go("auditor")}>
+          Only verifying an agreement? <span className={styles.auditorLink}>Open the public record <span className={styles.arrowInline} aria-hidden="true">→</span></span>
+        </button>
       </div>
     </div>
   );
 }
+
