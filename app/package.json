@@ -12,19 +12,19 @@
   },
   "dependencies": {
     "@accord/sdk": "workspace:*",
+    "@accord/store": "workspace:*",
+    "@hot-labs/near-connect": "0.12.0",
+    "@noble/hashes": "1.8.0",
+    "near-api-js": "7.3.1",
     "next": "16.3.8",
+    "pg": "8.23.1",
     "react": "19.2.9",
     "react-dom": "19.2.9",
-    "server-only": "0.0.1",
-    "@hot-labs/near-connect": "0.11.4",
-    "near-api-js": "7.3.1",
-    "pg": "8.23.1",
-    "@noble/hashes": "1.8.0",
-    "@accord/store": "workspace:*"
+    "server-only": "0.0.1"
   },
   "devDependencies": {
+    "@types/pg": "8.23.1",
     "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2",
-    "@types/pg": "8.23.1"
+    "@types/react-dom": "19.2.2"
   }
 }

@@ -8,9 +8,12 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { fromBase64, toTxResult, type Signer, type TxResult } from "@accord/sdk";
 
 export type WalletKind = "near-connect" | "sandbox";
+/** How the person signed in: their own NEAR wallet, NEAR Auth email (not wired yet), or a local sandbox key. */
+export type SignInMethod = "wallet" | "email" | "sandbox";
 
 export interface WalletState {
   kind: WalletKind;
+  method: SignInMethod | null;
   network: string;
   accountId: string | null;
   signer: Signer | null;
@@ -95,8 +98,10 @@ function sandboxSigner(role: string, accountId: string): Signer {
   };
 }
 
+/** `network` is the app config's label: "local sandbox", "testnet" or "mainnet". */
 export function WalletProvider({ network, children }: { network: string; children: ReactNode }) {
   const kind: WalletKind = network === "local sandbox" ? "sandbox" : "near-connect";
+  const chain: "mainnet" | "testnet" = network === "mainnet" ? "mainnet" : "testnet";
   const [connector, setConnector] = useState<Connector | null>(null);
   const [accountId, setAccountId] = useState<string | null>(null);
   const [signer, setSigner] = useState<Signer | null>(null);
@@ -124,7 +129,7 @@ export function WalletProvider({ network, children }: { network: string; childre
     let live = true;
     (async () => {
       const { NearConnector } = await import("@hot-labs/near-connect");
-      const c = new NearConnector({ network: "testnet" }) as unknown as Connector;
+      const c = new NearConnector({ network: chain }) as unknown as Connector;
       if (!live) return;
       setConnector(c);
       c.on("wallet:signOut", () => { setAccountId(null); setSigner(null); });
@@ -143,7 +148,7 @@ export function WalletProvider({ network, children }: { network: string; childre
       }
     })();
     return () => { live = false; };
-  }, [kind]);
+  }, [kind, chain]);
 
   const connect = useCallback(async (sandboxRole?: string) => {
     setError(null);
@@ -176,9 +181,10 @@ export function WalletProvider({ network, children }: { network: string; childre
     setSigner(null);
   }, [kind, connector]);
 
+  const method: SignInMethod | null = accountId ? (kind === "sandbox" ? "sandbox" : "wallet") : null;
   const value = useMemo<WalletState>(() => ({
-    kind, network, accountId, signer, connecting, error, connect, disconnect, sandboxPrincipals,
-  }), [kind, network, accountId, signer, connecting, error, connect, disconnect, sandboxPrincipals]);
+    kind, method, network, accountId, signer, connecting, error, connect, disconnect, sandboxPrincipals,
+  }), [kind, method, network, accountId, signer, connecting, error, connect, disconnect, sandboxPrincipals]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
