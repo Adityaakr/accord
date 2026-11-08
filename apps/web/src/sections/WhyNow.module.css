@@ -51,6 +51,16 @@
 .source a { color: var(--text-medium); text-decoration: underline; text-decoration-color: rgba(var(--ink-rgb), 0.3); text-underline-offset: 3px; }
 .source a:hover { color: var(--text-strong); }
 
+/* Second band of figures: a mono label, four tiles in a row (2 × 2 on tablet, 1 column on phone), its own source line */
+.more { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+.moreLabel { font-size: 12px; letter-spacing: 0.04em; color: var(--text-weak); background: none; padding: 0; }
+.row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; width: 100%; }
+.row .tile { grid-column: auto; }
+@media (min-width: 1200px) { .row .label { min-height: 2.9em; } }
+.more .source { margin-top: 0; }
+@media (max-width: 1199.98px) { .row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 809.98px) { .row { grid-template-columns: 1fr; } }
+
 /* Body (65-character measure), then the worst-case statement */
 .copy { display: flex; flex-direction: column; gap: 32px; width: 100%; }
 .body { max-width: 65ch; color: var(--text-medium); }

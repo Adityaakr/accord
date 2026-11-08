@@ -246,7 +246,35 @@ Complaints that referenced AI, 2025[1](/research#ic3-2025)
 
 Source: FBI Internet Crime Complaint Center, Internet Crime Reports for [2025](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf) and [2023](https://ic3.gov/annualreport/reports/2023_ic3report.pdf).
 
-Agents now read the messages. In May 2026, a wallet bot paid an attacker tokens then valued at $150,000 to $174,000 after an AI model on X translated a reply written in Morse code into a transfer instruction.[3](/research#grok-bankr-incident) The UK's National Cyber Security Centre warns that prompt injection "may never be totally mitigated" and recommends deterministic safeguards outside the model.[4](/research#ncsc-prompt-injection) In Accord, the contract is that safeguard: it checks every payment against the approved terms and the authorised recipient.
+Payments are the target, and the model is not the safeguard
+
+US organisations hit by business email compromise, 2025[3](/research#afp-2026)
+
+74%
+
+`76%` faced attempted or actual payments fraud.
+
+Stolen in crypto, 2025[4](/research#chainalysis-2025)
+
+$3.4B
+
+January to early December. One exchange breach accounted for `$1.5B`.
+
+US fraud losses generative AI could enable by 2027[5](/research#deloitte-genai-fraud)
+
+$40B
+
+A forecast, up from `$12.3B` in 2023: 32% a year.
+
+Prompt injections that still worked on a browser agent[6](/research#anthropic-chrome)
+
+11.2%
+
+With the maker's own mitigations, in 123 tests. `23.6%` without them.
+
+Sources: AFP Payments Fraud and Control Survey 2026; Chainalysis, December 2025; Deloitte Center for Financial Services, May 2024 (forecast); Anthropic, August 2025. Details on [Research](/research#attack-trends).
+
+Agents now read the messages. In May 2026, a wallet bot paid an attacker tokens then valued at $150,000 to $174,000 after an AI model on X translated a reply written in Morse code into a transfer instruction.[7](/research#grok-bankr-incident) The UK's National Cyber Security Centre warns that prompt injection "may never be totally mitigated" and recommends deterministic safeguards outside the model.[8](/research#ncsc-prompt-injection) In Accord, the contract is that safeguard: it checks every payment against the approved terms and the authorised recipient.
 
 Worst case
 
@@ -258,7 +286,7 @@ Where each attack stops · the agent is assumed to follow every message it reads
 
 Not stopped by the contract: a person approving the wrong terms, or a payment the terms already allow. Those stay with people, on the record.
 
-Where each attack stops. Each attack ends at a check in code; the tags give the closest entry in the OWASP Top 10 for Agentic Applications.[5](/research#owasp-agentic-2026)
+Where each attack stops. Each attack ends at a check in code; the tags give the closest entry in the OWASP Top 10 for Agentic Applications.[9](/research#owasp-agentic-2026)
 
 Try to move the money ↓
 

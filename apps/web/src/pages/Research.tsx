@@ -87,6 +87,39 @@ const QUESTIONS: Question[] = [
         ],
       },
       {
+        id: "afp-2026",
+        title: "2026 AFP Payments Fraud and Control Survey.",
+        who: "Association for Financial Professionals, press release, 14 April 2026. Survey of 465 treasury practitioners at US organisations, conducted January 2026, reporting 2025.",
+        url: "https://www.financialprofessionals.org/about/learn-more/press-releases/Details/over-75-percent-of-us-firms-experienced-payments-fraud-in-2025-while-ai-adoption-for-fraud-mitigation-lags/",
+        blocks: [
+          { label: ESTABLISHES, text: "74% of organisations were affected by business email compromise in 2025, and 76% of US organisations experienced attempted or actual payments fraud." },
+          { label: NOT_ESTABLISHES, text: "how much was lost, or anything about payments made by agents. It is a survey of practitioners, not a count of incidents." },
+          { label: INFORMS, text: "a message can never change where an Accord payment goes; the recipient is fixed when both companies approve the terms." },
+        ],
+      },
+      {
+        id: "chainalysis-2025",
+        title: "Crypto theft in 2025.",
+        who: "Chainalysis, blog post, 18 December 2025, ahead of its 2026 Crypto Crime Report.",
+        url: "https://www.chainalysis.com/blog/crypto-hacking-stolen-funds-2026/",
+        blocks: [
+          { label: ESTABLISHES, text: "over $3.4 billion was stolen in crypto from January through early December 2025, with the February compromise of Bybit alone accounting for $1.5 billion." },
+          { label: NOT_ESTABLISHES, text: "that agents were involved; most of the value came from a few large service compromises." },
+          { label: INFORMS, text: "agreement funds sit in each agreement's own account with no full-access key, and only the contract can send them." },
+        ],
+      },
+      {
+        id: "deloitte-genai-fraud",
+        title: "Generative AI is expected to magnify the risk of deepfakes and other fraud in banking.",
+        who: "Deloitte Center for Financial Services, 29 May 2024. A forecast built from the FBI's fraud categories under conservative, base and aggressive adoption scenarios.",
+        url: "https://www.deloitte.com/us/en/insights/industry/financial-services/deepfake-banking-fraud-risk-on-the-rise.html",
+        blocks: [
+          { label: ESTABLISHES, text: "Deloitte predicts generative AI could enable fraud losses of $40 billion in the United States by 2027, from $12.3 billion in 2023, a compound annual growth rate of 32%." },
+          { label: NOT_ESTABLISHES, text: "a measured loss. It is the forecast of one firm, and its conservative scenario is lower." },
+          { label: INFORMS, text: "Accord does not try to detect convincing fakes; a payment that does not match the approved terms is refused however convincing the request." },
+        ],
+      },
+      {
         id: "grok-bankr-incident",
         title: "The Grok and Bankr incident, as reported.",
         /* The copy sets each URL inside the sentence, after its own outlet. */
@@ -321,6 +354,17 @@ const QUESTIONS: Question[] = [
             label: INFORMS,
             text: "the agent's privileges are bounded by the contract (one key, one method, approved terms, authorised recipient), exceptions require human approval, and Accord does not claim to prevent injection, only to bound what it can cause.",
           },
+        ],
+      },
+      {
+        id: "anthropic-chrome",
+        title: "Piloting Claude in Chrome.",
+        who: "Anthropic, 25 August 2025 (updated November and December 2025). The model maker's own red-teaming of a browser agent, run in autonomous mode.",
+        url: "https://claude.com/blog/claude-for-chrome",
+        blocks: [
+          { label: ESTABLISHES, text: "across 123 prompt-injection test cases representing 29 attack scenarios, deliberate attacks succeeded 23.6% of the time without safety mitigations and 11.2% of the time with them." },
+          { label: NOT_ESTABLISHES, text: "the rate for any other model, product or later version; Anthropic reports further improvements after this test." },
+          { label: INFORMS, text: "Accord does not rely on the model resisting every injection; the contract checks each payment whatever the agent was told." },
         ],
       },
       {

@@ -4,7 +4,7 @@ Research
 
 Accord's design responds to problems that researchers, standards bodies, payment networks and practitioners have documented. This page lists those sources by the question each one answers, states what each establishes and what it does not, and names the design decision it informs. Findings are the authors' own; the connection to Accord is ours. Nothing here implies that any author or organisation has reviewed or endorsed Accord.
 
-6 questions, 21 sources. Choose a floor to read its sources.
+6 questions, 25 sources. Choose a floor to read its sources.
 
 Floor 06 · Attacks
 
@@ -49,6 +49,66 @@ whether the growth reflects more crime, more reporting, or both.
 #### Design decision it informs
 
 none on its own; it dates the trend shown on the homepage.
+
+[financialprofessionals.org Document 2026 AFP Payments Fraud and Control Survey](https://www.financialprofessionals.org/about/learn-more/press-releases/Details/over-75-percent-of-us-firms-experienced-payments-fraud-in-2025-while-ai-adoption-for-fraud-mitigation-lags/)
+
+### 2026 AFP Payments Fraud and Control Survey.
+
+Association for Financial Professionals, press release, 14 April 2026. Survey of 465 treasury practitioners at US organisations, conducted January 2026, reporting 2025. [Source ↗](https://www.financialprofessionals.org/about/learn-more/press-releases/Details/over-75-percent-of-us-firms-experienced-payments-fraud-in-2025-while-ai-adoption-for-fraud-mitigation-lags/)
+
+What it establishes
+
+74% of organisations were affected by business email compromise in 2025, and 76% of US organisations experienced attempted or actual payments fraud.
+
+More
+
+#### What it does not establish
+
+how much was lost, or anything about payments made by agents. It is a survey of practitioners, not a count of incidents.
+
+#### Design decision it informs
+
+a message can never change where an Accord payment goes; the recipient is fixed when both companies approve the terms.
+
+[chainalysis.com Document Crypto theft in 2025](https://www.chainalysis.com/blog/crypto-hacking-stolen-funds-2026/)
+
+### Crypto theft in 2025.
+
+Chainalysis, blog post, 18 December 2025, ahead of its 2026 Crypto Crime Report. [Source ↗](https://www.chainalysis.com/blog/crypto-hacking-stolen-funds-2026/)
+
+What it establishes
+
+over $3.4 billion was stolen in crypto from January through early December 2025, with the February compromise of Bybit alone accounting for $1.5 billion.
+
+More
+
+#### What it does not establish
+
+that agents were involved; most of the value came from a few large service compromises.
+
+#### Design decision it informs
+
+agreement funds sit in each agreement's own account with no full-access key, and only the contract can send them.
+
+[deloitte.com Document Generative AI is expected to magnify the risk of deepfakes and other fraud in banking](https://www.deloitte.com/us/en/insights/industry/financial-services/deepfake-banking-fraud-risk-on-the-rise.html)
+
+### Generative AI is expected to magnify the risk of deepfakes and other fraud in banking.
+
+Deloitte Center for Financial Services, 29 May 2024. A forecast built from the FBI's fraud categories under conservative, base and aggressive adoption scenarios. [Source ↗](https://www.deloitte.com/us/en/insights/industry/financial-services/deepfake-banking-fraud-risk-on-the-rise.html)
+
+What it establishes
+
+Deloitte predicts generative AI could enable fraud losses of $40 billion in the United States by 2027, from $12.3 billion in 2023, a compound annual growth rate of 32%.
+
+More
+
+#### What it does not establish
+
+a measured loss. It is the forecast of one firm, and its conservative scenario is lower.
+
+#### Design decision it informs
+
+Accord does not try to detect convincing fakes; a payment that does not match the approved terms is refused however convincing the request.
 
 [cointelegraph.com](https://cointelegraph.com/magazine/grok-bankr-wallet-free-nft-prompt-injection)
 
@@ -273,6 +333,26 @@ that any system eliminates prompt injection.
 #### Design decision it informs
 
 the agent's privileges are bounded by the contract (one key, one method, approved terms, authorised recipient), exceptions require human approval, and Accord does not claim to prevent injection, only to bound what it can cause.
+
+[claude.com Document Piloting Claude in Chrome](https://claude.com/blog/claude-for-chrome)
+
+### Piloting Claude in Chrome.
+
+Anthropic, 25 August 2025 (updated November and December 2025). The model maker's own red-teaming of a browser agent, run in autonomous mode. [Source ↗](https://claude.com/blog/claude-for-chrome)
+
+What it establishes
+
+across 123 prompt-injection test cases representing 29 attack scenarios, deliberate attacks succeeded 23.6% of the time without safety mitigations and 11.2% of the time with them.
+
+More
+
+#### What it does not establish
+
+the rate for any other model, product or later version; Anthropic reports further improvements after this test.
+
+#### Design decision it informs
+
+Accord does not rely on the model resisting every injection; the contract checks each payment whatever the agent was told.
 
 [ncsc.gov.uk](https://www.ncsc.gov.uk/blog-post/prompt-injection-is-not-sql-injection)
 

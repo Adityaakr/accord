@@ -70,12 +70,48 @@ export function WhyNow() {
         <a href={IC3_2025} target="_blank" rel="noreferrer">2025</a> and <a href={IC3_2023} target="_blank" rel="noreferrer">2023</a>.
       </p>
 
+      {/* The second band of figures: payments are the target, fakes get cheaper, and the model alone is not the safeguard.
+          Each figure is checked at its publisher (8 Nov 2026) and has its row on /research; forecasts say so. */}
+      <div className={styles.more}>
+        <p className={`mono ${styles.moreLabel}`}>Payments are the target, and the model is not the safeguard</p>
+        <div className={styles.row}>
+          <Tile
+            delay="0s"
+            label={<>US organisations hit by business email compromise, 2025<Fn n={3} to="afp-2026" /></>}
+            value="74%"
+            line={<><code className="mono">76%</code> faced attempted or actual payments fraud.</>}
+          />
+          <Tile
+            delay="0.08s"
+            label={<>Stolen in crypto, 2025<Fn n={4} to="chainalysis-2025" /></>}
+            value="$3.4B"
+            line={<>January to early December. One exchange breach accounted for <code className="mono">$1.5B</code>.</>}
+          />
+          <Tile
+            delay="0.16s"
+            label={<>US fraud losses generative AI could enable by 2027<Fn n={5} to="deloitte-genai-fraud" /></>}
+            value="$40B"
+            line={<>A forecast, up from <code className="mono">$12.3B</code> in 2023: 32% a year.</>}
+          />
+          <Tile
+            delay="0.24s"
+            label={<>Prompt injections that still worked on a browser agent<Fn n={6} to="anthropic-chrome" /></>}
+            value="11.2%"
+            line={<>With the maker's own mitigations, in 123 tests. <code className="mono">23.6%</code> without them.</>}
+          />
+        </div>
+        <p className={`t-body-sm ${styles.source}`}>
+          Sources: AFP Payments Fraud and Control Survey 2026; Chainalysis, December 2025; Deloitte Center for Financial Services, May 2024 (forecast);
+          Anthropic, August 2025. Details on <Link to="/research#attack-trends">Research</Link>.
+        </p>
+      </div>
+
       <Appear as="div" className={styles.copy} effect={{ ...appear("0s"), threshold: 0.3 }}>
         <p className={`t-body-lg ${styles.body}`}>
           Agents now read the messages. In May 2026, a wallet bot paid an attacker tokens then valued at $150,000 to $174,000 after an AI model on X
-          translated a reply written in Morse code into a transfer instruction.<Fn n={3} to="grok-bankr-incident" /> The UK's National Cyber Security
+          translated a reply written in Morse code into a transfer instruction.<Fn n={7} to="grok-bankr-incident" /> The UK's National Cyber Security
           Centre warns that prompt injection "may never be totally mitigated" and recommends deterministic safeguards outside the model.
-          <Fn n={4} to="ncsc-prompt-injection" /> In Accord, the contract is that safeguard: it checks every payment against the approved terms and the
+          <Fn n={8} to="ncsc-prompt-injection" /> In Accord, the contract is that safeguard: it checks every payment against the approved terms and the
           authorised recipient.
         </p>
         <div className={styles.worst}>
@@ -90,7 +126,7 @@ export function WhyNow() {
         <AttackScene />
         <figcaption className={`t-body-sm ${styles.caption}`}>
           <span className={styles.captionLead}>Where each attack stops.</span> Each attack ends at a check in code; the tags give the closest entry in the
-          OWASP Top 10 for Agentic Applications.<Fn n={5} to="owasp-agentic-2026" />
+          OWASP Top 10 for Agentic Applications.<Fn n={9} to="owasp-agentic-2026" />
         </figcaption>
       </Appear>
 
