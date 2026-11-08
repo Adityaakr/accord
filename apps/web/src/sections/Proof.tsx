@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react"
-import { motion, useReducedMotion } from "motion/react"
+import { useState, type FormEvent, type ReactNode } from "react"
+import { motion } from "motion/react"
 import { Appear, type AppearEffect } from "../lib/motion"
 import { appear } from "../components/SectionHeading"
 import { Mono } from "../components/Mono"
 import { FormButton, type FormButtonState } from "../components/FormButton"
 import { Button } from "../components/Button"
-import { API, useLive, asOfLabel, hasCount, panelLabel, utcTime, txUrl, sendToInbox, type InboxOutcome, type LiveValues, type Refusal } from "../lib/live"
+import { API, useLive, utcTime, sendToInbox, type InboxOutcome } from "../lib/live"
 import { Arrow } from "../components/Arrow"
-import { isPlaceholder } from "../content/links"
 import { InboxMock } from "../components/InboxMock"
+import { AgreementRecord } from "../components/AgreementRecord"
+import tl from "../styles/Timeline.module.css"
 import styles from "./Proof.module.css"
 
 /* "Security demonstration" (anchor #try, spec v6.6 §3.8; #security-demo kept as an alias): an About-style image row (image left, text right; the row
@@ -28,7 +29,6 @@ const slide = (x: -100 | 100): AppearEffect => ({
   enter: { opacity: 0, x, y: 0, scale: 1, rotate: 0, transition: { type: "spring", stiffness: 240, damping: 80, mass: 1, delay: "0s" } },
 })
 
-const STATES = ["Sealed", "Attested", "Executing", "Settled"] as const
 
 /* Spec §3.7 copy, verbatim */
 const ROW_TITLE = "Try to move the money."
@@ -45,210 +45,7 @@ const SOURCE_DOWN = "The inbox store is unreachable; nothing was sent. Try again
 const UNCONFIGURED = "The demonstration inbox is not open yet."
 const MESSAGE_MAX = 2000
 
-/* Spec §5 Refusal line: the sentence for the reason codes the contract emits; other reasons print as received. */
-const REFUSAL_TEXT: Record<string, string> = {
-  ERR_PAYEE_MISMATCH: "Refused: the account is not the authorised recipient. Nothing was sent.",
-  ERR_AMOUNT_MISMATCH: "Refused: the amount is not the approved amount for this payment. Nothing was sent.",
-}
-const CODE = /ERR_[A-Z0-9_]+/
-function splitReason(reason: string): { code: string | null; text: string | null } {
-  const code = reason.match(CODE)?.[0] ?? null
-  if (code && REFUSAL_TEXT[code]) return { code, text: REFUSAL_TEXT[code] }
-  return { code, text: reason.trim() === code ? null : reason }
-}
 
-const LOG_EMPTY = "No attempts yet. Send the agent a message."
-const LOG_CLOSED = "Refused attempts appear here, newest first, once the demonstration inbox opens."
-
-/* ---------- The two record panels: agreement + refusal log ---------- */
-
-const utcDate = (iso: string) => {
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return iso
-  return d.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }) + " UTC"
-}
-
-/* Empty state for an agreement row; the panel header already carries the snapshot time, so rows do not repeat it. */
-function Empty() {
-  return <p className={`t-body-sm ${styles.empty}`}>No entries yet</p>
-}
-
-/* Title-row label (spec §5 Live panel): "last known · 14:02 UTC" or "updated 14:02 UTC"; never the word "live". */
-function PanelLabel({ v }: { v: LiveValues | null }) {
-  if (v?.label) return <p className={`t-body-sm ${styles.panelHint}`}>{v.label}</p>
-  if (!v || !API) return null
-  return <p className={`t-body-sm ${styles.panelHint}`} title={asOfLabel(v)}>{panelLabel(v)}</p>
-}
-
-/* Left panel: the agreement page from the app on testnet */
-function AgreementPanel({ v, level = 3 }: { v: LiveValues | null; level?: 2 | 3 }) {
-  const H = level === 2 ? "h2" : "h3"
-  const a = v?.agreement
-  const payeeKnown = !!a && a.payee.domain !== ""
-  /* A state is highlighted only for a real agreement; the bundled snapshot carries a placeholder id and no state of its own. */
-  const realAgreement = !!a && a.id !== "" && !isPlaceholder(a.id)
-  return (
-    <article className={styles.panel} aria-labelledby="record-agreement-title">
-      <header className={styles.panelHead}>
-        <H id="record-agreement-title" className={`t-h6 ${styles.panelTitle}`}>Agreement</H>
-        <div className={styles.panelMeta}>
-          {a && !isPlaceholder(a.id) && a.id !== "" ? <Mono className={styles.panelId}>{a.id}</Mono> : null}
-          <PanelLabel v={v} />
-        </div>
-      </header>
-
-      {/* Four-state strip; the current state in the template's white pill */}
-      <ol className={styles.states} aria-label="Agreement state">
-        {STATES.map((s) => {
-          const current = realAgreement && a?.state === s
-          return (
-            <li key={s} aria-current={current ? "step" : undefined}>
-              <Mono className={`${styles.state} ${current ? styles.stateCurrent : ""}`}>{s}</Mono>
-            </li>
-          )
-        })}
-      </ol>
-
-      <div className={styles.panelRow}>
-        <p className={`t-body-sm ${styles.rowLabel}`}>Approved terms</p>
-        {!v ? <p className={`t-body-sm ${styles.empty}`}>Loading the agreement record.</p> : a && a.terms.length > 0 ? (
-          <ul className={styles.terms}>
-            {a.terms.map((t) => (
-              <li key={t.milestone} className={styles.term}>
-                <Mono className={styles.cell}>milestone {t.milestone}</Mono>
-                <Mono className={styles.cell}>{t.amount}</Mono>
-                <Mono className={styles.cell}>due {t.due}</Mono>
-              </li>
-            ))}
-          </ul>
-        ) : <Empty />}
-      </div>
-
-      <div className={styles.panelRow}>
-        <p className={`t-body-sm ${styles.rowLabel}`}>Authorised recipient</p>
-        {!v ? <p className={`t-body-sm ${styles.empty}`}>Loading the agreement record.</p> : payeeKnown ? (
-          <div className={styles.lines}>
-            {a.payee.account ? (
-              <>
-                <Mono className={styles.cell}>{a.payee.account} · v{a.payee.version}</Mono>
-                <Mono className={`${styles.cell} ${styles.wrapCell}`}>proven on {a.payee.domain}</Mono>
-              </>
-            ) : (
-              <>
-                <Mono className={styles.cell}>{a.payee.domain} · v{a.payee.version}</Mono>
-                {a.payee.proof ? <Mono className={`${styles.cell} ${styles.wrapCell}`}>{a.payee.proof}</Mono> : null}
-              </>
-            )}
-          </div>
-        ) : <Empty />}
-      </div>
-
-      <div className={styles.panelRow}>
-        <p className={`t-body-sm ${styles.rowLabel}`}>Last transfer</p>
-        {!v ? <p className={`t-body-sm ${styles.empty}`}>Loading the agreement record.</p> : a?.lastTransfer ? (
-          <div className={styles.lines}>
-            <Mono className={styles.cell}>{a.lastTransfer.amount} → {a.lastTransfer.to}</Mono>
-            <Mono className={styles.cell}>{utcDate(a.lastTransfer.at)} · <a className={styles.txLink} href={txUrl(a.lastTransfer.tx)} target="_blank" rel="noreferrer">tx<Arrow dir="up-right" /></a></Mono>
-          </div>
-        ) : <Empty />}
-      </div>
-    </article>
-  )
-}
-
-/* The two counters (spec §3.7): mono 20px values under 12px labels, each only once its source answered; then the timestamp. */
-function Counters({ v }: { v: LiveValues }) {
-  if (!API) return null
-  const items: { label: string; value: number }[] = []
-  if (hasCount(v.attempts)) items.push({ label: "Attempts so far", value: v.attempts })
-  if (hasCount(v.paidOutsideTerms)) items.push({ label: "Paid outside the terms", value: v.paidOutsideTerms })
-  if (items.length === 0) return null
-  return (
-    <div className={styles.counters}>
-      {items.length > 0 ? (
-        <dl className={styles.counterList}>
-          {items.map((c) => (
-            <div key={c.label} className={styles.counter}>
-              <dt className={styles.counterLabel}>{c.label}</dt>
-              <dd className={styles.counterValue}><Mono className={styles.counterMono}>{c.value.toLocaleString("en-GB")}</Mono></dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
-    </div>
-  )
-}
-
-/* One refusal line (spec §5): time · code · sentence. A line that was not in the previous render enters with the
-   §1.7 motion (200ms fade, 4px rise); existing lines never animate; reduced motion removes the transform. */
-const ENTER = { duration: 0.2, ease: "easeOut" as const }
-function RefusalLine({ r, isNew, reduce }: { r: Refusal; isNew: boolean; reduce: boolean }) {
-  const { code, text } = splitReason(r.reason)
-  const animate = isNew && !reduce
-  return (
-    <motion.li
-      className={styles.logLine}
-      initial={animate ? { opacity: 0, y: 4 } : false}
-      animate={{ opacity: 1, y: 0 }}
-      transition={ENTER}
-    >
-      <time dateTime={r.at} className={`mono ${styles.logTime}`}>{utcTime(r.at, true)}</time>
-      {code ? (
-        <>
-          <span className={styles.sep} aria-hidden="true">·</span>
-          <Mono tone="refusal" className={styles.logCode}>{code}</Mono>
-        </>
-      ) : null}
-      {r.amount && r.to ? (
-        <span className={styles.logText}>
-          <Mono className={styles.logCode}>{r.amount}</Mono> to <Mono className={styles.logCode}>{r.to}</Mono>. Nothing was sent.
-          {r.tx ? <> <a className={styles.txLink} href={txUrl(r.tx)} target="_blank" rel="noreferrer">tx<Arrow dir="up-right" /></a></> : null}
-        </span>
-      ) : text ? <span className={styles.logText}>{text}</span> : null}
-    </motion.li>
-  )
-}
-
-/* Right panel: the counters, then the refusal log (newest first, a polite live region) */
-function RefusalPanel({ v, limit, level = 3 }: { v: LiveValues | null; limit: number; level?: 2 | 3 }) {
-  const H = level === 2 ? "h2" : "h3"
-  const reduce = useReducedMotion() ?? false
-  const sorted = v ? [...v.refusals].sort((x, y) => Date.parse(y.at) - Date.parse(x.at)).slice(0, limit) : []
-  /* Stable keys: timestamp + reason + sender, suffixed by occurrence so identical refusals keep distinct identities */
-  const counts = new Map<string, number>()
-  const lines = sorted.map((r) => {
-    const base = `${r.at}|${r.reason}|${r.from}`
-    const n = counts.get(base) ?? 0
-    counts.set(base, n + 1)
-    return { r, key: `${base}#${n}` }
-  })
-  /* Keys present in the previous render; null until data has rendered once, so the page loads at rest (§1.7). */
-  const seen = useRef<Set<string> | null>(null)
-  const seenNow = seen.current
-  useEffect(() => {
-    if (v) seen.current = new Set(lines.map((l) => l.key))
-  })
-  return (
-    <article className={styles.panel} aria-labelledby="record-refusal-title">
-      <header className={styles.panelHead}>
-        <H id="record-refusal-title" className={`t-h6 ${styles.panelTitle}`}>Refusal log</H>
-        <PanelLabel v={v} />
-      </header>
-      {v ? <Counters v={v} /> : null}
-      <div className={styles.log} aria-live="polite" aria-atomic="false" aria-busy={!v}>
-        {!v ? <p className={`t-body-sm ${styles.empty}`}>Loading the refusal log.</p> : lines.length === 0 ? (
-          <p className={`t-body-sm ${styles.empty}`}>{API ? LOG_EMPTY : LOG_CLOSED}</p>
-        ) : (
-          <ol className={styles.logList}>
-            {lines.map((l) => (
-              <RefusalLine key={l.key} r={l.r} reduce={reduce} isNew={seenNow !== null && !seenNow.has(l.key)} />
-            ))}
-          </ol>
-        )}
-      </div>
-    </article>
-  )
-}
 
 /* ---------- The message form (POST ${VITE_ACCORD_API_URL}/inbox) ---------- */
 
@@ -359,7 +156,7 @@ type InboxModuleProps = {
   level?: 2 | 3
 }
 
-export function InboxModule({ limit = 10, agreement = true, goal = false, level = 3 }: InboxModuleProps) {
+export function InboxModule({ goal = false, level = 3 }: InboxModuleProps) {
   const live = useLive()
   return (
     <div className={styles.module}>
@@ -374,9 +171,8 @@ export function InboxModule({ limit = 10, agreement = true, goal = false, level 
 
       {/* The record: "Data unavailable" once (when the snapshot is the last retrieved one), then the panels */}
       <div className={styles.record}>
-        <Appear className={`${styles.panels} ${agreement ? "" : styles.panelsSingle}`} effect={appearTall("0.2s")}>
-          {agreement ? <AgreementPanel v={live} level={level} /> : null}
-          <RefusalPanel v={live} limit={limit} level={level} />
+        <Appear className={tl.column} effect={appearTall("0.2s")}>
+          <AgreementRecord v={live} level={level} />
         </Appear>
       </div>
     </div>
