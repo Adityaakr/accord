@@ -4,14 +4,15 @@ import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { SectionHeading } from "../components/SectionHeading"
 import { PixelIcon, type PixelName } from "../components/PixelIcon"
 import ab from "./AudienceBand.module.css"
+import { PHASES, VISUAL } from "./HowVisuals"
 import styles from "./HowSteps.module.css"
 
 /* How it works (#how), rebuilt 8 Nov 2026 from the deal-room band's own pieces so the two read as one product: the
    band's tab row (pixel icon + label, teal timer bar), its stage (teal weave + light sheen), and on it one card. The
    card's left half explains the step (what happens, who acts, what goes on NEAR, what cannot happen); its right half
-   is a console that plays the step like the band's agent: the dot mark pulses, the status line shimmers, each call
-   appears with a spinner and then its result (teal for a pass, the band's warm tone for a refusal), and the answer
-   sweeps in. Then the next step. Choosing a tab takes over; arrow keys move; reduced motion shows each step finished
+   is a live instrument for the step (HowVisuals: mandates sealing, offers meeting inside sealed ranges, approvals and
+   escrow, requests meeting three checks, observations at hidden times, the payment and its receipt), then the answer
+   sweeps in and the next step starts. Choosing a tab takes over; arrow keys move; reduced motion shows each step finished
    and does not advance. Every panel and every line stays in the DOM, so agents and screen readers read the whole flow.
    Example values are production-shaped (.near accounts, a vendor domain) and labelled illustrative. */
 
@@ -28,11 +29,9 @@ type Step = {
   answer: string; trace: TStep[]
 }
 
-const LINE_MS = 900 // each line: spinner, then result
-const DWELL = 3800 // after the answer, before the next step
-const runMs = (s: Step) => s.trace.length * LINE_MS + 600 + DWELL
-const GLYPH: Record<TStep["k"], string> = { call: "▸", event: "←", think: "∴", out: "=" }
-const VERB: Record<TStep["k"], string> = { call: "Running", event: "Reading", think: "Thinking", out: "Checking" }
+const PHASE_MS = 1100 // each beat of a step's instrument
+const DWELL = 3600 // after the last beat, before the next step
+const runMs = (s: Step) => PHASES[s.n] * PHASE_MS + DWELL
 
 const STEPS: Step[] = [
   {
@@ -53,7 +52,7 @@ const STEPS: Step[] = [
     answer: "Terms agreed at 18,500 USDC a period, with an attestation.",
     trace: [
       { k: "call", t: "start_negotiation()", r: "Sealed Table job started" },
-      { k: "think", t: "Halcyon asks 19,800; above our ceiling. Counter inside it." },
+      { k: "think", t: "Halcyon asks 19,800. Counter at 18,000, inside our sealed ceiling." },
       { k: "event", t: "round 2", r: "18,500 USDC a period · inside both limits" },
       { k: "event", t: "on_sealed_result()", r: "terms recorded · attestation verified" },
     ],
@@ -99,57 +98,41 @@ const STEPS: Step[] = [
     trace: [
       { k: "call", t: "act(Pay{period 1})", r: "18,500 USDC → halcyon-mm.near" },
       { k: "event", t: "record", r: "1 payment · 2 refusals · 6 observations" },
-      { k: "call", t: "make verify", r: "7 checks ok" },
+      { k: "call", t: "make verify", r: "contract code, agent key, recipient proof and record checked" },
     ],
   },
 ]
 
 
 
-/* The console's progress through one step: 0 … trace.length lines shown, then done */
+/* An instrument's progress through one step: phase 0 … n, one beat every PHASE_MS */
 function useRun(on: boolean, reduce: boolean, n: number) {
-  const [shown, setShown] = useState(reduce ? n : 0)
+  const [p, setP] = useState(reduce ? n : 0)
   useEffect(() => {
-    if (reduce) { setShown(n); return }
-    if (!on) { setShown(0); return }
-    setShown(0)
-    const t = Array.from({ length: n }, (_, i) => window.setTimeout(() => setShown(i + 1), (i + 1) * LINE_MS))
+    if (reduce) { setP(n); return }
+    if (!on) { setP(0); return }
+    setP(0)
+    const t = Array.from({ length: n }, (_, i) => window.setTimeout(() => setP(i + 1), 350 + i * PHASE_MS))
     return () => t.forEach(window.clearTimeout)
   }, [on, reduce, n])
-  return shown
+  return p
 }
 
-function Console({ s, on, reduce }: { s: Step; on: boolean; reduce: boolean }) {
-  const shown = useRun(on, reduce, s.trace.length)
-  const done = shown >= s.trace.length
-  const cur = s.trace[Math.min(shown, s.trace.length - 1)]
-  const fn = cur.t.split("(")[0]
-  const status = done ? s.answer : `${VERB[cur.k]}${cur.k === "call" ? ` ${fn}` : ""}…`
+/* The right half: the step's live instrument (HowVisuals), its answer once it lands, and the six-step track. The
+   on-chain calls behind it are listed for screen readers and agents. */
+function Instrument({ s, on, reduce }: { s: Step; on: boolean; reduce: boolean }) {
+  const n = PHASES[s.n]
+  const p = useRun(on, reduce, n)
+  const done = p >= n
+  const View = VISUAL[s.n]
   return (
     <div className={styles.console}>
-      <div className={ab.room}><span>Deal room · NEAR/USDC retainer</span><span className={ab.tags}><span className={styles.state}>{s.state}</span><span className={ab.tag}>Illustrative</span></span></div>
-      <div className={ab.agent}>
-        <span className={`${ab.dotMark} ${done ? "" : ab.dotBusy}`} aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <span key={i} style={{ animationDelay: `${((i % 3) + Math.floor(i / 3)) * 0.12}s` }} />)}</span>
-        <div className={ab.agentBody}>
-          <p className={`${ab.answer} ${done ? (reduce ? "" : ab.sweep) : ab.status}`} key={done ? "done" : `s${shown}`}>{status}</p>
-          <p className={ab.meta} data-seo-skip>Step {s.n} of 06 · {done ? `${s.trace.length} calls` : `call ${shown + 1} of ${s.trace.length}`}</p>
-          <ol className={styles.trace}>
-            {s.trace.map((st, i) => {
-              const state = i < shown ? "done" : i === shown ? "run" : "wait"
-              return (
-                <li key={i} className={`${styles.tline} ${styles[state]} ${styles[`k_${st.k}`]}`}>
-                  <span className={styles.thead}><span className={styles.glyph}>{GLYPH[st.k]}</span><span className={styles.ttext}>{st.t}</span></span>
-                  {st.r ? (
-                    <span className={`${styles.tout} ${st.bad ? styles.bad : ""}`}>
-                      {state === "run" ? <><span className={ab.spin} aria-hidden="true" /> running</> : <>{st.bad ? "✕" : "↳"} {st.r}</>}
-                    </span>
-                  ) : null}
-                </li>
-              )
-            })}
-          </ol>
-        </div>
-      </div>
+      <div className={ab.room}><span>NEAR/USDC retainer · step {s.n}</span><span className={ab.tags}><span className={styles.state}>{s.state}</span><span className={ab.tag}>Illustrative</span></span></div>
+      <div className={styles.view} aria-hidden="true"><View p={p} /></div>
+      <p className={`${styles.answer} ${done ? (reduce ? "" : ab.sweep) : styles.answerWait}`} key={done ? "done" : "wait"}>{s.answer}</p>
+      <ol className={styles.sr} aria-label="On chain">
+        {s.trace.map((st, i) => <li key={i}>{st.t}{st.r ? `: ${st.r}` : ""}</li>)}
+      </ol>
       <div className={styles.track} aria-hidden="true">{Array.from({ length: 6 }, (_, k) => <i key={k} className={k < Number(s.n) ? styles.trackOn : ""} />)}</div>
     </div>
   )
@@ -222,7 +205,7 @@ export function HowSteps() {
                     <div className={styles.never}><dt>Cannot happen</dt><dd>{s.never}</dd></div>
                   </dl>
                 </div>
-                <Console s={s} on={i === active} reduce={reduce} />
+                <Instrument s={s} on={i === active} reduce={reduce} />
               </div>
             ))}
           </div>

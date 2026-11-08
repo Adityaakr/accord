@@ -218,15 +218,15 @@ Cannot happen
 
 The other side, the operator or the app reading the numbers
 
-Deal room · NEAR/USDC retainer Sealed Illustrative
+NEAR/USDC retainer · step 01 Sealed Illustrative
 
 Both mandates sealed. Neither side sees the other's numbers.
 
-- ▸ commit_mandate(buyer) ↳ ciphertext stored · commitment 9f3c…a1
+- commit_mandate(buyer): ciphertext stored · commitment 9f3c…a1
 
-- ▸ commit_mandate(seller) ↳ ciphertext stored · commitment 41de…7b
+- commit_mandate(seller): ciphertext stored · commitment 41de…7b
 
-- ← enclave key check ↳ only the Sealed Table can open either mandate
+- enclave key check: only the Sealed Table can open either mandate
 
 Step 02 of 06
 
@@ -246,17 +246,17 @@ Cannot happen
 
 Terms outside either side's limits; a mandate leaving the enclave
 
-Deal room · NEAR/USDC retainer Attested Illustrative
+NEAR/USDC retainer · step 02 Attested Illustrative
 
 Terms agreed at 18,500 USDC a period, with an attestation.
 
-- ▸ start_negotiation() ↳ Sealed Table job started
+- start_negotiation(): Sealed Table job started
 
-- ∴ Halcyon asks 19,800; above our ceiling. Counter inside it.
+- Halcyon asks 19,800. Counter at 18,000, inside our sealed ceiling.
 
-- ← round 2 ↳ 18,500 USDC a period · inside both limits
+- round 2: 18,500 USDC a period · inside both limits
 
-- ← on_sealed_result() ↳ terms recorded · attestation verified
+- on_sealed_result(): terms recorded · attestation verified
 
 Step 03 of 06
 
@@ -276,15 +276,15 @@ Cannot happen
 
 Terms taking effect before both sides approve
 
-Deal room · NEAR/USDC retainer Executing Illustrative
+NEAR/USDC retainer · step 03 Executing Illustrative
 
 Approved by both companies. Escrow funded.
 
-- ▸ approve_terms() ↳ approved by yourco.near and Halcyon
+- approve_terms(): approved by yourco.near and Halcyon
 
-- ▸ accept_recipient(1) ↳ halcyon-mm.near bound to halcyon-mm.xyz
+- accept_recipient(1): halcyon-mm.near bound to halcyon-mm.xyz
 
-- ▸ ft_transfer_call("fund") ↳ escrow funded · USDC on NEAR
+- ft_transfer_call("fund"): escrow funded · USDC on NEAR
 
 Step 04 of 06
 
@@ -304,15 +304,15 @@ Cannot happen
 
 A payment to another account, a different amount or an early payment
 
-Deal room · NEAR/USDC retainer Executing Illustrative
+NEAR/USDC retainer · step 04 Executing Illustrative
 
 One payment within the terms. Two refused and recorded.
 
-- ▸ act(Pay{period 1, 18,500 USDC}) ↳ matches the terms · waits for evidence
+- act(Pay{period 1, 18,500 USDC}): matches the terms · waits for evidence
 
-- ▸ act(Pay{to "halcyon-ops.near"}) ✕ refused · ERR_PAYEE_MISMATCH
+- act(Pay{to "halcyon-ops.near"}): refused · ERR_PAYEE_MISMATCH
 
-- ▸ act(Pay{period 1, 25,000 USDC}) ✕ refused · ERR_AMOUNT_MISMATCH
+- act(Pay{period 1, 25,000 USDC}): refused · ERR_AMOUNT_MISMATCH
 
 Step 05 of 06
 
@@ -332,15 +332,15 @@ Cannot happen
 
 The keeper moving funds or changing an outcome
 
-Deal room · NEAR/USDC retainer Executing Illustrative
+NEAR/USDC retainer · step 05 Executing Illustrative
 
 Period 1 is eligible on measured liquidity.
 
-- ← observe · 6 hidden times ↳ Rhea USDC/wNEAR pool read
+- observe · 6 hidden times: Rhea USDC/wNEAR pool read
 
-- ← spread ≤ 60 bps · depth ≥ 12,000 USDC ↳ 4 of 6 slots meet both
+- spread ≤ 60 bps · depth ≥ 12,000 USDC: 4 of 6 slots meet both
 
-- = period 1 · 4 of 6 passed ↳ eligible
+- period 1 · 4 of 6 passed: eligible
 
 Step 06 of 06
 
@@ -360,15 +360,15 @@ Cannot happen
 
 A payment being reversed or redirected after the fact
 
-Deal room · NEAR/USDC retainer Settled Illustrative
+NEAR/USDC retainer · step 06 Settled Illustrative
 
 Paid, recorded and checkable by anyone.
 
-- ▸ act(Pay{period 1}) ↳ 18,500 USDC → halcyon-mm.near
+- act(Pay{period 1}): 18,500 USDC → halcyon-mm.near
 
-- ← record ↳ 1 payment · 2 refusals · 6 observations
+- record: 1 payment · 2 refusals · 6 observations
 
-- ▸ make verify ↳ 7 checks ok
+- make verify: contract code, agent key, recipient proof and record checked
 
 Core features
 
