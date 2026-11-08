@@ -3,7 +3,7 @@ import styles from "./ProductShot.module.css"
 
 /* Illustrative product panels for the supporting pages, in the hero preview's style (misty backdrop, light panel).
    One consistent example everywhere: the NEAR/USDC market-making retainer, 18,500 USDC a period, paid to
-   halcyon-mm.testnet, bound to halcyon.example. Each panel is labelled "Illustrative". */
+   halcyon-mm.near, bound to halcyon-mm.xyz. Each panel is labelled "Illustrative". */
 
 type Block =
   | { t: "kv"; k: string; v: string; mono?: boolean; muted?: boolean }
@@ -25,7 +25,7 @@ const SHOTS = {
     blocks: [{ t: "kv", k: "Retainer", v: "18,500 USDC / period", mono: true }, { t: "kv", k: "Spread", v: "≤ 60 bps", mono: true }, { t: "kv", k: "Depth ±2%", v: "≥ 12,000 USDC", mono: true }, { t: "kv", k: "Quoting", v: "both sides", mono: true }, { t: "kv", k: "Pays when", v: "4 of 6 slots pass", mono: true },
       { t: "check", text: "Within both mandates' limits", state: "ok" }, { t: "check", text: "Buyer approved", state: "ok" }, { t: "check", text: "Seller approved", state: "wait" }] },
   payment: { title: "Payment request · act(Pay)", tag: "Checked", label: "A payment request checked against the approved terms before it is paid",
-    blocks: [{ t: "check", text: <>Milestone <b>Period 3</b> is due</>, state: "ok" }, { t: "check", text: <>Amount <b>18,500 USDC</b> matches the terms</>, state: "ok" }, { t: "check", text: <>Recipient <b>halcyon-mm.testnet</b>, version 1</>, state: "ok" },
+    blocks: [{ t: "check", text: <>Milestone <b>Period 3</b> is due</>, state: "ok" }, { t: "check", text: <>Amount <b>18,500 USDC</b> matches the terms</>, state: "ok" }, { t: "check", text: <>Recipient <b>halcyon-mm.near</b>, version 1</>, state: "ok" },
       { t: "amount", value: "18,500 USDC", status: "Paid" }] },
   negotiation: { title: "Sealed Table · round 4", tag: "In enclave", label: "Two agents negotiating inside the Sealed Table, with the limit check",
     blocks: [{ t: "chat", side: "a", who: "Buyer's agent", text: "16,000 USDC a period at 50 bps." }, { t: "chat", side: "b", who: "Seller's agent", text: "19,500 USDC. 55 bps is our floor." }, { t: "chat", side: "a", who: "Buyer's agent", text: "18,500 at 60 bps, both sides quoted." },
@@ -35,17 +35,17 @@ const SHOTS = {
       { t: "code", text: "outlayer-verify job neg-7f3a…c21 · exit 0" }] },
   visibility: { title: "Who sees what", tag: "Boundary", label: "The privacy boundary: what stays private, what both parties see, and what is public",
     blocks: [{ t: "kv", k: "Your ceiling and walk-away", v: "Only you" }, { t: "kv", k: "Negotiation transcript", v: "Hash only" }, { t: "kv", k: "Approved terms", v: "Both companies" }, { t: "kv", k: "Payment schedule", v: "Public on NEAR" }, { t: "kv", k: "USDC transfers", v: "Public on NEAR" }] },
-  payeeProof: { title: "Payee · halcyon.example", tag: "Bound", label: "A recipient bound to the vendor's domain, approved and accepted",
+  payeeProof: { title: "Payee · halcyon-mm.xyz", tag: "Bound", label: "A recipient bound to the vendor's domain, approved and accepted",
     blocks: [{ t: "check", text: "Domain proof fetched inside the enclave", state: "ok" }, { t: "check", text: "Approved by the vendor's settlement authority", state: "ok" }, { t: "check", text: "Accepted by the buyer", state: "ok" },
-      { t: "kv", k: "Recipient", v: "halcyon-mm.testnet", mono: true }, { t: "kv", k: "Version", v: "1", mono: true }] },
+      { t: "kv", k: "Recipient", v: "halcyon-mm.near", mono: true }, { t: "kv", k: "Version", v: "1", mono: true }] },
   payeeChange: { title: "Recipient change", tag: "Pending", label: "A recipient change that needs a fresh proof, the authority, the buyer and a 24-hour delay",
-    blocks: [{ t: "kv", k: "Current", v: "halcyon-mm.testnet · v1", mono: true }, { t: "kv", k: "Proposed", v: "halcyon-ops.testnet · v2", mono: true },
+    blocks: [{ t: "kv", k: "Current", v: "halcyon-mm.near · v1", mono: true }, { t: "kv", k: "Proposed", v: "halcyon-ops.near · v2", mono: true },
       { t: "check", text: "Fresh domain proof", state: "ok" }, { t: "check", text: "Settlement authority approved", state: "ok" }, { t: "check", text: "Buyer acceptance", state: "wait" }, { t: "note", text: "24-hour delay: 23:41:07 left. Payments go to v1 until then." }] },
   payeeHistory: { title: "Recipient history", tag: "On record", label: "The recipient's version history, including a change request that was refused",
-    blocks: [{ t: "kv", k: "v1 · 14 Oct", v: "halcyon-mm.testnet · active", mono: true }, { t: "kv", k: "v2 · 22 Oct", v: "proposed · rejected by buyer", mono: true, muted: true },
+    blocks: [{ t: "kv", k: "v1 · 14 Oct", v: "halcyon-mm.near · active", mono: true }, { t: "kv", k: "v2 · 22 Oct", v: "proposed · rejected by buyer", mono: true, muted: true },
       { t: "check", text: "“Our bank details have changed” by email: no change from a message", state: "no" }, { t: "note", text: "Every version, approval and refusal stays on the agreement's record." }] },
   identity: { title: "What Payee proves", tag: "Scope", label: "What a payee binding proves, and what it does not",
-    blocks: [{ t: "check", text: "Control of halcyon.example", state: "ok" }, { t: "check", text: "Approval by the vendor's settlement authority", state: "ok" }, { t: "check", text: "Acceptance by the buyer", state: "ok" }, { t: "check", text: "That the company legally exists (KYB, planned for v2)", state: "wait" }] },
+    blocks: [{ t: "check", text: "Control of halcyon-mm.xyz", state: "ok" }, { t: "check", text: "Approval by the vendor's settlement authority", state: "ok" }, { t: "check", text: "Acceptance by the buyer", state: "ok" }, { t: "check", text: "That the company legally exists (KYB, planned for v2)", state: "wait" }] },
   conditions: { title: "Approved conditions", tag: "Both approved", label: "The liquidity conditions both sides approved before the engagement",
     blocks: [{ t: "kv", k: "Venue", v: "Rhea USDC/wNEAR pool", mono: true }, { t: "kv", k: "Schedule", v: "6 hidden slots per period", mono: true }, { t: "kv", k: "Spread", v: "≤ 60 bps", mono: true }, { t: "kv", k: "Depth ±2%", v: "≥ 12,000 USDC", mono: true }, { t: "kv", k: "Quoting", v: "both sides", mono: true }, { t: "kv", k: "Pays when", v: "4 of 6 slots pass", mono: true }] },
   observation: { title: "Slot 4 · USDC/wNEAR", tag: "Attested", label: "One observation slot: the pool's public liquidity, read at a time drawn inside the observer's enclave",

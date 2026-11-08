@@ -291,7 +291,7 @@ function InstructionForm() {
       <div className={styles.fields}>
         <label className={styles.field}>
           <p className={`t-body-sm ${styles.fieldLabel}`}>From</p>
-          <input className={styles.input} type="text" name="from" required placeholder="accounts@vendor.example" value={from} onChange={(e) => edit(setFrom)(e.target.value)} disabled={!configured} />
+          <input className={styles.input} type="text" name="from" required placeholder="accounts@vendor.xyz" value={from} onChange={(e) => edit(setFrom)(e.target.value)} disabled={!configured} />
         </label>
         <label className={styles.field}>
           <p className={`t-body-sm ${styles.fieldLabel}`}>Subject</p>

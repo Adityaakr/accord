@@ -70,7 +70,7 @@ Renew our NEAR/USDC market-making retainer on Rhea: up to 20,000 USDC a period, 
 
 - Any amount, period or recipient off the terms is refused Payment controls · passed
 
-- Paying `halcyon-mm.testnet` only, bound to halcyon.example Recipient authorisation · passed
+- Paying `halcyon-mm.near` only, bound to halcyon-mm.xyz Recipient authorisation · passed
 
 - Each period's payment becomes eligible when 4 of 6 slots pass Conditional settlement · passed
 
@@ -102,7 +102,7 @@ Buy inference for our research agent from a provider's agent: up to 500 USDC a w
 
 - Anything over the weekly amount or the 1,800 USDC cap is refused Payment controls · passed
 
-- Paying `inferhub.testnet` only, bound to inferhub.example Recipient authorisation · passed
+- Paying `inferhub.near` only, bound to inferhub.xyz Recipient authorisation · passed
 
 - Each week becomes payable on schedule, until you revoke Conditional settlement · passed
 
@@ -118,7 +118,7 @@ Commission the fix for the signature bug Kestrel reported in our SDK: up to 8,00
 
 - A different amount or an early payment is refused Payment controls · passed
 
-- Paying `kestrel-sec.testnet` only, bound to kestrel.example Recipient authorisation · passed
+- Paying `kestrel-sec.near` only, bound to kestrel-sec.xyz Recipient authorisation · passed
 
 - Payable once 14 of 14 checks pass and the security lead approves Conditional settlement · passed
 
@@ -134,7 +134,7 @@ Renew our GPU capacity with Northlight: up to 50,000 USDC a month for 99.5% avai
 
 - Paying a month that missed the levels is refused Payment controls · passed
 
-- Paying `northlight.testnet` only, bound to northlight.example Recipient authorisation · passed
+- Paying `northlight.near` only, bound to northlight.xyz Recipient authorisation · passed
 
 - Each month becomes payable when the agreed monitor reports both levels met Conditional settlement · passed
 
@@ -150,7 +150,7 @@ Fund grant G-114 for the wallet SDK: up to 45,000 USDC in three tranches, each o
 
 - A changed amount or an unscheduled tranche is refused Payment controls · passed
 
-- Paying `sdkworks.testnet` only, bound to sdkworks.example Recipient authorisation · passed
+- Paying `sdkworks.near` only, bound to sdkworks.xyz Recipient authorisation · passed
 
 - Each tranche becomes payable when two of three reviewers accept the report Conditional settlement · passed
 
@@ -188,17 +188,17 @@ How it works
 
 One agreement from sealed limits to a settled payment, in six steps. The example is the market-making room above.
 
-- 01 Sealed Each side seals its limits
+- 01Sealed
 
-- 02 Attested Agents negotiate in the enclave
+- 02Attested
 
-- 03 Approved Both companies approve and fund
+- 03Approved
 
-- 04 Executing The agent pays inside the rules
+- 04Executing
 
-- 05 Checked Evidence decides each payment
+- 05Checked
 
-- 06 Settled Paid, recorded, checkable
+- 06Settled
 
 Step 01 of 06
 
@@ -218,11 +218,15 @@ Cannot happen
 
 The other side, the operator or the app reading the numbers
 
-Agreement record · NEAR/USDC retainer Sealed
+Deal room · NEAR/USDC retainer Sealed Illustrative
 
-buyer mandate sealed · commitment 9f3c…a1 seller mandate sealed · commitment 41de…7b ceiling hidden
+Both mandates sealed. Neither side sees the other's numbers.
 
-Illustrative values
+- ▸ commit_mandate(buyer) ↳ ciphertext stored · commitment 9f3c…a1
+
+- ▸ commit_mandate(seller) ↳ ciphertext stored · commitment 41de…7b
+
+- ← enclave key check ↳ only the Sealed Table can open either mandate
 
 Step 02 of 06
 
@@ -242,11 +246,17 @@ Cannot happen
 
 Terms outside either side's limits; a mandate leaving the enclave
 
-Agreement record · NEAR/USDC retainer Attested
+Deal room · NEAR/USDC retainer Attested Illustrative
 
-round 1 19,800 USDC · above buyer limit round 2 18,500 USDC · inside both limits attestation verified
+Terms agreed at 18,500 USDC a period, with an attestation.
 
-Illustrative values
+- ▸ start_negotiation() ↳ Sealed Table job started
+
+- ∴ Halcyon asks 19,800; above our ceiling. Counter inside it.
+
+- ← round 2 ↳ 18,500 USDC a period · inside both limits
+
+- ← on_sealed_result() ↳ terms recorded · attestation verified
 
 Step 03 of 06
 
@@ -266,11 +276,15 @@ Cannot happen
 
 Terms taking effect before both sides approve
 
-Agreement record · NEAR/USDC retainer Executing
+Deal room · NEAR/USDC retainer Executing Illustrative
 
-approved buyer ✓ · seller ✓ recipient halcyon-mm.testnet · bound to halcyon.example escrow funded · USDC on NEAR
+Approved by both companies. Escrow funded.
 
-Illustrative values
+- ▸ approve_terms() ↳ approved by yourco.near and Halcyon
+
+- ▸ accept_recipient(1) ↳ halcyon-mm.near bound to halcyon-mm.xyz
+
+- ▸ ft_transfer_call("fund") ↳ escrow funded · USDC on NEAR
 
 Step 04 of 06
 
@@ -290,11 +304,15 @@ Cannot happen
 
 A payment to another account, a different amount or an early payment
 
-Agreement record · NEAR/USDC retainer Executing
+Deal room · NEAR/USDC retainer Executing Illustrative
 
-act · period 1 18,500 → halcyon-mm act · new account ERR_PAYEE_MISMATCH act · 25,000 ERR_AMOUNT_MISMATCH
+One payment within the terms. Two refused and recorded.
 
-Illustrative values
+- ▸ act(Pay{period 1, 18,500 USDC}) ↳ matches the terms · waits for evidence
+
+- ▸ act(Pay{to "halcyon-ops.near"}) ✕ refused · ERR_PAYEE_MISMATCH
+
+- ▸ act(Pay{period 1, 25,000 USDC}) ✕ refused · ERR_AMOUNT_MISMATCH
 
 Step 05 of 06
 
@@ -314,11 +332,15 @@ Cannot happen
 
 The keeper moving funds or changing an outcome
 
-Agreement record · NEAR/USDC retainer Executing
+Deal room · NEAR/USDC retainer Executing Illustrative
 
-spread ≤ 60 bps 5 of 6 slots depth ≥ 12,000 4 of 6 slots period 1 4 of 6 passed · eligible
+Period 1 is eligible on measured liquidity.
 
-Illustrative values
+- ← observe · 6 hidden times ↳ Rhea USDC/wNEAR pool read
+
+- ← spread ≤ 60 bps · depth ≥ 12,000 USDC ↳ 4 of 6 slots meet both
+
+- = period 1 · 4 of 6 passed ↳ eligible
 
 Step 06 of 06
 
@@ -338,11 +360,15 @@ Cannot happen
 
 A payment being reversed or redirected after the fact
 
-Agreement record · NEAR/USDC retainer Settled
+Deal room · NEAR/USDC retainer Settled Illustrative
 
-transfer 18,500 USDC → halcyon-mm.testnet exceptions none open make verify 7 checks ok
+Paid, recorded and checkable by anyone.
 
-Illustrative values
+- ▸ act(Pay{period 1}) ↳ 18,500 USDC → halcyon-mm.near
+
+- ← record ↳ 1 payment · 2 refusals · 6 observations
+
+- ▸ make verify ↳ 7 checks ok
 
 Core features
 

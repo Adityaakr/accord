@@ -64,7 +64,7 @@ type Node = { n: number; icon: keyof typeof P; title: string; sub: string; kind:
 const NODES: Record<string, Node> = {
   a: { n: 1, icon: "lock", title: "Sealed mandates", sub: "Both companies sealed limits", kind: "Sealed Table", status: "done" },
   b: { n: 2, icon: "file", title: "Approved terms", sub: "18,500 USDC / period", kind: "Agreement", status: "done" },
-  c: { n: 3, icon: "badge", title: "Authorised recipient", sub: "halcyon-mm.testnet · v1", kind: "Payee", status: "done" },
+  c: { n: 3, icon: "badge", title: "Authorised recipient", sub: "halcyon-mm.near · v1", kind: "Payee", status: "done" },
   d: { n: 4, icon: "eye", title: "Observation slots", sub: "Period 3", kind: "Agreed observer", status: "done", slots: true },
   e: { n: 5, icon: "branch", title: "Period decision", sub: "5 of 6 passed · eligible", kind: "Decision", status: "done" },
   f: { n: 6, icon: "send", title: "Payment request", sub: "18,500 USDC → halcyon-mm", kind: "Agreement controls", status: "now" },
@@ -92,7 +92,7 @@ const WIRES: { v?: boolean; x: string; y: number; w?: string; len?: number; dash
 const INSIGHTS = [
   { icon: "ban" as const, tone: "refuse", title: "Payment refused", text: "ERR_PAYEE_MISMATCH: the account is not the authorised recipient. Nothing was sent.", link: "View in refusal log" },
   { icon: "alert" as const, tone: "warn", title: "Slot 3 missed", text: "Depth below 12,000 USDC for this observation; period still eligible.", link: "Inspect attestation" },
-  { icon: "check" as const, tone: "ok", title: "Period 2 settled", text: "18,500 USDC confirmed to halcyon-mm.testnet.", link: "Open transaction" },
+  { icon: "check" as const, tone: "ok", title: "Period 2 settled", text: "18,500 USDC confirmed to halcyon-mm.near.", link: "Open transaction" },
 ]
 const EVENTS = [
   { t: "Attempt refused, nothing paid", ago: "12m ago" },
