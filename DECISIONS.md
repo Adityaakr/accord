@@ -271,3 +271,28 @@ Four reviewers on everything new in this round (the local OutLayer, the `/try` r
 - **The local node.** The local negotiator returns an error instead of panicking on contradictory limits; a job panic becomes an unsigned error output; a request is marked answered only after its output is submitted; agreements past the 100th are served; the HTTP endpoint answers only this machine (Host and Origin checked, JSON content type, five-second read, 64 connections).
 
 Kept as stated limits: an item can be reopened from `AssumedPaid` by one exception only, so a second stale lock on the same item leaves it `AssumedPaid` (the refund at `Settled` returns the amount if the transfer in fact failed); an approved exception without `waive_evidence` on a withheld Atlas period does not make it payable (use `waive_evidence`). Local Payee and observer outputs carry no marker of their own (their code and output shape are the deployed ones; the domain file is served by the local node, which its log says); they are signed with sandbox-only keys that no testnet release accepts.
+
+## 18. Testnet release 1 (8 Nov)
+
+- **New factory account, `accord-v2.testnet`.** Two contract bugs only show on testnet. (a) The factory's
+  `request_pubkeys` gave each releases call 90 Tgas, but `releases.request_pubkey` attaches 150 Tgas to OutLayer plus a
+  40 Tgas callback, so all three ran out of gas; the factory now has an owner-only `request_pubkey(job, project)` that
+  sends one job per transaction with 260 Tgas, and `make deploy-testnet` uses it. (b) Neither the releases contract nor
+  the agreement passed `secrets_ref` to `request_execution`, so OutLayer attached no secrets and every job answered
+  "PROTECTED_*_SEED is not set"; both now pass `{"account_id": <project owner>, "profile": "default"}`, the owner being
+  the first part of the project id. `releases.accord-v1.testnet` has no key by design and cannot be upgraded, so the
+  fixed release went to a fresh factory; `accord-v1.testnet` remains the OutLayer project owner and holds the secrets.
+- **S1 not expressible with outlayer-cli 0.2.2.** `secrets set/access` offers `allow-all`, a fixed whitelist,
+  `--direct`, `--via` and a build lock; no account pattern. Agreement accounts (`a<n>.accord-v2.testnet`) appear at
+  creation, so a fixed whitelist cannot name them. Applied the closest supported condition: `allow-all` AND locked to
+  the exact build hash. Effect: any caller can run a job and get an output signed with its seed, but every output names
+  the agreement and is checked by that agreement against state it reads itself, so a run requested by someone else
+  cannot change an outcome. Revisit with the dashboard's Account Pattern condition (or a later CLI) before mainnet.
+- **Token: `tusdc.accord-v1.testnet`** (the repo's test token, open mint capped at 1,000 per call) instead of Circle's
+  testnet USDC, because the faucets were down on 8 Nov. Switch back by setting `ACCORD_TOKEN` and redeploying a factory
+  config; both buyers are already registered with Circle's token.
+- **Task ids are OutLayer request ids.** The `execution_requested` event's `request_id` (13596, 13597, 13598) is the
+  task id: `GET https://testnet-api.outlayer.ai/attestations/<id>` returns the TDX quote for that run.
+- **Live flow:** `create` sized its buyer check for embedded (20 NEAR); it now reads the factory's `create_deposit`
+  and adds 6 NEAR. `make verify DEAL=` passed the agreement positionally; it now passes `--agreement`.
+
