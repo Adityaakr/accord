@@ -7,7 +7,7 @@
     "dev": "pnpm --filter @accord/sdk --filter @accord/store build && next dev -p 3100",
     "build": "pnpm --filter @accord/sdk --filter @accord/store build && next build",
     "start": "next start -p ${PORT:-3100}",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "pnpm --filter @accord/sdk --filter @accord/store build && tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
