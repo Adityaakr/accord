@@ -10,10 +10,11 @@
 
 .table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; table-layout: fixed; }
 .caption { caption-side: top; text-align: left; padding: 18px 20px 6px; font-size: 12px; letter-spacing: 0.04em; color: var(--text-weak); font-family: var(--mono); }
-.table th, .table td { padding: 14px 16px; vertical-align: top; border-bottom: 1px solid var(--hairline); }
+.table th, .table td { padding: 14px 14px; vertical-align: top; border-bottom: 1px solid var(--hairline); }
 .table tbody tr:last-child th, .table tbody tr:last-child td { border-bottom: 0; }
 .table thead th { font-family: "Host Grotesk", sans-serif; font-weight: 500; font-size: 13px; line-height: 1.3; letter-spacing: -0.01em; color: var(--text-medium); }
-.capHead { width: 26%; }
+.capHead { width: 22%; }
+.eg { display: block; margin-top: 3px; font-family: var(--mono); font-size: 10.5px; font-weight: 400; color: var(--text-weak); letter-spacing: 0; }
 .cap { font-family: "Host Grotesk", sans-serif; font-weight: 400; font-size: 14px; line-height: 1.4; letter-spacing: -0.01em; color: var(--text-strong); }
 
 /* the Accord column */
@@ -32,6 +33,8 @@
 .partly i { border: 1px solid var(--text-medium); background: linear-gradient(90deg, var(--text-medium) 50%, transparent 50%); }
 .no { color: var(--text-weak); }
 .no i { border: 1px dashed var(--text-weak); }
+.na { color: var(--text-weak); }
+.na i { width: 9px; height: 1.5px; border-radius: 1px; background: var(--text-weak); }
 .q { display: block; margin-top: 5px; font-size: 13px; line-height: 1.4; color: var(--text-weak); }
 
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -48,7 +51,7 @@
 /* ---------- Phone: scroll inside the card, capability column pinned, a fade and a hint on the right ---------- */
 @media (max-width: 809.98px) {
   .section { gap: 32px; padding: 72px 16px; }
-  .table { width: 880px; }
+  .table { width: 1010px; }
   .capHead { width: 140px; }
   .cap, .capHead { position: sticky; left: 0; z-index: 1; background: var(--elevation-strong); box-shadow: 1px 0 0 var(--hairline); }
   .cap { font-size: 13px; }
