@@ -5,7 +5,7 @@ import { Arrow } from "../components/Arrow"
 import { QuietLink } from "../components/QuietLink"
 import { CopyButton } from "../components/CopyButton"
 import { LINKS } from "../content/links"
-import { CHECKS, TESTNET, VERIFY_COMMAND, VERIFY_RAW } from "../content/testnet"
+import { CHECKS, TESTNET, VERIFY_RAW } from "../content/testnet"
 import { ROWS, hashOf, normaliseId, verifyAgreement, type Result, type Row, type RowKey, type Seg } from "../lib/nearVerify"
 import { usePageMeta } from "../lib/meta"
 import tl from "../styles/Timeline.module.css"
@@ -14,7 +14,8 @@ import styles from "./Verify.module.css"
 /* ------------------------------------------------------------------
    /verify, one centred column in the timeline language (styles/Timeline.module.css): the hero, an agreement id field,
    then "Live from testnet" (read by this browser from NEAR testnet RPC with no keys, lib/nearVerify.ts) and
-   "Full check · make verify" (the CLI's result for a6, raw output behind the footer). Every value is a quiet link to its
+   "Full check · make verify" (live from the app's /app/api/verify/<id>; a6's recorded result, labelled so, when the
+   app cannot answer; raw output behind the footer). Every value is a quiet link to its
    source: the live rows to the typed agreement's own accounts and transactions, the full check to a6's evidence.
 ------------------------------------------------------------------- */
 
@@ -39,12 +40,56 @@ function Value({ segs }: { segs: Seg[] }) {
   )
 }
 
+/* The full check (the same checks as make verify) comes live from the app's JSON endpoint, /app/api/verify/<id>,
+   same-origin on the hosted site. When it cannot answer (no app on this deployment, an id it cannot read), the panel
+   shows agreement a6's recorded result instead, labelled as a recording of a6, never as the entered id's result. */
+type LiveCheck = { name: string; status: "ok" | "failed" | "not_checked" | string; detail: string }
+type FullCheck =
+  | { state: "loading" }
+  | { state: "live"; checks: LiveCheck[]; ok: number }
+  | { state: "recorded"; reason?: string }
+const CHECK_NAMES: Record<string, string> = Object.fromEntries(CHECKS.map((c) => [c.id, c.name]))
+const CHECK_MEANINGS: Record<string, string> = {
+  code: "Matches a published release", keys: "No full-access key", sealed: "Signed inside the enclave",
+  release: "Needs the outlayer-verify tool", model: "The real model, fresh nonce", payee: "Proven on the vendor's domain",
+  record: "Payments match the receipts",
+}
+const liveResult = (s: string): Result => (s === "ok" ? "ok" : s === "not_checked" ? "not checked" : "not ok")
+/** A NEAR account id: 2 to 64 characters of lowercase letters, digits, - and _, in dot-separated parts */
+const isAccountId = (v: string) => v.length >= 2 && v.length <= 64 && /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/.test(v)
+
+async function fetchFullCheck(id: string, signal: AbortSignal): Promise<FullCheck> {
+  if (!isAccountId(id)) return { state: "recorded", reason: "This is not a NEAR account id, so there is nothing to check." }
+  const ctlTimeout = new AbortController()
+  const timer = setTimeout(() => ctlTimeout.abort(), 25000)
+  signal.addEventListener("abort", () => ctlTimeout.abort(), { once: true })
+  try {
+    const r = await fetch(`${LINKS.app}/api/verify/${encodeURIComponent(id)}`, { signal: ctlTimeout.signal, headers: { accept: "application/json" } })
+    const body = (await r.json().catch(() => null)) as { checks?: LiveCheck[]; ok?: number; error?: string } | null
+    if (r.ok && body && Array.isArray(body.checks) && body.checks.length) return { state: "live", checks: body.checks, ok: body.checks.filter((c) => c.status === "ok").length }
+    if (body?.error && /does not exist/i.test(body.error)) return { state: "recorded", reason: `No account ${id} on NEAR testnet.` }
+    return { state: "recorded", reason: body?.error ? `The full check could not run for ${id}.` : undefined }
+  } catch {
+    return { state: "recorded" }
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+const rawOf = (id: string, checks: LiveCheck[]) => {
+  const ok = checks.filter((c) => c.status === "ok").length
+  const nc = checks.filter((c) => c.status === "not_checked").length
+  const failed = checks.length - ok - nc
+  return [`accord verify · ${id}`, ...checks.map((c) => `${c.name.padEnd(9)} ${c.detail} · ${c.status.replace("_", " ")}`), `verify: ${ok} checks ok${failed ? ` · ${failed} failed` : ""}${nc ? ` · ${nc} not checked` : ""}`].join("\n")
+}
+
 export function Verify() {
   usePageMeta("Accord: Verify an agreement", "Check any Accord agreement from public data, with no account and no keys: the factory, the contract code, the access keys, the recipient and the record, read from NEAR testnet.")
   const [params, setParams] = useSearchParams()
   const [value, setValue] = useState(params.get("agreement") ?? TESTNET.agreement)
   const [id, setId] = useState(normaliseId(value))
   const [rows, setRows] = useState<Row[]>(blank)
+  const [full, setFull] = useState<FullCheck>({ state: "loading" })
   const abort = useRef<AbortController | null>(null)
 
   const run = useCallback((raw: string) => {
@@ -55,6 +100,8 @@ export function Verify() {
     abort.current = ctl
     setId(next)
     setRows(blank())
+    setFull({ state: "loading" })
+    void fetchFullCheck(next, ctl.signal).then((f) => { if (!ctl.signal.aborted) setFull(f) })
     void verifyAgreement(next, (key: RowKey, v, result) => {
       if (ctl.signal.aborted) return
       setRows((rs) => rs.map((r) => (r.key === key ? { ...r, value: v, result } : r)))
@@ -73,7 +120,9 @@ export function Verify() {
 
   const reading = rows.some((r) => r.result === "loading")
   const okLive = rows.filter((r) => r.result === "ok").length
-  const okFull = CHECKS.filter((c) => c.ok).length
+  const recorded = full.state === "recorded"
+  const fullId = recorded ? TESTNET.agreement : id
+  const fullCommand = `make verify DEAL=${fullId}`
 
   return (
     <div className={styles.page}>
@@ -128,39 +177,70 @@ export function Verify() {
           </div>
 
           <div className={tl.group}>
-            <p className={tl.groupLabel}><span>Full check · <span className={tl.lower}>make verify</span></span></p>
+            <p className={tl.groupLabel}>
+              <span>Full check · <span className={tl.lower}>make verify</span></span>
+              <span className={tl.groupMeta} aria-live="polite">
+                {full.state === "loading" ? "reading" : full.state === "live" ? `${full.ok} of ${full.checks.length} ok · live` : `Recorded for ${TESTNET.agreement}`}
+              </span>
+            </p>
+            {recorded && id !== TESTNET.agreement ? (
+              <p className={`${tl.note} ${styles.recordedNote}`}>
+                {full.reason ? `${full.reason} ` : "The full check is not reachable from this page right now. "}
+                Below is the recorded result for <span className="mono">{TESTNET.agreement}</span>, not for <span className="mono">{id}</span>.
+              </p>
+            ) : null}
             <div className={tl.cmdRow}>
-              <Link to="/docs/cli" className={`${tl.cmd} ${tl.link}`}><span className={tl.prompt} aria-hidden="true">$</span>{VERIFY_COMMAND}<Arrow /></Link>
-              <CopyButton text={VERIFY_COMMAND} label="the make verify command" />
+              <Link to="/docs/cli" className={`${tl.cmd} ${tl.link}`}><span className={tl.prompt} aria-hidden="true">$</span>{fullCommand}<Arrow /></Link>
+              <CopyButton text={fullCommand} label="the make verify command" />
             </div>
-            <ol className={tl.rows}>
-              {CHECKS.map((c, i) => (
-                <li key={c.id} className={tl.row}>
-                  <span className={`mono ${tl.num}`}>{String(i + 1).padStart(2, "0")}</span>
-                  <span className={tl.name}>{c.name}</span>
-                  <span className={tl.meaning}>
-                    <QuietLink href={c.href} mono={false}>{c.meaning}</QuietLink>
-                    {hashOf(c.href) ? <CopyButton text={hashOf(c.href)!} label={`the ${c.name.toLowerCase()} transaction hash`} /> : null}
-                  </span>
-                  <Status result={c.ok ? "ok" : "not checked"} />
-                </li>
-              ))}
+            <ol className={tl.rows} aria-busy={full.state === "loading"}>
+              {full.state === "live"
+                ? full.checks.map((c, i) => (
+                    <li key={c.name} className={tl.row}>
+                      <span className={`mono ${tl.num}`}>{String(i + 1).padStart(2, "0")}</span>
+                      <span className={tl.name}>{CHECK_NAMES[c.name] ?? c.name}</span>
+                      <span className={tl.meaning}>
+                        <QuietLink href={LINKS.appVerify(id)} mono={false}>{CHECK_MEANINGS[c.name] ?? c.detail}</QuietLink>
+                      </span>
+                      <Status result={liveResult(c.status)} />
+                    </li>
+                  ))
+                : CHECKS.map((c, i) => (
+                    <li key={c.id} className={tl.row}>
+                      <span className={`mono ${tl.num}`}>{String(i + 1).padStart(2, "0")}</span>
+                      <span className={tl.name}>{c.name}</span>
+                      <span className={tl.meaning}>
+                        {full.state === "loading" ? <span className={tl.weak}>{CHECK_MEANINGS[c.id]}</span> : (
+                          <>
+                            <QuietLink href={c.href} mono={false}>{c.meaning}</QuietLink>
+                            {hashOf(c.href) ? <CopyButton text={hashOf(c.href)!} label={`the ${c.name.toLowerCase()} transaction hash`} /> : null}
+                          </>
+                        )}
+                      </span>
+                      <Status result={full.state === "loading" ? "loading" : c.ok ? "ok" : "not checked"} />
+                    </li>
+                  ))}
             </ol>
           </div>
 
-          <details className={`${tl.foot} ${styles.foot}`}>
-            <summary>
-              <span className={`mono ${tl.ok}`}>{okFull} of {CHECKS.length} ok</span>
-              <span className={styles.sep} aria-hidden="true">·</span>
-              <span className={styles.headValue}>
-                <QuietLink href={TESTNET.agreementUrl} className={styles.footLink}>{TESTNET.agreement}</QuietLink>
-                <CopyButton text={TESTNET.agreement} />
-              </span>
-              <span className={styles.sep} aria-hidden="true">·</span>
-              <span className={styles.toggle}>Show raw output<Arrow dir="down" className={styles.toggleIcon} /></span>
-            </summary>
-            <pre className={styles.raw}>{VERIFY_RAW}</pre>
-          </details>
+          {full.state === "loading" ? null : (
+            <details className={`${tl.foot} ${styles.foot}`}>
+              <summary>
+                <span className={`mono ${tl.ok}`}>
+                  {full.state === "live" ? `${full.ok} of ${full.checks.length} ok` : `${CHECKS.filter((c) => c.ok).length} of ${CHECKS.length} ok`}
+                </span>
+                <span className={styles.sep} aria-hidden="true">·</span>
+                <span className={styles.headValue}>
+                  <QuietLink href={`https://testnet.nearblocks.io/address/${fullId}`} className={styles.footLink}>{fullId}</QuietLink>
+                  <CopyButton text={fullId} />
+                </span>
+                {recorded ? <><span className={styles.sep} aria-hidden="true">·</span><span>recorded</span></> : null}
+                <span className={styles.sep} aria-hidden="true">·</span>
+                <span className={styles.toggle}>Show raw output<Arrow dir="down" className={styles.toggleIcon} /></span>
+              </summary>
+              <pre className={styles.raw}>{full.state === "live" ? rawOf(id, full.checks) : VERIFY_RAW}</pre>
+            </details>
+          )}
         </div>
       </section>
     </div>

@@ -7,8 +7,10 @@ import { KNOWN_TX } from "../content/testnet"
    `get_agreement()`. Each row resolves on its own, so one slow call never holds the others. */
 
 export const FACTORY = "accord-v2.testnet"
-const PRIMARY = "https://rpc.testnet.near.org"
-const FALLBACK = "https://test.rpc.fastnear.com"
+/* FastNEAR's two testnet hosts. rpc.testnet.near.org is left out: under a page's burst of reads it answers 429s
+   without CORS headers, which the browser logs as errors. */
+const PRIMARY = "https://test.rpc.fastnear.com"
+const FALLBACK = "https://rpc.testnet.fastnear.com"
 /** Ask the fallback too when the primary has not answered by then; give up on a call after TIMEOUT. */
 const HEDGE_MS = 1200
 const TIMEOUT_MS = 8000

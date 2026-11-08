@@ -32,3 +32,4 @@
 @media (max-width: 809.98px) { .main { gap: 28px; padding: 0 16px 72px; } }
 .headValue, .seg { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
 .seg { white-space: normal; }
+.recordedNote { margin: 0 0 4px; }
