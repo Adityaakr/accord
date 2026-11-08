@@ -17,3 +17,4 @@
 @media (max-width: 1199.98px) {
   .layout { gap: 0; }
 }
+.loading { min-height: 100vh; }

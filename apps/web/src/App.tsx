@@ -1,25 +1,53 @@
-import { useEffect, useRef } from "react"
+import { Suspense, useEffect, useRef } from "react"
 import { Routes, Route, Navigate, useLocation } from "react-router-dom"
 import Lenis from "lenis"
 import { Nav } from "./components/Nav"
 import { Footer } from "./components/Footer"
-import { Home } from "./pages/Home"
-import { NotFound } from "./pages/NotFound"
-import { PrivacyPolicy } from "./pages/PrivacyPolicy"
-import { Contact } from "./pages/Contact"
-import { Product } from "./pages/Product"
-import { SealedTable } from "./pages/SealedTable"
-import { Payee } from "./pages/Payee"
-import { MarketMaking } from "./pages/MarketMaking"
-import { Security } from "./pages/Security"
-import { Docs } from "./pages/Docs"
-import { DocPage } from "./pages/docs/DocPage"
-import { Research } from "./pages/Research"
-import { Record } from "./pages/Record"
-import { Verify } from "./pages/Verify"
-import { Join } from "./pages/Join"
-import { Try } from "./pages/Try"
+import { lazyPage, type Page } from "./lib/lazyPage"
 import styles from "./App.module.css"
+
+/* Every page is its own chunk (lib/lazyPage.tsx), so /docs and /verify do not ship the home page's sections */
+const Home = lazyPage(() => import("./pages/Home").then((m) => m.Home))
+const NotFound = lazyPage(() => import("./pages/NotFound").then((m) => m.NotFound))
+const PrivacyPolicy = lazyPage(() => import("./pages/PrivacyPolicy").then((m) => m.PrivacyPolicy))
+const Contact = lazyPage(() => import("./pages/Contact").then((m) => m.Contact))
+const Product = lazyPage(() => import("./pages/Product").then((m) => m.Product))
+const SealedTable = lazyPage(() => import("./pages/SealedTable").then((m) => m.SealedTable))
+const Payee = lazyPage(() => import("./pages/Payee").then((m) => m.Payee))
+const MarketMaking = lazyPage(() => import("./pages/MarketMaking").then((m) => m.MarketMaking))
+const Security = lazyPage(() => import("./pages/Security").then((m) => m.Security))
+const Docs = lazyPage(() => import("./pages/Docs").then((m) => m.Docs))
+const DocPage = lazyPage(() => import("./pages/docs/DocPage").then((m) => m.DocPage))
+const Research = lazyPage(() => import("./pages/Research").then((m) => m.Research))
+const Record = lazyPage(() => import("./pages/Record").then((m) => m.Record))
+const Verify = lazyPage(() => import("./pages/Verify").then((m) => m.Verify))
+const Join = lazyPage(() => import("./pages/Join").then((m) => m.Join))
+const Try = lazyPage(() => import("./pages/Try").then((m) => m.Try))
+
+export const NOT_FOUND = NotFound
+/** The route table: path → page (a redirect has no page) */
+export const ROUTE_TABLE: { path: string; page?: Page }[] = [
+  { path: "/", page: Home },
+  { path: "/product", page: Product },
+  { path: "/product/sealed-table", page: SealedTable },
+  { path: "/product/payee", page: Payee },
+  { path: "/payee", page: Payee },
+  { path: "/use-cases/market-making", page: MarketMaking },
+  { path: "/atlas", page: MarketMaking },
+  { path: "/security", page: Security },
+  { path: "/docs", page: Docs },
+  { path: "/docs/:slug", page: DocPage },
+  { path: "/research", page: Research },
+  { path: "/demo" },
+  { path: "/record", page: Record },
+  { path: "/verify", page: Verify },
+  { path: "/join", page: Join },
+  { path: "/try", page: Try },
+  { path: "/sealed-table", page: SealedTable },
+  { path: "/404", page: NotFound },
+  { path: "/privacy-policy", page: PrivacyPolicy },
+  { path: "/contact", page: Contact },
+]
 
 /* Layout template "Layout" (vLUWo2njy): fill Background, vertical stack, centered,
    gap 48 (desktop) / 0 (tablet, phone): [Navigation sticky z1] [page content] [Footer].
@@ -52,29 +80,14 @@ export function App() {
     <div className={styles.layout}>
       <Nav />
       <main id="main" className={styles.content}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/product" element={<Product />} />
-          <Route path="/product/sealed-table" element={<SealedTable />} />
-          <Route path="/product/payee" element={<Payee />} />
-          <Route path="/payee" element={<Payee />} />
-          <Route path="/use-cases/market-making" element={<MarketMaking />} />
-          <Route path="/atlas" element={<MarketMaking />} />
-          <Route path="/security" element={<Security />} />
-          <Route path="/docs" element={<Docs />} />
-          <Route path="/docs/:slug" element={<DocPage />} />
-          <Route path="/research" element={<Research />} />
-          <Route path="/demo" element={<Navigate to="/#testnet" replace />} />
-          <Route path="/record" element={<Record />} />
-          <Route path="/verify" element={<Verify />} />
-          <Route path="/join" element={<Join />} />
-          <Route path="/try" element={<Try />} />
-          <Route path="/sealed-table" element={<SealedTable />} />
-          <Route path="/404" element={<NotFound />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={<div className={styles.loading} aria-busy="true" />}>
+          <Routes>
+            {ROUTE_TABLE.map(({ path, page: P }) => (
+              <Route key={path} path={path} element={P ? <P /> : <Navigate to="/#testnet" replace />} />
+            ))}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </main>
       <Footer />
     </div>
