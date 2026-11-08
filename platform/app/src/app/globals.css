@@ -16,7 +16,7 @@
   --text-strong: rgb(255, 255, 255);
   --text-medium: rgba(var(--ink-rgb), 0.8);
   --text-weak: rgba(var(--ink-rgb), 0.62);
-  --text-faint: rgba(var(--ink-rgb), 0.42);
+  --text-faint: rgba(var(--ink-rgb), 0.5); /* the quietest text: at least 4.5:1 on every surface (0.42 measured 3.6 to 4.1) */
   --teal: rgb(145, 207, 181);
   --teal-wash: rgba(var(--teal-rgb), 0.1);
   --teal-line: rgba(var(--teal-rgb), 0.32);
@@ -24,7 +24,7 @@
   --yellow-wash: rgba(212, 177, 68, 0.12);
   --purple: rgb(181, 154, 255);
   --refusal: rgb(255, 34, 68);
-  --refusal-bg: rgba(var(--refusal-rgb), 0.12);
+  --refusal-bg: rgba(var(--refusal-rgb), 0.06); /* a refusal code on its wash stays at 4.5:1 or more (0.12 measured 4.4) */
   --refusal-line: rgba(var(--refusal-rgb), 0.35);
   --hairline: rgba(var(--ink-rgb), 0.08);
   --hairline-strong: rgba(var(--ink-rgb), 0.14);
@@ -48,7 +48,7 @@
    contrast on white; red stays for refusals only. */
 :root[data-theme="light"] {
   --ink-rgb: 14, 15, 17;
-  --teal-rgb: 36, 133, 102;
+  --teal-rgb: 28, 112, 85; /* deep enough for 11px text on its own wash (rgb(36, 133, 102) measured 3.5 to 4.0) */
   --refusal-rgb: 208, 20, 54;
   --bg-rgb: 246, 246, 244;
   --shadow-rgb: 40, 50, 45;
@@ -58,9 +58,10 @@
   --elevation-weak: rgb(224, 224, 221);
   --white: rgb(17, 18, 20);
   --text-strong: rgb(14, 15, 17);
-  --teal: rgb(36, 133, 102);
-  --yellow: rgb(150, 112, 10);
-  --yellow-wash: rgba(150, 112, 10, 0.1);
+  --teal: rgb(28, 112, 85);
+  --yellow: rgb(120, 88, 0); /* 5.3:1 on its wash (rgb(150, 112, 10) measured 3.7) */
+  --yellow-wash: rgba(120, 88, 0, 0.1);
+  --text-faint: rgba(var(--ink-rgb), 0.6); /* 4.6:1 or more on every light surface (0.42 measured 2.7 to 2.8) */
   --refusal: rgb(208, 20, 54);
   --on-white: #ffffff;
   --stage-a: #e7f2ee; --stage-b: #d6ebe3; --stage-c: #e9f3ef;
