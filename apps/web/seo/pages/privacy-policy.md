@@ -24,7 +24,7 @@ Only what you choose to send:
 
 ## 3. What we do not do
 
-This site has no analytics, no advertising and no tracking cookies, and we do not sell or share what you send. Agreements, payments and refusals in the demonstration are on NEAR testnet, which is public by design.
+This site has no analytics, no advertising and no tracking cookies, and we do not sell or share what you send. Once the demonstration runs on NEAR testnet, its agreements, payments and refusals are public there by design.
 
 ## 4. Your browser and our host
 

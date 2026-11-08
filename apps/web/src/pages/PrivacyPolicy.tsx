@@ -102,7 +102,7 @@ export function PrivacyPolicy() {
           </Section>
 
           <Section title="3. What we do not do">
-            <Body>This site has no analytics, no advertising and no tracking cookies, and we do not sell or share what you send. Agreements, payments and refusals in the demonstration are on NEAR testnet, which is public by design.</Body>
+            <Body>This site has no analytics, no advertising and no tracking cookies, and we do not sell or share what you send. Once the demonstration runs on NEAR testnet, its agreements, payments and refusals are public there by design.</Body>
           </Section>
 
           <Section title="4. Your browser and our host">

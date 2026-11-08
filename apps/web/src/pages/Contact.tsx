@@ -110,7 +110,7 @@ function ShieldIcon() {
 }
 
 export function Contact() {
-  usePageMeta("Accord: Contact", "Contact the Accord team about early access, market-making agreements, integrations, security or press. Accord is pre-launch and runs on NEAR testnet.")
+  usePageMeta("Accord: Contact", "Contact the Accord team about early access, market-making agreements, integrations, security or press. Accord is pre-launch; the NEAR testnet release is pending.")
   const [sent, setSent] = useState(false)
   const [subject, setSubject] = useState("")
   const buttonState: FormButtonState = !CONTACT_EMAIL ? "disabled" : sent ? "success" : "default"

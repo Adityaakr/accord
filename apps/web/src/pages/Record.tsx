@@ -127,7 +127,7 @@ function RefusalPanel({ v }: { v: LiveValues | null }) {
 }
 
 export function Record() {
-  usePageMeta("Accord: Public record", "Agreements, payments and refusals from the Accord demonstration on NEAR testnet, each refused payment shown with the reason the contract recorded.")
+  usePageMeta("Accord: Public record", "Agreements, payments and refusals from the Accord demonstration, each refused payment shown with the reason the contract recorded.")
   const live = useLive()
   return (
     <div className={styles.page}>
