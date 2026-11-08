@@ -67,10 +67,24 @@ export async function verify(
   const known = knownFactories(accord, opts.factories);
   const own = accord.onFactory(a.factory);
   const registered = await own.chain.view<boolean>(a.factory, "is_agreement", { account: agreement }).catch(() => false);
-  const factoryNote = !known.includes(a.factory)
-    ? ` · factory ${a.factory} is not a known Accord factory`
-    : registered ? "" : ` · not registered by factory ${a.factory}`;
   const release = await own.release(a.release);
+  // Provenance: only an account the factory created, under its own id, with the release's job keys and the
+  // factory's token, outlayer and keeper, is the agreement it claims to be (the code hash alone is public).
+  const problems: string[] = [];
+  if (!known.includes(a.factory)) problems.push(`factory ${a.factory} is not a known Accord factory`);
+  else if (!registered) problems.push(`not registered by factory ${a.factory}`);
+  if (agreement !== `a${a.id}.${a.factory}`) problems.push(`id is not a${a.id}.${a.factory}`);
+  for (const j of ["sealed_table", "payee", "observer"] as const) {
+    if (a.jobs?.[j]?.signing_pubkey !== release[j].signing_pubkey) problems.push(`${j} key differs from release ${release.version}`);
+  }
+  const config = await own.config().catch(() => null);
+  if (!config) problems.push(`factory ${a.factory} config unreadable`);
+  else {
+    for (const k of ["token", "outlayer", "keeper"] as const) {
+      if (a[k] !== config[k]) problems.push(`${k} ${a[k]} differs from the factory's ${config[k]}`);
+    }
+  }
+  const factoryNote = problems.map((p) => ` · ${p}`).join("");
   const checks: Check[] = [];
   const add = (name: string, status: CheckStatus, detail: string) => checks.push({ name, status, detail });
 

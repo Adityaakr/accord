@@ -577,7 +577,7 @@ type ActResult = { status: "sent" | "failed" | "refused" | "exception_requested"
 
 // checks
 preflight(accord, agreement, recipient): Promise<{ rating: "allow" | "warn" | "block"; reasons: string[]; signals: Signals; approvedByBuyer: boolean }>
-verify(accord, agreement, opts?: { nonce?: string }): Promise<VerifyReport>
+verify(accord, agreement, opts?: { nonce?: string; factories?: string[] }): Promise<VerifyReport>   // `code` fails unless a known factory registered the account as a<id>.<factory>, its job keys are the release's and its token, outlayer and keeper are the factory's
 sealedCheck(accord, agreement, as: "buyer" | "vendor", key: DocKeySource): Promise<"ERR_SEALED" | "READABLE">   // a sanity check, not a proof
 ```
 
