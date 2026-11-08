@@ -5,7 +5,7 @@ import type {
   AgreementRecord, AgreementView, Commitment, ExceptionView, ItemView, PeriodView, Receipt, RecipientVersion, Refusal, Terms,
   StoredObservation,
 } from "@accord/sdk";
-import { accord, source, type Source } from "./accord";
+import { accord, listAllAgreements, source, type Source } from "./accord";
 import { currentStep } from "@/app/agreements/[id]/pipeline";
 
 export interface RoomSummary {
@@ -15,7 +15,7 @@ export interface RoomSummary {
 
 export async function rooms(party?: string): Promise<{ rooms: RoomSummary[]; source: Source }> {
   const a = accord();
-  const [records, src] = await Promise.all([party ? a.listAgreements({ party }) : a.listAgreements({ limit: 100 }), source()]);
+  const [records, src] = await Promise.all([party ? listAllAgreements({ party }) : listAllAgreements({ limit: 100 }), source()]);
   const views = await Promise.all(records.map((r) => a.agreement(r.account).get().catch(() => null)));
   return { rooms: records.map((record, i) => ({ record, view: views[i] ?? null })).reverse(), source: src };
 }
@@ -95,7 +95,7 @@ const big = (s: string | null | undefined) => BigInt(s ?? "0");
 
 export async function portfolio(account: string): Promise<Portfolio> {
   const a = accord();
-  const [records, src] = await Promise.all([a.listAgreements({ party: account }), source()]);
+  const [records, src] = await Promise.all([listAllAgreements({ party: account }), source()]);
   const monthStart = Math.floor(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1) / 1000);
 
   const out: Portfolio = {
@@ -236,7 +236,7 @@ function rolesIn(view: AgreementView, account: string): Role[] {
 
 export async function approvals(account: string): Promise<Approvals> {
   const a = accord();
-  const [records, src] = await Promise.all([a.listAgreements({ party: account }), source()]);
+  const [records, src] = await Promise.all([listAllAgreements({ party: account }), source()]);
   const items: ApprovalItem[] = [];
   await Promise.all(records.map(async (record) => {
     const d = a.agreement(record.account);
@@ -316,7 +316,7 @@ export interface AgentRow {
 
 export async function agents(account: string): Promise<{ account: string; rows: AgentRow[]; source: Source }> {
   const a = accord();
-  const [records, src] = await Promise.all([a.listAgreements({ party: account }), source()]);
+  const [records, src] = await Promise.all([listAllAgreements({ party: account }), source()]);
   const rows: AgentRow[] = [];
   await Promise.all(records.map(async (record) => {
     const d = a.agreement(record.account);
@@ -356,7 +356,7 @@ const PENDING = new Set(["Proposed", "Proven", "AuthorityApproved", "Accepted"])
 
 export async function recipients(account: string): Promise<{ account: string; rows: RecipientRow[]; source: Source }> {
   const a = accord();
-  const [records, src] = await Promise.all([a.listAgreements({ party: account }), source()]);
+  const [records, src] = await Promise.all([listAllAgreements({ party: account }), source()]);
   const rows: RecipientRow[] = [];
   await Promise.all(records.map(async (record) => {
     const d = a.agreement(record.account);
@@ -402,7 +402,7 @@ export interface RoomRow {
 export async function roomTable(party?: string): Promise<{ rows: RoomRow[]; source: Source }> {
   const a = accord();
   const [records, src, folio] = await Promise.all([
-    party ? a.listAgreements({ party }) : a.listAgreements({ limit: 100 }),
+    party ? listAllAgreements({ party }) : listAllAgreements({ limit: 100 }),
     source(),
     party ? portfolio(party).catch(() => null) : Promise.resolve(null),
   ]);
@@ -451,7 +451,7 @@ export interface DeliveryRow {
 
 export async function deliveries(account: string): Promise<{ account: string; rows: DeliveryRow[]; source: Source }> {
   const a = accord();
-  const [records, src] = await Promise.all([a.listAgreements({ party: account }), source()]);
+  const [records, src] = await Promise.all([listAllAgreements({ party: account }), source()]);
   const rows: DeliveryRow[] = [];
   await Promise.all(records.map(async (record) => {
     const d = a.agreement(record.account);

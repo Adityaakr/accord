@@ -5,8 +5,7 @@
 import { NextResponse } from "next/server";
 import { allow, sameOriginJson } from "@/server/ratelimit";
 import { counterpartyStep, demoReady } from "@/server/demo";
-import { agreementPattern } from "@/server/delegate";
-import { config } from "@/server/accord";
+import { isConfiguredAgreement } from "@/server/accord";
 
 export const dynamic = "force-dynamic";
 const busy = new Set<string>();
@@ -16,7 +15,7 @@ export async function POST(req: Request) {
   if (bad) return NextResponse.json({ error: bad }, { status: 415 });
   if (!demoReady().counterparty) return NextResponse.json({ error: "the demo counterparty is not configured on this server" }, { status: 503 });
   const { agreement } = (await req.json().catch(() => ({}))) as { agreement?: string };
-  if (typeof agreement !== "string" || !agreementPattern(config().factory).test(agreement)) {
+  if (typeof agreement !== "string" || !isConfiguredAgreement(agreement)) {
     return NextResponse.json({ error: "not an agreement of this factory" }, { status: 400 });
   }
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0]?.trim() || req.headers.get("x-real-ip") || "local";

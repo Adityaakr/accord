@@ -6,6 +6,7 @@
 import "server-only";
 import { Account, JsonRpcProvider, KeyPair, KeyPairSigner, actions, type KeyPairString } from "near-api-js";
 import { accord, config } from "./accord";
+import type { FactoryPair } from "./delegate";
 import { decodeSignedDelegate, innerStatus, rejectDelegate, type DecodedDelegate, type RawTx } from "./delegate";
 
 const rpcUrl = () => process.env.NEAR_RPC_URL || "https://rpc.testnet.near.org";
@@ -28,13 +29,27 @@ async function height(): Promise<bigint> {
   return BigInt(b.result.header.height);
 }
 
+/**
+ * The second factory (ACCORD_FACTORY_USDC) and the token its own config names. When ACCORD_TOKEN_USDC is set and
+ * differs from what the factory says, the pair is left out: the relayer never pairs a token with a factory that
+ * does not settle in it.
+ */
+async function extraPairs(): Promise<FactoryPair[]> {
+  const out: FactoryPair[] = [];
+  for (const cur of config().currencies.slice(1)) {
+    const onChain = await accord().onFactory(cur.factory).config().then((x) => x.token).catch(() => null);
+    if (onChain && (!cur.token || cur.token === onChain)) out.push({ factory: cur.factory, token: onChain });
+  }
+  return out;
+}
+
 /** Validates and submits one signed delegate; returns the final outcome with the user's call as its status. */
 export async function relay(signedDelegate: string): Promise<{ outcome: RawTx; sender: string }> {
   const c = config();
   if (c.network !== "testnet") throw new Error("the relayer runs on testnet only");
   const d: DecodedDelegate = decodeSignedDelegate(signedDelegate);
-  const [{ token }, h] = await Promise.all([accord().config(), height()]);
-  const why = rejectDelegate(d, { factory: c.factory, token, height: h });
+  const [{ token }, pairs, h] = await Promise.all([accord().config(), extraPairs(), height()]);
+  const why = rejectDelegate(d, { factory: c.factory, token, pairs, height: h });
   if (why) throw Object.assign(new Error(why), { status: 400 });
   const r = (await relayer().signAndSendTransaction({
     receiverId: d.delegateAction.senderId,

@@ -2,9 +2,11 @@
 // whether Accord's relayer will pay the gas to submit it. Pure functions (no server-only) so they are testable; the
 // broadcast lives in ./relay.ts.
 //
-// The relayer only carries calls into Accord: `create_agreement` on the factory, any call on one of the factory's
-// agreement accounts (the contract checks who may call what), and `ft_transfer_call` on the configured token when it
-// funds one of those agreements. Each delegate holds exactly one function call. Deposits come from the sender's own
+// The relayer only carries calls into Accord: `create_agreement` on a configured factory, any call on one of that
+// factory's agreement accounts (the contract checks who may call what), and `ft_transfer_call` on a factory's own
+// token when it funds one of that factory's agreements (never a token into another factory's agreement). With the
+// optional second pair (Circle USDC) there are two factories, each with its own token. Each delegate holds exactly
+// one function call. Deposits come from the sender's own
 // account inside the delegate; the relayer's outer transaction attaches none.
 
 import { deserialize } from "borsh";
@@ -47,11 +49,25 @@ export function decodeSignedDelegate(b64: string): DecodedDelegate {
   }
 }
 
-export interface RelayPolicy {
+/** One factory and the token it settles in (its on-chain `config().token`). */
+export interface FactoryPair {
   factory: string;
   token: string;
+}
+
+export interface RelayPolicy {
+  /** The default pair (ACCORD_FACTORY and its token). */
+  factory: string;
+  token: string;
+  /** Further pairs, each kept apart from the others: a token only funds agreements of its own factory. */
+  pairs?: FactoryPair[];
   /** The chain's current block height. */
   height: bigint;
+}
+
+/** Every pair the policy allows, the default first. */
+export function policyPairs(p: RelayPolicy): FactoryPair[] {
+  return [{ factory: p.factory, token: p.token }, ...(p.pairs ?? [])].filter((x) => x.factory && x.token);
 }
 
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -77,20 +93,26 @@ export function rejectDelegate(d: DecodedDelegate, p: RelayPolicy): string | nul
   if (!call || Object.keys(da.actions[0] ?? {}).length !== 1) return "the relayer carries function calls only";
   if (call.gas <= 0n || call.gas > MAX_GAS) return "the call asks for more gas than the relayer pays";
 
-  if (da.receiverId === p.factory) {
+  const pairs = policyPairs(p);
+  if (pairs.some((x) => x.factory === da.receiverId)) {
     if (call.methodName !== "create_agreement") return "the relayer carries create_agreement only on the factory";
     return null;
   }
-  if (agreementPattern(p.factory).test(da.receiverId)) {
+  if (pairs.some((x) => agreementPattern(x.factory).test(da.receiverId))) {
     // never relay act: the contract identifies the agent by the signing key, and a relayer's key would stand in for it
     if (call.methodName === "act") return "the relayer never carries act; the agent signs it with its own key";
     return null;
   }
-  if (da.receiverId === p.token) {
+  const own = pairs.filter((x) => x.token === da.receiverId);
+  if (own.length) {
     if (call.methodName !== "ft_transfer_call") return "the relayer carries ft_transfer_call only on the token";
     if (call.deposit !== 1n) return "ft_transfer_call takes exactly 1 yoctoNEAR";
     const args = jsonArgs(call.args);
-    if (!args || typeof args.receiver_id !== "string" || !agreementPattern(p.factory).test(args.receiver_id)) {
+    const into = typeof args?.receiver_id === "string" ? args.receiver_id : null;
+    if (!into || !own.some((x) => agreementPattern(x.factory).test(into))) {
+      if (into && pairs.some((x) => agreementPattern(x.factory).test(into))) {
+        return "this token does not settle that agreement; each factory's agreements take only its own token";
+      }
       return "the relayer only carries token transfers into an Accord agreement";
     }
     return null;

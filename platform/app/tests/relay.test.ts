@@ -128,3 +128,46 @@ describe("innerStatus", () => {
     expect(innerStatus(tx, `a1.${FACTORY}`).Failure).toBeDefined();
   });
 });
+
+// The optional second pair (ACCORD_FACTORY_USDC): a second factory that settles in Circle's testnet USDC. Each token
+// funds only its own factory's agreements; the default pair behaves exactly as above.
+describe("two factories, each with its own token", () => {
+  const USDC_FACTORY = "accord-usdc.testnet";
+  const USDC = "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af";
+  const both = { ...policy, pairs: [{ factory: USDC_FACTORY, token: USDC }] };
+  const check2 = async (o: Parameters<typeof delegate>[0]) => rejectDelegate(decodeSignedDelegate(await delegate(o)), both);
+  const fund = (token: string, into: string) => ({
+    receiverId: token, method: "ft_transfer_call", args: { receiver_id: into, amount: "10", msg: "fund" }, deposit: 1n, gas: 100n * TGAS,
+  });
+
+  it("carries create_agreement on either factory, and nothing else on the second", async () => {
+    expect(await check2({ receiverId: FACTORY, deposit: 2n })).toBeNull();
+    expect(await check2({ receiverId: USDC_FACTORY, deposit: 2n })).toBeNull();
+    expect(await check2({ receiverId: USDC_FACTORY, method: "set_config" })).toMatch(/create_agreement only/);
+  });
+  it("carries calls on agreements of either factory, never act", async () => {
+    expect(await check2({ receiverId: `a1.${USDC_FACTORY}`, method: "approve_terms", gas: 30n * TGAS })).toBeNull();
+    expect(await check2({ receiverId: `a12.${FACTORY}`, method: "approve_terms", gas: 30n * TGAS })).toBeNull();
+    expect(await check2({ receiverId: `a1.${USDC_FACTORY}`, method: "act", gas: 100n * TGAS })).toMatch(/never carries act/);
+  });
+  it("carries each token into its own factory's agreements", async () => {
+    expect(await check2(fund(TOKEN, `a3.${FACTORY}`))).toBeNull();
+    expect(await check2(fund(USDC, `a1.${USDC_FACTORY}`))).toBeNull();
+  });
+  it("never pairs a token with the other factory's agreements", async () => {
+    expect(await check2(fund(USDC, `a3.${FACTORY}`))).toMatch(/does not settle that agreement/);
+    expect(await check2(fund(TOKEN, `a1.${USDC_FACTORY}`))).toMatch(/does not settle that agreement/);
+  });
+  it("keeps the second token's other limits", async () => {
+    expect(await check2(fund(USDC, "evil.testnet"))).toMatch(/into an Accord agreement/);
+    expect(await check2({ ...fund(USDC, `a1.${USDC_FACTORY}`), method: "ft_transfer" })).toMatch(/ft_transfer_call only/);
+    expect(await check2({ ...fund(USDC, `a1.${USDC_FACTORY}`), deposit: 0n })).toMatch(/1 yoctoNEAR/);
+    expect(await check2({ receiverId: "a1.accord-usdc.testnet.evil.testnet", method: "approve_terms" })).toMatch(/only carries calls into Accord/);
+  });
+  it("without the second pair, its factory, agreements and token are refused as before", async () => {
+    expect(await check({ receiverId: USDC_FACTORY, deposit: 2n })).toMatch(/only carries calls into Accord/);
+    expect(await check({ receiverId: `a1.${USDC_FACTORY}`, method: "approve_terms" })).toMatch(/only carries calls into Accord/);
+    expect(await check(fund(USDC, `a1.${USDC_FACTORY}`))).toMatch(/only carries calls into Accord/);
+    expect(await check(fund(TOKEN, `a1.${USDC_FACTORY}`))).toMatch(/into an Accord agreement/);
+  });
+});

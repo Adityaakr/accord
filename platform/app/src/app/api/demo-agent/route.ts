@@ -7,8 +7,7 @@ import { NextResponse } from "next/server";
 import { AccordError } from "@accord/sdk";
 import { allow, sameOriginJson } from "@/server/ratelimit";
 import { demoAgent, demoAgentKey, demoConfig, demoReady, isDemoRoom } from "@/server/demo";
-import { agreementPattern } from "@/server/delegate";
-import { accord, config } from "@/server/accord";
+import { accord, isConfiguredAgreement } from "@/server/accord";
 
 export const dynamic = "force-dynamic";
 // the act outcome without its bigint gas figure, which JSON cannot carry
@@ -21,7 +20,7 @@ export async function POST(req: Request) {
   if (bad) return NextResponse.json({ error: bad }, { status: 415 });
   if (!demoReady().agent) return NextResponse.json({ error: "the demo agent is not configured on this server" }, { status: 503 });
   const { agreement, action } = (await req.json().catch(() => ({}))) as { agreement?: string; action?: string };
-  if (typeof agreement !== "string" || !agreementPattern(config().factory).test(agreement)) {
+  if (typeof agreement !== "string" || !isConfiguredAgreement(agreement)) {
     return NextResponse.json({ error: "not an agreement of this factory" }, { status: 400 });
   }
   if (action !== "key" && action !== "pay" && action !== "attack") return NextResponse.json({ error: "action is key, pay or attack" }, { status: 400 });

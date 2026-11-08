@@ -6,7 +6,7 @@ import "server-only";
 import type {
   AgreementRecord, AgreementView, AtlasTerms, PeriodView, Receipt, StoredObservation,
 } from "@accord/sdk";
-import { accord, source, type Source } from "./accord";
+import { accord, listAllAgreements, source, type Source } from "./accord";
 
 export interface AtlasRoom {
   record: AgreementRecord;
@@ -50,7 +50,7 @@ async function load(record: AgreementRecord): Promise<AtlasRoom | null> {
 
 export async function atlasConsole(): Promise<AtlasConsole> {
   const a = accord();
-  const [records, src] = await Promise.all([a.listAgreements({ limit: 100 }), source()]);
+  const [records, src] = await Promise.all([listAllAgreements({ limit: 100 }), source()]);
   const loaded = await Promise.all(
     records.filter((r) => r.kind === "market-making").map((r) => load(r).catch(() => "unread" as const)),
   );
