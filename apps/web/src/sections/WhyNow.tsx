@@ -40,6 +40,8 @@ export function WhyNow() {
     <section id="why-now" className={`section ${styles.section}`} aria-labelledby="why-now-title">
       <SectionHeading eyebrow="Why now" title={<span id="why-now-title">An agent’s instructions can change. Its payment authority stays within the approved rules.</span>} accent="orange" wide />
 
+      {/* One grid: the FBI losses chart on the left; six figures on the right in pairs (business email compromise,
+          AI, crypto and forecasts), one source line under all of them. Every figure has its row on /research. */}
       <div className={styles.stats}>
         <Tile
           className={styles.lossTile}
@@ -51,59 +53,48 @@ export function WhyNow() {
           <div className={styles.chartWrap}><LossesChart /></div>
         </Tile>
         <Tile
-          delay="0.1s"
-          label={<>Business email compromise, 2025<Fn n={1} to="ic3-2025" /></>}
+          delay="0.06s"
+          label={<>Lost to business email compromise, 2025<Fn n={1} to="ic3-2025" /></>}
           value="$3.0B"
           line="24,768 complaints about messages that redirect or request a payment."
         />
         <Tile
-          delay="0.2s"
-          label={<>Complaints that referenced AI, 2025<Fn n={1} to="ic3-2025" /></>}
+          delay="0.12s"
+          label={<>US organisations hit by business email compromise, 2025<Fn n={3} to="afp-2026" /></>}
+          value="74%"
+          line={<><code className="mono">76%</code> faced attempted or actual payments fraud.</>}
+        />
+        <Tile
+          delay="0.18s"
+          label={<>FBI complaints that referenced AI, 2025<Fn n={1} to="ic3-2025" /></>}
           value="22,364"
-          line={<><code className="mono">$893M</code> in losses. The FBI notes that AI-made content is getting harder to detect and easier to make.</>}
+          line={<><code className="mono">$893M</code> in losses.</>}
+        />
+        <Tile
+          delay="0.24s"
+          label={<>Prompt injections that still worked on a browser agent<Fn n={4} to="anthropic-chrome" /></>}
+          value="11.2%"
+          line={<>With the maker's mitigations, in 123 tests. <code className="mono">23.6%</code> without.</>}
+        />
+        <Tile
+          delay="0.3s"
+          label={<>Stolen in crypto, 2025<Fn n={5} to="chainalysis-2025" /></>}
+          value="$3.4B"
+          line={<>One exchange breach was <code className="mono">$1.5B</code> of it.</>}
+        />
+        <Tile
+          delay="0.36s"
+          label={<>US fraud losses generative AI could enable by 2027<Fn n={6} to="deloitte-genai-fraud" /></>}
+          value="$40B"
+          line={<>A forecast, up from <code className="mono">$12.3B</code> in 2023.</>}
         />
       </div>
 
       <p className={`t-body-sm ${styles.source}`}>
-        Source: FBI Internet Crime Complaint Center, Internet Crime Reports for{" "}
-        <a href={IC3_2025} target="_blank" rel="noreferrer">2025</a> and <a href={IC3_2023} target="_blank" rel="noreferrer">2023</a>.
+        Sources: FBI Internet Crime Complaint Center, reports for <a href={IC3_2025} target="_blank" rel="noreferrer">2025</a> and{" "}
+        <a href={IC3_2023} target="_blank" rel="noreferrer">2023</a>; AFP Payments Fraud and Control Survey 2026; Anthropic, August 2025;
+        Chainalysis, December 2025; Deloitte, May 2024 (forecast). Each is on <Link to="/research#attack-trends">Research</Link>.
       </p>
-
-      {/* The second band of figures: payments are the target, fakes get cheaper, and the model alone is not the safeguard.
-          Each figure is checked at its publisher (8 Nov 2026) and has its row on /research; forecasts say so. */}
-      <div className={styles.more}>
-        <p className={`mono ${styles.moreLabel}`}>Payments are the target, and the model is not the safeguard</p>
-        <div className={styles.row}>
-          <Tile
-            delay="0s"
-            label={<>US organisations hit by business email compromise, 2025<Fn n={3} to="afp-2026" /></>}
-            value="74%"
-            line={<><code className="mono">76%</code> faced attempted or actual payments fraud.</>}
-          />
-          <Tile
-            delay="0.08s"
-            label={<>Stolen in crypto, 2025<Fn n={4} to="chainalysis-2025" /></>}
-            value="$3.4B"
-            line={<>January to early December. One exchange breach accounted for <code className="mono">$1.5B</code>.</>}
-          />
-          <Tile
-            delay="0.16s"
-            label={<>US fraud losses generative AI could enable by 2027<Fn n={5} to="deloitte-genai-fraud" /></>}
-            value="$40B"
-            line={<>A forecast, up from <code className="mono">$12.3B</code> in 2023: 32% a year.</>}
-          />
-          <Tile
-            delay="0.24s"
-            label={<>Prompt injections that still worked on a browser agent<Fn n={6} to="anthropic-chrome" /></>}
-            value="11.2%"
-            line={<>With the maker's own mitigations, in 123 tests. <code className="mono">23.6%</code> without them.</>}
-          />
-        </div>
-        <p className={`t-body-sm ${styles.source}`}>
-          Sources: AFP Payments Fraud and Control Survey 2026; Chainalysis, December 2025; Deloitte Center for Financial Services, May 2024 (forecast);
-          Anthropic, August 2025. Details on <Link to="/research#attack-trends">Research</Link>.
-        </p>
-      </div>
 
       <Appear as="div" className={styles.copy} effect={{ ...appear("0s"), threshold: 0.3 }}>
         <div className={styles.worst}>

@@ -8,7 +8,8 @@
   position: relative;
 }
 
-/* Stat group: losses tile 7 of 12 spanning two rows, two tiles stacked on the right (5 of 12) */
+/* Stat group: the losses tile (6 of 12) spans three rows on the left; six figure tiles (3 of 12 each) fill a 2 × 3 grid
+   on the right. Every small tile has the same rhythm: a two-line label, the value, one short line. */
 .stats {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -17,7 +18,7 @@
   width: 100%;
 }
 .tile {
-  grid-column: span 5;
+  grid-column: span 3;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -29,17 +30,24 @@
   transition: outline-color 120ms ease;
 }
 .tile:hover { outline-color: rgba(var(--ink-rgb), 0.3); }
-.lossTile { grid-column: span 7; grid-row: span 2; }
+.lossTile { grid-column: span 6; grid-row: span 3; }
 .label { color: var(--text-weak); }
+/* desktop: two-line labels so the six values sit on one line per row; the chart fills the tall tile's width */
+@media (min-width: 1200px) {
+  .label { min-height: 2.9em; }
+  .lossTile .label { min-height: 0; }
+  .lossTile .chartWrap > * { max-width: none; }
+}
 .value {
   font-family: var(--mono);
   font-weight: 500;
-  font-size: 40px;
+  font-size: 32px;
   line-height: 110%;
   letter-spacing: -0.03em;
   color: var(--text-strong);
 }
 .line { color: var(--text-weak); max-width: 46ch; }
+.lossTile .value { font-size: 40px; }
 .line :global(code.mono) { color: var(--text-strong); background: none; padding: 0; font-size: 0.95em; }
 .chartWrap { margin-top: auto; padding-top: 24px; width: 100%; }
 
@@ -50,16 +58,6 @@
 .source { margin-top: -32px; color: var(--text-weak); font-size: 12.5px; }
 .source a { color: var(--text-medium); text-decoration: underline; text-decoration-color: rgba(var(--ink-rgb), 0.3); text-underline-offset: 3px; }
 .source a:hover { color: var(--text-strong); }
-
-/* Second band of figures: a mono label, four tiles in a row (2 × 2 on tablet, 1 column on phone), its own source line */
-.more { display: flex; flex-direction: column; gap: 16px; width: 100%; }
-.moreLabel { font-size: 12px; letter-spacing: 0.04em; color: var(--text-weak); background: none; padding: 0; }
-.row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; width: 100%; }
-.row .tile { grid-column: auto; }
-@media (min-width: 1200px) { .row .label { min-height: 2.9em; } }
-.more .source { margin-top: 0; }
-@media (max-width: 1199.98px) { .row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 809.98px) { .row { grid-template-columns: 1fr; } }
 
 /* Body (65-character measure), then the worst-case statement */
 .copy { display: flex; flex-direction: column; gap: 32px; width: 100%; }
@@ -84,6 +82,7 @@
   .section { padding: 72px 24px; }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lossTile { grid-column: 1 / -1; grid-row: auto; }
+  .lossTile .label { min-height: 0; }
   .tile { grid-column: span 1; }
   .lossTile.tile { grid-column: 1 / -1; }
   .lossTile { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr); grid-template-rows: auto auto 1fr; column-gap: 32px; }
@@ -95,7 +94,7 @@
   .tile, .lossTile.tile { grid-column: 1 / -1; padding: 20px 16px; }
   .lossTile { display: flex; }
   .lossTile > .chartWrap { padding-top: 16px; }
-  .value { font-size: 32px; }
+  .value, .lossTile .value { font-size: 32px; }
   .source { margin-top: -16px; }
   .worstText { font-size: 20px; }
 }

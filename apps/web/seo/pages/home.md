@@ -232,21 +232,11 @@ $20.9B
 
 Up from `$6.9B` in 2021[2](/research#ic3-2023)
 
-Business email compromise, 2025[1](/research#ic3-2025)
+Lost to business email compromise, 2025[1](/research#ic3-2025)
 
 $3.0B
 
 24,768 complaints about messages that redirect or request a payment.
-
-Complaints that referenced AI, 2025[1](/research#ic3-2025)
-
-22,364
-
-`$893M` in losses. The FBI notes that AI-made content is getting harder to detect and easier to make.
-
-Source: FBI Internet Crime Complaint Center, Internet Crime Reports for [2025](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf) and [2023](https://ic3.gov/annualreport/reports/2023_ic3report.pdf).
-
-Payments are the target, and the model is not the safeguard
 
 US organisations hit by business email compromise, 2025[3](/research#afp-2026)
 
@@ -254,25 +244,31 @@ US organisations hit by business email compromise, 2025[3](/research#afp-2026)
 
 `76%` faced attempted or actual payments fraud.
 
-Stolen in crypto, 2025[4](/research#chainalysis-2025)
+FBI complaints that referenced AI, 2025[1](/research#ic3-2025)
 
-$3.4B
+22,364
 
-January to early December. One exchange breach accounted for `$1.5B`.
+`$893M` in losses.
 
-US fraud losses generative AI could enable by 2027[5](/research#deloitte-genai-fraud)
-
-$40B
-
-A forecast, up from `$12.3B` in 2023: 32% a year.
-
-Prompt injections that still worked on a browser agent[6](/research#anthropic-chrome)
+Prompt injections that still worked on a browser agent[4](/research#anthropic-chrome)
 
 11.2%
 
-With the maker's own mitigations, in 123 tests. `23.6%` without them.
+With the maker's mitigations, in 123 tests. `23.6%` without.
 
-Sources: AFP Payments Fraud and Control Survey 2026; Chainalysis, December 2025; Deloitte Center for Financial Services, May 2024 (forecast); Anthropic, August 2025. Details on [Research](/research#attack-trends).
+Stolen in crypto, 2025[5](/research#chainalysis-2025)
+
+$3.4B
+
+One exchange breach was `$1.5B` of it.
+
+US fraud losses generative AI could enable by 2027[6](/research#deloitte-genai-fraud)
+
+$40B
+
+A forecast, up from `$12.3B` in 2023.
+
+Sources: FBI Internet Crime Complaint Center, reports for [2025](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf) and [2023](https://ic3.gov/annualreport/reports/2023_ic3report.pdf); AFP Payments Fraud and Control Survey 2026; Anthropic, August 2025; Chainalysis, December 2025; Deloitte, May 2024 (forecast). Each is on [Research](/research#attack-trends).
 
 Worst case
 
