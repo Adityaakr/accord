@@ -2,13 +2,14 @@ import { Link } from "react-router-dom"
 import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { SectionHeading } from "../components/SectionHeading"
 import { LINKS } from "../content/links"
-import { FLOW, INFRA, TESTNET } from "../content/testnet"
+import { CHECKS, FLOW, INFRA, PHASES, TESTNET } from "../content/testnet"
 import styles from "./LiveTestnet.module.css"
 
 /* Home · Live on NEAR testnet (#testnet), 8 Nov 2026. The full flow of one agreement, each step linked to its
    transaction on the explorer, in the Proof section's language (Elevation Strong panels, mono values, teal for a pass,
-   refusal red only for the refusal and the revocation). Below it, the infrastructure links and the verify result.
-   The settlement token is a test USDC on testnet, said plainly. */
+   refusal red only for the refusal and the revocation), as one vertical timeline in four phases. Each row: step,
+   a mono detail only where it carries a number or a code, and the transaction. Below it, one slim line with the
+   verify result and the infrastructure links. */
 
 const rise = (delay: `${number}s`): AppearEffect => ({
   threshold: 0.15,
@@ -17,6 +18,7 @@ const rise = (delay: `${number}s`): AppearEffect => ({
 })
 
 export function LiveTestnet() {
+  const ok = CHECKS.filter((c) => c.ok).length
   return (
     <section id="testnet" className={`section ${styles.section}`}>
       <SectionHeading
@@ -24,52 +26,45 @@ export function LiveTestnet() {
         accent="teal"
         wide
         title="One agreement, every step on chain."
-        lead={<p>Agreement <a href={TESTNET.agreementUrl} target="_blank" rel="noreferrer" className="mono">{TESTNET.agreement}</a> ran the full flow on testnet: sealed limits, a negotiation by the real model inside OutLayer's attested enclave, approvals, funding, a payment, a refused redirect and a revocation. Settlement is test USDC on NEAR testnet.</p>}
+        lead={<p>Twelve steps of a real agreement, each one a transaction you can open.</p>}
       />
 
-      <Appear as="div" className={styles.panel} effect={rise("0s")}>
-        <div className={styles.panelHead}>
-          <span className={styles.panelTitle}>Agreement record</span>
-          <a href={TESTNET.agreementUrl} target="_blank" rel="noreferrer" className={`mono ${styles.panelLink}`}>{TESTNET.agreement} ↗</a>
+      <Appear as="div" className={styles.timeline} effect={rise("0s")}>
+        <div className={styles.head}>
+          <span className={styles.headLabel}>Agreement</span>
+          <a href={TESTNET.agreementUrl} target="_blank" rel="noreferrer" className={`mono ${styles.headLink}`}>{TESTNET.agreement} ↗</a>
         </div>
-        <ol className={styles.flow}>
-          {FLOW.map((s) => (
-            <li key={s.n}>
-              <a href={s.href} target="_blank" rel="noreferrer" className={styles.step}>
-                <span className={`mono ${styles.num}`}>{s.n}</span>
-                <span className={styles.stepText}>
-                  <span className={styles.stepTitle}>{s.title}</span>
-                  <span className={`${styles.stepDetail} ${s.refused ? styles.refused : ""}`}>{s.detail}</span>
-                </span>
-                <span className={`mono ${styles.tx}`}>tx ↗</span>
-              </a>
-            </li>
-          ))}
-        </ol>
+        {PHASES.map((ph) => (
+          <div key={ph.label} className={styles.phase}>
+            <p className={styles.phaseLabel}>{ph.label}</p>
+            <ol className={styles.steps}>
+              {ph.steps.map((n) => FLOW.find((s) => s.n === n)!).map((s) => (
+                <li key={s.n} className={styles.row}>
+                  <span className={`mono ${styles.num}`}>{s.n}</span>
+                  <span className={`${styles.name} ${s.refused ? styles.refused : ""}`}>{s.title}</span>
+                  <span className={`mono ${styles.detail} ${s.refused ? styles.refused : ""}`}>{s.mono ?? ""}</span>
+                  <a href={s.href} target="_blank" rel="noreferrer" className={`mono ${styles.tx}`} aria-label={`${s.title}: open the transaction`}>tx ↗</a>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
       </Appear>
 
-      <div className={styles.foot}>
-        <Appear as="div" className={styles.card} effect={rise("0.05s")}>
-          <p className={styles.cardTitle}>Checked from public data</p>
-          <p className={styles.cardText}>
-            <span className="mono">make verify DEAL={TESTNET.agreement}</span> passes {TESTNET.verify.ok.length} checks: {TESTNET.verify.ok.join(", ")}. Not checked yet: {TESTNET.verify.notChecked.join("; ")}.
-          </p>
-          <a href={LINKS.appVerify(TESTNET.agreement)} className={`t-body-sm ls-link ${styles.cardLink}`}>{LINKS.app ? "Verify it in the app →" : "How to verify it →"}</a>
-        </Appear>
-        <Appear as="div" className={styles.card} effect={rise("0.1s")}>
-          <p className={styles.cardTitle}>Behind it</p>
-          <ul className={styles.infra}>
-            <li><a href={TESTNET.factoryUrl} target="_blank" rel="noreferrer">Factory <span className="mono">{TESTNET.factory}</span> ↗</a></li>
-            {INFRA.map((i) => <li key={i.label}><a href={i.href} target="_blank" rel="noreferrer">{i.label} ↗</a></li>)}
-          </ul>
-          <p className={styles.cardNote}>Mainnet follows an audit.</p>
-        </Appear>
-      </div>
+      <Appear as="div" className={styles.foot} effect={rise("0.05s")}>
+        <p className={styles.verify}>
+          <span className="mono">make verify</span>
+          <span className={styles.sep} aria-hidden="true">·</span>
+          <span className={styles.verifyResult}>{ok} of {CHECKS.length} checks ok</span>
+          <span className={styles.sep} aria-hidden="true">·</span>
+          <Link to="/verify" className={styles.footLink}>See the checks →</Link>
+        </p>
+        <ul className={styles.infra} aria-label="Behind it">
+          {INFRA.map((i) => <li key={i.label}><a href={i.href} target="_blank" rel="noreferrer">{i.label} <span aria-hidden="true">↗</span></a></li>)}
+        </ul>
+      </Appear>
 
-      <div className={styles.ctaRow}>
-        {LINKS.app ? <a href={LINKS.openDealRoom} className={`t-body-sm ls-link ${styles.cta}`}>Open the app and create a deal room →</a> : <Link to={LINKS.join} className={`t-body-sm ls-link ${styles.cta}`}>How to start →</Link>}
-        <Link to={LINKS.docs} className={`t-body-sm ls-link ${styles.ctaWeak}`}>Run it yourself from the docs</Link>
-      </div>
+      <Link to={LINKS.join} className={`t-body-sm ls-link ${styles.cta}`}>How to start →</Link>
     </section>
   )
 }

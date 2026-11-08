@@ -480,55 +480,53 @@ Live on NEAR testnet
 
 ## One agreement, every step on chain.
 
-Agreement [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet) ran the full flow on testnet: sealed limits, a negotiation by the real model inside OutLayer's attested enclave, approvals, funding, a payment, a refused redirect and a revocation. Settlement is test USDC on NEAR testnet.
+Twelve steps of a real agreement, each one a transaction you can open.
 
-Agreement record [a6.accord-v2.testnet ↗](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
+Agreement [a6.accord-v2.testnet ↗](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
 
-- [01 Buyer seals its limits Only a commitment and ciphertext go on chain tx ↗](https://testnet.nearblocks.io/txns/Ek9Zr1wjD6nrWaKHFak8UDv5Jwbaacqrdh1huNp6qwAk)
+Sealed
 
-- [02 Vendor seals its limits The other side never sees the numbers tx ↗](https://testnet.nearblocks.io/txns/2Zq8pfNoa1dFzMLAy79aGyek72q3LGcrvRqAjYABisKZ)
+- 01 Buyer seals its limits [tx ↗](https://testnet.nearblocks.io/txns/Ek9Zr1wjD6nrWaKHFak8UDv5Jwbaacqrdh1huNp6qwAk)
 
-- [03 Negotiated in the enclave 35.50 test USDC in 3 items, signed by the Sealed Table tx ↗](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW)
+- 02 Vendor seals its limits [tx ↗](https://testnet.nearblocks.io/txns/2Zq8pfNoa1dFzMLAy79aGyek72q3LGcrvRqAjYABisKZ)
 
-- [04 Buyer approves the terms Approval recorded on the agreement tx ↗](https://testnet.nearblocks.io/txns/H6cMyE6kzs9SdrC4yaP7CvnDxJqH4NSx7ivKeu2rBHSg)
+- 03 Negotiated in the enclave 35.50 USDC · 3 items [tx ↗](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW)
 
-- [05 Vendor approves the terms The agreement starts executing tx ↗](https://testnet.nearblocks.io/txns/2uv8tTfeYhe2aZ5cMrVNfFzr88kPL4HeSxwYzNhtmveT)
+Agreed
 
-- [06 Buyer funds the escrow 35.50 test USDC into the agreement's own account tx ↗](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy)
+- 04 Buyer approves the terms [tx ↗](https://testnet.nearblocks.io/txns/H6cMyE6kzs9SdrC4yaP7CvnDxJqH4NSx7ivKeu2rBHSg)
 
-- [07 Recipient proven in the enclave Payee checks the vendor's domain tx ↗](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6)
+- 05 Vendor approves the terms [tx ↗](https://testnet.nearblocks.io/txns/2uv8tTfeYhe2aZ5cMrVNfFzr88kPL4HeSxwYzNhtmveT)
 
-- [08 Vendor's authority approves A separate account signs off the recipient tx ↗](https://testnet.nearblocks.io/txns/FBQnqtKXs5B5zn1A4F1yCDUmACYMqsi2zM2uez6YxDis)
+Funded and bound
 
-- [09 Buyer accepts the recipient halcyon-mm.testnet is now the only destination tx ↗](https://testnet.nearblocks.io/txns/3d3LSZvz3yPX5LM1Bk6t9bxiX2x1JDMEt9mfa2fbw11p)
+- 06 Buyer funds the escrow 35.50 USDC [tx ↗](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy)
 
-- [10 Agent pays inside the terms 16.50 test USDC to halcyon-mm.testnet tx ↗](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ)
+- 07 Recipient proven in the enclave [tx ↗](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6)
 
-- [11 A redirected payment is refused ERR_PAYEE_MISMATCH, nothing sent tx ↗](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs)
+- 08 Vendor's authority approves [tx ↗](https://testnet.nearblocks.io/txns/FBQnqtKXs5B5zn1A4F1yCDUmACYMqsi2zM2uez6YxDis)
 
-- [12 Buyer revokes the agent Its next call fails: AccessKeyDoesNotExist tx ↗](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P)
+- 09 Buyer accepts the recipient [tx ↗](https://testnet.nearblocks.io/txns/3d3LSZvz3yPX5LM1Bk6t9bxiX2x1JDMEt9mfa2fbw11p)
 
-Checked from public data
+Paid, refused, revoked
 
-make verify DEAL=a6.accord-v2.testnet passes 6 checks: contract code, agent key, sealed outcome, model attestation, recipient proof, record. Not checked yet: release attestation (the outlayer-verify tool is not installed yet).
+- 10 Agent pays inside the terms 16.50 USDC [tx ↗](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ)
 
-[Verify it in the app →](/app/verify/a6.accord-v2.testnet)
+- 11 A redirected payment is refused ERR_PAYEE_MISMATCH [tx ↗](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs)
 
-Behind it
+- 12 Buyer revokes the agent AccessKeyDoesNotExist [tx ↗](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P)
 
-- [Factory accord-v2.testnet ↗](https://testnet.nearblocks.io/address/accord-v2.testnet)
+make verify 6 of 7 checks ok [See the checks →](/verify)
 
-- [Factory deployed ↗](https://testnet.nearblocks.io/txns/2bH5kjeQKSYpEhaxcftUtsfqhYKUFwtYLi8k9GF2zZWg)
+- [Factory](https://testnet.nearblocks.io/address/accord-v2.testnet)
 
-- [Release 3 published ↗](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh)
+- [Release 3](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh)
 
-- [Room created through Accord's relayer ↗](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC)
+- [Relayer tx](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC)
 
-- [Enclave key attestations ↗](https://testnet-api.outlayer.ai/attestations/13596)
+- [Attestations](https://testnet-api.outlayer.ai/attestations/13596)
 
-Mainnet follows an audit.
-
-[Open the app and create a deal room →](/app/signin) [Run it yourself from the docs](/docs)
+[How to start →](/join)
 
 > Illustrative: the demonstration agent's inbox. A message with new bank details and an urgent invoice are both refused by the contract with their reasons; the scheduled payment to the authorised recipient goes through.
 

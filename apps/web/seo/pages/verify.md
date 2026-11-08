@@ -6,44 +6,26 @@ One command checks a live agreement from public data, with no keys: the contract
 
 ## Verify this agreement
 
-Live on testnet: [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
+## What make verify checks.
 
-6 ok · 1 not checked
+`$make verify DEAL=a6.accord-v2.testnet`
 
-- ok contract code
+- Contract code Matches the published release ok
 
-- ok agent key
+- Agreement keys No full-access key ok
 
-- ok sealed outcome
+- Sealed outcome Signed inside the enclave ok
 
-- ok model attestation
+- Enclave release Needs the outlayer-verify tool not checked
 
-- ok recipient proof
+- Model attestation The real model, fresh nonce ok
 
-- ok record
+- Recipient Proven on the vendor's domain ok
 
-- not checked release attestation (the outlayer-verify tool is not installed yet)
+- Record Payments match the receipts ok
 
-[Run it again in the app](/app/verify/a6.accord-v2.testnet) · [factory accord-v2.testnet](https://testnet.nearblocks.io/address/accord-v2.testnet)
+6 of 7 ok [a6.accord-v2.testnet ↗](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
 
-## What make verify checks, line by line.
+Show raw output accord verify · a6.accord-v2.testnet code code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok keys 0 key · none · no full access · ok sealed outcome signature ok · commitments match · agreement matches · ok release sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · … · not checked model z-ai/glm-5.3-flash · fresh nonce 9debe4c3… · nonce bound in the report · ok payee halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · ok record 1 payments · 1 refusals · 0 exceptions · receipts match paid · ok verify: 6 checks ok · 1 not checked
 
-`make verify DEAL=<agreement>`
-
-The block starts with `accord verify · <agreement>`. Values in angle brackets are real values at run time.
-
-- `01` Contract code `code code hash <8>… = release <v> (<global by hash | embedded>) · no deploy method · ok`
-
-- `02` Agreement keys `keys <0 | 1> key · FunctionCall · receiver self · methods [act] · no full access · ok`
-
-- `03` Sealed Table release `release sealed-table wasm <8>… · keys from pubkey run <task id> · attestation verified · seed binding <shown | not exposed> · ok`
-
-- `04` Sealed outcome `sealed outcome signature ok · commitments match · nonce matches · ok`
-
-- `05` Model attestation `model <model> · gateway TDX <ok | not checked> · model TDX <ok | not checked> · GPU <ok | not checked> · fresh nonce bound · ok`
-
-- `06` Recipient `payee <recipient> · proof <domain> · authority approved · buyer accepted · active · ok`
-
-- `07` Record `record <n> payments · <n> refusals · <n> exceptions · <n> set aside · <n> observation conflicts · events match state · ok`
-
-It ends with `verify: <n> checks ok`. It fetches the attestation report from NEAR AI Cloud without a key when the endpoint allows it; otherwise it uses `NEARAI_API_KEY` if set, or the hosted relay at `/api/verify/<id>` with a nonce it generates itself, and prints which.
+Reads public data only. No keys, no account.
