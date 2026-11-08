@@ -313,7 +313,7 @@ Kept as stated limits: an item can be reopened from `AssumedPaid` by one excepti
   https://testnet.nearblocks.io/txns/Ce2DBJq6UYUjyceWPkpYhcZghghe4PrXb4ggxrbYfdbb. The agreement code is unchanged, so
   the global contract from release 1 (`8wMuMRre…`) is reused; `make deploy-testnet` now skips republishing it.
 - **Payee domain on testnet:** `DEMO_VENDOR_DOMAIN=accordweb-production.up.railway.app`; the website serves
-  `fixtures/companies/halcyon/accord.json` at `/.well-known/accord.json` (glassbook commit 1e6f349). It is not in the
+  `fixtures/companies/halcyon/accord.json` at `/.well-known/accord.json` (website commit 1e6f349). It is not in the
   job's `DEMO_DOMAINS`, so proofs carry `demo_domain: false`; the recipients and authorities are the real testnet
   accounts it lists.
 - **OutLayer keystore outage:** two runs for a3.accord-v2.testnet (requests 13608 and the retry) failed before the job

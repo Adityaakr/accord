@@ -170,5 +170,5 @@ From BLOCKED.md, plus the new platform:
 - models: lenses=opus (code map, wallet research, product design, security and regulatory)
 - claims: contract roles grounded (lib.rs, payments.rs, recipients.rs, evidence.rs) · near-connect 0.12.0 grounded (npm) ·
   NEAR Auth MPC supported (auth.near.org) · Intents no testnet supported (docs.near-intents.org) · security.md errors
-  grounded and fixed on the site (glassbook 8dbe850)
+  grounded and fixed on the site (website commit 8dbe850)
 - fleet: 4 lenses, one round
