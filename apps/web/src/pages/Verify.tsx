@@ -102,10 +102,20 @@ export function Verify() {
     setId(next)
     setRows(blank())
     setFull({ state: "loading" })
-    void fetchFullCheck(next, ctl.signal).then((f) => { if (!ctl.signal.aborted) setFull(f) })
+    /* Not an account id: nothing to ask the RPC or the app (they would only answer 400s into the console) */
+    if (!isAccountId(next)) {
+      setRows(ROWS.map((r, i) => ({ ...r, value: i === 0 ? ["Not a NEAR account id"] : [], result: i === 0 ? "not ok" : "not checked" })))
+      setFull({ state: "recorded", reason: "This is not a NEAR account id, so there is nothing to check." })
+      return
+    }
+    /* The full check runs once the factory has listed the account; an id it does not list gets the reason at once */
+    const startFull = () => void fetchFullCheck(next, ctl.signal).then((f) => { if (!ctl.signal.aborted) setFull(f) })
     void verifyAgreement(next, (key: RowKey, v, result) => {
       if (ctl.signal.aborted) return
       setRows((rs) => rs.map((r) => (r.key === key ? { ...r, value: v, result } : r)))
+      if (key !== "agreement") return
+      if (result === "not ok") setFull({ state: "recorded", reason: `${next} is not an Accord agreement on NEAR testnet.` })
+      else startFull()
     }, ctl.signal)
   }, [])
 
