@@ -404,25 +404,6 @@ Status: planned. Runs on Payee and USDC.
 
 Any agreement with approved terms, agreed evidence and an authorised recipient works the same way.
 
-Compared
-
-## Accord compared with the alternatives.
-
-Only Accord keeps both sides' limits sealed during negotiation and lets an agent pay on its own while a contract checks every payment. Escrow offers arbitration and is in production; Accord is pre-launch.
-
-**What each option enforces when an agent pays another business**
-
-| Capability | Accord | Escrow service Escrow.com | Multisig wallet Safe | Agent wallet Coinbase CDP, Privy | Payment mandates Google AP2 | Stablecoin transfer any wallet |
-| --- | --- | --- | --- | --- | --- | --- |
-| Each side's limits stay sealed while agents negotiate | Yes : Sealed Table enclave | No : no negotiation step | No : no negotiation step | No : no negotiation step | No : no negotiation step | No |
-| Each payment checked against the agreed terms | Yes : in the contract | Yes : by the escrow agent | Partly : signer review | Partly : caps, not terms | Partly : carries a signed mandate | No |
-| A message cannot redirect the recipient | Yes : Payee and the contract | Partly : payee details editable | Partly : signers or a guard | Partly : if allowlisted | Not stated | No |
-| Payment released only on agreed evidence | Yes : checked by the contract | Yes : on buyer acceptance | Partly : signers' judgement | No | Not stated | No |
-| An agent can pay without a person signing each payment | Yes : inside the approved terms | No : funding is manual | Partly : spending-limit module | Yes | Yes : within an intent mandate | Yes |
-| A neutral third party resolves disputes | No : the buyer decides exceptions | Yes : an arbitrator decides | No | No | Not stated | No |
-
-Partly: depends on setup or who checks. Sources: Escrow.com's process, Safe and its modules, Coinbase CDP and Privy wallet policies, Google's AP2 announcement; checked 8 November 2026. Not stated: the source does not address it. Accord is pre-launch: built and tested on a local NEAR node, testnet release pending.
-
 Why now
 
 ## An agent’s instructions can change. Its payment authority stays within the approved rules.
