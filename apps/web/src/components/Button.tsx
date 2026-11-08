@@ -27,7 +27,8 @@ export function Button({ variant = "primary", href, openInNewTab, children, clas
     whileHover: variant === "primary" ? { boxShadow: "0px 0px 0px 2px rgba(var(--ink-rgb), 0.5)" } : undefined,
   }
   if (href) {
-    const isInternal = href.startsWith("/")
+    // /app is the Accord app, a separate service behind this site: a full page load, not a client route
+    const isInternal = href.startsWith("/") && href !== "/app" && !href.startsWith("/app/")
     if (isInternal) {
       const MotionLink = motion.create(Link)
       return <MotionLink to={href} {...motionProps} onClick={onClick}>{inner}</MotionLink>
