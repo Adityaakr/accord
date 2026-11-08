@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { Arrow } from "../components/Arrow"
 import { Link } from "react-router-dom"
 import { Appear } from "../lib/motion"
 import { SectionHeading, appear } from "../components/SectionHeading"
@@ -114,7 +115,7 @@ export function WhyNow() {
         </figcaption>
       </Appear>
 
-      <a href="#try" className={`t-link ${styles.tryLink}`}>Try to move the money ↓</a>
+      <a href="#try" className={`t-link ${styles.tryLink}`}>Try to move the money<Arrow dir="down" /></a>
     </section>
   )
 }

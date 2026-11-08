@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react"
+import { Arrow } from "../components/Arrow"
 import { useReducedMotion } from "motion/react"
 import styles from "./DealDetail.module.css"
 
@@ -277,7 +278,7 @@ export function DealDetail({ open, room, caps, lines, detail, steps, cap, onCap,
 
           <div className={styles.foot}>
             <button type="button" className={styles.nav} onClick={() => onCap((cap + caps.length - 1) % caps.length)}>← {SHORT[(cap + caps.length - 1) % caps.length]}</button>
-            <button type="button" className={styles.nav} onClick={() => onCap((cap + 1) % caps.length)}>{SHORT[(cap + 1) % caps.length]} →</button>
+            <button type="button" className={styles.nav} onClick={() => onCap((cap + 1) % caps.length)}>{SHORT[(cap + 1) % caps.length]}<Arrow /></button>
           </div>
         </div>
       ) : null}

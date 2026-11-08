@@ -1,4 +1,5 @@
 import { usePageMeta } from "../lib/meta"
+import { Arrow } from "../components/Arrow"
 import type { ReactNode } from "react"
 import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { Button } from "../components/Button"
@@ -56,7 +57,7 @@ function Row({ id, shot, imageSide, title, subline, paragraphs, action }: RowPro
       </div>
       {action && (
         <div className={styles.actions}>
-          <Button variant="secondary" href={action.href}>{action.label}</Button>
+          <Button variant="secondary" href={action.href}>{action.label}<Arrow /></Button>
         </div>
       )}
     </Appear>
@@ -136,7 +137,7 @@ export function Product() {
             <>Each party submits a confidential mandate. Agents propose terms within those constraints, and both parties decide whether to approve the result.</>,
             <>Attestation provides evidence about the execution environment. It does not establish that a deal is fair or commercially optimal.</>,
           ]}
-          action={{ label: "How negotiation works →", href: LINKS.sealedTable }}
+          action={{ label: "How negotiation works", href: LINKS.sealedTable }}
         />
 
         <Row
@@ -152,7 +153,7 @@ export function Product() {
             </>,
             <>Destination changes follow a separate approval process and configured delay. Domain control and authorization do not establish legal business identity.</>,
           ]}
-          action={{ label: "How recipient approval works →", href: LINKS.payee }}
+          action={{ label: "How recipient approval works", href: LINKS.payee }}
         />
       </section>
     </div>

@@ -224,8 +224,8 @@
 .announceDot { color: var(--text-weak); }
 .announceKicker { font-size: 15px; letter-spacing: -0.01em; color: var(--teal); }
 .announceSub { flex-basis: 100%; font-size: 14px; line-height: 1.45; color: var(--text-weak); }
-.announceArrow { flex: none; color: var(--text-weak); font-size: 16px; transition: transform 0.2s ease, color 0.2s ease; }
-.announceLink:hover .announceArrow { transform: translateX(3px); color: var(--teal); }
+.announceArrow { flex: none; margin-left: 0; color: var(--text-weak); transition: transform 160ms ease, color 0.2s ease; }
+.announceLink:hover .announceArrow { transform: translateX(2px); color: var(--teal); }
 .announceLink:hover .announceName { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(var(--ink-rgb), 0.3); }
 @media (prefers-reduced-motion: reduce) { .announceArrow { transition: none; } }
 @media (max-width: 809.98px) {

@@ -175,3 +175,11 @@ code.mono { padding: 1px 6px; border-radius: 4px; background: var(--elevation-me
 @media print {
   [style*="opacity: 0"] { opacity: 1 !important; transform: none !important; filter: none !important; }
 }
+
+/* Link arrows (components/Arrow.tsx): 12px, 6px from the text, centred on the cap height, same weight everywhere.
+   Hover nudges 2px in the arrow's direction; reduced motion keeps it still. */
+.arrow-icon { display: inline-block; flex: none; width: 12px; height: 12px; margin-left: 6px; vertical-align: calc(0.35em - 6px); overflow: visible; transition: transform 160ms ease; }
+:is(a, button, summary):hover .arrow-right, .arrow-host:hover .arrow-right { transform: translateX(2px); }
+:is(a, button, summary):hover .arrow-up-right, .arrow-host:hover .arrow-up-right { transform: translate(2px, -2px); }
+:is(a, button, summary):hover .arrow-down, .arrow-host:hover .arrow-down { transform: translateY(2px); }
+@media (prefers-reduced-motion: reduce) { .arrow-icon { transition: none; } :is(a, button, summary, .arrow-host):hover .arrow-icon { transform: none; } }

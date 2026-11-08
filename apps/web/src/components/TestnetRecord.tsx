@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { Arrow } from "./Arrow"
 import { CHECKS, FLOW, TESTNET, VERIFY_COMMAND, VERIFY_RAW } from "../content/testnet"
 import styles from "./TestnetRecord.module.css"
 
@@ -40,7 +41,7 @@ export function VerifyChecks() {
       </ol>
       <div className={styles.termFoot}>
         <span className={`mono ${styles.summary}`}>{ok} of {CHECKS.length} ok</span>
-        <a href={TESTNET.agreementUrl} target="_blank" rel="noreferrer" className={`mono ${styles.agreement}`}>{TESTNET.agreement} ↗</a>
+        <a href={TESTNET.agreementUrl} target="_blank" rel="noreferrer" className={`mono ${styles.agreement}`}>{TESTNET.agreement}<Arrow dir="up-right" /></a>
       </div>
       <details className={styles.raw}>
         <summary>Show raw output</summary>
@@ -64,7 +65,7 @@ export function TestnetFlowRecord() {
               <span className={`mono ${styles.num}`}>{s.n}</span>
               <span className={styles.stepTitle}>{s.title}</span>
               <span className={`${styles.detail} ${s.refused ? styles.refused : ""}`}>{s.detail}</span>
-              <span className={`mono ${styles.tx}`}>tx ↗</span>
+              <span className={`mono ${styles.tx}`}>tx<Arrow dir="up-right" /></span>
             </a>
           </li>
         ))}

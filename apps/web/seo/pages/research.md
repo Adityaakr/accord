@@ -14,7 +14,7 @@ Floor 06 · Attacks
 
 ### Internet Crime Report 2025.
 
-FBI Internet Crime Complaint Center, published April 2026. Annual statistics from complaints filed with the FBI. [Source ↗](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf)
+FBI Internet Crime Complaint Center, published April 2026. Annual statistics from complaints filed with the FBI. [Source](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf)
 
 What it establishes
 
@@ -34,7 +34,7 @@ in Accord a payment destination never comes from a message, and a payment reques
 
 ### Internet Crime Report 2023.
 
-FBI Internet Crime Complaint Center, published March 2024. [Source ↗](https://ic3.gov/annualreport/reports/2023_ic3report.pdf)
+FBI Internet Crime Complaint Center, published March 2024. [Source](https://ic3.gov/annualreport/reports/2023_ic3report.pdf)
 
 What it establishes
 
@@ -54,7 +54,7 @@ none on its own; it dates the trend shown on the homepage.
 
 ### State of Crypto 2025.
 
-a16z crypto, 22 October 2025. Annual industry report. [Source ↗](https://a16zfrontier.com/posts/article/state-of-crypto-report-2025/)
+a16z crypto, 22 October 2025. Annual industry report. [Source](https://a16zfrontier.com/posts/article/state-of-crypto-report-2025/)
 
 What it establishes
 
@@ -74,7 +74,7 @@ Accord settles in USDC, the stablecoin businesses already hold, rather than a ne
 
 ### Stablecoin circulation.
 
-DefiLlama, daily stablecoin data, read 8 November 2026. Public on-chain dataset. [Source ↗](https://stablecoins.llama.fi/stablecoincharts/all)
+DefiLlama, daily stablecoin data, read 8 November 2026. Public on-chain dataset. [Source](https://stablecoins.llama.fi/stablecoincharts/all)
 
 What it establishes
 
@@ -94,7 +94,7 @@ none on its own; it sizes the money that already moves the way Accord settles.
 
 ### Business Email Compromise: The $55 Billion Scam.
 
-FBI Internet Crime Complaint Center, public service announcement I-091124-PSA, 11 September 2024. Statistics from filings with financial institutions, October 2013 to December 2023. [Source ↗](https://www.ic3.gov/PSA/2024/PSA240911)
+FBI Internet Crime Complaint Center, public service announcement I-091124-PSA, 11 September 2024. Statistics from filings with financial institutions, October 2013 to December 2023. [Source](https://www.ic3.gov/PSA/2024/PSA240911)
 
 What it establishes
 
@@ -114,7 +114,7 @@ a payment destination in Accord never comes from a message; it is fixed when bot
 
 ### 2026 AFP Payments Fraud and Control Survey.
 
-Association for Financial Professionals, press release, 14 April 2026. Survey of 465 treasury practitioners at US organisations, conducted January 2026, reporting 2025. [Source ↗](https://www.financialprofessionals.org/about/learn-more/press-releases/Details/over-75-percent-of-us-firms-experienced-payments-fraud-in-2025-while-ai-adoption-for-fraud-mitigation-lags/)
+Association for Financial Professionals, press release, 14 April 2026. Survey of 465 treasury practitioners at US organisations, conducted January 2026, reporting 2025. [Source](https://www.financialprofessionals.org/about/learn-more/press-releases/Details/over-75-percent-of-us-firms-experienced-payments-fraud-in-2025-while-ai-adoption-for-fraud-mitigation-lags/)
 
 What it establishes
 
@@ -134,7 +134,7 @@ a message can never change where an Accord payment goes; the recipient is fixed 
 
 ### Crypto theft in 2025.
 
-Chainalysis, blog post, 18 December 2025, ahead of its 2026 Crypto Crime Report. [Source ↗](https://www.chainalysis.com/blog/crypto-hacking-stolen-funds-2026/)
+Chainalysis, blog post, 18 December 2025, ahead of its 2026 Crypto Crime Report. [Source](https://www.chainalysis.com/blog/crypto-hacking-stolen-funds-2026/)
 
 What it establishes
 
@@ -154,7 +154,7 @@ agreement funds sit in each agreement's own account with no full-access key, and
 
 ### Generative AI is expected to magnify the risk of deepfakes and other fraud in banking.
 
-Deloitte Center for Financial Services, 29 May 2024. A forecast built from the FBI's fraud categories under conservative, base and aggressive adoption scenarios. [Source ↗](https://www.deloitte.com/us/en/insights/industry/financial-services/deepfake-banking-fraud-risk-on-the-rise.html)
+Deloitte Center for Financial Services, 29 May 2024. A forecast built from the FBI's fraud categories under conservative, base and aggressive adoption scenarios. [Source](https://www.deloitte.com/us/en/insights/industry/financial-services/deepfake-banking-fraud-risk-on-the-rise.html)
 
 What it establishes
 
@@ -198,7 +198,7 @@ Floor 05 · Confidential mandates
 
 ### NDAI Agreements.
 
-Matthew Stephenson, Andrew Miller, Xyn Sun, Bhargav Annem and Rohan Parikh. arXiv 2502.07924, submitted 11 February 2025. Theoretical paper with a bargaining model. [Source ↗](https://arxiv.org/abs/2502.07924)
+Matthew Stephenson, Andrew Miller, Xyn Sun, Bhargav Annem and Rohan Parikh. arXiv 2502.07924, submitted 11 February 2025. Theoretical paper with a bargaining model. [Source](https://arxiv.org/abs/2502.07924)
 
 What it establishes
 
@@ -218,7 +218,7 @@ the Sealed Table runs the negotiation inside an attested enclave, hard limits fr
 
 ### NEAR AI Brings Private USDC Stablecoin Payments to the Agentic Economy.
 
-NEAR AI press release, 14 May 2026. Commercial announcement by the host of the hackathon Accord is built for. [Source ↗](https://www.prnewswire.co.uk/news-releases/near-ai-brings-private-usdc-stablecoin-payments-to-the-agentic-economy-302772315.html)
+NEAR AI press release, 14 May 2026. Commercial announcement by the host of the hackathon Accord is built for. [Source](https://www.prnewswire.co.uk/news-releases/near-ai-brings-private-usdc-stablecoin-payments-to-the-agentic-economy-302772315.html)
 
 What it establishes
 
@@ -238,7 +238,7 @@ the Sealed Table's confidentiality, and the honesty of the privacy boundary stat
 
 ### Efficient Mechanisms for Bilateral Trading.
 
-Roger Myerson and Mark Satterthwaite. Journal of Economic Theory 29(2), 1983. Theoretical result. [Source ↗](https://doi.org/10.1016/0022-0531(83)90048-0)
+Roger Myerson and Mark Satterthwaite. Journal of Economic Theory 29(2), 1983. Theoretical result. [Source](https://doi.org/10.1016/0022-0531(83)90048-0)
 
 What it establishes
 
@@ -258,7 +258,7 @@ Accord presents the Sealed Table as a mechanism both sides commit to in advance,
 
 ### Bargaining under Incomplete Information.
 
-Kalyan Chatterjee and William Samuelson. Operations Research 31(5), 1983. Theoretical model of the sealed-bid double auction. [Source ↗](https://doi.org/10.1287/opre.31.5.835)
+Kalyan Chatterjee and William Samuelson. Operations Research 31(5), 1983. Theoretical model of the sealed-bid double auction. [Source](https://doi.org/10.1287/opre.31.5.835)
 
 What it establishes
 
@@ -274,7 +274,7 @@ the lineage of the Sealed Table.
 
 ### How Well Can LLMs Negotiate? NegotiationArena Platform and Analysis.
 
-Federico Bianchi, Patrick John Chia, Mert Yuksekgonul, Jacopo Tagliabue, Dan Jurafsky and James Zou. arXiv 2402.05863, 8 February 2024; presented at ICML 2024. Experimental benchmark. [Source ↗](https://arxiv.org/abs/2402.05863)
+Federico Bianchi, Patrick John Chia, Mert Yuksekgonul, Jacopo Tagliabue, Dan Jurafsky and James Zou. arXiv 2402.05863, 8 February 2024; presented at ICML 2024. Experimental benchmark. [Source](https://arxiv.org/abs/2402.05863)
 
 What it establishes
 
@@ -298,7 +298,7 @@ Floor 04 · Agent authority
 
 ### The missing infrastructure for AI agents: 5 ways blockchains can help.
 
-Christian Crowley, Christian Catalini, Andrew Hall, Elizabeth Harkavy, Noah Levine and Sean Neville. a16z Frontier, 16 April 2026. Expert essay. [Source ↗](https://a16zfrontier.com/posts/article/5-ways-blockchains-help-ai-agents/)
+Christian Crowley, Christian Catalini, Andrew Hall, Elizabeth Harkavy, Noah Levine and Sean Neville. a16z Frontier, 16 April 2026. Expert essay. [Source](https://a16zfrontier.com/posts/article/5-ways-blockchains-help-ai-agents/)
 
 What it establishes
 
@@ -318,7 +318,7 @@ the buyer's agent holds a function-call key restricted to one method on one cont
 
 ### Announcing the Agent Payments Protocol (AP2).
 
-Google Cloud, 16 September 2025. Commercial announcement of an open protocol. [Source ↗](https://cloud.google.com/blog/products/ai-machine-learning/announcing-agents-to-payments-ap2-protocol)
+Google Cloud, 16 September 2025. Commercial announcement of an open protocol. [Source](https://cloud.google.com/blog/products/ai-machine-learning/announcing-agents-to-payments-ap2-protocol)
 
 What it establishes
 
@@ -338,7 +338,7 @@ Accord's approved terms are an authorisation record both companies sign; they co
 
 ### Access keys.
 
-NEAR Protocol documentation. Technical documentation. [Source ↗](https://docs.near.org/protocol/access-keys)
+NEAR Protocol documentation. Technical documentation. [Source](https://docs.near.org/protocol/access-keys)
 
 What it establishes
 
@@ -358,7 +358,7 @@ Floor 03 · Malicious instructions
 
 ### The lethal trifecta for AI agents.
 
-Simon Willison, 16 June 2025. Practitioner essay. [Source ↗](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/)
+Simon Willison, 16 June 2025. Practitioner essay. [Source](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/)
 
 What it establishes
 
@@ -378,7 +378,7 @@ the demonstration agent is assumed to be compromised by whatever arrives in its 
 
 ### LLM01:2025 Prompt Injection.
 
-OWASP Top 10 for LLM Applications, 2025. Security guidance from a standards body. [Source ↗](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)
+OWASP Top 10 for LLM Applications, 2025. Security guidance from a standards body. [Source](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)
 
 What it establishes
 
@@ -398,7 +398,7 @@ the agent's privileges are bounded by the contract (one key, one method, approve
 
 ### Piloting Claude in Chrome.
 
-Anthropic, 25 August 2025 (updated November and December 2025). The model maker's own red-teaming of a browser agent, run in autonomous mode. [Source ↗](https://claude.com/blog/claude-for-chrome)
+Anthropic, 25 August 2025 (updated November and December 2025). The model maker's own red-teaming of a browser agent, run in autonomous mode. [Source](https://claude.com/blog/claude-for-chrome)
 
 What it establishes
 
@@ -418,7 +418,7 @@ Accord does not rely on the model resisting every injection; the contract checks
 
 ### Prompt injection is not SQL injection (it may be worse).
 
-UK National Cyber Security Centre, blog post, 8 December 2025, with the NCSC announcement "Mistaking AI vulnerability could lead to large-scale breaches", 10 December 2025. Guidance from a national cyber security authority. [Source ↗](https://www.ncsc.gov.uk/blog-post/prompt-injection-is-not-sql-injection)[Source 2 ↗](https://www.ncsc.gov.uk/news/mistaking-ai-vulnerability-could-lead-to-large-scale-breaches)
+UK National Cyber Security Centre, blog post, 8 December 2025, with the NCSC announcement "Mistaking AI vulnerability could lead to large-scale breaches", 10 December 2025. Guidance from a national cyber security authority. [Source](https://www.ncsc.gov.uk/blog-post/prompt-injection-is-not-sql-injection)[Source 2](https://www.ncsc.gov.uk/news/mistaking-ai-vulnerability-could-lead-to-large-scale-breaches)
 
 What it establishes
 
@@ -438,7 +438,7 @@ Accord assumes the agent will be steered by what it reads and puts every payment
 
 ### OWASP Top 10 for Agentic Applications for 2026.
 
-OWASP GenAI Security Project, 9 December 2025. Security framework, described by OWASP as globally peer-reviewed. [Source ↗](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
+OWASP GenAI Security Project, 9 December 2025. Security framework, described by OWASP as globally peer-reviewed. [Source](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
 
 What it establishes
 
@@ -462,7 +462,7 @@ Floor 02 · Payment destinations
 
 ### Business Email Compromise.
 
-FBI Internet Crime Complaint Center, crime information page. Law-enforcement guidance. [Source ↗](https://www.ic3.gov/CrimeInfo/BEC)
+FBI Internet Crime Complaint Center, crime information page. Law-enforcement guidance. [Source](https://www.ic3.gov/CrimeInfo/BEC)
 
 What it establishes
 
@@ -482,7 +482,7 @@ in Accord a payment destination is never taken from a message. The recipient pro
 
 ### Confirmation of Payee.
 
-Pay.UK. Live industry service, launched 2020. [Source ↗](https://www.wearepay.uk/what-we-do/overlay-services/confirmation-of-payee/)
+Pay.UK. Live industry service, launched 2020. [Source](https://www.wearepay.uk/what-we-do/overlay-services/confirmation-of-payee/)
 
 What it establishes
 
@@ -506,7 +506,7 @@ Floor 01 · Evidence to release
 
 ### Kraken WebSocket API v2, book channel.
 
-Exchange documentation. [Source ↗](https://docs.kraken.com/exchange/api-reference/spot-websocket-v2/book)
+Exchange documentation. [Source](https://docs.kraken.com/exchange/api-reference/spot-websocket-v2/book)
 
 What it establishes
 
@@ -516,7 +516,7 @@ a public order-book feed "describes the individual price levels in the book with
 
 ### Kraken WebSocket API v2, executions channel.
 
-Exchange documentation. [Source ↗](https://docs.kraken.com/exchange/api-reference/spot-websocket-v2/executions)
+Exchange documentation. [Source](https://docs.kraken.com/exchange/api-reference/spot-websocket-v2/executions)
 
 What it establishes
 
@@ -526,7 +526,7 @@ the executions channel "streams order status and execution events for this accou
 
 ### How do designated market makers create value for small-caps?
 
-Albert J. Menkveld and Ting Wang. Journal of Financial Markets 16(3), 571 to 603, 2013. Empirical event study of 74 Euronext stocks. [Source ↗](https://doi.org/10.1016/j.finmar.2012.12.003)
+Albert J. Menkveld and Ting Wang. Journal of Financial Markets 16(3), 571 to 603, 2013. Empirical event study of 74 Euronext stocks. [Source](https://doi.org/10.1016/j.finmar.2012.12.003)
 
 What it establishes
 
@@ -546,7 +546,7 @@ a liquidity agreement with a stated obligation is a known, valuable contract; a 
 
 ### Market Making Contracts, Firm Value, and the IPO Decision.
 
-Hendrik Bessembinder, Jia Hao and Kuncheng Zheng. Journal of Finance 70(5), 1997 to 2028, 2015. Theory with empirical discussion. [Source ↗](https://doi.org/10.1111/jofi.12285)
+Hendrik Bessembinder, Jia Hao and Kuncheng Zheng. Journal of Finance 70(5), 1997 to 2028, 2015. Theory with empirical discussion. [Source](https://doi.org/10.1111/jofi.12285)
 
 What it establishes
 

@@ -1,4 +1,5 @@
 import { usePageMeta } from "../lib/meta"
+import { Arrow } from "../components/Arrow"
 import type { ReactNode } from "react"
 import { Appear, DEFAULT_APPEAR, type AppearEffect } from "../lib/motion"
 import { appear } from "../components/SectionHeading"
@@ -698,7 +699,7 @@ export function Research() {
                     <h3 className={`t-h5 ${styles.title}`}>{s.title}</h3>
                     <p className={`t-body-sm ${styles.who}`}>
                       {s.who}
-                      {s.url ? (<>{" "}{(Array.isArray(s.url) ? s.url : [s.url]).map((u, k) => <a key={u} className={`ls-link-inline ${styles.src}`} href={u} target="_blank" rel="noopener noreferrer">{k === 0 ? "Source" : `Source ${k + 1}`} ↗</a>)}</>) : null}
+                      {s.url ? (<>{" "}{(Array.isArray(s.url) ? s.url : [s.url]).map((u, k) => <a key={u} className={`ls-link-inline ${styles.src}`} href={u} target="_blank" rel="noopener noreferrer">{k === 0 ? "Source" : `Source ${k + 1}`}<Arrow dir="up-right" /></a>)}</>) : null}
                     </p>
                     {s.blocks.length ? (
                       <div className={styles.lead}>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { Arrow } from "../components/Arrow"
 import { motion, useInView, useReducedMotion } from "motion/react"
 import { Appear, EASE_UI } from "../lib/motion"
 import { REFERENCES } from "../content/references"
@@ -120,7 +121,7 @@ export function Reviews() {
                     <span className={styles.nav}>
                       <span className={styles.count}>{String(i + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}</span>
                       <button type="button" className={styles.arrow} aria-label="Previous" tabIndex={k === 0 ? 0 : -1} onClick={() => { setHold(true); setActive((active - 1 + n) % n) }}>←</button>
-                      <button type="button" className={styles.arrow} aria-label="Next" tabIndex={k === 0 ? 0 : -1} onClick={() => { setHold(true); setActive((active + 1) % n) }}>→</button>
+                      <button type="button" className={styles.arrow} aria-label="Next" tabIndex={k === 0 ? 0 : -1} onClick={() => { setHold(true); setActive((active + 1) % n) }}><Arrow className={styles.arrowIcon} /></button>
                     </span>
                   </figcaption>
                 </div>

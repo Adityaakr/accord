@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { Arrow } from "../components/Arrow"
 import { motion } from "motion/react"
 import { Appear, EASE_APPEAR, EASE_UI, type AppearEffect } from "../lib/motion"
 import { Dots } from "../components/Dots"
@@ -220,7 +221,7 @@ export function Benefits() {
           A keeper service triggers scheduled steps such as observations; it cannot move funds or change an outcome. Mainnet follows an audit.
         </p>
         <div className={styles.links}>
-          <Tertiary href={LINKS.security}>Security documentation →</Tertiary>
+          <Tertiary href={LINKS.security}>Security documentation<Arrow /></Tertiary>
         </div>
       </Appear>
     </section>

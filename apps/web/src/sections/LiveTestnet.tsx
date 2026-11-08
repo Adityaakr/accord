@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import { Arrow } from "../components/Arrow"
 import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { SectionHeading } from "../components/SectionHeading"
 import { LINKS } from "../content/links"
@@ -32,7 +33,7 @@ export function LiveTestnet() {
       <Appear as="div" className={styles.timeline} effect={rise("0s")}>
         <div className={styles.head}>
           <span className={styles.headLabel}>Agreement</span>
-          <a href={TESTNET.agreementUrl} target="_blank" rel="noreferrer" className={`mono ${styles.headLink}`}>{TESTNET.agreement} ↗</a>
+          <a href={TESTNET.agreementUrl} target="_blank" rel="noreferrer" className={`mono ${styles.headLink}`}>{TESTNET.agreement}<Arrow dir="up-right" /></a>
         </div>
         {PHASES.map((ph) => (
           <div key={ph.label} className={styles.phase}>
@@ -43,7 +44,7 @@ export function LiveTestnet() {
                   <span className={`mono ${styles.num}`}>{s.n}</span>
                   <span className={`${styles.name} ${s.refused ? styles.refused : ""}`}>{s.title}</span>
                   <span className={`mono ${styles.detail} ${s.refused ? styles.refused : ""}`}>{s.mono ?? ""}</span>
-                  <a href={s.href} target="_blank" rel="noreferrer" className={`mono ${styles.tx}`} aria-label={`${s.title}: open the transaction`}>tx ↗</a>
+                  <a href={s.href} target="_blank" rel="noreferrer" className={`mono ${styles.tx}`} aria-label={`${s.title}: open the transaction`}>tx<Arrow dir="up-right" /></a>
                 </li>
               ))}
             </ol>
@@ -57,14 +58,14 @@ export function LiveTestnet() {
           <span className={styles.sep} aria-hidden="true">·</span>
           <span className={styles.verifyResult}>{ok} of {CHECKS.length} checks ok</span>
           <span className={styles.sep} aria-hidden="true">·</span>
-          <Link to="/verify" className={styles.footLink}>See the checks →</Link>
+          <Link to="/verify" className={styles.footLink}>See the checks<Arrow /></Link>
         </p>
         <ul className={styles.infra} aria-label="Behind it">
-          {INFRA.map((i) => <li key={i.label}><a href={i.href} target="_blank" rel="noreferrer">{i.label} <span aria-hidden="true">↗</span></a></li>)}
+          {INFRA.map((i) => <li key={i.label}><a href={i.href} target="_blank" rel="noreferrer">{i.label}<Arrow dir="up-right" /></a></li>)}
         </ul>
       </Appear>
 
-      <Link to={LINKS.join} className={`t-body-sm ls-link ${styles.cta}`}>How to start →</Link>
+      <Link to={LINKS.join} className={`t-body-sm ls-link ${styles.cta}`}>How to start<Arrow /></Link>
     </section>
   )
 }

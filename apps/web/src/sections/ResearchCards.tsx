@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { Arrow } from "../components/Arrow"
 import { Link } from "react-router-dom"
 import { useInView, useReducedMotion } from "motion/react"
 import { SectionHeading } from "../components/SectionHeading"
@@ -87,7 +88,7 @@ export function ResearchCards() {
         </div>
       </div>
 
-      <Link className={`t-body-sm ls-link ${styles.moreLink}`} to={LINKS.research}>Explore the research →</Link>
+      <Link className={`t-body-sm ls-link ${styles.moreLink}`} to={LINKS.research}>Explore the research<Arrow /></Link>
     </section>
   )
 }

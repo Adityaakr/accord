@@ -156,3 +156,4 @@
   .qBy { flex-direction: column; align-items: flex-start; }
   .k1 { transform: translateY(-18px) scale(0.95); } .k2 { transform: translateY(-34px) scale(0.9); }
 }
+.arrowIcon { margin-left: 0; }

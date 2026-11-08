@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { Arrow } from "../components/Arrow"
 import { Link } from "react-router-dom"
 import { useInView, useReducedMotion } from "motion/react"
 import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
@@ -348,7 +349,7 @@ export function Compliance() {
           </p>
           <div className={styles.actions}>
             <Button variant="primary" href={LINKS.marketMaking}>Explore the agreement</Button>
-            <Link to={LINKS.testnet} className={`t-body-sm ls-link ${styles.join}`}>See a market-making agreement run on testnet →</Link>
+            <Link to={LINKS.testnet} className={`t-body-sm ls-link ${styles.join}`}>See a market-making agreement run on testnet<Arrow /></Link>
           </div>
         </Appear>
       </div>

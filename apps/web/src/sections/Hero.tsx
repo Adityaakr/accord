@@ -1,4 +1,5 @@
 import { useRef, type ReactNode } from "react"
+import { Arrow } from "../components/Arrow"
 import { motion, useInView, type Transition } from "motion/react"
 import { Appear, EASE_APPEAR, EASE_UI, toTransition, type AppearEffect, type FramerTween } from "../lib/motion"
 import { Link } from "react-router-dom"
@@ -183,7 +184,7 @@ export function Hero() {
               <LogoMark size={22} />
               <span className={styles.announceBody}>
                 <span className={styles.announceName}>{DEMO_TITLE}</span>
-                <span className={styles.announceArrow} aria-hidden="true">→</span>
+                <Arrow className={styles.announceArrow} />
                 <span className={styles.announceSub}>{DEMO_TEXT}</span>
               </span>
             </Link>

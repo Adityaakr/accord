@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { Arrow } from "../components/Arrow"
 import { Link } from "react-router-dom"
 import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { SectionHeading } from "../components/SectionHeading"
@@ -79,7 +80,7 @@ export function CoreFeatures() {
         ))}
       </div>
 
-      <Link to="/security" className={`t-body-sm ls-link ${styles.more}`}>Each claim and its limit, on Security →</Link>
+      <Link to="/security" className={`t-body-sm ls-link ${styles.more}`}>Each claim and its limit, on Security<Arrow /></Link>
     </section>
   )
 }

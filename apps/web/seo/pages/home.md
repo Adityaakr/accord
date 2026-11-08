@@ -162,7 +162,7 @@ A market-making agreement connects the retainer to the liquidity conditions both
 
 When the required observations pass, payment becomes eligible for release under Accord's payment controls. Otherwise, it remains withheld for both parties to review. Each payment decision is linked to the terms and observations behind it.
 
-[Explore the agreement](/use-cases/market-making) [See a market-making agreement run on testnet →](/#testnet)
+[Explore the agreement](/use-cases/market-making) [See a market-making agreement run on testnet](/#testnet)
 
 Why it matters
 
@@ -358,7 +358,7 @@ Verify
 
 One command checks an agreement from public data, with no keys: the contract code, the agent's key, the recipient proof and the record. The enclave release check follows the testnet release.
 
-[Each claim and its limit, on Security →](/security)
+[Each claim and its limit, on Security](/security)
 
 Use cases
 
@@ -474,7 +474,7 @@ Not stopped by the contract: a person approving the wrong terms, or a payment th
 
 Where each attack stops. Each attack ends at a check in code; the tags give the closest entry in the OWASP Top 10 for Agentic Applications.[9](/research#owasp-agentic-2026)
 
-Try to move the money ↓
+Try to move the money
 
 Live on NEAR testnet
 
@@ -482,41 +482,41 @@ Live on NEAR testnet
 
 Twelve steps of a real agreement, each one a transaction you can open.
 
-Agreement [a6.accord-v2.testnet ↗](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
+Agreement [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
 
 Sealed
 
-- 01 Buyer seals its limits [tx ↗](https://testnet.nearblocks.io/txns/Ek9Zr1wjD6nrWaKHFak8UDv5Jwbaacqrdh1huNp6qwAk)
+- 01 Buyer seals its limits [tx](https://testnet.nearblocks.io/txns/Ek9Zr1wjD6nrWaKHFak8UDv5Jwbaacqrdh1huNp6qwAk)
 
-- 02 Vendor seals its limits [tx ↗](https://testnet.nearblocks.io/txns/2Zq8pfNoa1dFzMLAy79aGyek72q3LGcrvRqAjYABisKZ)
+- 02 Vendor seals its limits [tx](https://testnet.nearblocks.io/txns/2Zq8pfNoa1dFzMLAy79aGyek72q3LGcrvRqAjYABisKZ)
 
-- 03 Negotiated in the enclave 35.50 USDC · 3 items [tx ↗](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW)
+- 03 Negotiated in the enclave 35.50 USDC · 3 items [tx](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW)
 
 Agreed
 
-- 04 Buyer approves the terms [tx ↗](https://testnet.nearblocks.io/txns/H6cMyE6kzs9SdrC4yaP7CvnDxJqH4NSx7ivKeu2rBHSg)
+- 04 Buyer approves the terms [tx](https://testnet.nearblocks.io/txns/H6cMyE6kzs9SdrC4yaP7CvnDxJqH4NSx7ivKeu2rBHSg)
 
-- 05 Vendor approves the terms [tx ↗](https://testnet.nearblocks.io/txns/2uv8tTfeYhe2aZ5cMrVNfFzr88kPL4HeSxwYzNhtmveT)
+- 05 Vendor approves the terms [tx](https://testnet.nearblocks.io/txns/2uv8tTfeYhe2aZ5cMrVNfFzr88kPL4HeSxwYzNhtmveT)
 
 Funded and bound
 
-- 06 Buyer funds the escrow 35.50 USDC [tx ↗](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy)
+- 06 Buyer funds the escrow 35.50 USDC [tx](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy)
 
-- 07 Recipient proven in the enclave [tx ↗](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6)
+- 07 Recipient proven in the enclave [tx](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6)
 
-- 08 Vendor's authority approves [tx ↗](https://testnet.nearblocks.io/txns/FBQnqtKXs5B5zn1A4F1yCDUmACYMqsi2zM2uez6YxDis)
+- 08 Vendor's authority approves [tx](https://testnet.nearblocks.io/txns/FBQnqtKXs5B5zn1A4F1yCDUmACYMqsi2zM2uez6YxDis)
 
-- 09 Buyer accepts the recipient [tx ↗](https://testnet.nearblocks.io/txns/3d3LSZvz3yPX5LM1Bk6t9bxiX2x1JDMEt9mfa2fbw11p)
+- 09 Buyer accepts the recipient [tx](https://testnet.nearblocks.io/txns/3d3LSZvz3yPX5LM1Bk6t9bxiX2x1JDMEt9mfa2fbw11p)
 
 Paid, refused, revoked
 
-- 10 Agent pays inside the terms 16.50 USDC [tx ↗](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ)
+- 10 Agent pays inside the terms 16.50 USDC [tx](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ)
 
-- 11 A redirected payment is refused ERR_PAYEE_MISMATCH [tx ↗](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs)
+- 11 A redirected payment is refused ERR_PAYEE_MISMATCH [tx](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs)
 
-- 12 Buyer revokes the agent AccessKeyDoesNotExist [tx ↗](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P)
+- 12 Buyer revokes the agent AccessKeyDoesNotExist [tx](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P)
 
-make verify 6 of 7 checks ok [See the checks →](/verify)
+make verify 6 of 7 checks ok [See the checks](/verify)
 
 - [Factory](https://testnet.nearblocks.io/address/accord-v2.testnet)
 
@@ -526,7 +526,7 @@ make verify 6 of 7 checks ok [See the checks →](/verify)
 
 - [Attestations](https://testnet-api.outlayer.ai/attestations/13596)
 
-[How to start →](/join)
+[How to start](/join)
 
 > Illustrative: the demonstration agent's inbox. A message with new bank details and an urgent invoice are both refused by the contract with their reasons; the scheduled payment to the authorised recipient goes through.
 
@@ -566,7 +566,7 @@ It does not prove that a negotiation was fair or that external data is truthful;
 
 A keeper service triggers scheduled steps such as observations; it cannot move funds or change an outcome. Mainnet follows an audit.
 
-[Security documentation →](/security)
+[Security documentation](/security)
 
 Research
 
@@ -580,7 +580,7 @@ Research
 
 [arxiv.org/abs/2502.07924 Informs Sealed Table](https://arxiv.org/abs/2502.07924) [a16zfrontier.com Informs Agreement controls](https://a16zfrontier.com/posts/article/5-ways-blockchains-help-ai-agents/) [ideas.repec.org · J. Financial Markets Informs Market-making agreements](https://doi.org/10.1016/j.finmar.2012.12.003)
 
-[Explore the research →](/research)
+[Explore the research](/research)
 
 In their words
 

@@ -38,7 +38,7 @@ Each party submits a confidential mandate. Agents propose terms within those con
 
 Attestation provides evidence about the execution environment. It does not establish that a deal is fair or commercially optimal.
 
-[How negotiation works →](/product/sealed-table)
+[How negotiation works](/product/sealed-table)
 
 ### Payee
 
@@ -48,6 +48,6 @@ The recipient establishes control of its domain and proposes a payment destinati
 
 Destination changes follow a separate approval process and configured delay. Domain control and authorization do not establish legal business identity.
 
-[How recipient approval works →](/product/payee)
+[How recipient approval works](/product/payee)
 
 > Illustrative: A recipient bound to the vendor's domain, approved and accepted.

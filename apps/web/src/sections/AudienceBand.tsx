@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react"
+import { Arrow } from "../components/Arrow"
 import { useInView, useReducedMotion } from "motion/react"
 import { LogoMark } from "../components/Logo"
 import { PixelIcon, type PixelName } from "../components/PixelIcon"
@@ -403,7 +404,7 @@ function PanelView({ p, planned, active, id, labelledBy, onOpen }: { p: Panel; p
                     <span className={styles.cap}>
                       {state === "pass" ? <span className={styles.ok}><Tick /></span> : state === "check" ? <span className={styles.spin} aria-hidden="true" /> : null}
                       {CAPS[i]}{state === "check" ? " · verifying" : state === "pass" ? " · passed" : ""}
-                      <span className={styles.view} aria-hidden="true">See how ↗</span>
+                      <span className={styles.view} aria-hidden="true">See how<Arrow dir="up-right" /></span>
                     </span>
                     </button>
                   </li>
