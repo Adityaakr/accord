@@ -2,16 +2,18 @@
    teal for the chosen card and done steps. */
 .flow { display: flex; flex-direction: column; gap: 24px; border: 1px solid var(--hairline); border-radius: var(--radius-lg); background: var(--elevation-strong); overflow: hidden; --px-hi: #ffffff; --px-mid: #c9ccd1; --px-lo: #7d838b; }
 
-.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--hairline); list-style: none; margin: 0; padding: 0; }
-.stepItem button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 16px 20px; color: var(--text-weak); font-size: 14px; text-align: left; position: relative; }
+/* the stepper: step names in a quiet row, the current one strong, done ones with a small check; one thin line fills */
+.stepper { display: flex; flex-direction: column; gap: 12px; padding: 18px 22px 0; }
+.steps { display: flex; gap: 28px; list-style: none; margin: 0; padding: 0; overflow-x: auto; scrollbar-width: none; }
+.stepItem button { display: inline-flex; align-items: center; gap: 6px; padding: 0; color: var(--text-faint); font-size: 14px; white-space: nowrap; transition: color 0.3s var(--ease); }
 .stepItem button:disabled { cursor: default; }
-.stepItem + .stepItem button { border-left: 1px solid var(--hairline); }
-.stepNum { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 999px; border: 1px solid var(--hairline-strong); font-family: var(--font-mono); font-size: 11.5px; color: var(--text-weak); flex: none; }
-.stepOn button { color: var(--text-strong); }
-.stepOn button::after { content: ""; position: absolute; left: 20px; right: 20px; bottom: -1px; height: 2px; background: var(--teal); }
-.stepOn .stepNum { border-color: var(--teal-line); color: var(--text-strong); }
-.stepDone button { color: var(--text-medium); cursor: pointer; }
-.stepDone .stepNum { background: var(--teal-wash); border-color: var(--teal-line); color: var(--teal); }
+.stepOn button { color: var(--text-strong); font-weight: 500; }
+.stepDone button { color: var(--text-weak); cursor: pointer; }
+.stepDone button:hover { color: var(--text-strong); }
+.check { font-size: 11px; color: var(--teal); }
+.track { position: relative; height: 2px; border-radius: 2px; background: var(--hairline); overflow: hidden; }
+.fill { position: absolute; inset: 0; background: var(--teal); transform-origin: left; transition: transform 0.6s var(--ease); }
+@media (prefers-reduced-motion: reduce) { .fill, .stepItem button { transition: none; } }
 
 .body { padding: 4px 28px 0; min-height: 360px; }
 .h { font-size: 22px; font-weight: 500; letter-spacing: -0.02em; color: var(--text-strong); margin: 0 0 6px; }
@@ -68,9 +70,9 @@
   .types { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 809.98px) {
-  .steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .stepItem button { flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px 12px; font-size: 12.5px; }
-  .stepOn button::after { left: 12px; right: 12px; }
+  .stepper { padding: 14px 16px 0; }
+  .steps { gap: 18px; }
+  .stepItem button { font-size: 13px; }
   .body { padding: 0 16px; }
   .types, .pair { grid-template-columns: minmax(0, 1fr); }
   .review > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }

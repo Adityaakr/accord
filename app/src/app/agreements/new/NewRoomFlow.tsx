@@ -111,16 +111,20 @@ export function NewRoomFlow({ network, deposit, demoAllowed }: { network: string
 
   return (
     <div className={styles.flow}>
-      <ol className={styles.steps} aria-label="Steps">
-        {STEPS.map((s, i) => (
-          <li key={s} className={`${styles.stepItem} ${i === step ? styles.stepOn : ""} ${i < step ? styles.stepDone : ""}`} aria-current={i === step ? "step" : undefined}>
-            <button type="button" onClick={() => { if (i < step) { setError(null); setStep(i); } }} disabled={i >= step}>
-              <span className={styles.stepNum}>{i < step ? "✓" : `0${i + 1}`}</span>
-              <span>{s}</span>
-            </button>
-          </li>
-        ))}
-      </ol>
+      <div className={styles.stepper}>
+        <ol className={styles.steps} aria-label="Steps">
+          {STEPS.map((s, i) => (
+            <li key={s} className={`${styles.stepItem} ${i === step ? styles.stepOn : ""} ${i < step ? styles.stepDone : ""}`} aria-current={i === step ? "step" : undefined}>
+              <button type="button" onClick={() => { if (i < step) { setError(null); setStep(i); } }} disabled={i >= step}>
+                {i < step ? <span className={styles.check} aria-hidden="true">✓</span> : null}
+                <span>{s}</span>
+              </button>
+            </li>
+          ))}
+        </ol>
+        {/* one thin line under the row that fills as you advance */}
+        <span className={styles.track} aria-hidden="true"><span className={styles.fill} style={{ transform: `scaleX(${(step + 1) / STEPS.length})` }} /></span>
+      </div>
 
       <div className={styles.body}>
         {step === 0 && (
