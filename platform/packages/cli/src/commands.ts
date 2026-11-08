@@ -1,7 +1,7 @@
 // Command handlers. Each takes a `Ctx` with injected dependencies (an Accord-like factory client, agreement
 // clients, preflight, verify, files) and writes one block of text or one JSON value, so tests run with fakes.
 
-import { guardedPay, sha256Hex, type AgreementClient, type CreateArgs, type Kind, type Mandate, type Params,
+import { NotAnAgreementError, guardedPay, sha256Hex, type AgreementClient, type CreateArgs, type Kind, type Mandate, type Params,
   type PreflightResult, type TxResult, type VerifyReport } from "@accord/sdk";
 import { flagBool, flagInt, flagString, requireFlag, toInt, type ParsedArgs } from "./args.js";
 import { DEFAULT_ALLOWANCE, parseAmount, parseNear } from "./amount.js";
@@ -42,6 +42,8 @@ export interface Output {
   block(lines: string[], json: unknown): void;
   /** A notice on stderr (text mode only). */
   warn(text: string): void;
+  /** A one-line failure: `text` on stderr, or `json` on stdout with `--json`. */
+  fail(text: string, json: unknown): void;
 }
 
 export interface Ctx {
@@ -384,7 +386,14 @@ const check: Handler = async (ctx) => {
 
 const verifyCmd: Handler = async (ctx) => {
   const id = agreementId(ctx);
-  const r = await ctx.deps.verify(id);
+  let r: VerifyReport;
+  try {
+    r = await ctx.deps.verify(id);
+  } catch (e) {
+    if (!(e instanceof NotAnAgreementError)) throw e;
+    ctx.out.fail(`verify: ${e.message}`, { agreement: id, error: e.message });
+    return 1;
+  }
   ctx.out.block(formatVerify(r), r);
   return r.failed > 0 ? 1 : 0;
 };

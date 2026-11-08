@@ -150,7 +150,7 @@ export const TOOLS: ToolDef[] = [
   },
   {
     name: "accord_verify",
-    description: "What anyone can check without a key: code, keys, sealed outcome, release, model attestation, payee and record. Each check is ok, fail or not_checked with the reason.",
+    description: "What anyone can check without a key: code, keys, sealed outcome, release, model attestation, payee and record. Each check is ok, partial (part of it not run here), fail or not_checked, with the reason.",
     needs: "nothing",
     input: { agreement: account },
     run: (a, d) => d.verify(a.agreement as string),

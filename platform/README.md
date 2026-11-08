@@ -61,14 +61,14 @@ accord verify · a6.accord-v2.testnet
   code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok
   keys      0 key · none · no full access · ok
   sealed    outcome signature ok · commitments match · agreement matches · ok
-  release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · attestation record check pending probe 0.3 · not checked
-  model     z-ai/glm-5.3-flash · report fetched with fresh nonce aacb63ef… · nonce bound in the report · TDX quote and GPU evidence: not checked here (make probe-ai) · ok
+  release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) · not checked
+  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce f9e049d1… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
   payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
   record    1 payments · 1 refusals (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
-verify: 6 checks ok · 1 not checked
+verify: 5 checks ok · 1 partial · 1 not checked
 ```
 
-`release` stays `not checked` until `outlayer-verify` is installed (`BLOCKED.md`). `keys` reads `0 key` because a6's agent was revoked.
+`model` is `partial`: the nonce is bound in the attestation report, but the hardware quote and GPU evidence are not checked here (`make probe-ai` checks them). `release` stays `not checked` until `outlayer-verify` is installed (`BLOCKED.md`). `keys` reads `0 key` because a6's agent was revoked.
 
 `make sandbox`, from a real run on 3 Nov 2026 (the market-making line was then labelled `atlas`; the sandbox now prints `market`):
 

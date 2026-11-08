@@ -12,7 +12,7 @@ export const TESTNET = {
   token: "tusdc.accord-v1.testnet",
   release: 3,
   releaseUrl: tx("7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh"),
-  verify: { ok: ["contract code", "agent key", "sealed outcome", "model attestation", "recipient proof", "record"], notChecked: ["release attestation (the outlayer-verify tool is not installed yet)"] },
+  verify: { ok: ["contract code", "agent key", "sealed outcome", "recipient proof", "record"], partial: ["model attestation (nonce bound in the report; the hardware quote is not checked here)"], notChecked: ["release attestation (the outlayer-verify tool is not installed yet)"] },
 }
 
 export type Step = { n: string; title: string; detail: string; href: string; refused?: boolean; mono?: string }
@@ -47,14 +47,14 @@ export const INFRA = [
   { label: "Attestations", href: "https://testnet-api.outlayer.ai/attestations/13596" },
 ]
 
-/* make verify on a6, as it printed (8 Nov 2026): each check with what it means in plain words */
+/* make verify on a6, as it printed (9 Nov 2026): each check with what it means in plain words */
 export type Check = { id: string; name: string; meaning: string; ok: boolean; href: string }
 export const CHECKS: Check[] = [
   { id: "code", name: "Contract code", meaning: "Matches the published release", ok: true, href: TESTNET.releaseUrl },
   { id: "keys", name: "Agreement keys", meaning: "No full-access key", ok: true, href: `${acct("a6.accord-v2.testnet")}?tab=accesskeys` },
   { id: "sealed", name: "Sealed outcome", meaning: "Signed inside the enclave", ok: true, href: tx("GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW") },
   { id: "release", name: "Enclave release", meaning: "Needs the outlayer-verify tool", ok: false, href: "https://app.outlayer.ai/docs/trust-verification" },
-  { id: "model", name: "Model attestation", meaning: "The real model, fresh nonce", ok: true, href: "https://testnet-api.outlayer.ai/attestations/13596" },
+  { id: "model", name: "Model attestation", meaning: "The real model, fresh nonce bound; hardware quote not checked here", ok: true, href: "https://testnet-api.outlayer.ai/attestations/13596" },
   { id: "payee", name: "Recipient", meaning: "Proven on the vendor's domain", ok: true, href: tx("6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6") },
   { id: "record", name: "Record", meaning: "Payments match the receipts", ok: true, href: tx("2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ") },
 ]
@@ -63,11 +63,11 @@ export const VERIFY_RAW = `accord verify · a6.accord-v2.testnet
 code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok
 keys      0 key · none · no full access · ok
 sealed    outcome signature ok · commitments match · agreement matches · ok
-release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · … · not checked
-model     z-ai/glm-5.3-flash · fresh nonce 9debe4c3… · nonce bound in the report · ok
+release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) · not checked
+model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce f9e049d1… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
 payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · ok
 record    1 payments · 1 refusals · 0 exceptions · receipts match paid · ok
-verify: 6 checks ok · 1 not checked`
+verify: 5 checks ok · 1 partial · 1 not checked`
 
 /* Transactions behind agreement a6's record, so /verify's live rows link to the exact evidence for a6; any other
    agreement links to its account's transaction list instead. */

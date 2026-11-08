@@ -513,11 +513,13 @@ accord verify · <agreement>
   keys      <0 | 1> key · FunctionCall · receiver self · methods [act] · no full access · ok
   release   sealed-table wasm <8>… · keys from pubkey run <task id> · attestation verified · seed binding <shown | not exposed> · ok
   sealed    outcome signature ok · commitments match · nonce matches · ok
-  model     <model> · gateway TDX <ok | not checked> · model TDX <ok | not checked> · GPU <ok | not checked> · fresh nonce bound · ok
+  model     <model> · attestation report fetched with fresh nonce <8>… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
   payee     <recipient> · proof <domain> · authority approved · buyer accepted · active · ok
   record    <n> payments · <n> refusals · <n> exceptions · <n> set aside · <n> observation conflicts · events match state · ok
-  verify: <n> checks ok
+  verify: <n> checks ok[ · <n> partial][ · <n> failed][ · <n> not checked]
 ```
+
+A check is `ok`, `partial` (part of it ran and passed, the detail names the part not run here), `FAIL` or `not checked`; `partial` and `not checked` never count as `ok`. An account that does not exist or does not run the agreement code prints one line, `verify: <account> is not an Accord agreement`, and exits `1`.
 
 `make verify` fetches NEAR AI's attestation report without a key when the endpoint allows it (it did on 31 Oct); otherwise it uses `NEARAI_API_KEY` if set, or the hosted relay at `/api/verify/<id>` with a nonce it generates itself, and prints which.
 

@@ -59,14 +59,17 @@ export function actLines(r: ActResult): string[] {
 function checkSuffix(c: Check): string {
   if (c.status === "ok") return "ok";
   if (c.status === "fail") return "FAIL";
+  if (c.status === "partial") return "partial";
   return "not checked";
 }
 
-/** The `make verify` block. A check that was not run is printed as `not checked`, never as `ok`. */
+/** The `make verify` block. A check that was not run is printed as `not checked`, and one that ran only in part as
+ * `partial`, never as `ok`. */
 export function formatVerify(r: VerifyReport): string[] {
   const out = [header("verify", r.agreement)];
   for (const c of r.checks) out.push(line(c.name, `${c.detail} · ${checkSuffix(c)}`));
   const tail = [`verify: ${r.ok} checks ok`];
+  if (r.partial > 0) tail.push(`${r.partial} partial`);
   if (r.failed > 0) tail.push(`${r.failed} failed`);
   if (r.notChecked > 0) tail.push(`${r.notChecked} not checked`);
   out.push(tail.join(" · "));

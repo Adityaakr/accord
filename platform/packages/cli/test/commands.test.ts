@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { NotAnAgreementError } from "@accord/sdk";
 import type {
   ActResult, AgreementView, ItemView, PreflightResult, Rating, Terms, TxResult, VerifyReport,
 } from "@accord/sdk";
@@ -45,7 +46,7 @@ interface Recorder {
   files: Record<string, string>;
 }
 
-function fakes(opts: { rating?: Rating; approved?: boolean; payResult?: ActResult; verify?: VerifyReport } = {}) {
+function fakes(opts: { rating?: Rating; approved?: boolean; payResult?: ActResult; verify?: VerifyReport; verifyError?: Error } = {}) {
   const rec: Recorder = { calls: [], files: {} };
   const deal = {
     id: ID,
@@ -71,7 +72,7 @@ function fakes(opts: { rating?: Rating; approved?: boolean; payResult?: ActResul
       agreement: (id) => { rec.calls.push(`agreement ${id}`); return deal; },
       createAgreement: async () => ({ agreement: ID, tx: tx() }),
       preflight: async (a, r) => { rec.calls.push(`preflight ${a} ${r}`); return preflightResult(opts.rating ?? "allow", opts.approved); },
-      verify: async () => opts.verify ?? { agreement: ID, checks: [], ok: 0, failed: 0, notChecked: 0 },
+      verify: async () => { if (opts.verifyError) throw opts.verifyError; return opts.verify ?? { agreement: ID, checks: [], ok: 0, partial: 0, failed: 0, notChecked: 0 }; },
       sealedCheck: async () => "ERR_SEALED",
       ftBalance: async () => "0",
       ftTransfer: async () => tx(),
@@ -174,10 +175,17 @@ describe("other commands", () => {
     expect(r.out).toContain("  budget    balance 3.000 NEAR");
   });
   it("verify exits 1 on a failed check and prints the summary", async () => {
-    const f = fakes({ verify: { agreement: ID, checks: [{ name: "code", status: "fail", detail: "d" }], ok: 0, failed: 1, notChecked: 0 } });
+    const f = fakes({ verify: { agreement: ID, checks: [{ name: "code", status: "fail", detail: "d" }], ok: 0, partial: 0, failed: 1, notChecked: 0 } });
     const r = await cli(["verify", "--agreement", ID], f);
     expect(r.code).toBe(1);
     expect(r.out.split("\n").at(-1)).toBe("verify: 0 checks ok · 1 failed");
+  });
+  it("verify on an account that is not an agreement prints one line and exits 1", async () => {
+    const f = fakes({ verifyError: new NotAnAgreementError("a999.accord-v2.testnet") });
+    const r = await cli(["verify", "--agreement", "a999.accord-v2.testnet"], f);
+    expect(r.code).toBe(1);
+    expect(r.out).toBe("");
+    expect(r.err).toBe("verify: a999.accord-v2.testnet is not an Accord agreement");
   });
   it("check exits 1 on block; --json gives the full preflight", async () => {
     const r = await cli(["check", "x.testnet", "--agreement", ID, "--json"], fakes({ rating: "block" }));

@@ -64,6 +64,7 @@ export async function run(argv: readonly string[], env: Env, io: Io, makeDeps: D
     const out: Output = {
       block: (lines, value) => (g.json ? say(toJson(value)) : say(lines.join("\n"))),
       warn: (t) => { if (!g.json) io.stderr(redact(t, secrets)); },
+      fail: (t, value) => (g.json ? say(toJson(value)) : io.stderr(redact(t, secrets))),
     };
     const code = await handler({ deps, args, rest, env, out, role: g.role });
     return code ?? 0;

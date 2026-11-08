@@ -8,7 +8,8 @@ import type { Accord } from "./accord.js";
 import { signedBytes } from "./hash.js";
 import { fromBase64 } from "./bytes.js";
 
-export type CheckStatus = "ok" | "fail" | "not_checked";
+/** `partial`: some of the check ran and passed, and the rest was not run here; the detail says which part. */
+export type CheckStatus = "ok" | "partial" | "fail" | "not_checked";
 
 export interface Check {
   name: string;
@@ -20,9 +21,21 @@ export interface VerifyReport {
   agreement: string;
   checks: Check[];
   ok: number;
+  partial: number;
   failed: number;
   notChecked: number;
 }
+
+/** Thrown when the account does not exist or does not run Accord's agreement code. */
+export class NotAnAgreementError extends Error {
+  constructor(readonly agreement: string) {
+    super(`${agreement} is not an Accord agreement`);
+    this.name = "NotAnAgreementError";
+  }
+}
+
+// What the RPC says when an account is missing, has no code, or runs a contract without `get_agreement`.
+const NOT_AN_AGREEMENT = /does not exist|method is not found|MethodNotFound|CodeDoesNotExist|UNKNOWN_ACCOUNT/i;
 
 export function verifyEd25519(output: Record<string, unknown>, publicKey: string): boolean {
   const sig = output.sig;
@@ -41,7 +54,13 @@ export async function verify(
   opts: { nonce?: string; nearAiKey?: string } = {},
 ): Promise<VerifyReport> {
   const deal = accord.agreement(agreement);
-  const a = await deal.get();
+  let a: Awaited<ReturnType<typeof deal.get>>;
+  try {
+    a = await deal.get();
+  } catch (e) {
+    if (NOT_AN_AGREEMENT.test((e as Error).message ?? "")) throw new NotAnAgreementError(agreement);
+    throw e;
+  }
   const release = await accord.release(a.release);
   const checks: Check[] = [];
   const add = (name: string, status: CheckStatus, detail: string) => checks.push({ name, status, detail });
@@ -77,9 +96,9 @@ export async function verify(
       `outcome signature ${sigOk ? "ok" : "bad"} · commitments ${commitOk ? "match" : "differ"} · agreement ${agreementOk ? "matches" : "differs"}`);
   }
 
-  // release: the job keys came from pubkey runs; quote verification needs OutLayer's attestation record.
+  // release: the job keys came from pubkey runs; checking the quote needs OutLayer's attestation record.
   add("release", "not_checked",
-    `sealed-table wasm ${release.sealed_table.wasm_hash.slice(0, 8)}… · keys from pubkey run ${release.sealed_table.pubkey_task_id} · attestation record check pending probe 0.3`);
+    `sealed-table wasm ${release.sealed_table.wasm_hash.slice(0, 8)}… · keys from pubkey run ${release.sealed_table.pubkey_task_id} · OutLayer attestation record not checked here (needs outlayer-verify)`);
 
   // model: NEAR AI's attestation report, fetched with a fresh nonce chosen here. A local node's outcome says it
   // came from the deterministic local negotiator; no model ran, so there is nothing to attest.
@@ -113,6 +132,7 @@ export async function verify(
     agreement,
     checks,
     ok: checks.filter((c) => c.status === "ok").length,
+    partial: checks.filter((c) => c.status === "partial").length,
     failed: checks.filter((c) => c.status === "fail").length,
     notChecked: checks.filter((c) => c.status === "not_checked").length,
   };
@@ -129,8 +149,10 @@ async function modelCheck(model: string, nonce: string, key?: string): Promise<[
     if (!res.ok) return ["model", "not_checked", `${model} · attestation report HTTP ${res.status}`];
     const text = await res.text();
     const bound = text.toLowerCase().includes(nonce.toLowerCase());
-    return ["model", bound ? "ok" : "fail",
-      `${model} · report fetched with fresh nonce ${nonce.slice(0, 8)}… · nonce ${bound ? "bound in the report" : "not found in the report"} · TDX quote and GPU evidence: not checked here (make probe-ai)`];
+    // Only the nonce binding is checked here; the hardware quote and the GPU evidence are not, so a pass is partial.
+    return bound
+      ? ["model", "partial", `${model} · attestation report fetched with fresh nonce ${nonce.slice(0, 8)}… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them)`]
+      : ["model", "fail", `${model} · attestation report fetched with fresh nonce ${nonce.slice(0, 8)}… · nonce not found in the report`];
   } catch (e) {
     return ["model", "not_checked", `${model} · ${(e as Error).message}`];
   }

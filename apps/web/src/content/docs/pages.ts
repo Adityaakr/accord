@@ -418,7 +418,7 @@ export const DOC_PAGES: DocPage[] = [
               { name: "Agreement keys", value: "ok", href: `${TESTNET.agreementUrl}?tab=accesskeys`, tone: "ok", detail: "No full-access key; at most one `FunctionCall` key for `act`. On a6 there are `0` keys, because the agent was revoked." },
               { name: "Sealed outcome", value: "ok", href: A6.negotiate, tone: "ok", detail: "The outcome was signed inside the enclave by the release's Sealed Table key; the commitments and the agreement match." },
               { name: "Enclave release", value: "not checked", href: OUTLAYER_VERIFY, detail: "The Sealed Table build (`7c832ce9…`) and its keys from pubkey run `13682`. Checking the run's attestation needs the outlayer-verify tool." },
-              { name: "Model attestation", value: "ok", href: ATTESTATION, tone: "ok", detail: "The real model (`z-ai/glm-5.3-flash`) with a fresh nonce bound in the report." },
+              { name: "Model attestation", value: "partial", href: ATTESTATION, detail: "The real model (`z-ai/glm-5.3-flash`): the attestation report is fetched with a fresh nonce and the nonce is bound in it. The hardware quote and GPU evidence are not checked by `make verify`; `make probe-ai` checks them." },
               { name: "Recipient", value: "ok", href: A6.proof, tone: "ok", detail: "`halcyon-mm.testnet`, proven on the vendor's domain `accordweb-production.up.railway.app`, signed by the release's Payee key." },
               { name: "Record", value: "ok", href: A6.pay, tone: "ok", detail: "Payments match the receipts: `1` payment, `1` refusal, `0` exceptions." },
             ],
@@ -429,8 +429,8 @@ export const DOC_PAGES: DocPage[] = [
         id: "a6-result",
         title: "The result on a6",
         blocks: [
-          { kind: "code", label: "make verify DEAL=a6.accord-v2.testnet · 8 Nov 2026", code: VERIFY_RAW, output: true },
-          { kind: "note", text: "6 checks ok, 1 not checked: the enclave release check needs the outlayer-verify tool, which was not installed for this run. See [OutLayer trust and verification](" + OUTLAYER_VERIFY + ")." },
+          { kind: "code", label: "make verify DEAL=a6.accord-v2.testnet · 9 Nov 2026", code: VERIFY_RAW, output: true },
+          { kind: "note", text: "5 checks ok, 1 partial, 1 not checked: the model check binds the fresh nonce but does not check the hardware quote here, and the enclave release check needs the outlayer-verify tool, which was not installed for this run. See [OutLayer trust and verification](" + OUTLAYER_VERIFY + ")." },
         ],
       },
       {

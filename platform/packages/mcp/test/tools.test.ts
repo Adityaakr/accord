@@ -27,7 +27,7 @@ function fakeDeps(rating: Rating, approved = false) {
     listAgreements: async () => [],
     agreement: () => { throw new Error("not used"); },
     preflight: async () => preflightResult(rating, approved),
-    verify: async () => ({ agreement: AGREEMENT, checks: [], ok: 0, failed: 0, notChecked: 0 }),
+    verify: async () => ({ agreement: AGREEMENT, checks: [], ok: 0, partial: 0, failed: 0, notChecked: 0 }),
     agent: {
       agreement: AGREEMENT,
       publicKey: "ed25519:AgentPub",

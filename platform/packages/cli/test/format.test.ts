@@ -2,12 +2,13 @@ import { describe, expect, it } from "vitest";
 import type { PreflightResult, VerifyReport } from "@accord/sdk";
 import { formatCheck, formatVerify } from "../src/format.js";
 
-const report = (statuses: ("ok" | "fail" | "not_checked")[]): VerifyReport => {
+const report = (statuses: ("ok" | "partial" | "fail" | "not_checked")[]): VerifyReport => {
   const names = ["code", "keys", "release", "sealed", "model", "payee", "record"];
   const checks = statuses.map((status, i) => ({ name: names[i]!, status, detail: `detail ${names[i]}` }));
   return {
     agreement: "a7.accord-v1.testnet", checks,
     ok: statuses.filter((s) => s === "ok").length,
+    partial: statuses.filter((s) => s === "partial").length,
     failed: statuses.filter((s) => s === "fail").length,
     notChecked: statuses.filter((s) => s === "not_checked").length,
   };
@@ -31,6 +32,11 @@ describe("verify output", () => {
     expect(lines[3]).not.toMatch(/· ok$/);
     expect(lines[5]).toBe("  model     detail model · not checked");
     expect(lines.at(-1)).toBe("verify: 2 checks ok · 1 failed · 2 not checked");
+  });
+  it("prints a check that ran only in part as partial, never as ok, and counts it", () => {
+    const lines = formatVerify(report(["ok", "ok", "not_checked", "ok", "partial"]));
+    expect(lines[5]).toBe("  model     detail model · partial");
+    expect(lines.at(-1)).toBe("verify: 3 checks ok · 1 partial · 1 not checked");
   });
 });
 
