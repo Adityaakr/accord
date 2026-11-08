@@ -9,7 +9,7 @@ import type { PixelName } from "../PixelIcon";
 import { useWallet } from "../wallet/WalletProvider";
 
 export type WorkspaceId = "buyer" | "vendor" | "authority" | "reviewer" | "auditor";
-export type NavIcon = "home" | "rooms" | "approvals" | "agents" | "recipients" | "record" | "verify" | "deliveries" | "payout" | "try";
+export type NavIcon = "home" | "rooms" | "approvals" | "agents" | "recipients" | "record" | "verify" | "deliveries" | "payout" | "try" | "chart";
 export interface NavItem { href: string; label: string; icon: NavIcon; match: (p: string) => boolean }
 
 export interface Workspace {

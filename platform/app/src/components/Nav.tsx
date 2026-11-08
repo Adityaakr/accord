@@ -66,6 +66,14 @@ export function Nav({ network }: { network: string }) {
   );
 }
 
+/* The open pages, for a visitor who has not signed in */
+const PUBLIC_NAV: NavItem[] = [
+  { href: "/try-it", label: "Try a deal", icon: "try", match: (p) => p.startsWith("/try-it") },
+  { href: "/verify", label: "Verify", icon: "verify", match: (p) => p.startsWith("/verify") },
+  { href: "/record", label: "Public record", icon: "record", match: (p) => p.startsWith("/record") },
+  { href: "/status", label: "Status", icon: "chart", match: (p) => p.startsWith("/status") },
+];
+
 export function Sidebar() {
   const path = usePathname() ?? "/";
   const w = useWallet();
@@ -90,6 +98,16 @@ export function Sidebar() {
   // Settings says "Set up" until the organisation is confirmed and set up
   const orgPending = Boolean(w.accountId) && !o.checking && (!o.session || (o.data && !o.data.org));
   const settingsOn = path.startsWith("/settings") || path.startsWith("/onboarding");
+  /* Signed out, only the pages that work without an account: no workspace switcher, no Settings or Profile
+     (they would only bounce to sign-in). The logo and Sign in sit in the top bar. */
+  if (!w.accountId) {
+    return (
+      <nav className={`${styles.sidebar} ${styles.signedOut}`} aria-label="Main">
+        <div className={styles.group}>{PUBLIC_NAV.map(link)}</div>
+        <div className={`${styles.group} ${styles.bottom}`}><ThemeToggle /></div>
+      </nav>
+    );
+  }
   return (
     <nav className={styles.sidebar} aria-label="Main">
       <div className={styles.switcher}>

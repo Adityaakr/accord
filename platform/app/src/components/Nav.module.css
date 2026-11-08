@@ -102,6 +102,11 @@
   .switchSub { display: none; }
   .menu { position: fixed; left: 16px; right: 16px; top: 112px; }
   .groupLabel { display: none; }
+  /* the row scrolls sideways when it is longer than the screen: the last 28px fade, so a cut item reads as "more" */
+  .sidebar:not(.signedOut) { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); padding-right: 28px; }
+  /* signed out the row is short: it wraps instead of scrolling, so nothing is clipped */
+  .signedOut { flex-wrap: wrap; overflow-x: visible; gap: 4px 8px; }
+  .signedOut .group { flex-wrap: wrap; }
 }
 
 .search { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; border-radius: var(--radius); border: 1px solid var(--hairline-strong); color: var(--text-weak); font-size: 13px; transition: color 0.2s var(--ease), border-color 0.2s var(--ease); }
