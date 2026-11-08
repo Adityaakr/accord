@@ -68,6 +68,8 @@ function toMarkdown() {
     if (/^h[1-6]$/.test(tag)) { const t = clean(el.getAttribute("aria-label") || inline(el)); if (t) out.push(`${"#".repeat(Number(tag[1]))} ${t}`); return }
     if (el.getAttribute("role") === "tab") { const t = clean(inline(el)); if (t) out.push(`- ${t}`); return }
     if (tag === "table") {
+      const cap = el.querySelector("caption")
+      if (cap && clean(inline(cap))) out.push(`**${clean(inline(cap))}**`)
       const rows = [...el.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => clean(inline(c)).replace(/\|/g, "\\|")))
       if (rows.length) {
         // one block, rows on consecutive lines, so the table stays one table in Markdown

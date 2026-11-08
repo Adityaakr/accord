@@ -422,6 +422,28 @@ Status: planned. Runs on Payee and USDC.
 
 Any agreement with approved terms, agreed evidence and an authorised recipient works the same way.
 
+Compared
+
+## Accord compared with the alternatives.
+
+Of five ways an agent can pay another business, only Accord keeps each side's limits sealed while agents negotiate, then lets the agent pay on its own while a contract checks each payment against terms both companies approved. Escrow services offer arbitration and are in production; Accord is pre-launch.
+
+**What each option enforces when an agent pays another business**
+
+| Capability | Accord | Escrow service | Multisig wallet | Agent wallet with spending limits | Plain stablecoin transfer |
+| --- | --- | --- | --- | --- | --- |
+| Agents negotiate without revealing either side's limits | Yes : Sealed Table enclave | No : no agent negotiation step | No : no negotiation step | No : no negotiation step | No : no negotiation step |
+| Both companies approve the terms before money moves | Yes : both approve on chain | Yes : in the escrow agreement | Partly : if both firms are signers | No : one owner sets limits | No |
+| A message cannot redirect the recipient | Yes : Payee and the contract; changes wait 24 h | Partly : verified payee; bank details editable | Partly : signer review or a guard | Partly : if an allowlist is set | No : the sender decides |
+| Each payment checked against the agreed amount and milestone | Yes : in the contract | Yes : released on agreed terms | Partly : signer review or a roles module | Partly : caps, not agreement terms | No |
+| Payment released only on agreed evidence | Yes : checked by the contract | Yes : on buyer acceptance | Partly : signers' judgement | No | No |
+| An agent can pay without a person signing each payment | Yes : inside the approved terms | Partly : API; funding usually manual | Partly : allowance or roles module | Yes | Yes : whoever holds the key |
+| Both sides can check decisions from public data | Yes : on-chain events and make verify | No : private statements | Partly : transactions, not reasons | Partly : transactions, not policy | Partly : the transaction only |
+| A neutral third party resolves disputes | No : the buyer decides exceptions | Partly : funds held; an arbitrator decides | No | No | No |
+| In production today | No : pre-launch | Yes | Yes | Yes | Yes |
+
+Partly means it depends on how the option is set up or who checks it. Escrow: Escrow.com's published process. Multisig: Safe with its modules. Agent wallets: policy engines such as Coinbase's and Privy's. Checked 8 November 2026. Accord is pre-launch: built and tested end to end on a local NEAR node, with the testnet release pending.
+
 Why now
 
 ## An agent’s instructions can change. Its payment authority stays within the approved rules.
@@ -477,6 +499,8 @@ The most a hijacked agent can do is make a payment you already approved, to the 
 Where each attack stops · the agent is assumed to follow every message it reads
 
 - BEC ASI01 goal hijack What the agent does Asks to pay the new account Where it stops **Agreement controls** destination is not the authorised recipient Result `ERR_PAYEE_MISMATCH` nothing sent
+
+**Where each attack stops, assuming the agent follows every message it reads**
 
 | Attack | What the agent does | Where it stops | Result |
 | --- | --- | --- | --- |
@@ -545,6 +569,20 @@ Research
 [arxiv.org/abs/2502.07924 Informs Sealed Table](https://arxiv.org/abs/2502.07924) [a16zfrontier.com Informs Agreement controls](https://a16zfrontier.com/posts/article/5-ways-blockchains-help-ai-agents/) [ideas.repec.org · J. Financial Markets Informs Market-making agreements](https://doi.org/10.1016/j.finmar.2012.12.003)
 
 [Explore the research →](/research)
+
+## Built on
+
+- NEAR : The agreement contract, its escrowed USDC and the on-chain record of every payment and refusal.
+
+- NEAR AI Cloud : Private inference for the negotiating agents; each response's signature is checked in the enclave.
+
+- OutLayer : Attested enclaves for the Sealed Table, the recipient binding and the market observer.
+
+- USDC on NEAR : Settlement as a NEP-141 token, paid only by the contract from each agreement's own account.
+
+- Rhea : The USDC/wNEAR pool the market-making observer reads at hidden times.
+
+Accord builds on these networks and services; it does not claim a partnership with them. Built and tested end to end on a local NEAR node; the enclave and model runs follow the testnet release.
 
 In their words
 

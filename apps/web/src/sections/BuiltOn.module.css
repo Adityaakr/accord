@@ -1,0 +1,43 @@
+/* Home · Built on: a slim strip. A small tag label (the SectionHeading pill, no H2 display size), one template card
+   (Elevation Strong, radius 4) split into five columns by hairlines; 3 + 2 on tablet, a list on phone. */
+.section { gap: 20px; padding: 56px 0; scroll-margin-top: 40px; }
+
+.head { display: flex; align-items: center; gap: 8px; }
+.pill { width: 14px; height: 8px; border-radius: 9999px; background: var(--teal); }
+.label { color: var(--text-strong); font-weight: 400; }
+
+.strip {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-radius: 4px;
+  background: var(--elevation-strong);
+  overflow: hidden;
+}
+.item { display: flex; flex-direction: column; gap: 10px; padding: 22px 20px; border-left: 1px solid var(--hairline); min-width: 0; }
+.item:first-child { border-left: 0; }
+.name { display: inline-flex; align-items: center; gap: 8px; font-family: "Host Grotesk", sans-serif; font-size: 15px; font-weight: 500; letter-spacing: -0.01em; color: var(--text-strong); white-space: nowrap; }
+.nearai { display: inline-flex; font-size: 14px; }
+.line { font-size: 13px; line-height: 1.5; color: var(--text-weak); text-wrap: pretty; }
+.dot { width: 9px; height: 9px; border-radius: 2px; border: 1px solid var(--text-weak); }
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.note { font-size: 13px; line-height: 1.55; color: var(--text-weak); max-width: 80ch; }
+
+@media (max-width: 1199.98px) {
+  .section { padding: 56px 24px; }
+  .strip { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .item { grid-column: span 2; border-left: 0; border-top: 1px solid var(--hairline); }
+  .item:nth-child(-n + 3) { border-top: 0; }
+  .item:nth-child(4), .item:nth-child(5) { grid-column: span 3; }
+  .item:nth-child(2), .item:nth-child(3), .item:nth-child(5) { border-left: 1px solid var(--hairline); }
+}
+@media (max-width: 809.98px) {
+  .section { padding: 48px 16px; }
+  .strip { grid-template-columns: 1fr; }
+  .item, .item:nth-child(n) { grid-column: auto; border-left: 0; border-top: 1px solid var(--hairline); padding: 18px 16px; }
+  .item:first-child { border-top: 0; }
+}

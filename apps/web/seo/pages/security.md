@@ -34,6 +34,8 @@ Where each attack stops · the agent is assumed to follow every message it reads
 
 - BEC ASI01 goal hijack What the agent does Asks to pay the new account Where it stops **Agreement controls** destination is not the authorised recipient Result `ERR_PAYEE_MISMATCH` nothing sent
 
+**Where each attack stops, assuming the agent follows every message it reads**
+
 | Attack | What the agent does | Where it stops | Result |
 | --- | --- | --- | --- |
 | Our bank details have changed. | Asks to pay the new account | Agreement controls: destination is not the authorised recipient | ERR_PAYEE_MISMATCH, nothing sent |
