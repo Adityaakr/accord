@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Appear } from "../lib/motion"
 import { appear } from "../components/SectionHeading"
 import { PageHero } from "../components/PageHero"
+import { TestnetVerifyResult } from "../components/TestnetRecord"
 import { Mono } from "../components/Mono"
 import { FormButton, type FormButtonState } from "../components/FormButton"
 import { usePageMeta } from "../lib/meta"
@@ -108,7 +109,7 @@ function LookupForm() {
 const stepAppear = (i: number) => ({ ...appear(`${Math.min(i, 3) * 0.05}s` as `${number}s`), threshold: 0.2 })
 
 export function Verify() {
-  usePageMeta("Accord: Verify an agreement", "One command checks a live Accord agreement from public data, with no keys: contract code, keys, the Sealed Table release, attestation and recipient.")
+  usePageMeta("Accord: Verify an agreement", "Check an Accord agreement from public data, with no keys. Agreement a6.accord-v2.testnet on NEAR testnet passes six checks, from contract code to the record.")
   return (
     <div className={styles.page}>
       <PageHero pill="Verify" title="Verify this agreement." lead={LEAD} />
@@ -119,6 +120,8 @@ export function Verify() {
           <h2 className={`t-h5 ${styles.cardTitle}`}>Verify this agreement</h2>
           <LookupForm />
         </Appear>
+
+        <TestnetVerifyResult />
 
         {/* The checks `make verify` runs, as a checklist */}
         <div className={styles.block}>

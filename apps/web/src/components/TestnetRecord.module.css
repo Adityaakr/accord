@@ -1,0 +1,25 @@
+.card { width: 100%; display: flex; flex-direction: column; gap: 14px; padding: 24px; border-radius: 16px; background: var(--elevation-strong); border: 1px solid rgba(var(--ink-rgb), 0.08); scroll-margin-top: 96px; }
+.head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.title { font-size: 15px; font-weight: 500; color: var(--text-strong); }
+.title a { color: inherit; font-size: 13.5px; }
+.tag { font-size: 12px; color: var(--text-weak); }
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--text-medium); }
+.list li { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 12px; }
+.ok { color: var(--teal); font-size: 12px; }
+.weak { color: var(--text-weak); font-size: 12px; }
+.note { font-size: 13px; color: var(--text-weak); }
+.note :global(.mono) { font-size: 12.5px; color: var(--text-medium); }
+.flow { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.flow a { display: grid; grid-template-columns: 32px minmax(0, 0.9fr) minmax(0, 1.1fr) auto; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid var(--hairline); color: inherit; text-decoration: none; }
+.flow li:first-child a { border-top: 0; }
+.flow a:hover .stepTitle { color: var(--text-strong); }
+.num { font-size: 12px; color: var(--text-weak); }
+.stepTitle { font-size: 14px; color: var(--text-medium); }
+.detail { font-size: 13px; color: var(--text-weak); }
+.refused { color: var(--refusal); }
+.tx { font-size: 11.5px; color: var(--teal); white-space: nowrap; }
+@media (max-width: 809.98px) {
+  .flow a { grid-template-columns: 28px minmax(0, 1fr) auto; }
+  .detail { grid-column: 2 / 3; }
+  .list li { grid-template-columns: 1fr; gap: 2px; }
+}

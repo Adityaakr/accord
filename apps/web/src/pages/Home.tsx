@@ -7,6 +7,7 @@ import { BuiltOn } from "../sections/BuiltOn"
 import { Compliance } from "../sections/Compliance"
 import { HowSteps } from "../sections/HowSteps"
 import { Proof } from "../sections/Proof"
+import { LiveTestnet } from "../sections/LiveTestnet"
 import { WhyNow } from "../sections/WhyNow"
 import { Benefits } from "../sections/Benefits"
 import { ResearchCards } from "../sections/ResearchCards"
@@ -33,6 +34,7 @@ export function Home() {
       <CoreFeatures />
       <UseCases />
       <WhyNow />
+      <LiveTestnet />
       <Proof />
       <Benefits />
       <ResearchCards />

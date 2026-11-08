@@ -2,6 +2,7 @@ import { usePageMeta } from "../lib/meta"
 import { Appear } from "../lib/motion"
 import { appear } from "../components/SectionHeading"
 import { PageHero } from "../components/PageHero"
+import { TestnetFlowRecord } from "../components/TestnetRecord"
 import { Mono } from "../components/Mono"
 import { useLive, asOfLabel, type LiveValues } from "../lib/live"
 import { isPlaceholder } from "../content/links"
@@ -127,7 +128,7 @@ function RefusalPanel({ v }: { v: LiveValues | null }) {
 }
 
 export function Record() {
-  usePageMeta("Accord: Public record", "Agreements, payments and refusals from the Accord demonstration, each refused payment shown with the reason the contract recorded.")
+  usePageMeta("Accord: Public record", "Agreement a6.accord-v2.testnet on NEAR testnet, each step linked to its transaction, from the sealed limits to a refused redirect.")
   const live = useLive()
   return (
     <div className={styles.page}>
@@ -135,6 +136,7 @@ export function Record() {
 
       {/* The record: D4 "Data unavailable" once (when the snapshot is the last retrieved one), the two panels, the timestamp */}
       <section id="record" className={`section ${styles.section}`}>
+        <TestnetFlowRecord />
         <div className={styles.record}>
           {!live ? <p className={`t-body-sm ${styles.weak}`} role="status">{LOADING}</p> : null}
           {live?.source === "last-known" ? <p className={`t-body-sm ${styles.weak}`}>{DATA_UNAVAILABLE}</p> : null}
