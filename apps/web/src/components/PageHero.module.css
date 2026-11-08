@@ -150,3 +150,12 @@
   .main { padding: 48px 16px; }
   .header { gap: 32px; }
 }
+
+/* Centred variant (/verify): the column on the page axis, text centred, the dots behind it centred too */
+.centered { align-items: center; padding-bottom: 40px; }
+.centered .header, .centered .heading, .centered .container, .centered .text { align-items: center; }
+.centered .header { max-width: 760px; }
+.centered .text { text-align: center; }
+.centered .dotsClip { left: 50%; transform: translateX(-50%); height: 100%; }
+.centered .dots { left: 50%; transform: translateX(-50%); }
+@media (max-width: 809.98px) { .centered { padding-bottom: 32px; } }

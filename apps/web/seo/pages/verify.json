@@ -1,5 +1,5 @@
 {
   "title": "Accord: Verify an agreement",
-  "description": "Check an Accord agreement from public data, with no keys. Agreement a6.accord-v2.testnet on NEAR testnet passes six checks, from contract code to the record.",
+  "description": "Check any Accord agreement from public data, with no account and no keys: the factory, the contract code, the access keys, the recipient and the record, read from NEAR testnet.",
   "ld": []
 }

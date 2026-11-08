@@ -9,7 +9,7 @@ import styles from "./PageHero.module.css"
    Supporting-page hero: the 404 page shell (WebPageNode Nvv2EHdv3, Main hIwfdG7eE) reused as the
    template's page heading: Dots loop, Tag pill + H1 + lead (word reveal), one row of buttons (mount appear).
    Every geometry/timing value is the 404 page's; the button row is the Hero's `.actions` (gap 8).
-   Every supporting page (Product, Sealed Table, Payee, Market-making agreements, Security, Docs, Research, Demo, Record, 404)
+   Every supporting page (Product, Sealed Table, Payee, Market-making agreements, Security, Docs, Research, Record, 404)
    renders this one shell so the pill / H1 / lead / buttons share one left edge, one max-width and one rhythm.
 ------------------------------------------------------------------- */
 
@@ -59,12 +59,14 @@ type Props = {
   actions?: PageHeroAction[]
   /** Section element id (default "hero") */
   id?: string
+  /** Centre the pill, H1, lead and the dotted backdrop on the page axis (/verify) */
+  centered?: boolean
 }
 
-export function PageHero({ pill, title, lead, actions = [], id = "hero" }: Props) {
+export function PageHero({ pill, title, lead, actions = [], id = "hero", centered = false }: Props) {
   const leads = Array.isArray(lead) ? lead : [lead]
   return (
-    <section id={id} className={`section ${styles.main}`}>
+    <section id={id} className={`section ${styles.main} ${centered ? styles.centered : ""}`}>
       <LoopingDots />
 
       {/* Header SSeGtq_6G */}
