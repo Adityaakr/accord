@@ -12,7 +12,7 @@ Claim its limit
 
 - 02 The approved terms are the agent's only authority The agent's judgement is bounded, not protected: it can still be fooled into asking. Attestation proves which code produced the terms, not that the deal was good; people decide that when they approve
 
-- 03 Payments go only to the authorised recipient Authorisation proves control of the domain and the authority's approval, not that the company legally exists. A legal KYB check is a later integration
+- 03 Payments go only to the authorised recipient Authorisation proves control of the domain and the authority's approval, not that the company legally exists. A legal KYB check is a later integration. Testnet agreements run in demo mode: a recipient change waits 120 s and a claim 120 s; live mode enforces at least 24 h for a recipient change and 72 h for a claim, checked by the factory and again by the agreement
 
 - 04 Revoking ends the agent's authority in one transaction A payment already made stays made, and it went to the authorised recipient at the approved amount. A call that reached the chain before the revoke still runs, with every check. Revoking never cancels what the vendor has earned: an eligible payment stays claimable by the vendor
 
