@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { AgreementView } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
-import { useAppConfig } from "@/components/AppConfig";
+import { tokenSymbol, useAppConfig } from "@/components/AppConfig";
 import { Panel, Pill } from "@/components/ui";
 import { agreementClient, errorText } from "@/components/me/client";
 import styles from "./demo.module.css";
@@ -86,9 +86,9 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
       if (!r.ok) { setAgent({ ok: false, text: b.error ?? `the agent could not act (${r.status})` }); return; }
       const amt = (Number(b.amount) / 1e6).toFixed(2);
       if (b.result.status === "refused") {
-        setAgent({ ok: false, refusal: b.result.code, text: `Asked to pay ${amt} tUSDC for item ${b.item} to ${b.recipient}. The contract refused it and recorded the refusal.`, tx: b.result.txHash });
+        setAgent({ ok: false, refusal: b.result.code, text: `Asked to pay ${amt} ${tokenSymbol(cfg, a.factory)} for item ${b.item} to ${b.recipient}. The contract refused it and recorded the refusal.`, tx: b.result.txHash });
       } else if (b.result.status === "sent") {
-        setAgent({ ok: true, text: `Paid item ${b.item}: ${amt} tUSDC to ${b.recipient}, the active recipient.`, tx: b.result.txHash });
+        setAgent({ ok: true, text: `Paid item ${b.item}: ${amt} ${tokenSymbol(cfg, a.factory)} to ${b.recipient}, the active recipient.`, tx: b.result.txHash });
       } else {
         setAgent({ ok: false, text: `Item ${b.item}: ${b.result.status}`, tx: b.result.txHash });
       }

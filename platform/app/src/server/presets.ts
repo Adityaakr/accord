@@ -18,7 +18,13 @@ const LABELS: Record<string, string> = {
   "market-making": "Market making",
   "market-making.strict": "Market making, stricter spread",
   "try": "The /try room",
+  "usdc-procurement": "Procurement, Circle USDC (within 20)",
 };
+
+/** The presets sized for a Circle USDC room (`usdc-*.json`): ceilings that fit one faucet drip of about 20 USDC. */
+export function isCirclePreset(id: string): boolean {
+  return /\/usdc-[^/]*$/.test(id);
+}
 
 export function presets(): Preset[] {
   const root = path.resolve(process.cwd(), "../fixtures/companies");

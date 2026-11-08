@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <BasePathFetch />
-        <AppConfigProvider value={{ network: c.network, rpc: c.rpc, factory: c.factory, explorer: c.explorer }}>
+        <AppConfigProvider value={{ network: c.network, rpc: c.rpc, factory: c.factory, explorer: c.explorer, currencies: c.currencies.map(({ id, factory, label }) => ({ id, factory, label })) }}>
         <WalletProvider network={c.label}>
         <OrgProvider>
         <WorkspaceProvider>

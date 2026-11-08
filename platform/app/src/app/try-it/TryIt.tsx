@@ -8,7 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Accord, AccordError, DEMO_PARAMS, formatUnits, type AgreementView } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
-import { useAppConfig } from "@/components/AppConfig";
+import { CIRCLE_FAUCET, useAppConfig } from "@/components/AppConfig";
 import { useOrg } from "@/components/org/OrgProvider";
 import { IconTile } from "@/components/IconTile";
 import type { PixelName } from "@/components/PixelIcon";
@@ -38,11 +38,20 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
   const [buyerSealed, setBuyerSealed] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ step: number; ok: boolean; text: string; txs?: { label: string; hash: string }[] } | null>(null);
+  // Settlement: test USDC from our faucet by default; Circle's testnet USDC when the server offers it and the visitor
+  // picks it. An existing room keeps the currency of the factory that created it.
+  const currencies = cfg.currencies ?? [];
+  const [picked, setPicked] = useState<"default" | "usdc">("default");
+  const roomCurrency = room ? currencies.find((c) => c.factory === room.factory)?.id : undefined;
+  const currencyId = roomCurrency ?? picked;
+  const factory = currencies.find((c) => c.id === currencyId)?.factory ?? cfg.factory;
+  const circle = currencyId === "usdc";
+  const sym = circle ? "USDC" : "tUSDC";
   const txUrl = (h: string) => (explorer ? `${explorer}/txns/${h}` : null);
 
   const load = useCallback(async () => {
     if (!w.accountId) { setBal(null); setRoom(null); return; }
-    const a = new Accord({ network: network === "sandbox" ? "sandbox" : "testnet", factory: cfg.factory, rpc: cfg.rpc });
+    const a = new Accord({ network: network === "sandbox" ? "sandbox" : "testnet", factory, rpc: cfg.rpc });
     try {
       const ft = (await a.config()).token;
       const [info, usdc] = await Promise.all([
@@ -55,8 +64,10 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
     let id: string | null = null;
     try { id = localStorage.getItem(`${ROOM_KEY}:${w.accountId}`); } catch { /* no storage */ }
     if (!id) {
-      const mine = await a.listAgreements({ party: w.accountId }).catch(() => []);
-      id = mine.filter((r) => r.buyer === w.accountId && r.vendor === demo.vendor).sort((x, y) => y.id - x.id)[0]?.account ?? null;
+      const lists = await Promise.all([cfg.factory, ...(cfg.currencies ?? []).map((c) => c.factory).filter((f) => f !== cfg.factory)]
+        .map((f) => a.onFactory(f).listAgreements({ party: w.accountId! }).catch(() => [])));
+      const mine = lists.flat().sort((x, y) => x.created_at - y.created_at);
+      id = mine.filter((r) => r.buyer === w.accountId && r.vendor === demo.vendor).at(-1)?.account ?? null;
     }
     if (id) {
       const c = readClient(cfg, id);
@@ -64,7 +75,7 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
       setRoom(v);
       setBuyerSealed(!!cm?.buyer || (v ? v.state !== "Sealed" : false));
     } else setRoom(null);
-  }, [w.accountId, network, cfg, demo.vendor]);
+  }, [w.accountId, network, cfg, demo.vendor, factory]);
 
   useEffect(() => {
     void load();
@@ -72,7 +83,8 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
     return () => clearInterval(t);
   }, [load]);
 
-  const funded = !!bal && BigInt(bal.near) >= 2n * YOCTO + YOCTO / 5n && BigInt(bal.tusdc) >= 40_000_000n;
+  // Enough for the room's deposit and gas, and for the buyer preset's ceiling: 40 tUSDC, or 18 USDC for Circle.
+  const funded = !!bal && BigInt(bal.near) >= 2n * YOCTO + YOCTO / 5n && BigInt(bal.tusdc) >= (circle ? 18_000_000n : 40_000_000n);
 
   async function faucet() {
     setBusy("faucet"); setMsg(null);
@@ -92,7 +104,7 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
     if (!w.signer || !w.accountId) return;
     setBusy("create"); setMsg(null);
     try {
-      const a = new Accord({ network: network === "sandbox" ? "sandbox" : "testnet", factory: cfg.factory, rpc: cfg.rpc, signer: w.signer });
+      const a = new Accord({ network: network === "sandbox" ? "sandbox" : "testnet", factory, rpc: cfg.rpc, signer: w.signer });
       const { agreement, tx } = await a.createAgreement({
         kind: "procurement", title: TITLE, vendor: demo.vendor, vendor_authority: demo.authority, canaries: [], params: DEMO_PARAMS,
       });
@@ -118,7 +130,7 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
   const stage = !room ? null
     : room.state === "Sealed" ? (buyerSealed ? "Both mandates in; the Sealed Table negotiates next." : "Waiting for your mandate.")
     : room.state === "Attested" ? "Terms are back. Approve them in the room."
-    : room.state === "Executing" ? `Executing · funded ${formatUnits(room.funded)} of ${formatUnits(room.total)} tUSDC · paid ${formatUnits(room.paid)} · ${room.refusals} refused`
+    : room.state === "Executing" ? `Executing · funded ${formatUnits(room.funded)} of ${formatUnits(room.total)} ${sym} · paid ${formatUnits(room.paid)} · ${room.refusals} refused`
     : room.state;
 
   const Note = ({ step }: { step: number }) => msg && msg.step === step ? (
@@ -136,6 +148,13 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
           On this server: faucet {ready.faucet ? "on" : "off"} · demo counterparty {ready.counterparty ? "on" : "off"} · demo agent {ready.agent ? "on" : "off"}.
         </p>
       )}
+      {currencies.length > 1 && !room && (
+        <fieldset className="small" aria-label="Settle in" style={{ border: 0, padding: 0, margin: "0 0 16px", display: "flex", flexWrap: "wrap", gap: "8px 20px" }}>
+          <span>Settle in</span>
+          <label><input type="radio" name="currency" checked={currencyId === "default"} onChange={() => setPicked("default")} /> Test USDC (instant, from our faucet)</label>
+          <label><input type="radio" name="currency" checked={currencyId === "usdc"} onChange={() => setPicked("usdc")} /> Circle USDC (testnet, from faucet.circle.com)</label>
+        </fieldset>
+      )}
       <ol className={styles.steps}>
         <Row n={1} icon="key" status={s1} title="Connect a wallet" text={w.accountId
           ? <>Signed in as <span className="mono">{w.accountId}</span>.</>
@@ -144,8 +163,10 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
         </Row>
 
         <Row n={2} icon="bank" status={s2} title="Get test funds" text={<>
-          The faucet tops your account up to 2.5 testnet NEAR (the room&apos;s 2 NEAR deposit, returned when it closes) and 100 test USDC. Once a day per account.
-          {bal && <span className={`mono ${styles.bal}`}>{near(bal.near)} NEAR · {formatUnits(bal.tusdc)} tUSDC</span>}
+          {circle
+            ? <>Get Circle&apos;s testnet USDC at <a className="link" href={CIRCLE_FAUCET} target="_blank" rel="noreferrer">faucet.circle.com</a> (network NEAR Testnet, your account as the address): about 20 USDC per address every 1 to 2 hours. Our faucet tops your account up to 2.5 testnet NEAR (the room&apos;s 2 NEAR deposit, returned when it closes); the test USDC it also sends does not fund a Circle room. Once a day per account.</>
+            : <>The faucet tops your account up to 2.5 testnet NEAR (the room&apos;s 2 NEAR deposit, returned when it closes) and 100 test USDC. Once a day per account.</>}
+          {bal && <span className={`mono ${styles.bal}`}>{near(bal.near)} NEAR · {formatUnits(bal.tusdc)} {sym}</span>}
         </>}>
           {w.accountId && s2 !== "done" && (
             <button type="button" className={styles.primary} disabled={busy !== null || !ready.faucet} onClick={() => void faucet()}>
@@ -167,7 +188,9 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
         </Row>
 
         <Row n={4} icon="lock" status={s4} title="Seal your limits" text={<>
-          Pick the Northwind buyer preset: a ceiling of 40 tUSDC across 2 to 4 items. Your limits are encrypted to the Sealed Table; the vendor never sees them. The demo vendor seals its own (floor 30, target 38).
+          {circle
+            ? <>Pick the Northwind buyer preset for Circle USDC: a ceiling of 18 USDC across 2 to 4 items, inside one faucet drip. Your limits are encrypted to the Sealed Table; the vendor never sees them. The demo vendor seals its own (floor 12, target 16).</>
+            : <>Pick the Northwind buyer preset: a ceiling of 40 tUSDC across 2 to 4 items. Your limits are encrypted to the Sealed Table; the vendor never sees them. The demo vendor seals its own (floor 30, target 38).</>}
         </>}>
           {room && room.state === "Sealed" && !buyerSealed && <Link className={styles.primary} href={`/agreements/${room.account}/seal`}>Seal your mandate</Link>}
         </Row>

@@ -61,6 +61,24 @@ export const DEMO_VENDOR_MANDATE: Mandate = {
   instructions: "Hold close to target. Concede once if the buyer gives a reason. Never go below the floor.",
 };
 
+// The demo vendor's mandate in a Circle USDC room (fixtures/companies/halcyon/usdc-procurement.vendor.json): the same
+// vendor, sized so the whole deal fits one drip of Circle's faucet (about 20 USDC per address every 1 to 2 hours).
+export const DEMO_VENDOR_MANDATE_USDC: Mandate = {
+  kind: "procurement",
+  role: "vendor",
+  shared: { capabilities: "Halcyon Markets builds market data pipelines and reporting for token treasuries." },
+  limits: {
+    min_total: "12000000", target_total: "16000000", min_items: 2, max_items: 4, min_due_offset_secs: 60,
+    max_acceptance_window_secs: 604800,
+  },
+  instructions: "Settled in Circle's testnet USDC. Hold close to target. Concede once if the buyer gives a reason. Never go below the floor.",
+};
+
+/** True if this room was created by the Circle USDC factory (ACCORD_FACTORY_USDC). */
+export function isCircleRoom(a: AgreementView): boolean {
+  return config().currencies.find((c) => c.factory === a.factory)?.id === "usdc";
+}
+
 const signerFor = (account: string, key: string | undefined) => {
   if (!key) throw new Error(`the demo key for ${account} is not configured`);
   return new KeySigner(account, key, accord().chain);
@@ -171,15 +189,20 @@ export async function counterpartyStep(id: string): Promise<Step> {
   const a = await reader.get();
   if (!isDemoRoom(a)) throw Object.assign(new Error("this room's vendor is not Accord's demo vendor"), { status: 403 });
 
-  if (a.state === "NoDeal") return wait("The Sealed Table found no deal inside both mandates. Open a new room with a ceiling of at least 30 tUSDC.");
+  const circle = isCircleRoom(a);
+  if (a.state === "NoDeal") {
+    return wait(circle
+      ? "The Sealed Table found no deal inside both mandates. Open a new room with a ceiling of at least 12 USDC."
+      : "The Sealed Table found no deal inside both mandates. Open a new room with a ceiling of at least 30 tUSDC.");
+  }
   if (a.state === "Cancelled") return wait("This room was cancelled.");
   if (a.state === "Settled") return wait("This room is settled. Nothing left to do.");
 
   if (a.state === "Sealed") {
     const c = await reader.commitments();
     if (!c.vendor) {
-      const r = await as("vendor", id).sealMandate(DEMO_VENDOR_MANDATE, { role: "vendor" });
-      return done("Sealed the vendor's mandate (Halcyon procurement preset)", r.txHash,
+      const r = await as("vendor", id).sealMandate(circle ? DEMO_VENDOR_MANDATE_USDC : DEMO_VENDOR_MANDATE, { role: "vendor" });
+      return done(circle ? "Sealed the vendor's mandate (Halcyon procurement preset, Circle USDC)" : "Sealed the vendor's mandate (Halcyon procurement preset)", r.txHash,
         c.buyer ? "Both mandates are sealed. Start the negotiation next." : "Your move: seal your mandate.");
     }
     if (!c.buyer) return wait("Your move: seal your mandate. The vendor's is sealed.", true);
@@ -221,7 +244,9 @@ export async function counterpartyStep(id: string): Promise<Step> {
     }
   }
 
-  if (BigInt(a.funded) < BigInt(a.total)) return wait("Your move: fund the escrow with test USDC.", true);
+  if (BigInt(a.funded) < BigInt(a.total)) {
+    return wait(circle ? "Your move: fund the escrow with Circle testnet USDC (faucet.circle.com, network NEAR Testnet)." : "Your move: fund the escrow with test USDC.", true);
+  }
 
   const items = await reader.items();
   // One item at a time, in order: the vendor delivers the next one once the last is accepted and paid. A payment

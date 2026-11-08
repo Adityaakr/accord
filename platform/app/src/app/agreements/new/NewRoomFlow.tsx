@@ -9,7 +9,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Accord, AccordError, formatUnits, type Kind, type Params } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
-import { useAppConfig } from "@/components/AppConfig";
+import { CIRCLE_FAUCET, useAppConfig } from "@/components/AppConfig";
 import type { PixelName } from "@/components/PixelIcon";
 import styles from "./flow.module.css";
 import { IconTile } from "@/components/IconTile";
@@ -57,6 +57,11 @@ export function NewRoomFlow({ network, deposit, demoAllowed }: { network: string
   const [canaries, setCanaries] = useState("");
   const [advanced, setAdvanced] = useState(false);
   const [demo, setDemo] = useState(demoAllowed);
+  // Settlement: the default factory's test USDC unless the visitor picks Circle's testnet USDC (when offered).
+  const currencies = cfg.currencies ?? [];
+  const [currencyId, setCurrencyId] = useState<"default" | "usdc">("default");
+  const currency = currencies.find((c) => c.id === currencyId) ?? null;
+  const factory = currency?.factory ?? cfg.factory;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -93,7 +98,7 @@ export function NewRoomFlow({ network, deposit, demoAllowed }: { network: string
     setBusy(true);
     setError(null);
     try {
-      const accord = new Accord({ network: network === "sandbox" ? "sandbox" : "testnet", factory: cfg.factory, rpc: cfg.rpc, signer: w.signer });
+      const accord = new Accord({ network: network === "sandbox" ? "sandbox" : "testnet", factory, rpc: cfg.rpc, signer: w.signer });
       const { agreement } = await accord.createAgreement({
         kind: type.kind, title: title.trim(), vendor: vendor.trim(), vendor_authority: authority.trim(),
         canaries: canaryList, params: demo ? DEMO : LIVE,
@@ -212,6 +217,22 @@ export function NewRoomFlow({ network, deposit, demoAllowed }: { network: string
           <section aria-labelledby="t-review">
             <h2 id="t-review" className={styles.h}>Review before you sign</h2>
             <p className={styles.lead}>Creating the room makes it its own NEAR account with the release's code and no key of its own. Nothing is negotiated or paid yet.</p>
+            {currencies.length > 1 && (
+              <fieldset className={styles.field} aria-label="Settle in" style={{ border: 0, padding: 0, margin: "0 0 16px" }}>
+                <span className={styles.label}>Settle in</span>
+                {currencies.map((c) => (
+                  <label key={c.id} className={styles.toggle}>
+                    <input type="radio" name="currency" checked={currencyId === c.id} onChange={() => setCurrencyId(c.id)} />
+                    <span>{c.id === "usdc" ? "Circle USDC (testnet, from faucet.circle.com)" : "Test USDC (instant, from our faucet)"}</span>
+                  </label>
+                ))}
+                {currencyId === "usdc" && (
+                  <span className={styles.hint}>
+                    Fund the room from <a className="link" href={CIRCLE_FAUCET} target="_blank" rel="noreferrer">faucet.circle.com</a> (network NEAR Testnet): about 20 USDC per address every 1 to 2 hours, so keep the ceiling you seal within 20 USDC.
+                  </span>
+                )}
+              </fieldset>
+            )}
             <dl className={styles.review}>
               <div><dt>Type</dt><dd><IconTile name={type.icon} size={24} className={styles.tileGap} />{type.title}</dd></div>
               <div><dt>Title</dt><dd>{title.trim()}</dd></div>
@@ -219,6 +240,7 @@ export function NewRoomFlow({ network, deposit, demoAllowed }: { network: string
               <div><dt>Vendor</dt><dd className="mono">{vendor}{domain ? <span className={styles.faint}> · {domain}</span> : null}</dd></div>
               <div><dt>Settlement authority</dt><dd className="mono">{authority}</dd></div>
               {canaryList.length > 0 && <div><dt>Canaries</dt><dd className="mono">{canaryList.join(", ")}</dd></div>}
+              {currencies.length > 1 && <div><dt>Settlement</dt><dd className="mono">{currencyId === "usdc" ? "Circle USDC" : "test USDC"}<span className={styles.faint}> · factory {factory}</span></dd></div>}
               <div><dt>Timings</dt><dd>{demo ? "Demo: a recipient change waits 2 min; claims after 2 min" : "Live: a recipient change waits 24 h; claims after 72 h"}</dd></div>
               <div className={styles.deposit}><dt>Creation deposit</dt><dd><span className="mono">{deposit ? `${formatUnits(deposit, 24, 2)} NEAR` : "read from the factory"}</span><span className={styles.faint}> pays the room's storage and gas</span></dd></div>
             </dl>
