@@ -80,15 +80,15 @@ function agentSecretSource(): string | null {
 }
 
 /** The demo agent's ed25519 key for one agreement, derived from the server's seed; the same every time. */
-export function demoAgentKey(agreement: string): { publicKey: string; secretKey: string } {
+export function demoAgentKey(agreement: string, generation: number): { publicKey: string; secretKey: string } {
   const src = agentSecretSource();
   if (!src) throw new Error("the demo agent is not configured (DEMO_AGENT_SEED)");
-  return deriveAgentKey(src, agreement);
+  return deriveAgentKey(src, agreement, generation);
 }
 
 /** The agreement as the demo agent: signs as the agreement account with the key the buyer installed. */
-export function demoAgent(agreement: string): AgreementClient {
-  const k = demoAgentKey(agreement);
+export function demoAgent(agreement: string, generation: number): AgreementClient {
+  const k = demoAgentKey(agreement, generation);
   return accord().withSigner(new KeySigner(agreement, k.secretKey, accord().chain)).agreement(agreement);
 }
 
@@ -224,16 +224,21 @@ export async function counterpartyStep(id: string): Promise<Step> {
   if (BigInt(a.funded) < BigInt(a.total)) return wait("Your move: fund the escrow with test USDC.", true);
 
   const items = await reader.items();
-  const undelivered = items.filter((it: ItemView) => it.status === "Open" && !it.delivery && it.evidence === "DeliveryAccepted");
-  const due = undelivered.find((it) => (it.due_at ?? 0) <= a.now);
-  if (due) {
-    const tx = await as("vendor", id).submitDelivery(due.id, "ee".repeat(32), `https://${d.domain}/deliveries/${id}/${due.id}`);
-    return done(`Submitted delivery for item ${due.id}`, tx.txHash, `Your move: accept delivery ${due.id}, then let the agent pay it.`);
-  }
+  // One item at a time, in order: the vendor delivers the next one once the last is accepted and paid. A payment
+  // waits for the buyer's acceptance (or the acceptance window), not for the item's due date, so a test room does
+  // not have to wait days.
   const waiting = items.find((it) => it.status === "Delivered");
   if (waiting) return wait(`Your move: accept delivery ${waiting.id}.`, true);
-  if (!a.agent_key) return wait("Your move: start the demo agent (install its key).", true);
-  const next = undelivered.sort((x, y) => (x.due_at ?? 0) - (y.due_at ?? 0))[0];
-  if (next?.due_at) return wait(`The next item is due at ${new Date(next.due_at * 1000).toISOString().slice(11, 19)} UTC; the vendor delivers it then.`);
-  return wait("The vendor has nothing to do. Let the agent pay the eligible items.");
+  const eligible = items.find((it) => it.status === "Eligible");
+  if (eligible) {
+    return wait(a.agent_key ? `Item ${eligible.id} is eligible: let the agent pay it.` : "Your move: start the demo agent, then let it pay the accepted item.", true);
+  }
+  const next = items
+    .filter((it: ItemView) => it.status === "Open" && !it.delivery && it.evidence === "DeliveryAccepted")
+    .sort((x, y) => x.id - y.id)[0];
+  if (next) {
+    const tx = await as("vendor", id).submitDelivery(next.id, "ee".repeat(32), `https://${d.domain}/deliveries/${id}/${next.id}`);
+    return done(`Submitted delivery for item ${next.id}`, tx.txHash, `Your move: accept delivery ${next.id}, then let the agent pay it.`);
+  }
+  return wait("The vendor has delivered every item. Nothing left for it to do.");
 }

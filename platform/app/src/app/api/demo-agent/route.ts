@@ -28,17 +28,20 @@ export async function POST(req: Request) {
   const a = await accord().agreement(agreement).get().catch(() => null);
   if (!a) return NextResponse.json({ error: "no such agreement" }, { status: 404 });
   if (!isDemoRoom(a)) return NextResponse.json({ error: "the demo agent only runs in rooms opened against Accord's demo vendor" }, { status: 403 });
-  const key = demoAgentKey(agreement);
+  const key = demoAgentKey(agreement, a.revoked_keys);
   if (action === "key") return NextResponse.json({ publicKey: key.publicKey, installed: a.agent_key === key.publicKey });
 
   if (a.agent_key !== key.publicKey) {
-    return NextResponse.json({ error: a.agent_key ? "the installed agent key is not the demo agent's" : "install the demo agent's key first" }, { status: 409 });
+    const why = a.agent_key ? "the installed agent key is not the demo agent's"
+      : a.revoked_keys > 0 ? "the buyer revoked the agent's key: the agent can no longer act in this room"
+      : "install the demo agent's key first";
+    return NextResponse.json({ error: why }, { status: 409 });
   }
   if (!allow(`agent:${agreement}`, 6, 3600_000)) return NextResponse.json({ error: "the demo agent has acted enough in this room for an hour" }, { status: 429 });
   if (busy.has(agreement)) return NextResponse.json({ error: "the demo agent is already acting in this room" }, { status: 409 });
   busy.add(agreement);
   try {
-    const deal = demoAgent(agreement);
+    const deal = demoAgent(agreement, a.revoked_keys);
     const due = (await deal.dueItems()).find((d) => d.eligible_at !== null && d.eligible_at <= a.now) ?? null;
     if (action === "pay") {
       if (!due) return NextResponse.json({ error: "no item is eligible yet: the vendor delivers, you accept, then the agent pays" }, { status: 409 });

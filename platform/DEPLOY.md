@@ -26,6 +26,16 @@ website service forwards `<site>/app/*` to it, so visitors use one address.
 | `NEARAI_API_KEY` | optional: only for the agent's LLM planner and the verify relay |
 | `NEXT_PUBLIC_NEAR_AUTH_CLIENT_ID` | optional: your own NEAR Auth client for email sign-in on a hosted domain (build-time) |
 | `RESEND_API_KEY` | optional: invite and notification emails |
+| `FAUCET_ACCOUNT` | `faucet.accord-v2.testnet`: tops visitors up to 2.5 NEAR and 100 tUSDC on `/app/try-it` |
+| `FAUCET_KEY` | the faucet account's key (top it up with testnet NEAR when it runs low) |
+| `DEMO_VENDOR_ACCOUNT` | `halcyon-demo.testnet` (the demo counterparty's vendor) |
+| `DEMO_VENDOR_KEY` | its key (`VENDOR_KEY` in `accord-app/.env`) |
+| `DEMO_AUTHORITY_ACCOUNT` | `halcyon-auth.testnet` |
+| `DEMO_AUTHORITY_KEY` | its key (`AUTHORITY_KEY` in `accord-app/.env`) |
+| `DEMO_RECIPIENT` | `halcyon-mm.testnet` |
+| `DEMO_STRANGER` | `halcyon-markets.testnet` (the account the redirect attempt names) |
+| `DEMO_DOMAIN` | `accordweb-production.up.railway.app` (serves the Payee file for the demo recipient) |
+| `DEMO_AGENT_SEED` | a long random string (`openssl rand -hex 32`); the demo agent's per-room keys derive from it |
 
 4. Deploy. Check `https://<app-service>.up.railway.app/app/api/status` returns JSON with a testnet block.
 

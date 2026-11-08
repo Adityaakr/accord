@@ -20,4 +20,8 @@ describe("deriveAgentKey", () => {
     expect(deriveAgentKey(SEED, "a8.accord-v2.testnet").publicKey).not.toBe(a);
     expect(deriveAgentKey("y".repeat(32), "a7.accord-v2.testnet").publicKey).not.toBe(a);
   });
+  it("gives a new key after each revocation", () => {
+    const first = deriveAgentKey(SEED, "a7.accord-v2.testnet", 0).publicKey;
+    expect(deriveAgentKey(SEED, "a7.accord-v2.testnet", 1).publicKey).not.toBe(first);
+  });
 });

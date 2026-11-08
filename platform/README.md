@@ -12,6 +12,42 @@ Whose server do your agents meet on? Companies already let software negotiate fo
 
 ## Try it
 
+### In the browser, on NEAR testnet (about 3 minutes, nothing to install)
+
+Open `<site>/app/try-it` (locally: `http://localhost:3300/app/try-it`). Everything there is NEAR testnet with test
+USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, with its authority
+`halcyon-auth.testnet`), and the agent is a demo agent run by Accord for test rooms; both are labelled in the room.
+
+1. Do: sign in with Meteor or Intear on testnet, or your email. See: `01 Connect a wallet · done`, with your account.
+2. Do: **Get test funds**. See: `0.00 NEAR` become `2.50 NEAR · 100.00 tUSDC`, with both faucet transactions linked.
+3. Do: **Create the room**. See: `Your room is a8.accord-v2.testnet: My first deal room.` (your number will differ).
+4. Do: **Seal your mandate** with the Northwind preset (40 tUSDC ceiling, 2 to 4 items). See, in the room's Demo
+   counterparty panel: `Sealed the vendor's mandate (Halcyon procurement preset)`, then `Started the negotiation in
+   the Sealed Table`, and the state moves `Sealed` to `Attested` (on a8: 3 items, 15.00 + 12.00 + 6.00 tUSDC).
+5. Do: approve the terms and fund the escrow. See: `Approved the terms as the vendor`, `Proposed halcyon-mm.testnet
+   as the recipient on accordweb-production.up.railway.app`, `Approved recipient halcyon-mm.testnet as the vendor's
+   authority`. Accept the recipient; see `Submitted delivery for item 1`. Accept delivery 1.
+6. Do: **Start the demo agent** (your wallet signs `install_agent_key`), then **Let the agent pay the due item**.
+   See: `Paid item 1: 15.00 tUSDC to halcyon-mm.testnet, the active recipient.`
+7. Do: **Ask the agent to pay a new account**. See: `ERR_PAYEE_MISMATCH` and `Asked to pay … to
+   halcyon-markets.testnet. The contract refused it and recorded the refusal.`
+8. Do: revoke the key from the room header. See: `Agent revoked · next call rejected by the network`.
+
+The same path, run with a fresh account through the app's own routes on 8 Nov 2026 (agreement `a8.accord-v2.testnet`):
+faucet [NEAR](https://testnet.nearblocks.io/txns/935XqMoeb4Jt7fBQQHK9T7o9ZWJrWUoZYYCkdPGqhBoa) and
+[tUSDC](https://testnet.nearblocks.io/txns/3t7SSAkTzQt7Aj2d6FwkhpG7BzKfC2mhCcWMR2E46PQ3),
+[create](https://testnet.nearblocks.io/txns/5xdpHZTzQyjFiZcxApbwPDH2o3DQNKYhE9szxfjAjgDq),
+[negotiation started](https://testnet.nearblocks.io/txns/HFk6XgoFmkZt2mDBrtE3zzD4mXPMEQUKnVyTGwqi9143),
+[fund](https://testnet.nearblocks.io/txns/91knP5EzbKV5ajEXdfETkCXJqucQ5niJoPLBF2dbipng),
+[agent pays item 1](https://testnet.nearblocks.io/txns/HxYDHTRLteGfGYoeEptehVMKbFgBdVWBqrejUJhsjSnb),
+[redirect refused](https://testnet.nearblocks.io/txns/37zUgEoe8jbqnqQQhSe8L1VPBMRrrqXdsDorgDY7cEYL),
+[revoke](https://testnet.nearblocks.io/txns/F67Qcofq9CmVuGze7URoVD3E1HfucQ7qooBjDJjANHiG).
+The server side is `app/src/server/demo.ts`: the faucet sends only what an account lacks, once a day per account and
+per IP; the counterparty reads the room and makes the vendor's next valid move, so calling it twice does nothing twice;
+the demo agent's key is derived per room and signs `act` itself, never through the relayer.
+
+### From a terminal
+
 Three ways, cheapest first. None needs our keys.
 
 1. **Read-only check of a live agreement** (about a minute, no account): `make verify DEAL=<live agreement>`. Testnet agreements follow the first release; see "Status" below.
