@@ -1,0 +1,184 @@
+import { useId } from "react"
+
+/* Pixel icons: drawn on a 16×16 grid, one rect per pixel with a hairline gap, filled with a brushed-silver gradient
+   (the reference set: bitmap glyphs in metal). Pure SVG, scales crisply. */
+const MAPS = {
+  chart: [
+    "............XX..",
+    "............XX..",
+    "........XX..XX..",
+    "........XX..XX..",
+    "....XX..XX..XX..",
+    "....XX..XX..XX..",
+    "XX..XX..XX..XX..",
+    "XX..XX..XX..XX..",
+    "XX..XX..XX..XX..",
+    "XX..XX..XX..XX..",
+    "................",
+    "XXXXXXXXXXXXXXXX",
+  ],
+  shield: [
+    ".......XX.......",
+    ".....XX..XX.....",
+    "...XX......XX...",
+    ".XX..........XX.",
+    ".XX..........XX.",
+    ".XX.......XX.XX.",
+    ".XX......XX..XX.",
+    ".XX.XX..XX...XX.",
+    "..XX.XXXX...XX..",
+    "..XX..XX....XX..",
+    "...XX......XX...",
+    "....XX....XX....",
+    ".....XX..XX.....",
+    "......XXXX......",
+  ],
+  server: [
+    "XXXXXXXXXXXXXXXX",
+    "X..............X",
+    "X.XXXXX....X.X.X",
+    "X..............X",
+    "XXXXXXXXXXXXXXXX",
+    "................",
+    "XXXXXXXXXXXXXXXX",
+    "X..............X",
+    "X.XXXXX....X.X.X",
+    "X..............X",
+    "XXXXXXXXXXXXXXXX",
+  ],
+  agents: [
+    ".XXXX......XXXX.",
+    "XX..XX....XX..XX",
+    "X....X....X....X",
+    "X....XXXXXX....X",
+    "X....X....X....X",
+    "XX..XX....XX..XX",
+    ".XXXX......XXXX.",
+  ],
+  bank: [
+    "......XXXX......",
+    "....XXX..XXX....",
+    "..XXX......XXX..",
+    "XXXXXXXXXXXXXXXX",
+    "................",
+    ".XX..XX..XX..XX.",
+    ".XX..XX..XX..XX.",
+    ".XX..XX..XX..XX.",
+    ".XX..XX..XX..XX.",
+    ".XX..XX..XX..XX.",
+    ".XX..XX..XX..XX.",
+    "................",
+    "XXXXXXXXXXXXXXXX",
+    "XXXXXXXXXXXXXXXX",
+  ],
+  bag: [
+    "....XXXXXXXX....",
+    "...XX......XX...",
+    "..XXXXXXXXXXXX..",
+    "..XX........XX..",
+    "..XX........XX..",
+    "..XX.X....X.XX..",
+    "..XX..XXXX..XX..",
+    "..XX........XX..",
+    "..XX........XX..",
+    "..XX........XX..",
+    "..XX........XX..",
+    "..XXXXXXXXXXXX..",
+  ],
+  vault: [
+    "XXXXXXXXXXXXXXXX",
+    "XX............XX",
+    "XX....XXXX....XX",
+    "XX...XX..XX...XX",
+    "XX...XX..XX...XX",
+    "XX..XXXXXXXX..XX",
+    "XX..XXXXXXXX..XX",
+    "XX..XXX..XXX..XX",
+    "XX..XXXXXXXX..XX",
+    "XX............XX",
+    "XXXXXXXXXXXXXXXX",
+    ".XX..........XX.",
+  ],
+  store: [
+    "XXXXXXXXXXXXXXXX",
+    "X.X.X.X.X.X.X.XX",
+    "XXXXXXXXXXXXXXXX",
+    ".XX..........XX.",
+    ".XX..........XX.",
+    ".XX........X.XX.",
+    ".XX.......XX.XX.",
+    ".XX.X....XX..XX.",
+    ".XX.XX..XX...XX.",
+    ".XX..XXXX....XX.",
+    ".XX...XX.....XX.",
+    "XXXXXXXXXXXXXXXX",
+  ],
+  book: [
+    ".X....X..X....X.",
+    "XXXXXXX..XXXXXXX",
+    "XX....XXXX....XX",
+    "XX.....XX.....XX",
+    "XX.....XX.....XX",
+    "XX.....XX.....XX",
+    "XX.....XX.....XX",
+    "XX.....XX.....XX",
+    "XX.....XX.....XX",
+    "XXXXXXXXXXXXXXXX",
+    "......XXXX......",
+    ".......XX.......",
+  ],
+  key: [
+    ".XXXX...........",
+    "XX..XX..........",
+    "XX..XXXXXXXXXXX.",
+    "XX..XXXXXXXXXXX.",
+    "XX..XX....XX.XX.",
+    ".XXXX.....XX.XX.",
+  ],
+  power: [
+    ".......XX.......",
+    ".......XX.......",
+    "...XX..XX..XX...",
+    "..XX...XX...XX..",
+    ".XX....XX....XX.",
+    ".XX..........XX.",
+    ".XX..........XX.",
+    ".XX..........XX.",
+    "..XX........XX..",
+    "...XX......XX...",
+    "....XXXXXXXX....",
+  ],
+  terminal: [
+    "XXXXXXXXXXXXXXXX",
+    "X..............X",
+    "X.XX...........X",
+    "X..XX..........X",
+    "X...XX.........X",
+    "X..XX..........X",
+    "X.XX...XXXXX...X",
+    "X..............X",
+    "XXXXXXXXXXXXXXXX",
+  ],
+} as const
+
+export type PixelName = keyof typeof MAPS
+
+export function PixelIcon({ name, size = 40 }: { name: PixelName; size?: number }) {
+  const id = `px-${useId().replace(/:/g, "")}`
+  const rows = MAPS[name]
+  const top = Math.floor((16 - rows.length) / 2) // whole pixels: a half-pixel offset vanishes under crispEdges at small sizes
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden="true" shapeRendering="crispEdges" style={{ display: "block", flex: "none" }}>
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="16" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="var(--px-hi, #ffffff)" />
+          <stop offset="0.5" stopColor="var(--px-mid, #c9ccd1)" />
+          <stop offset="1" stopColor="var(--px-lo, #7d838b)" />
+        </linearGradient>
+      </defs>
+      <g fill={`url(#${id})`}>
+        {rows.flatMap((r, y) => [...r].map((c, x) => (c === "X" ? <rect key={`${x}-${y}`} x={x + 0.06} y={y + top + 0.06} width="0.88" height="0.88" /> : null)))}
+      </g>
+    </svg>
+  )
+}

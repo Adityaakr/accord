@@ -1,3 +1,4 @@
+import { InviteCard } from "./InviteCard";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -54,9 +55,9 @@ function when(t: number | null | undefined, now: number): string {
   return d >= 0 ? `in ${s}` : `${s} ago`;
 }
 
-export default async function DealRoom({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
+export default async function DealRoom({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string; created?: string }> }) {
   const { id } = await params;
-  const { tab: tabParam } = await searchParams;
+  const { tab: tabParam, created } = await searchParams;
   let r: Room;
   try {
     r = await room(id);
@@ -184,6 +185,8 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
         <RoomHeader room={a.account} buyer={a.buyer} step={step} terminal={terminal} agentKey={a.agent_key}
           revokedKeys={a.revoked_keys} canaryTripped={a.canary_tripped} executing={a.state === "Executing"} />
       </header>
+
+      {created === "1" && <InviteCard room={a.account} buyer={a.buyer} vendor={a.vendor} authority={a.vendor_authority} />}
 
       <nav className={styles.tabs} aria-label="Deal room sections">
         {TABS.map(([k, label]) => (
