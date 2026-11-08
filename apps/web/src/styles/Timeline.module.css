@@ -95,3 +95,9 @@
   .rowStep .tx { grid-column: 3; grid-row: 1 / span 2; }
 }
 .code { font-size: 12.5px; overflow-wrap: anywhere; }
+
+/* A later proof (ProofGroup): the step takes the room it needs, its detail and transactions sit right */
+.rowProof { grid-template-columns: 28px minmax(0, 1fr) auto; padding: 4px 0; }
+@media (max-width: 809.98px) {
+  .rowProof { grid-template-columns: 24px minmax(0, 1fr); }
+}

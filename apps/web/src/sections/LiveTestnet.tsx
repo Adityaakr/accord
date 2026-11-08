@@ -3,7 +3,7 @@ import { Arrow } from "../components/Arrow"
 import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { SectionHeading } from "../components/SectionHeading"
 import { LINKS } from "../content/links"
-import { CHECKS, checkSummary, FLOW, INFRA, PHASES, TESTNET } from "../content/testnet"
+import { CHECKS, checkSummary, CIRCLE, FLOW, INFRA, PHASES, RELEASE4, TESTNET } from "../content/testnet"
 import styles from "./LiveTestnet.module.css"
 
 /* Home · Live on NEAR testnet (#testnet), 8 Nov 2026. The full flow of one agreement, each step linked to its
@@ -59,6 +59,15 @@ export function LiveTestnet() {
           <span className={styles.verifyResult}>{checkSummary(CHECKS)}</span>
           <span className={styles.sep} aria-hidden="true">·</span>
           <Link to="/verify" className={styles.footLink}>See the checks<Arrow /></Link>
+        </p>
+        <p className={styles.verify}>
+          <span>Re-run on release 4 (audit fixes):</span>
+          <a href={RELEASE4.agreementUrl} target="_blank" rel="noreferrer" className={`mono ${styles.footLink}`}>a10<Arrow dir="up-right" /></a>
+          <span className={styles.sep} aria-hidden="true">·</span>
+          <span>Circle USDC:</span>
+          <a href={CIRCLE.agreementUrl} target="_blank" rel="noreferrer" className={`mono ${styles.footLink}`}>a1.accord-usdc<Arrow dir="up-right" /></a>
+          <span className={styles.sep} aria-hidden="true">·</span>
+          <Link to="/record" className={styles.footLink}>Every transaction<Arrow /></Link>
         </p>
         <ul className={styles.infra} aria-label="Behind it">
           {INFRA.map((i) => <li key={i.label}><a href={i.href} target="_blank" rel="noreferrer">{i.label}<Arrow dir="up-right" /></a></li>)}

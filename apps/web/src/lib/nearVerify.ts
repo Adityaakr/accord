@@ -1,4 +1,4 @@
-import { KNOWN_TX } from "../content/testnet"
+import { FACTORIES, KNOWN_TX, RELEASE_TX } from "../content/testnet"
 
 /* Public checks of an Accord agreement, run in the browser against NEAR testnet RPC with no keys: the account is an
    agreement of the factory, its code is the factory release it was created on, it holds no full-access key (at most
@@ -7,6 +7,8 @@ import { KNOWN_TX } from "../content/testnet"
    `get_agreement()`. Each row resolves on its own, so one slow call never holds the others. */
 
 export const FACTORY = "accord-v2.testnet"
+/** The factory an id names (a<n>.accord-usdc.testnet → accord-usdc.testnet); the default factory otherwise. */
+export const factoryOf = (id: string): string => FACTORIES.find((f) => id.endsWith(`.${f}`)) ?? FACTORY
 /* FastNEAR's two testnet hosts. rpc.testnet.near.org is left out: under a page's burst of reads it answers 429s
    without CORS headers, which the browser logs as errors. */
 const PRIMARY = "https://test.rpc.fastnear.com"
@@ -121,14 +123,15 @@ const addr = (a: string) => `https://testnet.nearblocks.io/address/${a}`
 
 export async function verifyAgreement(id: string, report: (key: RowKey, value: Seg[], result: Result) => void, signal?: AbortSignal): Promise<void> {
   const known = KNOWN_TX[id]
+  const factory = factoryOf(id)
   const rest: RowKey[] = ["code", "keys", "recipient", "record"]
   const quiet = <T,>(p: Promise<T>) => { p.catch(() => {}); return p }
 
   const acct = quiet(rpc("query", { request_type: "view_account", finality: "final", account_id: id }, signal))
-  const listed = quiet(view<boolean>(FACTORY, "is_agreement", { account: id }, signal))
+  const listed = quiet(view<boolean>(factory, "is_agreement", { account: id }, signal))
   const keyList = quiet(rpc("query", { request_type: "view_access_key_list", finality: "final", account_id: id }, signal))
   const agreement = quiet(view<Agreement>(id, "get_agreement", {}, signal))
-  const release = quiet(agreement.then((a) => view<{ code_hash: string } | null>(FACTORY, "release", { version: a.release }, signal)))
+  const release = quiet(agreement.then((a) => view<{ code_hash: string } | null>(factory, "release", { version: a.release }, signal)))
 
   /* 1. The account exists and the factory lists it as one of its agreements */
   let account: Json
@@ -136,7 +139,7 @@ export async function verifyAgreement(id: string, report: (key: RowKey, value: S
     const [a, isListed] = await Promise.all([acct, listed])
     if (!isListed) throw new Error("not listed")
     account = a
-    report("agreement", [{ text: id, href: addr(id), copy: id }, " · by ", { text: FACTORY, href: addr(FACTORY), copy: FACTORY }], "ok")
+    report("agreement", [{ text: id, href: addr(id), copy: id }, " · by ", { text: factory, href: addr(factory), copy: factory }], "ok")
   } catch (err) {
     if (signal?.aborted) return
     /* No answer at all is the RPC; any definite answer (unknown account, an id the factory rejects) means it is not one */
@@ -188,7 +191,7 @@ export async function verifyAgreement(id: string, report: (key: RowKey, value: S
     .then(([a, rel]) => {
       const onChain = String(account.global_contract_hash ?? account.code_hash ?? "")
       const ok = !!rel && onChain === rel.code_hash
-      const releaseHref = a.release === 3 ? KNOWN_TX["a6.accord-v2.testnet"].release : `${addr(FACTORY)}?tab=txns`
+      const releaseHref = RELEASE_TX[factory]?.[a.release] ?? `${addr(factory)}?tab=txns`
       report(
         "code",
         ok ? [{ text: `Release ${a.release}`, href: releaseHref }, " · ", { text: `${onChain.slice(0, 8)}…`, href: `${addr(id)}?tab=contract`, copy: onChain, copyLabel: "the code hash" }] : [`Not release ${a.release}`],

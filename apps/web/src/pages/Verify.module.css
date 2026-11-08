@@ -10,6 +10,13 @@
 .submit:hover { opacity: 0.86; }
 .submit:focus { outline: none; }
 .submit:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 3px; }
+.picks { width: 100%; max-width: 760px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin: -22px 0 0; font-size: 13px; color: var(--text-weak); }
+.pick { padding: 0; border: 0; background: none; font: inherit; color: var(--text-medium); cursor: pointer; }
+.pick :global(.mono) { font-size: 12.5px; color: var(--text-strong); }
+.pick:hover :global(.mono), .pick[aria-pressed="true"] :global(.mono) { color: var(--teal); }
+.pick:focus { outline: none; }
+.pick:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 3px; border-radius: 3px; }
+.pickNote { color: var(--text-weak); }
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .headLink { min-width: 0; font-size: 12.5px; overflow-wrap: anywhere; text-align: right; }
@@ -29,7 +36,7 @@
 .raw { margin: 16px 0 0; padding: 0 0 6px; overflow-x: auto; font-family: var(--mono); font-size: 12px; line-height: 1.7; color: var(--text-medium); white-space: pre; }
 
 @media (max-width: 1199.98px) { .main { padding: 0 24px 88px; } }
-@media (max-width: 809.98px) { .main { gap: 28px; padding: 0 16px 72px; } }
+@media (max-width: 809.98px) { .main { gap: 28px; padding: 0 16px 72px; } .picks { margin-top: -16px; } }
 .headValue, .seg { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
 .seg { white-space: normal; }
 .recordedNote { margin: 0 0 4px; }

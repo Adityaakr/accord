@@ -105,6 +105,8 @@ li.tRow:last-child { border-bottom: 0; }
 .tLabel { margin: 0; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-weak); }
 .tText { min-width: 0; font-size: 14.5px; line-height: 1.6; color: var(--text-medium); }
 .tText :global(code.mono) { font-size: 0.86em; }
+.inlineLink { color: var(--text-strong); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(var(--ink-rgb), 0.3); }
+.inlineLink:hover { text-decoration-color: currentColor; }
 @media (max-width: 809.98px) {
   li.tRow { grid-template-columns: 24px minmax(0, 1fr); }
   .tLine { grid-template-columns: minmax(0, 1fr); gap: 2px; }

@@ -43,6 +43,7 @@ export const PHASES: { label: string; steps: string[] }[] = [
 export const INFRA = [
   { label: "Factory", href: acct("accord-v2.testnet") },
   { label: "Release 3", href: tx("7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh") },
+  { label: "Release 4", href: tx("EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU") },
   { label: "Relayer tx", href: tx("DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC") },
   { label: "Attestations", href: "https://testnet-api.outlayer.ai/attestations/13596" },
 ]
@@ -77,11 +78,68 @@ verify: 5 checks ok · 1 partial · 1 not checked`
 
 /* Transactions behind agreement a6's record, so /verify's live rows link to the exact evidence for a6; any other
    agreement links to its account's transaction list instead. */
-export const KNOWN_TX: Record<string, { payment: string; refusal: string; recipientApproval: string; release: string }> = {
+export const KNOWN_TX: Record<string, { payment: string; refusal: string; recipientApproval?: string; release: string }> = {
   "a6.accord-v2.testnet": {
     payment: tx("2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ"),
     refusal: tx("AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs"),
     recipientApproval: tx("FBQnqtKXs5B5zn1A4F1yCDUmACYMqsi2zM2uez6YxDis"),
     release: tx("7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh"),
   },
+  "a10.accord-v2.testnet": {
+    payment: tx("Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm"),
+    refusal: tx("51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu"),
+    release: tx("EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU"),
+  },
+  "a1.accord-usdc.testnet": {
+    payment: tx("E127BGy3Tw6PmhE9JcoFr7vQsKTiHNevTTiAxEjJGWK2"),
+    refusal: tx("9rgsBFA26yedWuEEJk77sKBDrDGS9mHn9BFMknCaP8BB"),
+    release: tx("H5UYzV98Rwx68W2mvbQRqJ6bss9ZRRxDwi5LxKVJHmcg"),
+  },
+}
+
+/* The factories and the transaction that published each release on each (publish_release), so a code check links
+   to the right one. Release 4 (the audit fixes, DECISIONS 25 and 26) is current on both since 9 Nov 2026; an
+   agreement keeps the release it was created on. */
+export const FACTORIES = ["accord-v2.testnet", "accord-usdc.testnet"] as const
+export const RELEASE_TX: Record<string, Record<number, string>> = {
+  "accord-v2.testnet": { 3: tx("7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh"), 4: tx("EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU") },
+  "accord-usdc.testnet": { 3: tx("H5UYzV98Rwx68W2mvbQRqJ6bss9ZRRxDwi5LxKVJHmcg"), 4: tx("GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai") },
+}
+
+/* Later proofs, from DECISIONS 26 (9 Nov 2026). a6 above stays the original walkthrough. Each row is one proof with
+   the transactions behind it; a row with no transaction links the agreement's account. */
+export type Proof = { title: string; agreement: string; mono?: string; refused?: boolean; txs: string[] }
+export const RELEASE4 = {
+  release: 4,
+  agreement: "a10.accord-v2.testnet",
+  agreementUrl: acct("a10.accord-v2.testnet"),
+  code: "ECgsrZwy…",
+  publish: tx("EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU"),
+  current: tx("J9uADVqQSkY6f1uMYbMbWoPnB4oiwuS3CtLayKojtgeC"),
+  usdcPublish: tx("GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai"),
+  usdcCurrent: tx("5D9LxPuU4phUXTgRawd97TmhZPGiPjWzSPWCYXJteoLJ"),
+  verify: "ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a10.accord-v2.testnet",
+  verifyResult: "code = release 4 · 5 ok · 1 partial · 1 not checked",
+  steps: [
+    { title: "Negotiated in the enclave", agreement: "a10.accord-v2.testnet", mono: "33.00 USDC · 3 items", txs: [] },
+    { title: "Buyer funds the escrow", agreement: "a10.accord-v2.testnet", mono: "33.00 USDC", txs: [tx("2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22")] },
+    { title: "Agent pays item 1", agreement: "a10.accord-v2.testnet", mono: "12.00 USDC", txs: [tx("Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm")] },
+    { title: "A redirected payment is refused", agreement: "a10.accord-v2.testnet", mono: "ERR_PAYEE_MISMATCH", refused: true, txs: [tx("51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu")] },
+    { title: "Attack: redirect, altered amount, canary", agreement: "a11.accord-v2.testnet", mono: "0.00 moved · key deleted", refused: true, txs: [tx("HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv"), tx("3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh"), tx("DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT")] },
+    { title: "Revoke, then a new key pays item 2", agreement: "a13.accord-v2.testnet", mono: "AccessKeyDoesNotExist", refused: true, txs: [tx("8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3"), tx("DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT"), tx("24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe")] },
+  ] as Proof[],
+}
+export const CIRCLE = {
+  factory: "accord-usdc.testnet",
+  token: "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af",
+  agreement: "a1.accord-usdc.testnet",
+  agreementUrl: acct("a1.accord-usdc.testnet"),
+  release: 3,
+  verify: "make verify-usdc DEAL=a1.accord-usdc.testnet",
+  steps: [
+    { title: "Buyer funds the escrow", agreement: "a1.accord-usdc.testnet", mono: "14.00 USDC", txs: [tx("4gPohYYMokgQcPcgNhX3tCTTXjA35AfuKkpGs1SpS2no")] },
+    { title: "Agent pays item 1", agreement: "a1.accord-usdc.testnet", mono: "5.00 USDC", txs: [tx("E127BGy3Tw6PmhE9JcoFr7vQsKTiHNevTTiAxEjJGWK2")] },
+    { title: "A redirected payment is refused", agreement: "a1.accord-usdc.testnet", mono: "ERR_PAYEE_MISMATCH", refused: true, txs: [tx("9rgsBFA26yedWuEEJk77sKBDrDGS9mHn9BFMknCaP8BB")] },
+    { title: "Buyer revokes the agent", agreement: "a1.accord-usdc.testnet", mono: "AccessKeyDoesNotExist", refused: true, txs: [tx("FTigDebs1kZjLpTN8nC8SZWp4dMM1ChuUyR211JZnzuW")] },
+  ] as Proof[],
 }

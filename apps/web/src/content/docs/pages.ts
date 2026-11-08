@@ -2,7 +2,7 @@
    DECISIONS, README, DEMO, PLATFORM, Makefile, the contracts' sources, app/src/server/delegate.ts) and from content/testnet.ts,
    which wins for what runs on NEAR testnet (8 Nov 2026). Inline marks: `code` and [label](href) only (types.ts). */
 import type { DocPage } from "./types"
-import { TESTNET, VERIFY_COMMAND, VERIFY_RAW, acct, tx } from "../testnet"
+import { CIRCLE, RELEASE4, TESTNET, VERIFY_COMMAND, VERIFY_RAW, acct, tx } from "../testnet"
 import { LINKS } from "../links"
 
 /* a6's transactions, from FLOW and INFRA in testnet.ts */
@@ -317,7 +317,7 @@ export const DOC_PAGES: DocPage[] = [
             kind: "rows",
             rows: [
               { name: "Factory", value: "accord-v2.testnet", href: TESTNET.factoryUrl, detail: "Publishes releases and creates agreements. It cannot call, upgrade or drain an existing agreement." },
-              { name: "Release", value: "release 3", href: A6.release, detail: "One agreement code hash per release, published as a NEP-591 global contract and referenced by hash (`8wMuMRre…`), so it cannot change. Every agreement on the release uses it; an agreement keeps its release for life." },
+              { name: "Release", value: "release 4", href: RELEASE4.publish, detail: "One agreement code hash per release, published as a NEP-591 global contract and referenced by hash, so it cannot change. Every agreement on the release uses it; an agreement keeps its release for life. Release 4 (`ECgsrZwy…`, the audit fixes) is current on both factories since 9 Nov 2026; a6 and the agreements before it keep release 3 (`8wMuMRre…`)." },
               { name: "Agreement account", value: "a<id>.accord-v2.testnet", href: TESTNET.agreementUrl, detail: "Created in one batch (`CreateAccount`, `Transfer`, `UseGlobalContract`, `FunctionCall new`) with no `AddKey`, so it starts with no keys. It has no method that deploys code and never holds a full-access key." },
               { name: "Creation deposit", value: "2 NEAR", detail: "Paid by the buyer; covers state storage, mandate storage, the agent's gas and the on-chain OutLayer runs." },
             ],
@@ -365,7 +365,7 @@ export const DOC_PAGES: DocPage[] = [
             kind: "rows",
             rows: [
               { name: "Token on testnet", value: "tusdc.accord-v1.testnet", href: acct(TESTNET.token), detail: "A 6-decimal NEP-141 test token (open mint, capped at 1,000 per call), used because the testnet USDC faucets were down on 8 Nov 2026." },
-              { name: "Settle in Circle USDC (testnet)", value: "accord-usdc.testnet", href: acct("accord-usdc.testnet"), detail: "A second factory on the same release 3 settles in Circle's testnet USDC (`3e2210e1…afcb8af`, 6 decimals). Get it at [faucet.circle.com](https://faucet.circle.com), network NEAR Testnet: about `20 USDC` per address every 1 to 2 hours. Each agreement keeps its factory's token for life; try-it defaults to test USDC. `a1.accord-usdc.testnet` is negotiated and approved, not funded yet." },
+              { name: "Settle in Circle USDC (testnet)", value: "accord-usdc.testnet", href: acct("accord-usdc.testnet"), detail: "A second factory on the same release 3 settles in Circle's testnet USDC (`3e2210e1…afcb8af`, 6 decimals). Get it at [faucet.circle.com](https://faucet.circle.com), network NEAR Testnet: about `20 USDC` per address every 1 to 2 hours. Each agreement keeps its factory's token for life; try-it defaults to test USDC. `a1.accord-usdc.testnet` ran a full deal in it: funded `14.00 USDC`, paid `5.00` to `halcyon-mm.testnet`, refused a redirect and revoked the agent; see [/record](/record)." },
               { name: "Fund", value: "ft_transfer_call · fund", href: A6.fund, detail: "The buyer sends USDC into the agreement's own account; the escrow is credited up to the terms total and NEP-141 returns any excess." },
               { name: "Pay", value: "act → ft_transfer", href: A6.pay, detail: "After the six gates pass, the agreement's own code sends `ft_transfer` to the recipient under a payment lock with a callback. The key never touches the token contract." },
               { name: "Other ways out", value: "claim · close", detail: "The vendor's `claim` of an eligible payment after the claim delay, and the refund to the buyer at `close`." },
@@ -406,6 +406,14 @@ export const DOC_PAGES: DocPage[] = [
         blocks: [
           { kind: "code", label: "make verify", code: "make verify DEAL=<agreement>", caption: "Needs no account and no keys. Reads NEAR testnet, the release, OutLayer and NEAR AI's attestation report." },
           { kind: "code", label: "On agreement a6", code: VERIFY_COMMAND },
+          {
+            kind: "rows",
+            label: "Other agreements to check",
+            rows: [
+              { name: "Release 4", value: RELEASE4.agreement, href: "/verify?agreement=" + RELEASE4.agreement, tone: "ok", detail: "The audit fixes. `" + RELEASE4.verify + "` prints `" + RELEASE4.verifyResult + "`. JSON: `/app/api/verify/" + RELEASE4.agreement + "`." },
+              { name: "Circle USDC", value: CIRCLE.agreement, href: "/verify?agreement=" + CIRCLE.agreement, tone: "ok", detail: "The second factory, on release 3. `" + CIRCLE.verify + "` (the same as `ACCORD_FACTORY=accord-usdc.testnet make verify`). JSON: `/app/api/verify/" + CIRCLE.agreement + "`." },
+            ],
+          },
         ],
       },
       {
@@ -612,8 +620,11 @@ export const DOC_PAGES: DocPage[] = [
             kind: "rows",
             rows: [
               { name: "Factory", value: TESTNET.factory, href: TESTNET.factoryUrl },
-              { name: "Release", value: `release ${TESTNET.release}`, href: TESTNET.releaseUrl },
-              { name: "Agreement", value: TESTNET.agreement, href: TESTNET.agreementUrl, detail: "Ran the full flow on 8 Nov 2026; see [/record](/record)." },
+              { name: "Release", value: `release ${RELEASE4.release}`, href: RELEASE4.publish, detail: "The audit fixes, current since 9 Nov 2026 ([set current](" + RELEASE4.current + ")). Release 3: [publish](" + TESTNET.releaseUrl + ")." },
+              { name: "Agreement", value: TESTNET.agreement, href: TESTNET.agreementUrl, detail: "Ran the full flow on 8 Nov 2026 on release 3; see [/record](/record)." },
+              { name: "Agreement on release 4", value: RELEASE4.agreement, href: RELEASE4.agreementUrl, detail: "Negotiated, funded, paid item 1 and refused a redirect on 9 Nov 2026: [fund](" + RELEASE4.steps[1].txs[0] + "), [pay](" + RELEASE4.steps[2].txs[0] + "), [refused](" + RELEASE4.steps[3].txs[0] + ")." },
+              { name: "Circle USDC factory", value: CIRCLE.factory, href: acct(CIRCLE.factory), detail: "Settles in Circle's testnet USDC (`3e2210e1…afcb8af`); release 4 current ([publish](" + RELEASE4.usdcPublish + "), [set current](" + RELEASE4.usdcCurrent + "))." },
+              { name: "Circle USDC agreement", value: CIRCLE.agreement, href: CIRCLE.agreementUrl, detail: "Release 3. [Funded](" + CIRCLE.steps[0].txs[0] + ") `14.00 USDC`, [paid](" + CIRCLE.steps[1].txs[0] + ") `5.00`, [refused](" + CIRCLE.steps[2].txs[0] + ") a redirect, [revoked](" + CIRCLE.steps[3].txs[0] + ")." },
               { name: "Token", value: TESTNET.token, href: acct(TESTNET.token), detail: "Test USDC, 6 decimals." },
               { name: "OutLayer", value: "outlayer.testnet", href: acct("outlayer.testnet") },
               { name: "Attestations", value: "testnet-api.outlayer.ai", href: ATTESTATION, detail: "`/attestations/<id>` returns the TDX quote for that run." },
@@ -766,7 +777,7 @@ export const DOC_PAGES: DocPage[] = [
             rows: [
               { name: "Job secret condition", detail: "The planned condition (only runs an agreement requests can read the seeds) is not expressible with outlayer-cli `0.2.2`. The seeds are locked to the exact build hash and open to any caller: anyone can get a signed output, but every output names the agreement and is checked by that agreement against state it reads itself, so a run requested by someone else cannot change an outcome." },
               { name: "Factory key", detail: "The factory keeps its full-access key during the hackathon so fixes can ship. It cannot touch an existing agreement." },
-              { name: "Test token", value: "tusdc.accord-v1.testnet", href: acct(TESTNET.token), detail: "The default factory and the full flow on a6 settle in the repository's test token. Circle's testnet USDC settles on the second factory, `accord-usdc.testnet`, where no agreement has been funded yet." },
+              { name: "Test token", value: "tusdc.accord-v1.testnet", href: acct(TESTNET.token), detail: "The default factory and the full flow on a6 settle in the repository's test token. Circle's testnet USDC settles on the second factory, `accord-usdc.testnet`, where `a1.accord-usdc.testnet` ran a funded deal." },
               { name: "Release attestation", value: "not checked", href: "/docs/verify#a6-result", detail: "`make verify` on a6 did not check the enclave release: it needs the outlayer-verify tool." },
             ],
           },

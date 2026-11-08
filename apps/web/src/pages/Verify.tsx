@@ -5,7 +5,7 @@ import { Arrow } from "../components/Arrow"
 import { QuietLink } from "../components/QuietLink"
 import { CopyButton } from "../components/CopyButton"
 import { LINKS } from "../content/links"
-import { CHECKS, TESTNET, VERIFY_RAW, checkSummary, type CheckStatus } from "../content/testnet"
+import { CHECKS, CIRCLE, RELEASE4, TESTNET, VERIFY_RAW, checkSummary, type CheckStatus } from "../content/testnet"
 import { ROWS, hashOf, normaliseId, verifyAgreement, type Result, type Row, type RowKey, type Seg } from "../lib/nearVerify"
 import { usePageMeta } from "../lib/meta"
 import tl from "../styles/Timeline.module.css"
@@ -18,6 +18,14 @@ import styles from "./Verify.module.css"
    app cannot answer; raw output behind the footer). Every value is a quiet link to its
    source: the live rows to the typed agreement's own accounts and transactions, the full check to a6's evidence.
 ------------------------------------------------------------------- */
+
+/* Quick picks: a6 (the original walkthrough, the default), a10 (release 4, the audit fixes) and a1 on the Circle USDC
+   factory. The browser rows read each id's own factory; the full check comes from the app, which knows both. */
+const PICKS = [
+  { id: TESTNET.agreement, label: "a6", note: "original walkthrough" },
+  { id: RELEASE4.agreement, label: "a10", note: "release 4" },
+  { id: CIRCLE.agreement, label: "a1.accord-usdc", note: "Circle USDC" },
+]
 
 const blank = (): Row[] => ROWS.map((r) => ({ ...r, value: [], result: "loading" as Result }))
 
@@ -129,6 +137,12 @@ export function Verify() {
     run(value)
   }
 
+  function pick(next: string) {
+    setValue(next)
+    setParams(next !== TESTNET.agreement ? { agreement: next } : {}, { replace: true })
+    run(next)
+  }
+
   const reading = rows.some((r) => r.result === "loading")
   const okLive = rows.filter((r) => r.result === "ok").length
   const recorded = full.state === "recorded"
@@ -159,6 +173,14 @@ export function Verify() {
           />
           <button type="submit" className={styles.submit}>Verify</button>
         </form>
+        <p className={styles.picks}>
+          <span>Examples</span>
+          {PICKS.map((p) => (
+            <button key={p.id} type="button" className={styles.pick} onClick={() => pick(p.id)} aria-pressed={id === p.id}>
+              <span className="mono">{p.label}</span> <span className={styles.pickNote}>{p.note}</span>
+            </button>
+          ))}
+        </p>
 
         <div className={tl.column}>
           <div className={tl.head}>

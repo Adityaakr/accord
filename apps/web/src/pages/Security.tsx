@@ -1,5 +1,6 @@
 import { usePageMeta } from "../lib/meta"
 import type { ReactNode } from "react"
+import { Link } from "react-router-dom"
 import { Appear } from "../lib/motion"
 import { appear } from "../components/SectionHeading"
 import { PageHero } from "../components/PageHero"
@@ -130,6 +131,15 @@ const KEEPER: ReactNode[] = [
   "Every method it calls is open to anyone, so if the keeper is down a party can call the same methods from the app. A slot nobody polls counts as unobserved, and a period that unobserved slots leave undecided goes to the buyer, not to payment.",
 ]
 
+/* The audit (platform/DECISIONS.md 25 and 26, 9 Nov 2026). Facts only from there; S1 keeps its limit. */
+const AUDIT_URL = `${LINKS.repo}/blob/main/platform/DECISIONS.md#25-audit-fixes-and-release-4-9-nov-2026`
+const AUDIT: ReactNode[] = [
+  "Five independent audit lenses (the payment path; authorisation and keys; creation and code integrity; funds; the enclave jobs), with two skeptics reproducing each finding as a test, found 1 High and 5 Medium issues (one of them Medium-Low), plus 4 Low.",
+  <>The High one: a deposit sent during <Mono>close</Mono> could make the refund to the buyer spend the vendor&apos;s reserve. The refund is now capped at the ledger while anything is owed to the vendor.</>,
+  <>Every fix went in test first: the test failed for the reason named, then passed, and stays in the suite. The contract and factory fixes are live as release 4 on both testnet factories since 9 Nov 2026, and the proofs ran again on new agreements (a10, a11, a13; see the <Link to={LINKS.record} className={styles.inlineLink}>record</Link>). Agreements created before keep release 3.</>,
+  <>Limit: S1 (only an agreement&apos;s own calls can use the Sealed Table&apos;s seed) is partial. The jobs now serve only factory agreements in code, but those job builds are not deployed yet, and S1 itself needs the seed&apos;s access condition in OutLayer, which is not set yet. Details: <a href={AUDIT_URL} target="_blank" rel="noreferrer" className={styles.inlineLink}>DECISIONS.md section 25</a>.</>,
+]
+
 /* A table as timeline rows (styles/Timeline.module.css): the first cell is the row's name, each other cell a
    labelled line under it (the label is the column's heading), so wide tables read cleanly at any width. */
 function Table({ head, rows, label }: { head: string[]; rows: Row[]; label: string }) {
@@ -217,6 +227,11 @@ export function Security() {
           <h2 className={`t-h4 ${styles.subheading}`}>Claims and their limits</h2>
           <GatesFlow />
           <Table head={CLAIMS_HEAD} rows={CLAIMS} label="Claims and their limits" />
+        </Appear>
+
+        <Appear className={styles.block} effect={blockAppear("0s")}>
+          <h2 className={`t-h4 ${styles.subheading}`}>Audit</h2>
+          <List items={AUDIT} />
         </Appear>
 
         <Appear className={styles.block} effect={blockAppear("0s")}>

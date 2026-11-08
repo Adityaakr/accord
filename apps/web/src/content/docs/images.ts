@@ -10,6 +10,6 @@ export const DOC_IMAGES: Record<ImageId, { w: number; h: number; theme: "dark" |
   "room-demo-panel": { w: 360, h: 507, theme: "light" },
   "agent-paid": { w: 360, h: 640, theme: "light" },
   "agent-refused": { w: 360, h: 715, theme: "light" },
-  verify: { w: 1600, h: 1451, theme: "dark" },
+  verify: { w: 1600, h: 1944, theme: "dark" },
   record: { w: 1600, h: 1156, theme: "dark" },
 }

@@ -1,10 +1,10 @@
 import { usePageMeta } from "../lib/meta"
 import { PageHero } from "../components/PageHero"
-import { PhaseTimeline } from "../components/PhaseTimeline"
+import { PhaseTimeline, ProofGroup } from "../components/PhaseTimeline"
 import { AgreementRecord } from "../components/AgreementRecord"
 import { QuietLink } from "../components/QuietLink"
 import { CopyButton } from "../components/CopyButton"
-import { TESTNET, INFRA } from "../content/testnet"
+import { CIRCLE, RELEASE4, TESTNET, INFRA } from "../content/testnet"
 import { useLive } from "../lib/live"
 import tl from "../styles/Timeline.module.css"
 import styles from "./Record.module.css"
@@ -31,6 +31,18 @@ export function Record() {
           </div>
           <PhaseTimeline />
           <AgreementRecord v={live} />
+          <ProofGroup
+            label="Latest on release 4"
+            meta={<QuietLink href={`/verify?agreement=${RELEASE4.agreement}`}>verify a10</QuietLink>}
+            proofs={RELEASE4.steps}
+            note={<>Release 4 carries the audit fixes and is current on both factories since 9 Nov 2026 (<QuietLink href={RELEASE4.publish} mono={false}>published</QuietLink>); agreements created before it, a6 among them, keep release 3. The proofs ran again on new agreements a10, a11 and a13.</>}
+          />
+          <ProofGroup
+            label="Circle USDC"
+            meta={<QuietLink href={`/verify?agreement=${CIRCLE.agreement}`}>verify a1</QuietLink>}
+            proofs={CIRCLE.steps}
+            note={<>The second factory, <span className="mono">{CIRCLE.factory}</span>, settles in Circle&apos;s testnet USDC. Agreement a1 was created on its release 3.</>}
+          />
           <div className={`${tl.foot} ${styles.foot}`}>
             <span className={`mono ${tl.weak}`}>release {TESTNET.release} · test USDC</span>
             {INFRA.map((i) => <QuietLink key={i.label} href={i.href} mono={false} className={styles.infra}>{i.label}</QuietLink>)}
