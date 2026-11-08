@@ -157,3 +157,5 @@
   .panel { padding: 20px; }
   .panelId { max-width: 100%; }
 }
+.txLink { color: var(--teal); text-decoration: none; white-space: nowrap; }
+.txLink:hover { text-decoration: underline; text-underline-offset: 3px; }

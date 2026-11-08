@@ -1,24 +1,64 @@
 {
-  "asOf": "2026-10-29T00:00:00Z",
+  "asOf": "2026-11-08T17:04:31Z",
   "source": "last-known",
-  "attempts": 0,
+  "label": "From testnet agreement a6",
   "paidOutsideTerms": 0,
-  "lastRefusal": null,
+  "lastRefusal": {
+    "at": "2026-11-08T17:04:30Z",
+    "from": "agent",
+    "subject": "Pay item 2",
+    "reason": "ERR_PAYEE_MISMATCH",
+    "amount": "13.00 USDC",
+    "to": "halcyon-markets.testnet",
+    "tx": "AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs"
+  },
   "agreement": {
-    "id": "<live:agreement>",
-    "state": "Sealed",
-    "terms": [],
+    "id": "a6.accord-v2.testnet",
+    "state": "Executing",
+    "terms": [
+      {
+        "milestone": 1,
+        "amount": "16.50 USDC",
+        "due": "2026-11-12"
+      },
+      {
+        "milestone": 2,
+        "amount": "13.00 USDC",
+        "due": "2026-11-13"
+      },
+      {
+        "milestone": 3,
+        "amount": "6.00 USDC",
+        "due": "2026-11-15"
+      }
+    ],
     "payee": {
-      "domain": "",
-      "version": 0,
-      "proof": ""
+      "account": "halcyon-mm.testnet",
+      "domain": "accordweb-production.up.railway.app",
+      "version": 1,
+      "proof": "https://accordweb-production.up.railway.app/.well-known/accord.json"
     },
-    "lastTransfer": null
+    "lastTransfer": {
+      "amount": "16.50 USDC",
+      "to": "halcyon-mm.testnet",
+      "tx": "2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ",
+      "at": "2026-11-08T17:04:25Z"
+    }
   },
   "balance": {
-    "usdc": "",
-    "account": ""
+    "usdc": "19.00",
+    "account": "a6.accord-v2.testnet"
   },
-  "refusals": [],
+  "refusals": [
+    {
+      "at": "2026-11-08T17:04:30Z",
+      "from": "agent",
+      "subject": "Pay item 2",
+      "reason": "ERR_PAYEE_MISMATCH",
+      "amount": "13.00 USDC",
+      "to": "halcyon-markets.testnet",
+      "tx": "AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs"
+    }
+  ],
   "slots": []
 }

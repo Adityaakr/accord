@@ -397,3 +397,5 @@
 
 /* Honeypot: off-screen and out of the tab order, so no person sees or reaches it */
 .honeypot { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.txLink { color: var(--teal); text-decoration: none; white-space: nowrap; }
+.txLink:hover { text-decoration: underline; text-underline-offset: 3px; }

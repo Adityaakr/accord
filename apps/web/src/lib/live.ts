@@ -3,14 +3,15 @@ import { useEffect, useState } from "react"
 /* Live values (spec §6). Fetched from VITE_ACCORD_API_URL (JSON, same shape as LiveValues);
    if the source is down, the last-known snapshot in /live/last-known.json is shown WITH its timestamp.
    Nothing here is ever a made-up number: a counter the source did not answer is absent, not zero. */
-export type Refusal = { at: string; from: string; subject: string; reason: string }
+export type Refusal = { at: string; from: string; subject: string; reason: string; amount?: string; to?: string; tx?: string }
 export type LiveValues = {
   asOf: string                 // ISO timestamp of the snapshot
   source: "live" | "last-known"
+  label?: string               // where a bundled snapshot comes from, printed in place of a timestamp ("From testnet agreement a6")
   attempts?: number | null         // visitor messages sent to the demo agent (inbox store); absent until the store answers
   paidOutsideTerms?: number | null // "Paid outside the terms", from the contract's refusal and payment events; absent until read, 0 only while the events say so
   lastRefusal: Refusal | null
-  agreement: { id: string; state: "Sealed" | "Attested" | "Executing" | "Settled"; terms: { milestone: number; amount: string; due: string }[]; payee: { domain: string; version: number; proof: string }; lastTransfer: { amount: string; to: string; tx: string; at: string } | null }
+  agreement: { id: string; state: "Sealed" | "Attested" | "Executing" | "Settled"; terms: { milestone: number; amount: string; due: string }[]; payee: { account?: string; domain: string; version: number; proof: string }; lastTransfer: { amount: string; to: string; tx: string; at: string } | null }
   balance: { usdc: string; account: string } // the agreement's own NEAR account and its USDC (NEP-141) balance
   refusals: Refusal[]
   slots: { slot: number; result: "PASS" | "FAIL"; spreadBps: number; depthBid: number; depthAsk: number; twoSided: boolean }[] // observation_recorded (kit v7)
@@ -117,3 +118,6 @@ export async function sendToInbox(m: InboxMessage): Promise<InboxOutcome> {
   if (r.status >= 500) return { kind: "down", status: r.status }
   return { kind: "rejected", status: r.status }
 }
+
+/** A testnet transaction's explorer page */
+export const txUrl = (hash: string) => `https://testnet.nearblocks.io/txns/${hash}`

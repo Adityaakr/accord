@@ -5,7 +5,8 @@ import { appear } from "../components/SectionHeading"
 import { Mono } from "../components/Mono"
 import { FormButton, type FormButtonState } from "../components/FormButton"
 import { Button } from "../components/Button"
-import { API, useLive, asOfLabel, hasCount, panelLabel, utcTime, sendToInbox, type InboxOutcome, type LiveValues, type Refusal } from "../lib/live"
+import { API, useLive, asOfLabel, hasCount, panelLabel, utcTime, txUrl, sendToInbox, type InboxOutcome, type LiveValues, type Refusal } from "../lib/live"
+import { Arrow } from "../components/Arrow"
 import { isPlaceholder } from "../content/links"
 import { InboxMock } from "../components/InboxMock"
 import styles from "./Proof.module.css"
@@ -56,8 +57,6 @@ function splitReason(reason: string): { code: string | null; text: string | null
   return { code, text: reason.trim() === code ? null : reason }
 }
 
-/* Data-unavailable line (spec §6: the last known value with its timestamp) */
-const DATA_UNAVAILABLE = "We could not refresh this record. Showing the last retrieved data."
 const LOG_EMPTY = "No attempts yet. Send the agent a message."
 const LOG_CLOSED = "Refused attempts appear here, newest first, once the demonstration inbox opens."
 
@@ -76,6 +75,7 @@ function Empty() {
 
 /* Title-row label (spec §5 Live panel): "last known · 14:02 UTC" or "updated 14:02 UTC"; never the word "live". */
 function PanelLabel({ v }: { v: LiveValues | null }) {
+  if (v?.label) return <p className={`t-body-sm ${styles.panelHint}`}>{v.label}</p>
   if (!v || !API) return null
   return <p className={`t-body-sm ${styles.panelHint}`} title={asOfLabel(v)}>{panelLabel(v)}</p>
 }
@@ -128,8 +128,17 @@ function AgreementPanel({ v, level = 3 }: { v: LiveValues | null; level?: 2 | 3 
         <p className={`t-body-sm ${styles.rowLabel}`}>Authorised recipient</p>
         {!v ? <p className={`t-body-sm ${styles.empty}`}>Loading the agreement record.</p> : payeeKnown ? (
           <div className={styles.lines}>
-            <Mono className={styles.cell}>{a.payee.domain} · v{a.payee.version}</Mono>
-            {a.payee.proof ? <Mono className={`${styles.cell} ${styles.wrapCell}`}>{a.payee.proof}</Mono> : null}
+            {a.payee.account ? (
+              <>
+                <Mono className={styles.cell}>{a.payee.account} · v{a.payee.version}</Mono>
+                <Mono className={`${styles.cell} ${styles.wrapCell}`}>proven on {a.payee.domain}</Mono>
+              </>
+            ) : (
+              <>
+                <Mono className={styles.cell}>{a.payee.domain} · v{a.payee.version}</Mono>
+                {a.payee.proof ? <Mono className={`${styles.cell} ${styles.wrapCell}`}>{a.payee.proof}</Mono> : null}
+              </>
+            )}
           </div>
         ) : <Empty />}
       </div>
@@ -139,8 +148,7 @@ function AgreementPanel({ v, level = 3 }: { v: LiveValues | null; level?: 2 | 3 
         {!v ? <p className={`t-body-sm ${styles.empty}`}>Loading the agreement record.</p> : a?.lastTransfer ? (
           <div className={styles.lines}>
             <Mono className={styles.cell}>{a.lastTransfer.amount} → {a.lastTransfer.to}</Mono>
-            <Mono className={`${styles.cell} ${styles.wrapCell}`}>{a.lastTransfer.tx}</Mono>
-            <Mono className={styles.cell}>{utcDate(a.lastTransfer.at)}</Mono>
+            <Mono className={styles.cell}>{utcDate(a.lastTransfer.at)} · <a className={styles.txLink} href={txUrl(a.lastTransfer.tx)} target="_blank" rel="noreferrer">tx<Arrow dir="up-right" /></a></Mono>
           </div>
         ) : <Empty />}
       </div>
@@ -191,7 +199,12 @@ function RefusalLine({ r, isNew, reduce }: { r: Refusal; isNew: boolean; reduce:
           <Mono tone="refusal" className={styles.logCode}>{code}</Mono>
         </>
       ) : null}
-      {text ? <span className={styles.logText}>{text}</span> : null}
+      {r.amount && r.to ? (
+        <span className={styles.logText}>
+          <Mono className={styles.logCode}>{r.amount}</Mono> to <Mono className={styles.logCode}>{r.to}</Mono>. Nothing was sent.
+          {r.tx ? <> <a className={styles.txLink} href={txUrl(r.tx)} target="_blank" rel="noreferrer">tx<Arrow dir="up-right" /></a></> : null}
+        </span>
+      ) : text ? <span className={styles.logText}>{text}</span> : null}
     </motion.li>
   )
 }
@@ -361,7 +374,6 @@ export function InboxModule({ limit = 10, agreement = true, goal = false, level 
 
       {/* The record: "Data unavailable" once (when the snapshot is the last retrieved one), then the panels */}
       <div className={styles.record}>
-        {API && live?.source === "last-known" ? <p className={`t-body-sm ${styles.weak}`}>{DATA_UNAVAILABLE}</p> : null}
         <Appear className={`${styles.panels} ${agreement ? "" : styles.panelsSingle}`} effect={appearTall("0.2s")}>
           {agreement ? <AgreementPanel v={live} level={level} /> : null}
           <RefusalPanel v={live} limit={limit} level={level} />

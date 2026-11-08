@@ -32,9 +32,11 @@ release 3 · test USDC
 
 - [12 Buyer revokes the agent Its next call fails: AccessKeyDoesNotExist tx](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P)
 
-We could not refresh this record. Displaying the last retrieved data.
-
 ## Agreement
+
+`a6.accord-v2.testnet`
+
+From testnet agreement a6
 
 - `Sealed`
 
@@ -46,20 +48,22 @@ We could not refresh this record. Displaying the last retrieved data.
 
 Approved terms
 
-No entries yet · 29 Oct 2026, 00:00 UTC
+- `milestone 1` `16.50 USDC` `due 2026-11-12`
+
+- `milestone 2` `13.00 USDC` `due 2026-11-13`
+
+- `milestone 3` `6.00 USDC` `due 2026-11-15`
 
 Authorised recipient
 
-No entries yet · 29 Oct 2026, 00:00 UTC
+`halcyon-mm.testnet · v1` `proven on accordweb-production.up.railway.app`
 
 Last transfer on NEAR
 
-No entries yet · 29 Oct 2026, 00:00 UTC
+`16.50 USDC → halcyon-mm.testnet` `8 Nov, 17:04 UTC · [tx](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ)`
 
 ## Refusal log
 
 newest first
 
-No entries yet · 29 Oct 2026, 00:00 UTC
-
-Last updated: 29 Oct 2026, 00:00 UTC
+- 17:04:30 UTC `ERR_PAYEE_MISMATCH` 13.00 USDC to halcyon-markets.testnet [tx](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs)

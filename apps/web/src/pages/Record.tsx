@@ -4,7 +4,8 @@ import { appear } from "../components/SectionHeading"
 import { PageHero } from "../components/PageHero"
 import { TestnetFlowRecord } from "../components/TestnetRecord"
 import { Mono } from "../components/Mono"
-import { useLive, asOfLabel, type LiveValues } from "../lib/live"
+import { useLive, asOfLabel, txUrl, type LiveValues } from "../lib/live"
+import { Arrow } from "../components/Arrow"
 import { isPlaceholder } from "../content/links"
 import styles from "./Record.module.css"
 
@@ -13,7 +14,6 @@ import styles from "./Record.module.css"
    page does not depend on that file); D4 "Loading", "Data unavailable" and "Last updated" wording. Nothing is called live. */
 
 const LOADING = "Loading the agreement record."
-const DATA_UNAVAILABLE = "We could not refresh this record. Displaying the last retrieved data."
 
 /* The panels are taller than a phone viewport; the template's 0.5 threshold would never fire. */
 const appearTall = (delay: `${number}s`) => ({ ...appear(delay), threshold: 0.1 })
@@ -28,13 +28,9 @@ const utc = (iso: string, withDate: boolean) => {
     : d.toLocaleString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "UTC" }) + " UTC"
 }
 
-/* Empty state: the literal "No entries yet" plus the snapshot's timestamp. */
-function Empty({ v }: { v: LiveValues }) {
-  return (
-    <p className={`t-body-sm ${styles.empty}`}>
-      No entries yet <span className={styles.asOf}>· {asOfLabel(v)}</span>
-    </p>
-  )
+/* Empty state: the literal "No entries yet" */
+function Empty(_: { v: LiveValues }) {
+  return <p className={`t-body-sm ${styles.empty}`}>No entries yet</p>
 }
 
 /* Left panel: the agreement page from the app on testnet */
@@ -47,6 +43,7 @@ function AgreementPanel({ v }: { v: LiveValues | null }) {
         <h2 id="record-page-agreement-title" className={`t-h6 ${styles.panelTitle}`}>Agreement</h2>
         {a && !isPlaceholder(a.id) && a.id !== "" ? <Mono className={styles.panelId}>{a.id}</Mono> : null}
       </header>
+      {v?.label ? <p className={`t-body-sm ${styles.panelHint}`}>{v.label}</p> : null}
 
       {/* Four-state strip; the current state in the template's white pill */}
       <ol className={styles.states} aria-label="Agreement state">
@@ -79,8 +76,8 @@ function AgreementPanel({ v }: { v: LiveValues | null }) {
         <p className={`t-body-sm ${styles.rowLabel}`}>Authorised recipient</p>
         {!v ? <p className={`t-body-sm ${styles.empty}`}>{LOADING}</p> : payeeKnown ? (
           <div className={styles.lines}>
-            <Mono className={styles.cell}>{a.payee.domain} · v{a.payee.version}</Mono>
-            {a.payee.proof ? <Mono className={`${styles.cell} ${styles.wrapCell}`}>{a.payee.proof}</Mono> : null}
+            <Mono className={styles.cell}>{a.payee.account ?? a.payee.domain} · v{a.payee.version}</Mono>
+            {a.payee.account ? <Mono className={`${styles.cell} ${styles.wrapCell}`}>proven on {a.payee.domain}</Mono> : a.payee.proof ? <Mono className={`${styles.cell} ${styles.wrapCell}`}>{a.payee.proof}</Mono> : null}
           </div>
         ) : <Empty v={v} />}
       </div>
@@ -90,8 +87,7 @@ function AgreementPanel({ v }: { v: LiveValues | null }) {
         {!v ? <p className={`t-body-sm ${styles.empty}`}>{LOADING}</p> : a?.lastTransfer ? (
           <div className={styles.lines}>
             <Mono className={styles.cell}>{a.lastTransfer.amount} → {a.lastTransfer.to}</Mono>
-            <Mono className={`${styles.cell} ${styles.wrapCell}`}>{a.lastTransfer.tx}</Mono>
-            <Mono className={styles.cell}>{utc(a.lastTransfer.at, true)}</Mono>
+            <Mono className={styles.cell}>{utc(a.lastTransfer.at, true)} · <a className={styles.txLink} href={txUrl(a.lastTransfer.tx)} target="_blank" rel="noreferrer">tx<Arrow dir="up-right" /></a></Mono>
           </div>
         ) : <Empty v={v} />}
       </div>
@@ -115,9 +111,19 @@ function RefusalPanel({ v }: { v: LiveValues | null }) {
               <li key={`${r.at}-${i}`} className={styles.logLine}>
                 <time dateTime={r.at} className={`mono ${styles.logTime}`}>{utc(r.at, false)}</time>
                 <span className={styles.sep} aria-hidden="true">·</span>
-                <span className={`mono ${styles.logFrom}`}>{r.from}</span>
-                <span className={styles.sep} aria-hidden="true">·</span>
                 <Mono tone="refusal" className={styles.logReason}>{r.reason}</Mono>
+                {r.amount && r.to ? (
+                  <>
+                    <span className={styles.sep} aria-hidden="true">·</span>
+                    <span className={`mono ${styles.logFrom}`}>{r.amount} to {r.to}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className={styles.sep} aria-hidden="true">·</span>
+                    <span className={`mono ${styles.logFrom}`}>{r.from}</span>
+                  </>
+                )}
+                {r.tx ? <a className={styles.txLink} href={txUrl(r.tx)} target="_blank" rel="noreferrer">tx<Arrow dir="up-right" /></a> : null}
               </li>
             ))}
           </ol>
@@ -139,12 +145,11 @@ export function Record() {
         <TestnetFlowRecord />
         <div className={styles.record}>
           {!live ? <p className={`t-body-sm ${styles.weak}`} role="status">{LOADING}</p> : null}
-          {live?.source === "last-known" ? <p className={`t-body-sm ${styles.weak}`}>{DATA_UNAVAILABLE}</p> : null}
           <Appear className={styles.panels} effect={appearTall("0.1s")}>
             <AgreementPanel v={live} />
             <RefusalPanel v={live} />
           </Appear>
-          {live ? <p className={`t-body-sm ${styles.weak}`}>Last updated: {asOfLabel(live)}</p> : null}
+          {live && !live.label ? <p className={`t-body-sm ${styles.weak}`}>Last updated: {asOfLabel(live)}</p> : null}
         </div>
       </section>
     </div>
