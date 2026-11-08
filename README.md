@@ -14,10 +14,10 @@ Agreements negotiated in private, enforced in public.
 [Record](https://accordweb-production.up.railway.app/record) ·
 [Docs](https://accordweb-production.up.railway.app/docs)
 
-<a href="https://testnet.nearblocks.io/address/accord-v2.testnet"><img alt="Network: NEAR testnet" src="https://img.shields.io/badge/network-NEAR%20testnet-black" /></a>
-<img alt="Settlement: USDC on NEAR, NEP-141" src="https://img.shields.io/badge/settlement-USDC%20on%20NEAR%20%28NEP--141%29-2775CA" />
-<img alt="Mainnet: after audit" src="https://img.shields.io/badge/mainnet-after%20audit-555" />
-<a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue" /></a>
+<a href="https://testnet.nearblocks.io/address/accord-v2.testnet"><img alt="Network: NEAR testnet" src="docs/badges/network.svg" /></a>
+<img alt="Settlement: USDC on NEAR, NEP-141" src="docs/badges/settlement.svg" />
+<img alt="Mainnet: after audit" src="docs/badges/mainnet.svg" />
+<a href="LICENSE"><img alt="License: MIT" src="docs/badges/license.svg" /></a>
 
 </div>
 
