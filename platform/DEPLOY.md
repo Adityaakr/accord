@@ -7,9 +7,10 @@ website service forwards `<site>/app/*` to it, so visitors use one address.
 
 1. In the Railway project, **New → GitHub repo → this repository** (the same repo as the website).
 2. Service **Settings**:
-   - **Root directory:** `platform`
-   - **Builder:** Dockerfile (picked up from `platform/railway.json`)
-   - **Healthcheck:** `/app/api/status` (also from `railway.json`)
+   - **Root directory:** leave it at `/`.
+   - **Config-as-code → Railway config file:** `/railway.app.json`. It builds `Dockerfile.app` (the app, from the
+     repository root) and health-checks `/app/api/status`. Without it, the root `railway.json` builds the website.
+   - (Alternative: root directory `platform`, which uses `platform/railway.json` and `platform/Dockerfile`.)
 3. **Variables** (values from your local `accord-app/.env`; never commit them):
 
 | Variable | Value |
