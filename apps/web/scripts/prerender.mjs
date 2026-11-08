@@ -352,7 +352,7 @@ write(join(DIST, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>
 ${pages.map((r) => `  <url>\n    <loc>${SITE_URL}${r.path}</loc>\n    <lastmod>${TODAY}</lastmod>\n    <changefreq>${r.changefreq}</changefreq>\n    <priority>${r.priority.toFixed(1)}</priority>\n  </url>`).join("\n")}
 </urlset>
 `)
-const bots = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-User", "Claude-SearchBot", "anthropic-ai", "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot-Extended", "CCBot", "Bingbot", "Googlebot"]
+const bots = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-User", "Claude-SearchBot", "anthropic-ai", "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot", "Applebot-Extended", "CCBot", "Bingbot", "Googlebot", "DuckAssistBot", "Meta-ExternalAgent", "Amazonbot", "MistralAI-User", "cohere-ai"]
 write(join(DIST, "robots.txt"), `# Accord welcomes search engines and AI agents. Start with ${SITE_URL}/llms.txt
 # Content signals (contentsignals.org): use this site for search results and to answer questions
 User-agent: *
