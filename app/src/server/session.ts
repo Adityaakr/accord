@@ -8,7 +8,7 @@ import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { cookies } from "next/headers";
-import { verifySigned } from "./nep413";
+import { verifySignedDetailed } from "./nep413";
 
 export const SESSION_COOKIE = "accord_session";
 export const SESSION_RECIPIENT = "accord-session";
@@ -62,8 +62,10 @@ export async function sessionAccount(): Promise<string | null> {
 export async function openSession(b: { account: string; public_key: string; signature: string; issued_at: number }): Promise<{ ok: true; expires: number } | { ok: false; error: string }> {
   if (!b.account || !b.public_key || !b.signature || !Number.isFinite(b.issued_at)) return { ok: false, error: "account, public_key, signature and issued_at are required" };
   if (Math.abs(Date.now() - b.issued_at) > SKEW_MS) return { ok: false, error: "the signed message is too old; sign again" };
-  const ok = await verifySigned({ account: b.account, publicKey: b.public_key, message: sessionMessage(b.account, b.issued_at), recipient: SESSION_RECIPIENT, signature: b.signature });
-  if (!ok) return { ok: false, error: "the signature does not match a full-access key of this account" };
+  const v = await verifySignedDetailed({ account: b.account, publicKey: b.public_key, message: sessionMessage(b.account, b.issued_at), recipient: SESSION_RECIPIENT, signature: b.signature });
+  const short = b.account.length > 20 ? `${b.account.slice(0, 6)}…${b.account.slice(-4)}` : b.account;
+  if (v === "bad_signature") return { ok: false, error: "The signature did not verify. Sign again from the wallet that owns this account." };
+  if (v !== "ok") return { ok: false, error: `This wallet signed with a key that isn't a full-access key of ${short}. Use the wallet that owns this account.` };
   const exp = Math.floor(Date.now() / 1000) + TTL_SECS;
   (await cookies()).set(SESSION_COOKIE, encode(b.account, exp), {
     httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: TTL_SECS,
