@@ -14,7 +14,9 @@ import { useWorkspace } from "./workspace/Workspace";
 import styles from "./Chrome.module.css";
 
 const FULL = ["/signin", "/enter"];
-const PUBLIC = ["/verify", "/record", "/docs", "/status", "/try", "/join", "/market-making", "/atlas", "/payee", "/invite"];
+const PUBLIC = ["/verify", "/record", "/docs", "/status", "/replay", "/try", "/join", "/market-making", "/atlas", "/payee", "/invite"];
+// Read-only pages that never depend on who is signed in: they render at once, even while a session is being restored.
+const READ_ONLY = ["/verify", "/record", "/docs", "/status", "/replay"];
 
 export function Chrome({ network, factory, sandbox, children }: { network: string; factory: string; sandbox: boolean; children: ReactNode }) {
   const path = usePathname() ?? "/";
@@ -23,19 +25,27 @@ export function Chrome({ network, factory, sandbox, children }: { network: strin
   const { id, ready } = useWorkspace();
   const full = FULL.some((p) => path === p);
   const open = PUBLIC.some((p) => path.startsWith(p));
+  // after a reload the kept session (throwaway key or wallet) takes a moment to come back; until it does, a page that
+  // depends on it shows a quiet loading line instead of its signed-out state
+  const waiting = w.restoring && !READ_ONLY.some((p) => path.startsWith(p));
 
   // wallet state settles after mount; wait a beat before deciding
   useEffect(() => {
-    if (full || open || !ready) return;
+    if (full || open || !ready || w.restoring) return;
     const t = window.setTimeout(() => {
       // a room link keeps its room: sign-in shows a read-only summary of it and returns there afterwards
       if (!w.accountId) router.replace(path.startsWith("/agreements/") ? `/signin?next=${encodeURIComponent(path)}` : "/signin");
       else if (!id && path === "/") router.replace("/enter");
     }, 400);
     return () => window.clearTimeout(t);
-  }, [full, open, ready, w.accountId, id, path, router]);
+  }, [full, open, ready, w.restoring, w.accountId, id, path, router]);
 
-  if (full) return <main id="main">{children}</main>;
+  const restoringLine = (
+    <div className={styles.restoring} role="status" aria-live="polite">
+      <span className={styles.restoringDot} aria-hidden="true" />Restoring your session…
+    </div>
+  );
+  if (full) return <main id="main">{waiting ? restoringLine : children}</main>;
   return (
     <>
       <Nav network={network} />
@@ -46,7 +56,7 @@ export function Chrome({ network, factory, sandbox, children }: { network: strin
       )}
       <div className={styles.shell}>
         <Sidebar />
-        <main id="main" className={`${styles.main} texture`}><div key={path} className="page-in">{children}</div></main>
+        <main id="main" className={`${styles.main} texture`}><div key={path} className="page-in">{waiting ? restoringLine : children}</div></main>
       </div>
       <footer className={styles.footer}>
         <div className={`container ${styles.footerInner}`}>

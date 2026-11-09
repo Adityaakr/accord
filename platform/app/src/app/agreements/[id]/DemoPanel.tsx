@@ -134,6 +134,20 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
   }
 
   const installed = !!agentKey?.installed && !!a.agent_key;
+  // a key the demo agent did not derive (installed from Your actions, or by your own agent): it cannot pay with it
+  const foreign = !!a.agent_key && !!agentKey && !agentKey.installed;
+
+  async function replaceForeignKey() {
+    if (!client) return;
+    setBusy("replace"); setAgent(null);
+    try {
+      const tx = await client.revokeAgent();
+      setAgent({ ok: true, text: "Revoked the other key. Start the demo agent now: it gets a new key of its own.", tx: tx.txHash });
+      refreshSoon();
+    } catch (e) {
+      setAgent({ ok: false, text: `Revoke the other key: ${errorText(e)}` });
+    } finally { setBusy(null); }
+  }
 
   return (
     <Panel title="Demo counterparty" eyebrow="Testnet demo" aside={<button type="button" className={styles.toggle} onClick={() => setAuto((v) => !v)} aria-pressed={auto}>{auto ? "auto on" : "auto off"}</button>}>
@@ -165,9 +179,18 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
               </p>
             )}
             {!isBuyer ? <p className="small">Sign in as the buyer, <span className="mono" style={{ overflowWrap: "anywhere" }}>{a.buyer}</span>, to start the agent.</p>
-              : !installed ? (
-                <button type="button" className={`${styles.btn} ${styles.primary}`} disabled={busy !== null || !agentKey || !client || (!!a.agent_key && !installed)} onClick={() => void startAgent()}>
-                  {busy === "start" ? "Waiting for the network…" : a.agent_key ? "Another agent key is installed" : "Start the demo agent"}
+              : foreign ? (
+                <>
+                  <p className={`small ${styles.you}`} role="status">
+                    The key installed on this room is not the demo agent&apos;s, so the demo agent cannot sign with it and the due item waits. Revoke that key, then start the demo agent.
+                  </p>
+                  <button type="button" className={`${styles.btn} ${styles.primary}`} disabled={busy !== null || !client} onClick={() => void replaceForeignKey()}>
+                    {busy === "replace" ? "Waiting for the network…" : "Revoke the other key"}
+                  </button>
+                </>
+              ) : !installed ? (
+                <button type="button" className={`${styles.btn} ${styles.primary}`} disabled={busy !== null || !agentKey || !client} onClick={() => void startAgent()}>
+                  {busy === "start" ? "Waiting for the network…" : "Start the demo agent"}
                 </button>
               ) : (
                 <>

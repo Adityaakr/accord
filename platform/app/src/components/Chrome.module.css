@@ -14,3 +14,9 @@
 .footerBrand svg { color: var(--text-medium); }
 .footerLinks { display: flex; gap: 20px; color: var(--text-weak); }
 .footerLinks a:hover { color: var(--text-strong); }
+
+/* shown while a kept session is read back after a reload */
+.restoring { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 40vh; color: var(--text-weak); font-size: 14px; }
+.restoringDot { width: 8px; height: 8px; border-radius: 2px; background: var(--text-weak); animation: restoring-pulse 1s var(--ease) infinite alternate; }
+@keyframes restoring-pulse { from { opacity: 0.25; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .restoringDot { animation: none; } }

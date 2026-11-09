@@ -353,7 +353,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
 
         <aside className={styles.side}>
           {config().network === "testnet" && isDemoRoom(a) && <DemoPanel agreement={a} explorer={config().explorer} />}
-          <Actions agreement={a} items={r.items} exceptions={r.exceptions} recipients={r.recipients} periods={r.periods} />
+          <Actions agreement={a} items={r.items} exceptions={r.exceptions} recipients={r.recipients} periods={r.periods} demoRoom={config().network === "testnet" && isDemoRoom(a)} />
           <Panel title="At a glance">
             <KV rows={[
               ["In escrow", <CountUp key="e" value={(escrow < 0n ? 0n : escrow).toString()} unit={sym} />],

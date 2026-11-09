@@ -87,6 +87,8 @@ export function WalletButton() {
     );
   }
 
+  // while a kept session is read back, show nothing rather than a Sign in button that is about to disappear
+  if (w.restoring) return <span className={styles.connect} aria-hidden="true" style={{ visibility: "hidden" }}>Sign in</span>;
   return (
     <Link href="/signin" className={styles.connect}>Sign in</Link>
   );

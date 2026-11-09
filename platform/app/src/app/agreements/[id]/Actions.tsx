@@ -24,9 +24,11 @@ import Link from "next/link";
 type Role = "buyer" | "vendor" | "authority" | "viewer";
 
 export function Actions({
-  agreement: a, items, exceptions, recipients, periods,
+  agreement: a, items, exceptions, recipients, periods, demoRoom = false,
 }: {
   agreement: AgreementView; items: ItemView[]; exceptions: ExceptionView[]; recipients: RecipientVersion[]; periods: PeriodView[];
+  /** a test room run against Accord's demo vendor: the demo panel installs the demo agent's key, so no generic install here */
+  demoRoom?: boolean;
 }) {
   const w = useWallet();
   const cfg = useAppConfig();
@@ -127,7 +129,9 @@ export function Actions({
           </div>
         ));
       }
-      if (!a.agent_key) {
+      // In a demo room a key installed here is one the demo agent cannot sign with, and the room stalls at "let the
+      // agent pay it" (a39, 9 Nov 2026). The demo panel's Start the demo agent installs the right key instead.
+      if (!a.agent_key && !demoRoom) {
         add("install", <Btn busy={busy} label="Install an agent key" onClick={open("Install an agent key", async () => {
           const { KeyPair } = await import("near-api-js");
           const kp = KeyPair.fromRandom("ed25519");

@@ -1,26 +1,27 @@
+import Form from "next/form";
 import { redirect } from "next/navigation";
 import { PageHead, Panel } from "@/components/ui";
 import styles from "../pages.module.css";
 
 export const metadata = { title: "Verify" };
 
-async function go(form: FormData) {
-  "use server";
-  const id = String(form.get("agreement") ?? "").trim();
+// The form is a plain GET (?agreement=…), not a server action: a server action posts back to this page and Next
+// checks its Origin against the Host, which fails behind the site's proxy (the page answered with a server error).
+// A GET works on every host and from a bookmarked or shared link.
+export default async function Verify({ searchParams }: { searchParams: Promise<{ agreement?: string | string[] }> }) {
+  const q = (await searchParams).agreement;
+  const id = (Array.isArray(q) ? q[0] : q)?.trim();
   if (id) redirect(`/verify/${encodeURIComponent(id)}`);
-}
-
-export default function Verify() {
   return (
     <div className="container">
       <PageHead
         title="Verify an agreement"
         lead="No account and no key needed. The checks read the chain directly and fetch NEAR AI Cloud's attestation report with a nonce your browser chooses."
       />
-      <form action={go} className={styles.search}>
+      <Form action="/verify" className={styles.search}>
         <input name="agreement" className={styles.input} placeholder="a1.accord-v1.testnet" aria-label="Agreement account" required />
         <button type="submit" className={styles.button}>Verify</button>
-      </form>
+      </Form>
       <h2 className={`h3 ${styles.sectionTitle}`}>What is checked</h2>
       <div className={styles.cols2}>
         <Panel title="code"><p className="body">The account runs exactly its release&apos;s code, and has no method that deploys code.</p></Panel>

@@ -283,7 +283,9 @@ export async function counterpartyStep(id: string): Promise<Step> {
     }
     // with the demo agent's own key installed, the agent pays on its own (server/demoagent.ts agentTick)
     if (a.agent_key && a.agent_key === demoAgentKey(id, a.revoked_keys).publicKey) return wait(`Item ${eligible.id} is eligible: the agent is paying it.`);
-    return wait(a.agent_key ? `Item ${eligible.id} is eligible: let the agent pay it.` : "Your move: start the demo agent; it pays the accepted item on its own.", true);
+    return wait(a.agent_key
+      ? `Item ${eligible.id} is eligible, but the installed key is not the demo agent's, so it cannot pay. Your move: revoke that key, then start the demo agent.`
+      : "Your move: start the demo agent; it pays the accepted item on its own.", true);
   }
   const next = items
     .filter((it: ItemView) => it.status === "Open" && !it.delivery && it.evidence === "DeliveryAccepted")

@@ -26,6 +26,8 @@ export interface WalletState {
   network: string;
   accountId: string | null;
   signer: Signer | null;
+  /** True until the session kept from before a reload (a throwaway key, a connected wallet) has been read back. */
+  restoring: boolean;
   connecting: boolean;
   error: string | null;
   connect: (sandboxRole?: string) => Promise<void>;
@@ -161,6 +163,7 @@ export function WalletProvider({ network, children }: { network: string; childre
   const [accountId, setAccountId] = useState<string | null>(null);
   const [signer, setSigner] = useState<Signer | null>(null);
   const [connecting, setConnecting] = useState(false);
+  const [restoring, setRestoring] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sandboxPrincipals, setSandboxPrincipals] = useState<{ role: string; account: string }[]>([]);
 
@@ -179,6 +182,7 @@ export function WalletProvider({ network, children }: { network: string; childre
       } catch {
         // storage unavailable: start disconnected
       }
+      setRestoring(false);
       return;
     }
     let live = true;
@@ -195,7 +199,10 @@ export function WalletProvider({ network, children }: { network: string; childre
       setAccountId(id);
       setSigner(throwawaySigner(kept, { rpc }));
       setThrowaway(true);
+      setRestoring(false);
     }
+    // a wallet extension that never answers must not hold the page: give up waiting after a few seconds
+    const cap = window.setTimeout(() => setRestoring(false), 4000);
     (async () => {
       const { NearConnector } = await import("@hot-labs/near-connect");
       const c = new NearConnector({ network: chain }) as unknown as Connector;
@@ -217,8 +224,9 @@ export function WalletProvider({ network, children }: { network: string; childre
       } catch {
         // no wallet connected yet
       }
-    })();
-    return () => { live = false; window.removeEventListener("unhandledrejection", quiet); };
+      if (live) setRestoring(false);
+    })().catch(() => { if (live) setRestoring(false); });
+    return () => { live = false; window.clearTimeout(cap); window.removeEventListener("unhandledrejection", quiet); };
   }, [kind, chain, throwawayAvailable, rpc]);
 
   const startThrowaway = useCallback(async () => {
@@ -269,8 +277,8 @@ export function WalletProvider({ network, children }: { network: string; childre
 
   const method: SignInMethod | null = accountId ? (throwaway ? "throwaway" : kind === "sandbox" ? "sandbox" : "wallet") : null;
   const value = useMemo<WalletState>(() => ({
-    kind, method, network, accountId, signer, connecting, error, connect, disconnect, throwawayAvailable, startThrowaway, sandboxPrincipals,
-  }), [kind, method, network, accountId, signer, connecting, error, connect, disconnect, throwawayAvailable, startThrowaway, sandboxPrincipals]);
+    kind, method, network, accountId, signer, restoring, connecting, error, connect, disconnect, throwawayAvailable, startThrowaway, sandboxPrincipals,
+  }), [kind, method, network, accountId, signer, restoring, connecting, error, connect, disconnect, throwawayAvailable, startThrowaway, sandboxPrincipals]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
