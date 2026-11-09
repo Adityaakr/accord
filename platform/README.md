@@ -164,6 +164,8 @@ A second factory, `accord-usdc.testnet`, runs the same code as `accord-v2.testne
 - `act` is never relayed as a meta transaction: through a relayer, the signing key would be the relayer's and the contract could not tell the agent's key apart.
 - It cannot change the terms, the recipient, the amounts or the evidence. Those change only through the principals' own transactions.
 
+Preflight on testnet: three of its signals, `age_days`, `tx_30d` and `code_changed_30d`, return `unavailable`. No keyless indexer gives an account's age or its transaction count, and `code_changed_30d` needs an archival RPC (`NEAR_ARCHIVAL_RPC_URL`), which is not set by default and which did not serve testnet state from 30 days back when tried on 9 Nov 2026. The rating comes from the RPC account read (exists, is a contract), the agreement (authorised recipient, canaries) and the factory's reports, blocklist and recipient stats.
+
 ## Claims and their limits
 
 | We claim | Because | Limit, stated next to it |
