@@ -8,7 +8,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Accord, DEMO_PARAMS, formatUnits, type AgreementView } from "@accord/sdk";
+import { DEMO_PARAMS, formatUnits, type AgreementView } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { ThrowawayTag } from "@/components/wallet/ThrowawayTag";
 import { CIRCLE_FAUCET, useAppConfig } from "@/components/AppConfig";
@@ -16,16 +16,21 @@ import { useOrg } from "@/components/org/OrgProvider";
 import { IconTile } from "@/components/IconTile";
 import type { PixelName } from "@/components/PixelIcon";
 import { errorText, readClient } from "@/components/me/client";
+import { browserAccord } from "@/components/chainClient";
+import { onVisibleInterval } from "@/components/visible";
+import { AccountId } from "@/components/account/AccountId";
+import { fundingGap, near2, usdc2 } from "@/lib/funding";
 import styles from "./tryit.module.css";
 
 interface Demo { vendor: string; authority: string; recipient: string; stranger: string; domain: string }
 interface Ready { faucet: boolean; counterparty: boolean; agent: boolean }
-interface Balances { near: string; tusdc: string }
+/** From /api/chain/balances: NEAR (0 for an account the chain does not know yet) and the chosen currency's token. */
+interface Balances { near: string; ft: string; exists: boolean; currency: "default" | "usdc" }
 
 const ROOM_KEY = "accord-try-it-room";
 const TITLE = "My first deal room";
-const YOCTO = 10n ** 24n;
-const near = (y: string) => (Number(BigInt(y) / 10n ** 21n) / 1000).toFixed(2);
+/** How often the page re-reads while it is visible; a hidden tab reads nothing. */
+const POLL_MS = 10_000;
 
 type Status = "done" | "now" | "later";
 
@@ -54,17 +59,20 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
   const sym = circle ? "USDC" : "tUSDC";
   const txUrl = (h: string) => (explorer ? `${explorer}/txns/${h}` : null);
 
+  // a faucet answer is newer than the server's balance cache (a few seconds): polls inside this window keep it
+  const holdBal = useRef(0);
+
   const load = useCallback(async () => {
     if (!w.accountId) { setBal(null); setRoom(null); setChecked(null); return; }
-    const a = new Accord({ network: network === "sandbox" ? "sandbox" : "testnet", factory, rpc: cfg.rpc });
+    const a = browserAccord(cfg, { factory });
     try {
-      const ft = (await a.config()).token;
-      const [info, usdc] = await Promise.all([
-        a.chain.account(w.accountId).catch(() => null),
-        a.chain.view<string>(ft, "ft_balance_of", { account_id: w.accountId }).catch(() => "0"),
-      ]);
-      setBal({ near: String(info?.amount ?? "0"), tusdc: String(usdc ?? "0") });
-    } catch { /* the RPC is slow; the next pass reads it */ }
+      const r = await fetch(`/api/chain/balances?account=${encodeURIComponent(w.accountId)}&currency=${currencyId}`, { cache: "no-store" });
+      const b = (await r.json()) as Partial<Balances> & { busy?: boolean };
+      // busy: keep what was shown; never show a 0 the chain did not say
+      if (r.ok && !b.busy && b.near !== undefined && b.ft !== undefined && Date.now() > holdBal.current) {
+        setBal({ near: b.near, ft: b.ft, exists: b.exists ?? true, currency: currencyId });
+      }
+    } catch { /* offline for a moment; the next pass reads it */ }
     // this browser's try-it room, else the visitor's newest room with the demo vendor
     let id: string | null = null;
     try { id = localStorage.getItem(`${ROOM_KEY}:${w.accountId}`); } catch { /* no storage */ }
@@ -82,26 +90,34 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
       // an unreadable room (slow RPC) stays unchecked, so nothing opens a new one in its place
       if (v) setChecked(w.accountId);
     } else { setRoom(null); setChecked(w.accountId); }
-  }, [w.accountId, network, cfg, demo.vendor, factory]);
+  }, [w.accountId, cfg, demo.vendor, factory, currencyId]);
 
   useEffect(() => {
     void load();
-    const t = setInterval(() => { if (document.visibilityState === "visible") void load(); }, 8000);
-    return () => clearInterval(t);
+    return onVisibleInterval(() => void load(), POLL_MS);
   }, [load]);
 
-  // Enough for the room's deposit and gas, and for the buyer preset's ceiling: 40 tUSDC, or 18 USDC for Circle.
-  const funded = !!bal && BigInt(bal.near) >= 2n * YOCTO + YOCTO / 5n && BigInt(bal.tusdc) >= (circle ? 18_000_000n : 40_000_000n);
+  // Enough NEAR for the room's deposit and gas, and enough of the chosen token for the buyer preset's ceiling (40
+  // tUSDC, or 18 USDC for Circle). Balances read for another currency do not count.
+  const shown = bal && bal.currency === currencyId ? bal : null;
+  const gap = shown ? fundingGap(circle ? "usdc" : "default", shown) : null;
+  const funded = !!gap?.funded;
 
   async function faucet() {
     setBusy("faucet"); setMsg(null);
     try {
       if (!org.session && !(await org.confirm())) { setMsg({ step: 2, ok: false, text: "The faucet needs you to confirm it's you, so it knows which account to fund." }); return; }
-      const r = await fetch("/api/faucet", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
-      const b = (await r.json()) as { error?: string; txs?: { label: string; hash: string }[]; balances?: Balances };
-      if (!r.ok) { setMsg({ step: 2, ok: false, text: b.error ?? `the faucet said ${r.status}` }); return; }
-      if (b.balances) setBal(b.balances);
-      setMsg({ step: 2, ok: true, text: b.txs?.length ? "Sent. Your balances are below." : "Your account already had enough.", txs: b.txs });
+      // a Circle USDC room needs only NEAR from Accord's faucet: its test USDC does not fund that room
+      const nearOnly = circle;
+      const r = await fetch("/api/faucet", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(nearOnly ? { only: "near" } : {}) });
+      const b = (await r.json()) as { error?: string; txs?: { label: string; hash: string }[]; balances?: { near: string; tusdc: string } };
+      if (!r.ok) { setMsg({ step: 2, ok: false, text: b.error ?? `The faucet could not send right now (${r.status}).` }); return; }
+      if (b.balances) {
+        const got = b.balances;
+        holdBal.current = Date.now() + 6_000;
+        setBal((prev) => ({ near: got.near, ft: nearOnly ? prev?.ft ?? "0" : got.tusdc, exists: true, currency: currencyId }));
+      }
+      setMsg({ step: 2, ok: true, text: b.txs?.length ? (nearOnly ? "Sent test NEAR. Your balances are below." : "Sent. Your balances are below.") : "Your account already had enough.", txs: b.txs });
     } catch (e) {
       setMsg({ step: 2, ok: false, text: errorText(e) });
     } finally { setBusy(null); }
@@ -111,7 +127,7 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
     if (!w.signer || !w.accountId) return;
     setBusy("create"); setMsg(null);
     try {
-      const a = new Accord({ network: network === "sandbox" ? "sandbox" : "testnet", factory, rpc: cfg.rpc, signer: w.signer });
+      const a = browserAccord(cfg, { factory, signer: w.signer });
       const { agreement, tx } = await a.createAgreement({
         kind: "procurement", title: TITLE, vendor: demo.vendor, vendor_authority: demo.authority, canaries: [], params: DEMO_PARAMS,
       });
@@ -132,7 +148,7 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
   const throwaway = w.method === "throwaway";
   useEffect(() => {
     if (!throwaway || !bal || busy !== null || room || checked !== w.accountId) return;
-    if (!funded && ready.faucet && !auto.current.faucet) { auto.current.faucet = true; void faucet(); return; }
+    if (!funded && gap?.faucet && ready.faucet && !auto.current.faucet) { auto.current.faucet = true; void faucet(); return; }
     if (funded && !auto.current.create) { auto.current.create = true; void create(); }
     // faucet and create read the latest state when they run
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -177,7 +193,7 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
       )}
       <ol className={styles.steps}>
         <Row n={1} icon="key" status={s1} title="Connect a wallet, or try without one" text={w.accountId
-          ? <>Signed in as <span className="mono" style={{ overflowWrap: "anywhere" }}>{w.accountId}</span>. <ThrowawayTag />{throwaway && <> The faucet funds it and the room opens on their own; every call is signed in this tab.</>}</>
+          ? <><span className={styles.signedIn}>Signed in as <AccountId id={w.accountId} copy /> <ThrowawayTag /></span>{throwaway && <> The faucet funds it and the room opens on their own; every call is signed in this tab.</>}</>
           : <>{w.throwawayAvailable && <>No wallet? Try without one: the page creates a temporary key in this browser tab, funded by Accord&apos;s faucet. Closing the tab removes it. Or connect your</>}{!w.throwawayAvailable && <>Your</>} NEAR wallet: <a className="link" href="https://wallet.meteorwallet.app" target="_blank" rel="noreferrer">Meteor</a> or <a className="link" href="https://wallet.intear.tech" target="_blank" rel="noreferrer">Intear</a>. Ledger, Nightly and WalletConnect work too. Meteor and Intear send through Accord&apos;s relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit from the faucet&apos;s NEAR).</>}>
           {!w.accountId && w.throwawayAvailable && (
             <button type="button" className={styles.primary} onClick={() => void w.startThrowaway()}>Try without a wallet</button>
@@ -188,13 +204,14 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
 
         <Row n={2} icon="bank" status={s2} title="Get test funds" text={<>
           {circle
-            ? <>Get Circle&apos;s testnet USDC at <a className="link" href={CIRCLE_FAUCET} target="_blank" rel="noreferrer">faucet.circle.com</a> (network NEAR Testnet, your account as the address): about 20 USDC per address every 1 to 2 hours. Our faucet tops your account up to 2.5 testnet NEAR (the room&apos;s 2 NEAR deposit, returned when it closes); the test USDC it also sends does not fund a Circle room. Once a day per account.</>
+            ? <>Get Circle&apos;s testnet USDC at <a className="link" href={CIRCLE_FAUCET} target="_blank" rel="noreferrer">faucet.circle.com</a> (network NEAR Testnet, your account as the address): about 20 USDC per address every 1 to 2 hours. Our faucet sends the testnet NEAR: up to 2.5 NEAR, for the room&apos;s 2 NEAR deposit (returned when it closes) and gas. Once a day per account.</>
             : <>The faucet tops your account up to 2.5 testnet NEAR (the room&apos;s 2 NEAR deposit, returned when it closes) and 100 test USDC. Once a day per account.</>}
-          {bal && <span className={`mono ${styles.bal}`}>{near(bal.near)} NEAR · {formatUnits(bal.tusdc)} {sym}</span>}
+          {shown && <span className={`mono ${styles.bal}`}>{near2(shown.near)} NEAR · {usdc2(shown.ft)} {sym}</span>}
+          {gap?.line && s2 !== "done" && <span className={styles.gap}>{gap.line}</span>}
         </>}>
-          {w.accountId && s2 !== "done" && (
+          {w.accountId && s2 !== "done" && (!gap || gap.faucet) && (
             <button type="button" className={styles.primary} disabled={busy !== null || !ready.faucet} onClick={() => void faucet()}>
-              {busy === "faucet" ? "Sending…" : org.session ? "Get test funds" : "Confirm it's you and get test funds"}
+              {busy === "faucet" ? "Sending…" : faucetLabel(gap?.button ?? (circle ? "Get test NEAR" : "Get test funds"), !!org.session)}
             </button>
           )}
           <Note step={2} />
@@ -233,6 +250,9 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
     </div>
   );
 }
+
+/** "Get test NEAR", or "Confirm it's you and get test NEAR" before the session exists. */
+const faucetLabel = (base: string, session: boolean) => (session ? base : `Confirm it's you and ${base[0]!.toLowerCase()}${base.slice(1)}`);
 
 function Row({ n, icon, status, title, text, children }: {
   n: number; icon: PixelName; status: Status; title: string; text: React.ReactNode; children?: React.ReactNode;
