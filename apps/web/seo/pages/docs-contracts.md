@@ -8,7 +8,7 @@ The accounts and endpoints Accord uses on NEAR testnet, and the agreement contra
 
 - 01 Factory [accord-v2.testnet](https://testnet.nearblocks.io/address/accord-v2.testnet)
 
-- 02 Release The audit fixes, current since 9 Nov 2026 ([set current](https://testnet.nearblocks.io/txns/J9uADVqQSkY6f1uMYbMbWoPnB4oiwuS3CtLayKojtgeC)). Release 3: [publish](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh). [release 4](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)
+- 02 Release The security-review fixes, current since 9 Nov 2026 ([set current](https://testnet.nearblocks.io/txns/J9uADVqQSkY6f1uMYbMbWoPnB4oiwuS3CtLayKojtgeC)). Release 3: [publish](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh). [release 4](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)
 
 - 03 Agreement Ran the full flow on 8 Nov 2026 on release 3; see [/record](/record). [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
 

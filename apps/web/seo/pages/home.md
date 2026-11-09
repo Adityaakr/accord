@@ -172,7 +172,7 @@ A market-making agreement connects the retainer to the liquidity conditions both
 
 When the required observations pass, payment becomes eligible for release under Accord's payment controls. Otherwise, it remains withheld for both parties to review. Each payment decision is linked to the terms and observations behind it.
 
-[Explore the agreement](/use-cases/market-making) [See a market-making agreement run on testnet](/#testnet)
+[Explore the agreement](/use-cases/market-making) [See a market-making period replayed (local node)](/docs/cli#market-making)
 
 Why it matters
 
@@ -528,7 +528,7 @@ Paid, refused, revoked
 
 make verify 5 ok · 1 partial · 1 not checked [See the checks](/verify)
 
-Re-run on release 4 (audit fixes): [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet) Circle USDC: [a1.accord-usdc](https://testnet.nearblocks.io/address/a1.accord-usdc.testnet) [Every transaction](/record)
+Re-run on release 4 (security-review fixes): [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet) Circle USDC: [a1.accord-usdc](https://testnet.nearblocks.io/address/a1.accord-usdc.testnet) [Every transaction](/record)
 
 - [Factory](https://testnet.nearblocks.io/address/accord-v2.testnet)
 
@@ -578,7 +578,7 @@ It does not verify that a company legally exists; Payee establishes control of a
 
 It does not prove that a negotiation was fair or that external data is truthful; attestation shows which code ran on which inputs.
 
-A keeper service triggers scheduled steps such as observations; it cannot move funds or change an outcome. Mainnet follows an audit.
+A keeper service triggers scheduled steps such as observations; it cannot move funds or change an outcome. Mainnet follows an external audit.
 
 [Security documentation](/security)
 
@@ -658,16 +658,32 @@ FAQ
 
 ### Who can see my mandate?
 
+No one outside the attested enclaves that run the negotiation. Your browser encrypts it to a key that exists only inside the Sealed Table, the chain stores the ciphertext and a hash, and the Sealed Table decrypts it for one negotiation, in which the negotiators run on NEAR AI Cloud's private inference. The other side sees the agreed terms. What the terms reveal is what any signed agreement reveals: that you were willing to accept them. This rests on the enclave hardware, on your browser running the published code (the command-line tool is the alternative), and on the operator never moving the key to a different build.
+
 ### What if the model negotiates badly?
+
+You do not approve the terms. The model proposes; code checks each proposal against both mandates' limits before anything leaves the enclave; both companies approve before the terms take effect. Attestation shows which code ran, not that the deal was good. That judgement stays with people.
 
 ### What if my agent is tricked?
 
+Assume it will be. The demonstration agent follows a spoofed request for new bank details and tries to pay. The contract refuses because the account is not the authorised recipient, and refuses again when the amount is changed. The agent's judgement is not what protects the money; the contract's comparison is.
+
 ### Our vendor really did change banks. What happens?
+
+The vendor proposes the new account, an enclave fetches a fresh domain proof, the vendor's settlement authority approves, the buyer accepts, and a 24-hour delay runs before the first payment can reach it. One stolen key, on either side, cannot do it.
 
 ### How does a market-making agreement decide whether a period pays?
 
+The approved terms set the venue, the number of observation slots, the maximum spread, the minimum depth and the threshold. An observer in an attested enclave draws each slot's time from a seed generated inside it and reads the pool at the first block after that time, so anyone can recompute the reading. A slot passes when it meets every condition. When the agreed number of slots pass, the period's payment becomes eligible and still goes through the same payment controls as any other payment; otherwise it is withheld, or goes to the buyer if unobserved slots could have changed the result. The observer also reports uptime: the share of observed slots in which the pool quoted both sides. Two limits: the observer measures the pool's liquidity, not the market maker's own positions, and the hidden times rest on the operator never moving the observer's seed to a build that reveals them.
+
 ### Can we use Accord if the other side has no agent?
+
+Yes. Every negotiation in the Sealed Table runs between two negotiators built from the two mandates, so a person who writes a mandate in the application takes part exactly as a company with its own agent does. Their limits stay sealed from the other side, and everything after approval works the same way.
 
 ### What does it cost?
 
+Testnet use is free and uses test funds. Planned pricing: an Accord Teams subscription for managing business agreements, and market-making agreements priced per monitored market. No percentage-based Accord fee on payment amounts. Production prices and included allowances will be published before launch; network and third-party fees may apply.
+
 ### Is it live?
+
+On NEAR testnet, yes. The full flow ran on agreement a6.accord-v2.testnet: both sides sealed their limits, the Sealed Table negotiated inside an attested enclave, both companies approved, the buyer funded, the agent paid, a redirected payment was refused and the agent was revoked. Settlement on testnet uses a test USDC token. Mainnet follows an external audit.

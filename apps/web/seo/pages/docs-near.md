@@ -8,7 +8,7 @@ The factory and agreement contracts, the three OutLayer enclave jobs, NEAR AI Cl
 
 - 01 Factory Publishes releases and creates agreements. It cannot call, upgrade or drain an existing agreement. [accord-v2.testnet](https://testnet.nearblocks.io/address/accord-v2.testnet)
 
-- 02 Release One agreement code hash per release, published as a NEP-591 global contract and referenced by hash, so it cannot change. Every agreement on the release uses it; an agreement keeps its release for life. Release 4 (`ECgsrZwy…`, the audit fixes) is current on both factories since 9 Nov 2026; a6 and the agreements before it keep release 3 (`8wMuMRre…`). [release 4](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)
+- 02 Release One agreement code hash per release, published as a NEP-591 global contract and referenced by hash, so it cannot change. Every agreement on the release uses it; an agreement keeps its release for life. Release 4 (`ECgsrZwy…`, the security-review fixes) is current on both factories since 9 Nov 2026; a6 and the agreements before it keep release 3 (`8wMuMRre…`). [release 4](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)
 
 - 03 Agreement account Created in one batch (`CreateAccount`, `Transfer`, `UseGlobalContract`, `FunctionCall new`) with no `AddKey`, so it starts with no keys. It has no method that deploys code and never holds a full-access key. [a<id>.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
 

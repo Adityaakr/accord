@@ -28,7 +28,7 @@ The reason behind each claim is on [/security](/security).
 
 - 02 Legal KYB Not done. The enclave proves control of a domain, and the vendor's settlement authority approves the account; a registry lookup is a later integration.
 
-- 03 Mainnet Accord runs on NEAR testnet only; mainnet follows an audit. not live
+- 03 Mainnet Accord runs on NEAR testnet only; mainnet follows an external audit. not live
 
 ## Limits of this testnet deployment
 

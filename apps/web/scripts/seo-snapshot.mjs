@@ -91,6 +91,25 @@ function toMarkdown() {
   return { md: dedup.join("\n\n"), ld, title: document.title, description: document.querySelector('meta[name="description"]')?.content || "" }
 }
 
+/* The FAQ accordions render their answers only when open, so the walk sees bare question headings. Each answer comes
+   from the page's own FAQPage JSON-LD (the same text the accordion shows) and goes in under its question. */
+function withFaqAnswers(md, ld) {
+  const faq = ld.map((t) => { try { return JSON.parse(t) } catch { return null } }).find((o) => o && o["@type"] === "FAQPage")
+  if (!faq) return md
+  const clean = (s) => s.replace(/\s+/g, " ").trim()
+  const blocks = md.split(/\n{2,}/)
+  const answers = new Map(faq.mainEntity.map((q) => [clean(q.name), clean(q.acceptedAnswer?.text || "")]))
+  const out = []
+  blocks.forEach((b, i) => {
+    out.push(b)
+    const h = b.trim().match(/^#{1,6} (.*)$/)
+    const a = h && answers.get(clean(h[1]))
+    const next = (blocks[i + 1] || "").trim()
+    if (a && (!next || next.startsWith("#") || next !== a)) out.push(a)
+  })
+  return out.join("\n\n")
+}
+
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" })
 for (const r of ROUTES.filter((x) => !x.alias)) {
@@ -98,6 +117,7 @@ for (const r of ROUTES.filter((x) => !x.alias)) {
   await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 700) { scrollTo(0, y); await new Promise((f) => setTimeout(f, 40)) } scrollTo(0, 0) })
   await page.waitForTimeout(600)
   const snap = await page.evaluate(toMarkdown)
+  snap.md = withFaqAnswers(snap.md, snap.ld)
   writeFileSync(join(OUT, `${r.slug}.md`), snap.md.trim() + "\n")
   writeFileSync(join(OUT, `${r.slug}.json`), JSON.stringify({ title: snap.title, description: snap.description, ld: snap.ld }, null, 2) + "\n")
   console.log(`${r.path.padEnd(24)} ${snap.md.length} chars`)

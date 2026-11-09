@@ -98,15 +98,19 @@ The agent cannot reorder, skip or argue with a gate. Humans change the inputs (a
 
 - 06 A market-making agreement's payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception Because Each slot's time is drawn inside the observer's enclave from a seed generated there; the observation is taken at the first NEAR mainnet block after that time, signed by the observer's key, and checked by the contract against the agreed spread, depth and two-sided quoting; anyone can recompute it from an archival node Limit, stated next to it A market-making agreement's observer measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment
 
-## Audit
+## Security review
 
-- 01 Five independent audit lenses (the payment path; authorisation and keys; creation and code integrity; funds; the enclave jobs), with two skeptics reproducing each finding as a test, found 1 High and 5 Medium issues (one of them Medium-Low), plus 4 Low.
+- 01 An internal security review, not a third-party audit: five AI-assisted review passes, each on a separate code area (the payment path; authorisation and keys; creation and code integrity; funds; the enclave jobs), with every finding re-checked by separate reviewers who reproduced it as a test, found 1 High and 5 Medium issues (one of them Medium-Low), plus 4 Low.
 
 - 02 The High one: a deposit sent during `close` could make the refund to the buyer spend the vendor's reserve. The refund is now capped at the ledger while anything is owed to the vendor.
 
 - 03 Every fix went in test first: the test failed for the reason named, then passed, and stays in the suite. The contract and factory fixes are live as release 4 on both testnet factories since 9 Nov 2026, and the proofs ran again on new agreements (a10, a11, a13; see the [record](/record)). Agreements created before keep release 3.
 
-- 04 Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is partial. The jobs now serve only factory agreements in code, but those job builds are not deployed yet, and S1 itself needs the seed's access condition in OutLayer, which is not set yet. Details: [DECISIONS.md section 25](https://github.com/Adityaakr/accord/blob/main/platform/DECISIONS.md#25-audit-fixes-and-release-4-9-nov-2026).
+- 04 Agreements created before release 4 (a6, a8 and a1.accord-usdc.testnet) keep release 3's code by hash, so they keep the close-refund issue; new agreements get release 4.
+
+- 05 Changed limit: an item left `AssumedPaid` (its transfer sent, its callback not yet answered) is no longer refunded to the buyer at `Settled`. Its amount stays on the agreement's account until that payment's callback answers (a failure sets it `Reserved` for the vendor to claim, a success leaves it paid), and if that callback never runs, the amount stays on the account.
+
+- 06 Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is partial. The jobs now serve only factory agreements in code, but those job builds are not deployed yet, and S1 itself needs the seed's access condition in OutLayer, which is not set yet. Details: [DECISIONS.md section 25](https://github.com/Adityaakr/accord/blob/main/platform/DECISIONS.md#25-audit-fixes-and-release-4-9-nov-2026). Mainnet follows an external audit, which has not happened yet.
 
 ## What the keeper can and cannot do
 

@@ -72,7 +72,7 @@ Agreement [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord
 
 - 06 Revoke, then a new key pays item 2 [a13](https://testnet.nearblocks.io/address/a13.accord-v2.testnet)·AccessKeyDoesNotExist·[tx 1](https://testnet.nearblocks.io/txns/8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3)·[tx 2](https://testnet.nearblocks.io/txns/DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT)·[tx 3](https://testnet.nearblocks.io/txns/24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe)
 
-Release 4 carries the audit fixes and is current on both factories since 9 Nov 2026 ([published](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)); agreements created before it, a6 among them, keep release 3. The proofs ran again on new agreements a10, a11 and a13.
+Release 4 carries the security-review fixes and is current on both factories since 9 Nov 2026 ([published](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)); agreements created before it, a6 among them, keep release 3. The proofs ran again on new agreements a10, a11 and a13.
 
 ## Circle USDC [verify a1](/verify?agreement=a1.accord-usdc.testnet)
 

@@ -31,18 +31,29 @@ function inlineMd(t) {
   s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, txt, href) => `<a href="${href}">${txt}</a>`)
   return s
 }
-function mdToHtml(md) {
+/* faq: the page's FAQ questions (from its FAQPage JSON-LD). A heading that is one of them becomes a closed <details>
+   with its answer inside, so the HTML carries every answer without showing them all open. */
+function mdToHtml(md, faq = new Set()) {
   const blocks = md.split(/\n{2,}/)
   const html = []
+  let openFaq = false
+  const closeFaq = () => { if (openFaq) { html.push("</details>"); openFaq = false } }
   let list = []
   const flush = () => { if (list.length) { html.push(`<ul>${list.map((l) => `<li>${inlineMd(l)}</li>`).join("")}</ul>`); list = [] } }
   for (const b of blocks) {
     const t = b.trim()
     if (!t) continue
-    if (t.startsWith("- ")) { list.push(t.slice(2)); continue }
+    if (t.startsWith("- ")) { closeFaq(); list.push(t.slice(2)); continue }
     flush()
     const h = t.match(/^(#{1,6}) (.*)$/)
-    if (h) { const n = Math.min(h[1].length, 6); html.push(`<h${n}>${inlineMd(h[2])}</h${n}>`); continue }
+    if (h) {
+      closeFaq()
+      const n = Math.min(h[1].length, 6)
+      if (faq.has(h[2].trim())) { html.push(`<details><summary><h${n}>${inlineMd(h[2])}</h${n}></summary>`); openFaq = true; continue }
+      html.push(`<h${n}>${inlineMd(h[2])}</h${n}>`)
+      continue
+    }
+    if (openFaq) { html.push(`<p>${inlineMd(t)}</p>`); closeFaq(); continue }
     if (t.startsWith("> ")) { html.push(`<blockquote>${inlineMd(t.slice(2))}</blockquote>`); continue }
     if (t.startsWith("| ")) {
       const rows = t.split("\n").filter((r) => !/^\|\s*-+/.test(r)).map((r) => r.replace(/^\||\|$/g, "").split(/(?<!\\)\|/).map((c) => c.trim().replace(/\\\|/g, "|")))
@@ -54,8 +65,13 @@ function mdToHtml(md) {
     html.push(`<p>${inlineMd(t)}</p>`)
   }
   flush()
+  closeFaq()
   return html.join("\n")
 }
+
+/** The questions of a page's FAQPage JSON-LD, as its snapshot captured it */
+const faqQuestions = (meta) => new Set((meta.ld || []).map((t) => { try { return JSON.parse(t) } catch { return null } })
+  .filter((o) => o && o["@type"] === "FAQPage").flatMap((o) => o.mainEntity.map((q) => q.name.replace(/\s+/g, " ").trim())))
 
 const pageData = (slug) => {
   const md = existsSync(join(PAGES, `${slug}.md`)) ? readFileSync(join(PAGES, `${slug}.md`), "utf8") : ""
@@ -167,7 +183,7 @@ function render(route, target = route) {
   const body = `<div id="root"><div data-prerender>
 <header><p><a href="/">Accord</a>: ${esc(TAGLINE)}</p></header>
 <main>
-${md ? mdToHtml(md) : `<h1>${esc(title)}</h1><p>${esc(description)}</p>`}
+${md ? mdToHtml(md, faqQuestions(meta)) : `<h1>${esc(title)}</h1><p>${esc(description)}</p>`}
 </main>
 <nav aria-label="Site"><h2>Pages</h2><ul>${nav}</ul></nav>
 <footer><p>${esc(ABOUT)}</p><p>Live on NEAR testnet (factory accord-v2.testnet); the full flow ran on agreement a6.accord-v2.testnet; mainnet follows an external audit. <a href="/llms.txt">llms.txt</a> · <a href="/sitemap.xml">Sitemap</a> · <a href="${REPO}">GitHub</a></p></footer>
