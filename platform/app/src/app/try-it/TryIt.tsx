@@ -36,20 +36,30 @@ const POLL_MS = 10_000;
 
 type Status = "done" | "now" | "later";
 
-/** A faucet refusal never ends the visit: three ways to see Accord work without test funds. */
+/** Three ways to see Accord work with no funds and no wallet: a recorded run replayed, the pre-funded live room, Verify. */
+const NO_FUNDS = [
+  { href: "/replay", label: "Watch a 60-second replay", note: "a recorded run, every step with its transaction" },
+  { href: "/try", label: "Send a scam to the live room", note: "pre-funded, on chain, no funds needed" },
+  { href: "/verify", label: "Verify any agreement", note: "public data, no keys" },
+] as const;
+
+/** A faucet refusal never ends the visit: the no-funds paths become the main buttons. */
 function Elsewhere() {
   return (
-    <p className={`small ${styles.elsewhere}`}>
-      Meanwhile: <Link className="link" href="/try">Watch the public room</Link> (live) · <Link className="link" href={RECORDED_RUN}>See a recorded run</Link> · <Link className="link" href="/verify">Verify any agreement</Link>
-    </p>
+    <div className={styles.elsewhere} role="status">
+      <p className="small">The faucet is busy for this network. You can still see it work:</p>
+      <div className={styles.elsewhereRow}>
+        {NO_FUNDS.map((o, i) => (
+          <Link key={o.href} className={i === 0 ? styles.primary : styles.secondary} href={o.href}>{o.label}</Link>
+        ))}
+      </div>
+      <p className="small">{NO_FUNDS.map((o) => `${o.label}: ${o.note}`).join(" · ")}.</p>
+    </div>
   );
 }
 
 /** The site's own checker, which takes ?agreement= (the app links to the site the same way its header does). */
 const SITE_VERIFY = "https://accordweb-production.up.railway.app/verify";
-
-/** A full wallet-free run on testnet: create, seals, negotiation, payment, the refused redirect and the revoke. */
-const RECORDED_RUN = "/agreements/a21.accord-v2.testnet";
 
 export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
   network: string; explorer: string | null; token: string | null; deposit: string | null; demo: Demo; ready: Ready; perIp: number;
@@ -138,6 +148,7 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
       const b = (await r.json()) as { error?: string; txs?: { label: string; hash: string }[]; balances?: { near: string; tusdc: string } };
       if (!r.ok) {
         setMsg({ step: 2, ok: false, text: b.error ?? `The faucet could not send right now (${r.status}).` });
+        // a limit (this account, this connection, today's budget) or an empty faucet: offer the no-funds paths
         if (r.status === 429 || (r.status === 503 && !(b as { busy?: boolean }).busy)) setFaucetRefused(true);
         return;
       }
@@ -229,6 +240,9 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
           <label><input type="radio" name="currency" checked={currencyId === "usdc"} onChange={() => setPicked("usdc")} /> Circle USDC (testnet, from faucet.circle.com)</label>
         </fieldset>
       )}
+      <p className={`small ${styles.quiet}`}>
+        No time? <Link className="link" href="/replay">Watch a 60-second replay</Link> · <Link className="link" href="/try">Try the live scam room</Link> · <Link className="link" href="/verify">Verify any agreement</Link>
+      </p>
       <ol className={styles.steps}>
         <Row n={1} icon="key" status={s1} title="Connect a wallet, or try without one" text={w.accountId
           ? <><span className={styles.signedIn}>Signed in as <AccountId id={w.accountId} copy /> <ThrowawayTag /></span>{throwaway && <> The faucet funds it and the room opens on their own; every call is signed in this tab.</>}</>
@@ -244,7 +258,7 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
           {circle
             ? <>Get Circle&apos;s testnet USDC at <a className="link" href={CIRCLE_FAUCET} target="_blank" rel="noreferrer">faucet.circle.com</a> (network NEAR Testnet, your account as the address): about 20 USDC per address every 1 to 2 hours. Our faucet sends the testnet NEAR: up to 2.35 NEAR, for the room&apos;s 2 NEAR deposit (returned when it closes) and gas.</>
             : <>The faucet tops your account up to 2.35 testnet NEAR (the room&apos;s 2 NEAR deposit, returned when it closes, and gas) and 100 test USDC.</>}
-          {" "}Once a day per account, and up to {perIp} accounts per connection a day.
+          {" "}Once a day per account, up to {perIp} accounts per connection a day, within a daily budget.
           {shown && <span className={`mono ${styles.bal}`}>{near2(shown.near)} NEAR · {usdc2(shown.ft)} {sym}</span>}
           {gap?.line && s2 !== "done" && <span className={styles.gap}>{gap.line}</span>}
         </>}>

@@ -18,6 +18,7 @@ Agreements negotiated in private, enforced in public.
 
 1. Open [/app/try-it](https://accordweb-production.up.railway.app/app/try-it) and choose "Try without a wallet". It runs one deal on testnet, including a refused redirect.
 2. Open [/verify](https://accordweb-production.up.railway.app/verify) and enter the agreement id it gives you.
+   No funds, no wallet, or the faucet refuses your network: [watch a 60-second replay](https://accordweb-production.up.railway.app/app/replay) of a recorded run (`a32.accord-v2.testnet`, every step with its transaction), or [send a scam to the live room](https://accordweb-production.up.railway.app/app/try) (pre-funded, on chain; the contract refuses it).
 3. Clone the repo and run `cd platform && corepack enable && pnpm install && make verify DEAL=a10.accord-v2.testnet`.
 
 The same site is also served at its custom domain, [useaccord.tech](https://useaccord.tech) (the same Railway service; `www.useaccord.tech` has no certificate yet). The `/app/try-it` rooms propose their demo recipient on `useaccord.tech`, which serves the same `/.well-known/accord.json` as the Railway host.
@@ -245,7 +246,7 @@ Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it). Ev
 | # | Do | See |
 | --- | --- | --- |
 | 1 | **Try without a wallet**, or **Connect a wallet**: a NEAR testnet wallet such as Meteor or Intear. Without a wallet, the page makes a throwaway testnet key in this tab (sessionStorage only, never sent to the server, gone when the tab closes), and steps 2 and 3 run on their own | `01` marked done, with your account; for the throwaway key, a 64-character implicit account labelled `Throwaway testnet key` |
-| 2 | **Get test funds** (once a day per account, up to 10 accounts per connection a day; if the faucet refuses, the step links the public room, a recorded run and Verify) | `0.00 NEAR` becomes `2.35 NEAR · 100.00 tUSDC`, both faucet transactions linked |
+| 2 | **Get test funds** (once a day per account, up to 30 accounts per connection a day, within a daily budget; if the faucet refuses, the step offers the 60-second replay, the live scam room and Verify) | `0.00 NEAR` becomes `2.35 NEAR · 100.00 tUSDC`, both faucet transactions linked |
 | 3 | **Create the room** | `Your room is a8.accord-v2.testnet: My first deal room.` (your number will differ) |
 | 4 | **Seal your mandate** with the Northwind preset (`40` tUSDC ceiling, 2 to 4 items) | In the Demo counterparty panel: `Sealed the vendor's mandate (Halcyon procurement preset)`, then `Started the negotiation in the Sealed Table`; the state moves `Sealed` to `Attested` |
 | 5 | **Watch the demo counterparty act**, in your room, in four parts: | |
@@ -276,7 +277,7 @@ Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it). Ev
 | Redirect refused | [`37zUgEoe…`](https://testnet.nearblocks.io/txns/37zUgEoe8jbqnqQQhSe8L1VPBMRrrqXdsDorgDY7cEYL) |
 | Revoke | [`F67Qcofq…`](https://testnet.nearblocks.io/txns/F67Qcofq9CmVuGze7URoVD3E1HfucQ7qooBjDJjANHiG) |
 
-The server side is [`platform/app/src/server/demo.ts`](platform/app/src/server/demo.ts): the faucet sends only what an account lacks, one grant per account per day, up to 10 accounts per connection per day; the counterparty reads the room and makes the vendor's next valid move, so calling it twice does nothing twice; the demo agent's key is derived per room and signs `act` itself, never through the relayer.
+The server side is [`platform/app/src/server/demo.ts`](platform/app/src/server/demo.ts): the faucet sends only what an account lacks, one grant per account per day, up to 30 accounts per connection per day, within a daily budget of 25 NEAR net (what Finish returns counts back); the counterparty reads the room and makes the vendor's next valid move, so calling it twice does nothing twice; the demo agent's key is derived per room and signs `act` itself, never through the relayer.
 
 </details>
 

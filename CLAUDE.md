@@ -26,6 +26,7 @@ Release 4 (the security-review fixes, `platform/DECISIONS.md` sections 25 and 26
 
 1. Open [/app/try-it](https://accordweb-production.up.railway.app/app/try-it) and choose "Try without a wallet". It runs one deal on testnet, including a refused redirect.
 2. Open [/verify](https://accordweb-production.up.railway.app/verify) and enter the agreement id it gives you.
+   No funds, no wallet, or the faucet refuses your network: [/app/replay](https://accordweb-production.up.railway.app/app/replay) replays a recorded run (`a32.accord-v2.testnet`) in about 60 seconds, each step with its transaction, and [/app/try](https://accordweb-production.up.railway.app/app/try) is a pre-funded live room where a scam you send is refused on chain.
 3. Clone the repo and run `cd platform && corepack enable && pnpm install && make verify DEAL=a10.accord-v2.testnet`.
 
 Then, in more depth:

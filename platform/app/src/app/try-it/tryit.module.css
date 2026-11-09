@@ -12,7 +12,9 @@
 .now .status { color: var(--text-strong); }
 .done .status { color: var(--teal); }
 .bal { display: block; margin-top: 8px; color: var(--text-strong); }
-.elsewhere { color: var(--text-medium); }
+.elsewhere { display: flex; flex-direction: column; gap: 10px; color: var(--text-medium); }
+.elsewhereRow { display: flex; flex-wrap: wrap; gap: 10px; }
+.quiet { color: var(--text-weak); }
 .gap { display: block; margin-top: 4px; color: var(--text-strong); }
 .signedIn { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; vertical-align: middle; }
 .actions { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 4px; }

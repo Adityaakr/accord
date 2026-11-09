@@ -19,7 +19,7 @@ USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, w
 `halcyon-auth.testnet`), and the agent is a demo agent run by Accord for test rooms; both are labelled in the room.
 
 1. Do: **Connect a NEAR wallet**, a NEAR testnet wallet such as Meteor or Intear, or choose **Try without a wallet**: the page makes a throwaway testnet key in this tab (sessionStorage only, never sent to the server, gone when the tab closes), and steps 2 and 3 run on their own. See: `01 Connect a wallet · done`, with your account; for the throwaway key, a 64-character implicit account labelled `Throwaway testnet key`.
-2. Do: **Get test funds** (once a day per account, up to 10 accounts per connection a day). See: `0.00 NEAR` become
+2. Do: **Get test funds** (once a day per account, up to 30 accounts per connection a day, within a daily budget; if it refuses, the step offers a 60-second replay, the live scam room at `/app/try` and Verify). See: `0.00 NEAR` become
    `2.35 NEAR · 100.00 tUSDC`, with both faucet transactions linked. If the faucet refuses, the step links the public
    room (`/app/try`), a recorded run and `/app/verify` instead.
 3. Do: **Create the room**. See: `Your room is a8.accord-v2.testnet: My first deal room.` (your number will differ).
@@ -52,7 +52,7 @@ faucet [NEAR](https://testnet.nearblocks.io/txns/935XqMoeb4Jt7fBQQHK9T7o9ZWJrWUo
 [redirect refused](https://testnet.nearblocks.io/txns/37zUgEoe8jbqnqQQhSe8L1VPBMRrrqXdsDorgDY7cEYL),
 [revoke](https://testnet.nearblocks.io/txns/F67Qcofq9CmVuGze7URoVD3E1HfucQ7qooBjDJjANHiG).
 The server side is `app/src/server/demo.ts`: the faucet sends only what an account lacks, one grant per account per day,
-up to 10 accounts per connection per day; the counterparty reads the room and makes the vendor's next valid move, so calling it twice does nothing twice;
+up to 30 accounts per connection per day, within a daily budget of 25 NEAR net; the counterparty reads the room and makes the vendor's next valid move, so calling it twice does nothing twice;
 the demo agent's key is derived per room and signs `act` itself, never through the relayer.
 
 <details>
