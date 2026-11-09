@@ -29,6 +29,7 @@ interface Ready { faucet: boolean; counterparty: boolean; agent: boolean }
 interface Balances { near: string; ft: string; exists: boolean; currency: "default" | "usdc" }
 
 const ROOM_KEY = "accord-try-it-room";
+const ENDED = ["Cancelled", "NoDeal", "Settled"];
 const TITLE = "My first deal room";
 /** How often the page re-reads while it is visible; a hidden tab reads nothing. */
 const POLL_MS = 10_000;
@@ -96,10 +97,16 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
         .map((f) => a.onFactory(f).listAgreements({ party: w.accountId! }).catch(() => [])));
       const mine = lists.flat().sort((x, y) => x.created_at - y.created_at);
       id = mine.filter((r) => r.buyer === w.accountId && r.vendor === demo.vendor).at(-1)?.account ?? null;
+      // the newest room only; an older one that ended is skipped below
     }
     if (id) {
       const c = readClient(cfg, id);
       const [v, cm] = await Promise.all([c.get().catch(() => null), c.commitments().catch(() => null)]);
+      // a room that has ended (cancelled, no deal, or settled, as Finish leaves it) is not this visit's room any more
+      if (v && ENDED.includes(v.state)) {
+        try { localStorage.removeItem(`${ROOM_KEY}:${w.accountId}`); } catch { /* no storage */ }
+        setRoom(null); setChecked(w.accountId); return;
+      }
       setRoom(v);
       setBuyerSealed(!!cm?.buyer || (v ? v.state !== "Sealed" : false));
       // an unreadable room (slow RPC) stays unchecked, so nothing opens a new one in its place
@@ -164,14 +171,18 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
   // The throwaway key signs without a prompt, so the flow moves on by itself: faucet, then the room. Each runs once
   // per page load; a failure stays on screen with its button, as with a wallet.
   const auto = useRef({ faucet: false, create: false });
+  // Finish: after the agent's key is revoked (or any time before leaving), close the room and return the NEAR. While
+  // it runs, and after it, nothing opens on its own: the room it closed no longer counts, and the account is going.
+  const fin = useFinish(() => { setRoom(null); setBal(null); setMsg(null); });
+  const finishing = fin.running || !!fin.deleteTx;
   const throwaway = w.method === "throwaway";
   useEffect(() => {
-    if (!throwaway || !bal || busy !== null || room || checked !== w.accountId) return;
+    if (!throwaway || !bal || busy !== null || room || checked !== w.accountId || finishing) return;
     if (!funded && gap?.faucet && ready.faucet && !auto.current.faucet) { auto.current.faucet = true; void faucet(); return; }
     if (funded && !auto.current.create) { auto.current.create = true; void create(); }
     // faucet and create read the latest state when they run
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [throwaway, bal, busy, room, funded, ready.faucet, checked, w.accountId]);
+  }, [throwaway, bal, busy, room, funded, ready.faucet, checked, w.accountId, finishing]);
   useEffect(() => { if (!throwaway) auto.current = { faucet: false, create: false }; }, [throwaway]);
 
   const s1: Status = w.accountId ? "done" : "now";
@@ -181,8 +192,6 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
   const paid = room ? BigInt(room.paid) > 0n : false;
   const s5: Status = paid && room!.refusals > 0 ? "done" : s4 === "done" ? "now" : "later";
 
-  // Finish: after the agent's key is revoked (or any time before leaving), close the room and return the NEAR
-  const fin = useFinish(() => { setRoom(null); setBal(null); setMsg(null); });
   const revoked = !!room && room.revoked_keys > 0 && !room.agent_key;
   const s6: Status = fin.deleteTx ? "done" : revoked || s5 === "done" ? "now" : "later";
 
@@ -271,7 +280,7 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
 
         {(fin.available || fin.deleteTx || fin.progress) && (
           <Row n={6} icon="power" status={s6} title="Finish" text={<>
-            Close the room and give the test NEAR back: your throwaway key {room && room.state === "Executing" ? <>asks to close it early (<span className="mono">mutual_close</span>) and the demo vendor agrees, so the escrow comes back</> : <>cancels it</>}, <span className="mono">withdraw_near</span> returns the room&apos;s deposit, and the throwaway account deletes itself with the faucet as beneficiary, so the next visitor can use the NEAR. Reset does the same.
+            Close the room and give the test NEAR back: {room ? <>your throwaway key {room.state === "Executing" ? <>asks to close it early (<span className="mono">mutual_close</span>) and the demo vendor agrees, so the escrow comes back</> : <>cancels it</>}, <span className="mono">withdraw_near</span> returns the room&apos;s deposit, and </> : null}the throwaway account deletes itself with the faucet as beneficiary, so the next visitor can use the NEAR. Reset does the same.
           </>}>
             {!fin.deleteTx && (
               <button type="button" className={s6 === "now" ? styles.primary : styles.secondary} disabled={fin.running || busy !== null} onClick={() => void fin.run()}>
