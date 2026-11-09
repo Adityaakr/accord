@@ -122,8 +122,8 @@ export const DOC_PAGES: DocPage[] = [
               },
               {
                 title: "With a throwaway key, click **Finish: close the room and return the test NEAR**.",
-                body: "The room closes early by `mutual_close` with the demo vendor (the escrow comes back to your account), `withdraw_near` returns the room's deposit, and the throwaway account deletes itself with the faucet as beneficiary, so the next visitor can use the NEAR. Reset does the same.",
-                see: "`Done. The room is closed and its test NEAR is back with the faucet.`, with the `delete_account` transaction linked.",
+                body: "The room closes early by `mutual_close` with the demo vendor (the escrow comes back to your account), `withdraw_near` returns the room's deposit, the account's test USDC goes back to the faucet with `ft_transfer`, and the throwaway account deletes itself with the faucet as beneficiary, so the next visitor can use the NEAR. Reset does the same.",
+                see: "`Done. The room is closed and its test NEAR and test USDC are back with the faucet.`, with the `ft_transfer` and `delete_account` transactions linked, then the room's id with a Verify link, kept for the tab after the reset.",
               },
             ],
           },

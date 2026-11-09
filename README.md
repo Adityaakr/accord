@@ -253,7 +253,7 @@ Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it). Ev
 | 5b | **Start the demo agent** (your wallet signs `install_agent_key`), then **Let the agent pay the due item** | `Paid item 1: 15.00 tUSDC to halcyon-mm.testnet, the active recipient.` |
 | 5c | **Ask the agent to pay a new account** | `ERR_PAYEE_MISMATCH` and `Asked to pay … to halcyon-markets.testnet. The contract refused it and recorded the refusal.` |
 | 5d | Revoke the key from the room header | `Agent revoked · next call rejected by the network` |
-| 6 | With a throwaway key: **Finish: close the room and return the test NEAR** (Reset does the same) | `Done. The room is closed and its test NEAR is back with the faucet.` with the `delete_account` transaction linked: the room closes by `mutual_close` with the demo vendor, `withdraw_near` returns its deposit, and the throwaway account deletes itself into the faucet |
+| 6 | With a throwaway key: **Finish: close the room and return the test NEAR** (Reset does the same) | `Done. The room is closed and its test NEAR and test USDC are back with the faucet.` with the `ft_transfer` and `delete_account` transactions linked, then `Room a8.accord-v2.testnet · Verify it →` (kept for the tab after the reset): the room closes by `mutual_close` with the demo vendor, `withdraw_near` returns its deposit, the account's test USDC goes back to the faucet with `ft_transfer`, and the throwaway account deletes itself into the faucet |
 
 <p align="center">
   <img src="apps/web/public/docs/agent-paid.webp" width="300" alt="The demo agent panel after a payment inside the terms: Paid item 2, 12.00 tUSDC to halcyon-mm.testnet, the active recipient, with the act transaction linked." />

@@ -45,6 +45,9 @@ function Elsewhere() {
   );
 }
 
+/** The site's own checker, which takes ?agreement= (the app links to the site the same way its header does). */
+const SITE_VERIFY = "https://accordweb-production.up.railway.app/verify";
+
 /** A full wallet-free run on testnet: create, seals, negotiation, payment, the refused redirect and the revoke. */
 const RECORDED_RUN = "/agreements/a21.accord-v2.testnet";
 
@@ -193,7 +196,9 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
   const s5: Status = paid && room!.refusals > 0 ? "done" : s4 === "done" ? "now" : "later";
 
   const revoked = !!room && room.revoked_keys > 0 && !room.agent_key;
-  const s6: Status = fin.deleteTx ? "done" : revoked || s5 === "done" ? "now" : "later";
+  // the room Finish closed stays named after the reset (sessionStorage), until this visit opens a new one
+  const lastRoom = !room && !fin.running ? fin.lastRoom : null;
+  const s6: Status = fin.deleteTx || lastRoom ? "done" : revoked || s5 === "done" ? "now" : "later";
 
   const roomHref = room ? `/agreements/${room.account}` : null;
   const stage = !room ? null
@@ -278,19 +283,26 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
           {roomHref && <Link className={s5 === "now" ? styles.primary : styles.secondary} href={roomHref}>Open the room</Link>}
         </Row>
 
-        {(fin.available || fin.deleteTx || fin.progress) && (
+        {(fin.available || fin.deleteTx || fin.progress || lastRoom) && (
           <Row n={6} icon="power" status={s6} title="Finish" text={<>
-            Close the room and give the test NEAR back: {room ? <>your throwaway key {room.state === "Executing" ? <>asks to close it early (<span className="mono">mutual_close</span>) and the demo vendor agrees, so the escrow comes back</> : <>cancels it</>}, <span className="mono">withdraw_near</span> returns the room&apos;s deposit, and </> : null}the throwaway account deletes itself with the faucet as beneficiary, so the next visitor can use the NEAR. Reset does the same.
+            Close the room and give the test NEAR back: {room ? <>your throwaway key {room.state === "Executing" ? <>asks to close it early (<span className="mono">mutual_close</span>) and the demo vendor agrees, so the escrow comes back</> : <>cancels it</>}, <span className="mono">withdraw_near</span> returns the room&apos;s deposit, </> : null}its test USDC goes back to the faucet (<span className="mono">ft_transfer</span>), and the throwaway account deletes itself with the faucet as beneficiary, so the next visitor can use the NEAR. Reset does the same.
           </>}>
             {!fin.deleteTx && (
               <button type="button" className={s6 === "now" ? styles.primary : styles.secondary} disabled={fin.running || busy !== null} onClick={() => void fin.run()}>
                 {fin.running ? "Finishing…" : "Finish: close the room and return the test NEAR"}
               </button>
             )}
-            {(fin.progress || fin.error) && (
+            {(fin.progress || fin.error || lastRoom) && (
               <div className={fin.error ? styles.note : styles.noteOk} role="status">
-                <span>{fin.error ?? fin.progress}</span>
+                {(fin.error || fin.progress) && <span>{fin.error ?? fin.progress}</span>}
+                {fin.tokenTx && <a className="mono link small" href={txUrl(fin.tokenTx) ?? "#"} target="_blank" rel="noreferrer">ft_transfer · tx {fin.tokenTx.slice(0, 8)}</a>}
                 {fin.deleteTx && <a className="mono link small" href={txUrl(fin.deleteTx) ?? "#"} target="_blank" rel="noreferrer">delete_account · tx {fin.deleteTx.slice(0, 8)}</a>}
+                {lastRoom && !fin.error && (
+                  <span>
+                    Room <span className="mono">{lastRoom}</span> · <Link className="link" href={`/verify/${lastRoom}`}>Verify it →</Link>
+                    {" "}<a className="link small" href={`${SITE_VERIFY}?agreement=${encodeURIComponent(lastRoom)}`} target="_blank" rel="noreferrer">or on the site</a>
+                  </span>
+                )}
               </div>
             )}
           </Row>

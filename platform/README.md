@@ -36,9 +36,11 @@ USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, w
      halcyon-markets.testnet. The contract refused it and recorded the refusal.`
    - 5d. Do: revoke the key from the room header. See: `Agent revoked · next call rejected by the network`.
 6. Do, with a throwaway key: **Finish: close the room and return the test NEAR** (Reset does the same). See: `Done. The
-   room is closed and its test NEAR is back with the faucet.`, with the `delete_account` transaction linked. The room
-   closes by `mutual_close` with the demo vendor, `withdraw_near` returns its deposit, and the throwaway account
-   deletes itself with `faucet.accord-v2.testnet` as beneficiary.
+   room is closed and its test NEAR and test USDC are back with the faucet.`, with the `ft_transfer` and
+   `delete_account` transactions linked, then `Room a8.accord-v2.testnet · Verify it →` (kept for the tab after the
+   reset). The room closes by `mutual_close` with the demo vendor, `withdraw_near` returns its deposit, the account's
+   test USDC goes back to the faucet with `ft_transfer`, and the throwaway account deletes itself with
+   `faucet.accord-v2.testnet` as beneficiary.
 
 The same path, run with a fresh account through the app's own routes on 8 Nov 2026 (agreement `a8.accord-v2.testnet`):
 faucet [NEAR](https://testnet.nearblocks.io/txns/935XqMoeb4Jt7fBQQHK9T7o9ZWJrWUoZYYCkdPGqhBoa) and
