@@ -272,7 +272,7 @@ const CHECKS = [
   { c: "agent key", r: "FunctionCall · act only", ok: true },
   { c: "recipient proof", r: "bound to the vendor's domain", ok: true },
   { c: "record", r: "payments and refusals reconcile", ok: true },
-  { c: "enclave release", r: "follows the testnet release", ok: false },
+  { c: "enclave release", r: "job runs proven with outlayer-verify", ok: true },
 ]
 const CMD = "make verify DEAL=<agreement>"
 export function SceneVerify() {

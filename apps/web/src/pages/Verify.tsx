@@ -59,9 +59,12 @@ type FullCheck =
 const CHECK_NAMES: Record<string, string> = Object.fromEntries(CHECKS.map((c) => [c.id, c.name]))
 const CHECK_MEANINGS: Record<string, string> = {
   code: "Matches a published release", keys: "No full-access key", sealed: "Signed inside the enclave",
-  release: "Needs the outlayer-verify tool", model: "The model as served now, fresh nonce", payee: "Proven on the vendor's domain",
+  release: "The three job runs, proven by outlayer-verify", model: "The model as served now, fresh nonce", payee: "Proven on the vendor's domain",
   record: "Payments match the receipts",
 }
+/* A live answer from a server without outlayer-verify leaves release not checked: say why instead of the ok meaning */
+const liveMeaning = (c: LiveCheck): string | undefined =>
+  c.name === "release" && c.status !== "ok" ? (c.status === "fail" ? "A job run did not prove the release" : "Needs the outlayer-verify tool on the server") : CHECK_MEANINGS[c.name]
 const liveResult = (s: string): Result => (s === "ok" ? "ok" : s === "not_checked" ? "not checked" : s === "partial" ? "partial" : "not ok")
 /** A NEAR account id: 2 to 64 characters of lowercase letters, digits, - and _, in dot-separated parts */
 const isAccountId = (v: string) => v.length >= 2 && v.length <= 64 && /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/.test(v)
@@ -284,7 +287,7 @@ function FullRows({ full, id, fullCommand }: { full: FullCheck; id: string; full
                       <span className={`mono ${tl.num}`}>{String(i + 1).padStart(2, "0")}</span>
                       <span className={tl.name}>{CHECK_NAMES[c.name] ?? c.name}</span>
                       <span className={tl.meaning}>
-                        <QuietLink href={LINKS.appVerify(id)} mono={false}>{CHECK_MEANINGS[c.name] ?? c.detail}</QuietLink>
+                        <QuietLink href={LINKS.appVerify(id)} mono={false}>{liveMeaning(c) ?? c.detail}</QuietLink>
                       </span>
                       <Status result={liveResult(c.status)} />
                     </li>

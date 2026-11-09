@@ -265,7 +265,7 @@ ${TRY_STEPS.map((t) => `- **${t.n === "After" ? "After" : `Step ${t.n}`}: ${t.na
 - [Live attack room](${SITE_URL}/app/try): a pre-funded public room; write to the agent and watch the contract refuse it
 - [Watch the replay](${SITE_URL}/app/replay): a recorded run (a32.accord-v2.testnet) in about 60 seconds, each step with its transaction
 - [Sign in](${SITE_URL}/app/signin): the app, with your own NEAR wallet
-- [Verify an agreement](${SITE_URL}/verify): the seven-check verdict make verify gives (on a6: 5 ok · 1 partial · 1 not checked), plus five quick reads live from testnet, no account and no keys; ${SITE_URL}/verify?agreement=<account> opens one directly
+- [Verify an agreement](${SITE_URL}/verify): the seven-check verdict make verify gives (on a6, with outlayer-verify installed: 6 ok · 1 partial), plus five quick reads live from testnet, no account and no keys; ${SITE_URL}/verify?agreement=<account> opens one directly
 - [Public record](${SITE_URL}/record): agreement a6's 12 transactions, each linked to the explorer
 - [Security](${SITE_URL}/security): the claims table with every limit, custody, the privacy boundary and the threat model
 ${docsPages.map((r) => `- [${r.name}](${SITE_URL}${r.path}): ${r.summary}`).join("\n")}

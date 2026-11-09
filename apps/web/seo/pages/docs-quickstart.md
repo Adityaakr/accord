@@ -38,7 +38,7 @@ The counterparty reads the room and makes the vendor's next valid move, so press
 
 ## Pay, refuse, revoke
 
-- 01 Start the demo agent. It pays the due item on its own. Starting the agent asks your wallet to sign `install_agent_key`: one function-call key on the agreement account that can call `act` and nothing else. You do not click pay: once the delivery is accepted, the agent pays the item by itself. You see The agent bar and the Activity tab read `Paid item 1: <amount> tUSDC to halcyon-mm.testnet`, with the `act` transaction linked. The amount is what the negotiated terms say (`15.00` on a8).
+- 01 Start the demo agent. It pays the due item on its own. Starting the agent asks your wallet to sign `install_agent_key`: one function-call key on the agreement account that can call `act` and nothing else. You do not click pay: once the delivery is accepted, the agent pays the item by itself, within about 2 minutes. You see The agent bar and the Activity tab read `Paid item 1: <amount> tUSDC to halcyon-mm.testnet`, with the `act` transaction linked. The amount is what the negotiated terms say (`15.00` on a8).
 
 - 02 Ask the agent to pay a new account. You see `ERR_PAYEE_MISMATCH`: the contract refused it and recorded the refusal. Nothing moves; the refusal appears in the room's activity.
 

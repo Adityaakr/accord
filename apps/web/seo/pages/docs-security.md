@@ -38,7 +38,7 @@ The reason behind each claim is on [/security](/security).
 
 - 03 Test token The default factory and the full flow on a6 settle in the repository's test token. Circle's testnet USDC settles on the second factory, `accord-usdc.testnet`, where `a1.accord-usdc.testnet` ran a funded deal. [tusdc.accord-v1.testnet](https://testnet.nearblocks.io/address/tusdc.accord-v1.testnet)
 
-- 04 Release attestation `make verify` on a6 did not check the enclave release: it needs the outlayer-verify tool. [not checked](/docs/verify#a6-result)
+- 04 Job builds `make verify` proves the three job runs with the outlayer-verify tool when it is installed (`6 ok · 1 partial` on a6), so the job keys came from the release's wasm in an enclave. Release 4 still runs release 3's job builds; the reviewed builds are not deployed. [release 3's](/docs/verify#a6-result)
 
 ## Threat model
 

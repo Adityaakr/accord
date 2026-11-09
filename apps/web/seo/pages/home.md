@@ -526,7 +526,7 @@ Paid, refused, revoked
 
 - 12 Buyer revokes the agent AccessKeyDoesNotExist [tx](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P)
 
-make verify 5 ok · 1 partial · 1 not checked [See the checks](/verify)
+make verify 6 ok · 1 partial [See the checks](/verify)
 
 Re-run on release 4 (security-review fixes): [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet) Circle USDC: [a1.accord-usdc](https://testnet.nearblocks.io/address/a1.accord-usdc.testnet) [Every transaction](/record)
 
