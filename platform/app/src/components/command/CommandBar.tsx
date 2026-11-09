@@ -4,7 +4,7 @@
 // agent in <room>" opens that room at its hold-to-revoke control and nothing is signed from here. Outside an input,
 // G then D goes to Deal rooms and G then A to Approvals.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import styles from "./command.module.css";
@@ -93,6 +93,17 @@ export function CommandBar() {
 
   useEffect(() => { if (open) setTimeout(() => input.current?.focus(), 0); }, [open]);
   useEffect(() => { setSel(0); }, [q]);
+  // One highlight that glides to the selected row (instead of a coloured bar on each row): measured from the row's
+  // position inside the list, so it follows arrow keys, the mouse and scrolling alike.
+  const [glide, setGlide] = useState<{ y: number; h: number; danger: boolean } | null>(null);
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    const el = list?.querySelector<HTMLElement>(`[data-i="${sel}"]`);
+    if (!list || !el) { setGlide(null); return; }
+    // rows sit inside group items, so measure against the list itself (plus its scroll), not the row's offsetParent
+    const y = el.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop;
+    setGlide({ y, h: el.offsetHeight, danger: el.dataset.danger === "1" });
+  }, [sel, q, open]);
   useEffect(() => {
     listRef.current?.querySelector(`[data-i="${sel}"]`)?.scrollIntoView({ block: "nearest" });
   }, [sel]);
@@ -117,6 +128,7 @@ export function CommandBar() {
           <input ref={input} className={styles.input} value={q} onChange={(e) => setQ(e.target.value)} placeholder={w.accountId ? "Search rooms, pages and actions" : "Search pages and actions (sign in to see your rooms)"} aria-label="Search" aria-controls="cmd-list" aria-activedescendant={entries[sel] ? `cmd-${entries[sel].id}` : undefined} />
         </div>
         <ul id="cmd-list" ref={listRef} className={styles.list} role="listbox">
+          {glide && <li aria-hidden="true" role="presentation" className={`${styles.glide} ${glide.danger ? styles.glideDanger : ""}`} style={{ transform: `translateY(${glide.y}px)`, height: glide.h }} />}
           {groups.map(({ g, items }) => (
             <li key={g} role="presentation">
               <p className={styles.group}>{g}</p>
@@ -125,11 +137,14 @@ export function CommandBar() {
                   i += 1;
                   const idx = i;
                   return (
-                    <li key={e.id} id={`cmd-${e.id}`} data-i={idx} role="option" aria-selected={idx === sel}
+                    <li key={e.id} id={`cmd-${e.id}`} data-i={idx} data-danger={e.danger ? "1" : undefined} role="option" aria-selected={idx === sel}
                       className={`${styles.item} ${idx === sel ? styles.on : ""} ${e.danger ? styles.danger : ""}`}
                       onMouseEnter={() => setSel(idx)} onClick={() => go(e)}>
                       <span className={styles.label}>{e.label}</span>
-                      {e.hint ? <span className={styles.hint}>{e.hint}</span> : null}
+                      <span className={styles.end}>
+                        {e.hint ? <span className={styles.hint}>{e.hint}</span> : null}
+                        <kbd className={styles.enter} aria-hidden="true">↵</kbd>
+                      </span>
                     </li>
                   );
                 })}
