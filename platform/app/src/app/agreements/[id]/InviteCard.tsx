@@ -8,19 +8,24 @@ import Link from "next/link";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import styles from "./invite.module.css";
 import { withBase } from "@/lib/basePath";
+import { briefFacts, readStoredBrief, type StoredBrief } from "../new/intake";
 
 export function InviteCard({ room, buyer, vendor, authority }: { room: string; buyer: string; vendor: string; authority: string }) {
   const w = useWallet();
   const [mounted, setMounted] = useState(false);
-  const [brief, setBrief] = useState<{ brief: string; domain: string } | null>(null);
+  const [brief, setBrief] = useState<StoredBrief | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [hidden, setHidden] = useState(false);
   useEffect(() => {
     setMounted(true);
-    try { setBrief(JSON.parse(localStorage.getItem(`accord-brief:${room}`) ?? "null")); } catch { /* not kept */ }
+    setBrief(readStoredBrief(room));
   }, [room]);
   if (!mounted || hidden || w.accountId !== buyer) return null;
 
+  const facts = brief?.intake && brief.kind ? [
+    ...(brief.intake.reference ? [{ label: "Reference", value: brief.intake.reference }] : []),
+    ...briefFacts(brief.kind, brief.intake, brief.symbol ?? "USDC"),
+  ] : [];
   const url = `${window.location.origin}${withBase(`/agreements/${room}`)}`;
   const copy = async (text: string, what: string) => {
     try { await navigator.clipboard.writeText(text); setCopied(what); setTimeout(() => setCopied(null), 1600); } catch { /* clipboard blocked */ }
@@ -44,10 +49,15 @@ export function InviteCard({ room, buyer, vendor, authority }: { room: string; b
         <span className={styles.note}>New to Accord? <Link href="/join" className="link">What the vendor does</Link> explains the steps on their side.</span>
         <Link href={`/agreements/${room}/seal`} className={styles.primary}>Seal your limits</Link>
       </div>
-      {brief?.brief ? (
+      {brief?.brief || facts.length ? (
         <details className={styles.brief}>
           <summary>Your brief <span className={styles.note}>kept in this browser</span></summary>
-          <p>{brief.brief}</p>
+          {brief?.brief ? <p>{brief.brief}</p> : null}
+          {facts.length ? (
+            <dl className={styles.facts}>
+              {facts.map((f) => <div key={f.label}><dt>{f.label}</dt><dd className="mono">{f.value}</dd></div>)}
+            </dl>
+          ) : null}
         </details>
       ) : null}
     </section>

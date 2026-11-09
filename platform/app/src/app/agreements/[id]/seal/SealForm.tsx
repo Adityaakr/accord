@@ -3,7 +3,7 @@
 // The mandate editor. The mandate exists only in this component's memory: it is sealed with the SDK in the browser
 // and the wallet sends the ciphertext. No request from this page carries the mandate.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AccountId, shortAccount } from "@/components/account/AccountId";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,7 @@ import type { Preset } from "@/server/presets";
 import styles from "../../form.module.css";
 import { SealMoment } from "./SealMoment";
 import { TxLink } from "@/components/TxLink";
+import { briefFacts, readStoredBrief } from "../../new/intake";
 
 const AMOUNT_KEYS = /total|retainer|depth_quote/;
 const LIMIT_LABELS: Record<string, string> = {
@@ -73,6 +74,13 @@ export function SealForm({
   // that derives the document key, then send the sealed mandate. A throwaway key opens no window and does both.
   const twoSteps = w.method === "wallet";
   const [docKey, setDocKey] = useState<DocKey | null>(null);
+
+  // The buyer's working brief from the new room flow, if this browser kept it: shown for reference, never sealed as is.
+  const [fromBrief, setFromBrief] = useState<{ label: string; value: string; sealAs?: string }[]>([]);
+  useEffect(() => {
+    const b = readStoredBrief(agreement);
+    setFromBrief(b?.intake && b.kind ? briefFacts(b.kind, b.intake, b.symbol ?? "USDC") : []);
+  }, [agreement]);
 
   const limits = draft ?? (preset ? toDraft(preset.mandate.limits) : {});
   const text = instructions ?? preset?.mandate.instructions ?? "";
@@ -174,6 +182,16 @@ export function SealForm({
             <div><span className="h5">Public on NEAR</span><span className="small">The ciphertext, its commitment hash, and later the enforced terms and every payment.</span></div>
           </div>
         </Panel>
+
+        {role === "buyer" && fromBrief.length > 0 && (
+          <Panel title="From your brief" eyebrow="kept in this browser; type the figures into your limits">
+            <ul className={styles.facts}>
+              {fromBrief.map((f) => (
+                <li key={f.label}><span>{f.label}</span><span className="mono">{f.value}</span></li>
+              ))}
+            </ul>
+          </Panel>
+        )}
 
         <Panel title="Sealed so far">
           <ul className={styles.facts}>
