@@ -34,7 +34,7 @@ export class Accord {
     this.network = opts.network;
     this.factory = opts.factory;
     this.signer = opts.signer;
-    this.chain = new Chain(opts.rpc ?? RPC[opts.network]?.rpc ?? "http://127.0.0.1:3030");
+    this.chain = new Chain(opts.rpc ?? RPC[opts.network]?.rpc ?? "http://127.0.0.1:3030", opts.network);
   }
 
   withSigner(signer: Signer): Accord {
