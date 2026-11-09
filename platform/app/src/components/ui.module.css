@@ -90,6 +90,7 @@
 }
 .pageHeadText { display: flex; flex-direction: column; gap: 14px; max-width: 720px; }
 .pageEyebrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.quiet { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-weak); }
 .pageHeadAside { display: flex; gap: 10px; flex: none; }
 
 @media (max-width: 809.98px) {

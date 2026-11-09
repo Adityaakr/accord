@@ -143,6 +143,11 @@ export function Meter({ value, max, tone = "teal" }: { value: bigint; max: bigin
   );
 }
 
+/** One quiet line above a page title (where it runs, what it is): body text, muted, no pill. */
+export function Quiet({ children }: { children: ReactNode }) {
+  return <p className={styles.quiet}>{children}</p>;
+}
+
 export function PageHead({ eyebrow, title, lead, aside }: { eyebrow?: ReactNode; title: ReactNode; lead?: ReactNode; aside?: ReactNode }) {
   return (
     <div className={styles.pageHead}>

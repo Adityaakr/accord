@@ -51,25 +51,10 @@
   color: var(--text-medium);
 }
 .item:hover { background: var(--elevation-medium); color: var(--text-strong); }
-.tag {
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-size: 11px;
-  white-space: nowrap;
-  color: var(--teal);
-  background: var(--teal-wash);
-  border: 1px solid var(--teal-line);
-}
+.tag { font-size: 12px; white-space: nowrap; color: var(--text-weak); }
 @media (max-width: 640px) { .tag { display: none; } }
 .throwaway { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.tagAlways {
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-size: 11px;
-  white-space: nowrap;
-  color: var(--teal);
-  background: var(--teal-wash);
-  border: 1px solid var(--teal-line);
-}
+/* the throwaway label: a quiet word beside the account, not a chip */
+.tagAlways { font-size: 13px; white-space: nowrap; color: var(--text-weak); }
 .reset { font-size: 12px; color: var(--text-weak); text-decoration: underline; text-underline-offset: 3px; }
 .reset:hover { color: var(--text-strong); }

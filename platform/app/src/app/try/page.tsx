@@ -2,7 +2,7 @@ import Link from "next/link";
 import { closedReason, duration, rearmTimings, tryRoom } from "@/server/tryroom";
 import { heartbeats, recentMessages } from "@/server/store";
 import { accord, config } from "@/server/accord";
-import { PageHead, Panel, Pill, Usdc } from "@/components/ui";
+import { PageHead, Panel, Pill, Quiet, Usdc } from "@/components/ui";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { InboxForm } from "./InboxForm";
 import { Counters } from "./Counters";
@@ -44,9 +44,9 @@ export default async function Try() {
 
   return (
     <div className="container">
-      <AutoRefresh seconds={8} />
+      <AutoRefresh seconds={10} />
       <PageHead
-        eyebrow={<Pill tone="warn">public demo room</Pill>}
+        eyebrow={<Quiet>A public demo room on NEAR testnet.</Quiet>}
         title="Try to get the agent to pay you"
         lead="Write to the buyer's accounts-payable agent the way a vendor would. It is deliberately gullible and acts on what it reads. The agreement's code decides what actually moves."
       />
@@ -121,7 +121,7 @@ function Recorded() {
   return (
     <div className="container">
       <PageHead
-        eyebrow={<Pill tone="muted">recorded on NEAR testnet</Pill>}
+        eyebrow={<Quiet>Recorded on NEAR testnet.</Quiet>}
         title="Try to get the agent to pay you"
         lead="On NEAR testnet the demonstration agent was told to pay a new account, a different amount, or a canary account, on agreements a6 to a15. The contract refused each payment. Run the same attack in your own deal room in about five minutes."
       />

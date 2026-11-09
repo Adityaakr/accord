@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import type { AgreementView } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { tokenSymbol, useAppConfig } from "@/components/AppConfig";
-import { Panel, Pill } from "@/components/ui";
+import { Panel } from "@/components/ui";
 import { agreementClient, errorText } from "@/components/me/client";
 import { useOrg } from "@/components/org/OrgProvider";
 import { POLL_MS, isBusyStatus, nextPollDelay } from "@/components/pollbackoff";
@@ -125,7 +125,7 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
   const installed = !!agentKey?.installed;
 
   return (
-    <Panel title="Demo counterparty" eyebrow={<Pill tone="warn">testnet demo</Pill>} aside={<button type="button" className={styles.toggle} onClick={() => setAuto((v) => !v)} aria-pressed={auto}>{auto ? "auto on" : "auto off"}</button>}>
+    <Panel title="Demo counterparty" eyebrow="Testnet demo" aside={<button type="button" className={styles.toggle} onClick={() => setAuto((v) => !v)} aria-pressed={auto}>{auto ? "auto on" : "auto off"}</button>}>
       <div className={styles.body}>
         <p className="small">
           Accord plays the vendor (<span className="mono">{a.vendor}</span>) and its authority (<span className="mono">{a.vendor_authority}</span>) in this test room. It makes their next valid move and nothing else; the contract checks each call.

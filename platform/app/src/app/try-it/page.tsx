@@ -1,4 +1,4 @@
-import { PageHead, Pill } from "@/components/ui";
+import { PageHead, Quiet } from "@/components/ui";
 import { accord, config } from "@/server/accord";
 import { demoConfig, demoReady } from "@/server/demo";
 import { TryIt } from "./TryIt";
@@ -14,9 +14,9 @@ export default async function TryItPage() {
   return (
     <div className="container">
       <PageHead
-        eyebrow={<Pill tone="warn">NEAR testnet · test USDC</Pill>}
+        eyebrow={<Quiet>Runs on NEAR testnet with test funds.</Quiet>}
         title="Try a deal in about 5 minutes"
-        lead="Open a real deal room against Accord's demo vendor, seal your limits, and watch the agents negotiate, the contract pay the right account, and refuse the wrong one. Everything here is on NEAR testnet with test USDC."
+        lead="Open a real deal room against Accord's demo vendor, seal your limits, and watch the agents negotiate, the contract pay the right account, and refuse the wrong one."
       />
       <TryIt
         network={c.network}
