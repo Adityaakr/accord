@@ -47,6 +47,18 @@ The server side is `app/src/server/demo.ts`: the faucet sends only what an accou
 per IP; the counterparty reads the room and makes the vendor's next valid move, so calling it twice does nothing twice;
 the demo agent's key is derived per room and signs `act` itself, never through the relayer.
 
+<details>
+<summary>Try without a wallet on the public URL (9 Nov 2026), agreement <code>a21.accord-v2.testnet</code></summary>
+
+A throwaway key made in the tab created the room and relayed every other buyer call; create to revoke in 3 min 44 s.
+Agent pays item 1, 16.50 tUSDC: [`5vKHipEb…`](https://testnet.nearblocks.io/txns/5vKHipEbqk9r4rxra1q9uhYNrnFGJttQYprEL3g2x3ZG);
+redirect refused, `ERR_PAYEE_MISMATCH`: [`DaRuHG2t…`](https://testnet.nearblocks.io/txns/DaRuHG2tLsA5FP4f2CHouMjgABnbenUfZcGSnDeUDDmH);
+revoke: [`BGJEcstT…`](https://testnet.nearblocks.io/txns/BGJEcstTMS3oNyWiy92y7D8QRZqne2AFaNR2gxj8yy58).
+`make verify DEAL=a21.accord-v2.testnet`: `verify: 5 checks ok · 1 partial · 1 not checked`. Every step, and the RPC
+rate limits the run hit (now handled by the SDK's `RotatingRpcProvider`), in `DECISIONS.md` section 28.
+
+</details>
+
 ### From a terminal
 
 Three ways, cheapest first. None needs our keys.

@@ -586,3 +586,69 @@ Correction (9 Nov 2026, read back from RPC and `tx.test.fastnear.com`): the earl
 negotiation and said the recipient waited out a timelock. On chain, `accord-keeper.testnet` sent `start_negotiation`
 (`Gp9JqBvY…`), and `Tg1rtc6C…` emitted `recipient_accepted` and `recipient_active` together, because a first recipient
 has no timelock; the 120 s wait applies to a recipient change.
+
+## 28. Try without a wallet on the public URL (9 Nov 2026)
+
+`/app/try-it` was run end to end on https://accordweb-production.up.railway.app/app with **Try without a wallet**
+(`e2e/try-without-wallet.mjs`, Playwright): the tab made a throwaway ed25519 key, whose implicit account
+(`f98a8a5d…fad2d1`) signed its own `create_agreement` (the room deposit, paid from the faucet's NEAR) and sent every
+other buyer call as a NEP-366 delegate through `/app/api/relay`. Agreement `a21.accord-v2.testnet` (release 4) went
+Sealed, Attested, Executing, recipient active, paid, refused, revoked in 3 min 44 s from create to revoke. Read back
+from `tx.test.fastnear.com/v0/account` (18 transactions on a21) and RPC `tx` through the SDK's `RotatingRpcProvider`.
+
+| Step | Result | Tx |
+| --- | --- | --- |
+| Faucet, NEAR (2.5) | `faucet.accord-v2.testnet` transfer | `27e15dD5akxXayuDCmhfvUqjJaPwwhShvFuxH39HwbGU` |
+| Faucet, tUSDC (100) | `ft_transfer` on `tusdc.accord-v1.testnet` | `25w7o9hRNFFPZ4kGbzktvyd4dhW9Cxaqeb764MHR7rdT` |
+| Create a21 (signed by the throwaway account), 09:04:51 UTC | `agreement_created`, `agreement_registered` | `2bXYcG7PGewYBswgXBmf4R9axkBoMQaRQn3bVniGhpt4` |
+| Buyer seals the Northwind mandate (relayed) | `mandate_committed` | `Ag4FA6YrePLU8BxeY7WkXACHZA55MT3tcisoEpXriQc9` |
+| Counterparty seals the vendor mandate | `mandate_committed` | `9vqBbLsLsUfV6c61CDh4RBnNboCgoFVv36ugwDXQhzf1` |
+| Counterparty starts the negotiation | `negotiation_requested`, the Sealed Table ran in OutLayer, `terms_proposed` in the same transaction | `D6941SNDMAFTPHCc6XApwG8jGrebhXa4XQobExU6xFGx` |
+| Buyer approves the terms (relayed) | `terms_approved`, `executing` | `7ypCffmbMwfTsQUjtR5EGi526Xf41WwBzUyHj6sGjaT6` |
+| Counterparty approves the terms (same block) | `terms_approved` | `yC8Wkyocr8ZyC4VLoHe4SHsoWC4anpaSjdWMYFow1Ji` |
+| Counterparty proposes halcyon-mm.testnet on useaccord.tech | `recipient_proposed`, `recipient_proven` | `2Qj2RU2kVB11JTCQXupAzJ2feYyxXfHzy8Fx8gzQu3NB` |
+| Buyer funds 35.00 tUSDC (relayed `ft_transfer_call`) | `funded` 35.00 | `hds2yoNKgQTaqdpkX562XvkA1tDxJr7YeakwE3sXpse` |
+| Buyer installs the demo agent key (relayed) | `agent_key_installed` | `8fYwP9wUanudAmpjJ17pxmppJM1jhaYCtN6zv9z4Ai5i` |
+| Authority (`halcyon-auth.testnet`) approves the recipient | `recipient_approved` | `5pz4sz8cqv1ufp9sdA7SedubwAhzvTDeQbWzVLiA61gy` |
+| Buyer accepts the recipient (relayed) | `recipient_accepted`, `recipient_active` (a first recipient has no timelock) | `EoYnYBv6zZegNvPdfjqstM4wsaLnbzzjinzJcyyfa1ke` |
+| Counterparty submits delivery 1 | `delivery_submitted` | `HQ9qQdWew8D8v6sbKhxa2b4xPhybGaV6CeCzSZBHuSCb` |
+| Buyer accepts delivery 1 (relayed) | `delivery_accepted`, item 1 eligible | `3nT451chF9m6JXq9JYxhHUndDARi6wm21szZTdrep7oK` |
+| Demo agent pays item 1 (`act`, signed by a21's agent key) | `payment_sent`, `ft_transfer`, `payment_settled`: 16.50 tUSDC to halcyon-mm.testnet | `5vKHipEbqk9r4rxra1q9uhYNrnFGJttQYprEL3g2x3ZG` |
+| Demo agent asked to pay halcyon-markets.testnet (item 2, 13.50 tUSDC) | `act_refused` `ERR_PAYEE_MISMATCH`, `recipient_reported`; refusal seq 1 in the log | `DaRuHG2tLsA5FP4f2CHouMjgABnbenUfZcGSnDeUDDmH` |
+| Counterparty submits delivery 2 | `delivery_submitted` | `498cCzSWagrQk7NUnUWJpF9sLXugJHsv1tsu7UQo15NT` |
+| Buyer accepts delivery 2 (relayed) | `delivery_accepted` | `Dhrg1sfMe9L9QQQNcVRc16BcpPhpH3bijrntquKieuyY` |
+| Buyer revokes the key (relayed), 09:08:35 UTC | `agent_key_revoked`; `view_access_key_list` on a21 returns 0 keys | `BGJEcstTMS3oNyWiy92y7D8QRZqne2AFaNR2gxj8yy58` |
+
+Items after the run: 1 Paid (16.50), 2 Eligible (13.50, the refused amount still unpaid), 3 Open (5.00).
+`/app/api/verify/a21.accord-v2.testnet`: code ok, keys ok, sealed ok, release not checked (needs `outlayer-verify`),
+model partial (the hardware quote is not checked here), payee ok, record ok: 5 ok · 1 partial · 1 not checked · 0
+failed. `ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a21.accord-v2.testnet`, run through the new provider, prints
+the same: `verify: 5 checks ok · 1 partial · 1 not checked`, with `record 1 payment · 1 refusal (1 in the log) · …
+receipts match paid · ok`. Screenshots: `01-try-it-signed-out` to `06-revoked` from the run (local, not committed).
+
+**The run hit rate limits.** Along the way `/app/api/demo-counterparty/step` and `/app/api/relay` answered many 502s
+whose body was FastNEAR's free tier saying `{"error":{"code":-429,"message":"Rate limits exceeded..."}}` (HTTP 429). The
+page retried and got through, but a visitor saw raw RPC errors. Fixed the same day:
+
+- `@accord/sdk` `RotatingRpcProvider` (`packages/sdk/src/chain.ts`), used by `Chain`, the relayer, the faucet and the
+  throwaway signer. It walks `NEAR_RPC_URL` (one URL or a comma list) and then the testnet defaults
+  `test.rpc.fastnear.com`, `rpc.testnet.fastnear.com`, `near-testnet.drpc.org`, `rpc.testnet.near.org` (all four
+  answered `block` on 9 Nov), and moves to the next endpoint only on HTTP 429 or 5xx, a JSON-RPC -429 or rate-limit
+  message, a network error or a timeout. An endpoint that just failed is tried last for 30 s. Mainnet keeps
+  `free.rpc.fastnear.com` then `rpc.mainnet.near.org`.
+- Not near-api-js's `FailoverRpcProvider`: its `withBackoff` catches every error except AccountDoesNotExist and moves
+  on, so it re-sends after a contract panic, AccessKeyDoesNotExist or InvalidNonce and replaces the real error with
+  "Exceeded N providers". The app and the proofs read those errors (`/AccessKeyDoesNotExist/` in revoke and attack,
+  `NotAnAgreementError` in verify). The new provider throws every nearcore error unchanged from the first endpoint
+  that gave it.
+- A signed transaction is re-sent only after a transport failure: its hash is fixed by its bytes, so nearcore finds it
+  already known or accepts it once. If the re-send answers InvalidNonce, the first send got through, and the provider
+  reads the outcome by hash (`tx`) instead of letting `Account` re-sign with a new nonce, which would run the call twice.
+- When every endpoint fails, `RpcUnavailableError` names the method, the attempts and the last cause, with the host only
+  (an API key in a URL never reaches a message). The API routes answer it with 503, `Retry-After: 5` and "The network is
+  busy, retrying shortly." and never pass a raw JSON-RPC body on. DemoPanel backs off from 8 s to 30 s while busy and
+  shows one quiet line; the throwaway signer re-posts a delegate after a busy 503 (its own nonce makes a repeat
+  harmless); a room page whose read hit a busy RPC shows a retrying panel instead of a 404.
+- Tests: `packages/sdk/test/rpc.test.ts` (local mock servers: 429, -429, 502/503, contract panic kept, AccessKeyDoesNotExist
+  kept, network error, timeout, all failing, cooldown, InvalidNonce after a transport failure, no key in errors) and
+  `app/tests/rpcbusy.test.ts`.

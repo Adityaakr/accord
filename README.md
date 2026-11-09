@@ -310,6 +310,38 @@ The relayed `create_agreement` failed, so it was signed directly. The relayer pa
 
 </details>
 
+<details>
+<summary>Try without a wallet on the public URL (9 Nov 2026), agreement <code>a21.accord-v2.testnet</code></summary>
+
+**Try without a wallet** on https://accordweb-production.up.railway.app/app/try-it, driven by Playwright (`platform/app/e2e/try-without-wallet.mjs`): a throwaway key made in the tab signed the room's create itself and sent every other buyer call through `/app/api/relay`. Create to revoke in 3 min 44 s; `/app/api/verify/a21.accord-v2.testnet` and `make verify DEAL=a21.accord-v2.testnet` give 5 ok, 1 partial (model: hardware quote not checked here), 1 not checked (release: needs `outlayer-verify`), 0 failed.
+
+| Step | Transaction |
+| --- | --- |
+| Faucet, NEAR (2.5) | [`27e15dD5…`](https://testnet.nearblocks.io/txns/27e15dD5akxXayuDCmhfvUqjJaPwwhShvFuxH39HwbGU) |
+| Faucet, tUSDC (100) | [`25w7o9hR…`](https://testnet.nearblocks.io/txns/25w7o9hRNFFPZ4kGbzktvyd4dhW9Cxaqeb764MHR7rdT) |
+| Create a21 (signed by the throwaway account) | [`2bXYcG7P…`](https://testnet.nearblocks.io/txns/2bXYcG7PGewYBswgXBmf4R9axkBoMQaRQn3bVniGhpt4) |
+| Buyer seals the Northwind mandate (relayed) | [`Ag4FA6Yr…`](https://testnet.nearblocks.io/txns/Ag4FA6YrePLU8BxeY7WkXACHZA55MT3tcisoEpXriQc9) |
+| Counterparty seals the vendor mandate | [`9vqBbLsL…`](https://testnet.nearblocks.io/txns/9vqBbLsLsUfV6c61CDh4RBnNboCgoFVv36ugwDXQhzf1) |
+| Negotiation started; `terms_proposed` in the same transaction | [`D6941SND…`](https://testnet.nearblocks.io/txns/D6941SNDMAFTPHCc6XApwG8jGrebhXa4XQobExU6xFGx) |
+| Buyer approves the terms (relayed) | [`7ypCffmb…`](https://testnet.nearblocks.io/txns/7ypCffmbMwfTsQUjtR5EGi526Xf41WwBzUyHj6sGjaT6) |
+| Counterparty approves the terms | [`yC8Wkyoc…`](https://testnet.nearblocks.io/txns/yC8Wkyocr8ZyC4VLoHe4SHsoWC4anpaSjdWMYFow1Ji) |
+| Recipient halcyon-mm.testnet proposed and proven | [`2Qj2RU2k…`](https://testnet.nearblocks.io/txns/2Qj2RU2kVB11JTCQXupAzJ2feYyxXfHzy8Fx8gzQu3NB) |
+| Buyer funds 35.00 tUSDC (relayed) | [`hds2yoNK…`](https://testnet.nearblocks.io/txns/hds2yoNKgQTaqdpkX562XvkA1tDxJr7YeakwE3sXpse) |
+| Buyer installs the demo agent key (relayed) | [`8fYwP9wU…`](https://testnet.nearblocks.io/txns/8fYwP9wUanudAmpjJ17pxmppJM1jhaYCtN6zv9z4Ai5i) |
+| Authority approves the recipient | [`5pz4sz8c…`](https://testnet.nearblocks.io/txns/5pz4sz8cqv1ufp9sdA7SedubwAhzvTDeQbWzVLiA61gy) |
+| Buyer accepts the recipient (relayed); active | [`EoYnYBv6…`](https://testnet.nearblocks.io/txns/EoYnYBv6zZegNvPdfjqstM4wsaLnbzzjinzJcyyfa1ke) |
+| Delivery 1 submitted | [`HQ9qQdWe…`](https://testnet.nearblocks.io/txns/HQ9qQdWew8D8v6sbKhxa2b4xPhybGaV6CeCzSZBHuSCb) |
+| Buyer accepts delivery 1 (relayed) | [`3nT451ch…`](https://testnet.nearblocks.io/txns/3nT451chF9m6JXq9JYxhHUndDARi6wm21szZTdrep7oK) |
+| Agent pays item 1: 16.50 tUSDC to halcyon-mm.testnet | [`5vKHipEb…`](https://testnet.nearblocks.io/txns/5vKHipEbqk9r4rxra1q9uhYNrnFGJttQYprEL3g2x3ZG) |
+| Redirect to halcyon-markets.testnet refused: `ERR_PAYEE_MISMATCH` | [`DaRuHG2t…`](https://testnet.nearblocks.io/txns/DaRuHG2tLsA5FP4f2CHouMjgABnbenUfZcGSnDeUDDmH) |
+| Delivery 2 submitted | [`498cCzSW…`](https://testnet.nearblocks.io/txns/498cCzSWagrQk7NUnUWJpF9sLXugJHsv1tsu7UQo15NT) |
+| Buyer accepts delivery 2 (relayed) | [`Dhrg1sfM…`](https://testnet.nearblocks.io/txns/Dhrg1sfMe9L9QQQNcVRc16BcpPhpH3bijrntquKieuyY) |
+| Buyer revokes the key (relayed); 0 keys on a21 | [`BGJEcstT…`](https://testnet.nearblocks.io/txns/BGJEcstTMS3oNyWiy92y7D8QRZqne2AFaNR2gxj8yy58) |
+
+The free RPC tier rate-limited the run (HTTP 429, JSON-RPC `-429`), and the page showed those as 502s before it got through. Since then the SDK's `RotatingRpcProvider` moves to the next testnet endpoint only on a rate limit or a transport failure and keeps every real error (a contract refusal, `AccessKeyDoesNotExist`) unchanged, and the app answers a busy network with a 503 and "The network is busy, retrying" ([`platform/DECISIONS.md`](platform/DECISIONS.md) 28).
+
+</details>
+
 ### Settle in Circle USDC (testnet)
 
 A second factory, `accord-usdc.testnet`, runs the same code as `accord-v2.testnet` (release 3 at first, release 4 since 9 Nov 2026; the same job builds and keys) and settles in Circle's USDC on NEAR testnet, `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (6 decimals). Each agreement copies its factory's token at creation and keeps it for life, so `a<n>.accord-usdc.testnet` takes only Circle USDC and `a<n>.accord-v2.testnet` only test USDC. `/app/try-it` defaults to test USDC from the app's faucet; Circle USDC is offered next to it where the server sets `ACCORD_FACTORY_USDC`.
