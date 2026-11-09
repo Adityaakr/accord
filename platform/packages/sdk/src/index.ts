@@ -10,3 +10,4 @@ export * from "./guard.js";
 export * from "./bytes.js";
 export * from "./params.js";
 export * from "./delivery.js";
+export * from "./accountid.js";

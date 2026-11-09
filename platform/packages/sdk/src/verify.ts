@@ -36,7 +36,7 @@ export class NotAnAgreementError extends Error {
 }
 
 // What the RPC says when an account is missing, has no code, or runs a contract without `get_agreement`.
-const NOT_AN_AGREEMENT = /does not exist|method is not found|MethodNotFound|CodeDoesNotExist|UNKNOWN_ACCOUNT/i;
+export const NOT_AN_AGREEMENT = /does not exist|method is not found|MethodNotFound|CodeDoesNotExist|UNKNOWN_ACCOUNT/i;
 
 export function verifyEd25519(output: Record<string, unknown>, publicKey: string): boolean {
   const sig = output.sig;
