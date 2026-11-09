@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { config } from "@/server/accord";
 import { ledger } from "@/server/ledger";
-import { Account, PageHead, Panel, Pill, Usdc, Hash } from "@/components/ui";
+import { Account, PageHead, Panel, Pill, Usdc, EvidenceHash } from "@/components/ui";
 import styles from "../pages.module.css";
 import rstyles from "./record.module.css";
 import { withBase } from "@/lib/basePath";
@@ -58,7 +58,7 @@ export default async function Record({ searchParams }: { searchParams: Promise<{
                   <td><Usdc amount={p.amount} /></td>
                   <td><Account id={p.recipient} href={c.explorer ? `${c.explorer}/address/${p.recipient}` : undefined} /></td>
                   <td><Pill tone={p.via === "agent" ? "teal" : "neutral"}>{p.via}</Pill></td>
-                  <td><Hash value={p.evidence_hash} /></td>
+                  <td><EvidenceHash value={p.evidence_hash} agreement={p.agreement} item={p.item} /></td>
                 </tr>
               ))}
             </tbody>

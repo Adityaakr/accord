@@ -2,6 +2,7 @@
 // line every live panel carries.
 
 import type { ReactNode } from "react";
+import { isDemoEvidence } from "@accord/sdk";
 import { shortAccount } from "@/components/account/short";
 import { formatUnits, type State } from "@accord/sdk";
 import styles from "./ui.module.css";
@@ -125,6 +126,12 @@ export function Account({ id, href }: { id: string; href?: string }) {
 export function Hash({ value, n = 8 }: { value: string | null | undefined; n?: number }) {
   if (!value) return <span className="faint">none</span>;
   return <span className="mono" title={value}>{value.slice(0, n)}…</span>;
+}
+
+/** An item's evidence hash; the demo vendor's stand-in deliveries say so, so a demo hash never reads as real work. */
+export function EvidenceHash({ value, agreement, item }: { value: string | null | undefined; agreement?: string; item?: number }) {
+  if (!isDemoEvidence(value, agreement, item)) return <Hash value={value} />;
+  return <span title={value ?? undefined}><Hash value={value} /> <span className="small faint">demo delivery evidence</span></span>;
 }
 
 export function Meter({ value, max, tone = "teal" }: { value: bigint; max: bigint; tone?: "teal" | "muted" }) {

@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { KeyPair } from "near-api-js";
 import {
-  DEMO_PARAMS, KNOWN_FACTORIES, KeySigner, formatUnits, shortHash, type AgreementClient, type AgreementView, type Kind, type Mandate,
+  DEMO_PARAMS, KNOWN_FACTORIES, demoDelivery, demoDeliveryPath, KeySigner, formatUnits, shortHash, type AgreementClient, type AgreementView, type Kind, type Mandate,
   type TxResult,
 } from "@accord/sdk";
 import { repoRoot, type Role, type World } from "./world.js";
@@ -147,7 +147,8 @@ export async function installAgent(w: World, id: string): Promise<Agent & { tx: 
 }
 
 export async function deliverAndAccept(w: World, id: string, item: number): Promise<void> {
-  await client(w, "vendor", id).submitDelivery(item, "ee".repeat(32), `https://${w.domain}/deliveries/${item}`);
+  const evidence = demoDelivery(id, item);
+  await client(w, "vendor", id).submitDelivery(item, evidence.hash, `https://${w.domain}${demoDeliveryPath(id, item)}`);
   await client(w, "buyer", id).acceptDelivery(item);
 }
 

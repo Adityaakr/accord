@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { formatUnits, type ItemView, type Refusal } from "@accord/sdk";
 import { room, type Room } from "@/server/data";
 import { config } from "@/server/accord";
-import { Account, Empty, Hash, KV, Meter, Near, Panel, Pill, Usdc, type Tone } from "@/components/ui";
+import { Account, Empty, EvidenceHash, Hash, KV, Meter, Near, Panel, Pill, Usdc, type Tone } from "@/components/ui";
 import { SourceLine } from "@/components/SourceLine";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { CountUp } from "@/components/CountUp";
@@ -146,7 +146,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead><tr><th>#</th><th>Amount</th><th>Due</th><th>Evidence</th><th>Status</th></tr></thead>
-          <tbody>{r.items.map((it) => <ItemRow key={it.id} it={it} now={now} />)}</tbody>
+          <tbody>{r.items.map((it) => <ItemRow key={it.id} it={it} now={now} agreement={a.account} />)}</tbody>
         </table>
       </div>
     </Panel>
@@ -270,7 +270,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
                   <p className="small">Payment #{a.in_flight.payment_id} in flight: <Usdc amount={a.in_flight.amount} /> for item {a.in_flight.item}.</p>
                 )}
               </Panel>
-              <Receipts receipts={r.receipts} />
+              <Receipts receipts={r.receipts} agreement={a.account} />
             </>
           )}
 
@@ -356,7 +356,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
   );
 }
 
-function Receipts({ receipts }: { receipts: Room["receipts"] }) {
+function Receipts({ receipts, agreement }: { receipts: Room["receipts"]; agreement: string }) {
   return (
     <Panel title="Receipts" eyebrow="every payment is a receipt: item, evidence, amount, recipient, transaction" flush>
       {receipts.length === 0 ? (
@@ -373,7 +373,7 @@ function Receipts({ receipts }: { receipts: Room["receipts"] }) {
                   <td><Usdc amount={x.amount} /></td>
                   <td><Account id={x.recipient} /></td>
                   <td><Pill tone={x.via === "agent" ? "teal" : "neutral"}>{x.via}</Pill></td>
-                  <td><Hash value={x.evidence_hash} /></td>
+                  <td><EvidenceHash value={x.evidence_hash} agreement={agreement} item={x.item} /></td>
                   <td className="mono weak">{x.block.toLocaleString("en-US")}</td>
                 </tr>
               ))}
@@ -396,9 +396,9 @@ function Figure({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function ItemRow({ it, now }: { it: ItemView; now: number }) {
+function ItemRow({ it, now, agreement }: { it: ItemView; now: number; agreement: string }) {
   const evidence = it.evidence === "DeliveryAccepted"
-    ? (it.delivery ? <>delivered <Hash value={it.delivery.evidence_hash} /></> : <span className="faint">no delivery yet</span>)
+    ? (it.delivery ? <>delivered <EvidenceHash value={it.delivery.evidence_hash} agreement={agreement} item={it.id} /></> : <span className="faint">no delivery yet</span>)
     : <>period {it.evidence.PeriodEligible.period + 1}</>;
   return (
     <tr>

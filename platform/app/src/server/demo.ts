@@ -10,7 +10,7 @@ import "server-only";
 import { Account, JsonRpcProvider, KeyPair, KeyPairSigner, actions, type KeyPairString } from "near-api-js";
 import { deriveAgentKey } from "./demokey";
 import {
-  KeySigner, type AgreementClient, type AgreementView, type ItemView, type Mandate, type RecipientVersion,
+  KeySigner, demoDelivery, demoDeliveryPath, type AgreementClient, type AgreementView, type ItemView, type Mandate, type RecipientVersion,
 } from "@accord/sdk";
 import { accord, config } from "./accord";
 
@@ -262,7 +262,8 @@ export async function counterpartyStep(id: string): Promise<Step> {
     .filter((it: ItemView) => it.status === "Open" && !it.delivery && it.evidence === "DeliveryAccepted")
     .sort((x, y) => x.id - y.id)[0];
   if (next) {
-    const tx = await as("vendor", id).submitDelivery(next.id, "ee".repeat(32), `https://${d.domain}/deliveries/${id}/${next.id}`);
+    const evidence = demoDelivery(id, next.id);
+    const tx = await as("vendor", id).submitDelivery(next.id, evidence.hash, `https://${d.domain}${demoDeliveryPath(id, next.id)}`);
     return done(`Submitted delivery for item ${next.id}`, tx.txHash, `Your move: accept delivery ${next.id}, then let the agent pay it.`);
   }
   return wait("The vendor has delivered every item. Nothing left for it to do.");

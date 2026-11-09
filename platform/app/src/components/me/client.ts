@@ -4,7 +4,7 @@
 // signing client, to word an error, and to read a decision back from chain right before it is signed.
 
 import { useEffect, useState } from "react";
-import { Accord, AccordError, type Signer } from "@accord/sdk";
+import { Accord, AccordError, isDemoEvidence, type Signer } from "@accord/sdk";
 import type { PublicConfig } from "../AppConfig";
 
 const net = (cfg: PublicConfig) => (cfg.network === "sandbox" ? "sandbox" : "testnet");
@@ -69,7 +69,7 @@ export async function readBack(cfg: PublicConfig, room: string, d: Decision): Pr
     case "delivery": {
       const it = (await c.items()).find((x) => x.id === d.item);
       const stale = !it ? "This item no longer exists." : it.status !== "Delivered" ? `It is now ${it.status}.` : null;
-      return { amount: it?.due_amount ?? null, recipient: payee, stale, lines: it?.delivery ? [["Evidence", it.delivery.evidence_hash.slice(0, 16) + "…"]] : [] };
+      return { amount: it?.due_amount ?? null, recipient: payee, stale, lines: it?.delivery ? [["Evidence", it.delivery.evidence_hash.slice(0, 16) + "…" + (isDemoEvidence(it.delivery.evidence_hash, room, it.id) ? " (demo delivery evidence)" : "")]] : [] };
     }
     case "exception": {
       const e = (await c.exceptions()).find((x) => x.id === d.id);
