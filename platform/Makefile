@@ -14,8 +14,11 @@ help:
 	@grep -E '^[a-z-]+:' Makefile | grep -v '^atlas:' | sed 's/:.*//' | tr '\n' ' '; echo
 
 setup-check: ; @bash scripts/setup-check.sh
-ci: wasm ; @cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && pnpm -r typecheck && pnpm -r --filter './packages/*' --filter './services/*' --filter @accord/app test
-test: wasm ; @cargo test --workspace && pnpm -r --filter './packages/*' --filter './services/*' --filter @accord/app test
+# sdk and store ship as built dist/ that the other packages import; `pnpm install` builds them (the root `prepare`), and
+# these targets build them again so a changed sdk or store is what the typecheck and tests see.
+LIBS = pnpm --silent --filter @accord/sdk --filter @accord/store build
+ci: wasm ; @cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && $(LIBS) && pnpm -r typecheck && pnpm -r --filter './packages/*' --filter './services/*' --filter @accord/app test
+test: wasm ; @cargo test --workspace && $(LIBS) && pnpm -r --filter './packages/*' --filter './services/*' --filter @accord/app test
 wasm: ; @bash scripts/build-wasm.sh
 
 setup: ; @bash scripts/setup.sh

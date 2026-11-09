@@ -586,6 +586,7 @@ corepack enable && pnpm install
 | `make dev` | A local NEAR node with the real contracts, the three jobs' own code run natively (only the model is replaced, labelled `model.local`), a test USDC faucet, the keeper, the demo agent and the app at http://localhost:3100 |
 | `make sandbox` | The full procurement flow and one market-making period on a local sandbox, mocked steps marked `[mock]`, ending `sandbox: all checks passed` |
 | `make test` | `cargo test` for the workspace, then the package, service and app tests |
+| `pnpm -r typecheck && pnpm -r test` | The TypeScript typecheck and tests alone, no Rust needed (`pnpm install` has already built `@accord/sdk` and `@accord/store`, which the other packages import) |
 | `make attack NET=local` | `ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY` with the key revoked and deleted, then `AccessKeyDoesNotExist`, and `0.00 USDC moved by attempts` |
 | `make demo NET=local` | The whole loop from fresh accounts (14 s on 3 Nov 2026) |
 | `make market-making NET=local` | Two market-making agreements on Rhea's USDC/wNEAR pool, observed at real mainnet blocks: one period `Eligible` and paid, the stricter one `Withheld` and refused `ERR_PERIOD_WITHHELD` |

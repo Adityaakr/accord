@@ -16,7 +16,7 @@ The product:
 
 ```sh
 cd platform
-corepack enable && pnpm install
+corepack enable && pnpm install   # also builds @accord/sdk and @accord/store, which the others import
 make setup-check   # each pinned tool with its version and ok
 make test          # cargo tests, then the package, service and app tests
 ```
