@@ -43,9 +43,9 @@ const ITEMS: Item[] = [
   { name: "HOT Connect", mark: <img className={styles.tile} src="/assets/logos/hot-wallet.png" alt="" width={32} height={32} loading="lazy" />,
     role: "HOT's wallet connector library (@hot-labs/near-connect): the Accord app's sign-in, listing the NEAR wallets a principal can use on testnet." },
   { name: "Meteor Wallet", mark: <span className={`${styles.tile} ${styles.tileLight}`}><img src="/assets/logos/meteor-wallet.svg" alt="" width={24} height={24} loading="lazy" /></span>,
-    role: "A NEAR wallet for the Accord app; on testnet it signs delegate actions that Accord's relayer sends, so the user pays no gas." },
+    role: "A NEAR wallet for the Accord app; on testnet it signs delegate actions that Accord's relayer sends, so the user pays no gas except for opening a room, whose 2 NEAR deposit the wallet pays itself." },
   { name: "Intear Wallet", mark: <span className={`${styles.tile} ${styles.tileLight}`}><img src="/assets/logos/intear-wallet.svg" alt="" width={24} height={24} loading="lazy" /></span>,
-    role: "A NEAR wallet for the Accord app; on testnet it signs delegate actions that Accord's relayer sends, so the user pays no gas." },
+    role: "A NEAR wallet for the Accord app; on testnet it signs delegate actions that Accord's relayer sends, so the user pays no gas except for opening a room, whose 2 NEAR deposit the wallet pays itself." },
   { name: "NEAR Builders", mark: <img className={styles.tile} src="/assets/logos/near-builders.png" alt="" width={32} height={32} loading="lazy" />,
     role: "The NEAR builder community; Accord was built with its build resources." },
 ]

@@ -158,7 +158,7 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
       <ol className={styles.steps}>
         <Row n={1} icon="key" status={s1} title="Connect a wallet" text={w.accountId
           ? <>Signed in as <span className="mono">{w.accountId}</span>.</>
-          : <>A NEAR testnet wallet: <a className="link" href="https://wallet.meteorwallet.app" target="_blank" rel="noreferrer">Meteor</a> or <a className="link" href="https://wallet.intear.tech" target="_blank" rel="noreferrer">Intear</a> (switch it to testnet). Ledger, Nightly and WalletConnect work too. Meteor and Intear send through Accord&apos;s relayer, so you pay no gas.</>}>
+          : <>A NEAR testnet wallet: <a className="link" href="https://wallet.meteorwallet.app" target="_blank" rel="noreferrer">Meteor</a> or <a className="link" href="https://wallet.intear.tech" target="_blank" rel="noreferrer">Intear</a> (switch it to testnet). Ledger, Nightly and WalletConnect work too. Meteor and Intear send through Accord&apos;s relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit from the faucet&apos;s NEAR).</>}>
           {!w.accountId && <Link className={styles.primary} href="/signin?next=/try-it">Sign in</Link>}
         </Row>
 

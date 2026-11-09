@@ -42,7 +42,7 @@ export const DOC_PAGES: DocPage[] = [
             kind: "rows",
             rows: [
               { name: "Network", value: "NEAR testnet", detail: "Everything on this path is testnet with a test USDC token. Nothing here moves real money." },
-              { name: "Sign-in", value: "Meteor · Intear · Ledger · Nightly · WalletConnect", detail: "Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas." },
+              { name: "Sign-in", value: "Meteor · Intear · Ledger · Nightly · WalletConnect", detail: "Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit)." },
               { name: "Test funds", value: "2.50 NEAR · 100 tUSDC", detail: "The faucet tops your account up once a day per account. The room's `2 NEAR` deposit is returned when it closes." },
               { name: "Counterparty", value: "halcyon-demo.testnet", href: acct("halcyon-demo.testnet"), detail: "Accord's demo vendor, with its authority `halcyon-auth.testnet`. The demo vendor and the demo agent are Accord's own testnet accounts, labelled in the room." },
               { name: "Time", value: "about 3 minutes" },
