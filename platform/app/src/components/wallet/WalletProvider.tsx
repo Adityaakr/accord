@@ -79,9 +79,13 @@ function connectorSigner(wallet: ConnectorWallet, accountId: string, chain: stri
           deposit: String(opts.deposit ?? 0n),
         },
       };
+      // In a NEP-366 meta transaction the relayer pays any NEAR the delegate attaches, so only calls that attach at most
+      // 1 yoctoNEAR go through Accord's relayer; a call that attaches more (create_agreement's room deposit) is signed
+      // and paid by the person's own wallet.
+      const deposit = BigInt(opts.deposit ?? 0n);
       let outcome: unknown;
       try {
-        outcome = relays(wallet, chain)
+        outcome = relays(wallet, chain) && deposit <= 1n
           ? await sendRelayed(wallet, accountId, chain, contractId, action)
           : await wallet.signAndSendTransaction({ signerId: accountId, receiverId: contractId, actions: [action] });
       } catch (e) {

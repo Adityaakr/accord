@@ -6,8 +6,8 @@
 // factory's agreement accounts (the contract checks who may call what), and `ft_transfer_call` on a factory's own
 // token when it funds one of that factory's agreements (never a token into another factory's agreement). With the
 // optional second pair (Circle USDC) there are two factories, each with its own token. Each delegate holds exactly
-// one function call. Deposits come from the sender's own
-// account inside the delegate; the relayer's outer transaction attaches none.
+// one function call. The relayer pays any NEAR a delegate attaches (NEP-366),
+// so it carries calls that attach at most 1 yoctoNEAR; calls that attach more are signed and paid by the person's wallet.
 
 import { deserialize } from "borsh";
 import { SCHEMA } from "near-api-js";
@@ -96,11 +96,14 @@ export function rejectDelegate(d: DecodedDelegate, p: RelayPolicy): string | nul
   const pairs = policyPairs(p);
   if (pairs.some((x) => x.factory === da.receiverId)) {
     if (call.methodName !== "create_agreement") return "the relayer carries create_agreement only on the factory";
+    // NEP-366: the relayer, not the sender, pays any NEAR attached inside the delegate. Accord pays gas only.
+    if (call.deposit > 1n) return "the relayer attaches at most 1 yoctoNEAR; sign a call that attaches NEAR in your wallet";
     return null;
   }
   if (pairs.some((x) => agreementPattern(x.factory).test(da.receiverId))) {
     // never relay act: the contract identifies the agent by the signing key, and a relayer's key would stand in for it
     if (call.methodName === "act") return "the relayer never carries act; the agent signs it with its own key";
+    if (call.deposit > 1n) return "the relayer attaches at most 1 yoctoNEAR; sign a call that attaches NEAR in your wallet";
     return null;
   }
   const own = pairs.filter((x) => x.token === da.receiverId);

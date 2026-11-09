@@ -48,8 +48,12 @@ describe("decodeSignedDelegate", () => {
 });
 
 describe("receiver allowlist", () => {
-  it("carries create_agreement on the factory", async () => {
-    expect(await check({ receiverId: FACTORY, deposit: 2_000_000_000_000_000_000_000_000n })).toBeNull();
+  it("carries create_agreement on the factory when it attaches no NEAR", async () => {
+    expect(await check({ receiverId: FACTORY, deposit: 0n })).toBeNull();
+  });
+  it("refuses a delegate that attaches NEAR, which the relayer would pay (NEP-366)", async () => {
+    expect(await check({ receiverId: FACTORY, deposit: 2_000_000_000_000_000_000_000_000n })).toMatch(/at most 1 yoctoNEAR/);
+    expect(await check({ receiverId: `a1.${FACTORY}`, method: "approve_terms", deposit: 2n })).toMatch(/at most 1 yoctoNEAR/);
   });
   it("refuses any other method on the factory", async () => {
     expect(await check({ receiverId: FACTORY, method: "set_config" })).toMatch(/create_agreement only/);
@@ -141,8 +145,8 @@ describe("two factories, each with its own token", () => {
   });
 
   it("carries create_agreement on either factory, and nothing else on the second", async () => {
-    expect(await check2({ receiverId: FACTORY, deposit: 2n })).toBeNull();
-    expect(await check2({ receiverId: USDC_FACTORY, deposit: 2n })).toBeNull();
+    expect(await check2({ receiverId: FACTORY, deposit: 0n })).toBeNull();
+    expect(await check2({ receiverId: USDC_FACTORY, deposit: 0n })).toBeNull();
     expect(await check2({ receiverId: USDC_FACTORY, method: "set_config" })).toMatch(/create_agreement only/);
   });
   it("carries calls on agreements of either factory, never act", async () => {
