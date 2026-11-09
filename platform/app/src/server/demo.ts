@@ -7,7 +7,7 @@
 // as the agreement with the function-call key the buyer installed; it is never relayed.
 
 import "server-only";
-import { Account, JsonRpcProvider, KeyPair, KeyPairSigner, actions, type KeyPairString } from "near-api-js";
+import { Account, KeyPair, KeyPairSigner, actions, type KeyPairString } from "near-api-js";
 import { deriveAgentKey } from "./demokey";
 import {
   KeySigner, demoDelivery, demoDeliveryPath, type AgreementClient, type AgreementView, type ItemView, type Mandate, type RecipientVersion,
@@ -115,7 +115,7 @@ export function demoAgent(agreement: string, generation: number): AgreementClien
 function faucetAccount(): Account {
   const id = process.env.FAUCET_ACCOUNT, key = process.env.FAUCET_KEY;
   if (!id || !key) throw new Error("the faucet is not configured");
-  return new Account(id, new JsonRpcProvider({ url: config().rpc }), new KeyPairSigner(KeyPair.fromString(key as KeyPairString)));
+  return new Account(id, accord().chain.provider, new KeyPairSigner(KeyPair.fromString(key as KeyPairString)));
 }
 
 export interface Balances { near: string; tusdc: string }

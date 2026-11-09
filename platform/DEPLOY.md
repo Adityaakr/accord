@@ -16,7 +16,7 @@ website service forwards `<site>/app/*` to it, so visitors use one address.
 | `ACCORD_NETWORK` | `testnet` |
 | `ACCORD_FACTORY` | `accord-v2.testnet` |
 | `ACCORD_TOKEN` | `tusdc.accord-v1.testnet` |
-| `NEAR_RPC_URL` | `https://test.rpc.fastnear.com` |
+| `NEAR_RPC_URL` | `https://test.rpc.fastnear.com` (one URL or a comma-separated list; the public testnet endpoints follow as fallbacks for rate limits and outages, DECISIONS section 28) |
 | `RELAYER_ACCOUNT` | the relayer account (`relay.accord-v2.testnet`) |
 | `RELAYER_KEY` | the relayer's key |
 | `ACCORD_SESSION_SECRET` | a long random string (e.g. `openssl rand -hex 32`) |

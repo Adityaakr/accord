@@ -4,29 +4,27 @@
 // the gitignored .env) and attaches no deposit of its own. Under NEP-366 the relayer pays any NEAR a delegate attaches, so the policy (delegate.ts) only carries calls that attach at most 1 yoctoNEAR.
 
 import "server-only";
-import { Account, JsonRpcProvider, KeyPair, KeyPairSigner, actions, type KeyPairString } from "near-api-js";
+import { Account, KeyPair, KeyPairSigner, actions, type KeyPairString } from "near-api-js";
+import { RotatingRpcProvider, rpcEndpoints, rpcRequest } from "@accord/sdk";
 import { accord, config } from "./accord";
 import type { FactoryPair } from "./delegate";
 import { decodeSignedDelegate, innerStatus, rejectDelegate, type DecodedDelegate, type RawTx } from "./delegate";
 
-const rpcUrl = () => process.env.NEAR_RPC_URL || "https://rpc.testnet.near.org";
+// NEAR_RPC_URL (one URL or a comma list) first, then the public testnet endpoints; rotates only on a rate limit or
+// a transport failure, so the relayed call's own errors reach the caller as they are (@accord/sdk RotatingRpcProvider).
+let provider: RotatingRpcProvider | null = null;
+const rpc = () => (provider ??= new RotatingRpcProvider(rpcEndpoints(process.env.NEAR_RPC_URL, "testnet")));
 
 function relayer(): Account {
   const id = process.env.RELAYER_ACCOUNT, key = process.env.RELAYER_KEY;
   if (!id || !key) throw new Error("the relayer is not configured");
-  return new Account(id, new JsonRpcProvider({ url: rpcUrl() }), new KeyPairSigner(KeyPair.fromString(key as KeyPairString)));
+  return new Account(id, rpc(), new KeyPairSigner(KeyPair.fromString(key as KeyPairString)));
 }
 
 async function height(): Promise<bigint> {
-  const r = await fetch(rpcUrl(), {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ jsonrpc: "2.0", id: "accord-relay", method: "block", params: { finality: "final" } }),
-    cache: "no-store",
-  });
-  const b = (await r.json()) as { result?: { header: { height: number } } };
-  if (!b.result) throw new Error("could not read the chain height");
-  return BigInt(b.result.header.height);
+  const b = await rpcRequest<{ header?: { height: number } }>(rpc(), "block", { finality: "final" });
+  if (!b?.header) throw new Error("could not read the chain height");
+  return BigInt(b.header.height);
 }
 
 /**

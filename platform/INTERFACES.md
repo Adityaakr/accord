@@ -632,7 +632,7 @@ No route accepts a field named or shaped like a mandate; `app/tests/no-mandate-r
 
 | Variable | Used by | Meaning |
 | --- | --- | --- |
-| `NEAR_NETWORK`, `NEAR_RPC_URL`, `NEAR_RPC_FALLBACK_URL`, `NEAR_ARCHIVAL_RPC_URL` | all | `testnet`; endpoints from DECISIONS |
+| `NEAR_NETWORK`, `NEAR_RPC_URL`, `NEAR_RPC_FALLBACK_URL`, `NEAR_ARCHIVAL_RPC_URL` | all | `testnet`; endpoints from DECISIONS. `NEAR_RPC_URL` may be a comma-separated list; the SDK's `RotatingRpcProvider` tries it first, then `RPC.testnet.urls`, moving on only after a rate limit or a transport failure (DECISIONS section 28) |
 | `NEAR_MAINNET_RPC_URL`, `NEAR_MAINNET_ARCHIVAL_RPC_URL` | scripts (`make probe-venue`, `make verify`) | Read-only mainnet views for the venue |
 | `ACCORD_FACTORY`, `ACCORD_TOKEN` | all | Factory account; token id (USDC or tUSDC) |
 | `FACTORY_KEY` | scripts | Deploy and owner key for the factory (never on Railway) |
