@@ -7,7 +7,8 @@ import { useMemo, useState } from "react";
 import { AccountId, shortAccount } from "@/components/account/AccountId";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Accord, formatUnits, parseUnits, type Kind, type Mandate } from "@accord/sdk";
+import { formatUnits, parseUnits, type Kind, type Mandate } from "@accord/sdk";
+import { browserAccord } from "@/components/chainClient";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { useAppConfig } from "@/components/AppConfig";
 import { errorText } from "@/components/me/client";
@@ -84,7 +85,7 @@ export function SealForm({
       const mandate: Mandate = {
         kind, role, shared: preset.mandate.shared, limits: fromDraft(limits, preset.mandate.limits), instructions: text,
       };
-      const client = new Accord({ network: cfg.network === "sandbox" ? "sandbox" : "testnet", factory: cfg.factory, rpc: cfg.rpc, signer: w.signer })
+      const client = browserAccord(cfg, { signer: w.signer })
         .agreement(agreement);
       setDone(await client.sealMandate(mandate, { role }));
       router.refresh(); // "Sealed so far" re-reads the commitments

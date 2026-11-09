@@ -4,19 +4,19 @@
 // signing client, to word an error, and to read a decision back from chain right before it is signed.
 
 import { useEffect, useState } from "react";
-import { Accord, AccordError, isDemoEvidence, isRpcBusy, type Signer } from "@accord/sdk";
+import { AccordError, isDemoEvidence, isRpcBusy, type Signer } from "@accord/sdk";
 import type { PublicConfig } from "../AppConfig";
+import { browserAccord } from "../chainClient";
+import { onVisibleInterval } from "../visible";
 
-const net = (cfg: PublicConfig) => (cfg.network === "sandbox" ? "sandbox" : "testnet");
-
-/** The agreement client that signs with the person's own wallet */
+/** The agreement client that signs with the person's own wallet; it reads through the app's server */
 export function agreementClient(signer: Signer, cfg: PublicConfig, id: string) {
-  return new Accord({ network: net(cfg), factory: cfg.factory, rpc: cfg.rpc, signer }).agreement(id);
+  return browserAccord(cfg, { signer }).agreement(id);
 }
 
-/** A read-only agreement client: views straight from the RPC, no signer */
+/** A read-only agreement client: views through the app's server (/api/chain), no signer */
 export function readClient(cfg: PublicConfig, id: string) {
-  return new Accord({ network: net(cfg), factory: cfg.factory, rpc: cfg.rpc }).agreement(id);
+  return browserAccord(cfg).agreement(id);
 }
 
 export function errorText(e: unknown): string {
@@ -103,8 +103,8 @@ export function useMe<T>(path: string, account: string | null, every = 15000) {
       .then((b) => { if (live) { setData(b); setError(null); } })
       .catch((e: Error) => { if (live) setError(e.message); });
     void load();
-    const t = window.setInterval(load, every);
-    return () => { live = false; window.clearInterval(t); };
+    const stop = onVisibleInterval(load, every);
+    return () => { live = false; stop(); };
   }, [path, account, every, tick]);
   return { data, error, reload: () => setTick((x) => x + 1) };
 }

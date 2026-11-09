@@ -7,7 +7,8 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Accord, AccordError, formatUnits, type Kind, type Params } from "@accord/sdk";
+import { AccordError, formatUnits, type Kind, type Params } from "@accord/sdk";
+import { browserAccord } from "@/components/chainClient";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { CIRCLE_FAUCET, useAppConfig } from "@/components/AppConfig";
 import type { PixelName } from "@/components/PixelIcon";
@@ -98,7 +99,7 @@ export function NewRoomFlow({ network, deposit, demoAllowed }: { network: string
     setBusy(true);
     setError(null);
     try {
-      const accord = new Accord({ network: network === "sandbox" ? "sandbox" : "testnet", factory, rpc: cfg.rpc, signer: w.signer });
+      const accord = browserAccord(cfg, { factory, signer: w.signer });
       const { agreement } = await accord.createAgreement({
         kind: type.kind, title: title.trim(), vendor: vendor.trim(), vendor_authority: authority.trim(),
         canaries: canaryList, params: demo ? DEMO : LIVE,

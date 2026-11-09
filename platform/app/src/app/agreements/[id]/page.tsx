@@ -170,7 +170,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
 
   return (
     <div className="container">
-      <AutoRefresh seconds={6} />
+      <AutoRefresh seconds={10} />
       <header className={styles.head}>
         <div className={styles.headTop}>
           <Link href="/rooms" className="small link">Deal rooms</Link>

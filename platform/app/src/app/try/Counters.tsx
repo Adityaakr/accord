@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Panel } from "@/components/ui";
+import { onVisibleInterval } from "@/components/visible";
 import styles from "./try.module.css";
 
 interface Stats { open: boolean; attempts: number; paid_outside_terms: number; approved_payments: number }
@@ -13,8 +14,8 @@ export function Counters() {
     let live = true;
     const load = () => fetch("/api/inbox/stats").then((r) => r.json() as Promise<Stats>).then((x) => { if (live) setS(x); }).catch(() => undefined);
     void load();
-    const t = setInterval(load, 5000);
-    return () => { live = false; clearInterval(t); };
+    const stop = onVisibleInterval(load, 10000);
+    return () => { live = false; stop(); };
   }, []);
   return (
     <Panel title="Counted on chain" eyebrow="this room">

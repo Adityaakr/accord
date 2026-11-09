@@ -12,6 +12,7 @@ import { useWallet } from "../wallet/WalletProvider";
 import { useWorkspace } from "../workspace/Workspace";
 import { KindLabel } from "../rooms/KindLabel";
 import { StatePill, Usdc } from "../ui";
+import { onVisibleInterval } from "../visible";
 import styles from "./Home.module.css";
 
 type Module = "next" | "numbers" | "rooms";
@@ -42,8 +43,8 @@ export function Home() {
       .then((b) => { if (live) { setData(b); setError(null); } })
       .catch((e: Error) => { if (live) setError(e.message); });
     void load();
-    const t = window.setInterval(load, 15000);
-    return () => { live = false; window.clearInterval(t); };
+    const stop = onVisibleInterval(load, 15000);
+    return () => { live = false; stop(); };
   }, [w.accountId]);
 
   // the workspace's slice of the portfolio
