@@ -3,11 +3,15 @@
 //   "pay"    pays the first eligible item once, to the active recipient, signed as the agreement with that key.
 //   "attack" asks the agent to pay a new account instead; the contract refuses it (ERR_PAYEE_MISMATCH) on the record.
 // The agent signs act itself with the agreement's function-call key; nothing is relayed. Revoke stays the buyer's.
+// "pay" and "attack" need the session of the room's buyer (demoguard.ts): five refusals revoke the key, so nobody
+// else may make the agent act in someone's room.
 import { NextResponse } from "next/server";
 import { AccordError } from "@accord/sdk";
 import { allow, sameOriginJson } from "@/server/ratelimit";
 import { demoAgent, demoAgentKey, demoConfig, demoReady, isDemoRoom } from "@/server/demo";
 import { accord, isConfiguredAgreement } from "@/server/accord";
+import { sessionAccount } from "@/server/session";
+import { agentGuard } from "@/server/demoguard";
 
 export const dynamic = "force-dynamic";
 // the act outcome without its bigint gas figure, which JSON cannot carry
@@ -27,6 +31,8 @@ export async function POST(req: Request) {
   const a = await accord().agreement(agreement).get().catch(() => null);
   if (!a) return NextResponse.json({ error: "no such agreement" }, { status: 404 });
   if (!isDemoRoom(a)) return NextResponse.json({ error: "the demo agent only runs in rooms opened against Accord's demo vendor" }, { status: 403 });
+  const refused = agentGuard(action, await sessionAccount(), a.buyer);
+  if (refused) return NextResponse.json({ error: refused.error, code: refused.code }, { status: refused.status });
   const key = demoAgentKey(agreement, a.revoked_keys);
   if (action === "key") return NextResponse.json({ publicKey: key.publicKey, installed: a.agent_key === key.publicKey });
 

@@ -12,6 +12,7 @@ import { useWallet } from "@/components/wallet/WalletProvider";
 import { tokenSymbol, useAppConfig } from "@/components/AppConfig";
 import { Panel, Pill } from "@/components/ui";
 import { agreementClient, errorText } from "@/components/me/client";
+import { useOrg } from "@/components/org/OrgProvider";
 import styles from "./demo.module.css";
 
 interface Step { did: string | null; next: string; tx: string | null; yourMove: boolean; error?: string }
@@ -21,6 +22,7 @@ const POLL_MS = 8000;
 
 export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView; explorer: string | null }) {
   const w = useWallet();
+  const org = useOrg();
   const cfg = useAppConfig();
   const router = useRouter();
   const [step, setStep] = useState<Step | null>(null);
@@ -81,7 +83,14 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
   async function agentDo(action: "pay" | "attack") {
     setBusy(action); setAgent(null);
     try {
-      const r = await fetch("/api/demo-agent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ agreement: a.account, action }) });
+      // pay and attack need the buyer's session (the cookie /api/session sets, same origin so fetch sends it);
+      // without one, confirm it is you with a signed message and ask once more
+      const ask = () => fetch("/api/demo-agent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ agreement: a.account, action }) });
+      let r = await ask();
+      if (r.status === 401) {
+        if (!(await org.confirm())) { setAgent({ ok: false, text: "Confirm it's you (a signed message, no transaction) so the demo agent knows the buyer asked." }); return; }
+        r = await ask();
+      }
       const b = (await r.json()) as AgentOut;
       if (!r.ok) { setAgent({ ok: false, text: b.error ?? `the agent could not act (${r.status})` }); return; }
       const amt = (Number(b.amount) / 1e6).toFixed(2);
