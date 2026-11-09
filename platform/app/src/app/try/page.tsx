@@ -99,7 +99,7 @@ export default async function Try() {
           </Panel>
           <Panel title="About this room">
             <p className="small">This public demo room re-arms its agent {duration(t.rearmSecs)} after a revocation. In a real agreement only the buyer can do that.</p>
-            <p className="small">Its items are 0.01 USDC each, one due at a time, the next {duration(t.itemIntervalSecs)} after a payment. The form only stores your message; it holds no key and calls no contract. Ten messages an hour per visitor.</p>
+            <p className="small">Its items are 0.01 tUSDC each, one due at a time, the next {duration(t.itemIntervalSecs)} after a payment. The form only stores your message; it holds no key and calls no contract. Ten messages an hour per visitor.</p>
             <p className="small">The re-arm never asks for a payment. When a room&apos;s term ends, closing it settles any item the terms already made payable, as in every agreement.</p>
           </Panel>
         </aside>

@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { isRpcBusy } from "@accord/sdk";
 import { formatUnits, type ItemView, type Refusal } from "@accord/sdk";
 import { room, type Room } from "@/server/data";
-import { config } from "@/server/accord";
+import { config, symbolFor } from "@/server/accord";
 import { Account, Empty, EvidenceHash, Hash, KV, Meter, Near, Panel, Pill, Usdc, type Tone } from "@/components/ui";
 import { SourceLine } from "@/components/SourceLine";
 import { AutoRefresh } from "@/components/AutoRefresh";
@@ -78,6 +78,8 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
   const explorer = (acct: string) => (c.explorer ? `${c.explorer}/address/${acct}` : undefined);
   const now = a.now;
   const isAtlas = a.kind === "market-making";
+  // test-token rooms say tUSDC, Circle rooms USDC, everywhere on the page
+  const sym = symbolFor(a.factory);
   const total = BigInt(a.total);
   const paid = BigInt(a.paid);
   const funded = BigInt(a.funded);
@@ -96,7 +98,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
     attempt: typeof neg === "object" ? ("Requested" in neg ? neg.Requested.attempt : neg.Ready.attempts + 1) : null,
     buyer: a.buyer, vendor: a.vendor,
     buyerCommit: r.commitments.buyer?.commitment ?? null, vendorCommit: r.commitments.vendor?.commitment ?? null,
-    terms: terms ? { total: usd(terms.total), items: terms.items.length, hash: a.terms_hash, label: isAtlas ? "periods" : "items" } : null,
+    terms: terms ? { total: usd(terms.total), items: terms.items.length, hash: a.terms_hash, label: isAtlas ? "periods" : "items", unit: sym } : null,
     verifyHref: `/verify/${a.account}`,
   };
 
@@ -120,7 +122,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
       {terms ? (
         <>
           <div className={styles.figures}>
-            <Figure label="Total" value={<Usdc amount={terms.total} />} />
+            <Figure label="Total" value={<Usdc symbol={sym} amount={terms.total} />} />
             <Figure label={isAtlas ? "Periods" : "Items"} value={<span className="num">{terms.items.length}</span>} />
             <Figure label="Term" value={<span className="num">{duration(terms.duration_secs)}</span>} />
             <Figure label={isAtlas ? "Slots per period" : "Acceptance window"}
@@ -149,7 +151,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead><tr><th>#</th><th>Amount</th><th>Due</th><th>Evidence</th><th>Status</th></tr></thead>
-          <tbody>{r.items.map((it) => <ItemRow key={it.id} it={it} now={now} agreement={a.account} />)}</tbody>
+          <tbody>{r.items.map((it) => <ItemRow key={it.id} it={it} now={now} agreement={a.account} symbol={sym} />)}</tbody>
         </table>
       </div>
     </Panel>
@@ -259,23 +261,23 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
             <>
               <Panel title="Escrow" eyebrow={`held by ${a.account.split(".")[0]} itself`}>
                 <div className={styles.escrowFigure}>
-                  <Usdc amount={escrow < 0n ? 0n : escrow} />
+                  <Usdc symbol={sym} amount={escrow < 0n ? 0n : escrow} />
                   <span className="small">in escrow</span>
                 </div>
                 <Meter value={paid} max={total > 0n ? total : 1n} />
                 <KV rows={[
-                  ["Funded", <Usdc key="f" amount={funded} />],
-                  ["Paid", <Usdc key="p" amount={paid} />],
-                  ...(reserved > 0n ? [["Set aside for the vendor", <Usdc key="r" amount={reserved} />] as [string, React.ReactNode]] : []),
-                  ...(BigInt(a.refunded) > 0n ? [["Refunded", <Usdc key="rf" amount={a.refunded} />] as [string, React.ReactNode]] : []),
-                  ["Terms total", <Usdc key="t" amount={total} />],
+                  ["Funded", <Usdc key="f" symbol={sym} amount={funded} />],
+                  ["Paid", <Usdc key="p" symbol={sym} amount={paid} />],
+                  ...(reserved > 0n ? [["Set aside for the vendor", <Usdc key="r" symbol={sym} amount={reserved} />] as [string, React.ReactNode]] : []),
+                  ...(BigInt(a.refunded) > 0n ? [["Refunded", <Usdc key="rf" symbol={sym} amount={a.refunded} />] as [string, React.ReactNode]] : []),
+                  ["Terms total", <Usdc key="t" symbol={sym} amount={total} />],
                   ["NEAR for gas and storage", <Near key="n" yocto={a.budget.liquid} />],
                 ]} />
                 {a.in_flight && (
-                  <p className="small">Payment #{a.in_flight.payment_id} in flight: <Usdc amount={a.in_flight.amount} /> for item {a.in_flight.item}.</p>
+                  <p className="small">Payment #{a.in_flight.payment_id} in flight: <Usdc symbol={sym} amount={a.in_flight.amount} /> for item {a.in_flight.item}.</p>
                 )}
               </Panel>
-              <Receipts receipts={r.receipts} agreement={a.account} />
+              <Receipts receipts={r.receipts} agreement={a.account} symbol={sym} />
             </>
           )}
 
@@ -291,7 +293,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
                     {r.exceptions.map((e) => (
                       <li key={e.id} className={styles.exception}>
                         <div className={styles.exceptionTop}>
-                          <span className="h5">Item {e.item} · <Usdc amount={e.amount} /></span>
+                          <span className="h5">Item {e.item} · <Usdc symbol={sym} amount={e.amount} /></span>
                           <Pill tone={e.status === "pending" ? "warn" : e.status === "approved" ? "teal" : "muted"}>{e.status}</Pill>
                         </div>
                         <p className="body">{e.reason}</p>
@@ -311,7 +313,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
               aside={<span className={`mono ${a.refusals > 0 ? styles.refusalCount : "faint"}`}>{a.refusals}</span>}
               flush
             >
-              <Activity events={events} now={now} />
+              <Activity events={events} now={now} symbol={sym} />
             </Panel>
           )}
 
@@ -349,8 +351,8 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
           <Actions agreement={a} items={r.items} exceptions={r.exceptions} recipients={r.recipients} periods={r.periods} />
           <Panel title="At a glance">
             <KV rows={[
-              ["In escrow", <CountUp key="e" value={(escrow < 0n ? 0n : escrow).toString()} unit="USDC" />],
-              ["Paid", <CountUp key="p" value={paid.toString()} unit="USDC" />],
+              ["In escrow", <CountUp key="e" value={(escrow < 0n ? 0n : escrow).toString()} unit={sym} />],
+              ["Paid", <CountUp key="p" value={paid.toString()} unit={sym} />],
               ["Refused", <span key="r" className={`num ${a.refusals > 0 ? styles.refusedText : ""}`}>{a.refusals}</span>],
               ["Recipient", a.recipient ? <span key="rc" className="mono" title={a.recipient.account}>{shortAccount(a.recipient.account)}</span> : <span key="rc" className="faint">none yet</span>],
             ]} />
@@ -361,7 +363,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
   );
 }
 
-function Receipts({ receipts, agreement }: { receipts: Room["receipts"]; agreement: string }) {
+function Receipts({ receipts, agreement, symbol }: { receipts: Room["receipts"]; agreement: string; symbol: string }) {
   return (
     <Panel title="Receipts" eyebrow="every payment is a receipt: item, evidence, amount, recipient, transaction" flush>
       {receipts.length === 0 ? (
@@ -375,7 +377,7 @@ function Receipts({ receipts, agreement }: { receipts: Room["receipts"]; agreeme
                 <tr key={x.payment_id}>
                   <td className="mono">#{x.payment_id}</td>
                   <td className="mono">{x.item}</td>
-                  <td><Usdc amount={x.amount} /></td>
+                  <td><Usdc symbol={symbol} amount={x.amount} /></td>
                   <td><Account id={x.recipient} /></td>
                   <td><Pill tone={x.via === "agent" ? "teal" : "neutral"}>{x.via}</Pill></td>
                   <td><EvidenceHash value={x.evidence_hash} agreement={agreement} item={x.item} /></td>
@@ -401,7 +403,7 @@ function Figure({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function ItemRow({ it, now, agreement }: { it: ItemView; now: number; agreement: string }) {
+function ItemRow({ it, now, agreement, symbol }: { it: ItemView; now: number; agreement: string; symbol: string }) {
   const evidence = it.evidence === "DeliveryAccepted"
     ? (it.delivery ? <>delivered <EvidenceHash value={it.delivery.evidence_hash} agreement={agreement} item={it.id} /></> : <span className="faint">no delivery yet</span>)
     : <>period {it.evidence.PeriodEligible.period + 1}</>;
@@ -409,7 +411,7 @@ function ItemRow({ it, now, agreement }: { it: ItemView; now: number; agreement:
     <tr>
       <td className="mono">{it.id}</td>
       <td>
-        <Usdc amount={it.due_amount} />
+        <Usdc symbol={symbol} amount={it.due_amount} />
         {it.exception && <span className="small"> · exception</span>}
       </td>
       <td className="small">{it.due_at ? when(it.due_at, now) : <span className="faint">after approval</span>}</td>

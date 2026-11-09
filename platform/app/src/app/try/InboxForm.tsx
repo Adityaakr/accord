@@ -47,7 +47,7 @@ export function InboxForm({ recipient, due }: { recipient: string | null; due: {
     <form className={styles.form} onSubmit={send}>
       <div className={styles.facts}>
         <span className="small">Authorised recipient <span className="mono strong">{recipient ?? "none yet"}</span></span>
-        <span className="small">Due now {due.length ? due.map((d) => <span key={d.item} className="mono strong"> item {d.item} · {formatUnits(d.amount, 6, 2)} USDC</span>) : <span className="mono"> nothing</span>}</span>
+        <span className="small">Due now {due.length ? due.map((d) => <span key={d.item} className="mono strong"> item {d.item} · {formatUnits(d.amount, 6, 2)} tUSDC</span>) : <span className="mono"> nothing</span>}</span>
       </div>
       <div className={styles.ideas}>
         {IDEAS.map((i) => (

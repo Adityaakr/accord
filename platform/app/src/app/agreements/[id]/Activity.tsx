@@ -18,7 +18,7 @@ function ago(at: number, now: number) {
   return s < 90 ? `${s} s ago` : s < 5400 ? `${Math.round(s / 60)} min ago` : s < 172800 ? `${Math.round(s / 3600)} h ago` : `${Math.round(s / 86400)} d ago`;
 }
 
-export function Activity({ events, now }: { events: Event[]; now: number }) {
+export function Activity({ events, now, symbol = "USDC" }: { events: Event[]; now: number; symbol?: string }) {
   // Keys present on first render never animate; anything new after that slides in once.
   const seen = useRef<Set<string> | null>(null);
   const [, force] = useState(0);
@@ -42,7 +42,7 @@ export function Activity({ events, now }: { events: Event[]; now: number }) {
               <span className={styles.body}>
                 <span className={styles.code}>{e.code}</span>
                 <span className={styles.detail}>
-                  {e.amount ? <>asked <b>{e.amount} USDC</b>{e.allowedAmount ? <> · terms allow <b>{e.allowedAmount} USDC</b></> : null}</> : null}
+                  {e.amount ? <>asked <b>{e.amount} {symbol}</b>{e.allowedAmount ? <> · terms allow <b>{e.allowedAmount} {symbol}</b></> : null}</> : null}
                   {e.recipient ? <>{e.amount ? " · " : ""}to <span className="mono">{e.recipient}</span>{e.allowedRecipient && e.allowedRecipient !== e.recipient ? <> · approved <span className="mono">{e.allowedRecipient}</span></> : null}</> : null}
                   {!e.amount && !e.recipient ? <>item {e.item}</> : null}
                 </span>
@@ -57,7 +57,7 @@ export function Activity({ events, now }: { events: Event[]; now: number }) {
             <li key={e.key} className={`${styles.row} ${arriving ? styles.arrive : ""}`}>
               <span className={`${styles.kind} ${styles.paid}`}>Paid</span>
               <span className={styles.body}>
-                <span className={styles.amount}>{e.amount} USDC</span>
+                <span className={styles.amount}>{e.amount} {symbol}</span>
                 <span className={styles.detail}>item {e.item} → <span className="mono">{e.recipient}</span></span>
               </span>
               <span className={styles.meta}>#{e.id} · {e.via} · block {e.block.toLocaleString("en-US")}</span>
@@ -68,7 +68,7 @@ export function Activity({ events, now }: { events: Event[]; now: number }) {
           <li key={e.key} className={`${styles.row} ${arriving ? styles.arrive : ""}`}>
             <span className={styles.kind}>Exception</span>
             <span className={styles.body}>
-              <span className={styles.amount}>{e.amount} USDC</span>
+              <span className={styles.amount}>{e.amount} {symbol}</span>
               <span className={styles.detail}>item {e.item} · {e.status} · asked by the {e.by} · {e.reason}</span>
             </span>
             <span className={styles.meta}>#{e.id} · {ago(e.at, now)}</span>

@@ -79,6 +79,11 @@ export function config(): AppConfig {
   };
 }
 
+/** How the app names an agreement's token: "tUSDC" for the default factory's test token, "USDC" for Circle's. */
+export function symbolFor(factory: string): "USDC" | "tUSDC" {
+  return config().currencies.find((c) => c.factory === factory)?.id === "usdc" ? "USDC" : "tUSDC";
+}
+
 /** The configured factories, the default first. */
 export function factories(): string[] {
   return config().currencies.map((c) => c.factory);

@@ -19,7 +19,7 @@ export interface NegotiationProps {
   vendor: string;
   buyerCommit: string | null;
   vendorCommit: string | null;
-  terms: { total: string; items: number; hash: string | null; label: string } | null;
+  terms: { total: string; items: number; hash: string | null; label: string; unit?: string } | null;
   verifyHref: string;
 }
 
@@ -85,7 +85,7 @@ export function Negotiation(p: NegotiationProps) {
           <div className={styles.terms}>
             <div className={styles.termsMain}>
               <span className={styles.termsLabel}>Agreed terms</span>
-              <span className={styles.big}>{p.terms.total}<span className={styles.unit}> USDC</span></span>
+              <span className={styles.big}>{p.terms.total}<span className={styles.unit}> {p.terms.unit ?? "USDC"}</span></span>
               <span className={styles.meta}>{p.terms.items} {p.terms.label}{p.terms.hash ? ` · ${short(p.terms.hash)}` : ""}</span>
             </div>
             <div className={styles.termsSide}>

@@ -12,7 +12,7 @@ import {
 } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { ThrowawayTag } from "@/components/wallet/ThrowawayTag";
-import { useAppConfig } from "@/components/AppConfig";
+import { tokenSymbol, useAppConfig } from "@/components/AppConfig";
 import { Panel } from "@/components/ui";
 import { agreementClient, errorText, txLine } from "@/components/me/client";
 import { can, useOrg, type Capability } from "@/components/org/OrgProvider";
@@ -91,7 +91,7 @@ export function Actions({
     if (role === "buyer" && a.state === "Executing") {
       const missing = BigInt(a.total) - BigInt(a.funded);
       if (missing > 0n) {
-        add("fund", <Btn busy={busy} primary label={`Fund ${formatUnits(missing)} USDC`} onClick={open("Fund the escrow", () => client.fund(missing.toString()))} />);
+        add("fund", <Btn busy={busy} primary label={`Fund ${formatUnits(missing)} ${tokenSymbol(cfg, a.factory)}`} onClick={open("Fund the escrow", () => client.fund(missing.toString()))} />);
       }
       for (const v of recipients.filter((x) => x.status === "AuthorityApproved")) {
         add(`accept-${v.version}`, (
@@ -111,7 +111,7 @@ export function Actions({
       for (const e of exceptions.filter((x) => x.status === "pending")) {
         add(`ex-${e.id}`, (
           <div className={styles.pair}>
-            <Btn busy={busy} label={`Approve exception ${e.id} · ${formatUnits(e.amount)} USDC`} onClick={open("Approve the exception", () => client.approveException(e.id))} />
+            <Btn busy={busy} label={`Approve exception ${e.id} · ${formatUnits(e.amount)} ${tokenSymbol(cfg, a.factory)}`} onClick={open("Approve the exception", () => client.approveException(e.id))} />
             <Btn busy={busy} quiet label="Reject" onClick={open("Reject the exception", () => client.rejectException(e.id))} />
           </div>
         ));
