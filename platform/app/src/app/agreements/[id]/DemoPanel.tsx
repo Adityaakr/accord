@@ -5,6 +5,7 @@
 // is run by Accord for this test room and pays with the key the buyer installs. Every buyer step stays in the
 // buyer's own wallet, and the contract checks every call the same way it checks anyone's.
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRefreshSoon } from "@/components/refreshSoon";
 import type { AgreementView } from "@accord/sdk";
@@ -39,6 +40,11 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
   const txUrl = (h: string) => (explorer ? `${explorer}/txns/${h}` : null);
   const client = useMemo(() => (w.signer ? agreementClient(w.signer, cfg, a.account) : null), [w.signer, cfg, a.account]);
   const closed = a.state === "Settled" || a.state === "Cancelled" || a.state === "NoDeal";
+  // Signed out, the panel only describes the room: it never calls the demo endpoints (the counterparty and the agent
+  // act for a signed-in visitor, in practice the room's buyer).
+  const signedIn = !!w.accountId;
+  // the buyer revoked the agent's key and has not installed another: the agent cannot pay any more
+  const revoked = a.revoked_keys > 0 && !a.agent_key;
 
   const runStep = useCallback(async () => {
     if (running.current) return;
@@ -66,7 +72,7 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
   }, [a.account, refreshSoon]);
 
   useEffect(() => {
-    if (!auto || closed) return;
+    if (!auto || closed || !signedIn) return;
     let stop = false;
     let t: ReturnType<typeof setTimeout> | undefined;
     const tick = async () => {
@@ -75,13 +81,13 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
     };
     void tick();
     return () => { stop = true; clearTimeout(t); };
-  }, [auto, closed, runStep]);
+  }, [auto, closed, signedIn, runStep]);
 
   useEffect(() => {
-    if (a.state !== "Executing") return;
+    if (a.state !== "Executing" || !signedIn) return;
     void fetch("/api/demo-agent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ agreement: a.account, action: "key" }) })
       .then((r) => (r.ok ? r.json() : null)).then((b: { publicKey: string; installed: boolean } | null) => setAgentKey(b)).catch(() => setAgentKey(null));
-  }, [a.account, a.state, a.agent_key]);
+  }, [a.account, a.state, a.agent_key, signedIn]);
 
   async function startAgent() {
     if (!client || !agentKey) return;
@@ -122,7 +128,7 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
     } finally { setBusy(null); }
   }
 
-  const installed = !!agentKey?.installed;
+  const installed = !!agentKey?.installed && !!a.agent_key;
 
   return (
     <Panel title="Demo counterparty" eyebrow="Testnet demo" aside={<button type="button" className={styles.toggle} onClick={() => setAuto((v) => !v)} aria-pressed={auto}>{auto ? "auto on" : "auto off"}</button>}>
@@ -136,10 +142,10 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
             <span>{last.did}{last.tx ? <> · {txUrl(last.tx) ? <a className="mono link" href={txUrl(last.tx)!} target="_blank" rel="noreferrer">tx {last.tx.slice(0, 8)}</a> : <span className="mono">tx {last.tx.slice(0, 8)}</span>}</> : null}</span>
           ) : <span className="small">None yet in this tab.</span>}
           <span className="eyebrow">next</span>
-          <span className={step?.yourMove ? styles.you : undefined}>{step ? step.next : "Reading the room…"}</span>
+          <span className={step?.yourMove ? styles.you : undefined}>{!signedIn ? "Sign in as the buyer to run the demo counterparty in this room." : step ? step.next : "Reading the room…"}</span>
           {netBusy && <span className="small" role="status">The network is busy, retrying.</span>}
         </div>
-        {!closed && <button type="button" className={styles.btn} disabled={running.current} onClick={() => void runStep()}>Run next step</button>}
+        {!closed && signedIn && <button type="button" className={styles.btn} disabled={running.current} onClick={() => void runStep()}>Run next step</button>}
 
         {a.state === "Executing" && (
           <div className={styles.agent}>
@@ -147,6 +153,11 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
             <p className="small">
               It holds one function-call key on the agreement account, which you install and can revoke. It signs <span className="mono">act</span> itself; nothing is relayed.
             </p>
+            {revoked && (
+              <p className={`small ${styles.you}`} role="status">
+                The agent&apos;s key is revoked: anything it signs is rejected by the network. <Link className="link" href="/try-it">Finish on Try it</Link> closes the room and returns the test funds{isBuyer ? <>, or start the agent again below with a new key</> : null}.
+              </p>
+            )}
             {!isBuyer ? <p className="small">Sign in as the buyer, <span className="mono" style={{ overflowWrap: "anywhere" }}>{a.buyer}</span>, to start the agent.</p>
               : !installed ? (
                 <button type="button" className={`${styles.btn} ${styles.primary}`} disabled={busy !== null || !agentKey || !client || (!!a.agent_key && !installed)} onClick={() => void startAgent()}>
@@ -154,10 +165,10 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
                 </button>
               ) : (
                 <>
-                  <button type="button" className={`${styles.btn} ${styles.primary}`} disabled={busy !== null} onClick={() => void agentDo("pay")}>
+                  <button type="button" className={`${styles.btn} ${styles.primary}`} disabled={busy !== null || revoked || !a.agent_key} onClick={() => void agentDo("pay")}>
                     {busy === "pay" ? "Waiting for the network…" : "Let the agent pay the due item"}
                   </button>
-                  <button type="button" className={styles.btn} disabled={busy !== null} onClick={() => void agentDo("attack")}>
+                  <button type="button" className={styles.btn} disabled={busy !== null || revoked || !a.agent_key} onClick={() => void agentDo("attack")}>
                     {busy === "attack" ? "Waiting for the network…" : "Ask the agent to pay a new account"}
                   </button>
                   <p className="small">Then revoke the key from the room header: the agent's next call fails at the network.</p>

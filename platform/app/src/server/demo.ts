@@ -278,6 +278,9 @@ export async function counterpartyStep(id: string): Promise<Step> {
   if (waiting) return wait(`Your move: accept delivery ${waiting.id}.`, true);
   const eligible = items.find((it) => it.status === "Eligible");
   if (eligible) {
+    if (!a.agent_key && a.revoked_keys > 0) {
+      return wait("The agent's key is revoked: anything it signs is rejected by the network. Finish on Try it closes the room and returns the test funds, or start the demo agent again with a new key.", true);
+    }
     return wait(a.agent_key ? `Item ${eligible.id} is eligible: let the agent pay it.` : "Your move: start the demo agent, then let it pay the accepted item.", true);
   }
   const next = items

@@ -17,6 +17,16 @@ Include what you found, how to reproduce it and what an attacker could do with i
 - The agreement contract, the enclave jobs (negotiation, payee verification, observation) and the agent, as specified in `platform/GOAL.md` and built in `platform/`.
 - The website in `apps/web`, including its forms and any endpoint it calls.
 
+### Open demo endpoints (by design)
+
+The testnet demo has endpoints that take no session. The two counterparty endpoints are same-origin JSON only, rate-limited per client and per room, and act only in rooms opened against Accord's demo vendor:
+
+- `POST /app/api/demo-counterparty/step`: Accord's demo vendor and its authority make their next valid move in the room (seal, start the negotiation, approve, propose and activate the recipient, deliver). It reads the room from chain each time, so a repeat does nothing twice, and the contract checks every call. Past 15 s it answers `pending` while the move finishes.
+- `POST /app/api/demo-counterparty/close`: the demo vendor joins an early close only after the room's buyer asked for it on chain (`mutual_close`).
+- `POST /app/api/inbox`: a message into the demo agent's inbox for the public `/try` room, rate-limited per visitor and in total; it holds no key and calls no contract.
+
+`POST /app/api/demo-agent` with `pay` or `attack` needs the room buyer's session; `POST /app/api/faucet` needs a session and is limited per account and per connection. The room page calls the demo endpoints only for a signed-in visitor.
+
 ## What Accord does and does not claim
 
 Read the claims table in the README before reporting a design issue: each claim is stated with its limit. A finding that goes beyond a stated limit is exactly what we want to hear about.
