@@ -2,6 +2,8 @@
 /* Tests for scripts/serve.mjs, run against the real server on spare ports with a stand-in app behind it:
    - the proxy sets x-accord-client-ip itself (from X-Real-IP, else the rightmost X-Forwarded-For entry, else its socket
      peer), replacing any value the visitor sent;
+   - the site's own responses carry HSTS and the Content-Security-Policy; proxied /app responses keep the app's own
+     headers and get no site CSP.
    Usage: node scripts/test-serve.mjs (needs no build: a missing dist answers 404 with the same headers). */
 import { createServer, request } from "node:http"
 import { spawn } from "node:child_process"
@@ -57,6 +59,25 @@ await test("with neither, the proxy's own socket peer", async () => {
   const r = await get("/app/api/x", { "x-accord-client-ip": "6.6.6.6" })
   assert.match(JSON.parse(r.body).ip, /127\.0\.0\.1/)
 })
+await test("site responses carry HSTS and the CSP", async () => {
+  const r = await get("/")
+  assert.equal(r.headers["strict-transport-security"], "max-age=31536000")
+  const csp = r.headers["content-security-policy"] || ""
+  assert.match(csp, /default-src 'self'/)
+  assert.match(csp, /connect-src [^;]*https:\/\/test\.rpc\.fastnear\.com/)
+  assert.match(csp, /img-src 'self' data:/)
+})
+await test("redirects carry them too", async () => {
+  const r = await get("/signin")
+  assert.equal(r.status, 308)
+  assert.ok(r.headers["content-security-policy"])
+})
+await test("proxied /app responses keep the app's headers and get no site CSP", async () => {
+  const r = await get("/app/api/x")
+  assert.equal(r.headers["x-app"], "yes")
+  assert.equal(r.headers["content-security-policy"], undefined)
+})
+
 site.kill("SIGTERM")
 app.close()
 if (failed) { console.log(`${failed} failed`); process.exit(1) }

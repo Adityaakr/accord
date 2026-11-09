@@ -6,7 +6,8 @@
    /app and /app/* go to the Accord app service when APP_ORIGIN is set (see platform/DEPLOY.md). */
 import { createServer, request as httpRequest } from "node:http"
 import { request as httpsRequest } from "node:https"
-import { createReadStream, readFileSync, statSync } from "node:fs"
+import { createReadStream, readFileSync, readdirSync, statSync } from "node:fs"
+import { createHash } from "node:crypto"
 import { extname, join, normalize, resolve, sep, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -75,10 +76,63 @@ const TYPES = {
   ".mp4": "video/mp4", ".pdf": "application/pdf",
 }
 
+/* The Content-Security-Policy for the site's own responses (the static pages, their assets and the redirects), never for
+   the proxied /app responses, which keep the app's own headers. It allows what the site loads: its own files, Google
+   Fonts (index.html), the NEAR testnet RPC hosts /verify reads (src/lib/nearVerify.ts), the app at /app on this origin,
+   images from itself and data: URIs, inline styles, and the inline scripts in the built pages by their sha256 (read from dist at
+   start, so a rebuild needs no edit here). VITE_ACCORD_API_URL and VITE_APP_URL, when they name another origin, and
+   CSP_CONNECT_EXTRA (space-separated origins) are added to connect-src. */
+const RPC_HOSTS = ["https://test.rpc.fastnear.com", "https://rpc.testnet.fastnear.com"]
+
+function inlineScriptHashes() {
+  const hashes = new Set()
+  const walk = (dir) => {
+    let entries = []
+    try { entries = readdirSync(dir, { withFileTypes: true }) } catch { return }
+    for (const e of entries) {
+      const full = join(dir, e.name)
+      if (e.isDirectory()) walk(full)
+      else if (e.name.endsWith(".html")) {
+        const html = readFileSync(full, "utf8")
+        for (const m of html.matchAll(/<script(?![^>]*\bsrc=)(?![^>]*application\/ld\+json)[^>]*>([\s\S]*?)<\/script>/g)) {
+          hashes.add(`'sha256-${createHash("sha256").update(m[1]).digest("base64")}'`)
+        }
+      }
+    }
+  }
+  walk(DIST)
+  return [...hashes]
+}
+
+function originOf(url) {
+  try { return /^https?:\/\//.test(url || "") ? new URL(url).origin : null } catch { return null }
+}
+
+const CONNECT = ["'self'", ...RPC_HOSTS, originOf(process.env.VITE_ACCORD_API_URL), originOf(process.env.VITE_APP_URL),
+  ...(process.env.CSP_CONNECT_EXTRA || "").split(/\s+/).filter(Boolean)].filter(Boolean)
+
+const CSP = [
+  "default-src 'self'",
+  `script-src 'self' ${inlineScriptHashes().join(" ")}`.trim(),
+  // styles: the prerendered pages and the components use style attributes and a style element; scripts stay locked to hashes
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' https://fonts.gstatic.com",
+  "img-src 'self' data:",
+  "media-src 'self'",
+  `connect-src ${[...new Set(CONNECT)].join(" ")}`,
+  "frame-src 'self'",
+  "frame-ancestors 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join("; ")
+
 const HEADERS = {
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "X-Frame-Options": "SAMEORIGIN",
+  "Strict-Transport-Security": "max-age=31536000",
+  "Content-Security-Policy": CSP,
 }
 
 function fileFor(urlPath) {
