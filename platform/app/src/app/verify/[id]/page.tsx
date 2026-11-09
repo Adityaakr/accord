@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RoomLink } from "@/components/RoomLink";
 import type { Metadata } from "next";
 import { PageHead } from "@/components/ui";
 import { VerifiedPanel } from "@/app/agreements/[id]/VerifiedPanel";
@@ -22,7 +23,7 @@ export default async function VerifyOne({ params }: { params: Promise<{ id: stri
       <PageHead
         eyebrow={<Link href="/verify" className="small link">Verify</Link>}
         title={a ? a.title : "Unknown agreement"}
-        lead={a ? <><span className="mono">{id}</span> · <Link className="link" href={`/agreements/${id}`}>open the deal room</Link></> : valid
+        lead={a ? <><span className="mono">{id}</span>{" · "}<RoomLink className="link" id={id} signedOut={<>public, read-only check</>}>open the deal room</RoomLink></> : valid
           ? <>No agreement at <span className="mono">{id}</span> on this network. <Link className="link" href="/verify">Check another</Link>.</>
           : <><span className="mono">{id}</span> is not a NEAR account id. Agreement accounts look like <span className="mono">a6.accord-v2.testnet</span>. <Link className="link" href="/verify">Check another</Link>.</>}
       />

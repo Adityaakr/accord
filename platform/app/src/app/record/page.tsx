@@ -6,6 +6,7 @@ import { Account, PageHead, Panel, Pill, Usdc, EvidenceHash } from "@/components
 import styles from "../pages.module.css";
 import rstyles from "./record.module.css";
 import { withBase } from "@/lib/basePath";
+import { RoomLink } from "@/components/RoomLink";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Record" };
@@ -57,7 +58,7 @@ export default async function Record({ searchParams }: { searchParams: Promise<{
               {payments.map((p) => (
                 <tr key={`${p.agreement}-${p.payment_id}`}>
                   <td className="mono">{new Date(p.at * 1000).toISOString().replace("T", " ").slice(0, 16)}</td>
-                  <td><Link className="mono link" href={`/agreements/${p.agreement}`}>{p.agreement}</Link></td>
+                  <td><RoomLink className="mono link" id={p.agreement} /></td>
                   <td className="mono">{p.item}</td>
                   <td><Usdc amount={p.amount} symbol={p.symbol} /></td>
                   <td><Account id={p.recipient} href={c.explorer ? `${c.explorer}/address/${p.recipient}` : undefined} /></td>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RoomLink } from "@/components/RoomLink";
 import { formatUnits } from "@accord/sdk";
 import { atlasConsole } from "@/server/atlas";
 import { blockLink, Conditions, ObservationLog, PeriodGrid } from "@/components/atlas";
@@ -78,7 +79,7 @@ export default async function MarketMaking() {
             return (
               <Panel
                 key={r.record.account}
-                title={<Link href={`/agreements/${r.record.account}`} className={styles.roomTitle}>{r.record.title}</Link>}
+                title={<RoomLink id={r.record.account} className={styles.roomTitle}>{r.record.title}</RoomLink>}
                 eyebrow={<span className="mono">{r.record.account} · {r.view.buyer} pays {r.view.vendor}</span>}
                 aside={<StatePill state={r.view.state} />}
               >

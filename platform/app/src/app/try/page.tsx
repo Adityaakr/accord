@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RoomLink } from "@/components/RoomLink";
 import { closedReason, duration, rearmTimings, tryRoom } from "@/server/tryroom";
 import { heartbeats, recentMessages } from "@/server/store";
 import { accord, config, symbolFor } from "@/server/accord";
@@ -54,7 +55,7 @@ export default async function Try() {
 
       <div className={styles.grid}>
         <div className={styles.main}>
-          <Panel title="Write to the agent" eyebrow={room ? <>inbox of the agent for <Link className="mono link" href={`/agreements/${room.account}`}>{room.account}</Link></> : "the room is closed"}>
+          <Panel title="Write to the agent" eyebrow={room ? <>inbox of the agent for <RoomLink className="mono link" id={room.account} /></> : "the room is closed"}>
             {room ? (
               <InboxForm symbol={sym} recipient={room.recipient?.account ?? null} due={due.map((d) => ({ item: d.item, amount: d.amount }))} />
             ) : (
@@ -134,7 +135,7 @@ function Recorded() {
                 <li key={r.tx}>
                   <span className={`mono ${styles.code}`}>{r.code}</span>
                   <span className="small">
-                    <Link className="mono link" href={`/agreements/${r.agreement}`}>{r.agreement.split(".")[0]}</Link> item {r.item} · <Usdc amount={r.amount} symbol="tUSDC" /> → <span className="mono">{r.to}</span>
+                    <RoomLink className="mono link" id={r.agreement}>{r.agreement.split(".")[0]}</RoomLink> item {r.item} · <Usdc amount={r.amount} symbol="tUSDC" /> → <span className="mono">{r.to}</span>
                     {" · "}{r.at.slice(11, 16)} UTC, {r.at.slice(0, 10)}
                     {" · "}<a className="mono link" href={`${explorer}/txns/${r.tx}`} target="_blank" rel="noreferrer">tx {r.tx.slice(0, 8)}</a>
                   </span>
