@@ -47,7 +47,7 @@ export function InviteCard({ room, buyer, vendor, authority }: { room: string; b
       </div>
       <div className={styles.foot}>
         <span className={styles.note}>New to Accord? <Link href="/join" className="link">What the vendor does</Link> explains the steps on their side.</span>
-        <Link href={`/agreements/${room}/seal`} className={styles.primary}>Seal your limits</Link>
+        <Link href={`/agreements/${room}/seal`} className={styles.primary} prefetch={false}>Seal your limits</Link>
       </div>
       {brief?.brief || facts.length ? (
         <details className={styles.brief}>

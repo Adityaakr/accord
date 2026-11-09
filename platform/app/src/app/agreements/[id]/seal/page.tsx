@@ -21,10 +21,18 @@ function roomPresets(kind: string, circle: boolean) {
 
 export default async function Seal({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  // at most 12 s on the chain per read: past it the room's error boundary says the network is busy and reads again
-  const a = await readWithin(accord().agreement(id).get(), 12_000, `reading ${id}`).catch((e: unknown) => { if (isRpcBusy(e)) throw e; return null; });
+  // Both reads run together, each bounded at 12 s on the chain: past it the room's error boundary says the network is
+  // busy and reads again. The links here use prefetch={false}, so a slow chain never holds a background prefetch open.
+  const deal = accord().agreement(id);
+  const [got, sealed] = await Promise.allSettled([
+    readWithin(deal.get(), 12_000, `reading ${id}`),
+    readWithin(deal.commitments(), 12_000, `reading ${id}'s commitments`),
+  ]);
+  if (got.status === "rejected" && isRpcBusy(got.reason)) throw got.reason;
+  const a = got.status === "fulfilled" ? got.value : null;
   if (!a) notFound();
-  const commitments = await readWithin(accord().agreement(id).commitments(), 12_000, `reading ${id}'s commitments`);
+  if (sealed.status === "rejected") throw sealed.reason;
+  const commitments = sealed.value;
   return (
     <div className="container">
       <PageHead
