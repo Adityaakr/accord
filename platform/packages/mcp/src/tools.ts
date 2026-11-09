@@ -51,6 +51,8 @@ const account = z.string().refine(isAccountId,
 const baseUnits = z.string().regex(/^\d+$/, "a decimal string in the token's base units (USDC: 6 decimals, \"12000000\" is 12.00)");
 const hex64 = z.string().regex(/^[0-9a-f]{64}$/, "64 lowercase hex");
 const limit = z.number().int().min(1).max(100).optional();
+/** accord_list_agreements returns this many agreements when no `limit` is given. */
+export const LIST_DEFAULT = 25;
 
 /** Circle's USDC on NEAR (mainnet, testnet); the unit when a token's metadata cannot be read. */
 const CIRCLE_USDC = new Set([
@@ -120,10 +122,16 @@ const mandateShape = z.object({
 export const TOOLS: ToolDef[] = [
   {
     name: "accord_list_agreements",
-    description: "List agreements on the factory, or those where `party` is the buyer, vendor or authority.",
+    description: `List agreements on the factory, or those where \`party\` is the buyer, vendor or authority. Paginated: \`limit\` (default ${LIST_DEFAULT}, at most 100) and \`offset\` (default 0); the result gives \`total\` and \`next_offset\` (null on the last page).`,
     needs: "nothing",
-    input: { party: account.optional() },
-    run: async (a, d) => ({ agreements: await d.listAgreements(a.party as string | undefined) }),
+    input: { party: account.optional(), limit, offset: z.number().int().min(0).optional() },
+    run: async (a, d) => {
+      const all = await d.listAgreements(a.party as string | undefined);
+      const n = (a.limit as number | undefined) ?? LIST_DEFAULT;
+      const from = (a.offset as number | undefined) ?? 0;
+      const page = all.slice(from, from + n);
+      return { agreements: page, total: all.length, offset: from, limit: n, next_offset: from + n < all.length ? from + n : null };
+    },
   },
   {
     name: "accord_get_agreement",

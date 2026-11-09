@@ -593,7 +593,7 @@ Run `npx @accord/mcp` (stdio) or `npx @accord/mcp --http 8787`; with no variable
 
 | Tool | Input | Needs | Notes |
 | --- | --- | --- | --- |
-| `accord_list_agreements` | `{ party? }` | nothing | |
+| `accord_list_agreements` | `{ party?, limit?, offset? }` | nothing | Paginated: `limit` defaults to 25 (at most 100), `offset` to 0; returns `{ agreements, total, offset, limit, next_offset }` |
 | `accord_get_agreement` | `{ agreement }` | nothing | |
 | `accord_due_items` | `{ agreement }` | nothing | |
 | `accord_preflight` | `{ agreement, recipient }` | nothing | `allow` · `warn` · `block` with reasons, and whether the buyer approved it |

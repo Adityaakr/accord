@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import type { ActResult, PreflightResult, Rating } from "@accord/sdk";
+import type { ActResult, AgreementRecord, PreflightResult, Rating } from "@accord/sdk";
 import { buildServer } from "../src/server.js";
-import { TOOLS, envFlags, toolsFor, type McpDeps } from "../src/tools.js";
+import { LIST_DEFAULT, TOOLS, envFlags, toolsFor, type McpDeps } from "../src/tools.js";
 
 const AGREEMENT = "a7.accord-v1.testnet";
 const READ = [
@@ -162,5 +162,27 @@ describe("accord_get_agreement on a bad id", () => {
     for (const ok of ["a7.accord-v1.testnet", "halcyon_mm.testnet", "ab", "a".repeat(64)]) {
       expect(shape.safeParse({ agreement: ok }).success).toBe(true);
     }
+  });
+});
+
+describe("accord_list_agreements is paginated", () => {
+  const list = TOOLS.find((t) => t.name === "accord_list_agreements")!;
+  const records = Array.from({ length: 60 }, (_, i) => ({ id: `a${i + 1}.accord-v2.testnet` })) as unknown as AgreementRecord[];
+  type Page = { agreements: AgreementRecord[]; total: number; offset: number; limit: number; next_offset: number | null };
+  it(`returns the first ${LIST_DEFAULT} with no arguments, and the total`, async () => {
+    const { deps } = fakeDeps("allow");
+    deps.listAgreements = async () => records;
+    const r = await list.run({}, deps) as Page;
+    expect(r.agreements).toHaveLength(LIST_DEFAULT);
+    expect(r).toMatchObject({ total: 60, offset: 0, limit: LIST_DEFAULT, next_offset: LIST_DEFAULT });
+  });
+  it("limit and offset page through, with next_offset null on the last page", async () => {
+    const { deps } = fakeDeps("allow");
+    deps.listAgreements = async () => records;
+    const r = await list.run({ limit: 50, offset: 50 }, deps) as Page;
+    expect(r.agreements.map((x) => (x as unknown as { id: string }).id)).toEqual(records.slice(50).map((x) => (x as unknown as { id: string }).id));
+    expect(r.next_offset).toBeNull();
+    expect(z.object(list.input).safeParse({ limit: 101 }).success).toBe(false);
+    expect(z.object(list.input).safeParse({ offset: -1 }).success).toBe(false);
   });
 });
