@@ -1,7 +1,7 @@
 // Accord's relayer for NEP-366 meta-transactions. A wallet that can sign delegate actions (Meteor, Intear and others)
 // signs the user's call; the relayer wraps it in its own transaction, pays the gas and broadcasts it, so the user's
 // wallet never has to reach the network itself. The relayer holds only its own key (RELAYER_ACCOUNT / RELAYER_KEY in
-// the gitignored .env) and attaches no deposit: any deposit is inside the delegate and comes from the user's account.
+// the gitignored .env) and attaches no deposit of its own. Under NEP-366 the relayer pays any NEAR a delegate attaches, so the policy (delegate.ts) only carries calls that attach at most 1 yoctoNEAR.
 
 import "server-only";
 import { Account, JsonRpcProvider, KeyPair, KeyPairSigner, actions, type KeyPairString } from "near-api-js";
