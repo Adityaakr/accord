@@ -96,6 +96,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
     phase: terminal === "NoDeal" ? "ended" : a.state !== "Sealed" || neg === "Done" ? "done"
       : neg === "AwaitingMandates" ? "awaiting" : typeof neg === "object" && "Requested" in neg ? "requested" : "ready",
     attempt: typeof neg === "object" ? ("Requested" in neg ? neg.Requested.attempt : neg.Ready.attempts + 1) : null,
+    requestedAt: typeof neg === "object" && "Requested" in neg ? neg.Requested.at : null, now: a.now,
     buyer: a.buyer, vendor: a.vendor,
     buyerCommit: r.commitments.buyer?.commitment ?? null, vendorCommit: r.commitments.vendor?.commitment ?? null,
     terms: terms ? { total: usd(terms.total), items: terms.items.length, hash: a.terms_hash, label: isAtlas ? "periods" : "items", unit: sym } : null,
