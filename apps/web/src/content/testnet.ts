@@ -70,8 +70,8 @@ export const VERIFY_RAW = `accord verify · a6.accord-v2.testnet
 code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok
 keys      0 keys · none · no full access · ok
 sealed    outcome signature ok · commitments match · agreement matches · ok
-release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) · not checked
-model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 3d293e48… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+release   sealed-table run 13682 = task 28492 · wasm 7c832ce9… and caller match · quote not checked (needs outlayer-verify) · payee run 13672 = task 28478 · wasm 24071443… and caller match · quote not checked (needs outlayer-verify) · observer run 13683 = task 28493 · wasm 8240179a… and caller match · quote not checked (needs outlayer-verify) · not checked
+model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce c940dede… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
 payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
 record    1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
 verify: 5 checks ok · 1 partial · 1 not checked`

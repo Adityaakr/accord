@@ -83,14 +83,14 @@ accord verify · a6.accord-v2.testnet
   code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok
   keys      0 keys · none · no full access · ok
   sealed    outcome signature ok · commitments match · agreement matches · ok
-  release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) · not checked
-  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 3d293e48… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+  release   sealed-table run 13682 = task 28492 · wasm 7c832ce9… and caller match · quote not checked (needs outlayer-verify) · payee run 13672 = task 28478 · wasm 24071443… and caller match · quote not checked (needs outlayer-verify) · observer run 13683 = task 28493 · wasm 8240179a… and caller match · quote not checked (needs outlayer-verify) · not checked
+  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce c940dede… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
   payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
   record    1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
 verify: 5 checks ok · 1 partial · 1 not checked
 ```
 
-`model` is `partial`: the nonce is bound in the attestation report, but it attests the model as served now, not the negotiating run (the run's own attestation is bound in the signed outcome, which `sealed` checks), and the hardware quote and GPU evidence are not checked here (`make probe-ai` checks them). `release` stays `not checked` until `outlayer-verify` is installed (`docs/build/BLOCKED.md`). `keys` reads `0 keys` because a6's agent was revoked.
+`model` is `partial`: the nonce is bound in the attestation report, but it attests the model as served now, not the negotiating run (the run's own attestation is bound in the signed outcome, which `sealed` checks), and the hardware quote and GPU evidence are not checked here (`make probe-ai` checks them). `release` looks each job key's pubkey run up by OutLayer request id and checks its task, wasm and caller; it stays `not checked` because the TDX quote needs `outlayer-verify` (`docs/build/BLOCKED.md`). `/app/api/verify/<agreement>` and the MCP tool `accord_verify` print the same line. `keys` reads `0 keys` because a6's agent was revoked.
 
 `make sandbox`, from a real run on 3 Nov 2026 (the market-making line was then labelled `atlas`; the sandbox now prints `market`):
 
@@ -172,7 +172,7 @@ A second factory, `accord-usdc.testnet`, runs the same code as `accord-v2.testne
 | Do | See |
 | --- | --- |
 | Get Circle testnet USDC at https://faucet.circle.com, network `NEAR Testnet`, your account as the address | about `20 USDC` per address every 1 to 2 hours |
-| `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as `ACCORD_FACTORY=accord-usdc.testnet make verify`) | `code hash 8wMuMRre… = release 3 (global by hash)` · `keys from pubkey run 13909` · `verify: 5 checks ok · 1 partial · 1 not checked` |
+| `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as `ACCORD_FACTORY=accord-usdc.testnet make verify`) | `code hash 8wMuMRre… = release 3 (global by hash)` · `release   sealed-table run 13909 = task 28801 · wasm 7c832ce9… and caller match · quote not checked (needs outlayer-verify)` (and the same for payee run `13910` and observer run `13911`) · `verify: 5 checks ok · 1 partial · 1 not checked` |
 | `make negotiate-usdc`, then `make finish-usdc DEAL=<agreement>` once the buyer holds the terms' total | the same blocks as `make negotiate` and `make finish`, with Circle USDC; the presets fit one faucet drip (buyer ceiling `18`, vendor floor `12`) |
 
 `a1.accord-usdc.testnet` (release 3) was negotiated on 9 Nov 2026 (`14.00 USDC` in 3 items, `QUOTE → COUNTER → ACCEPT`, glm-5.3-flash in OutLayer's enclave), approved, funded, paid `5.00` and refused a redirect, then revoked: [Circle USDC proof](#circle-usdc). Transactions: `DECISIONS.md` sections 24 and 26.

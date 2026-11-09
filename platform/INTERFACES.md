@@ -515,7 +515,8 @@ accord market-making · <agreement> · rhea-dcl <pool short id>
 accord verify · <agreement>
   code      code hash <8>… = release <v> (<global by hash | embedded>) · no deploy method · ok
   keys      <0 | 1> key · FunctionCall · receiver self · methods [act] · no full access · ok
-  release   sealed-table wasm <8>… · keys from pubkey run <task id> · attestation verified · seed binding <shown | not exposed> · ok
+  release   sealed-table run <request id> = task <task id> · wasm <8>… and caller match · quote not checked (needs outlayer-verify) · payee run … · observer run … · not checked
+            (with outlayer-verify installed: sealed-table run <request id> = task <task id> · wasm <8>… · outlayer-verify proven · … · ok)
   sealed    outcome signature ok · commitments match · nonce matches · ok
   model     <model> · attestation report fetched with fresh nonce <8>… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
   payee     <recipient> · proof <domain> · authority approved · buyer accepted · active · ok

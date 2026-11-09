@@ -30,7 +30,7 @@ Other agreements to check
 
 - 03 Sealed outcome The outcome was signed inside the enclave by the release's Sealed Table key; the commitments and the agreement match. [ok](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW)
 
-- 04 Enclave release The Sealed Table build (`7c832ce9…`) and its keys from pubkey run `13682`. Checking the run's attestation needs the outlayer-verify tool. [not checked](https://app.outlayer.ai/docs/trust-verification)
+- 04 Enclave release Each job key's pubkey run, looked up by OutLayer request id: Sealed Table run `13682` = task `28492`, its wasm (`7c832ce9…`) and caller match the release; the same for Payee and the observer. Checking each run's TDX quote needs the outlayer-verify tool. [not checked](https://app.outlayer.ai/docs/trust-verification)
 
 - 05 Model attestation The real model (`z-ai/glm-5.3-flash`): the attestation report is fetched with a fresh nonce and the nonce is bound in it. This attests the model as served now, not the negotiating run; the run's own attestation is bound in the signed outcome, which the sealed check verifies. The hardware quote and GPU evidence are not checked by `make verify`; `make probe-ai` checks them. [partial](https://testnet-api.outlayer.ai/attestations/by-request/13596)
 
@@ -50,9 +50,9 @@ accord verify · a6.accord-v2.testnet
 
 - sealed outcome signature ok · commitments match · agreement matches ok
 
-- release sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) not checked
+- release sealed-table run 13682 = task 28492 · wasm 7c832ce9… and caller match · quote not checked (needs outlayer-verify) · payee run 13672 = task 28478 · wasm 24071443… and caller match · quote not checked (needs outlayer-verify) · observer run 13683 = task 28493 · wasm 8240179a… and caller match · quote not checked (needs outlayer-verify) not checked
 
-- model z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 3d293e48… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+- model z-ai/glm-5.3-flash · attestation report fetched with fresh nonce c940dede… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
 
 - payee halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active ok
 

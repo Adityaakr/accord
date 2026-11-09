@@ -1,6 +1,6 @@
 // The real dependencies: the SDK over RPC; the agent and principal signers only when their variables are set.
 
-import { Accord, KeySigner, preflight, verify, type Network } from "@accord/sdk";
+import { Accord, KeySigner, preflight, recordReleaseProof, verify, type Network } from "@accord/sdk";
 import type { McpDeps } from "./tools.js";
 import type { Env } from "./env.js";
 
@@ -37,7 +37,8 @@ export function readDeps(accord: Accord, o: ReadOptions = {}): McpDeps {
     preflight: (agreement, recipient) => preflight(accord, agreement, recipient, {
       archivalRpc: o.archivalRpc, approvalsUrl: o.approvalsUrl,
     }),
-    verify: (agreement) => verify(accord, agreement, { nearAiKey: o.nearAiKey, factories: [second] }),
+    // the same by-request release lookup as the CLI and the app's /api/verify; the quote needs outlayer-verify
+    verify: (agreement) => verify(accord, agreement, { nearAiKey: o.nearAiKey, factories: [second], releaseProof: recordReleaseProof() }),
     tokenSymbol: (token) => {
       let s = symbols.get(token);
       if (!s) {

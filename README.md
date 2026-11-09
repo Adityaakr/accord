@@ -48,7 +48,7 @@ The site is also served at [useaccord.tech](https://useaccord.tech) (the same Ra
 | `sealed` | ok | The terms were signed by the Sealed Table release's key and match both on-chain commitments |
 | `payee`, `record` | ok | The recipient was proven, approved and accepted; every payment matches a receipt |
 | `model` | **partial** | NEAR AI's attestation report is fetched with a fresh nonce and the nonce is bound in it, but it attests the model as served now, not the negotiating run (that run's attestation is bound in the signed outcome). The hardware quote and GPU evidence are not checked by `make verify`; `make probe-ai` checks them with a NEAR AI key |
-| `release` | **not checked** | Which enclave build produced the terms is attested by OutLayer, but `release` stays `not checked` until [`outlayer-verify`](https://github.com/out-layer/outlayer-verify) is installed ([`BLOCKED.md`](platform/docs/build/BLOCKED.md)); with it, `make verify` checks each job key's pubkey run, looked up by OutLayer request id |
+| `release` | **not checked** | Each job key's pubkey run is looked up by OutLayer request id, and its task, wasm and caller are checked against the release; the TDX quote is not, so `release` stays `not checked` until [`outlayer-verify`](https://github.com/out-layer/outlayer-verify) is installed ([`BLOCKED.md`](platform/docs/build/BLOCKED.md)); with it, `make verify` checks each run's quote too |
 
 Not in place yet, and stated with the claims: on testnet the Sealed Table's seed admits any caller during an agreement's open request window (restricting it to the agreement's own calls, S1, needs a setting only OutLayer's dashboard can make); the reviewed enclave job builds are not deployed (release 4 runs release 3's job builds); end-to-end encryption to the model is not shipped. Market-making agreements have run end to end on a local node, not on testnet. Every claim with its limit: [Claims and their limits](#claims-and-their-limits), from [`platform/GOAL.md`](platform/GOAL.md).
 
@@ -82,21 +82,21 @@ corepack enable && pnpm install
 make verify DEAL=a6.accord-v2.testnet
 ```
 
-Output, from a run on 9 Nov 2026 (the nonce is fresh on every run; `keys` reads `0 keys` because a6's agent was revoked; `release` stays `not checked` until [`outlayer-verify`](https://github.com/out-layer/outlayer-verify) is installed, and with it `make verify` checks each job key's pubkey run, looked up by OutLayer request id):
+Output, from a run on 9 Nov 2026 (the nonce is fresh on every run; `keys` reads `0 keys` because a6's agent was revoked; `release` looks each job key's pubkey run up by OutLayer request id and checks its task, wasm and caller, and stays `not checked` because the TDX quote needs [`outlayer-verify`](https://github.com/out-layer/outlayer-verify); with the tool installed, `make verify` checks the quote too. `/app/api/verify/<agreement>` and the MCP tool `accord_verify` print the same `release` line):
 
 ```
 accord verify · a6.accord-v2.testnet
   code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok
   keys      0 keys · none · no full access · ok
   sealed    outcome signature ok · commitments match · agreement matches · ok
-  release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) · not checked
-  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 3d293e48… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+  release   sealed-table run 13682 = task 28492 · wasm 7c832ce9… and caller match · quote not checked (needs outlayer-verify) · payee run 13672 = task 28478 · wasm 24071443… and caller match · quote not checked (needs outlayer-verify) · observer run 13683 = task 28493 · wasm 8240179a… and caller match · quote not checked (needs outlayer-verify) · not checked
+  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce c940dede… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
   payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
   record    1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
 verify: 5 checks ok · 1 partial · 1 not checked
 ```
 
-`make verify DEAL=a10.accord-v2.testnet` prints `code hash ECgsrZwy… = release 4` and the same last line; `make verify-usdc DEAL=a1.accord-usdc.testnet` checks the Circle USDC deal.
+`make verify DEAL=a10.accord-v2.testnet` prints `code hash ECgsrZwy… = release 4`, `release   sealed-table run 13987 = task 28880 · wasm 7c832ce9… and caller match · quote not checked (needs outlayer-verify)` (and the same for payee run `13988` = task `28881` and observer run `13989` = task `28882`) and the same last line; `make verify-usdc DEAL=a1.accord-usdc.testnet` checks the Circle USDC deal.
 
 ### More runs
 
@@ -302,7 +302,7 @@ A second factory, `accord-usdc.testnet`, runs the same code (release 4 since 9 N
 | Do | See |
 | --- | --- |
 | Get Circle testnet USDC at https://faucet.circle.com, network `NEAR Testnet`, your account as the address | about `20 USDC` per address every 1 to 2 hours |
-| `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as `make verify DEAL=a1.accord-usdc.testnet`, which reads the factory from the id) | `code hash 8wMuMRre… = release 3 (global by hash)` · `keys from pubkey run 13909` · `verify: 5 checks ok · 1 partial · 1 not checked` |
+| `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as `make verify DEAL=a1.accord-usdc.testnet`, which reads the factory from the id) | `code hash 8wMuMRre… = release 3 (global by hash)` · `release   sealed-table run 13909 = task 28801 · wasm 7c832ce9… and caller match · quote not checked (needs outlayer-verify)` (and the same for payee run `13910` and observer run `13911`) · `verify: 5 checks ok · 1 partial · 1 not checked` |
 | `make negotiate-usdc`, then `make finish-usdc DEAL=<agreement>` once the buyer holds the terms' total | the same blocks as `make negotiate` and `make finish`, with Circle USDC; the presets fit one faucet drip (buyer ceiling `18`, vendor floor `12`) |
 
 ## What the agent's key can and cannot do
