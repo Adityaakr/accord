@@ -12,6 +12,8 @@ export interface AccordOptions {
   network: Network;
   factory: string;
   rpc?: string;
+  /** False: read only from `rpc`, without the network's public endpoints after it (default true). */
+  rpcFallbacks?: boolean;
   signer?: Signer;
 }
 
@@ -34,17 +36,17 @@ export class Accord {
     this.network = opts.network;
     this.factory = opts.factory;
     this.signer = opts.signer;
-    this.chain = new Chain(opts.rpc ?? RPC[opts.network]?.rpc ?? "http://127.0.0.1:3030", opts.network);
+    this.chain = new Chain(opts.rpc ?? RPC[opts.network]?.rpc ?? "http://127.0.0.1:3030", opts.network, { fallbacks: opts.rpcFallbacks ?? true });
   }
 
   withSigner(signer: Signer): Accord {
-    return new Accord({ network: this.network, factory: this.factory, rpc: this.chain.rpcUrl, signer });
+    return new Accord({ network: this.network, factory: this.factory, rpc: this.chain.rpcUrl, rpcFallbacks: this.chain.fallbacks, signer });
   }
 
   /** The same network, chain and signer on another factory: an agreement's own, read from its state. */
   onFactory(factory: string): Accord {
     if (factory === this.factory) return this;
-    return new Accord({ network: this.network, factory, rpc: this.chain.rpcUrl, signer: this.signer });
+    return new Accord({ network: this.network, factory, rpc: this.chain.rpcUrl, rpcFallbacks: this.chain.fallbacks, signer: this.signer });
   }
 
   agreement(account: string): AgreementClient {

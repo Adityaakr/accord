@@ -309,14 +309,25 @@ export interface BlockInfo {
   header: { height: number; hash: string; timestamp_nanosec: string };
 }
 
+export interface ChainOptions extends RotatingRpcOptions {
+  /**
+   * Whether the network's public endpoints follow the configured ones (default true). False for a client that must
+   * read only through its own server, such as the app in a browser reading through `/app/api/chain`.
+   */
+  fallbacks?: boolean;
+}
+
 export class Chain {
   readonly provider: RotatingRpcProvider;
+  readonly fallbacks: boolean;
   /**
    * `rpcUrl` is one URL or a comma-separated list; with a `network` that has public defaults (testnet, mainnet)
-   * those follow it as fallbacks.
+   * those follow it as fallbacks, unless `options.fallbacks` is false.
    */
-  constructor(readonly rpcUrl: string, readonly network?: string, options?: RotatingRpcOptions) {
-    this.provider = new RotatingRpcProvider(rpcEndpoints(rpcUrl, network), options);
+  constructor(readonly rpcUrl: string, readonly network?: string, options: ChainOptions = {}) {
+    const { fallbacks = true, ...rotating } = options;
+    this.fallbacks = fallbacks;
+    this.provider = new RotatingRpcProvider(rpcEndpoints(rpcUrl, fallbacks ? network : undefined), rotating);
   }
 
   get rpcUrls(): string[] {

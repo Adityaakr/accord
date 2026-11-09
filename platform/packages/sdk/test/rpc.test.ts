@@ -6,7 +6,7 @@ import type { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it } from "vitest";
 import { KeyPair, KeyPairSigner, actions, baseDecode, baseEncode, createTransaction, type KeyPairString } from "near-api-js";
 import { AccessKeyDoesNotExistError, ContractExecutionError } from "near-api-js/rpc-errors";
-import { Chain, RotatingRpcProvider, RpcUnavailableError, isRpcBusy, rpcEndpoints, rpcFailureKind, rpcRequest } from "../src/index.js";
+import { Accord, Chain, RotatingRpcProvider, RpcUnavailableError, isRpcBusy, rpcEndpoints, rpcFailureKind, rpcRequest } from "../src/index.js";
 
 type Body = { method: string; params: unknown; id: string };
 type Handler = (req: Body, res: ServerResponse) => void;
@@ -198,6 +198,24 @@ describe("rpcEndpoints", () => {
 
   it("Chain on testnet falls back to the public endpoints", () => {
     expect(new Chain("https://test.rpc.fastnear.com", "testnet").rpcUrls).toHaveLength(4);
+  });
+
+  it("Chain with fallbacks off reads only from the configured URL, and Accord keeps that on every copy", () => {
+    const proxy = "https://example.test/app/api/chain";
+    expect(new Chain(proxy, "testnet", { fallbacks: false }).rpcUrls).toEqual([proxy]);
+    const a = new Accord({ network: "testnet", factory: "accord-v2.testnet", rpc: proxy, rpcFallbacks: false });
+    expect(a.chain.rpcUrls).toEqual([proxy]);
+    expect(a.onFactory("accord-usdc.testnet").chain.rpcUrls).toEqual([proxy]);
+    expect(a.withSigner({ accountId: "x.testnet", call: async () => { throw new Error("unused"); } }).chain.rpcUrls).toEqual([proxy]);
+    expect(new Accord({ network: "testnet", factory: "accord-v2.testnet", rpc: proxy }).chain.rpcUrls).toHaveLength(5);
+  });
+
+  it("a busy JSON-RPC body in an HTTP 200 (what the app's read proxy answers) reads as busy", async () => {
+    const m = await mock((req, res) => json(res, 200, { jsonrpc: "2.0", id: req.id, error: { code: -429, message: "Rate limited: the network is busy" } }));
+    const c = new Chain(m.url, "testnet", { fallbacks: false, rounds: 1 });
+    const e = await c.view("x.testnet", "config").catch((x: unknown) => x);
+    expect(isRpcBusy(e)).toBe(true);
+    expect(m.calls).toEqual(["query"]);
   });
 
   it("an endpoint's API key never appears in the error", async () => {
