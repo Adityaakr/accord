@@ -6,7 +6,7 @@ Accord turns private negotiations into enforceable payment rules. Agents negotia
 
 [Open the app](/app/signin) [Try a deal in about 5 minutes](/app/try-it)
 
-[Every step of a live testnet agreement, on chain](/#testnet)
+[Testnet record: procurement agreement a6, each step with its transaction](/record)
 
 > Illustrative Accord product: the deal-room list, a market-making agreement shown as its seven-step pipeline from sealed mandates to the USDC transfer on NEAR, and the agreement's activity: a refused payment, a missed observation slot and a settled period.
 
@@ -84,7 +84,7 @@ Renew our NEAR/USDC market-making retainer on Rhea: up to 20,000 USDC a period, 
 
 - Each period's payment becomes eligible when 4 of 6 slots pass Conditional settlement · passed
 
-Deal room · Vendor invoices, October run Illustrative
+Deal room · Vendor invoices, October run Planned Illustrative
 
 Process October's vendor invoices, 214 in the queue. Pay each one only if it matches its purchase order and a confirmed delivery, only to the vendor's proven address, and hold anything that doesn't.
 
@@ -286,11 +286,11 @@ Step 05 of 06 · Executing
 
 ### Checked: evidence decides each payment.
 
-A payment becomes eligible only when the agreed evidence is recorded: observations of a market at hidden times, the buyer's acceptance of a delivery, or a named reviewer's approval. Otherwise it is withheld for both sides to review.
+A payment becomes eligible only when the agreed evidence is recorded: observations of a market at hidden times or the buyer's acceptance of a delivery; a named reviewer's approval is planned. Otherwise it is withheld for both sides to review.
 
 Who acts
 
-An attested observer, the buyer or a named reviewer; a keeper triggers scheduled steps
+An attested observer or the buyer (a named reviewer is planned); a keeper triggers scheduled steps
 
 On NEAR
 
@@ -604,53 +604,17 @@ Verbatim where marked; everything else paraphrases the linked source.
 
 Quoted for context; no endorsement implied.
 
-> Illia Polosukhin
-
-Verbatim
-
-> "Businesses will not deploy agents that expose their revenue, counterparties, or financial operations on a public ledger."
-
-Illia Polosukhin NEAR co-founder · 14 May 2026 · [source](https://tools.prnewswire.com/en-us/live/20813/release/20260514EN59736) 01 / 06
-
-> Illia Polosukhin
-
-Paraphrase
-
-> Agents should be treated as hostile by default, with policy caps that hold even if the model is compromised
-
-Illia Polosukhin NEAR co-founder · 26 Feb 2026 · [source](https://rosetta.to/u/unchainedcrypto/the-ai-agent-revolution-crypto-isn-t-talking-about-the-chopping-block) 02 / 06
-
-> Eddy Lazzarin
-
-Paraphrase
-
-> The core unsolved problem is authorization: proving to a counterparty that an agent represents you
-
-Eddy Lazzarin a16z crypto · 28 Apr 2026 · [source](https://www.techflowpost.com/en-US/article/31368) 03 / 06
-
-> Haseeb Qureshi
-
-Paraphrase
-
-> The delegation model that works is sub-cards with owner-set limits; privacy wins when it is easy
-
-Haseeb Qureshi Dragonfly · 7 Oct 2026 · [source](https://www.rootdata.com/news/781111) 04 / 06
-
-> Jack Forestell
-
 Verbatim
 
 > "These agents will need to be trusted with payments, not only by users, but by banks and sellers as well."
 
-Jack Forestell Visa · 30 Apr 2025 · [source](https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21361.html) 05 / 06
-
-> Simon Willison
+Jack Forestell Visa · 30 Apr 2025 · [source](https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21361.html) 01 / 02
 
 Paraphrase
 
 > The lethal trifecta: access to private data, exposure to untrusted content, and the ability to communicate externally; combine the three and an attacker can trick the agent into sending your data to them
 
-Simon Willison 16 Jun 2025 · [source](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/) 06 / 06
+Simon Willison 16 Jun 2025 · [source](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/) 02 / 02
 
 FAQ
 

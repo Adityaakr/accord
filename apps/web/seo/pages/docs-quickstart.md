@@ -12,7 +12,7 @@ Run one deal on NEAR testnet at /app/try-it in about 5 minutes, with or without 
 
 - 03 Sign-in Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit). Meteor · Intear · Ledger · Nightly · WalletConnect
 
-- 04 Test funds The faucet tops your account up once a day per account, and up to 10 accounts per connection a day. The room's `2 NEAR` deposit is returned when it closes. If the faucet refuses, step 2 offers the public room at [/app/try](/app/try), a recorded run and [/app/verify](/app/verify). 2.35 NEAR · 100 tUSDC
+- 04 Test funds The faucet tops your account up once a day per account, up to 30 accounts per connection a day, within a daily budget. The room's `2 NEAR` deposit is returned when it closes. If the faucet refuses, step 2 offers a [60-second replay](/app/replay) of a recorded run, the live scam room at [/app/try](/app/try) (pre-funded, no funds needed) and [/app/verify](/app/verify). 2.35 NEAR · 100 tUSDC
 
 - 05 Counterparty Accord's demo vendor, with its authority `halcyon-auth.testnet`. The demo vendor and the demo agent are Accord's own testnet accounts, labelled in the room. [halcyon-demo.testnet](https://testnet.nearblocks.io/address/halcyon-demo.testnet)
 
@@ -43,7 +43,8 @@ The counterparty reads the room and makes the vendor's next valid move, so press
 - 02 Ask the agent to pay a new account. You see `ERR_PAYEE_MISMATCH`: the contract refused it and recorded the refusal. Nothing moves; the refusal appears in the room's activity.
 
 - 03 Revoke the key from the room header. You see `Agent revoked · next call rejected by the network`. Starting the demo agent again installs a new key.
-- 04 With a throwaway key, click **Finish: close the room and return the test NEAR**. The room closes early by `mutual_close` with the demo vendor (the escrow comes back to your account), `withdraw_near` returns the room's deposit, and the throwaway account deletes itself with the faucet as beneficiary, so the next visitor can use the NEAR. Reset does the same. You see `Done. The room is closed and its test NEAR is back with the faucet.`, with the `delete_account` transaction linked.
+
+- 04 With a throwaway key, click **Finish: close the room and return the test NEAR**. The room closes early by `mutual_close` with the demo vendor (the escrow comes back to your account), `withdraw_near` returns the room's deposit, the account's test USDC goes back to the faucet with `ft_transfer`, and the throwaway account deletes itself with the faucet as beneficiary, so the next visitor can use the NEAR. Reset does the same. You see `Done. The room is closed and its test NEAR and test USDC are back with the faucet.`, with the `ft_transfer` and `delete_account` transactions linked, then the room's id with a Verify link, kept for the tab after the reset.
 
 The demo agent's panel in a test room: a payment inside the terms, then a redirect the contract refused.
 
