@@ -6,7 +6,7 @@
 // buyer's own wallet, and the contract checks every call the same way it checks anyone's.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRefreshSoon } from "@/components/refreshSoon";
 import type { AgreementView } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { tokenSymbol, useAppConfig } from "@/components/AppConfig";
@@ -24,7 +24,7 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
   const w = useWallet();
   const org = useOrg();
   const cfg = useAppConfig();
-  const router = useRouter();
+  const refreshSoon = useRefreshSoon();
   const [step, setStep] = useState<Step | null>(null);
   // the network is busy: the panel keeps its last state, says so in one quiet line, and polls less often
   const [netBusy, setNetBusy] = useState(false);
@@ -57,13 +57,13 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
       setNetBusy(false);
       if (!r.ok) { setStep({ did: null, next: b.error ?? `the counterparty could not act (${r.status})`, tx: null, yourMove: false, error: b.error }); return; }
       setStep(b);
-      if (b.did) { setLast({ did: b.did, tx: b.tx, at: Date.now() }); router.refresh(); }
+      if (b.did) { setLast({ did: b.did, tx: b.tx, at: Date.now() }); refreshSoon(); }
     } catch {
       busy(null); // no answer at all (offline, a dropped connection): the same quiet back-off
     } finally {
       running.current = false;
     }
-  }, [a.account, router]);
+  }, [a.account, refreshSoon]);
 
   useEffect(() => {
     if (!auto || closed) return;
@@ -89,7 +89,7 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
     try {
       const tx = await client.installAgentKey(agentKey.publicKey, a.params.agent_allowance);
       setAgent({ ok: true, text: "The demo agent's key is installed on the agreement account.", tx: tx.txHash });
-      router.refresh();
+      refreshSoon();
     } catch (e) {
       setAgent({ ok: false, text: `Install the agent key: ${errorText(e)}` });
     } finally { setBusy(null); }
@@ -116,7 +116,7 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
       } else {
         setAgent({ ok: false, text: `Item ${b.item}: ${b.result.status}`, tx: b.result.txHash });
       }
-      router.refresh();
+      refreshSoon();
     } catch (e) {
       setAgent({ ok: false, text: errorText(e) });
     } finally { setBusy(null); }

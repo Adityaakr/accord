@@ -5,7 +5,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import { AccountId, shortAccount } from "@/components/account/AccountId";
-import { useRouter } from "next/navigation";
+import { useRefreshSoon } from "@/components/refreshSoon";
 import {
   parseUnits, formatUnits,
   type AgreementView, type ExceptionView, type ItemView, type PeriodView, type RecipientVersion,
@@ -29,7 +29,7 @@ export function Actions({
   const w = useWallet();
   const cfg = useAppConfig();
   const org = useOrg();
-  const router = useRouter();
+  const refreshSoon = useRefreshSoon();
   const [busy, setBusy] = useState<string | null>(null);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
   const [agentSecret, setAgentSecret] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export function Actions({
     setResult(null);
     try {
       setResult(txLine(label, await fn()));
-      router.refresh();
+      refreshSoon();
     } catch (e) {
       setResult({ ok: false, text: `${label}: ${errorText(e)}` });
     } finally {

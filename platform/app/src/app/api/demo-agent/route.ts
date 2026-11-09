@@ -13,6 +13,7 @@ import { demoAgent, demoAgentKey, demoConfig, demoReady, isDemoRoom } from "@/se
 import { accord, isConfiguredAgreement } from "@/server/accord";
 import { sessionAccount } from "@/server/session";
 import { agentGuard } from "@/server/demoguard";
+import { readCache } from "@/server/chainproxy";
 
 export const dynamic = "force-dynamic";
 // the act outcome without its bigint gas figure, which JSON cannot carry
@@ -65,6 +66,7 @@ export async function POST(req: Request) {
     if (e instanceof AccordError) return NextResponse.json({ error: `${e.code ?? "failed"} · tx ${e.tx.txHash}` }, { status: 502 });
     return chainErrorResponse(e);
   } finally {
+    readCache.invalidate(agreement);
     busy.delete(agreement);
   }
 }

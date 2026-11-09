@@ -7,6 +7,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useRefreshSoon } from "@/components/refreshSoon";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { useAppConfig } from "@/components/AppConfig";
 import { HoldButton } from "@/components/me/Confirm";
@@ -30,6 +31,7 @@ export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys,
   const w = useWallet();
   const cfg = useAppConfig();
   const router = useRouter();
+  const refreshSoon = useRefreshSoon();
   const [revoked, setRevoked] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   // The wallet is known only in the browser; render the signed-in parts after mount so server and client agree.
@@ -45,11 +47,11 @@ export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys,
       if (rb.stale) { setError(`${rb.stale} Nothing was signed.`); router.refresh(); return; }
       const tx = await agreementClient(w.signer, cfg, room).revokeAgent();
       setRevoked(tx.txHash);
-      router.refresh();
+      refreshSoon();
     } catch (e) {
       setError(errorText(e));
     }
-  }, [w.signer, cfg, room, agentKey, router]);
+  }, [w.signer, cfg, room, agentKey, router, refreshSoon]);
 
   const status = revoked || (!agentKey && revokedKeys > 0)
     ? "revoked"

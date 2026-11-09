@@ -8,6 +8,7 @@ import { counterpartyStep, demoReady } from "@/server/demo";
 import { isConfiguredAgreement } from "@/server/accord";
 import { chainErrorResponse } from "@/server/rpcerror";
 import { REQUEST_DEADLINE_MS, settleWithin } from "@/server/deadline";
+import { readCache } from "@/server/chainproxy";
 
 export const dynamic = "force-dynamic";
 const busy = new Set<string>();
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
   busy.add(agreement);
   // The move runs to the end whatever the request does; the room stays locked until it has. Past the deadline the
   // answer is "pending" and the panel polls again (a transaction such as start_negotiation can wait on the enclave).
-  const work = counterpartyStep(agreement).finally(() => busy.delete(agreement));
+  const work = counterpartyStep(agreement).finally(() => { readCache.invalidate(agreement); busy.delete(agreement); });
   try {
     const r = await settleWithin(work, REQUEST_DEADLINE_MS);
     if (!r.done) {

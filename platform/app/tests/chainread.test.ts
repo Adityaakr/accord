@@ -147,3 +147,40 @@ describe("balances", () => {
     expect(ftFrom(ok({ result: bytes({ no: 1 }) }))).toBeNull();
   });
 });
+
+describe("ReadCache.invalidate", () => {
+  it("drops an account's cached reads, so the next read after a transaction goes upstream", async () => {
+    const cache = new ReadCache();
+    let n = 0;
+    const load = async () => ({ jsonrpc: "2.0", id: 1, result: { n: ++n } }) as never;
+    const b = viewAccount("a33.accord-v2.testnet");
+    await cache.read(b, load);
+    await cache.read(b, load);
+    expect(n).toBe(1);
+    expect(cache.invalidate("a33.accord-v2.testnet")).toBe(1);
+    await cache.read(b, load);
+    expect(n).toBe(2);
+  });
+  it("never caches a read that began before the invalidation", async () => {
+    const cache = new ReadCache();
+    let n = 0;
+    let release!: () => void;
+    const slow = () => new Promise<never>((r) => { release = () => r({ jsonrpc: "2.0", id: 1, result: { n: ++n } } as never); });
+    const b = viewAccount("a33.accord-v2.testnet");
+    const first = cache.read(b, slow);
+    cache.invalidate("a33.accord-v2.testnet");
+    release();
+    await first;
+    await cache.read(b, async () => ({ jsonrpc: "2.0", id: 1, result: { n: ++n } }) as never);
+    expect(n).toBe(2);
+  });
+  it("leaves other accounts' reads cached", async () => {
+    const cache = new ReadCache();
+    let n = 0;
+    const load = async () => ({ jsonrpc: "2.0", id: 1, result: { n: ++n } }) as never;
+    await cache.read(viewAccount("other.testnet"), load);
+    cache.invalidate("a33.accord-v2.testnet");
+    await cache.read(viewAccount("other.testnet"), load);
+    expect(n).toBe(1);
+  });
+});

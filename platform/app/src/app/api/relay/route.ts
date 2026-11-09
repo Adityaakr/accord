@@ -6,6 +6,7 @@ import { relay } from "@/server/relay";
 import { decodeSignedDelegate } from "@/server/delegate";
 import { allow, clientIp, sameOriginJson } from "@/server/ratelimit";
 import { chainErrorResponse } from "@/server/rpcerror";
+import { readCache } from "@/server/chainproxy";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,8 @@ export async function POST(req: Request) {
   if (!allow(`relay:${sender}`, 60, 3600_000)) return NextResponse.json({ error: "too many relayed calls this hour" }, { status: 429 });
   try {
     const { outcome } = await relay(signedDelegate as string);
+    // the next read of the room (or the token, or the sender) sees this call, not a cached copy from before it
+    readCache.invalidate(sender, decodeSignedDelegate(signedDelegate as string).delegateAction.receiverId);
     return NextResponse.json({ outcome });
   } catch (e) {
     return chainErrorResponse(e);

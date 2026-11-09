@@ -103,29 +103,48 @@ export async function forward(urls: string[], b: RpcRequestBody, opts: { fetch?:
 
 /** A small TTL cache that also shares in-flight reads. Busy answers are never kept. */
 export class ReadCache {
-  private readonly done = new Map<string, { at: number; ttl: number; body: RpcResponseBody }>();
+  private readonly done = new Map<string, { at: number; ttl: number; body: RpcResponseBody; account: string | null }>();
   private readonly flying = new Map<string, Promise<RpcResponseBody | null>>();
+  private readonly gen = new Map<string, number>();
   constructor(private readonly max = 2_000, private readonly now: () => number = Date.now) {}
 
   async read(b: RpcRequestBody, load: () => Promise<RpcResponseBody | null>): Promise<RpcResponseBody | null> {
     const key = readKey(b);
+    const account = typeof b.params.account_id === "string" ? b.params.account_id : null;
     const hit = this.done.get(key);
     if (hit && this.now() - hit.at < hit.ttl) return hit.body;
     const inFlight = this.flying.get(key);
     if (inFlight) return inFlight;
+    const gen = account ? this.gen.get(account) ?? 0 : 0;
     const p = load()
       .then((body) => {
-        if (body) this.put(key, ttlFor(b), body);
+        // a read that started before an invalidation may carry the old state: answer it, never cache it
+        if (body && (!account || (this.gen.get(account) ?? 0) === gen)) this.put(key, ttlFor(b), body, account);
         return body;
       })
-      .finally(() => this.flying.delete(key));
+      .finally(() => { if (this.flying.get(key) === p) this.flying.delete(key); });
     this.flying.set(key, p);
     return p;
   }
 
-  private put(key: string, ttl: number, body: RpcResponseBody) {
+  /**
+   * Drops every cached read of these accounts, so the next read after a transaction this server sent (relayed, the
+   * demo agent's or the counterparty's) sees it at once instead of after the cache's few seconds. A read already in
+   * flight still answers its caller but is not cached.
+   */
+  invalidate(...accounts: string[]): number {
+    const drop = new Set(accounts);
+    for (const a of drop) this.gen.set(a, (this.gen.get(a) ?? 0) + 1);
+    let n = 0;
+    for (const [key, hit] of this.done) if (hit.account && drop.has(hit.account)) { this.done.delete(key); n++; }
+    // later callers start a fresh read instead of joining one that began before the transaction
+    for (const key of [...this.flying.keys()]) if (accounts.some((a) => key.includes(JSON.stringify(a)))) this.flying.delete(key);
+    return n;
+  }
+
+  private put(key: string, ttl: number, body: RpcResponseBody, account: string | null = null) {
     this.done.delete(key);
-    this.done.set(key, { at: this.now(), ttl, body });
+    this.done.set(key, { at: this.now(), ttl, body, account });
     while (this.done.size > this.max) this.done.delete(this.done.keys().next().value as string);
   }
 
