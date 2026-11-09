@@ -128,8 +128,9 @@ const H1_WORDS = HEADLINE.split(" ")
 const ACCENT = new Set([H1_WORDS.indexOf("deal"), H1_WORDS.indexOf("room"), H1_WORDS.indexOf("control"), H1_WORDS.indexOf("plane")])
 const headlineWord = (i: number) => (ACCENT.has(i) ? styles.h1Accent : i > H1_BREAK_AFTER ? styles.h1Soft : undefined)
 const LEAD = "Accord turns private negotiations into enforceable payment rules. Agents negotiate within each business’s confidential limits. Both parties approve the terms, and the contract enforces who can authorise payments, who can receive them, how much can be paid and what evidence is required."
-/* The line under the buttons links to the demonstration (it replaced the Accord Atlas announcement, 8 Nov 2026) */
-const PROOF_LINK = "Every step of a live testnet agreement, on chain"
+/* The line under the buttons links to the record of agreement a6 (it replaced the Accord Atlas announcement, 8 Nov 2026).
+   It names the agreement it points to, so it is not read as a caption of the illustrative mock-up below it. */
+const PROOF_LINK = "Testnet record: procurement agreement a6, each step with its transaction"
 
 export function Hero() {
   return (
@@ -179,7 +180,7 @@ export function Hero() {
 
           {/* The demonstration, below the buttons: the hero reads headline, lead, actions, then the walkthrough */}
           <Mount y={16} delay="0.7s" className={styles.announce}>
-            <Link to={LINKS.testnet} className={styles.announceLink}>
+            <Link to={LINKS.record} className={styles.announceLink}>
               <LogoMark size={18} />
               <span className={styles.announceBody}>
                 <span className={styles.announceQuiet}>{PROOF_LINK}</span>
