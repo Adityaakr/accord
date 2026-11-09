@@ -9,6 +9,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRefreshSoon } from "@/components/refreshSoon";
 import { useWallet } from "@/components/wallet/WalletProvider";
+import { useOrg } from "@/components/org/OrgProvider";
 import { useAppConfig } from "@/components/AppConfig";
 import { HoldButton } from "@/components/me/Confirm";
 import { agreementClient, errorText, readBack } from "@/components/me/client";
@@ -76,16 +77,28 @@ export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys,
   const transcript = useTranscript(hasWork ? data : null);
 
   // In a demo room the agent pays a due item on its own. While the buyer has the room open, it is asked to look once
-  // per change of chain state; the server reads the chain and the agent's record and pays at most once.
+  // per change of chain state; the server reads the chain and the agent's record and pays at most once. It acts only
+  // for the room's proven buyer (the session): a throwaway key confirms silently, a wallet asks once, on a click.
+  const org = useOrg();
   const asked = useRef<string | null>(null);
+  const [needsConfirm, setNeedsConfirm] = useState(false);
+  const tick = useCallback(async () => {
+    const ask = () => fetch("/api/demo-agent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ agreement: room, action: "tick" }) });
+    let r = await ask();
+    if (r.status === 401) {
+      if (w.method !== "throwaway") { setNeedsConfirm(true); return; }
+      if (!(await org.confirm())) return;
+      r = await ask();
+    }
+    setNeedsConfirm(false);
+    const b = r.ok ? ((await r.json()) as { paid?: boolean }) : null;
+    if (b?.paid) refreshSoon();
+  }, [room, w.method, org, refreshSoon]);
   useEffect(() => {
     if (!demoRoom || !isBuyer || status !== "active" || !dueNow || asked.current === version) return;
     asked.current = version;
-    void fetch("/api/demo-agent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ agreement: room, action: "tick" }) })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((b: { paid?: boolean } | null) => { if (b?.paid) refreshSoon(); })
-      .catch(() => undefined);
-  }, [demoRoom, isBuyer, status, dueNow, version, room, refreshSoon]);
+    void tick().catch(() => undefined);
+  }, [demoRoom, isBuyer, status, dueNow, version, tick]);
 
   return (
     <div className={styles.header}>
@@ -126,6 +139,11 @@ export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys,
             {executing ? "No agent key yet. The buyer installs it from Actions." : "No agent until the agreement is executing."}
           </span>
         )}
+        {needsConfirm && isBuyer && status === "active" ? (
+          <button type="button" className={styles.confirm} onClick={() => void org.confirm().then((ok) => { if (ok) void tick(); })}>
+            Confirm it&apos;s you so the agent pays the due item on its own
+          </button>
+        ) : null}
         {hasWork ? <span className={styles.work}><WorkToggle t={transcript} open={open} onToggle={() => setOpen((v) => !v)} controls={workId} /></span> : null}
         {isBuyer && status === "active" ? (
           <span id="revoke" className={styles.revoke}><HoldButton label="Hold to revoke" onConfirm={() => void revoke()} /></span>

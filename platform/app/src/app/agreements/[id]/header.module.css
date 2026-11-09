@@ -24,6 +24,8 @@
 .revokedLine { color: var(--refusal); animation: settle 0.5s var(--ease); }
 .tx { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-weak); }
 .work { margin-left: auto; }
+.confirm { padding: 0; border: 0; background: none; font: inherit; font-size: 12.5px; color: var(--teal); text-decoration: underline; text-decoration-color: var(--teal-line); text-underline-offset: 3px; cursor: pointer; }
+.confirm:focus-visible { outline: 2px solid var(--teal-line); outline-offset: 2px; border-radius: 4px; }
 .work + .revoke, .work + .signin { margin-left: 0; }
 .revoke { margin-left: auto; scroll-margin-top: 120px; border-radius: var(--radius); }
 /* arriving from the command bar (#revoke): point at the control; the hold still decides */
