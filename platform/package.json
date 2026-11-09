@@ -8,10 +8,10 @@
   },
   "packageManager": "pnpm@10.30.2",
   "scripts": {
-    "prepare": "pnpm --filter @accord/sdk --filter @accord/store build",
+    "prepare": "pnpm --filter @accord/sdk --filter @accord/store --filter @accord/mcp build",
     "build": "pnpm -r build",
-    "test": "pnpm --filter @accord/sdk --filter @accord/store build && pnpm -r test",
-    "typecheck": "pnpm --filter @accord/sdk --filter @accord/store build && pnpm -r typecheck"
+    "test": "pnpm --filter @accord/sdk --filter @accord/store --filter @accord/mcp build && pnpm -r test",
+    "typecheck": "pnpm --filter @accord/sdk --filter @accord/store --filter @accord/mcp build && pnpm -r typecheck"
   },
   "devDependencies": {
     "typescript": "5.9.3",

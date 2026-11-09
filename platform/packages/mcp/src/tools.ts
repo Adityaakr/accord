@@ -18,6 +18,8 @@ export interface McpDeps {
   agreement(id: string): AgreementReader;
   preflight(agreement: string, recipient: string): Promise<PreflightResult>;
   verify(agreement: string): Promise<VerifyReport>;
+  /** The token's `ft_metadata` symbol (`tUSDC` for the test token, `USDC` for Circle's). */
+  tokenSymbol?(token: string): Promise<string>;
   /** Present only when ACCORD_AGENT_KEY and AGENT_AGREEMENT are set; signs as the agreement account. */
   agent?: {
     agreement: string;
@@ -49,6 +51,47 @@ const account = z.string().refine(isAccountId,
 const baseUnits = z.string().regex(/^\d+$/, "a decimal string in the token's base units (USDC: 6 decimals, \"12000000\" is 12.00)");
 const hex64 = z.string().regex(/^[0-9a-f]{64}$/, "64 lowercase hex");
 const limit = z.number().int().min(1).max(100).optional();
+
+/** Circle's USDC on NEAR (mainnet, testnet); the unit when a token's metadata cannot be read. */
+const CIRCLE_USDC = new Set([
+  "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+  "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af",
+]);
+
+export function guessUnit(token: string): string {
+  if (/^tusdc\./.test(token)) return "tUSDC";
+  if (CIRCLE_USDC.has(token)) return "USDC";
+  return `units of ${token}`;
+}
+
+export interface TokenUnit {
+  /** The NEP-141 account the agreement settles in. */
+  account: string;
+  /** Its `ft_metadata` symbol: `tUSDC` is the test token (no value), `USDC` is Circle's testnet USDC. */
+  symbol: string;
+  decimals: number;
+}
+
+/** The agreement's own token and its unit, so an agent never reports test-token amounts as USDC. */
+async function unitOf(d: McpDeps, token: string, decimals = 6): Promise<TokenUnit> {
+  let symbol = "";
+  if (d.tokenSymbol) {
+    try {
+      symbol = (await d.tokenSymbol(token)).trim();
+    } catch {
+      symbol = "";
+    }
+  }
+  return { account: token, symbol: symbol || guessUnit(token), decimals };
+}
+
+async function unitFor(d: McpDeps, agreement: string): Promise<TokenUnit | null> {
+  try {
+    return await unitOf(d, (await d.agreement(agreement).get()).token);
+  } catch {
+    return null;
+  }
+}
 
 function txOut(tx: TxResult) {
   return { txHash: tx.txHash, ok: tx.ok, value: tx.value, events: tx.events, failure: tx.failure ?? null };
@@ -84,7 +127,7 @@ export const TOOLS: ToolDef[] = [
   },
   {
     name: "accord_get_agreement",
-    description: "One agreement: state, parties, terms, items with status, recipient, agent key and budget. Amounts are base units.",
+    description: "One agreement: state, parties, terms, items with status, recipient, agent key and budget. Amounts are base units of `token` (its symbol and decimals are given: tUSDC is the test token, USDC is Circle's testnet USDC).",
     needs: "nothing",
     input: { agreement: account },
     run: async (a, d) => {
@@ -92,7 +135,7 @@ export const TOOLS: ToolDef[] = [
       const deal = d.agreement(id);
       try {
         const [view, terms, items] = await Promise.all([deal.get(), deal.terms(), deal.items()]);
-        return { agreement: view, terms, items };
+        return { agreement: view, token: await unitOf(d, view.token, terms?.decimals ?? 6), terms, items };
       } catch (e) {
         // A missing account, one with no code or one without get_agreement: one line, not the RPC's own text.
         if (NOT_AN_AGREEMENT.test((e as Error).message ?? "")) throw new Error(`${id} is not an Accord agreement`);
@@ -105,7 +148,11 @@ export const TOOLS: ToolDef[] = [
     description: "Items eligible for payment now, with amount and the current recipient.",
     needs: "nothing",
     input: { agreement: account },
-    run: async (a, d) => ({ due: await d.agreement(a.agreement as string).dueItems() }),
+    run: async (a, d) => {
+      const id = a.agreement as string;
+      const [due, token] = await Promise.all([d.agreement(id).dueItems(), unitFor(d, id)]);
+      return { token, due };
+    },
   },
   {
     name: "accord_preflight",
@@ -144,7 +191,11 @@ export const TOOLS: ToolDef[] = [
     description: "The agreement's refusal log: code, item, amount, recipient, signer and block for each refused act.",
     needs: "nothing",
     input: { agreement: account, limit },
-    run: async (a, d) => ({ refusals: await d.agreement(a.agreement as string).refusals(undefined, a.limit as number | undefined) }),
+    run: async (a, d) => {
+      const id = a.agreement as string;
+      const [refusals, token] = await Promise.all([d.agreement(id).refusals(undefined, a.limit as number | undefined), unitFor(d, id)]);
+      return { token, refusals };
+    },
   },
   {
     name: "accord_receipts",
@@ -152,9 +203,10 @@ export const TOOLS: ToolDef[] = [
     needs: "nothing",
     input: { agreement: account, limit },
     run: async (a, d) => {
-      const list = await d.agreement(a.agreement as string).receipts();
+      const id = a.agreement as string;
+      const [list, token] = await Promise.all([d.agreement(id).receipts(), unitFor(d, id)]);
       const n = a.limit as number | undefined;
-      return { receipts: n ? list.slice(-n) : list };
+      return { token, receipts: n ? list.slice(-n) : list };
     },
   },
   {

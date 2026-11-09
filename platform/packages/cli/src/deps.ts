@@ -7,6 +7,7 @@ import {
 } from "@accord/sdk";
 import type { Deps } from "./commands.js";
 import type { Env, Identity } from "./env.js";
+import { realReleaseProof } from "./release.js";
 
 export interface RealDepsOptions {
   network: Network;
@@ -31,6 +32,7 @@ export function realDeps(o: RealDepsOptions): Deps {
     if (!signer) throw new Error("this command signs: pass --as");
     return signer;
   };
+  const symbols = new Map<string, Promise<string>>();
   return {
     signer: signer && o.identity ? { role: o.identity.role, accountId: signer.accountId, publicKey: signer.publicKey } : undefined,
     agreement: (id) => accord.agreement(id),
@@ -43,6 +45,8 @@ export function realDeps(o: RealDepsOptions): Deps {
     verify: (agreement) => verify(accord, agreement, {
       nearAiKey: o.env.NEARAI_API_KEY || undefined,
       factories: [o.env.ACCORD_FACTORY_USDC ?? ""],
+      // the release check runs OutLayer's verifier when it is installed; otherwise it stays `not checked`
+      releaseProof: realReleaseProof(o.env),
     }),
     sealedCheck: async (agreement, other) => {
       const s = needSigner();
@@ -53,6 +57,15 @@ export function realDeps(o: RealDepsOptions): Deps {
       return sealedCheck(target.ciphertext, docKey);
     },
     ftBalance: (token, account) => accord.chain.view<string>(token, "ft_balance_of", { account_id: account }),
+    tokenSymbol: (token) => {
+      let s = symbols.get(token);
+      if (!s) {
+        s = accord.chain.view<{ symbol?: string }>(token, "ft_metadata", {}).then((m) => m.symbol ?? "");
+        s.catch(() => symbols.delete(token));
+        symbols.set(token, s);
+      }
+      return s;
+    },
     ftTransfer: (token, receiver, amount, memo) =>
       needSigner().call(token, "ft_transfer", { receiver_id: receiver, amount, memo }, { gas: 30n * TGAS, deposit: 1n }),
     generateKeyPair: () => {

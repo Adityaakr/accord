@@ -46,7 +46,7 @@ interface Recorder {
   files: Record<string, string>;
 }
 
-function fakes(opts: { rating?: Rating; approved?: boolean; payResult?: ActResult; verify?: VerifyReport; verifyError?: Error } = {}) {
+function fakes(opts: { rating?: Rating; approved?: boolean; payResult?: ActResult; verify?: VerifyReport; verifyError?: Error; symbol?: string } = {}) {
   const rec: Recorder = { calls: [], files: {} };
   const deal = {
     id: ID,
@@ -75,6 +75,7 @@ function fakes(opts: { rating?: Rating; approved?: boolean; payResult?: ActResul
       verify: async () => { if (opts.verifyError) throw opts.verifyError; return opts.verify ?? { agreement: ID, checks: [], ok: 0, partial: 0, failed: 0, notChecked: 0 }; },
       sealedCheck: async () => "ERR_SEALED",
       ftBalance: async () => "0",
+      ...(opts.symbol !== undefined ? { tokenSymbol: async () => opts.symbol! } : {}),
       ftTransfer: async () => tx(),
       generateKeyPair: () => ({ publicKey: "ed25519:NewAgentPub", secretKey: NEW_SECRET }),
       writeSecretFile: async (p, c) => { rec.files[p] = c; },
@@ -150,7 +151,7 @@ describe("other commands", () => {
     const f = fakes();
     const r = await cli(["fund", "32", "--agreement", ID, "--as", "buyer"], f);
     expect(f.rec.calls).toContain("fund 32000000");
-    expect(r.out).toContain("  amount    32.00 USDC");
+    expect(r.out).toContain("  amount    32.00 tUSDC");
   });
   it("approve reads the terms hash from the agreement", async () => {
     const f = fakes();
@@ -167,12 +168,19 @@ describe("other commands", () => {
     const lines = r.out.split("\n");
     expect(lines[0]).toBe(`accord show · ${ID} · procurement · demo timings`);
     expect(r.out).toContain("  state     Executing · release 1");
-    expect(r.out).toContain("  terms     32.00 USDC · 2 items · terms abababab…");
-    expect(r.out).toContain("  item 1    12.00 USDC · Paid · due 2023-11-14T22:13:20Z");
-    expect(r.out).toContain("  item 2    20.00 USDC · Open · due not set");
+    expect(r.out).toContain("  terms     32.00 tUSDC · 2 items · terms abababab…");
+    expect(r.out).toContain("  item 1    12.00 tUSDC · Paid · due 2023-11-14T22:13:20Z");
+    expect(r.out).toContain("  item 2    20.00 tUSDC · Open · due not set");
     expect(r.out).toContain("  recipient halcyon-mm.testnet · halcyon.example · version 1");
     expect(r.out).toContain("  agent key ed25519:AgentPub · 1 revoked");
     expect(r.out).toContain("  budget    balance 3.000 NEAR");
+  });
+  it("show names amounts in the agreement token's own symbol", async () => {
+    const circle = await cli(["show", "--agreement", ID], fakes({ symbol: "USDC" }));
+    expect(circle.out).toContain("  terms     32.00 USDC · 2 items");
+    expect(circle.out).toContain("  token     tusdc.testnet · USDC");
+    const json = JSON.parse((await cli(["show", "--agreement", ID, "--json"], fakes())).out) as { unit: string };
+    expect(json.unit).toBe("tUSDC");
   });
   it("verify exits 1 on a failed check and prints the summary", async () => {
     const f = fakes({ verify: { agreement: ID, checks: [{ name: "code", status: "fail", detail: "d" }], ok: 0, partial: 0, failed: 1, notChecked: 0 } });

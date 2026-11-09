@@ -27,6 +27,9 @@ importers:
 
   app:
     dependencies:
+      '@accord/mcp':
+        specifier: workspace:*
+        version: link:../packages/mcp
       '@accord/sdk':
         specifier: workspace:*
         version: link:../packages/sdk

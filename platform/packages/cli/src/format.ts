@@ -12,7 +12,23 @@ export const line = (label: string, value: string): string => `  ${label.padEnd(
 export const header = (command: string, ...parts: (string | undefined)[]): string =>
   ["accord " + command, ...parts.filter((p): p is string => Boolean(p))].join(" · ");
 
-export const usdc = (amount: string | bigint, decimals = 6): string => `${formatUnits(amount, decimals)} USDC`;
+/** An amount in the token's own unit: `35.50 tUSDC` for the test token, `35.50 USDC` for Circle's (see `unitFor`). */
+export const units = (amount: string | bigint, unit = "USDC", decimals = 6): string => `${formatUnits(amount, decimals)} ${unit}`;
+
+/** The unit for a token account when its `ft_metadata` could not be read: the test token is `tUSDC`, Circle's is
+ * `USDC`, anything else is named by its account. */
+export function guessUnit(token: string | undefined): string {
+  if (!token) return "USDC";
+  if (/^tusdc\./.test(token)) return "tUSDC";
+  if (CIRCLE_USDC.has(token)) return "USDC";
+  return `units of ${token}`;
+}
+
+/** Circle's USDC on NEAR: mainnet and testnet. */
+const CIRCLE_USDC = new Set([
+  "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+  "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af",
+]);
 
 export function time(unix: number | null | undefined): string {
   if (unix === null || unix === undefined) return "not set";
@@ -105,6 +121,8 @@ export interface ShowData {
   items: ItemView[];
   recipients: RecipientVersion[];
   exceptions: ExceptionView[];
+  /** The agreement token's symbol (`tUSDC`, `USDC`); defaults to `USDC`. */
+  unit?: string;
 }
 
 function evidenceText(e: ItemView["evidence"]): string {
@@ -114,12 +132,14 @@ function evidenceText(e: ItemView["evidence"]): string {
 export function formatShow(d: ShowData): string[] {
   const a = d.view;
   const dec = d.terms?.decimals ?? 6;
+  const unit = d.unit ?? "USDC";
+  const usdc = (amount: string | bigint, decimals: number) => units(amount, unit, decimals);
   const out = [header("show", a.account, a.kind, a.params.mode === "demo" ? "demo timings" : undefined)];
   out.push(line("title", a.title));
   out.push(line("state", `${a.state} · release ${a.release}${a.closing ? " · closing" : ""}${a.canary_tripped ? " · canary tripped" : ""}`));
   out.push(line("buyer", a.buyer));
   out.push(line("vendor", `${a.vendor} · authority ${a.vendor_authority}`));
-  out.push(line("token", a.token));
+  out.push(line("token", `${a.token} · ${unit}`));
   if (d.terms) {
     out.push(line("terms", `${usdc(d.terms.total, dec)} · ${d.terms.items.length} items · terms ${shortHash(a.terms_hash ?? "")}`));
     out.push(line("approvals", `buyer ${a.approvals.buyer ? "yes" : "no"} · vendor ${a.approvals.vendor ? "yes" : "no"}`));
@@ -147,21 +167,21 @@ export function formatShow(d: ShowData): string[] {
   return out;
 }
 
-export function formatRefusals(agreement: string, list: Refusal[]): string[] {
+export function formatRefusals(agreement: string, list: Refusal[], unit = "USDC"): string[] {
   const out = [header("refusals", agreement)];
   for (const r of list) {
-    out.push(line(`seq ${r.seq}`, `${r.code} · item ${r.item} · ${usdc(r.amount)} → ${r.recipient} · via ${r.via} · block ${r.block}`));
+    out.push(line(`seq ${r.seq}`, `${r.code} · item ${r.item} · ${units(r.amount, unit)} → ${r.recipient} · via ${r.via} · block ${r.block}`));
   }
   out.push(`refusals: ${list.length}`);
   return out;
 }
 
-export function formatReceipts(agreement: string, list: Receipt[]): string[] {
+export function formatReceipts(agreement: string, list: Receipt[], unit = "USDC"): string[] {
   const out = [header("receipts", agreement)];
   for (const r of list) {
-    out.push(line(`payment ${r.payment_id}`, `item ${r.item} · ${usdc(r.amount)} → ${r.recipient} · via ${r.via} · block ${r.block}`));
+    out.push(line(`payment ${r.payment_id}`, `item ${r.item} · ${units(r.amount, unit)} → ${r.recipient} · via ${r.via} · block ${r.block}`));
   }
   const total = list.reduce((s, r) => s + BigInt(r.amount), 0n);
-  out.push(`receipts: ${list.length} · ${usdc(total)}`);
+  out.push(`receipts: ${list.length} · ${units(total, unit)}`);
   return out;
 }

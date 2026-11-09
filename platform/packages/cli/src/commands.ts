@@ -7,8 +7,8 @@ import { flagBool, flagInt, flagString, requireFlag, toInt, type ParsedArgs } fr
 import { DEFAULT_ALLOWANCE, parseAmount, parseNear } from "./amount.js";
 import type { Env, Role } from "./env.js";
 import {
-  actLines, formatCheck, formatReceipts, formatRefusals, formatShow, formatVerify, header, line, time, txJson,
-  txLines, usdc,
+  actLines, formatCheck, formatReceipts, formatRefusals, formatShow, formatVerify, guessUnit, header, line, time, txJson,
+  txLines, units,
 } from "./format.js";
 
 /** The agreement methods the CLI uses: the SDK's own `AgreementClient` satisfies it. */
@@ -30,6 +30,8 @@ export interface Deps {
   /** The signer's document key against the other party's sealed mandate. */
   sealedCheck(agreement: string, other: "buyer" | "vendor"): Promise<"ERR_SEALED" | "READABLE">;
   ftBalance(token: string, account: string): Promise<string>;
+  /** The token's `ft_metadata` symbol (`tUSDC`, `USDC`); without it the unit is guessed from the token account. */
+  tokenSymbol?(token: string): Promise<string>;
   ftTransfer(token: string, receiver: string, amount: string, memo: string): Promise<TxResult>;
   generateKeyPair(): { publicKey: string; secretKey: string };
   writeSecretFile(path: string, content: string): Promise<void>;
@@ -89,6 +91,30 @@ function posInt(ctx: Ctx, i: number, what: string): number {
 
 function amountArg(ctx: Ctx, i: number): string {
   return parseAmount(pos(ctx, i, "amount"), { raw: flagBool(ctx.args, "raw") });
+}
+
+/** The unit amounts are printed in: the symbol of the agreement's own token, so a test-token agreement never reads as
+ * USDC. A token that cannot be read falls back to `guessUnit`; a failed read never stops the command. */
+async function unitFor(ctx: Ctx, token: string | undefined): Promise<string> {
+  if (token && ctx.deps.tokenSymbol) {
+    try {
+      const s = (await ctx.deps.tokenSymbol(token)).trim();
+      if (s) return s;
+    } catch {
+      // fall through to the guess
+    }
+  }
+  return guessUnit(token);
+}
+
+async function agreementUnit(ctx: Ctx, id: string): Promise<string> {
+  let token: string | undefined;
+  try {
+    token = (await ctx.deps.agreement(id).get()).token;
+  } catch {
+    token = undefined;
+  }
+  return unitFor(ctx, token);
 }
 
 async function txBlock(ctx: Ctx, command: string, id: string, label: string, run: Promise<TxResult>, extra: string[] = []) {
@@ -173,7 +199,8 @@ const fund: Handler = async (ctx) => {
   needRole(ctx, "buyer");
   const id = agreementId(ctx);
   const amount = amountArg(ctx, 0);
-  return txBlock(ctx, "fund", id, "funded", ctx.deps.agreement(id).fund(amount), [line("amount", usdc(amount))]);
+  const unit = await agreementUnit(ctx, id);
+  return txBlock(ctx, "fund", id, "funded", ctx.deps.agreement(id).fund(amount), [line("amount", units(amount, unit))]);
 };
 
 const recipient: Handler = async (ctx) => {
@@ -275,12 +302,13 @@ const pay: Handler = async (ctx) => {
   const pf = flagString(ctx.args, "preflight") ?? "on";
   if (pf !== "on" && pf !== "off") throw new Error("--preflight is on or off");
   const deal = ctx.deps.agreement(id);
+  const unit = await agreementUnit(ctx, id);
   const r = await guardedPay(
     { preflight: (a, rcpt) => ctx.deps.preflight(a, rcpt), pay: (_a, p) => deal.pay(p) },
     id, { item, amount, recipient: to, memo }, { preflight: pf },
   );
   const lines = [header("pay", id, ctx.deps.signer ? `agent key ${ctx.deps.signer.publicKey}` : undefined),
-    line("request", `item ${item} · ${usdc(amount)} → ${to}`)];
+    line("request", `item ${item} · ${units(amount, unit)} → ${to}`)];
   if (r.preflight) lines.push(line("preflight", `${r.preflight.rating}${r.preflight.reasons.length ? `: ${r.preflight.reasons.join("; ")}` : ""}`));
   else lines.push(line("preflight", "off for this run"));
   if (r.status === "preflight_blocked") lines.push(line("signed", "no · preflight block refuses to sign"));
@@ -308,7 +336,8 @@ const exception: Handler = async (ctx) => {
     waiveEvidence: flagBool(ctx.args, "waive-evidence"),
     reason: requireFlag(ctx.args, "reason"),
   };
-  const head = [header("exception request", id), line(`item ${e.item}`, `${usdc(e.amount)}${e.waiveEvidence ? " · waive evidence" : ""} · ${e.reason}`)];
+  const unit = await agreementUnit(ctx, id);
+  const head = [header("exception request", id), line(`item ${e.item}`, `${units(e.amount, unit)}${e.waiveEvidence ? " · waive evidence" : ""} · ${e.reason}`)];
   if (role === "vendor") return txBlock(ctx, "exception request", id, "requested", deal.requestException(e), head.slice(1));
   const r = await deal.agentRequestException(e);
   ctx.out.block([...head, ...actLines(r)], { command: "exception request", agreement: id, ...e, ...r });
@@ -361,19 +390,22 @@ const show: Handler = async (ctx) => {
   const [view, terms, items, recipients, exceptions] = await Promise.all([
     deal.get(), deal.terms(), deal.items(), deal.recipients(), deal.exceptions(),
   ]);
-  ctx.out.block(formatShow({ view, terms, items, recipients, exceptions }), { view, terms, items, recipients, exceptions });
+  const unit = await unitFor(ctx, view.token);
+  ctx.out.block(formatShow({ view, terms, items, recipients, exceptions, unit }), { view, terms, items, recipients, exceptions, unit });
 };
 
 const refusals: Handler = async (ctx) => {
   const id = agreementId(ctx);
-  const list = await ctx.deps.agreement(id).refusals(flagInt(ctx.args, "from"), flagInt(ctx.args, "limit"));
-  ctx.out.block(formatRefusals(id, list), { agreement: id, refusals: list });
+  const [list, unit] = await Promise.all([
+    ctx.deps.agreement(id).refusals(flagInt(ctx.args, "from"), flagInt(ctx.args, "limit")), agreementUnit(ctx, id),
+  ]);
+  ctx.out.block(formatRefusals(id, list, unit), { agreement: id, unit, refusals: list });
 };
 
 const receipts: Handler = async (ctx) => {
   const id = agreementId(ctx);
-  const list = await ctx.deps.agreement(id).receipts();
-  ctx.out.block(formatReceipts(id, list), { agreement: id, receipts: list });
+  const [list, unit] = await Promise.all([ctx.deps.agreement(id).receipts(), agreementUnit(ctx, id)]);
+  ctx.out.block(formatReceipts(id, list, unit), { agreement: id, unit, receipts: list });
 };
 
 const check: Handler = async (ctx) => {
@@ -423,6 +455,8 @@ const watch: Handler = async (ctx) => {
   const deal = ctx.deps.agreement(id);
   const intervalMs = (flagInt(ctx.args, "interval") ?? 5) * 1000;
   const count = flagInt(ctx.args, "count");
+  const unit = await agreementUnit(ctx, id);
+  const usdc = (amount: string) => units(amount, unit);
   let last: { state: string; refusals: number; receipts: number; funded: string; agentKey: string | null; recipient: string | null } | undefined;
   for (let i = 0; count === undefined || i < count; i++) {
     if (i > 0) await ctx.deps.sleep(intervalMs);
@@ -457,6 +491,8 @@ const recycle: Handler = async (ctx) => {
   const to = flagString(ctx.args, "to") ?? ctx.env.BUYER_ACCOUNT;
   if (!to) throw new Error("missing --to (or BUYER_ACCOUNT)");
   const balance = await ctx.deps.ftBalance(token, signer.accountId);
+  const unit = await unitFor(ctx, token);
+  const usdc = (amount: string) => units(amount, unit);
   const amountText = flagString(ctx.args, "amount");
   const amount = amountText ? parseAmount(amountText, { raw: flagBool(ctx.args, "raw") }) : balance;
   if (BigInt(amount) === 0n) {
@@ -502,4 +538,4 @@ export const USAGE = `accord <command> [--network testnet] [--factory <id>] [--a
   watch --agreement <a> [--interval <s>] [--count <n>]
   recycle [--token <id>] [--to <account>] [--amount <x>]      (signs as RECIPIENT_ACCOUNT)
 
-Amounts are USDC (\`12.5\`); --raw takes base units. Keys come from .env; only public keys are printed.`;
+Amounts are in the agreement's token (\`12.5\`: tUSDC on the test-token factory, USDC on Circle's); --raw takes base units. Keys come from .env; only public keys are printed.`;

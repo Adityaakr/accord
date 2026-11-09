@@ -589,7 +589,7 @@ Built on `near-api-js` (version pinned in `DECISIONS.md`; 7.x is a single packag
 
 ## 12. MCP server (`@accord/mcp`)
 
-Run `npx @accord/mcp` (stdio) or `npx @accord/mcp --http 8787`. Tools:
+Run `npx @accord/mcp` (stdio) or `npx @accord/mcp --http 8787`; with no variables it reads testnet (`accord-v2.testnet` and `accord-usdc.testnet`). The app also serves the seven read tools, keyless, at `/app/mcp` (streamable HTTP, stateless, JSON responses, any origin, 60 requests a minute per IP). `accord_get_agreement`, `accord_due_items`, `accord_refusals` and `accord_receipts` return `token: { account, symbol, decimals }` (the symbol from the token's `ft_metadata`: `tUSDC` for the test token, `USDC` for Circle's) beside the base-unit amounts. Tools:
 
 | Tool | Input | Needs | Notes |
 | --- | --- | --- | --- |
@@ -616,10 +616,11 @@ Pages: `/` (deal rooms), `/agreements/new`, `/agreements/[id]` (deal room: the f
 | `/api/agreements` | GET | summaries | From the factory view; 15 s cache; `source` and `block` in every response |
 | `/api/agreements/[id]` | GET | `AgreementView` and items | Same |
 | `/api/agreements/[id]/events` | GET | events after a cursor | Method per check 0.8 |
-| `/api/verify/[id]` | GET | `VerifyReport` | `?nonce=<64 hex>` from the client; relays NEAR AI's report when a key is needed; the client verifies |
+| `/api/verify/[id]` | GET | `VerifyReport` | `?nonce=<64 hex>` from the client; relays NEAR AI's report when a key is needed; the client verifies. CORS: any origin, GET only, no credentials |
 | `/api/inbox` | POST | `{ id }` | `{ sender, subject, body }`; 10 an hour per visitor and `TRY_MAX_MESSAGES_PER_HOUR` in all; no key, no contract call |
 | `/api/inbox/stats` | GET | `{ attempts, last_refusal, paid_outside_terms, approved_payments }` | Computed from the contract's events; `paid_outside_terms` is `0` by construction and shown as counted |
-| `/api/record.csv` | GET | CSV | Columns: `date_utc, agreement, item, description_hash, amount_usdc, recipient, via, status, inference_cost_usd, transaction_url` |
+| `/api/record.csv` (also `/record.csv`) | GET | CSV | Columns: `date_utc, agreement, title, item, description_hash, amount, unit, token, recipient, via, status, block, transaction_url`; `unit` is the token's own symbol (`tUSDC`, `USDC`); `transaction_url` is the payment's own transaction (its `payment_sent` event), empty when the transactions API has not indexed it. No inference cost column: the Sealed Table's `usage` is not kept on chain. The public CSV is readable from any origin (no credentials); `?scope=org` is not |
+| `/mcp` | POST | MCP JSON-RPC | The hosted, keyless MCP server (section 12): read tools only, stateless, CORS for any origin, 60 a minute per IP and 600 in all |
 | `/api/payee/check` | GET | the file check result | Advisory onboarding check from the server; the binding proof is the Payee job's |
 | `/api/preflight/approve` | POST | `{ ok }` | `{ agreement, recipient, signature, public_key }`: a NEP-413 signature by the buyer over `accord:preflight:v1:<agreement>:<recipient>`; checked against the buyer's keys over RPC |
 | `/api/preflight/approvals` | GET | approvals | Read by the MCP server |

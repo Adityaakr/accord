@@ -97,4 +97,16 @@ describe("verify provenance", () => {
       expect(c.status, JSON.stringify(over)).toBe("fail");
     }
   });
+
+  it("release: ok only when every job's run is proven; any failure fails; no proof leaves it not checked", async () => {
+    vi.stubGlobal("fetch", async () => new Response("", { status: 404 }));
+    const w = () => world(view(6, "accord-v2.testnet"), () => true);
+    const release = async (proof?: Parameters<typeof verify>[2]) =>
+      (await verify(w() as never, "a6.accord-v2.testnet", proof)).checks.find((c) => c.name === "release")!;
+    expect((await release()).status).toBe("not_checked");
+    expect((await release({ releaseProof: async () => ({ status: "ok", detail: "proven" }) })).status).toBe("ok");
+    expect((await release({ releaseProof: async (j) => ({ status: j.job === "payee" ? "fail" : "ok", detail: "d" }) })).status).toBe("fail");
+    expect((await release({ releaseProof: async (j) => ({ status: j.job === "observer" ? "not_checked" : "ok", detail: "d" }) })).status).toBe("partial");
+    expect((await release({ releaseProof: async () => { throw new Error("down"); } })).status).toBe("not_checked");
+  });
 });

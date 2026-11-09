@@ -4,11 +4,23 @@
   "description": "Accord MCP server: read agreements, preflight and pay through the contract's gates",
   "license": "MIT",
   "type": "module",
+  "keywords": ["mcp", "near", "agents", "accord", "escrow"],
+  "homepage": "https://accordweb-production.up.railway.app",
+  "engines": { "node": ">=22" },
   "bin": { "accord-mcp": "dist/main.js" },
   "main": "dist/main.js",
-  "files": ["dist"],
+  "exports": {
+    ".": "./dist/main.js",
+    "./hosted": { "types": "./dist/hosted.d.ts", "default": "./dist/hosted.js" },
+    "./deps": { "types": "./dist/deps.d.ts", "default": "./dist/deps.js" },
+    "./tools": { "types": "./dist/tools.d.ts", "default": "./dist/tools.js" },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "!dist/**/*.map"],
+  "publishConfig": { "access": "public" },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "prepack": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "dev": "tsx --tsconfig tsconfig.json src/main.ts"

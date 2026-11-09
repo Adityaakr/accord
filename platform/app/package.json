@@ -4,13 +4,14 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @accord/sdk --filter @accord/store build && next dev -p 3100",
-    "build": "pnpm --filter @accord/sdk --filter @accord/store build && next build",
+    "dev": "pnpm --filter @accord/sdk --filter @accord/store --filter @accord/mcp build && next dev -p 3100",
+    "build": "pnpm --filter @accord/sdk --filter @accord/store --filter @accord/mcp build && next build",
     "start": "next start -p ${PORT:-3100}",
-    "typecheck": "pnpm --filter @accord/sdk --filter @accord/store build && tsc --noEmit",
+    "typecheck": "pnpm --filter @accord/sdk --filter @accord/store --filter @accord/mcp build && tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@accord/mcp": "workspace:*",
     "@accord/sdk": "workspace:*",
     "@accord/store": "workspace:*",
     "@hot-labs/near-connect": "0.12.0",

@@ -49,10 +49,26 @@ export function verifyEd25519(output: Record<string, unknown>, publicKey: string
   }
 }
 
+/** One of the release's three job keys, and the OutLayer request (on chain) whose output it came from. */
+export interface ReleaseJob {
+  job: "sealed_table" | "payee" | "observer";
+  /** The OutLayer request id the factory stored as `pubkey_task_id` (a request id, not OutLayer's task id). */
+  requestId: number;
+  wasmHash: string;
+  factory: string;
+  network: Accord["network"];
+}
+
+/**
+ * Proves one job key's run against OutLayer's attestation record (the CLI runs `outlayer-verify`). `not_checked`
+ * when the proof could not be run here (the tool is missing, the record API is unreachable).
+ */
+export type ReleaseProof = (job: ReleaseJob) => Promise<{ status: "ok" | "fail" | "not_checked"; detail: string }>;
+
 export async function verify(
   accord: Accord,
   agreement: string,
-  opts: { nonce?: string; nearAiKey?: string; factories?: string[] } = {},
+  opts: { nonce?: string; nearAiKey?: string; factories?: string[]; releaseProof?: ReleaseProof } = {},
 ): Promise<VerifyReport> {
   const deal = accord.agreement(agreement);
   let a: Awaited<ReturnType<typeof deal.get>>;
@@ -120,8 +136,23 @@ export async function verify(
   }
 
   // release: the job keys came from pubkey runs; checking the quote needs OutLayer's attestation record.
-  add("release", "not_checked",
-    `sealed-table wasm ${release.sealed_table.wasm_hash.slice(0, 8)}… · keys from pubkey run ${release.sealed_table.pubkey_task_id} · OutLayer attestation record not checked here (needs outlayer-verify)`);
+  const notHere = `sealed-table wasm ${release.sealed_table.wasm_hash.slice(0, 8)}… · keys from pubkey run ${release.sealed_table.pubkey_task_id} · OutLayer attestation record not checked here (needs outlayer-verify)`;
+  if (!opts.releaseProof) {
+    add("release", "not_checked", notHere);
+  } else {
+    // Each of the three job keys: its pubkey run proven by OutLayer's attestation (TDX quote, approved build, binding)
+    // and run by the release's own wasm. ok only when all three are; any failure fails the check.
+    const jobs = (["sealed_table", "payee", "observer"] as const).map((job) => ({
+      job, requestId: release[job].pubkey_task_id, wasmHash: release[job].wasm_hash, factory: a.factory, network: accord.network,
+    }));
+    const proofs = await Promise.all(jobs.map((j) => opts.releaseProof!(j).catch((e: unknown) => ({
+      status: "not_checked" as const, detail: e instanceof Error ? e.message : String(e),
+    }))));
+    const status: CheckStatus = proofs.some((p) => p.status === "fail") ? "fail"
+      : proofs.every((p) => p.status === "ok") ? "ok" : proofs.some((p) => p.status === "ok") ? "partial" : "not_checked";
+    const detail = jobs.map((j, i) => `${j.job.replace("_", "-")} run ${j.requestId} ${proofs[i]!.detail}`).join(" · ");
+    add("release", status, detail);
+  }
 
   // model: NEAR AI's attestation report, fetched with a fresh nonce chosen here. A local node's outcome says it
   // came from the deterministic local negotiator; no model ran, so there is nothing to attest.
