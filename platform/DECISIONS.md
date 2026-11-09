@@ -449,11 +449,12 @@ Kept as stated limits: an item can be reopened from `AssumedPaid` by one excepti
   factory's agreements; a token into the other factory's agreement is refused. With the variables absent the app is
   as before. Limit: the portfolio totals add test USDC and Circle USDC together.
 
-## 25. Audit fixes and release 4 (9 Nov 2026)
+## 25. Security review fixes and release 4 (9 Nov 2026)
 
-This was an internal, AI-assisted security review, not a third-party audit (mainnet still follows an external audit):
-the "auditors" and "skeptics" below are review passes. Five auditors (L1 payment path, L2 authorisation and keys, L3
-creation and code integrity, L4 funds, L5 the jobs) and two skeptics reproduced each finding with a test; every fix below went in test first (the test failed for the reason
+This was an internal, AI-assisted security review, not a third-party audit (mainnet still follows an external audit).
+Five review passes (L1 payment path, L2 authorisation and keys, L3 creation and code integrity, L4 funds, L5 the jobs)
+and two re-checking passes, which reproduced each finding with a test (the review's own notes called them "auditors"
+and "skeptics"; the finding ids below keep their labels, and C1 to C3 are the re-checking passes' ids); every fix below went in test first (the test failed for the reason
 named, then passed), and the tests stay in the suite. Release 4 carries the contract fixes for **new** agreements
 only: a6, a8 and a1.accord-usdc.testnet keep running release 3's code by hash and are unchanged.
 
@@ -502,15 +503,23 @@ only: a6, a8 and a1.accord-usdc.testnet keep running release 3's code by hash an
     accord-v2.testnet (https://testnet.nearblocks.io/txns/4onpVKM3qRosBSuodGYSnpuL7FkBJYL2VyzrU1ozkPyA,
     https://testnet.nearblocks.io/txns/7P5Auw4ai64u1xk7zL17NWWUmC1HHk3Jy2d4Jn3quuFo); it holds about `21.4 NEAR`
     above its storage stake.
+- **Counts:** 1 High (1), 5 Medium (3, 4 Medium-Low, 5, 6, 7), and 4 groups of Low findings (2, 8, 9, 10) holding 13
+  individual items: 1 in row 2 (found twice, as L4-F2 and L1-4), 8 in row 8 (L2-6 and L3-F6 are one), 3 in row 9 and
+  1 in row 10.
+- **Where the review tests run:** in CI (`.github/workflows/ci.yml`), the Rust unit tests of `accord-core`,
+  `accord-agreement` (`tests.rs`, `review_funds_tests.rs`) and `accord-factory` (`review_tests.rs`) on the mocked
+  chain, and the SDK tests (`verify.test.ts`, `preflight.test.ts`, `yocto.test.ts`). Locally only: the sandbox tests on
+  a real local node (`tests/`, including `tests/audit.rs`; `make sandbox`) and the enclave job tests
+  (`jobs/*/tests`, `accord-jobkit`).
 - **Not done yet: release 4 itself** (superseded by section 26: release 4 is published and current on both factories). Publishing the new agreement code as a global contract burns about `50 NEAR`
   (release 1's publish burned `50.13 NEAR`, ten times the storage of the `500 KB` wasm), and the faucet stopped
   answering after two accounts. Until the release is published and current, `make check-deploy` reports the local
   wasm `ECgsrZwy…` against release 3, and the three proofs on a release 4 agreement wait. Steps:
   `docs/build/BLOCKED.md`.
 
-## 26. Release 4 (audit fixes) live on testnet, proofs re-run (9 Nov 2026)
+## 26. Release 4 (security review fixes) live on testnet, proofs re-run (9 Nov 2026)
 
-The audited agreement code (`ECgsrZwyoZvoHDjawYhRnFbxoWtt6Sx9iaPsEzqwTTGz`) is published as a global contract
+The reviewed agreement code (`ECgsrZwyoZvoHDjawYhRnFbxoWtt6Sx9iaPsEzqwTTGz`) is published as a global contract
 (`R2qxw4u5q7unDwoUP4VCSA5BQ4pjnwpbX3eX65czRqo`) and is release 4 on both factories: accord-v2.testnet
 (`EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU`, `J9uADVqQSkY6f1uMYbMbWoPnB4oiwuS3CtLayKojtgeC`) and accord-usdc.testnet
 (`GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai`, `5D9LxPuU4phUXTgRawd97TmhZPGiPjWzSPWCYXJteoLJ`). `make check-deploy`: release 4,

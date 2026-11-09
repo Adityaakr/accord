@@ -177,7 +177,7 @@ fn review_ids_not_reused_and_store_pubkey_gated() {
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-// Audit fixes (9 Nov 2026, DECISIONS.md section 25). Each asserts the fixed behaviour.
+// Security review fixes (9 Nov 2026, DECISIONS.md section 25). Each asserts the fixed behaviour.
 // ---------------------------------------------------------------------------------------------------------------
 
 /// The actions of the receipts the last call scheduled.

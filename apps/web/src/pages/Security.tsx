@@ -132,9 +132,9 @@ const KEEPER: ReactNode[] = [
 ]
 
 /* The internal security review, not a third-party audit (platform/DECISIONS.md 25 and 26, 9 Nov 2026). Facts only from there; S1 keeps its limit. */
-const AUDIT_URL = `${LINKS.repo}/blob/main/platform/DECISIONS.md#25-audit-fixes-and-release-4-9-nov-2026`
+const AUDIT_URL = `${LINKS.repo}/blob/main/platform/DECISIONS.md#25-security-review-fixes-and-release-4-9-nov-2026`
 const AUDIT: ReactNode[] = [
-  "An internal security review, not a third-party audit: five AI-assisted review passes, each on a separate code area (the payment path; authorisation and keys; creation and code integrity; funds; the enclave jobs), with every finding re-checked by separate reviewers who reproduced it as a test, found 1 High and 5 Medium issues (one of them Medium-Low), plus 4 Low.",
+  "An internal security review, not a third-party audit: five AI-assisted review passes, each on a separate code area (the payment path; authorisation and keys; creation and code integrity; funds; the enclave jobs), with every finding re-checked by separate reviewers who reproduced it as a test, found 1 High and 5 Medium issues (one of them Medium-Low), plus 4 groups of Low findings (13 individual items).",
   <>The High one: a deposit sent during <Mono>close</Mono> could make the refund to the buyer spend the vendor&apos;s reserve. The refund is now capped at the ledger while anything is owed to the vendor.</>,
   <>Every fix went in test first: the test failed for the reason named, then passed, and stays in the suite. The contract and factory fixes are live as release 4 on both testnet factories since 9 Nov 2026, and the proofs ran again on new agreements (a10, a11, a13; see the <Link to={LINKS.record} className={styles.inlineLink}>record</Link>). Agreements created before keep release 3.</>,
   "Agreements created before release 4 (a6, a8 and a1.accord-usdc.testnet) keep release 3's code by hash, so they keep the close-refund issue; new agreements get release 4.",

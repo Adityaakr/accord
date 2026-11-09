@@ -33,7 +33,7 @@ jobs:
           retention-days: 7
 
   rust:
-    name: Platform · Rust money path (accord-core, accord-agreement)
+    name: Platform · Rust money path (accord-core, accord-agreement, accord-factory)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -47,7 +47,7 @@ jobs:
         with:
           workspaces: platform
       - name: Unit, property and fuzz tests on the mocked chain
-        run: cargo test --locked -p accord-core -p accord-agreement
+        run: cargo test --locked -p accord-core -p accord-agreement -p accord-factory
 
   platform-ts:
     name: Platform · TypeScript typecheck and tests (sdk, cli, mcp, store, live, services, app)

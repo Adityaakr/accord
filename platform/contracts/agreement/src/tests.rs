@@ -996,7 +996,7 @@ fn no_view_exposes_a_mandate_in_plaintext() {
 mod act_fuzz;
 
 // ---------------------------------------------------------------------------------------------------------------
-// Audit fixes (9 Nov 2026, DECISIONS.md section 25). Each test asserts the fixed behaviour.
+// Security review fixes (9 Nov 2026, DECISIONS.md section 25). Each test asserts the fixed behaviour.
 // ---------------------------------------------------------------------------------------------------------------
 
 fn panics<R>(f: impl FnOnce() -> R) -> bool {
