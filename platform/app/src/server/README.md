@@ -14,7 +14,7 @@ What the server stores (Postgres, `src/server/store.ts`):
 | `demo_vendors` | Recipient and authority pairs registered on the demo domain, for 24 hours | `/.well-known/accord.json` for `make demo` |
 | `try_rooms` | The `/try` room's agreements and their status | The re-arm process |
 | `heartbeats` | Keeper, agent and re-arm liveness | `/status` |
-| `faucet_grants` | One row per account and one per client IP (a salted sha256, never the address) for each UTC day the faucet funded them | The faucet's limit survives a redeploy; `/status` counts today's |
+| `faucet_grants` | One row per account the faucet funded each UTC day, and one per account under its client IP (a salted sha256, never the address); up to `FAUCET_PER_IP_PER_DAY` (default 10) per IP a day | The faucet's limit survives a redeploy; `/status` counts today's |
 
 Everything else on every page is read from the chain when the page is requested, with its source and age shown.
 The routes under `/api/dev` exist only for the local sandbox (`make serve`) and answer 404 on any other network.

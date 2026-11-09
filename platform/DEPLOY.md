@@ -26,6 +26,7 @@ website service forwards `<site>/app/*` to it, so visitors use one address.
 | `RESEND_API_KEY` | optional: invite and notification emails |
 | `FAUCET_ACCOUNT` | `faucet.accord-v2.testnet`: tops visitors up to 2.5 NEAR and 100 tUSDC on `/app/try-it` |
 | `FAUCET_KEY` | the faucet account's key (top it up with testnet NEAR when it runs low) |
+| `FAUCET_PER_IP_PER_DAY` | optional: accounts the faucet funds from one client IP each UTC day (default 10; always one per account) |
 | `DEMO_VENDOR_ACCOUNT` | `halcyon-demo.testnet` (the demo counterparty's vendor) |
 | `DEMO_VENDOR_KEY` | its key (`VENDOR_KEY` in `accord-app/.env`) |
 | `DEMO_AUTHORITY_ACCOUNT` | `halcyon-auth.testnet` |

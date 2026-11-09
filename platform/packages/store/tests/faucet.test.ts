@@ -1,4 +1,4 @@
-// Faucet grants: one per account and one per IP each UTC day, claimed together, released when a drip fails, and
+// Faucet grants: one per account and up to a limit per IP each UTC day, claimed together, released when a drip fails, and
 // kept in Postgres so a redeploy does not reset them. Without DATABASE_URL the store returns null and the app keeps
 // its in-memory limiter. The Postgres half runs when ACCORD_TEST_DATABASE_URL is set.
 import { beforeAll, describe, expect, it, vi } from "vitest";
@@ -30,14 +30,21 @@ describe.runIf(!!process.env.ACCORD_TEST_DATABASE_URL)("faucet grants (postgres)
     s = await import("../src/index.js");
   });
 
-  it("grants once per account and once per IP a day, both or neither", async () => {
-    expect(await s.claimFaucetGrant(`a-${run}.testnet`, `ip1-${run}`, day)).toBe("granted");
-    expect(await s.claimFaucetGrant(`a-${run}.testnet`, `ip2-${run}`, day)).toBe("account_used");
-    // the second account from the same IP is refused, and its account row is not left behind
-    expect(await s.claimFaucetGrant(`b-${run}.testnet`, `ip1-${run}`, day)).toBe("ip_used");
-    expect(await s.claimFaucetGrant(`b-${run}.testnet`, `ip3-${run}`, day)).toBe("granted");
+  it("grants once per account a day and up to the limit per IP, both or neither", async () => {
+    expect(await s.claimFaucetGrant(`a-${run}.testnet`, `ip1-${run}`, day, 2)).toBe("granted");
+    expect(await s.claimFaucetGrant(`a-${run}.testnet`, `ip2-${run}`, day, 2)).toBe("account_used");
+    // a second account behind the same connection is funded; the third is refused, leaving no account row behind
+    expect(await s.claimFaucetGrant(`b-${run}.testnet`, `ip1-${run}`, day, 2)).toBe("granted");
+    expect(await s.claimFaucetGrant(`x-${run}.testnet`, `ip1-${run}`, day, 2)).toBe("ip_used");
+    expect(await s.claimFaucetGrant(`x-${run}.testnet`, `ip3-${run}`, day, 2)).toBe("granted");
     // a new day starts again
-    expect(await s.claimFaucetGrant(`a-${run}.testnet`, `ip1-${run}`, "2026-11-10")).toBe("granted");
+    expect(await s.claimFaucetGrant(`a-${run}.testnet`, `ip1-${run}`, "2026-11-10", 2)).toBe("granted");
+  });
+
+  it("serialises claims from one connection, so a burst cannot pass the limit", async () => {
+    const out = await Promise.all([0, 1, 2, 3, 4].map((k) => s.claimFaucetGrant(`burst${k}-${run}.testnet`, `ipb-${run}`, day, 2)));
+    expect(out.filter((x) => x === "granted")).toHaveLength(2);
+    expect(out.filter((x) => x === "ip_used")).toHaveLength(3);
   });
 
   it("releases a grant whose drip failed", async () => {

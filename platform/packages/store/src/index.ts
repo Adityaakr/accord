@@ -329,35 +329,44 @@ export async function closeRoomMessages(agreement: string) {
 }
 
 // ---- faucet grants ------------------------------------------------------------------------------------------
-// One testnet drip per account and per client IP each UTC day, kept in Postgres so a redeploy does not reset it.
-// The IP is stored as the caller gives it (the app passes a hash). Without DATABASE_URL these return null and the
-// app keeps its in-memory limiter.
+// One testnet drip per account each UTC day, and up to `ipLimit` drips per client IP (people behind one office or
+// home connection share an address), kept in Postgres so a redeploy does not reset it. The IP is stored as the
+// caller gives it (the app passes a hash); an IP row's subject is `<ip>:<account>`, one row per account funded from
+// that connection. Without DATABASE_URL these return null and the app keeps its in-memory limiter.
 
 export type FaucetClaim = "granted" | "account_used" | "ip_used";
 
 /** The UTC day a grant counts against, as YYYY-MM-DD. */
 export const faucetDay = (at = new Date()) => at.toISOString().slice(0, 10);
 
+/** Grants per client IP each day unless the caller says otherwise. */
+export const FAUCET_IP_LIMIT_DEFAULT = 10;
+
 /**
- * Claims today's grant for `account` and `ip` together: both rows are inserted, or neither. Null when there is no
- * Postgres (the caller falls back to memory).
+ * Claims today's grant for `account` from `ip`: the account row and one IP row are inserted together, or neither.
+ * Refused when the account already had one today, or when `ipLimit` accounts were already funded from `ip`. Null
+ * when there is no Postgres (the caller falls back to memory).
  */
-export async function claimFaucetGrant(account: string, ip: string, day = faucetDay()): Promise<FaucetClaim | null> {
+export async function claimFaucetGrant(account: string, ip: string, day = faucetDay(), ipLimit = FAUCET_IP_LIMIT_DEFAULT): Promise<FaucetClaim | null> {
   const p = await db();
   if (!p) return null;
   const c = await p.connect();
   try {
     await c.query("begin");
+    // two visitors on one connection claiming at once must not both pass the count
+    await c.query("select pg_advisory_xact_lock(hashtext($1))", [`faucet|${day}|${ip}`]);
     const a = await c.query("insert into faucet_grants (day, kind, subject) values ($1, 'account', $2) on conflict do nothing", [day, account]);
     if (a.rowCount === 0) {
       await c.query("rollback");
       return "account_used";
     }
-    const i = await c.query("insert into faucet_grants (day, kind, subject) values ($1, 'ip', $2) on conflict do nothing", [day, ip]);
-    if (i.rowCount === 0) {
+    // rows written before the limit was per account carry the bare IP as subject; they count too
+    const n = await c.query("select count(*)::int as n from faucet_grants where day = $1 and kind = 'ip' and (subject = $2 or subject like $2 || ':%')", [day, ip]);
+    if ((n.rows[0] as { n: number }).n >= ipLimit) {
       await c.query("rollback");
       return "ip_used";
     }
+    await c.query("insert into faucet_grants (day, kind, subject) values ($1, 'ip', $2) on conflict do nothing", [day, `${ip}:${account}`]);
     await c.query("commit");
     return "granted";
   } catch (e) {
@@ -372,7 +381,7 @@ export async function claimFaucetGrant(account: string, ip: string, day = faucet
 export async function releaseFaucetGrant(account: string, ip: string, day = faucetDay()): Promise<void> {
   const p = await db();
   if (!p) return;
-  await p.query("delete from faucet_grants where day = $1 and ((kind = 'account' and subject = $2) or (kind = 'ip' and subject = $3))", [day, account, ip]);
+  await p.query("delete from faucet_grants where day = $1 and ((kind = 'account' and subject = $2) or (kind = 'ip' and subject = $3))", [day, account, `${ip}:${account}`]);
 }
 
 /** Accounts granted on `day`, or null without Postgres. */

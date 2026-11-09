@@ -15,7 +15,7 @@ import {
 import { accord, config } from "./accord";
 
 const YOCTO = 10n ** 24n;
-import { FAUCET_NEAR_TARGET } from "./faucetgrant";
+import { FAUCET_NEAR_TARGET, faucetEmpty, isFaucetEmptyError } from "./faucetgrant";
 export { FAUCET_NEAR_TARGET };
 /** Test USDC the faucet mints (6 decimals): enough for the suggested 40 tUSDC ceiling twice over. */
 export const FAUCET_TUSDC = 100_000_000n;
@@ -141,8 +141,14 @@ export async function faucetStatus(): Promise<{ account: string; near: bigint } 
 
 export interface FaucetResult { sent: { near: string | null; tusdc: string | null }; txs: { label: string; hash: string }[]; balances: Balances }
 
-/** Tops `account` up to 2.5 NEAR and 100 tUSDC, sending only what it lacks. */
-export async function drip(account: string): Promise<FaucetResult> {
+/** Leaves room for the transfer's own gas when checking the faucet's balance. */
+const DRIP_GAS_RESERVE = 10n ** 22n;
+
+/**
+ * Tops `account` up to 2.5 NEAR and 100 tUSDC, sending only what it lacks. `nearOnly` skips the test USDC: a visitor
+ * settling in Circle USDC that already holds enough of it needs only NEAR.
+ */
+export async function drip(account: string, opts: { nearOnly?: boolean } = {}): Promise<FaucetResult> {
   const f = faucetAccount();
   const { token } = await accord().config();
   const before = await balances(account);
@@ -150,10 +156,17 @@ export async function drip(account: string): Promise<FaucetResult> {
   let near: string | null = null, tusdc: string | null = null;
   const needNear = FAUCET_NEAR_TARGET - BigInt(before.near);
   if (needNear > 0n) {
-    const r = await f.signAndSendTransaction({ receiverId: account, actions: [actions.transfer(needNear)], waitUntil: "FINAL" });
-    txs.push({ label: "testnet NEAR", hash: (r as { transaction: { hash: string } }).transaction.hash });
+    const own = await accord().chain.account(f.accountId);
+    if (BigInt(String(own.amount ?? "0")) < needNear + DRIP_GAS_RESERVE) throw faucetEmpty();
+    try {
+      const r = await f.signAndSendTransaction({ receiverId: account, actions: [actions.transfer(needNear)], waitUntil: "FINAL" });
+      txs.push({ label: "testnet NEAR", hash: (r as { transaction: { hash: string } }).transaction.hash });
+    } catch (e) {
+      throw isFaucetEmptyError(e) ? faucetEmpty() : e;
+    }
     near = needNear.toString();
   }
+  if (opts.nearOnly) return { sent: { near, tusdc }, txs, balances: await balances(account) };
   const needUsdc = FAUCET_TUSDC - BigInt(before.tusdc);
   if (needUsdc > 0n) {
     const r = await f.signAndSendTransaction({
