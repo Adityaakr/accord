@@ -1,0 +1,138 @@
+// A throwaway testnet key: "Try without a wallet". The browser makes an ed25519 key, and the implicit account it names
+// (the hex of the public key) signs like a wallet would: NEP-413 for the session, NEP-366 delegates sent through
+// Accord's relayer for calls that attach at most 1 yoctoNEAR, and its own transactions, paid from the faucet's NEAR,
+// for calls that attach more (create_agreement's room deposit). The key lives in sessionStorage only, so it belongs to
+// one tab and is gone when the tab closes. It is never sent to the server. Testnet only.
+//
+// No "use client": pure apart from the default network calls, so it is unit-tested.
+
+import { Account, JsonRpcProvider, KeyPair, KeyPairSigner, actions, buildDelegateAction, encodeSignedDelegate, type KeyPairString } from "near-api-js";
+import { toTxResult, type Signer, type TxResult } from "@accord/sdk";
+
+export const THROWAWAY_STORAGE_KEY = "accord-throwaway-key";
+/** Blocks a relayed request stays valid for; the relayer accepts up to 7200. */
+export const DELEGATE_TTL = 300n;
+
+const toHex = (b: Uint8Array) => Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+const toB64 = (b: Uint8Array) => {
+  let s = "";
+  for (const x of b) s += String.fromCharCode(x);
+  return btoa(s);
+};
+
+export const newThrowawayKey = (): KeyPair => KeyPair.fromRandom("ed25519");
+
+/** The implicit account an ed25519 key controls: the 64-character hex of its public key. */
+export const implicitAccountId = (kp: KeyPair): string => toHex(kp.getPublicKey().data);
+
+/** What a call needs from the chain and from Accord. Defaults talk to the RPC and /api/relay; tests pass fakes. */
+export interface ThrowawayDeps {
+  /** The access key's current nonce and the chain's height, for a delegate. */
+  accessKey(accountId: string, publicKey: string): Promise<{ nonce: bigint; height: bigint }>;
+  /** Posts a base64 borsh SignedDelegate to Accord's relayer and returns its outcome. */
+  relay(signedDelegate: string): Promise<unknown>;
+  /** Signs and sends a transaction from the account itself, and returns its outcome. */
+  direct(receiverId: string, action: ReturnType<typeof actions.functionCall>): Promise<unknown>;
+}
+
+async function rpcAccessKey(rpc: string, accountId: string, publicKey: string) {
+  const r = await fetch(rpc, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0", id: "accord", method: "query",
+      params: { request_type: "view_access_key", finality: "final", account_id: accountId, public_key: publicKey },
+    }),
+  });
+  const b = (await r.json()) as { result?: { nonce: number | string; block_height: number | string; error?: string }; error?: { message?: string } };
+  if (!b.result || b.result.error) {
+    throw new Error("this throwaway account has no key on chain yet; get test funds first");
+  }
+  return { nonce: BigInt(b.result.nonce), height: BigInt(b.result.block_height) };
+}
+
+async function postRelay(signedDelegate: string): Promise<unknown> {
+  const res = await fetch("/api/relay", {
+    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ signedDelegate }),
+  });
+  const body = (await res.json().catch(() => ({}))) as { outcome?: unknown; error?: string };
+  if (!res.ok || !body.outcome) throw new Error(`Accord's relayer could not send this transaction: ${body.error ?? `HTTP ${res.status}`}.`);
+  return body.outcome;
+}
+
+export function defaultDeps(kp: KeyPair, accountId: string, rpc: string): ThrowawayDeps {
+  const account = new Account(accountId, new JsonRpcProvider({ url: rpc }), new KeyPairSigner(kp));
+  return {
+    accessKey: (id, pk) => rpcAccessKey(rpc, id, pk),
+    relay: postRelay,
+    direct: (receiverId, action) => account.signAndSendTransaction({ receiverId, actions: [action], waitUntil: "FINAL", throwOnFailure: false }),
+  };
+}
+
+/** Signs a NEP-366 delegate for one function call and encodes it the way wallets return it (base64 borsh). */
+export async function signDelegate(kp: KeyPair, senderId: string, receiverId: string, action: ReturnType<typeof actions.functionCall>, at: { nonce: bigint; height: bigint }): Promise<string> {
+  const da = buildDelegateAction({
+    senderId, receiverId, actions: [action], nonce: at.nonce + 1n, maxBlockHeight: at.height + DELEGATE_TTL, publicKey: kp.getPublicKey(),
+  });
+  const { signedDelegate } = await new KeyPairSigner(kp).signDelegateAction(da);
+  return toB64(encodeSignedDelegate(signedDelegate));
+}
+
+/** A `Signer` for the throwaway key, like the wallet's connectorSigner. Calls run one at a time, so nonces never race. */
+export function throwawaySigner(kp: KeyPair, opts: { rpc: string; deps?: ThrowawayDeps }): Signer {
+  const accountId = implicitAccountId(kp);
+  const publicKey = kp.getPublicKey().toString();
+  const deps = opts.deps ?? defaultDeps(kp, accountId, opts.rpc);
+  let queue: Promise<unknown> = Promise.resolve();
+  const serial = <T>(f: () => Promise<T>): Promise<T> => {
+    const run = queue.then(f, f);
+    queue = run.catch(() => undefined);
+    return run;
+  };
+  return {
+    accountId,
+    call(contractId, method, args, o = {}): Promise<TxResult> {
+      return serial(async () => {
+        const deposit = BigInt(o.deposit ?? 0n);
+        const action = actions.functionCall(method, args, BigInt(o.gas ?? 100_000_000_000_000n), deposit);
+        // NEP-366: the relayer pays any NEAR a delegate attaches, so only calls that attach at most 1 yoctoNEAR are
+        // relayed; the room deposit is this account's own transaction, paid from the faucet's NEAR.
+        let outcome: unknown;
+        if (deposit <= 1n) {
+          const at = await deps.accessKey(accountId, publicKey);
+          outcome = await deps.relay(await signDelegate(kp, accountId, contractId, action, at));
+        } else {
+          outcome = await deps.direct(contractId, action);
+        }
+        return toTxResult(outcome);
+      });
+    },
+    async signMessage(message, recipient, nonce) {
+      const s = await new KeyPairSigner(kp).signNep413Message(accountId, { message, recipient, nonce });
+      return { signature: s.signature, publicKey };
+    },
+  };
+}
+
+/** The tab's throwaway key, if it has one. sessionStorage only: never localStorage, never the server. */
+export function loadThrowawayKey(): KeyPair | null {
+  try {
+    const s = sessionStorage.getItem(THROWAWAY_STORAGE_KEY);
+    return s ? KeyPair.fromString(s as KeyPairString) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveThrowawayKey(kp: KeyPair): boolean {
+  try {
+    sessionStorage.setItem(THROWAWAY_STORAGE_KEY, kp.toString());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function clearThrowawayKey() {
+  try { sessionStorage.removeItem(THROWAWAY_STORAGE_KEY); } catch { /* nothing stored */ }
+}
