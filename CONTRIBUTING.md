@@ -29,7 +29,7 @@ npm run build      # production build
 npm run check:rendered   # optional: copy rules on the rendered pages (needs Playwright and a running dev server)
 ```
 
-CI runs the first two on every pull request. For changes in `platform/`, run `make test` and the app's `pnpm --filter @accord/app typecheck`.
+CI runs the first two on every push to `main` and every pull request, plus `npm run test:serve -w @accord/web` (the site server). For `platform/` it runs `cargo test -p accord-core -p accord-agreement -p accord-factory`, `pnpm -r typecheck` and every package, service and app test; locally, run `make test` too.
 
 ## Copy rules
 
