@@ -19,5 +19,6 @@ check node         "node --version"              "install Node 24"
 check pnpm         "pnpm --version"              "npm i -g pnpm"
 check wasmtime     "wasmtime --version"          "brew install wasmtime"
 check outlayer     "outlayer --version"          "cargo install --locked outlayer-cli"
-check outlayer-verify "outlayer-verify --version" "cargo install --git https://github.com/out-layer/outlayer-verify outlayer-verify"
+# outlayer-verify 0.1.0 has no --version: -h prints its usage and exits 0; pinned to the commit the Dockerfile builds
+check outlayer-verify "outlayer-verify -h >/dev/null && echo outlayer-verify" "cargo install --locked --git https://github.com/out-layer/outlayer-verify --rev 90c27d9d outlayer-verify"
 exit $fail
