@@ -40,7 +40,7 @@ export function WalletButton() {
                 <span>Act as {p.role}</span><span className="mono faint">{short(p.account)}</span>
               </button>
             ))}
-            <Link href="/profile" role="menuitem" className={styles.item} onClick={() => setOpen(false)}>Profile</Link>
+            <Link href="/profile" prefetch={false} role="menuitem" className={styles.item} onClick={() => setOpen(false)}>Profile</Link>
             <button type="button" role="menuitem" className={styles.item} disabled={f.running}
               onClick={() => { if (w.method === "throwaway" && f.available) { void f.run(); return; } void w.disconnect(); setOpen(false); }}>
               {w.method !== "throwaway" ? "Disconnect" : f.running ? "Returning test NEAR…" : f.available ? "Reset (return the test NEAR, delete the key)" : "Reset (delete the throwaway key)"}

@@ -7,6 +7,7 @@ import { allow, clientIp, sameOriginJson } from "@/server/ratelimit";
 import { demoReady, vendorClose } from "@/server/demo";
 import { isConfiguredAgreement } from "@/server/accord";
 import { chainErrorResponse } from "@/server/rpcerror";
+import { REQUEST_DEADLINE_MS, settleWithin } from "@/server/deadline";
 
 export const dynamic = "force-dynamic";
 const busy = new Set<string>();
@@ -24,11 +25,13 @@ export async function POST(req: Request) {
   }
   if (busy.has(agreement)) return NextResponse.json({ state: "Executing", txs: [], pending: true });
   busy.add(agreement);
+  // The close runs to the end; past the deadline the answer is "pending" and Finish reads the room and asks again.
+  const work = vendorClose(agreement).finally(() => busy.delete(agreement));
   try {
-    return NextResponse.json(await vendorClose(agreement));
+    const r = await settleWithin(work, REQUEST_DEADLINE_MS);
+    if (!r.done) { work.catch(() => undefined); return NextResponse.json({ state: "Executing", txs: [], pending: true }); }
+    return NextResponse.json(r.value);
   } catch (e) {
     return chainErrorResponse(e, 502);
-  } finally {
-    busy.delete(agreement);
   }
 }

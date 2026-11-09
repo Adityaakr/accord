@@ -88,7 +88,7 @@ export function Sidebar() {
     const href = l.href === "/rooms" && w.accountId ? `/rooms?party=${encodeURIComponent(w.accountId)}${ws.role ? `&role=${ws.role}` : ""}` : l.href;
     const on = l.match(path);
     return (
-      <Link key={l.href + l.label} href={href} className={`${styles.side} ${on ? styles.on : ""}`} aria-current={on ? "page" : undefined}>
+      <Link key={l.href + l.label} href={href} prefetch={false} className={`${styles.side} ${on ? styles.on : ""}`} aria-current={on ? "page" : undefined}>
         {on ? <Pill /> : null}
         <Icon name={l.icon} />
         <span>{l.label}</span>
@@ -132,13 +132,13 @@ export function Sidebar() {
       </div>
       <div className={styles.group}>{ws.nav.map(link)}</div>
       <div className={`${styles.group} ${styles.bottom}`}>
-        <Link href="/settings" className={`${styles.side} ${settingsOn ? styles.on : ""}`} aria-current={settingsOn ? "page" : undefined}>
+        <Link href="/settings" prefetch={false} className={`${styles.side} ${settingsOn ? styles.on : ""}`} aria-current={settingsOn ? "page" : undefined}>
           {settingsOn ? <Pill /> : null}
           <Icon name="settings" />
           <span>Settings</span>
           {orgPending ? <span className={styles.pending} title="Confirm it's you to set up your organisation">Set up</span> : null}
         </Link>
-        <Link href="/profile" className={`${styles.side} ${path.startsWith("/profile") ? styles.on : ""}`}>
+        <Link href="/profile" prefetch={false} className={`${styles.side} ${path.startsWith("/profile") ? styles.on : ""}`}>
           {path.startsWith("/profile") ? <Pill /> : null}
           <Icon name="profile" />
           <span>Profile</span>

@@ -7,6 +7,7 @@ import { allow, clientIp, sameOriginJson } from "@/server/ratelimit";
 import { counterpartyStep, demoReady } from "@/server/demo";
 import { isConfiguredAgreement } from "@/server/accord";
 import { chainErrorResponse } from "@/server/rpcerror";
+import { REQUEST_DEADLINE_MS, settleWithin } from "@/server/deadline";
 
 export const dynamic = "force-dynamic";
 const busy = new Set<string>();
@@ -25,12 +26,18 @@ export async function POST(req: Request) {
   }
   if (busy.has(agreement)) return NextResponse.json({ did: null, next: "The counterparty is already acting in this room.", tx: null, yourMove: false });
   busy.add(agreement);
+  // The move runs to the end whatever the request does; the room stays locked until it has. Past the deadline the
+  // answer is "pending" and the panel polls again (a transaction such as start_negotiation can wait on the enclave).
+  const work = counterpartyStep(agreement).finally(() => busy.delete(agreement));
   try {
-    return NextResponse.json(await counterpartyStep(agreement));
+    const r = await settleWithin(work, REQUEST_DEADLINE_MS);
+    if (!r.done) {
+      work.catch(() => undefined);
+      return NextResponse.json({ did: null, next: "The counterparty's transaction is on its way to the network; this panel checks again shortly.", tx: null, yourMove: false, pending: true });
+    }
+    return NextResponse.json(r.value);
   } catch (e) {
     // a busy RPC is a 503 with Retry-After; the panel backs off quietly
     return chainErrorResponse(e);
-  } finally {
-    busy.delete(agreement);
   }
 }

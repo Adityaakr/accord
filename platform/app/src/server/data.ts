@@ -7,6 +7,10 @@ import type {
 } from "@accord/sdk";
 import { accord, listAllAgreements, source, type Source } from "./accord";
 import { currentStep } from "@/app/agreements/[id]/pipeline";
+import { readWithin } from "./deadline";
+
+/** A page render waits this long for the chain, then shows "busy, reading again" (error.tsx) rather than hanging. */
+const PAGE_READ_MS = 12_000;
 
 export interface RoomSummary {
   record: AgreementRecord;
@@ -35,7 +39,11 @@ export interface Room {
   source: Source;
 }
 
-export async function room(id: string): Promise<Room> {
+export function room(id: string): Promise<Room> {
+  return readWithin(readRoom(id), PAGE_READ_MS, `reading ${id}`);
+}
+
+async function readRoom(id: string): Promise<Room> {
   const d = accord().agreement(id);
   const [view, terms, items, refusals, recipients, exceptions, periods, receipts, commitments, src] = await Promise.all([
     d.get(), d.terms(), d.items(), d.refusals(undefined, 128), d.recipients(), d.exceptions(), d.periods(), d.receipts(),

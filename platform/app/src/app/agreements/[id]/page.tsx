@@ -193,9 +193,11 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
 
       {created === "1" && <InviteCard room={a.account} buyer={a.buyer} vendor={a.vendor} authority={a.vendor_authority} />}
 
+      {/* no prefetch: each tab is a full server render of the room from the chain, and seven of them on every refresh
+          queued behind a busy RPC; a click renders the one tab asked for */}
       <nav className={styles.tabs} aria-label="Deal room sections">
         {TABS.map(([k, label]) => (
-          <Link key={k} href={`?tab=${k}`} scroll={false} className={`${styles.tab} ${k === tab ? styles.tabOn : ""}`} aria-current={k === tab ? "page" : undefined}>
+          <Link key={k} href={`?tab=${k}`} scroll={false} prefetch={false} className={`${styles.tab} ${k === tab ? styles.tabOn : ""}`} aria-current={k === tab ? "page" : undefined}>
             {label}
             {k === "activity" && a.refusals > 0 ? <span className={styles.tabCount}>{a.refusals}</span> : null}
             {k === tab ? <Underline /> : null}
