@@ -1,12 +1,9 @@
 // The working brief a buyer fills in while opening a deal room. None of it is sent to the factory: `create_agreement`
 // takes only the type, title, vendor, settlement authority, canaries and timings. The brief stays in this browser
 // (localStorage, `accord-brief:<room>`) and is shown back to the buyer on the room's invite card and when they seal
-// their limits; the figures marked "sealed next" are the ones the buyer then enters as sealed limits.
+// their limits; the figures under "Sealed limits" are the ones the buyer then enters as sealed limits.
 
 import type { Kind } from "@accord/sdk";
-
-/** Where a field ends up: public on NEAR, only in this browser, or entered next as a sealed limit (enclave only). */
-export type Where = "public" | "browser" | "sealed";
 
 export interface Milestone { name: string; deliverable: string }
 
@@ -49,8 +46,8 @@ export function sampleBrief(kind: Kind, circle: boolean): { title: string; brief
       title: "NEAR/USDC liquidity retainer, Q1",
       brief: "Retain a desk to keep NEAR/USDC liquid on the Rhea pool: quotes on both sides, spread within 200 bps, depth within 2% of mid. Pay a period only when the readings met the terms. Never pay an account the desk has not proven.",
       intake: {
-        reference: "TRS-MM-Q1", pair: "NEAR/USDC", retainer: circle ? "4" : "8", periods: "4", spreadBps: "200",
-        depth: "20", bandBps: "200", slots: "6", threshold: "4",
+        pair: "NEAR/USDC", retainer: circle ? "4" : "8", periods: "4", spreadBps: "200",
+        depth: "20", slots: "6", threshold: "4",
       },
     };
   }
@@ -58,7 +55,6 @@ export function sampleBrief(kind: Kind, circle: boolean): { title: string; brief
     title: "Treasury reporting integration, phase one",
     brief: "Integrate liquidity reporting into our treasury dashboard: a data pipeline from the venue, a reporting dashboard, and a handover with documentation. Delivery dates matter more than the last few dollars; walk away rather than exceed the ceiling.",
     intake: {
-      reference: "PO-2026-0142",
       milestones: [
         { name: "Data pipeline", deliverable: "Hourly pool snapshots written to the treasury database, with tests" },
         { name: "Dashboard", deliverable: "Spread, depth and volume panels for NEAR/USDC, refreshed hourly" },
@@ -78,19 +74,19 @@ function whole(v: string): number | null { return WHOLE.test(v.trim()) ? Number(
 /** Field errors for the brief step, keyed by field. Only the title is required; a figure, once typed, must make sense. */
 export function briefErrors(kind: Kind, title: string, i: Intake): Record<string, string> {
   const e: Record<string, string> = {};
-  if (title.trim().length < 3) e.title = "Give the room a title of at least 3 characters. Both companies see it.";
+  if (title.trim().length < 3) e.title = "Use at least 3 characters.";
   const money = (k: keyof Intake, label: string) => {
     const v = String(i[k]).trim();
     if (!v) return null;
     const n = amount(v);
-    if (n === null || n <= 0) { e[k] = `${label} is an amount above 0, up to 6 decimals.`; return null; }
+    if (n === null || n <= 0) { e[k] = "An amount above 0, up to 6 decimals."; return null; }
     return n;
   };
   const count = (k: keyof Intake, label: string, min: number, max: number) => {
     const v = String(i[k]).trim();
     if (!v) return null;
     const n = whole(v);
-    if (n === null || n < min || n > max) { e[k] = `${label} is a whole number from ${min} to ${max}.`; return null; }
+    if (n === null || n < min || n > max) { e[k] = `A whole number from ${min} to ${max}.`; return null; }
     return n;
   };
   if (kind === "procurement") {
@@ -100,7 +96,7 @@ export function briefErrors(kind: Kind, title: string, i: Intake): Record<string
     count("termWeeks", "The term", 1, 104);
     count("reviewDays", "The review window", 1, 7);
     i.milestones.forEach((m, n) => {
-      if (!m.name.trim() && m.deliverable.trim()) e[`milestone${n}`] = "Name this milestone, or clear its deliverable.";
+      if (!m.name.trim() && m.deliverable.trim()) e[`milestone${n}`] = "Name this milestone.";
     });
   } else {
     money("retainer", "The retainer");
@@ -110,8 +106,8 @@ export function briefErrors(kind: Kind, title: string, i: Intake): Record<string
     count("bandBps", "The depth band", 1, 10_000);
     const slots = count("slots", "Readings per period", 1, 48);
     const threshold = count("threshold", "Readings that must pass", 1, 48);
-    if (slots !== null && threshold !== null && threshold > slots) e.threshold = "Cannot be more than the readings per period.";
-    if (i.pair.trim() && !/^[A-Za-z0-9.]{1,12}\/[A-Za-z0-9.]{1,12}$/.test(i.pair.trim())) e.pair = "Write the pair as TOKEN/QUOTE, for example NEAR/USDC.";
+    if (slots !== null && threshold !== null && threshold > slots) e.threshold = "No more than the readings per period.";
+    if (i.pair.trim() && !/^[A-Za-z0-9.]{1,12}\/[A-Za-z0-9.]{1,12}$/.test(i.pair.trim())) e.pair = "Write it as TOKEN/QUOTE, such as NEAR/USDC.";
   }
   return e;
 }
@@ -134,7 +130,7 @@ export function briefFacts(kind: Kind, i: Intake, symbol: string): { label: stri
     add("Review window", i.reviewDays, `${i.reviewDays.trim()} ${i.reviewDays.trim() === "1" ? "day" : "days"} per delivery`, "min_acceptance_window_secs");
   } else {
     add("Pair", i.pair, i.pair.trim().toUpperCase());
-    add("Retainer ceiling", i.retainer, `${i.retainer.trim()} ${symbol} per period`, "max_retainer_per_period");
+    add("Retainer", i.retainer, `${i.retainer.trim()} ${symbol} per period`, "max_retainer_per_period");
     add("Periods", i.periods, i.periods.trim(), "periods");
     add("Widest spread", i.spreadBps, `${i.spreadBps.trim()} bps`, "max_spread_bps");
     add("Depth each side", i.depth, `${i.depth.trim()} ${symbol}${i.bandBps.trim() ? ` within ${i.bandBps.trim()} bps` : ""}`, "min_depth_quote");

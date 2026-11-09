@@ -17,7 +17,7 @@ export default async function NewAgreement() {
       <PageHead
         eyebrow={<span className="small">new deal room</span>}
         title="Open a deal room"
-        lead="Set up the agreement your company wants to run with a counterparty. The room becomes its own NEAR account; both companies then seal their limits, the agents negotiate inside the Sealed Table, and both of you approve before any payment."
+        lead="Four short steps. The room becomes its own NEAR account; both companies then seal their limits, the agents negotiate, and both of you approve."
       />
       <NewRoomFlow network={c.network} deposit={factory?.create_deposit ?? null} demoAllowed={factory?.demo_allowed ?? true}
         demoVendor={d ? { vendor: d.vendor, authority: d.authority, domain: d.domain } : null} />
