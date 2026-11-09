@@ -1,8 +1,11 @@
 // End-to-end: the wallet-free try-it path, driven in a real browser. Not part of CI: it spends testnet funds from
 // Accord's faucet and takes about ten minutes. It opens /app/try-it, chooses "Try without a wallet", and clicks
 // through every buyer step (the faucet and the room open on their own, then seal, approve, accept the recipient,
-// fund, accept the delivery, start the demo agent, pay, ask it to pay a new account, revoke), then Finish: the room
-// closes early, its NEAR comes back and the throwaway account deletes itself into the faucet.
+// fund, accept the delivery, start the demo agent), then waits, with no click, for the agent to pay the due item on
+// its own (payment_sent in the agent bar or Activity), asks it to pay a new account (ERR_PAYEE_MISMATCH), revokes,
+// and Finishes: the room closes early, its NEAR and test USDC go back to the faucet and the throwaway account deletes
+// itself into it. The faucet's NEAR and its tUSDC ft_balance_of are read from the RPC before and after. Every
+// request's duration is logged at the end and any over 20 s is flagged.
 //
 // Run with Playwright installed in the current directory (it is resolved from there, not from this file):
 //   cd <dir with node_modules/playwright> && node /path/to/platform/app/e2e/try-without-wallet.mjs [base]
@@ -103,7 +106,7 @@ try {
   };
   let lastAgentNote = "";
   let lastNext = "";
-  let paidAt = 0;
+  let startedAt = 0;
   while (!reached.revoked) {
     if (Date.now() > DEADLINE) throw new Error("the deadline passed before revoke");
     at("room loop");
@@ -125,8 +128,7 @@ try {
     else if (await clickIf(page.getByRole("button", { name: /^Fund .* t?USDC$/ }), "fund")) { mark("fund clicked"); }
     else if (await clickIf(page.getByRole("button", { name: /^Activate recipient / }), "activate recipient")) { mark("recipient activated"); }
     else if (await clickIf(page.getByRole("button", { name: /^Accept delivery / }), "accept delivery")) { mark("delivery accepted"); }
-    else if (await clickIf(page.getByRole("button", { name: "Start the demo agent" }), "start the demo agent")) { mark("agent started"); }
-    else if (reached["delivery accepted"] && !reached.paid && Date.now() - paidAt > 15_000 && await clickIf(page.getByRole("button", { name: "Let the agent pay the due item" }), "agent pay")) { paidAt = Date.now(); }
+    else if (await clickIf(page.getByRole("button", { name: "Start the demo agent" }), "start the demo agent")) { mark("agent started"); startedAt = Date.now(); }
     else if (reached.paid && !reached.refused && await clickIf(page.getByRole("button", { name: "Ask the agent to pay a new account" }), "agent pay a new account")) { /* result below */ }
     else if (reached.refused) {
       const hold = page.getByRole("button", { name: /Hold to revoke/ });
@@ -156,12 +158,21 @@ try {
     // wait for a click's outcome, then read the demo agent's last result
     at("wait for the network");
     await page.waitForFunction(() => !/Waiting for the network…|Opening the room…|Sealing in this browser…/.test(document.body.innerText), null, { timeout: 180_000 }).catch(() => log("still waiting for the network after 180 s"));
-    const agentBox = page.locator("[role=status]").filter({ hasText: /Paid item|refused|Item \d|could not|Asked to pay/ });
+    // auto-pay: never clicked here. The agent pays the accepted item on its own; the agent bar's reply line and the
+    // Activity tab say "Paid item N", and the transcript shows payment_sent
+    if (!reached.paid && reached["delivery accepted"]) {
+      const body = await page.locator("body").innerText().catch(() => "");
+      const m = body.match(/Paid item (\d+)[^\n]*/) ?? (/payment_sent/.test(body) ? ["payment_sent"] : null);
+      if (m) {
+        mark("paid", `auto-pay with no click: ${m[0].slice(0, 160)}${startedAt ? ` (${Math.round((Date.now() - startedAt) / 1000)} s after the agent started)` : ""}`);
+        await shot(page, "auto-paid");
+      }
+    }
+    const agentBox = page.locator("[role=status]").filter({ hasText: /refused|could not|Asked to pay/ });
     at("read results");
     if (await visible(agentBox)) {
       const t = (await agentBox.first().innerText()).replace(/\s+/g, " ");
       if (t !== lastAgentNote) { lastAgentNote = t; log("agent:", t.slice(0, 300)); }
-      if (/Paid item/.test(t)) { mark("paid"); await shot(page, "paid"); }
       if (/ERR_PAYEE_MISMATCH/.test(t)) { mark("refused", "ERR_PAYEE_MISMATCH"); await shot(page, "refused"); }
     }
     const actionResult = page.locator("p[role=status]").filter({ hasText: /:/ });
@@ -176,20 +187,31 @@ try {
   // account with the faucet as beneficiary. The faucet's NEAR is read before and after through the app's own API.
   at("finish");
   // the read API answers { busy: true } while the network is busy: ask again a few times
-  const near = async (a) => {
-    for (let i = 0; i < 10; i++) {
-      const n = await page.evaluate(async ([base, a]) => (await (await fetch(`${new URL(base).pathname}/api/chain/balances?account=${a}`, { cache: "no-store" })).json()).near ?? null, [BASE, a]);
-      if (n !== null) return n;
-      await page.waitForTimeout(3000);
-    }
-    throw new Error(`could not read ${a}'s NEAR`);
-  };
   const FAUCET = process.env.FAUCET ?? "faucet.accord-v2.testnet";
+  const TOKEN = process.env.ACCORD_TOKEN ?? "tusdc.accord-v1.testnet";
+  const RPCS = (process.env.NEAR_RPC_URL ?? "").split(",").filter(Boolean).concat(["https://test.rpc.fastnear.com", "https://rpc.testnet.near.org"]);
+  const rpcQuery = async (params) => {
+    for (let i = 0; i < 12; i++) {
+      const url = RPCS[i % RPCS.length];
+      try {
+        const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, signal: AbortSignal.timeout(10_000), body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "query", params: { finality: "final", ...params } }) });
+        const b = await r.json();
+        if (b.result) return b.result;
+      } catch { /* the next endpoint */ }
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+    throw new Error(`could not read ${JSON.stringify(params)}`);
+  };
+  const near = async (a) => (await rpcQuery({ request_type: "view_account", account_id: a })).amount;
+  const tusdc = async (a) => JSON.parse(Buffer.from((await rpcQuery({ request_type: "call_function", account_id: TOKEN, method_name: "ft_balance_of", args_base64: Buffer.from(JSON.stringify({ account_id: a })).toString("base64") })).result).toString());
+  const fmtNear = (y) => (Number(BigInt(y) / 10n ** 21n) / 1000).toFixed(3);
+  const fmtUsdc = (u) => (Number(BigInt(u)) / 1e6).toFixed(2);
   await page.goto(`${BASE}/try-it`, { waitUntil: "domcontentloaded" });
   const finish = page.getByRole("button", { name: /^Finish: close the room/ });
   await finish.waitFor({ timeout: 90_000 });
   const before = await near(FAUCET);
-  log("faucet before Finish:", before);
+  const usdcBefore = await tusdc(FAUCET);
+  log(`faucet before Finish: ${fmtNear(before)} NEAR (${before} yocto), ft_balance_of ${fmtUsdc(usdcBefore)} tUSDC (${usdcBefore})`);
   await finish.click();
   await page.getByRole("button", { name: "Finishing…" }).waitFor({ timeout: 10_000 }).catch(() => undefined);
   await page.waitForFunction(() => !Array.from(document.querySelectorAll("button")).some((x) => x.textContent === "Finishing…"), null, { timeout: 300_000, polling: 1000 });
@@ -198,8 +220,13 @@ try {
   if (!/^Done\./.test(outcome) && !/ Done\./.test(outcome)) throw new Error(`Finish did not complete: ${outcome.slice(0, 200)}`);
   await page.waitForTimeout(6000);
   const after = await near(FAUCET);
-  log("faucet after Finish:", after, "gained", (BigInt(after) - BigInt(before)).toString(), "yoctoNEAR");
-  mark("finished", `faucet +${(Number((BigInt(after) - BigInt(before)) / 10n ** 21n) / 1000).toFixed(3)} NEAR`);
+  const usdcAfter = await tusdc(FAUCET);
+  const gainNear = BigInt(after) - BigInt(before), gainUsdc = BigInt(usdcAfter) - BigInt(usdcBefore);
+  log(`faucet after Finish: ${fmtNear(after)} NEAR (${after} yocto), ft_balance_of ${fmtUsdc(usdcAfter)} tUSDC (${usdcAfter})`);
+  log(`faucet gained ${gainNear} yoctoNEAR (${fmtNear(gainNear)} NEAR) and ${gainUsdc} tUSDC base units (${fmtUsdc(gainUsdc)} tUSDC)`);
+  if (gainNear <= 0n) log("WARNING: no NEAR came back to the faucet");
+  if (gainUsdc <= 0n) log("WARNING: no tUSDC came back to the faucet");
+  mark("finished", `faucet +${fmtNear(gainNear)} NEAR, +${fmtUsdc(gainUsdc)} tUSDC`);
   await shot(page, "finished");
   log("after Finish, key in sessionStorage:", await page.evaluate(() => !!sessionStorage.getItem("accord-throwaway-key")));
   // the Done box names the room it closed, with Verify, and keeps it after a reload (sessionStorage)
@@ -220,7 +247,8 @@ try {
   log("summary", JSON.stringify(reached));
   const slow = durations.filter((d) => d.ms > 20_000);
   const top = [...durations].sort((a, b) => b.ms - a.ms).slice(0, 5).map((d) => `${(d.ms / 1000).toFixed(1)} s ${d.what.slice(0, 90)}`);
-  log(`requests: ${durations.length}, over 20 s: ${slow.length}; slowest: ${top.join(" | ")}`);
+  log(`requests: ${durations.length}, over 20 s: ${slow.length}; max ${durations.length ? (Math.max(...durations.map((d) => d.ms)) / 1000).toFixed(1) : 0} s; slowest: ${top.join(" | ")}`);
+  for (const d of durations) log(`request ${(d.ms / 1000).toFixed(1)} s ${d.what.slice(0, 140)}${d.ms > 20_000 ? "  <-- OVER 20 s" : ""}`);
   await browser.close();
   process.exit(exit);
 }
