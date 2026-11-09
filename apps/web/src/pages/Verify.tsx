@@ -220,7 +220,7 @@ export function Verify() {
             <p className={tl.groupLabel}>
               <span>Full check · <span className={tl.lower}>make verify</span></span>
               <span className={tl.groupMeta} aria-live="polite">
-                {full.state === "loading" ? "reading" : full.state === "live" ? `${fullSummary} · live` : `Recorded for ${TESTNET.agreement}`}
+                {full.state === "loading" ? "reading" : full.state === "live" ? `${fullSummary} · live` : failedId ? `No result for ${id}` : `Recorded for ${TESTNET.agreement}`}
               </span>
             </p>
             {failedId ? (
