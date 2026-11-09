@@ -1,6 +1,8 @@
 # Security policy
 
-Accord runs on NEAR testnet. There is no mainnet deployment and no audit yet; mainnet follows an audit.
+Accord runs on NEAR testnet. There is no mainnet deployment and no third-party audit yet; mainnet follows an external audit.
+
+An internal security review ran on 9 Nov 2026: five AI-assisted review passes, each on a separate code area (the payment path; authorisation and keys; creation and code integrity; funds; the enclave jobs), with every finding re-checked by separate reviewers who reproduced it as a test. It is not a third-party audit. It found 1 High, 5 Medium (one of them Medium-Low) and 4 Low issues; the contract and factory fixes are release 4 on both testnet factories, and agreements created before release 4 keep release 3's code. Every finding, fix, test and commit, and the limits that remain: [`platform/DECISIONS.md`](platform/DECISIONS.md) sections 25 and 26.
 
 ## Reporting a vulnerability
 

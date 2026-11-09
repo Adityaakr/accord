@@ -2,7 +2,7 @@
 
 Each entry names the `PROGRESS.md` item it blocks. Remove an entry when it is done.
 
-## Release 4 (audit fixes): about 30 NEAR for the global contract
+## Release 4 (security-review fixes): about 30 NEAR for the global contract
 
 Added 9 Nov 2026 (DECISIONS.md 25). Everything up to the publish is done: both factories run the new factory code, and
 release 4's three pubkey runs are stored on each. Publishing the new agreement code as a global contract burns about
@@ -18,7 +18,7 @@ release 4's three pubkey runs are stored on each. Publishing the new agreement c
    - `make check-deploy`, then `make negotiate`, `make finish DEAL=<the new agreement>`, `make attack`, `make revoke`
      and `make verify DEAL=<it>`, and record every transaction in DECISIONS.md 25.
 
-## 2.7 (S1) and audit finding 5: new job builds, and the seed condition only the dashboard can set
+## 2.7 (S1) and security-review finding 5: new job builds, and the seed condition only the dashboard can set
 
 Added 9 Nov 2026 (DECISIONS.md 25). The job code on `main` (commit e12adb2 and 8d53aee) serves only agreements of
 `accord-v2.testnet` and `accord-usdc.testnet` (`a<n>.<factory>`, the agreement's own view, the factory's

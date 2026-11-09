@@ -42,7 +42,7 @@ Two companies' agents negotiate inside an attested enclave from sealed mandates.
 6. [Testnet proof](#testnet-proof)
 7. [Where each attack stops](#where-each-attack-stops)
 8. [Claims and their limits](#claims-and-their-limits)
-9. [Security audit](#security-audit)
+9. [Security review](#security-review)
 10. [Repository map](#repository-map)
 11. [Run locally](#run-locally)
 12. [Deployment](#deployment)
@@ -373,9 +373,9 @@ Agreement [`a6.accord-v2.testnet`](https://testnet.nearblocks.io/address/a6.acco
 | 11 | Redirect to `halcyon-markets.testnet` refused: `ERR_PAYEE_MISMATCH`, nothing sent | [`AB9HLnWv…`](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs) |
 | 12 | Buyer revokes the agent; its next call fails with `AccessKeyDoesNotExist` | [`4ervNQdj…`](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P) |
 
-### Release 4 (audit fixes)
+### Release 4 (security-review fixes)
 
-The audited agreement code (`ECgsrZwy…`, global contract `R2qxw4u5…`) is release 4 on both factories since 9 Nov 2026: `accord-v2.testnet` ([publish](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU), [set current](https://testnet.nearblocks.io/txns/J9uADVqQSkY6f1uMYbMbWoPnB4oiwuS3CtLayKojtgeC)) and `accord-usdc.testnet` ([publish](https://testnet.nearblocks.io/txns/GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai), [set current](https://testnet.nearblocks.io/txns/5D9LxPuU4phUXTgRawd97TmhZPGiPjWzSPWCYXJteoLJ)). Agreements created before keep release 3 (code pinned by hash), so a6 above is unchanged. The proofs ran again on new release 4 agreements of `accord-v2.testnet` (test USDC):
+The reviewed agreement code (`ECgsrZwy…`, global contract `R2qxw4u5…`) is release 4 on both factories since 9 Nov 2026: `accord-v2.testnet` ([publish](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU), [set current](https://testnet.nearblocks.io/txns/J9uADVqQSkY6f1uMYbMbWoPnB4oiwuS3CtLayKojtgeC)) and `accord-usdc.testnet` ([publish](https://testnet.nearblocks.io/txns/GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai), [set current](https://testnet.nearblocks.io/txns/5D9LxPuU4phUXTgRawd97TmhZPGiPjWzSPWCYXJteoLJ)). Agreements created before keep release 3 (code pinned by hash), so a6 above is unchanged. The proofs ran again on new release 4 agreements of `accord-v2.testnet` (test USDC):
 
 | Proof | Agreement | Result | Transaction |
 | --- | --- | --- | --- |
@@ -438,11 +438,15 @@ Verbatim from [`platform/GOAL.md`](platform/GOAL.md). Every public statement abo
 
 The site's [/security](https://accordweb-production.up.railway.app/security) page shows the same table.
 
-## Security audit
+## Security review
 
-Five independent audit lenses (the payment path; authorisation and keys; creation and code integrity; funds; the enclave jobs), with two skeptics reproducing each finding as a test, found 1 High and 5 Medium issues (one of them Medium-Low), plus 4 Low. The High one was a close-refund drain: a deposit sent during `close` could make the refund to the buyer spend the vendor's reserve; the refund is now capped at the ledger while anything is owed to the vendor. Every fix went in test first (the test failed for the reason named, then passed) and the tests stay in the suite. The contract and factory fixes are live as release 4 on both testnet factories ([proofs](#release-4-audit-fixes)).
+An internal security review, not a third-party audit: five AI-assisted review passes, each on a separate code area (the payment path; authorisation and keys; creation and code integrity; funds; the enclave jobs), with every finding re-checked by separate reviewers who reproduced it as a test, found 1 High and 5 Medium issues (one of them Medium-Low), plus 4 Low. The High one was a close-refund drain: a deposit sent during `close` could make the refund to the buyer spend the vendor's reserve; the refund is now capped at the ledger while anything is owed to the vendor. Every fix went in test first (the test failed for the reason named, then passed) and the tests stay in the suite. The contract and factory fixes are live as release 4 on both testnet factories ([proofs](#release-4-security-review-fixes)).
 
-Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is partial. The jobs now serve only factory agreements in code, but those job builds are not deployed yet (release 4 runs release 3's job builds), and S1 itself needs the seed's access condition in OutLayer, which only its dashboard can set and which is not set yet. Every finding, fix, test and commit: [`platform/DECISIONS.md`](platform/DECISIONS.md) section 25.
+Agreements created before release 4 (a6, a8 and a1.accord-usdc.testnet) keep release 3's code by hash, so they keep the close-refund issue; new agreements get release 4.
+
+Changed limit: an item left `AssumedPaid` (its transfer sent, its callback not yet answered) is no longer refunded to the buyer at `Settled`; its amount stays on the agreement's account until that payment's callback answers (a failure sets it `Reserved` for the vendor to claim, a success leaves it paid), and if that callback never runs, the amount stays on the account.
+
+Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is partial. The jobs now serve only factory agreements in code, but those job builds are not deployed yet (release 4 runs release 3's job builds), and S1 itself needs the seed's access condition in OutLayer, which only its dashboard can set and which is not set yet. Every finding, fix, test and commit: [`platform/DECISIONS.md`](platform/DECISIONS.md) section 25. Mainnet follows an external audit, which has not happened yet.
 
 ## Repository map
 

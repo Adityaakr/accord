@@ -18,7 +18,7 @@ const TEMPLATE = readFileSync(join(DIST, "index.html"), "utf8")
 const OG_IMAGE = `${SITE_URL}/og-image.png`
 const TODAY = new Date().toISOString().slice(0, 10)
 const TAGLINE = "The private deal room and control plane for agent-to-agent commerce."
-const ABOUT = "Accord is the private deal room and control plane for agent-to-agent commerce on NEAR. It turns private negotiations into enforceable payment rules. Two companies' agents negotiate in confidence inside an attested enclave (the Sealed Table); both companies approve the terms; from then on those terms are the only authority the buyer's agent has over money. A NEAR contract (Agreement controls) refuses any payment whose amount, milestone or recipient differs from the approved terms, and Payee binds the recipient to a domain the vendor controls. Settlement is USDC on NEAR. Agreement types (market making, security remediation, infrastructure services, agent-to-agent services, vendor contracts and grants) change the commercial fields and the evidence accepted, not the controls. Two types are built: vendor contracts, which ran end to end on NEAR testnet (agreement a6.accord-v2.testnet), and the featured market-making agreement, a retainer paid only for periods where enough observations of the venue's public liquidity, taken at hidden times, met the agreed spread, depth and two-sided quoting (run end to end on a local node reading real NEAR mainnet blocks; not yet on testnet). The other four are planned. Accord runs on NEAR testnet only; mainnet follows an audit."
+const ABOUT = "Accord is the private deal room and control plane for agent-to-agent commerce on NEAR. It turns private negotiations into enforceable payment rules. Two companies' agents negotiate in confidence inside an attested enclave (the Sealed Table); both companies approve the terms; from then on those terms are the only authority the buyer's agent has over money. A NEAR contract (Agreement controls) refuses any payment whose amount, milestone or recipient differs from the approved terms, and Payee binds the recipient to a domain the vendor controls. Settlement is USDC on NEAR. Agreement types (market making, security remediation, infrastructure services, agent-to-agent services, vendor contracts and grants) change the commercial fields and the evidence accepted, not the controls. Two types are built: vendor contracts, which ran end to end on NEAR testnet (agreement a6.accord-v2.testnet), and the featured market-making agreement, a retainer paid only for periods where enough observations of the venue's public liquidity, taken at hidden times, met the agreed spread, depth and two-sided quoting (run end to end on a local node reading real NEAR mainnet blocks; not yet on testnet). The other four are planned. Accord runs on NEAR testnet only; mainnet follows an external audit."
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 const abs = (href) => (href.startsWith("/") ? SITE_URL + href : href)
@@ -74,7 +74,7 @@ const APP = {
   operatingSystem: "Web", url: `${SITE_URL}/`, description: ABOUT, image: OG_IMAGE,
   featureList: CONTROLS.map((c) => `${c.name}: ${c.text}`),
   isAccessibleForFree: true,
-  offers: { "@type": "Offer", name: "NEAR testnet", url: `${SITE_URL}/app/try-it`, price: "0", priceCurrency: "USD", availability: "https://schema.org/InStock", description: "Free on NEAR testnet with test USDC: open /app/try-it with a NEAR wallet. Mainnet follows an audit. Planned: Accord Teams (subscription) and market-making agreements (per monitored market). No percentage-based Accord fee on payment amounts; production prices are published before launch." },
+  offers: { "@type": "Offer", name: "NEAR testnet", url: `${SITE_URL}/app/try-it`, price: "0", priceCurrency: "USD", availability: "https://schema.org/InStock", description: "Free on NEAR testnet with test USDC: open /app/try-it with a NEAR wallet. Mainnet follows an external audit. Planned: Accord Teams (subscription) and market-making agreements (per monitored market). No percentage-based Accord fee on payment amounts; production prices are published before launch." },
   publisher: { "@id": `${SITE_URL}/#organization` }, sameAs: [REPO],
 }
 /* The public source: the contracts, enclave jobs, SDK, MCP server, CLI, app and this site */
@@ -170,7 +170,7 @@ function render(route, target = route) {
 ${md ? mdToHtml(md) : `<h1>${esc(title)}</h1><p>${esc(description)}</p>`}
 </main>
 <nav aria-label="Site"><h2>Pages</h2><ul>${nav}</ul></nav>
-<footer><p>${esc(ABOUT)}</p><p>Live on NEAR testnet (factory accord-v2.testnet); the full flow ran on agreement a6.accord-v2.testnet; mainnet follows an audit. <a href="/llms.txt">llms.txt</a> · <a href="/sitemap.xml">Sitemap</a> · <a href="${REPO}">GitHub</a></p></footer>
+<footer><p>${esc(ABOUT)}</p><p>Live on NEAR testnet (factory accord-v2.testnet); the full flow ran on agreement a6.accord-v2.testnet; mainnet follows an external audit. <a href="/llms.txt">llms.txt</a> · <a href="/sitemap.xml">Sitemap</a> · <a href="${REPO}">GitHub</a></p></footer>
 </div></div>`
 
   let html = TEMPLATE
@@ -227,11 +227,11 @@ const agentSections = `Source code (MIT): ${REPO} · Machine-readable facts: ${S
 
 ## Status
 
-- Network: NEAR testnet only. Mainnet follows an audit and is not live.
+- Network: NEAR testnet only. Mainnet follows an external audit and is not live.
 - Proof: agreement a6.accord-v2.testnet ran the full flow on 8 Nov 2026 on factory accord-v2.testnet, release 3: sealed limits, the Sealed Table negotiation by the real NEAR AI model inside OutLayer's attested enclave, approvals, funding, a payment, a refused redirect (ERR_PAYEE_MISMATCH) and a revocation. Each of its 12 transactions is linked at ${SITE_URL}/record
 - ${STATUS.release4}
 - ${STATUS.circleUsdc}
-- Audit: ${STATUS.audit}
+- Security review: ${STATUS.audit}
 - Settlement: USDC on NEAR (NEP-141), from each agreement's own account; on testnet a test USDC token (tUSDC) on accord-v2.testnet, and Circle's testnet USDC on accord-usdc.testnet.
 - Agreement types: six; two are built (vendor contracts, called procurement in code, and market-making agreements) and four are planned.
 - Sign-in: external NEAR wallets only, through HOT Connect. There is no email sign-in.

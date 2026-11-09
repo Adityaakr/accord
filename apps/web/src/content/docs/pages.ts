@@ -317,7 +317,7 @@ export const DOC_PAGES: DocPage[] = [
             kind: "rows",
             rows: [
               { name: "Factory", value: "accord-v2.testnet", href: TESTNET.factoryUrl, detail: "Publishes releases and creates agreements. It cannot call, upgrade or drain an existing agreement." },
-              { name: "Release", value: "release 4", href: RELEASE4.publish, detail: "One agreement code hash per release, published as a NEP-591 global contract and referenced by hash, so it cannot change. Every agreement on the release uses it; an agreement keeps its release for life. Release 4 (`ECgsrZwy…`, the audit fixes) is current on both factories since 9 Nov 2026; a6 and the agreements before it keep release 3 (`8wMuMRre…`)." },
+              { name: "Release", value: "release 4", href: RELEASE4.publish, detail: "One agreement code hash per release, published as a NEP-591 global contract and referenced by hash, so it cannot change. Every agreement on the release uses it; an agreement keeps its release for life. Release 4 (`ECgsrZwy…`, the security-review fixes) is current on both factories since 9 Nov 2026; a6 and the agreements before it keep release 3 (`8wMuMRre…`)." },
               { name: "Agreement account", value: "a<id>.accord-v2.testnet", href: TESTNET.agreementUrl, detail: "Created in one batch (`CreateAccount`, `Transfer`, `UseGlobalContract`, `FunctionCall new`) with no `AddKey`, so it starts with no keys. It has no method that deploys code and never holds a full-access key." },
               { name: "Creation deposit", value: "2 NEAR", detail: "Paid by the buyer; covers state storage, mandate storage, the agent's gas and the on-chain OutLayer runs." },
             ],
@@ -410,7 +410,7 @@ export const DOC_PAGES: DocPage[] = [
             kind: "rows",
             label: "Other agreements to check",
             rows: [
-              { name: "Release 4", value: RELEASE4.agreement, href: "/verify?agreement=" + RELEASE4.agreement, tone: "ok", detail: "The audit fixes. `" + RELEASE4.verify + "` prints `" + RELEASE4.verifyResult + "`. JSON: `/app/api/verify/" + RELEASE4.agreement + "`." },
+              { name: "Release 4", value: RELEASE4.agreement, href: "/verify?agreement=" + RELEASE4.agreement, tone: "ok", detail: "The security-review fixes. `" + RELEASE4.verify + "` prints `" + RELEASE4.verifyResult + "`. JSON: `/app/api/verify/" + RELEASE4.agreement + "`." },
               { name: "Circle USDC", value: CIRCLE.agreement, href: "/verify?agreement=" + CIRCLE.agreement, tone: "ok", detail: "The second factory, on release 3. `" + CIRCLE.verify + "` (the same as `ACCORD_FACTORY=accord-usdc.testnet make verify`). JSON: `/app/api/verify/" + CIRCLE.agreement + "`." },
             ],
           },
@@ -620,7 +620,7 @@ export const DOC_PAGES: DocPage[] = [
             kind: "rows",
             rows: [
               { name: "Factory", value: TESTNET.factory, href: TESTNET.factoryUrl },
-              { name: "Release", value: `release ${RELEASE4.release}`, href: RELEASE4.publish, detail: "The audit fixes, current since 9 Nov 2026 ([set current](" + RELEASE4.current + ")). Release 3: [publish](" + TESTNET.releaseUrl + ")." },
+              { name: "Release", value: `release ${RELEASE4.release}`, href: RELEASE4.publish, detail: "The security-review fixes, current since 9 Nov 2026 ([set current](" + RELEASE4.current + ")). Release 3: [publish](" + TESTNET.releaseUrl + ")." },
               { name: "Agreement", value: TESTNET.agreement, href: TESTNET.agreementUrl, detail: "Ran the full flow on 8 Nov 2026 on release 3; see [/record](/record)." },
               { name: "Agreement on release 4", value: RELEASE4.agreement, href: RELEASE4.agreementUrl, detail: "Negotiated, funded, paid item 1 and refused a redirect on 9 Nov 2026: [fund](" + RELEASE4.steps[1].txs[0] + "), [pay](" + RELEASE4.steps[2].txs[0] + "), [refused](" + RELEASE4.steps[3].txs[0] + ")." },
               { name: "Circle USDC factory", value: CIRCLE.factory, href: acct(CIRCLE.factory), detail: "Settles in Circle's testnet USDC (`3e2210e1…afcb8af`); release 4 current ([publish](" + RELEASE4.usdcPublish + "), [set current](" + RELEASE4.usdcCurrent + "))." },
@@ -763,7 +763,7 @@ export const DOC_PAGES: DocPage[] = [
             rows: [
               { name: "Settlement privacy", detail: "Settlement is not confidential: the USDC transfer is public on NEAR, as with any stablecoin payment. Only the negotiation is private." },
               { name: "Legal KYB", detail: "Not done. The enclave proves control of a domain, and the vendor's settlement authority approves the account; a registry lookup is a later integration." },
-              { name: "Mainnet", value: "not live", detail: "Accord runs on NEAR testnet only; mainnet follows an audit." },
+              { name: "Mainnet", value: "not live", detail: "Accord runs on NEAR testnet only; mainnet follows an external audit." },
             ],
           },
         ],

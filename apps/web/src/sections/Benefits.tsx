@@ -218,7 +218,7 @@ export function Benefits() {
           (Body Small .ls-link) as one block under the grid, on the grid's left edge, the heading's text→link rhythm (gap 16) */}
       <Appear className={styles.closing} effect={appear("0s")}>
         <p className={`t-body-lg ${styles.closingText}`}>
-          A keeper service triggers scheduled steps such as observations; it cannot move funds or change an outcome. Mainnet follows an audit.
+          A keeper service triggers scheduled steps such as observations; it cannot move funds or change an outcome. Mainnet follows an external audit.
         </p>
         <div className={styles.links}>
           <Tertiary href={LINKS.security}>Security documentation<Arrow /></Tertiary>

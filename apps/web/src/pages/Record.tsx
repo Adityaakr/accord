@@ -35,7 +35,7 @@ export function Record() {
             label="Latest on release 4"
             meta={<QuietLink href={`/verify?agreement=${RELEASE4.agreement}`}>verify a10</QuietLink>}
             proofs={RELEASE4.steps}
-            note={<>Release 4 carries the audit fixes and is current on both factories since 9 Nov 2026 (<QuietLink href={RELEASE4.publish} mono={false}>published</QuietLink>); agreements created before it, a6 among them, keep release 3. The proofs ran again on new agreements a10, a11 and a13.</>}
+            note={<>Release 4 carries the security-review fixes and is current on both factories since 9 Nov 2026 (<QuietLink href={RELEASE4.publish} mono={false}>published</QuietLink>); agreements created before it, a6 among them, keep release 3. The proofs ran again on new agreements a10, a11 and a13.</>}
           />
           <ProofGroup
             label="Circle USDC"

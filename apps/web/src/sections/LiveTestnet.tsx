@@ -61,7 +61,7 @@ export function LiveTestnet() {
           <Link to="/verify" className={styles.footLink}>See the checks<Arrow /></Link>
         </p>
         <p className={styles.verify}>
-          <span>Re-run on release 4 (audit fixes):</span>
+          <span>Re-run on release 4 (security-review fixes):</span>
           <a href={RELEASE4.agreementUrl} target="_blank" rel="noreferrer" className={`mono ${styles.footLink}`}>a10<Arrow dir="up-right" /></a>
           <span className={styles.sep} aria-hidden="true">·</span>
           <span>Circle USDC:</span>

@@ -98,7 +98,7 @@ export const KNOWN_TX: Record<string, { payment: string; refusal: string; recipi
 }
 
 /* The factories and the transaction that published each release on each (publish_release), so a code check links
-   to the right one. Release 4 (the audit fixes, DECISIONS 25 and 26) is current on both since 9 Nov 2026; an
+   to the right one. Release 4 (the security-review fixes, DECISIONS 25 and 26) is current on both since 9 Nov 2026; an
    agreement keeps the release it was created on. */
 export const FACTORIES = ["accord-v2.testnet", "accord-usdc.testnet"] as const
 export const RELEASE_TX: Record<string, Record<number, string>> = {

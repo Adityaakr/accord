@@ -89,7 +89,7 @@ const COLUMN_2: Item[] = [
     delay: 0.5,
     title: "Is it live?",
     description:
-      "On NEAR testnet, yes. The full flow ran on agreement a6.accord-v2.testnet: both sides sealed their limits, the Sealed Table negotiated inside an attested enclave, both companies approved, the buyer funded, the agent paid, a redirected payment was refused and the agent was revoked. Settlement on testnet uses a test USDC token. Mainnet follows an audit.",
+      "On NEAR testnet, yes. The full flow ran on agreement a6.accord-v2.testnet: both sides sealed their limits, the Sealed Table negotiated inside an attested enclave, both companies approved, the buyer funded, the agent paid, a redirected payment was refused and the agent was revoked. Settlement on testnet uses a test USDC token. Mainnet follows an external audit.",
   },
 ]
 

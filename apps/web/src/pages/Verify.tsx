@@ -19,7 +19,7 @@ import styles from "./Verify.module.css"
    source: the live rows to the typed agreement's own accounts and transactions, the full check to a6's evidence.
 ------------------------------------------------------------------- */
 
-/* Quick picks: a6 (the original walkthrough, the default), a10 (release 4, the audit fixes) and a1 on the Circle USDC
+/* Quick picks: a6 (the original walkthrough, the default), a10 (release 4, the security-review fixes) and a1 on the Circle USDC
    factory. The browser rows read each id's own factory; the full check comes from the app, which knows both. */
 const PICKS = [
   { id: TESTNET.agreement, label: "a6", note: "original walkthrough" },

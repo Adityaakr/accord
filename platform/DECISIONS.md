@@ -451,8 +451,9 @@ Kept as stated limits: an item can be reopened from `AssumedPaid` by one excepti
 
 ## 25. Audit fixes and release 4 (9 Nov 2026)
 
-Five auditors (L1 payment path, L2 authorisation and keys, L3 creation and code integrity, L4 funds, L5 the jobs) and
-two skeptics reproduced each finding with a test; every fix below went in test first (the test failed for the reason
+This was an internal, AI-assisted security review, not a third-party audit (mainnet still follows an external audit):
+the "auditors" and "skeptics" below are review passes. Five auditors (L1 payment path, L2 authorisation and keys, L3
+creation and code integrity, L4 funds, L5 the jobs) and two skeptics reproduced each finding with a test; every fix below went in test first (the test failed for the reason
 named, then passed), and the tests stay in the suite. Release 4 carries the contract fixes for **new** agreements
 only: a6, a8 and a1.accord-usdc.testnet keep running release 3's code by hash and are unchanged.
 
@@ -501,7 +502,7 @@ only: a6, a8 and a1.accord-usdc.testnet keep running release 3's code by hash an
     accord-v2.testnet (https://testnet.nearblocks.io/txns/4onpVKM3qRosBSuodGYSnpuL7FkBJYL2VyzrU1ozkPyA,
     https://testnet.nearblocks.io/txns/7P5Auw4ai64u1xk7zL17NWWUmC1HHk3Jy2d4Jn3quuFo); it holds about `21.4 NEAR`
     above its storage stake.
-- **Not done yet: release 4 itself.** Publishing the new agreement code as a global contract burns about `50 NEAR`
+- **Not done yet: release 4 itself** (superseded by section 26: release 4 is published and current on both factories). Publishing the new agreement code as a global contract burns about `50 NEAR`
   (release 1's publish burned `50.13 NEAR`, ten times the storage of the `500 KB` wasm), and the faucet stopped
   answering after two accounts. Until the release is published and current, `make check-deploy` reports the local
   wasm `ECgsrZwy…` against release 3, and the three proofs on a release 4 agreement wait. Steps:
