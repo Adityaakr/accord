@@ -128,7 +128,7 @@ const TRY_HOW_TO = {
   description: "Connect a NEAR wallet, get test funds, open a deal room against Accord's demo vendor, let the demo agent pay, watch a redirect get refused and revoke the key. Everything is on NEAR testnet with test USDC.",
   totalTime: "PT3M", estimatedCost: { "@type": "MonetaryAmount", currency: "USD", value: "0" },
   tool: [{ "@type": "HowToTool", name: "A NEAR testnet wallet (Meteor, Intear, Ledger, Nightly or WalletConnect) through HOT Connect" }],
-  step: TRY_STEPS.map((t, i) => ({ "@type": "HowToStep", position: i + 1, name: t.name, text: `${t.do} You see: ${t.see}`, url: `${SITE_URL}/app/try-it` })),
+  step: TRY_STEPS.map((t, i) => ({ "@type": "HowToStep", position: i + 1, name: `${t.n === "After" ? "After" : `Step ${t.n}`}: ${t.name}`, text: `${t.do} You see: ${t.see}`, url: `${SITE_URL}/app/try-it` })),
 }
 const isDoc = (r) => r.path.startsWith("/docs/")
 const docsHome = () => ROUTES.find((r) => r.path === "/docs")
@@ -257,7 +257,7 @@ const agentSections = `Source code (MIT): ${REPO} · Machine-readable facts: ${S
 
 Start at ${SITE_URL}/app/try-it (walkthrough with screenshots: ${SITE_URL}/docs/quickstart). No wallet needed: choose "Try without a wallet" and the page makes a throwaway testnet key in your browser tab, funded by the faucet. A faucet, a demo counterparty and a demo agent run by Accord are built in; everything uses test USDC.
 
-${TRY_STEPS.map((t, i) => `${i + 1}. **${t.name}.** Do: ${t.do} See: ${t.see}`).join("\n")}
+${TRY_STEPS.map((t) => `- **${t.n === "After" ? "After" : `Step ${t.n}`}: ${t.name}.** Do: ${t.do} See: ${t.see}`).join("\n")}
 
 ## Key URLs
 
