@@ -40,7 +40,7 @@ export const ROUTES = [
   { path: "/verify", slug: "verify", name: "Verify an agreement", priority: 0.6, changefreq: "monthly",
     summary: "Walk the attestation chain of an agreement, step by step." },
   { path: "/try", slug: "try", name: "Try to move the money", priority: 0.6, changefreq: "monthly",
-    summary: "The open demonstration inbox: send the agent an attack and watch the contract refuse it." },
+    summary: "The attack recorded on NEAR testnet: the demonstration agent told to pay a new account on agreements a6 and a8, and the contract refusing it with ERR_PAYEE_MISMATCH. Run the same attack in your own deal room at /app/try-it." },
   { path: "/join", slug: "join", name: "How to start", priority: 0.7, changefreq: "monthly",
     summary: "Sign in with a NEAR wallet, choose a workspace, create a deal room and invite the counterparty, on NEAR testnet." },
   { path: "/record", slug: "record", name: "Public record", priority: 0.5, changefreq: "daily",
