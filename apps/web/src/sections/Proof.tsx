@@ -9,6 +9,7 @@ import { API, useLive, utcTime, sendToInbox, type InboxOutcome } from "../lib/li
 import { Arrow } from "../components/Arrow"
 import { InboxMock } from "../components/InboxMock"
 import { AgreementRecord } from "../components/AgreementRecord"
+import { useRoom, ROOM_URL } from "../lib/room"
 import tl from "../styles/Timeline.module.css"
 import styles from "./Proof.module.css"
 
@@ -32,7 +33,7 @@ const slide = (x: -100 | 100): AppearEffect => ({
 
 /* Spec §3.7 copy, verbatim */
 const ROW_TITLE = "Try to move the money."
-const ROW_P1 = "When the demonstration opens, its agent's inbox is public. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it, and your attempt appears in the public refusal log with the contract's reason. Revocation is shown exactly: the agent's only key is deleted in one transaction, and anything it signs afterwards is rejected by the network before it reaches the contract."
+const ROW_P1 = "In the public demonstration room, the agent's inbox is open to anyone while the room runs. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it, and your attempt appears in the public refusal log with the contract's reason. Revocation is shown exactly: the agent's only key is deleted in one transaction, and anything it signs afterwards is rejected by the network before it reaches the contract."
 const HELP_LINE = "Ten messages an hour per visitor · Testnet USDC on NEAR · This public room re-arms its agent five minutes after a revocation; in a real agreement only the buyer can."
 const GOAL_LINE = "A successful attempt can only ever produce a payment to the authorised recipient at the approved amount."
 
@@ -179,6 +180,14 @@ export function InboxModule({ goal = false, level = 3 }: InboxModuleProps) {
   )
 }
 
+/* The row's button reads the room's state in the browser (lib/room.ts): "Open now" only once /app/api/inbox/stats said
+   open; until then, and when closed, it goes to /try, which shows the recorded refusals. */
+function RoomButton() {
+  const room = useRoom()
+  if (room.kind === "open") return <Button variant="primary" href={ROOM_URL}>Open now: write to the agent</Button>
+  return <Button variant="secondary" href="/try">{room.kind === "closed" ? "See the recorded attempts" : "See the demonstration"}</Button>
+}
+
 export function Proof() {
   return (
     <section id="try" className={`section ${styles.section}`}>
@@ -192,7 +201,7 @@ export function Proof() {
           <div className={styles.text}>
             <h2 className={`t-h2 ${styles.title}`}>{ROW_TITLE}</h2>
             <p className={`t-body-lg ${styles.description}`}>{ROW_P1}</p>
-            <Button variant="secondary" href="/try">Preview the demonstration</Button>
+            <RoomButton />
           </div>
         </Appear>
       </div>

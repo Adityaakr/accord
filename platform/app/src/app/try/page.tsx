@@ -11,12 +11,18 @@ import styles from "./try.module.css";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Try the agent" };
 
-/* The attack as recorded on NEAR testnet (a6 and a8): the agent told to pay halcyon-markets.testnet, refused by the
-   contract each time. Shown in place of the room while the public room's services are not running here. */
+/* The attack as recorded on NEAR testnet (a6, a8, a10, a11, a15; DECISIONS.md 21, 26, 27): the agent told to pay
+   an account the vendor never proved, a different amount, or a canary; refused by the contract each time. Shown in
+   place of the room only while no room is open and none of its services has reported in the last three minutes. */
 const RECORDED = [
-  { agreement: "a6.accord-v2.testnet", item: 2, amount: "13000000", at: "2026-11-08T17:04:30Z", tx: "AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs" },
-  { agreement: "a8.accord-v2.testnet", item: 2, amount: "12000000", at: "2026-11-08T17:48:34Z", tx: "37zUgEoe8jbqnqQQhSe8L1VPBMRrrqXdsDorgDY7cEYL" },
-  { agreement: "a8.accord-v2.testnet", item: 3, amount: "6000000", at: "2026-11-08T17:53:37Z", tx: "CPirnYdV9J55zsKRkvQkdzFZujXzEYHzkhqo51NBWtm4" },
+  { agreement: "a6.accord-v2.testnet", item: 2, amount: "13000000", to: "halcyon-markets.testnet", code: "ERR_PAYEE_MISMATCH", at: "2026-11-08T17:04:30Z", tx: "AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs" },
+  { agreement: "a8.accord-v2.testnet", item: 2, amount: "12000000", to: "halcyon-markets.testnet", code: "ERR_PAYEE_MISMATCH", at: "2026-11-08T17:48:34Z", tx: "37zUgEoe8jbqnqQQhSe8L1VPBMRrrqXdsDorgDY7cEYL" },
+  { agreement: "a8.accord-v2.testnet", item: 3, amount: "6000000", to: "halcyon-markets.testnet", code: "ERR_PAYEE_MISMATCH", at: "2026-11-08T17:53:37Z", tx: "CPirnYdV9J55zsKRkvQkdzFZujXzEYHzkhqo51NBWtm4" },
+  { agreement: "a10.accord-v2.testnet", item: 2, amount: "11000000", to: "halcyon-markets.testnet", code: "ERR_PAYEE_MISMATCH", at: "2026-11-08T23:04:55Z", tx: "51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu" },
+  { agreement: "a11.accord-v2.testnet", item: 1, amount: "15000000", to: "halcyon-markets.testnet", code: "ERR_PAYEE_MISMATCH", at: "2026-11-08T23:07:20Z", tx: "HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv" },
+  { agreement: "a11.accord-v2.testnet", item: 1, amount: "83000000", to: "halcyon-mm.testnet", code: "ERR_AMOUNT_MISMATCH", at: "2026-11-08T23:07:25Z", tx: "3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh" },
+  { agreement: "a11.accord-v2.testnet", item: 1, amount: "15000000", to: "halcyon-mm-payments.testnet", code: "ERR_CANARY", at: "2026-11-08T23:07:32Z", tx: "DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT" },
+  { agreement: "a15.accord-v2.testnet", item: 2, amount: "12000000", to: "halcyon-markets.testnet", code: "ERR_PAYEE_MISMATCH", at: "2026-11-09T00:21:49Z", tx: "7Cjd6cvxVm8racRQTotSJ1CXh5PHdgEvSzJxYszAbptz" },
 ];
 const SERVICES = ["keeper", "agent", "rearm"];
 
@@ -117,17 +123,17 @@ function Recorded() {
       <PageHead
         eyebrow={<Pill tone="muted">recorded on NEAR testnet</Pill>}
         title="Try to get the agent to pay you"
-        lead="On NEAR testnet the demonstration agent was told to pay a new account three times, on agreements a6 and a8. The contract refused each payment. Run the same attack in your own deal room in about three minutes."
+        lead="On NEAR testnet the demonstration agent was told to pay a new account, a different amount, or a canary account, on agreements a6 to a15. The contract refused each payment. Run the same attack in your own deal room in about three minutes."
       />
       <div className={styles.grid}>
         <div className={styles.main}>
-          <Panel title="Refused on testnet" eyebrow="the agent's own act calls, each naming an account the vendor never proved" flush>
+          <Panel title="Refused on testnet" eyebrow="the agent's own act calls, each outside the approved recipient or amount" flush>
             <ul className={styles.refusals}>
               {RECORDED.map((r) => (
                 <li key={r.tx}>
-                  <span className={`mono ${styles.code}`}>ERR_PAYEE_MISMATCH</span>
+                  <span className={`mono ${styles.code}`}>{r.code}</span>
                   <span className="small">
-                    <Link className="mono link" href={`/agreements/${r.agreement}`}>{r.agreement.split(".")[0]}</Link> item {r.item} · <Usdc amount={r.amount} /> → <span className="mono">halcyon-markets.testnet</span>
+                    <Link className="mono link" href={`/agreements/${r.agreement}`}>{r.agreement.split(".")[0]}</Link> item {r.item} · <Usdc amount={r.amount} /> → <span className="mono">{r.to}</span>
                     {" · "}{r.at.slice(11, 16)} UTC, {r.at.slice(0, 10)}
                     {" · "}<a className="mono link" href={`${explorer}/txns/${r.tx}`} target="_blank" rel="noreferrer">tx {r.tx.slice(0, 8)}</a>
                   </span>
@@ -143,7 +149,7 @@ function Recorded() {
         <aside className={styles.side}>
           <Panel title="About this page">
             <p className="small">Nothing moved in any of these attempts; each refusal is on the agreement&apos;s record. A successful attempt can only ever produce a payment to the authorised recipient at the approved amount.</p>
-            <p className="small">The always-open public room, where anyone can write to the agent, returns when its service is running on this deployment. <Link className="link" href="/status">Status</Link></p>
+            <p className="small">The always-open public room, where anyone can write to the agent, is closed right now: no room is open and none of its services (keeper, agent, re-arm) has reported in the last three minutes. This page shows the room again as soon as one is open. <Link className="link" href="/status">Status</Link></p>
           </Panel>
         </aside>
       </div>
