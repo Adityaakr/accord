@@ -121,7 +121,7 @@ Three ways to check Accord, in the README in this order, from cheapest to fulles
 
 1. `make verify DEAL=<live agreement>`: read-only against our live testnet agreements; no account, no key. Runs in about a minute.
 2. `make sandbox`: the full flow on a local NEAR sandbox; no network, no key; the jobs are mocked and say so.
-3. `make demo`: the full live loop on testnet with faucet accounts, `tUSDC` if no USDC is configured, the app's labelled demo domain for the recipient's domain proof, and our deployed jobs (their NEAR AI key is an OutLayer secret, so the reader needs none). Under two minutes.
+3. `make demo NET=local`: the full live loop on a local node (`NET=local`) from fresh accounts, the recipient proven on the app's labelled demo domain; 14 s on 3 Nov 2026. `make demo` on testnet has not been run yet (`docs/build/PROGRESS.md` 5.2 is blocked). On testnet the same flow runs as `make negotiate`, `make finish`, `make attack` and `make revoke`, each recorded on release 4 in `DECISIONS.md` section 26, with our deployed jobs (their NEAR AI key is an OutLayer secret, so the reader needs none).
 
 ## README requirements
 

@@ -52,7 +52,7 @@ Three ways, cheapest first. None needs our keys.
 
 1. **Read-only check of a live agreement** (about a minute, no account): `make verify DEAL=a6.accord-v2.testnet` after `pnpm install`. No `.env` is needed: the CLI reads the factory from the id's `a<n>.<factory>` suffix when it is a known one (`accord-v2.testnet` or `accord-usdc.testnet`); any other factory needs `ACCORD_FACTORY` or `--factory`. Output below.
 2. **Full flow on a local NEAR sandbox** (no network; the enclave jobs are replaced by a mock signer and every mocked line says `[mock]`): `make sandbox`
-3. **Full live loop on testnet** (faucet accounts, under two minutes): `make demo`. The procurement flow ran on testnet on release 3 as `a6.accord-v2.testnet` (`make negotiate`, then `make finish DEAL=a6.accord-v2.testnet`; every transaction in `DECISIONS.md` section 21).
+3. **Full live loop on a local node (`NET=local`)**: `make demo NET=local`, from fresh accounts in about 14 s (3 Nov 2026). `make demo` has not been run on testnet yet (`docs/build/PROGRESS.md` 5.2 is blocked on funds). **On testnet**, the same flow runs as separate targets, each recorded on release 4 in `DECISIONS.md` section 26: `make negotiate`, then `make finish DEAL=<agreement>`, `make attack` and `make revoke`. Release 3's run is `a6.accord-v2.testnet` (`DECISIONS.md` section 21).
 
 `make verify` on the testnet agreement, from a real run on 9 Nov 2026 (the nonce is fresh on every run):
 

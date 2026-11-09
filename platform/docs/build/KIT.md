@@ -14,7 +14,7 @@ If two files disagree, the order of authority is: `HACKATHON.md` (the organisers
 - The buyer's agent holds one function-call key on that account, able to call `act` and nothing else. `act` pays only an item that is due on the agreed evidence, at the approved amount, to the authorised recipient; everything else is refused and recorded on chain. A canary request or repeated refusals delete the key; the buyer can delete it in one transaction; the vendor can still claim what it has earned.
 - The recipient is authorised by a file on the vendor's domain (fetched in an enclave), the vendor's settlement authority and the buyer, with a 24-hour delay on any change.
 - Market-making agreements pay market-making retainers only for periods where enough observations of Rhea's USDC/wNEAR pool, taken at times only the observer's enclave knows, met the agreed spread and depth, unless the buyer approves an exception.
-- Three proofs print on testnet: `make negotiate`, `make attack`, `make revoke`. Three judge paths need no help from us: `make verify`, `make sandbox`, `make demo`.
+- Three proofs print on testnet: `make negotiate`, `make attack`, `make revoke`. Three judge paths need no help from us: `make verify`, `make sandbox`, `make demo NET=local` (local node; on testnet the flow runs as `make negotiate`, `make finish`, `make attack`, `make revoke`).
 - Every guarantee is stated with its limit; `GOAL.md` "Claims and their limits" is the source of truth.
 
 ## The files

@@ -15,7 +15,8 @@ const CLAIMS: [string, string, string][] = [
 
 const JUDGE_PATHS = `make verify DEAL=<agreement>   # read-only, no account, no key
 make sandbox                    # full flow on a local node; jobs mocked and labelled
-make demo                       # full live loop on testnet, under two minutes`;
+make demo NET=local             # full live loop on a local node (NET=local)
+make negotiate && make finish DEAL=<agreement>   # the same flow on testnet, then make attack, make revoke`;
 
 export default function Docs() {
   return (
