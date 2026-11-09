@@ -196,7 +196,7 @@ export function Hero() {
             <HeroPreview />
             {/* On a phone the caption below falls under the fold while the "live testnet" link sits above the image,
                 so the frame itself says it is a mock-up */}
-            <span className={styles.illustrative}>Illustrative</span>
+            <span className={styles.illustrative} aria-hidden="true">Illustrative</span>
           </div>
           {/* The mock-up shows the product's shape, not a running deployment: say so in words a visitor reads */}
           <p className={`t-body-sm ${styles.caption}`}>

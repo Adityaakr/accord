@@ -44,9 +44,9 @@ A payment becomes eligible only when the agreed evidence or acceptance is record
 
 - HOT Connect : HOT's wallet connector library (@hot-labs/near-connect): the Accord app's sign-in, listing the NEAR wallets a principal can use on testnet.
 
-- Meteor Wallet : A NEAR wallet for the Accord app; on testnet it signs delegate actions that Accord's relayer sends, so the user pays no gas.
+- Meteor Wallet : A NEAR wallet for the Accord app; on testnet it signs delegate actions that Accord's relayer sends, so the user pays no gas except for opening a room, whose 2 NEAR deposit the wallet pays itself.
 
-- Intear Wallet : A NEAR wallet for the Accord app; on testnet it signs delegate actions that Accord's relayer sends, so the user pays no gas.
+- Intear Wallet : A NEAR wallet for the Accord app; on testnet it signs delegate actions that Accord's relayer sends, so the user pays no gas except for opening a room, whose 2 NEAR deposit the wallet pays itself.
 
 - NEAR Builders : The NEAR builder community; Accord was built with its build resources.
 
@@ -380,7 +380,7 @@ Negotiate privately, approve the terms and define what must happen before money 
 
 A project renews an 18,500 USDC retainer. Each period pays only if four of six readings of the pool, taken at hidden times, meet the agreed spread and depth.
 
-Status: demo. Runs on the Rhea pool, OutLayer and NEAR.
+Status: demo (local node). Runs on the Rhea pool, OutLayer and NEAR.
 
 ### Let an agent pay invoices it cannot redirect
 
@@ -546,9 +546,9 @@ Re-run on release 4 (security-review fixes): [a10](https://testnet.nearblocks.io
 
 ## Try to move the money.
 
-When the demonstration opens, its agent's inbox is public. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it, and your attempt appears in the public refusal log with the contract's reason. Revocation is shown exactly: the agent's only key is deleted in one transaction, and anything it signs afterwards is rejected by the network before it reaches the contract.
+In the public demonstration room, the agent's inbox is open to anyone while the room runs. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it, and your attempt appears in the public refusal log with the contract's reason. Revocation is shown exactly: the agent's only key is deleted in one transaction, and anything it signs afterwards is rejected by the network before it reaches the contract.
 
-[Preview the demonstration](/try)
+[See the demonstration](/try)
 
 Privacy and control
 
@@ -658,7 +658,7 @@ FAQ
 
 ### Who can see my mandate?
 
-No one outside the attested enclaves that run the negotiation. Your browser encrypts it to a key that exists only inside the Sealed Table, the chain stores the ciphertext and a hash, and the Sealed Table decrypts it for one negotiation, in which the negotiators run on NEAR AI Cloud's private inference. The other side sees the agreed terms. What the terms reveal is what any signed agreement reveals: that you were willing to accept them. This rests on the enclave hardware, on your browser running the published code (the command-line tool is the alternative), and on the operator never moving the key to a different build.
+No one outside the attested enclaves that run the negotiation. Your browser encrypts it to a key that exists only inside the Sealed Table, the chain stores the ciphertext and a hash, and the Sealed Table decrypts it for one negotiation, in which the negotiators run on NEAR AI Cloud's private inference. The other side sees the agreed terms. What the terms reveal is what any signed agreement reveals: that you were willing to accept them. This rests on the enclave hardware, on your browser running the published code (the command-line tool is the alternative), and on the operator never moving the key to a different build. On testnet the job's seed condition admits any caller during an agreement's open request window, so an outside party could request extra runs then and learn bounds on the limits; restricting the seed to the agreement's own calls is the next step.
 
 ### What if the model negotiates badly?
 
@@ -670,7 +670,7 @@ Assume it will be. The demonstration agent follows a spoofed request for new ban
 
 ### Our vendor really did change banks. What happens?
 
-The vendor proposes the new account, an enclave fetches a fresh domain proof, the vendor's settlement authority approves, the buyer accepts, and a 24-hour delay runs before the first payment can reach it. One stolen key, on either side, cannot do it.
+The vendor proposes the new account, an enclave fetches a fresh domain proof, the vendor's settlement authority approves, the buyer accepts, and a 24-hour delay runs before the first payment can reach it. One stolen key, on either side, cannot do it. Testnet agreements run in demo mode, where the delay is 120 s. The domain proof and the authority's approval show control of the domain, not that the company legally exists.
 
 ### How does a market-making agreement decide whether a period pays?
 

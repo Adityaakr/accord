@@ -8,7 +8,7 @@ Run one deal on NEAR testnet at /app/try-it in about 3 minutes: sign in, get tes
 
 - 01 Network Everything on this path is testnet with a test USDC token. Nothing here moves real money. NEAR testnet
 
-- 02 Sign-in Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas. Meteor · Intear · Ledger · Nightly · WalletConnect
+- 02 Sign-in Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit). Meteor · Intear · Ledger · Nightly · WalletConnect
 
 - 03 Test funds The faucet tops your account up once a day per account. The room's `2 NEAR` deposit is returned when it closes. 2.50 NEAR · 100 tUSDC
 

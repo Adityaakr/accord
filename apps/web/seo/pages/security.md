@@ -108,9 +108,11 @@ The agent cannot reorder, skip or argue with a gate. Humans change the inputs (a
 
 - 04 Agreements created before release 4 (a6, a8 and a1.accord-usdc.testnet) keep release 3's code by hash, so they keep the close-refund issue; new agreements get release 4.
 
-- 05 Changed limit: an item left `AssumedPaid` (its transfer sent, its callback not yet answered) is no longer refunded to the buyer at `Settled`. Its amount stays on the agreement's account until that payment's callback answers (a failure sets it `Reserved` for the vendor to claim, a success leaves it paid), and if that callback never runs, the amount stays on the account.
+- 05 Scope: the review covered the contracts, the factory and the enclave jobs. The app server, the relayer and the demo endpoints were outside it; the relayer deposit issue (DECISIONS.md section 27) was found later by a live run on the public URL and fixed the same day.
 
-- 06 Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is partial. The jobs now serve only factory agreements in code, but those job builds are not deployed yet, and S1 itself needs the seed's access condition in OutLayer, which is not set yet. Details: [DECISIONS.md section 25](https://github.com/Adityaakr/accord/blob/main/platform/DECISIONS.md#25-audit-fixes-and-release-4-9-nov-2026). Mainnet follows an external audit, which has not happened yet.
+- 06 Changed limit: an item left `AssumedPaid` (its transfer sent, its callback not yet answered) is no longer refunded to the buyer at `Settled`. Its amount stays on the agreement's account until that payment's callback answers (a failure sets it `Reserved` for the vendor to claim, a success leaves it paid), and if that callback never runs, the amount stays on the account.
+
+- 07 Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is partial. The jobs now serve only factory agreements in code, but those job builds are not deployed yet, and S1 itself needs the seed's access condition in OutLayer, which is not set yet. Details: [DECISIONS.md section 25](https://github.com/Adityaakr/accord/blob/main/platform/DECISIONS.md#25-audit-fixes-and-release-4-9-nov-2026). Mainnet follows an external audit, which has not happened yet.
 
 ## What the keeper can and cannot do
 

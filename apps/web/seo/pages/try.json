@@ -1,6 +1,6 @@
 {
   "title": "Accord: Try to move the money",
-  "description": "The attack recorded on NEAR testnet: the Accord demonstration agent told to pay a new account, and the contract refusing it with ERR_PAYEE_MISMATCH. Run it yourself at /app/try-it.",
+  "description": "The attack recorded on NEAR testnet: the Accord demonstration agent told to pay a new account or a different amount, and the contract refusing it. Write to the agent in the public room at /app/try when it is open, or run it yourself at /app/try-it.",
   "ld": [
     "{\"@context\":\"https://schema.org\",\"@type\":\"Organization\",\"name\":\"Accord\",\"url\":\"/\",\"description\":\"The private deal room and control plane for agent-to-agent commerce.\"}",
     "{\"@context\":\"https://schema.org\",\"@type\":\"SoftwareApplication\",\"name\":\"Accord\",\"applicationCategory\":\"BusinessApplication\",\"operatingSystem\":\"Web\",\"description\":\"Accord turns private negotiations between agents into enforceable payment rules. Both companies approve the terms, and a NEAR contract enforces who pays, who receives, how much and on what evidence.\"}"
