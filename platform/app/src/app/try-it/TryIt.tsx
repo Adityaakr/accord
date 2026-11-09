@@ -242,10 +242,12 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
         </p>
       )}
       {currencies.length > 1 && !room && (
-        <fieldset className="small" aria-label="Settle in" style={{ border: 0, padding: 0, margin: "0 0 16px", display: "flex", flexWrap: "wrap", gap: "8px 20px" }}>
-          <span>Settle in</span>
-          <label><input type="radio" name="currency" checked={currencyId === "default"} onChange={() => setPicked("default")} /> Test USDC (instant, from our faucet)</label>
-          <label><input type="radio" name="currency" checked={currencyId === "usdc"} onChange={() => setPicked("usdc")} /> Circle USDC (testnet, from faucet.circle.com)</label>
+        <fieldset className={`small ${styles.settle}`}>
+          <legend className={styles.settleLabel}>Settle in</legend>
+          <div className={styles.settleOptions}>
+            <label className={styles.settleOption}><input type="radio" name="currency" checked={currencyId === "default"} onChange={() => setPicked("default")} /><span>Test USDC (instant, from our faucet)</span></label>
+            <label className={styles.settleOption}><input type="radio" name="currency" checked={currencyId === "usdc"} onChange={() => setPicked("usdc")} /><span>Circle USDC (testnet, from faucet.circle.com)</span></label>
+          </div>
         </fieldset>
       )}
       {throwaway && !fin.deleteTx && (
@@ -300,14 +302,14 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
             ? <>Pick the Northwind buyer preset for Circle USDC: a ceiling of 18 USDC across 2 to 4 items, inside one faucet drip. Your limits are encrypted to the Sealed Table; the vendor never sees them. The demo vendor seals its own (floor 12, target 16).</>
             : <>Pick the Northwind buyer preset: a ceiling of 40 tUSDC across 2 to 4 items. Your limits are encrypted to the Sealed Table; the vendor never sees them. The demo vendor seals its own (floor 30, target 38).</>}
         </>}>
-          {room && room.state === "Sealed" && !buyerSealed && <Link className={styles.primary} href={`/agreements/${room.account}/seal`}>Seal your mandate</Link>}
+          {room && room.state === "Sealed" && !buyerSealed && <Link className={styles.primary} href={`/agreements/${room.account}/seal`} prefetch={false}>Seal your mandate</Link>}
         </Row>
 
         <Row n={5} icon="agents" status={s5} title="Watch the demo counterparty act" text={<>
-          In the room, the Demo counterparty panel starts the negotiation, approves the terms, proposes and approves its recipient, and delivers. You approve, fund, accept, then start the demo agent: it pays the due item to the proven recipient, and when you ask it to pay a new account the contract refuses with <span className="mono">ERR_PAYEE_MISMATCH</span>. Revoke the key from the room header to end it.
+          In the room, the Demo counterparty panel starts the negotiation, approves the terms, proposes and approves its recipient, and delivers. You approve, fund, accept, then start the demo agent: it pays the due item to the proven recipient within about 2 minutes, and when you ask it to pay a new account the contract refuses with <span className="mono">ERR_PAYEE_MISMATCH</span>. Revoke the key from the room header to end it.
           {stage && <span className={`mono ${styles.bal}`}>{stage}</span>}
         </>}>
-          {roomHref && <Link className={s5 === "now" ? styles.primary : styles.secondary} href={roomHref}>Open the room</Link>}
+          {roomHref && <Link className={s5 === "now" ? styles.primary : styles.secondary} href={roomHref} prefetch={false}>Open the room</Link>}
         </Row>
 
         {(fin.available || fin.deleteTx || fin.progress || lastRoom) && (

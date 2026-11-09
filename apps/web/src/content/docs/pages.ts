@@ -109,7 +109,7 @@ export const DOC_PAGES: DocPage[] = [
             steps: [
               {
                 title: "Start the demo agent. It pays the due item on its own.",
-                body: "Starting the agent asks your wallet to sign `install_agent_key`: one function-call key on the agreement account that can call `act` and nothing else. You do not click pay: once the delivery is accepted, the agent pays the item by itself.",
+                body: "Starting the agent asks your wallet to sign `install_agent_key`: one function-call key on the agreement account that can call `act` and nothing else. You do not click pay: once the delivery is accepted, the agent pays the item by itself, within about 2 minutes.",
                 see: "The agent bar and the Activity tab read `Paid item 1: <amount> tUSDC to halcyon-mm.testnet`, with the `act` transaction linked. The amount is what the negotiated terms say (`15.00` on a8).",
               },
               {

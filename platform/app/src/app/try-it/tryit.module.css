@@ -38,3 +38,15 @@
   .text:has(.actionsFirst) > p { order: 1; }
   .actionsFirst { margin-top: 0; }
 }
+
+/* "Settle in": the label, then the two choices. Beside the label when they fit; on a phone, stacked under it with
+   each radio aligned with its own text. The legend floats so it sits on the row instead of the fieldset's border. */
+.settle { border: 0; padding: 0; margin: 0 0 16px; min-width: 0; }
+.settleLabel { float: left; padding: 0; margin: 0 20px 8px 0; }
+.settleOptions { display: flex; flex-wrap: wrap; gap: 8px 20px; min-width: 0; }
+.settleOption { display: inline-flex; align-items: baseline; gap: 8px; }
+.settleOption input { margin: 0; flex: none; transform: translateY(1px); }
+@media (max-width: 560px) {
+  .settleLabel { float: none; display: block; }
+  .settleOptions { flex-direction: column; gap: 8px; }
+}
