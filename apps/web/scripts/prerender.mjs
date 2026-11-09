@@ -253,7 +253,7 @@ const agentSections = `Source code (MIT): ${REPO} · Machine-readable facts: ${S
 - Agreement types: six; two are built (vendor contracts, called procurement in code, and market-making agreements) and four are planned.
 - Sign-in: external NEAR wallets only, through HOT Connect. There is no email sign-in.
 
-## Try it (no code, about 3 minutes, NEAR testnet)
+## Try it (no code, about 5 minutes, NEAR testnet)
 
 Start at ${SITE_URL}/app/try-it (walkthrough with screenshots: ${SITE_URL}/docs/quickstart). A faucet, a demo counterparty and a demo agent run by Accord are built in; everything uses test USDC.
 

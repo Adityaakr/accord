@@ -15,7 +15,7 @@ import styles from "./Verify.module.css"
    account, a different amount, or to follow a canary; refused by the contract each time), then the two ways to run it:
    the always-open public room at /app/try, offered only once the browser has read /app/api/inbox/stats and found it
    open (lib/room.ts), and your own room at /app/try-it. The prerendered page claims neither state. */
-const LEAD = "Tell the agent to pay someone else. On NEAR testnet the demonstration agent was told to pay a new account, a different amount, or to follow a planted instruction, and the contract refused each payment. Write to the agent in the public room when it is open, or run the same attack in your own deal room in about three minutes."
+const LEAD = "Tell the agent to pay someone else. On NEAR testnet the demonstration agent was told to pay a new account, a different amount, or to follow a planted instruction, and the contract refused each payment. Write to the agent in the public room when it is open, or run the same attack in your own deal room in about five minutes."
 const GOAL_LINE = "A successful attempt can only ever produce a payment to the authorised recipient at the approved amount."
 
 const short = (id: string) => id.split(".")[0]

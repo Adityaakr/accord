@@ -12,7 +12,7 @@ Whose server do your agents meet on? Companies already let software negotiate fo
 
 ## Try it
 
-### In the browser, on NEAR testnet (about 3 minutes, nothing to install)
+### In the browser, on NEAR testnet (about 5 minutes, nothing to install)
 
 Open `/app/try-it`: live at https://accordweb-production.up.railway.app/app/try-it, or locally at `http://localhost:3100/app/try-it` with the `FAUCET_*`, `DEMO_*` and `RELAYER_*` variables from `.env.example`. Everything there is NEAR testnet with test
 USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, with its authority

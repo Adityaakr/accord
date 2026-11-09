@@ -33,7 +33,7 @@ Release 4 (the security-review fixes, `platform/DECISIONS.md` sections 25 and 26
    Expected last line: `verify: 5 checks ok · 1 partial · 1 not checked` (`model` is partial: the nonce is bound in the attestation report, the hardware quote is not checked here; the `release` check needs the `outlayer-verify` tool).
 3. **Run the tests.** `cd platform && make test` (Rust toolchain from `platform/rust-toolchain.toml`; `make setup-check` lists what is missing). The app alone: `pnpm --filter @accord/app typecheck` and `pnpm --filter @accord/app test`. The website: `npm ci && npm run check` at the repository root.
 4. **Run the whole flow locally, no network.** `cd platform && make sandbox` ends with `sandbox: all checks passed`; jobs are replaced by a mock signer and every mocked line says `[mock]`.
-5. **Try it in the browser.** `/app/try-it`: the steps and their literal output are in [`README.md`](README.md#try-it-in-3-minutes-on-testnet). It is live at https://accordweb-production.up.railway.app/app/try-it; the README also says how to run it locally.
+5. **Try it in the browser.** `/app/try-it`: the steps and their literal output are in [`README.md`](README.md#try-it-in-about-5-minutes-on-testnet). It is live at https://accordweb-production.up.railway.app/app/try-it; the README also says how to run it locally.
 
 ## Use from an agent
 

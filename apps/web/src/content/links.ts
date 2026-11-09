@@ -7,7 +7,7 @@ const app = env.VITE_APP_URL || "/app" // empty (an unset Docker build arg) mean
 
 /** Primary CTA: always the app (<site>/app/signin). The guided testnet path is LINKS.tryDeal. */
 export const PRIMARY_CTA = "Open the app"
-export const TRY_CTA = "Try a deal in 3 minutes"
+export const TRY_CTA = "Try a deal in about 5 minutes"
 
 export const LINKS = {
   /* app routes */

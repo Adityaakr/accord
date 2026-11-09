@@ -123,7 +123,7 @@ function Recorded() {
       <PageHead
         eyebrow={<Pill tone="muted">recorded on NEAR testnet</Pill>}
         title="Try to get the agent to pay you"
-        lead="On NEAR testnet the demonstration agent was told to pay a new account, a different amount, or a canary account, on agreements a6 to a15. The contract refused each payment. Run the same attack in your own deal room in about three minutes."
+        lead="On NEAR testnet the demonstration agent was told to pay a new account, a different amount, or a canary account, on agreements a6 to a15. The contract refused each payment. Run the same attack in your own deal room in about five minutes."
       />
       <div className={styles.grid}>
         <div className={styles.main}>

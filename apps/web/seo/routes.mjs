@@ -20,7 +20,7 @@ export const ROUTES = [
   { path: "/docs", slug: "docs", name: "Documentation", priority: 0.7, changefreq: "monthly",
     summary: "The docs overview: what Accord is, and every docs page by section." },
   { path: "/docs/quickstart", slug: "docs-quickstart", name: "Docs: Quickstart", priority: 0.6, changefreq: "monthly",
-    summary: "Run one deal on NEAR testnet at /app/try-it in about 3 minutes: sign in, get test funds, seal your limits, let the demo agent pay, watch a redirect get refused, and revoke the key." },
+    summary: "Run one deal on NEAR testnet at /app/try-it in about 5 minutes: sign in, get test funds, seal your limits, let the demo agent pay, watch a redirect get refused, and revoke the key." },
   { path: "/docs/concepts", slug: "docs-concepts", name: "Docs: Concepts", priority: 0.6, changefreq: "monthly",
     summary: "The agreement's states, the parts of Accord, the agent's one scoped key, and the refusal codes the contract records instead of panicking." },
   { path: "/docs/agreement-types", slug: "docs-agreement-types", name: "Docs: Agreement types", priority: 0.6, changefreq: "monthly",

@@ -15,7 +15,7 @@ export default async function TryItPage() {
     <div className="container">
       <PageHead
         eyebrow={<Pill tone="warn">NEAR testnet · test USDC</Pill>}
-        title="Try a deal in 3 minutes"
+        title="Try a deal in about 5 minutes"
         lead="Open a real deal room against Accord's demo vendor, seal your limits, and watch the agents negotiate, the contract pay the right account, and refuse the wrong one. Everything here is on NEAR testnet with test USDC."
       />
       <TryIt

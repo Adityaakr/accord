@@ -32,7 +32,7 @@ export const DOC_PAGES: DocPage[] = [
     slug: "quickstart",
     group: "Get started",
     title: "Quickstart",
-    summary: "Run one deal on NEAR testnet at /app/try-it in about 3 minutes: sign in, get test funds, seal your limits, let the demo agent pay, watch a redirect get refused, and revoke the key.",
+    summary: "Run one deal on NEAR testnet at /app/try-it in about 5 minutes: sign in, get test funds, seal your limits, let the demo agent pay, watch a redirect get refused, and revoke the key.",
     sections: [
       {
         id: "before",
@@ -45,7 +45,7 @@ export const DOC_PAGES: DocPage[] = [
               { name: "Sign-in", value: "Meteor · Intear · Ledger · Nightly · WalletConnect", detail: "Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit)." },
               { name: "Test funds", value: "2.50 NEAR · 100 tUSDC", detail: "The faucet tops your account up once a day per account. The room's `2 NEAR` deposit is returned when it closes." },
               { name: "Counterparty", value: "halcyon-demo.testnet", href: acct("halcyon-demo.testnet"), detail: "Accord's demo vendor, with its authority `halcyon-auth.testnet`. The demo vendor and the demo agent are Accord's own testnet accounts, labelled in the room." },
-              { name: "Time", value: "about 3 minutes" },
+              { name: "Time", value: "about 5 minutes" },
             ],
           },
           { kind: "note", text: "Sealing a mandate takes a wallet signature (NEP-413) that derives your document key, so the key never leaves your browser." },

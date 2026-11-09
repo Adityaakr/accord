@@ -26,7 +26,7 @@ The same site is also served at its custom domain, [useaccord.tech](https://usea
 Two companies' agents negotiate inside an attested enclave from sealed mandates. Both companies approve the terms. From then on, a NEAR contract holds the USDC and refuses any payment the buyer's agent asks for that differs from the approved item, evidence, amount or recipient.
 
 <p align="center">
-  <a href="https://accordweb-production.up.railway.app"><img src="docs/diagrams/home-hero.webp" width="820" alt="The Accord home page: The private deal room and control plane for agent-to-agent commerce, with Open the app and Try a deal in 3 minutes, above the deal-room view (deal rooms, the agreement's steps, and the activity and refusal log)." /></a>
+  <a href="https://accordweb-production.up.railway.app"><img src="docs/diagrams/home-hero.webp" width="820" alt="The Accord home page: The private deal room and control plane for agent-to-agent commerce, with Open the app and Try a deal, above the deal-room view (deal rooms, the agreement's steps, and the activity and refusal log)." /></a>
 </p>
 
 <p align="center">
@@ -38,7 +38,7 @@ Two companies' agents negotiate inside an attested enclave from sealed mandates.
 
 1. [The problem](#the-problem)
 2. [How it works](#how-it-works)
-3. [Try it in 3 minutes on testnet](#try-it-in-3-minutes-on-testnet)
+3. [Try it in about 5 minutes on testnet](#try-it-in-about-5-minutes-on-testnet)
 4. [Verify any agreement](#verify-any-agreement)
 5. [Use from an agent](#use-from-an-agent)
 6. [Testnet proof](#testnet-proof)
@@ -229,7 +229,7 @@ flowchart LR
 
 Source: [`platform/ARCHITECTURE.md`](platform/ARCHITECTURE.md) section 6. Five refusals by the same key inside an hour revoke it automatically.
 
-## Try it in 3 minutes on testnet
+## Try it in about 5 minutes on testnet
 
 > [!NOTE]
 > The app is live at https://accordweb-production.up.railway.app/app/try-it (since 9 Nov 2026). The transactions below show this exact path run on 8 Nov 2026, and [Verify any agreement](#verify-any-agreement) works with no account. To run the page yourself instead, start the app ([Run locally](#run-locally)) and open http://localhost:3100/app/try-it; the faucet, demo counterparty and demo agent need the `FAUCET_*`, `DEMO_*` and `RELAYER_*` variables named in [`platform/.env.example`](platform/.env.example).
