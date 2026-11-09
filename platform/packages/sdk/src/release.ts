@@ -5,8 +5,8 @@
 // Sealed Table), not OutLayer's internal task id (28880). The public record is looked up by request
 // (`/attestations/by-request/<id>`, no key) and its build and caller are compared with the release. That proves which
 // task ran which wasm for which caller; it does not prove the TDX quote, which needs `outlayer-verify`
-// (https://github.com/out-layer/outlayer-verify). The CLI adds that step when the tool is installed; without it the
-// check stays `not_checked`: nothing is assumed.
+// (https://github.com/out-layer/outlayer-verify). `@accord/sdk/node` (release-node.ts) adds that step when the tool is
+// installed, for the CLI, the app's /api/verify and the MCP server; without it the check stays `not_checked`.
 
 import type { ReleaseJob, ReleaseProof } from "./verify.js";
 
@@ -71,7 +71,7 @@ export function recordOnlyDetail(rec: AttestationRecord, j: ReleaseJob): string 
 /**
  * The release proof without `outlayer-verify`: the by-request record lookup only (task id, wasm and caller). Never
  * `ok`, because the TDX quote is not checked; `fail` when the record ran other code or came from another caller.
- * The app's /api/verify and the MCP server pass this; the CLI adds the quote check when the tool is installed.
+ * The browser-safe fallback; `@accord/sdk/node` adds the quote check when the tool is installed.
  */
 export function recordReleaseProof(o: { fetchRecord?: FetchAttestationRecord; api?: string } = {}): ReleaseProof {
   return async (j) => {

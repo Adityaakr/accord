@@ -7,6 +7,7 @@ import { readDeps } from "@accord/mcp/deps";
 import type { McpDeps } from "@accord/mcp/tools";
 import { accord, factories } from "@/server/accord";
 import { clientIp, takeAll } from "@/server/ratelimit";
+import { releaseProof } from "@/server/release";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,7 @@ function deps(): McpDeps {
         nearAiKey: process.env.NEARAI_API_KEY || undefined,
         archivalRpc: process.env.NEAR_ARCHIVAL_RPC_URL || undefined,
         approvalsUrl: process.env.ACCORD_APPROVALS_URL || undefined,
+        releaseProof: releaseProof(),
       }),
     };
   }

@@ -1,7 +1,8 @@
 # One Dockerfile for both Railway services, chosen by the service's own variables:
 # - the website service (no ACCORD_NETWORK): install, typecheck, Vite build, pre-render, then the dependency-free
 #   static server on $PORT (apps/web/scripts/serve.mjs), with /healthz;
-# - the app service (ACCORD_NETWORK set, e.g. testnet): the Next.js app in platform/ under /app on $PORT;
+# - the app service (ACCORD_NETWORK set, e.g. testnet): the Next.js app in platform/ under /app on $PORT, with
+#   OutLayer's `outlayer-verify` on PATH (built in its own Rust stage) for the release check of /api/verify and /app/mcp;
 # - a platform service (ACCORD_SERVICE=keeper or agent): the same platform build, running
 #   `pnpm --filter @accord/$ACCORD_SERVICE start` (no HTTP port; it writes heartbeats to DATABASE_URL).
 # Railway builds this file directly, so a deploy never depends on Railway's builder tool being downloadable.
@@ -40,6 +41,16 @@ COPY --from=web-build /app/apps/web/dist ./apps/web/dist
 EXPOSE 8080
 CMD ["node", "apps/web/scripts/serve.mjs"]
 
+# ---- outlayer-verify, OutLayer's own verifier, for the app's `release` check (/api/verify and /app/mcp) ----
+# Built from source at a pinned commit; a static musl binary (ureq + rustls with webpki roots), so the runtime image
+# gets one file and no Rust toolchain. Only the app target copies it, so the website and keeper builds skip this stage.
+FROM rust:1.91-alpine AS outlayer-verify
+RUN apk add --no-cache musl-dev gcc
+ARG OUTLAYER_VERIFY_REV=90c27d9d4fc843194ddc6f8ebaafa4eb320c3bb6
+RUN cargo install --locked --git https://github.com/out-layer/outlayer-verify --rev "$OUTLAYER_VERIFY_REV" \
+      outlayer-verify --root /opt/outlayer-verify \
+ && /opt/outlayer-verify/bin/outlayer-verify -h >/dev/null
+
 # ---- the app (platform/, Next.js under /app) ----
 FROM node:24-alpine AS app-build
 WORKDIR /repo
@@ -56,6 +67,9 @@ WORKDIR /repo
 RUN corepack enable
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
 COPY --from=app-build /repo /repo
+# on PATH, so the release check proves each job run; without it the check says "not checked"
+COPY --from=outlayer-verify /opt/outlayer-verify/bin/outlayer-verify /usr/local/bin/outlayer-verify
+RUN outlayer-verify -h >/dev/null
 WORKDIR /repo/app
 EXPOSE 3100
 CMD ["sh", "-c", "pnpm exec next start -p ${PORT:-3100}"]

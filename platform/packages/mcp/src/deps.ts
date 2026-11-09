@@ -1,6 +1,7 @@
 // The real dependencies: the SDK over RPC; the agent and principal signers only when their variables are set.
 
-import { Accord, KeySigner, preflight, recordReleaseProof, verify, type Network } from "@accord/sdk";
+import { Accord, KeySigner, preflight, recordReleaseProof, verify, type Network, type ReleaseProof } from "@accord/sdk";
+import { cachedReleaseProof, outlayerVerifyProof } from "@accord/sdk/node";
 import type { McpDeps } from "./tools.js";
 import type { Env } from "./env.js";
 
@@ -22,12 +23,23 @@ export interface ReadOptions {
   nearAiKey?: string;
   archivalRpc?: string;
   approvalsUrl?: string;
+  /** The release check; by default the by-request record lookup only (the quote stays not checked). */
+  releaseProof?: ReleaseProof;
+}
+
+/**
+ * The release check with `outlayer-verify` when it is installed (OUTLAYER_VERIFY_BIN, else PATH), bounded by a timeout
+ * and cached per job run, so repeated verify calls answer from memory. Without the tool it is the record lookup only.
+ */
+export function releaseProofFromEnv(env: Record<string, string | undefined>, o: { timeoutMs?: number } = {}): ReleaseProof {
+  return cachedReleaseProof(outlayerVerifyProof(env, { timeoutMs: o.timeoutMs ?? 30_000 }));
 }
 
 /** The keyless, read-only dependencies over one SDK client: what the hosted /app/mcp route serves. */
 export function readDeps(accord: Accord, o: ReadOptions = {}): McpDeps {
   const second = o.second && o.second !== accord.factory ? o.second : "";
   const symbols = new Map<string, Promise<string>>();
+  const releaseProof = o.releaseProof ?? recordReleaseProof();
   return {
     listAgreements: async (party) => [
       ...(await accord.listAgreements({ party })),
@@ -37,8 +49,8 @@ export function readDeps(accord: Accord, o: ReadOptions = {}): McpDeps {
     preflight: (agreement, recipient) => preflight(accord, agreement, recipient, {
       archivalRpc: o.archivalRpc, approvalsUrl: o.approvalsUrl,
     }),
-    // the same by-request release lookup as the CLI and the app's /api/verify; the quote needs outlayer-verify
-    verify: (agreement) => verify(accord, agreement, { nearAiKey: o.nearAiKey, factories: [second], releaseProof: recordReleaseProof() }),
+    // the same release check as the CLI and the app's /api/verify: outlayer-verify when the caller passes it
+    verify: (agreement) => verify(accord, agreement, { nearAiKey: o.nearAiKey, factories: [second], releaseProof }),
     tokenSymbol: (token) => {
       let s = symbols.get(token);
       if (!s) {
@@ -63,6 +75,7 @@ export function realDeps(env: Env): McpDeps {
     nearAiKey: env.NEARAI_API_KEY || undefined,
     archivalRpc: env.NEAR_ARCHIVAL_RPC_URL || undefined,
     approvalsUrl: env.ACCORD_APPROVALS_URL || undefined,
+    releaseProof: releaseProofFromEnv(env),
   });
   if (env.ACCORD_AGENT_KEY && env.AGENT_AGREEMENT) {
     if (network === "mainnet") throw new Error("the agent signs on testnet only");
