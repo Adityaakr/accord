@@ -104,7 +104,7 @@ The agent cannot reorder, skip or argue with a gate. Humans change the inputs (a
 
 - 02 The High one: a deposit sent during `close` could make the refund to the buyer spend the vendor's reserve. The refund is now capped at the ledger while anything is owed to the vendor.
 
-- 03 Severities are self-assigned. Each fix landed together with a failing test that it makes pass (one commit per fix), and the test stays in the suite. The contract and factory fixes are live as release 4 on both testnet factories since 9 Nov 2026, and the proofs ran again on new agreements (a10, a11, a13; see the [record](/record)). Agreements created before keep release 3.
+- 03 Severities are self-assigned. Each fix landed together with a failing test that it makes pass, and the test stays in the suite. The contract and factory fixes are live as release 4 on both testnet factories since 9 Nov 2026, and the proofs ran again on new agreements (a10, a11, a13; see the [record](/record)). Agreements created before keep release 3.
 
 - 04 Agreements created before release 4 (a6, a8 and a1.accord-usdc.testnet) keep release 3's code by hash, so they keep the close-refund issue; new agreements get release 4.
 
