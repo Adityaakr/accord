@@ -17,6 +17,9 @@ export type WalletKind = "near-connect" | "sandbox";
 /** How the person signed in: their own NEAR wallet, a local sandbox key, or a throwaway testnet key in this tab. */
 export type SignInMethod = "wallet" | "sandbox" | "throwaway";
 
+/** What leaving a wallet-free visit costs; most browsers show their own text in place of it. */
+export const LEAVE_WARNING = "Leave without Finish? The test NEAR and test USDC go back to the faucet only with Finish on Try it; this tab's key is lost when it closes.";
+
 /** The label the app shows for an account signed in with a throwaway key. */
 export const THROWAWAY_LABEL = "Throwaway testnet key";
 
@@ -276,6 +279,19 @@ export function WalletProvider({ network, children }: { network: string; childre
   }, [kind, connector, throwaway]);
 
   const method: SignInMethod | null = accountId ? (throwaway ? "throwaway" : kind === "sandbox" ? "sandbox" : "wallet") : null;
+  // A throwaway key lives only in this tab: closing it before Finish strands the test funds on testnet (the account's
+  // NEAR and test USDC, and the room's 2 NEAR deposit, which only this key can withdraw). Ask before the tab goes; the
+  // browser shows its own words, the try-it page says why. Finish signs out first, so a finished visit leaves quietly.
+  useEffect(() => {
+    if (method !== "throwaway") return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = LEAVE_WARNING;
+      return LEAVE_WARNING;
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [method]);
   const value = useMemo<WalletState>(() => ({
     kind, method, network, accountId, signer, restoring, connecting, error, connect, disconnect, throwawayAvailable, startThrowaway, sandboxPrincipals,
   }), [kind, method, network, accountId, signer, restoring, connecting, error, connect, disconnect, throwawayAvailable, startThrowaway, sandboxPrincipals]);

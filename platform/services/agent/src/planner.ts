@@ -9,7 +9,8 @@ export type Plan =
 
 const ACCOUNT = /\b(?:[a-z0-9]+[-_])*[a-z0-9]+(?:\.(?:[a-z0-9]+[-_])*[a-z0-9]+)*\.(?:testnet|near)\b|\b[0-9a-f]{64}\b/;
 const ITEM = /\b(?:milestone|item|period)\s+#?(\d+)\b/i;
-const AMOUNT = /(?:\$\s?(\d+(?:\.\d+)?))|(\d+(?:\.\d+)?)\s?usdc\b/i;
+// "19 USDC" and "19 tUSDC" (the test token's symbol, as the app writes it) both name an amount
+const AMOUNT = /(?:\$\s?(\d+(?:\.\d+)?))|(\d+(?:\.\d+)?)\s?t?usdc\b/i;
 const VERBS = /\b(pay|send|transfer|urgent|today|now)\b/i;
 
 export function plan(text: string, due: DueItem[], authorised: string | null): Plan {

@@ -45,7 +45,7 @@ export function SignInCard({ title = "Sign in to Accord" }: { title?: string }) 
               <button type="button" className={styles.alt} onClick={() => void w.startThrowaway()} disabled={w.connecting}>
                 <span>Try without a wallet</span>
               </button>
-              <p className={styles.note}>Creates a temporary key in this browser tab. Closing the tab removes it.</p>
+              <p className={styles.note}>Creates a temporary key in this browser tab, gone when the tab closes: use Finish on Try it before you leave, so the test funds go back.</p>
             </div>
           )}
         </>

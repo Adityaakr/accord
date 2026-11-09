@@ -59,6 +59,8 @@ export function Nav({ network }: { network: string }) {
             <kbd className={styles.searchKbd}>⌘K</kbd>
           </button>
           <span className={`mono ${styles.network}`} title="Network this app reads and writes">{network}</span>
+          {/* on a phone the theme switch sits here, so the sidebar row below keeps to the pages */}
+          <span className={styles.barTheme}><ThemeToggle compact /></span>
           <WalletButton />
         </div>
       </div>
@@ -103,13 +105,13 @@ export function Sidebar() {
   // While a kept session is read back after a reload, show neither the signed-out nor the signed-in set: an empty
   // sidebar of the same size, so nothing flashes and swaps a moment later.
   if (w.restoring) {
-    return <nav className={styles.sidebar} aria-label="Main" aria-busy="true"><div className={`${styles.group} ${styles.bottom}`}><ThemeToggle /></div></nav>;
+    return <nav className={styles.sidebar} aria-label="Main" aria-busy="true"><div className={`${styles.group} ${styles.bottom}`}><span className={styles.sideTheme}><ThemeToggle /></span></div></nav>;
   }
   if (!w.accountId) {
     return (
       <nav className={`${styles.sidebar} ${styles.signedOut}`} aria-label="Main">
         <div className={styles.group}>{PUBLIC_NAV.map(link)}</div>
-        <div className={`${styles.group} ${styles.bottom}`}><ThemeToggle /></div>
+        <div className={`${styles.group} ${styles.bottom}`}><span className={styles.sideTheme}><ThemeToggle /></span></div>
       </nav>
     );
   }
@@ -148,7 +150,7 @@ export function Sidebar() {
           <Icon name="profile" />
           <span>Profile</span>
         </Link>
-        <ThemeToggle />
+        <span className={styles.sideTheme}><ThemeToggle /></span>
       </div>
     </nav>
   );

@@ -61,8 +61,8 @@ export default async function MarketMaking() {
       )}
       {c && (
         <div className={styles.totals}>
-          <Figure label="Retainers paid" value={<Usdc amount={c.totals.paid} />} note={`${c.totals.eligible} period${c.totals.eligible === 1 ? "" : "s"} eligible`} />
-          <Figure label="Withheld" value={<span className={c.totals.withheld > 0n ? styles.withheld : ""}><Usdc amount={c.totals.withheld} /></span>} note={`${c.totals.withheldPeriods} period${c.totals.withheldPeriods === 1 ? "" : "s"} below the threshold`} />
+          <Figure label="Retainers paid" value={<Usdc amount={c.totals.paid} symbol={c.unit} />} note={`${c.totals.eligible} period${c.totals.eligible === 1 ? "" : "s"} eligible`} />
+          <Figure label="Withheld" value={<span className={c.totals.withheld > 0n ? styles.withheld : ""}><Usdc amount={c.totals.withheld} symbol={c.unit} /></span>} note={`${c.totals.withheldPeriods} period${c.totals.withheldPeriods === 1 ? "" : "s"} below the threshold`} />
           <Figure label="Observations" value={<span className="num">{c.totals.observations}</span>} note={`${c.totals.passed} passed · ${c.totals.observations - c.totals.passed} failed`} />
           <Figure label="Buyer decides" value={<span className="num">{c.totals.review}</span>} note="periods with conflicts or too few slots" />
         </div>

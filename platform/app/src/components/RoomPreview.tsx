@@ -15,19 +15,27 @@ type Room = { view: AgreementView; terms: Terms | null; refusals: Refusal[]; rec
 export function RoomPreview({ id }: { id: string }) {
   const cfg = useAppConfig();
   const [room, setRoom] = useState<Room | null>(null);
-  const [missing, setMissing] = useState(false);
+  // "missing": the chain has no agreement at this id; "unread": it could not be read just now (shown as nothing)
+  const [missing, setMissing] = useState<"missing" | "unread" | null>(null);
 
   useEffect(() => {
     let live = true;
     fetch(`/api/agreements/${encodeURIComponent(id)}`, { cache: "no-store" })
-      .then((r) => (r.ok ? (r.json() as Promise<Room>) : null))
-      .then((b) => { if (live) { if (b?.view) setRoom(b); else setMissing(true); } })
-      .catch(() => { if (live) setMissing(true); });
+      .then(async (r) => ({ status: r.status, body: r.ok ? ((await r.json()) as Room) : null }))
+      .then(({ status, body }) => { if (live) { if (body?.view) setRoom(body); else setMissing(status === 404 ? "missing" : "unread"); } })
+      .catch(() => { if (live) setMissing("unread"); });
     return () => { live = false; };
   }, [id]);
 
-  if (missing) return null;
   const verify = <Link href={`/verify/${id}`} className="link small">Verify it</Link>;
+  if (missing === "missing") {
+    return (
+      <Panel title="Agreement not found" eyebrow={<>deal room · <span className="mono">{id}</span></>}>
+        <p className="small">There is no agreement at <span className="mono">{id}</span> on {cfg.network}. Check the link, or <Link href="/verify" className="link">look up another agreement</Link>.</p>
+      </Panel>
+    );
+  }
+  if (missing) return null;
   if (!room) {
     return (
       <Panel title={<span className="mono">{id}</span>} eyebrow="deal room · read-only" aside={verify}>

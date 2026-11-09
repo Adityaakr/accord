@@ -4,7 +4,7 @@
 // signing client, to word an error, and to read a decision back from chain right before it is signed.
 
 import { useEffect, useState } from "react";
-import { AccordError, isDemoEvidence, isRpcBusy, type Signer } from "@accord/sdk";
+import { AccordError, isDemoEvidence, isRpcBusy, type AgreementView, type Signer } from "@accord/sdk";
 import type { PublicConfig } from "../AppConfig";
 import { browserAccord } from "../chainClient";
 import { onVisibleInterval } from "../visible";
@@ -38,6 +38,8 @@ export interface Readback {
   lines: [string, string][];
   /** Set when the chain no longer matches what the list showed */
   stale: string | null;
+  /** The factory that created the room, for the amount's unit */
+  factory?: string;
 }
 
 export type Decision =
@@ -53,6 +55,10 @@ export async function readBack(cfg: PublicConfig, room: string, d: Decision): Pr
   const c = readClient(cfg, room);
   const view = await c.get();
   const payee = view.recipient?.account ?? null;
+  return { ...(await readBackFor(c, view, payee, room, d)), factory: view.factory };
+}
+
+async function readBackFor(c: ReturnType<typeof readClient>, view: AgreementView, payee: string | null, room: string, d: Decision): Promise<Readback> {
   switch (d.kind) {
     case "terms": {
       const stale = view.state !== "Attested" ? `The room is now ${view.state}.` : view.terms_hash !== d.termsHash ? "The terms hash changed." : null;

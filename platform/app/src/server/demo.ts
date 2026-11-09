@@ -217,7 +217,7 @@ export async function counterpartyStep(id: string): Promise<Step> {
       ? "The Sealed Table found no deal inside both mandates. Open a new room with a ceiling of at least 12 USDC."
       : "The Sealed Table found no deal inside both mandates. Open a new room with a ceiling of at least 30 tUSDC.");
   }
-  if (a.state === "Cancelled") return wait("This room was cancelled.");
+  if (a.state === "Cancelled") return wait("This room was cancelled. Its spare NEAR (the creation deposit) goes back to the buyer with withdraw_near: Finish on Try it does it.");
   if (a.state === "Settled") return wait("This room is settled. Nothing left to do.");
 
   if (a.state === "Sealed") {
@@ -322,4 +322,10 @@ export async function vendorClose(id: string, opts: { maxSteps?: number; pause?:
     await pause(1500);
   }
   return { state: (await reader.get()).state, txs };
+}
+
+/** `cancel` as Accord's demo vendor, for the stale room sweep (server/sweep.ts); the contract allows it only before
+ * `Executing`, and only rooms opened against the demo vendor are ever passed here. */
+export async function vendorCancel(id: string): Promise<string> {
+  return (await as("vendor", id).cancel()).txHash;
 }

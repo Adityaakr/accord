@@ -248,13 +248,18 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
           <label><input type="radio" name="currency" checked={currencyId === "usdc"} onChange={() => setPicked("usdc")} /> Circle USDC (testnet, from faucet.circle.com)</label>
         </fieldset>
       )}
+      {throwaway && !fin.deleteTx && (
+        <p className={`small ${styles.leave}`} role="note">
+          Leaving? Use <strong>Finish</strong> first. This tab holds the only key to your throwaway account: closed before Finish, its test NEAR, its test USDC and the room&apos;s 2 NEAR deposit stay stranded on testnet. Accord&apos;s demo vendor cancels a room left before execution after a few hours, but only this key can take the deposit back.
+        </p>
+      )}
       <p className={`small ${styles.quiet}`}>
         No time? <Link className="link" href="/replay">Watch a 60-second replay</Link> · <Link className="link" href="/try">Try the live scam room</Link> · <Link className="link" href="/verify">Verify any agreement</Link>
       </p>
       <ol className={styles.steps}>
-        <Row n={1} icon="key" status={s1} title="Connect a wallet, or try without one" text={w.accountId
+        <Row n={1} icon="key" status={s1} actionsFirst={!w.accountId} title="Connect a wallet, or try without one" text={w.accountId
           ? <><span className={styles.signedIn}>Signed in as <AccountId id={w.accountId} copy /> <ThrowawayTag /></span>{throwaway && <> The faucet funds it and the room opens on their own; every call is signed in this tab.</>}</>
-          : <>{w.throwawayAvailable && <>No wallet? Try without one: the page creates a temporary key in this browser tab, funded by Accord&apos;s faucet. Closing the tab removes it. Or connect your</>}{!w.throwawayAvailable && <>Your</>} NEAR wallet: <a className="link" href="https://wallet.meteorwallet.app" target="_blank" rel="noreferrer">Meteor</a> or <a className="link" href="https://wallet.intear.tech" target="_blank" rel="noreferrer">Intear</a>. Ledger, Nightly and WalletConnect work too. Meteor and Intear send through Accord&apos;s relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit from the faucet&apos;s NEAR).</>}>
+          : <>{w.throwawayAvailable && <>No wallet? Try without one: the page creates a temporary key in this browser tab, funded by Accord&apos;s faucet. The key lives only in this tab: use Finish before you close it, so the test funds go back. Or connect your</>}{!w.throwawayAvailable && <>Your</>} NEAR wallet: <a className="link" href="https://wallet.meteorwallet.app" target="_blank" rel="noreferrer">Meteor</a> or <a className="link" href="https://wallet.intear.tech" target="_blank" rel="noreferrer">Intear</a>. Ledger, Nightly and WalletConnect work too. Meteor and Intear send through Accord&apos;s relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit from the faucet&apos;s NEAR).</>}>
           {!w.accountId && w.throwawayAvailable && (
             <button type="button" className={styles.primary} onClick={() => void w.startThrowaway()}>Try without a wallet</button>
           )}
@@ -341,8 +346,10 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
 /** "Get test NEAR", or "Confirm it's you and get test NEAR" before the session exists. */
 const faucetLabel = (base: string, session: boolean) => (session ? base : `Confirm it's you and ${base[0]!.toLowerCase()}${base.slice(1)}`);
 
-function Row({ n, icon, status, title, text, children }: {
+function Row({ n, icon, status, title, text, children, actionsFirst }: {
   n: number; icon: PixelName; status: Status; title: string; text: React.ReactNode; children?: React.ReactNode;
+  /** On a phone, the buttons above the explanation (step 1 before sign-in, so "Try without a wallet" is in view) */
+  actionsFirst?: boolean;
 }) {
   return (
     <li className={`${styles.step} ${status === "done" ? styles.done : status === "now" ? styles.now : styles.later}`}>
@@ -354,7 +361,7 @@ function Row({ n, icon, status, title, text, children }: {
           <span className={`mono small ${styles.status}`}>{status === "done" ? "done" : status === "now" ? "your move" : "next"}</span>
         </div>
         <p className="small">{text}</p>
-        {children && <div className={styles.actions}>{children}</div>}
+        {children && <div className={`${styles.actions} ${actionsFirst ? styles.actionsFirst : ""}`}>{children}</div>}
       </div>
     </li>
   );

@@ -5,7 +5,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { Usdc } from "../ui";
-import { useAppConfig } from "../AppConfig";
+import { tokenSymbol, useAppConfig } from "../AppConfig";
 import { readBack, type Decision, type Readback } from "./client";
 import styles from "./me.module.css";
 
@@ -30,7 +30,7 @@ export function Confirm({ room, decision, label, tone = "primary", onSign, onCan
       {!rb && !error && <p className={styles.when}>Reading…</p>}
       {rb && (
         <dl className={styles.readback}>
-          {rb.amount !== null && <><dt>Amount</dt><dd><Usdc amount={rb.amount} /></dd></>}
+          {rb.amount !== null && <><dt>Amount</dt><dd><Usdc amount={rb.amount} symbol={rb.factory ? tokenSymbol(cfg, rb.factory) : "tUSDC"} /></dd></>}
           {rb.recipient !== null && <><dt>Recipient</dt><dd>{rb.recipient}</dd></>}
           {rb.lines.map(([k, v]) => <span key={k} style={{ display: "contents" }}><dt>{k}</dt><dd>{v}</dd></span>)}
         </dl>

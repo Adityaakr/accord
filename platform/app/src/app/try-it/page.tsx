@@ -2,6 +2,7 @@ import { PageHead, Quiet } from "@/components/ui";
 import { accord, config } from "@/server/accord";
 import { demoConfig, demoReady } from "@/server/demo";
 import { perIpPerDay } from "@/server/faucetgrant";
+import { maybeSweep } from "@/server/sweep";
 import { TryIt } from "./TryIt";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,8 @@ export const metadata = { title: "Try a deal" };
 // demo vendor. Every step is a real transaction on NEAR testnet with test USDC.
 export default async function TryItPage() {
   const c = config();
+  // rooms visitors left before execution are ended by the demo vendor, at most one pass every few minutes
+  maybeSweep();
   const factory = await accord().config().catch(() => null);
   return (
     <div className="container">

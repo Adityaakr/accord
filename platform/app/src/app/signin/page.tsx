@@ -11,6 +11,7 @@ import { RoomPreview } from "@/components/RoomPreview";
 import { LogoMark } from "@/components/LogoMark";
 import { ThemeToggle } from "@/components/theme/Theme";
 import { useWallet } from "@/components/wallet/WalletProvider";
+import { isAccountId } from "@/lib/accountid";
 import styles from "./signin.module.css";
 
 /** ?next= is followed only when it is a path inside the app (agreement ids carry dots, never "..") */
@@ -23,7 +24,10 @@ export default function SignIn() {
   useEffect(() => {
     // a room link (/agreements/<id>) shows that room's read-only summary above the card
     const m = /^\/agreements\/([a-z0-9._-]+)$/i.exec(safeNext(new URLSearchParams(window.location.search).get("next")) ?? "");
-    setRoom(m ? m[1]! : null);
+    // only an agreement account: /agreements/new (the new-room form) and anything that is not an account id have no
+    // room to read
+    const id = m?.[1]?.toLowerCase();
+    setRoom(id && id !== "new" && isAccountId(id) ? id : null);
   }, []);
   useEffect(() => {
     if (!w.accountId) return;

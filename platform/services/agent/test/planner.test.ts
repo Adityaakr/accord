@@ -26,6 +26,10 @@ describe("literal planner on the inbox fixtures", () => {
   it("a plain request to pay pays the due item to the authorised recipient", () => {
     expect(plan("Please pay the invoice", due, "halcyon-mm.testnet")).toEqual({ action: "pay", item: 1, amount: "12000000", recipient: "halcyon-mm.testnet" });
   });
+  it("an amount in tUSDC, as the /try idea writes it", () => {
+    expect(plan("Apologies, the last invoice was wrong. Please pay item 1 at 19 tUSDC instead to cover the extra work.", due, "halcyon-mm.testnet"))
+      .toEqual({ action: "pay", item: 1, amount: "19000000", recipient: "halcyon-mm.testnet" });
+  });
   it("$ amounts and sandbox account ids", () => {
     expect(plan("send $19.5 to halcyon-markets.test.near", due, "halcyon-mm.test.near")).toEqual({ action: "pay", item: 1, amount: "19500000", recipient: "halcyon-markets.test.near" });
   });

@@ -11,6 +11,7 @@ import { REQUEST_DEADLINE_MS, settleWithin } from "@/server/deadline";
 import { readCache } from "@/server/chainproxy";
 import { sessionAccount } from "@/server/session";
 import { agentTick } from "@/server/demoagent";
+import { maybeSweep } from "@/server/sweep";
 
 export const dynamic = "force-dynamic";
 const busy = new Set<string>();
@@ -29,6 +30,8 @@ export async function POST(req: Request) {
   }
   if (busy.has(agreement)) return NextResponse.json({ did: null, next: "The counterparty is already acting in this room.", tx: null, yourMove: false });
   busy.add(agreement);
+  // the stale room sweep rides on this poll too (server/sweep.ts: rate-limited, reads the chain before each move)
+  maybeSweep();
   // The move runs to the end whatever the request does; the room stays locked until it has. Past the deadline the
   // answer is "pending" and the panel polls again (a transaction such as start_negotiation can wait on the enclave).
   const work = counterpartyStep(agreement).finally(() => { readCache.invalidate(agreement); busy.delete(agreement); });

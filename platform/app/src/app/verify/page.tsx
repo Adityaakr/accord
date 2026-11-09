@@ -1,6 +1,7 @@
 import Form from "next/form";
 import { redirect } from "next/navigation";
 import { PageHead, Panel } from "@/components/ui";
+import { parseAgreementInput } from "@/lib/accountid";
 import styles from "../pages.module.css";
 
 export const metadata = { title: "Verify" };
@@ -10,8 +11,11 @@ export const metadata = { title: "Verify" };
 // A GET works on every host and from a bookmarked or shared link.
 export default async function Verify({ searchParams }: { searchParams: Promise<{ agreement?: string | string[] }> }) {
   const q = (await searchParams).agreement;
-  const id = (Array.isArray(q) ? q[0] : q)?.trim();
-  if (id) redirect(`/verify/${encodeURIComponent(id)}`);
+  const raw = (Array.isArray(q) ? q[0] : q)?.trim();
+  // a NEAR account id only: anything else stays here with a plain answer instead of a lookup that cannot match
+  const parsed = raw ? parseAgreementInput(raw) : null;
+  if (parsed && "id" in parsed) redirect(`/verify/${parsed.id}`);
+  const error = parsed && "error" in parsed ? parsed.error : null;
   return (
     <div className="container">
       <PageHead
@@ -19,9 +23,11 @@ export default async function Verify({ searchParams }: { searchParams: Promise<{
         lead="No account and no key needed. The checks read the chain directly and fetch NEAR AI Cloud's attestation report with a nonce your browser chooses."
       />
       <Form action="/verify" className={styles.search}>
-        <input name="agreement" className={styles.input} placeholder="a1.accord-v1.testnet" aria-label="Agreement account" required />
+        <input name="agreement" className={styles.input} placeholder="a6.accord-v2.testnet" aria-label="Agreement account" required
+          defaultValue={error ? raw : undefined} aria-invalid={error ? true : undefined} aria-describedby={error ? "verify-error" : undefined} />
         <button type="submit" className={styles.button}>Verify</button>
       </Form>
+      {error && <p id="verify-error" className="small" role="alert" style={{ marginTop: 10, color: "var(--refusal)" }}>{error}</p>}
       <h2 className={`h3 ${styles.sectionTitle}`}>What is checked</h2>
       <div className={styles.cols2}>
         <Panel title="code"><p className="body">The account runs exactly its release&apos;s code, and has no method that deploys code.</p></Panel>

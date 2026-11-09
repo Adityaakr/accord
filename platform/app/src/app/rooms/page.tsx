@@ -110,9 +110,9 @@ export default async function Rooms({ searchParams }: { searchParams: Promise<{ 
                         <span className={styles.stepName}>{stepName}</span>
                       </span>
                     </td>
-                    <td className={styles.num} data-label="Escrowed"><Usdc amount={r.escrowed} /></td>
-                    <td className={styles.num} data-label="Paid"><Usdc amount={r.paid} /></td>
-                    <td data-label="Next eligible">{r.next ? <span className={styles.next}><Usdc amount={r.next.amount} /><span className={styles.nextNote}>{r.next.payableNow ? "eligible now" : "waiting on evidence"}</span></span> : <span className="faint small">none</span>}</td>
+                    <td className={styles.num} data-label="Escrowed"><Usdc amount={r.escrowed} symbol={r.symbol} /></td>
+                    <td className={styles.num} data-label="Paid"><Usdc amount={r.paid} symbol={r.symbol} /></td>
+                    <td data-label="Next eligible">{r.next ? <span className={styles.next}><Usdc amount={r.next.amount} symbol={r.symbol} /><span className={styles.nextNote}>{r.next.payableNow ? "eligible now" : "waiting on evidence"}</span></span> : <span className="faint small">none</span>}</td>
                     <td className={styles.flagCell}>
                       {r.needs > 0 || r.refusals > 0 ? (
                         <span className={styles.flags}>

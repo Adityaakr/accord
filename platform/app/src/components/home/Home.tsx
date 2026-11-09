@@ -5,6 +5,7 @@
 // from contract views through /api/me and filtered to the workspace's role; nothing here signs. "Customise" shows,
 // hides and reorders the three modules, remembered per account and workspace in this browser.
 
+import { sumBySymbol } from "@/lib/units";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Portfolio, PortfolioRoom } from "@/server/data";
@@ -18,7 +19,6 @@ import styles from "./Home.module.css";
 type Module = "next" | "numbers" | "rooms";
 const MODULE_NAME: Record<Module, string> = { next: "Next for you", numbers: "Numbers", rooms: "Your rooms" };
 const DEFAULT: { id: Module; on: boolean }[] = [{ id: "next", on: true }, { id: "numbers", on: true }, { id: "rooms", on: true }];
-const sum = (xs: string[]) => xs.reduce((a, x) => a + BigInt(x || "0"), 0n).toString();
 
 export function Home() {
   const w = useWallet();
@@ -158,10 +158,12 @@ function NextFor({ needs, more, setMore }: { needs: Portfolio["needs"]; more: bo
 
 function Numbers({ ws, rooms, data, needs }: { ws: string; rooms: PortfolioRoom[]; data: Portfolio; needs: number }) {
   const refused = rooms.reduce((a, r) => a + r.refusals, 0);
+  // one figure per token: test USDC and Circle USDC are never added together
+  const total = (pick: (r: PortfolioRoom) => string | bigint) => <Amounts parts={sumBySymbol(rooms.map((r) => ({ amount: pick(r), symbol: r.symbol ?? data.unit })))} fallback={data.unit} />;
   const items: { label: string; value: React.ReactNode; note: React.ReactNode; refusal?: boolean }[] =
     ws === "vendor" ? [
-      { label: "Paid to you", value: <Usdc amount={sum(rooms.map((r) => r.paid))} />, note: `across ${rooms.length} room${rooms.length === 1 ? "" : "s"}` },
-      { label: "Still to come", value: <Usdc amount={(BigInt(sum(rooms.map((r) => r.total))) - BigInt(sum(rooms.map((r) => r.paid)))).toString()} />, note: "under the approved terms" },
+      { label: "Paid to you", value: total((r) => r.paid), note: `across ${rooms.length} room${rooms.length === 1 ? "" : "s"}` },
+      { label: "Still to come", value: total((r) => BigInt(r.total) - BigInt(r.paid)), note: "under the approved terms" },
       { label: "Waiting on you", value: String(needs), note: needs ? "see Next for you" : "nothing to do" },
     ] : ws === "authority" ? [
       { label: "Rooms you authorise", value: String(rooms.length), note: "your company is the vendor" },
@@ -169,8 +171,8 @@ function Numbers({ ws, rooms, data, needs }: { ws: string; rooms: PortfolioRoom[
     ] : ws === "reviewer" ? [
       { label: "To review", value: String(needs), note: "deliveries to accept or dispute" },
     ] : [
-      { label: "In escrow", value: <Usdc amount={sum(rooms.map((r) => r.escrowed))} />, note: `across ${rooms.length} room${rooms.length === 1 ? "" : "s"} you fund` },
-      { label: "Paid this month", value: <Usdc amount={data.paidThisMonth} />, note: BigInt(data.paidTotal) > 0n ? "every payment matched its terms" : "no payments yet" },
+      { label: "In escrow", value: total((r) => r.escrowed), note: `across ${rooms.length} room${rooms.length === 1 ? "" : "s"} you fund` },
+      { label: "Paid this month", value: <Usdc amount={data.paidThisMonth} symbol={data.unit} />, note: BigInt(data.paidTotal) > 0n ? "every payment matched its terms" : "no payments yet" },
       { label: "Refused", value: String(refused), refusal: refused > 0, note: data.topCode && refused ? <span className="mono">{data.topCode.code}</span> : "every payment matched its terms" },
     ];
   return (
@@ -208,7 +210,7 @@ function Rooms({ rooms, role, account, showNew }: { rooms: PortfolioRoom[]; role
                   <span className={styles.roomTitle}>{r.title}</span>
                   <KindLabel kind={r.kind} with={r.counterparty} />
                 </span>
-                <span className={styles.roomMoney}><Usdc amount={r.paid} /> <span className="faint">of</span> <Usdc amount={r.total} /></span>
+                <span className={styles.roomMoney}><Usdc amount={r.paid} symbol={r.symbol} /> <span className="faint">of</span> <Usdc amount={r.total} symbol={r.symbol} /></span>
                 <span className={styles.roomState}><StatePill state={r.state} /></span>
               </Link>
             </li>
@@ -217,4 +219,10 @@ function Rooms({ rooms, role, account, showNew }: { rooms: PortfolioRoom[]; role
       )}
     </section>
   );
+}
+
+/** Amounts per token, joined; 0 in the fallback unit when there are none. */
+function Amounts({ parts, fallback }: { parts: { symbol: string; amount: bigint }[]; fallback: string }) {
+  const shown = parts.length ? parts : [{ symbol: fallback, amount: 0n }];
+  return <>{shown.map((p, i) => <span key={p.symbol}>{i > 0 ? " · " : null}<Usdc amount={p.amount} symbol={p.symbol} /></span>)}</>;
 }

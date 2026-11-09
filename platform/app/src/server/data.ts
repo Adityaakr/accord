@@ -5,7 +5,8 @@ import type {
   AgreementRecord, AgreementView, Commitment, ExceptionView, ItemView, PeriodView, Receipt, RecipientVersion, Refusal, Terms,
   StoredObservation,
 } from "@accord/sdk";
-import { accord, listAllAgreements, source, type Source } from "./accord";
+import { accord, listAllAgreements, source, symbolFor, type Source } from "./accord";
+import { unitFor } from "@/lib/units";
 import { currentStep } from "@/app/agreements/[id]/pipeline";
 import { readWithin } from "./deadline";
 
@@ -83,6 +84,8 @@ export interface PortfolioRoom {
   escrowed: string;
   refusals: number;
   agent: "active" | "revoked" | "none" | null;
+  /** The room's token: "tUSDC" or "USDC" */
+  symbol: string;
 }
 
 export interface Portfolio {
@@ -96,6 +99,8 @@ export interface Portfolio {
   topCode: { code: string; count: number } | null;
   nextEligible: { room: string; title: string; amount: string; at: number | null; payableNow: boolean; waiting: string } | null;
   agents: { active: number; revoked: number; none: number; lastCall: number | null };
+  /** The unit of the totals above: one symbol, or every symbol they add up */
+  unit: string;
   source: Source;
 }
 
@@ -108,7 +113,7 @@ export async function portfolio(account: string): Promise<Portfolio> {
 
   const out: Portfolio = {
     account, rooms: [], needs: [], escrowed: "0", paidThisMonth: "0", paidTotal: "0", refused: 0, topCode: null,
-    nextEligible: null, agents: { active: 0, revoked: 0, none: 0, lastCall: null }, source: src,
+    nextEligible: null, agents: { active: 0, revoked: 0, none: 0, lastCall: null }, unit: "tUSDC", source: src,
   };
   let escrowed = 0n, paidMonth = 0n, paidTotal = 0n;
   const codes = new Map<string, number>();
@@ -147,7 +152,7 @@ export async function portfolio(account: string): Promise<Portfolio> {
     out.rooms.push({
       account: record.account, title: view.title, kind: view.kind, state: view.state, roles,
       counterparty: isBuyer ? view.vendor : view.buyer, total: view.total, paid: view.paid,
-      escrowed: (roomEscrow > 0n ? roomEscrow : 0n).toString(), refusals: view.refusals, agent,
+      escrowed: (roomEscrow > 0n ? roomEscrow : 0n).toString(), refusals: view.refusals, agent, symbol: symbolFor(view.factory),
     });
 
     // what this person can do next in this room
@@ -197,6 +202,7 @@ export async function portfolio(account: string): Promise<Portfolio> {
 
   out.rooms.sort((x, y) => x.title.localeCompare(y.title));
   out.needs.sort((x, y) => x.rank - y.rank || x.title.localeCompare(y.title));
+  out.unit = unitFor(out.rooms.map((r) => r.symbol));
   out.escrowed = escrowed.toString();
   out.paidThisMonth = paidMonth.toString();
   out.paidTotal = paidTotal.toString();
@@ -222,6 +228,8 @@ export interface ApprovalItem {
   amount: string | null;
   /** The account the money would go to, when there is one */
   recipient: string | null;
+  /** The room's token: "tUSDC" or "USDC" */
+  symbol: string;
   /** When it started waiting (unix seconds) */
   at: number;
   /** The exception id, item id, recipient version or period index the action takes */
@@ -259,8 +267,8 @@ export async function approvals(account: string): Promise<Approvals> {
     ]);
     const room = record.account, title = view.title, href = `/agreements/${room}`;
     const payee = view.recipient?.account ?? null;
-    const push = (x: Omit<ApprovalItem, "room" | "title" | "href" | "key"> & { href?: string }) =>
-      items.push({ room, title, href: x.href ?? href, key: `${room}:${x.kind}:${x.ref ?? ""}:${x.role}`, ...x });
+    const push = (x: Omit<ApprovalItem, "room" | "title" | "href" | "key" | "symbol"> & { href?: string }) =>
+      items.push({ room, title, symbol: symbolFor(view.factory), href: x.href ?? href, key: `${room}:${x.kind}:${x.ref ?? ""}:${x.role}`, ...x });
     const base = { amount: null, recipient: null, ref: null, termsHash: null, rating: null };
 
     if (view.state === "Sealed" && view.negotiation === "AwaitingMandates") {
@@ -401,6 +409,8 @@ export interface RoomRow {
   paid: string;
   total: string;
   next: { amount: string; payableNow: boolean } | null;
+  /** The room's token: "tUSDC" or "USDC" */
+  symbol: string;
   refusals: number;
   /** How many things in this room wait on the signed-in account (0 without one) */
   needs: number;
@@ -431,7 +441,7 @@ export async function roomTable(party?: string): Promise<{ rows: RoomRow[]; sour
     return {
       account: record.account, title: view.title, kind: view.kind, state: view.state, buyer: view.buyer, vendor: view.vendor,
       step: currentStep(view, items, periods), terminal, escrowed: (escrow > 0n ? escrow : 0n).toString(), paid: view.paid,
-      total: view.total, next, refusals: view.refusals, needs: needsBy.get(record.account) ?? 0,
+      total: view.total, next, symbol: symbolFor(view.factory), refusals: view.refusals, needs: needsBy.get(record.account) ?? 0,
       roles: party ? rolesIn(view, party) : [],
     };
   }));
@@ -446,6 +456,8 @@ export interface DeliveryRow {
   kind: string;
   item: number;
   amount: string;
+  /** The room's token: "tUSDC" or "USDC" */
+  symbol: string;
   status: string;
   dueAt: number | null;
   eligibleAt: number | null;
@@ -476,7 +488,7 @@ export async function deliveries(account: string): Promise<{ account: string; ro
         : st === "Disputed" ? { next: "Disputed by the buyer", tab: "activity", yours: false }
         : st === "Paid" || st === "AssumedPaid" ? { next: "Paid", tab: "activity", yours: false }
         : { next: st, tab: "activity", yours: false };
-      rows.push({ room: record.account, title: view.title, kind: view.kind, item: it.id, amount: it.due_amount, status: st, dueAt: it.due_at, eligibleAt: it.eligible_at, ...step });
+      rows.push({ room: record.account, title: view.title, kind: view.kind, item: it.id, amount: it.due_amount, symbol: symbolFor(view.factory), status: st, dueAt: it.due_at, eligibleAt: it.eligible_at, ...step });
     }
   }));
   rows.sort((x, y) => Number(y.yours) - Number(x.yours) || (x.dueAt ?? Infinity) - (y.dueAt ?? Infinity));

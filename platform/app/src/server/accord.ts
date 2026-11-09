@@ -5,7 +5,7 @@
 import "server-only";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { Accord, type AgreementRecord, type Network } from "@accord/sdk";
+import { Accord, KNOWN_FACTORIES, type AgreementRecord, type Network } from "@accord/sdk";
 import { agreementPattern } from "./delegate";
 
 /**
@@ -81,8 +81,14 @@ export function config(): AppConfig {
 
 /** How the app names an agreement's token: "tUSDC" for the default factory's test token, "USDC" for Circle's. */
 export function symbolFor(factory: string): "USDC" | "tUSDC" {
-  return config().currencies.find((c) => c.factory === factory)?.id === "usdc" ? "USDC" : "tUSDC";
+  const c = config();
+  if (c.currencies.find((x) => x.factory === factory)?.id === "usdc") return "USDC";
+  // a factory the ledger reads without it being configured here (KNOWN_FACTORIES): Circle's token is USDC
+  return (KNOWN_FACTORIES[c.network] ?? []).find((f) => f.factory === factory)?.label.startsWith("Circle") ? "USDC" : "tUSDC";
 }
+
+/** The factory an agreement account was created by: agreements are `<n>.<factory>`. */
+export const factoryOf = (agreement: string): string => agreement.slice(agreement.indexOf(".") + 1);
 
 /** The configured factories, the default first. */
 export function factories(): string[] {

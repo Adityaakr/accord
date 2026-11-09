@@ -35,7 +35,7 @@ export function Deliveries() {
                 <Link className={styles.strong} href={`/agreements/${r.room}`}>{r.title} · item {r.item}</Link>
                 <KindLabel kind={r.kind} />
               </span>
-              <span className="mono small"><Usdc amount={r.amount} /></span>
+              <span className="mono small"><Usdc amount={r.amount} symbol={r.symbol} /></span>
               <span className={styles.when}>{r.status === "Eligible" ? "eligible" : r.dueAt ? `due ${when(r.dueAt)}` : ""}</span>
               <span className={styles.delNext}>
                 {r.yours ? <Link href={`/agreements/${r.room}?tab=${r.tab}`} className={styles.delGo}>{r.next} →</Link> : <span className="small weak">{r.next}</span>}

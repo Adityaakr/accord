@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { closedReason, duration, rearmTimings, tryRoom } from "@/server/tryroom";
 import { heartbeats, recentMessages } from "@/server/store";
-import { accord, config } from "@/server/accord";
+import { accord, config, symbolFor } from "@/server/accord";
 import { PageHead, Panel, Pill, Quiet, Usdc } from "@/components/ui";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { InboxForm } from "./InboxForm";
@@ -41,6 +41,7 @@ export default async function Try() {
         accord().agreement(room.account).dueItems(),
       ])
     : [[], [], []];
+  const sym = room ? symbolFor(room.factory) : "tUSDC";
 
   return (
     <div className="container">
@@ -55,7 +56,7 @@ export default async function Try() {
         <div className={styles.main}>
           <Panel title="Write to the agent" eyebrow={room ? <>inbox of the agent for <Link className="mono link" href={`/agreements/${room.account}`}>{room.account}</Link></> : "the room is closed"}>
             {room ? (
-              <InboxForm recipient={room.recipient?.account ?? null} due={due.map((d) => ({ item: d.item, amount: d.amount }))} />
+              <InboxForm symbol={sym} recipient={room.recipient?.account ?? null} due={due.map((d) => ({ item: d.item, amount: d.amount }))} />
             ) : (
               <p className="body">{closed}</p>
             )}
@@ -91,7 +92,7 @@ export default async function Try() {
                 {[...refusals].reverse().map((r) => (
                   <li key={r.seq}>
                     <span className={`mono ${styles.code}`}>{r.code}</span>
-                    <span className="small">{r.amount !== "0" && <Usdc amount={r.amount} />}{r.recipient && <> → <span className="mono">{r.recipient}</span></>}</span>
+                    <span className="small">{r.amount !== "0" && <Usdc amount={r.amount} symbol={sym} />}{r.recipient && <> → <span className="mono">{r.recipient}</span></>}</span>
                   </li>
                 ))}
               </ul>
@@ -99,7 +100,7 @@ export default async function Try() {
           </Panel>
           <Panel title="About this room">
             <p className="small">This public demo room re-arms its agent {duration(t.rearmSecs)} after a revocation. In a real agreement only the buyer can do that.</p>
-            <p className="small">Its items are 0.01 tUSDC each, one due at a time, the next {duration(t.itemIntervalSecs)} after a payment. The form only stores your message; it holds no key and calls no contract. Ten messages an hour per visitor.</p>
+            <p className="small">Its items are 0.01 {sym} each, one due at a time, the next {duration(t.itemIntervalSecs)} after a payment. The form only stores your message; it holds no key and calls no contract. Ten messages an hour per visitor.</p>
             <p className="small">The re-arm never asks for a payment. When a room&apos;s term ends, closing it settles any item the terms already made payable, as in every agreement.</p>
           </Panel>
         </aside>
@@ -133,7 +134,7 @@ function Recorded() {
                 <li key={r.tx}>
                   <span className={`mono ${styles.code}`}>{r.code}</span>
                   <span className="small">
-                    <Link className="mono link" href={`/agreements/${r.agreement}`}>{r.agreement.split(".")[0]}</Link> item {r.item} · <Usdc amount={r.amount} /> → <span className="mono">{r.to}</span>
+                    <Link className="mono link" href={`/agreements/${r.agreement}`}>{r.agreement.split(".")[0]}</Link> item {r.item} · <Usdc amount={r.amount} symbol="tUSDC" /> → <span className="mono">{r.to}</span>
                     {" · "}{r.at.slice(11, 16)} UTC, {r.at.slice(0, 10)}
                     {" · "}<a className="mono link" href={`${explorer}/txns/${r.tx}`} target="_blank" rel="noreferrer">tx {r.tx.slice(0, 8)}</a>
                   </span>

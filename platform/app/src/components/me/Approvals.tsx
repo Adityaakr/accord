@@ -120,7 +120,7 @@ export function Approvals() {
                   <Link className={styles.weak} href={it.href}>{it.title}</Link>
                   <span className={styles.when}><Pill tone="teal">{it.role}</Pill> · {ago(it.at)}</span>
                 </span>
-                <span className={styles.mono}><span className={styles.label}>Amount</span>{it.amount ? <Usdc amount={it.amount} /> : "None"}</span>
+                <span className={styles.mono}><span className={styles.label}>Amount</span>{it.amount ? <Usdc amount={it.amount} symbol={it.symbol} /> : "None"}</span>
                 <span className={styles.mono} title={it.recipient ?? undefined}><span className={styles.label}>Recipient</span>{it.recipient ?? "None yet"}{it.rating === "warn" ? " · warnings" : it.rating === "block" ? " · blocked" : ""}</span>
                 <span className={styles.actions}>
                   {it.kind === "seal" ? (

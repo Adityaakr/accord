@@ -6,7 +6,8 @@ import "server-only";
 import type {
   AgreementRecord, AgreementView, AtlasTerms, PeriodView, Receipt, StoredObservation,
 } from "@accord/sdk";
-import { accord, listAllAgreements, source, type Source } from "./accord";
+import { accord, listAllAgreements, source, symbolFor, type Source } from "./accord";
+import { unitFor } from "@/lib/units";
 
 export interface AtlasRoom {
   record: AgreementRecord;
@@ -27,6 +28,8 @@ export interface AtlasConsole {
   totals: { paid: bigint; withheld: bigint; eligible: number; withheldPeriods: number; review: number; observations: number; passed: number };
   /** Agreements whose views could not be read this time; the totals leave them out and the page says so. */
   unread: number;
+  /** The unit of the money totals: the rooms' token, or every token they add up */
+  unit: string;
   source: Source;
 }
 
@@ -73,6 +76,7 @@ export async function atlasConsole(): Promise<AtlasConsole> {
       passed: all.filter((o) => o.pass).length,
     },
     unread,
+    unit: unitFor(rooms.map((r) => symbolFor(r.view.factory))),
     source: src,
   };
 }

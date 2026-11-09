@@ -15,6 +15,8 @@
 .elsewhere { display: flex; flex-direction: column; gap: 10px; color: var(--text-medium); }
 .elsewhereRow { display: flex; flex-wrap: wrap; gap: 10px; }
 .quiet { color: var(--text-weak); }
+.leave { padding: 10px 12px; border-radius: var(--radius); border: 1px solid var(--hairline-strong); color: var(--text-medium); }
+.leave strong { color: var(--text-strong); font-weight: 500; }
 .gap { display: block; margin-top: 4px; color: var(--text-strong); }
 .signedIn { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; vertical-align: middle; }
 .actions { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 4px; }
@@ -32,4 +34,7 @@
 @media (max-width: 560px) {
   .step { grid-template-columns: 1fr; gap: 12px; }
   .status { margin-left: 0; }
+  /* step 1 before sign-in: the buttons come before the long explanation, so they are in view on a phone */
+  .text:has(.actionsFirst) > p { order: 1; }
+  .actionsFirst { margin-top: 0; }
 }
