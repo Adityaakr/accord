@@ -444,6 +444,9 @@ create table demo_vendors (recipient text primary key, authority text not null, 
 create table try_rooms (agreement text primary key, opened_at timestamptz not null, closed_at timestamptz,
                         items_paid int not null default 0, status text not null);   -- open | exhausted | closed
 create table heartbeats (service text primary key, at timestamptz, detail jsonb);
+create table faucet_grants (day date not null, kind text not null check (kind in ('account', 'ip')), subject text not null,
+                            granted_at timestamptz not null default now(), primary key (day, kind, subject));
+                            -- one drip per account and per client IP (a salted sha256) each UTC day
 ```
 
 ## 10. Make targets and the lines they print

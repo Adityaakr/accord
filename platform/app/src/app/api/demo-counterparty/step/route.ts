@@ -3,7 +3,7 @@
 // recipient, activate it after the timelock, deliver items when due. Read from chain state each time, so calling it
 // twice does nothing twice. Only rooms whose vendor is the demo vendor; testnet only.
 import { NextResponse } from "next/server";
-import { allow, sameOriginJson } from "@/server/ratelimit";
+import { allow, clientIp, sameOriginJson } from "@/server/ratelimit";
 import { counterpartyStep, demoReady } from "@/server/demo";
 import { isConfiguredAgreement } from "@/server/accord";
 
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   if (typeof agreement !== "string" || !isConfiguredAgreement(agreement)) {
     return NextResponse.json({ error: "not an agreement of this factory" }, { status: 400 });
   }
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0]?.trim() || req.headers.get("x-real-ip") || "local";
+  const ip = clientIp(req);
   if (!allow(`cp:ip:${ip}`, 240, 3600_000) || !allow(`cp:${agreement}`, 30, 60_000)) {
     return NextResponse.json({ error: "too many requests; wait a minute" }, { status: 429 });
   }

@@ -4,14 +4,14 @@
 import { NextResponse } from "next/server";
 import { relay } from "@/server/relay";
 import { decodeSignedDelegate } from "@/server/delegate";
-import { allow, sameOriginJson } from "@/server/ratelimit";
+import { allow, clientIp, sameOriginJson } from "@/server/ratelimit";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   const bad = sameOriginJson(req);
   if (bad) return NextResponse.json({ error: bad }, { status: 415 });
-  const client = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+  const client = clientIp(req);
   if (!allow(`relay-ip:${client}`, 120, 3600_000)) return NextResponse.json({ error: "too many relayed calls this hour" }, { status: 429 });
   const { signedDelegate } = (await req.json().catch(() => ({}))) as { signedDelegate?: string };
   let sender: string;

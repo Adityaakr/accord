@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { config, source } from "@/server/accord";
 import { heartbeats } from "@/server/store";
+import { faucetStatus } from "@/server/demo";
+import { FAUCET_NEAR_TARGET, grantsToday, visitorsLeft } from "@/server/faucetgrant";
+import { formatNear } from "@accord/sdk";
 import { PageHead, Panel, Pill } from "@/components/ui";
 import { SourceLine } from "@/components/SourceLine";
 import styles from "../pages.module.css";
@@ -26,7 +29,9 @@ const SERVICES = [
 
 export default async function Status() {
   const c = config();
-  const [src, beats] = await Promise.all([source().catch(() => null), heartbeats().catch(() => [])]);
+  const [src, beats, faucet, grants] = await Promise.all([
+    source().catch(() => null), heartbeats().catch(() => []), faucetStatus().catch(() => undefined), grantsToday().catch(() => null),
+  ]);
   const now = Date.now();
   return (
     <div className="container" style={{ maxWidth: 820 }}>
@@ -37,6 +42,33 @@ export default async function Status() {
           {src ? <SourceLine {...src} /> : <Pill tone="refusal">unreachable</Pill>}
         </div>
         <div className={styles.statusRow}><span>Factory</span><span className="mono">{c.factory}</span></div>
+      </Panel>
+      <div style={{ height: 16 }} />
+      <Panel title="Faucet">
+        {faucet === null ? (
+          <p className="small">No faucet is configured on this deployment.</p>
+        ) : faucet === undefined ? (
+          <div className={styles.statusRow}><span>Faucet account</span><Pill tone="refusal">unreachable</Pill></div>
+        ) : (
+          <>
+            <div className={styles.statusRow}><span>Account</span><span className="mono">{faucet.account}</span></div>
+            <div className={styles.statusRow}><span>Testnet NEAR</span><span className="mono">{formatNear(faucet.near)} NEAR</span></div>
+            <div className={styles.statusRow}>
+              <span>Visitors left, estimated</span>
+              <span className="mono">{visitorsLeft(faucet.near)}</span>
+            </div>
+            {grants && (
+              <div className={styles.statusRow}>
+                <span>Accounts funded today (UTC)</span>
+                <span className="mono">{grants.count}{grants.durable ? "" : " since this process started"}</span>
+              </div>
+            )}
+            <p className="small" style={{ paddingTop: 14 }}>
+              The estimate assumes every visitor arrives with an empty account and takes the full <span className="mono">{formatNear(FAUCET_NEAR_TARGET, 1)}</span> NEAR plus gas, so it is a floor.
+              Each account and each network gets one drip a UTC day.
+            </p>
+          </>
+        )}
       </Panel>
       <div style={{ height: 16 }} />
       <Panel title="Services">

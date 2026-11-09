@@ -15,8 +15,8 @@ import {
 import { accord, config } from "./accord";
 
 const YOCTO = 10n ** 24n;
-/** The faucet tops a visitor's account up to 2.5 NEAR: the factory's 2 NEAR creation deposit and gas after it. */
-export const FAUCET_NEAR_TARGET = (25n * YOCTO) / 10n;
+import { FAUCET_NEAR_TARGET } from "./faucetgrant";
+export { FAUCET_NEAR_TARGET };
 /** Test USDC the faucet mints (6 decimals): enough for the suggested 40 tUSDC ceiling twice over. */
 export const FAUCET_TUSDC = 100_000_000n;
 
@@ -129,6 +129,14 @@ export async function balances(account: string): Promise<Balances> {
   ]);
   // viewAccount returns the amount as a bigint in near-api-js 7
   return { near: String(info?.amount ?? "0"), tusdc: String(ft ?? "0") };
+}
+
+/** The faucet's own account and liquid NEAR, for /status; null when no faucet is configured here. */
+export async function faucetStatus(): Promise<{ account: string; near: bigint } | null> {
+  const id = process.env.FAUCET_ACCOUNT;
+  if (!demoReady().faucet || !id) return null;
+  const info = await accord().chain.account(id);
+  return { account: id, near: BigInt(String(info.amount ?? "0")) };
 }
 
 export interface FaucetResult { sent: { near: string | null; tusdc: string | null }; txs: { label: string; hash: string }[]; balances: Balances }

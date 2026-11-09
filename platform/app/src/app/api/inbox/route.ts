@@ -2,6 +2,7 @@
 // per visitor (a salted hash of the address, never the address) and in total.
 import { createHash } from "node:crypto";
 import { addMessage, countMessagesSince } from "@/server/store";
+import { clientIp } from "@/server/ratelimit";
 import { closedReason, tryRoom } from "@/server/tryroom";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 const PER_VISITOR_PER_HOUR = 10;
 
 function visitorHash(req: Request): string {
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0]?.trim() || req.headers.get("x-real-ip") || "local";
+  const ip = clientIp(req);
   const day = new Date().toISOString().slice(0, 10);
   return createHash("sha256").update(`${ip}|${process.env.INBOX_DAILY_SALT ?? "accord-dev-salt"}|${day}`).digest("hex");
 }

@@ -22,6 +22,8 @@ jobs:
       - run: npm ci
       - name: Typecheck, copy rules and reference integrity
         run: npm run check
+      - name: Site server (client IP header, security headers)
+        run: npm run test:serve -w @accord/web
       - name: Production build
         run: npm run build
       - uses: actions/upload-artifact@v4

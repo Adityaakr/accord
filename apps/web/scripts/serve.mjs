@@ -23,6 +23,19 @@ main{max-width:420px;padding:24px}h1{font-weight:500;font-size:22px;margin:0 0 8
 <body><main><h1>The app is starting up</h1><p>The Accord app is not connected to this site yet. You can still check any agreement from public data.</p>
 <p><a href="/verify">Verify an agreement</a> &middot; <a href="/">Back to Accord</a></p></main></body></html>`
 
+/* The visitor's IP as this proxy's trusted upstream reported it, for the app's per-IP limits (the faucet, the
+   inbox, the relayer). Railway's edge sets X-Real-IP to the client's address (docs.railway.com/networking/
+   public-networking/specs-and-limits); without it, the rightmost X-Forwarded-For entry this proxy received is the one
+   the edge appended (anything to its left came from the client); without either, this proxy's own socket peer.
+   Limit: off Railway, with no edge in front, X-Real-IP is whatever the client sent. */
+function clientIpFor(req) {
+  const real = String(req.headers["x-real-ip"] || "").trim()
+  if (real) return real
+  const xff = String(req.headers["x-forwarded-for"] || "").split(",").map((s) => s.trim()).filter(Boolean)
+  if (xff.length) return xff[xff.length - 1]
+  return req.socket?.remoteAddress || "unknown"
+}
+
 function proxyToApp(req, res) {
   if (!APP_ORIGIN) {
     res.writeHead(503, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "Retry-After": "60" }).end(req.method === "HEAD" ? undefined : STARTING)
@@ -35,6 +48,8 @@ function proxyToApp(req, res) {
   // Railway's edge rewrites x-forwarded-host to the app's own host; this one reaches the app unchanged
   headers["x-accord-site-host"] = req.headers.host || ""
   headers["x-forwarded-proto"] = req.headers["x-forwarded-proto"] || "https"
+  // set here, replacing any value the visitor sent: the app keys its per-IP limits on this header
+  headers["x-accord-client-ip"] = clientIpFor(req)
   headers.host = target.host
   const send = target.protocol === "https:" ? httpsRequest : httpRequest
   const up = send(target, { method: req.method, headers }, (r) => {
@@ -146,7 +161,7 @@ const server = createServer((req, res) => {
 /* Listen on $PORT, and also on the ports hosts most often target by default (8080, 3000, 5180), so a public domain
    pinned to a fixed target port still reaches the app. Extra ports that are taken are skipped. */
 const handler = server.listeners("request")[0]
-const extra = [8080, 3000, 5180].filter((p) => p !== PORT)
+const extra = process.env.SERVE_EXTRA_PORTS === "off" ? [] : [8080, 3000, 5180].filter((p) => p !== PORT)
 const servers = [server]
 server.listen(PORT, HOST, () => console.log(`accord web: serving ${DIST} on http://${HOST}:${PORT}`))
 for (const p of extra) {

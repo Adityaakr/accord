@@ -42,6 +42,7 @@ create table if not exists preflight_approvals (agreement text, recipient text, 
 create table if not exists demo_vendors (recipient text primary key, authority text not null, registered_at timestamptz not null);
 create table if not exists try_rooms (agreement text primary key, opened_at timestamptz not null, closed_at timestamptz, items_paid int not null default 0, status text not null);
 create table if not exists heartbeats (service text primary key, at timestamptz, detail jsonb);
+create table if not exists faucet_grants (day date not null, kind text not null check (kind in ('account', 'ip')), subject text not null, granted_at timestamptz not null default now(), primary key (day, kind, subject));
 `;
 
 interface FileDb extends OrgTables {
@@ -325,6 +326,61 @@ export async function closeRoomMessages(agreement: string) {
   mutate((d) => {
     for (const m of d.inbox) if (m.agreement === agreement && !m.processed_at) Object.assign(m, { processed_at: new Date().toISOString(), outcome: "room_closed" });
   });
+}
+
+// ---- faucet grants ------------------------------------------------------------------------------------------
+// One testnet drip per account and per client IP each UTC day, kept in Postgres so a redeploy does not reset it.
+// The IP is stored as the caller gives it (the app passes a hash). Without DATABASE_URL these return null and the
+// app keeps its in-memory limiter.
+
+export type FaucetClaim = "granted" | "account_used" | "ip_used";
+
+/** The UTC day a grant counts against, as YYYY-MM-DD. */
+export const faucetDay = (at = new Date()) => at.toISOString().slice(0, 10);
+
+/**
+ * Claims today's grant for `account` and `ip` together: both rows are inserted, or neither. Null when there is no
+ * Postgres (the caller falls back to memory).
+ */
+export async function claimFaucetGrant(account: string, ip: string, day = faucetDay()): Promise<FaucetClaim | null> {
+  const p = await db();
+  if (!p) return null;
+  const c = await p.connect();
+  try {
+    await c.query("begin");
+    const a = await c.query("insert into faucet_grants (day, kind, subject) values ($1, 'account', $2) on conflict do nothing", [day, account]);
+    if (a.rowCount === 0) {
+      await c.query("rollback");
+      return "account_used";
+    }
+    const i = await c.query("insert into faucet_grants (day, kind, subject) values ($1, 'ip', $2) on conflict do nothing", [day, ip]);
+    if (i.rowCount === 0) {
+      await c.query("rollback");
+      return "ip_used";
+    }
+    await c.query("commit");
+    return "granted";
+  } catch (e) {
+    await c.query("rollback").catch(() => undefined);
+    throw e;
+  } finally {
+    c.release();
+  }
+}
+
+/** Gives back a grant whose drip failed before it spent anything. */
+export async function releaseFaucetGrant(account: string, ip: string, day = faucetDay()): Promise<void> {
+  const p = await db();
+  if (!p) return;
+  await p.query("delete from faucet_grants where day = $1 and ((kind = 'account' and subject = $2) or (kind = 'ip' and subject = $3))", [day, account, ip]);
+}
+
+/** Accounts granted on `day`, or null without Postgres. */
+export async function faucetGrantsOn(day = faucetDay()): Promise<number | null> {
+  const p = await db();
+  if (!p) return null;
+  const r = await p.query("select count(*)::int as n from faucet_grants where day = $1 and kind = 'account'", [day]);
+  return (r.rows[0] as { n: number }).n;
 }
 
 /** Organisations, members, roles, invitations and the audit log (./orgs.ts), on the same backend as the rest. */

@@ -13,6 +13,7 @@
     "check:rendered": "node scripts/check-rendered.mjs",
     "check": "npm run typecheck && npm run check:copy && npm run check:refs",
     "start": "node scripts/serve.mjs",
+    "test:serve": "node scripts/test-serve.mjs",
     "seo:snapshot": "node scripts/seo-snapshot.mjs"
   },
   "dependencies": {

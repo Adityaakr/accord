@@ -14,15 +14,11 @@ export function allow(key: string, max: number, windowMs: number): boolean {
   return true;
 }
 
+export { clientIp } from "./clientip";
+
 /** Same-origin JSON only, like the app's other write routes. */
 export function sameOriginJson(req: Request): string | null {
   if (!(req.headers.get("content-type") ?? "").includes("application/json")) return "JSON only";
   if (!fromThisSite(req)) return "cross-origin request";
   return null;
-}
-
-/** Gives back the last call counted for `key`, for a call that failed before it spent anything. */
-export function forget(key: string): void {
-  const recent = hits.get(key);
-  if (recent?.length) recent.pop();
 }
