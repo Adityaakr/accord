@@ -9,11 +9,16 @@ import { useEffect, useState } from "react";
 import { Stage } from "@/components/Stage";
 import styles from "./seal.module.css";
 import { IconTile } from "@/components/IconTile";
+import { useAppConfig } from "@/components/AppConfig";
 
 export function SealMoment({ rows, commitment, txHash, role }: {
   rows: { label: string; value: string }[]; commitment: string; txHash: string; role: string;
 }) {
   const [go, setGo] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const { explorer } = useAppConfig();
+  const txHref = explorer ? `${explorer}/txns/${txHash}` : null;
+  const copy = () => { void navigator.clipboard?.writeText(commitment).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1200); }); };
   useEffect(() => { const r = requestAnimationFrame(() => setGo(true)); return () => cancelAnimationFrame(r); }, []);
   const chunk = (i: number) => commitment.slice((i * 8) % Math.max(8, commitment.length - 8), (i * 8) % Math.max(8, commitment.length - 8) + 8);
   return (
@@ -35,8 +40,12 @@ export function SealMoment({ rows, commitment, txHash, role }: {
           ))}
         </ul>
         <div className={styles.momentFoot}>
-          <span className={styles.momentCommit}>commitment {commitment.slice(0, 16)}…{commitment.slice(-6)}</span>
-          <span className={styles.momentTx}>tx {txHash.slice(0, 12)}…</span>
+          <button type="button" className={`${styles.momentCommit} ${styles.momentLink}`} onClick={copy} title={commitment} aria-label="Copy the commitment hash">
+            commitment {commitment.slice(0, 16)}…{commitment.slice(-6)} <span aria-live="polite">{copied ? "· copied" : "· copy"}</span>
+          </button>
+          {txHref
+            ? <a className={`${styles.momentTx} ${styles.momentLink}`} href={txHref} target="_blank" rel="noreferrer" title={txHash} aria-label={`Transaction ${txHash} on the explorer`}>tx {txHash.slice(0, 12)}… ↗</a>
+            : <span className={styles.momentTx} title={txHash}>tx {txHash.slice(0, 12)}…</span>}
         </div>
       </div>
     </Stage>

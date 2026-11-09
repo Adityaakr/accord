@@ -18,6 +18,7 @@ import { IconTile } from "@/components/IconTile";
 import { AgentWork, WorkToggle, useTranscript } from "./AgentWork";
 import { useRoomActivity } from "./useRoomActivity";
 import styles from "./header.module.css";
+import { TxLink } from "@/components/TxLink";
 
 export interface HeaderProps {
   room: string;
@@ -127,7 +128,7 @@ export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys,
         {status === "revoked" ? (
           <span className={styles.revokedLine}>
             Agent revoked · next call rejected by the network
-            {revoked ? <span className={styles.tx}> · tx {revoked.slice(0, 10)}…</span> : null}
+            {revoked ? <span className={styles.tx}> · <TxLink hash={revoked} /></span> : null}
             {canaryTripped && !revoked ? <span className={styles.tx}> · a canary request revoked it</span> : null}
           </span>
         ) : status === "active" ? (

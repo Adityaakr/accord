@@ -18,6 +18,7 @@ import { agreementClient, errorText, txLine } from "@/components/me/client";
 import { can, useOrg, type Capability } from "@/components/org/OrgProvider";
 import styles from "./actions.module.css";
 import { withBase } from "@/lib/basePath";
+import { TxLink } from "@/components/TxLink";
 
 type Role = "buyer" | "vendor" | "authority" | "viewer";
 
@@ -31,7 +32,7 @@ export function Actions({
   const org = useOrg();
   const refreshSoon = useRefreshSoon();
   const [busy, setBusy] = useState<string | null>(null);
-  const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
+  const [result, setResult] = useState<{ ok: boolean; text: string; txHash?: string } | null>(null);
   const [agentSecret, setAgentSecret] = useState<string | null>(null);
 
   const role: Role = !w.accountId ? "viewer"
@@ -194,7 +195,7 @@ export function Actions({
           <button type="button" className={styles.link} onClick={() => setAgentSecret(null)}>I saved it</button>
         </div>
       )}
-      {result && <p className={`small mono ${result.ok ? styles.ok : styles.bad}`} role="status">{result.text}</p>}
+      {result && <p className={`small mono ${result.ok ? styles.ok : styles.bad}`} role="status">{result.text}{result.txHash ? <> · <TxLink hash={result.txHash} prefix="tx " /></> : null}</p>}
     </Panel>
   );
 }

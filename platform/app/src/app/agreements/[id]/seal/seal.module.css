@@ -22,3 +22,6 @@
   .momentPlain { opacity: 0; }
   .momentHash { opacity: 1; filter: none; }
 }
+
+.momentLink { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; transition: color 0.2s ease, text-decoration-color 0.2s ease; }
+.momentLink:hover, .momentLink:focus-visible { color: var(--teal); text-decoration-color: currentColor; }

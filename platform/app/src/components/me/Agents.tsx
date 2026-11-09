@@ -15,6 +15,7 @@ import { agreementClient, errorText, readBack, useMe } from "./client";
 import { HoldButton } from "./Confirm";
 import { SignedOut, Shell, ago } from "./Shell";
 import styles from "./me.module.css";
+import { TxLink } from "@/components/TxLink";
 
 type Data = { account: string; rows: AgentRow[]; source: { label: string; block: number } };
 const short = (k: string | null) => (!k ? "none" : k.length > 22 ? `${k.slice(0, 14)}…${k.slice(-6)}` : k);
@@ -78,7 +79,7 @@ export function Agents() {
                   {r.status === "active" && !done && <HoldButton label="Hold to revoke" onConfirm={() => void revoke(r)} />}
                   {r.status === "none" && r.state === "Executing" && <Link className={`${styles.btn} ${styles.quiet}`} href={`/agreements/${r.room}`}>Connect an agent</Link>}
                 </span>
-                {done && <p className={styles.revokedRow} role="status">Revoked · next call rejected by the network · tx {done.slice(0, 10)}…</p>}
+                {done && <p className={styles.revokedRow} role="status">Revoked · next call rejected by the network · <TxLink hash={done} /></p>}
                 {failed[r.room] && <p className={`${styles.result} ${styles.bad}`} style={{ gridColumn: "1 / -1" }} role="status">{failed[r.room]}</p>}
               </div>
             );

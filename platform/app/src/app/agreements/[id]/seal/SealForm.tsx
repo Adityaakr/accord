@@ -16,6 +16,7 @@ import { Panel, Pill } from "@/components/ui";
 import type { Preset } from "@/server/presets";
 import styles from "../../form.module.css";
 import { SealMoment } from "./SealMoment";
+import { TxLink } from "@/components/TxLink";
 
 const AMOUNT_KEYS = /total|retainer|depth_quote/;
 const LIMIT_LABELS: Record<string, string> = {
@@ -185,7 +186,7 @@ export function SealForm({
           <div className={styles.sealed}>
             <span className="h5">Sealed as the {role}</span>
             <span className="small mono">commitment {done.commitment.slice(0, 16)}…</span>
-            <span className="small mono">tx {done.txHash.slice(0, 16)}…</span>
+            <span className="small mono"><TxLink hash={done.txHash} chars={16} /></span>
             <Link href={`/agreements/${agreement}`} className="small link">Back to the deal room</Link>
           </div>
         ) : (

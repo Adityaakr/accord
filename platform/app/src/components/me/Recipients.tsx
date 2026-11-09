@@ -14,6 +14,7 @@ import { agreementClient, errorText, txLine, useMe } from "./client";
 import { Confirm } from "./Confirm";
 import { SignedOut, Shell, ago } from "./Shell";
 import styles from "./me.module.css";
+import { TxLink } from "@/components/TxLink";
 
 type Data = { account: string; rows: RecipientRow[]; source: { label: string; block: number } };
 
@@ -36,7 +37,7 @@ export function Recipients({ role, title = "Recipients", lead }: { role?: "buyer
   const router = useRouter();
   const { data, error, reload } = useMe<Data>("/api/me/recipients", w.accountId, 10000);
   const [open, setOpen] = useState<string | null>(null);
-  const [result, setResult] = useState<{ room: string; ok: boolean; text: string } | null>(null);
+  const [result, setResult] = useState<{ room: string; ok: boolean; text: string; txHash?: string } | null>(null);
   const [, setTick] = useState(0);
   useEffect(() => { const t = window.setInterval(() => setTick((x) => x + 1), 1000); return () => window.clearInterval(t); }, []);
 
@@ -87,7 +88,7 @@ export function Recipients({ role, title = "Recipients", lead }: { role?: "buyer
                         <Confirm room={r.room} decision={{ kind: "cancel-recipient", version: p.version }} label="Cancel the change" tone="quiet"
                           onCancel={() => setOpen(null)} onSign={() => cancel(r)} />
                       )}
-                      {result?.room === r.room && <p className={`${styles.result} ${result.ok ? styles.ok : styles.bad}`} style={{ gridColumn: "1 / -1" }} role="status">{result.text}</p>}
+                      {result?.room === r.room && <p className={`${styles.result} ${result.ok ? styles.ok : styles.bad}`} style={{ gridColumn: "1 / -1" }} role="status">{result.text}{result.txHash ? <> · <TxLink hash={result.txHash} /></> : null}</p>}
                     </div>
                   );
                 })}

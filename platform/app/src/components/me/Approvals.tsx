@@ -15,6 +15,7 @@ import { agreementClient, errorText, txLine, useMe, type Decision } from "./clie
 import { Confirm } from "./Confirm";
 import { SignedOut, Shell, ago } from "./Shell";
 import styles from "./me.module.css";
+import { TxLink } from "@/components/TxLink";
 
 type Choice = { key: string; option: "primary" | "secondary" };
 
@@ -48,7 +49,7 @@ export function Approvals() {
   const [sel, setSel] = useState(0);
   const [choice, setChoice] = useState<Choice | null>(null);
   const [reason, setReason] = useState("Does not meet the deliverable");
-  const [result, setResult] = useState<{ key: string; ok: boolean; text: string } | null>(null);
+  const [result, setResult] = useState<{ key: string; ok: boolean; text: string; txHash?: string } | null>(null);
   const items = useMemo(() => data?.items ?? [], [data]);
 
   const sign = useCallback(async (it: ApprovalItem, option: Choice["option"]) => {
@@ -141,13 +142,13 @@ export function Approvals() {
                     )}
                   </Confirm>
                 )}
-                {result?.key === it.key && <p className={`${styles.result} ${result.ok ? styles.ok : styles.bad}`} style={{ gridColumn: "1 / -1" }} role="status">{result.text}</p>}
+                {result?.key === it.key && <p className={`${styles.result} ${result.ok ? styles.ok : styles.bad}`} style={{ gridColumn: "1 / -1" }} role="status">{result.text}{result.txHash ? <> · <TxLink hash={result.txHash} /></> : null}</p>}
               </div>
             );
           })}
         </div>
       ))}
-      {result && !items.some((x) => x.key === result.key) && <p className={`${styles.result} ${result.ok ? styles.ok : styles.bad}`} role="status">{result.text}</p>}
+      {result && !items.some((x) => x.key === result.key) && <p className={`${styles.result} ${result.ok ? styles.ok : styles.bad}`} role="status">{result.text}{result.txHash ? <> · <TxLink hash={result.txHash} /></> : null}</p>}
     </Shell>
   );
 }

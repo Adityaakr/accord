@@ -25,10 +25,10 @@ export function errorText(e: unknown): string {
   return e instanceof AccordError ? e.code ?? e.message : (e as Error).message;
 }
 
-export function txLine(label: string, r: unknown): { ok: boolean; text: string } {
+export function txLine(label: string, r: unknown): { ok: boolean; text: string; txHash?: string } {
   const x = r as { txHash?: string; status?: string; code?: string } | undefined;
   const tail = x?.code ? ` · ${x.code}` : x?.status ? ` · ${x.status}` : "";
-  return { ok: !x?.code, text: `${label}${tail}${x?.txHash ? ` · tx ${x.txHash.slice(0, 10)}…` : ""}` };
+  return { ok: !x?.code, text: `${label}${tail}`, txHash: x?.txHash };
 }
 
 /** What the chain says right now about the thing about to be signed */

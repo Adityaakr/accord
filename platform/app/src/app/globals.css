@@ -162,3 +162,8 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   .h1 { font-size: 32px; }
   .h2 { font-size: 26px; }
 }
+
+/* transaction links (components/TxLink.tsx) */
+.txlink { color: inherit; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; transition: color 0.2s ease, text-decoration-color 0.2s ease; }
+.txlink:hover, .txlink:focus-visible { color: var(--teal); text-decoration-color: currentColor; }
+@media (prefers-reduced-motion: reduce) { .txlink { transition: none; } }
