@@ -318,7 +318,7 @@ No partnership with these projects is claimed.
 
 ## Pricing
 
-Free on NEAR testnet with test funds today. Planned: Accord Teams, a subscription; market-making agreements, per monitored market. No percentage-based Accord fee on payment amounts. Production prices are published before launch; network and third-party fees may apply.
+Free on NEAR testnet with test funds today. Planned pricing, still a hypothesis: buyers pay per agreement, and vendors pay per recipient authorisation. Building on Accord and verifying an agreement stay free. Never a percentage of payments. Production prices are published before launch; network and third-party fees may apply.
 
 ## Glossary
 

@@ -682,7 +682,7 @@ Yes. Every negotiation in the Sealed Table runs between two negotiators built fr
 
 ### What does it cost?
 
-Testnet use is free and uses test funds. Planned pricing: an Accord Teams subscription for managing business agreements, and market-making agreements priced per monitored market. No percentage-based Accord fee on payment amounts. Production prices and included allowances will be published before launch; network and third-party fees may apply.
+Testnet use is free and uses test funds. Planned pricing, still a hypothesis: buyers pay per agreement, and vendors pay per recipient authorisation. Building on Accord and verifying an agreement stay free. Never a percentage of payments. Production prices will be published before launch; network and third-party fees may apply.
 
 ### Is it live?
 
