@@ -9,7 +9,7 @@ Dates are UTC. The window opened 19 Oct; development ends 14 Nov 23:59.
 - Live on NEAR testnet: factory `accord-v2.testnet` on release 4 since 9 Nov 2026 (`DECISIONS.md` 26; agreements created before keep release 3), the second factory `accord-usdc.testnet` (Circle USDC, also release 4), test USDC `tusdc.accord-v1.testnet`, relayer `relay.accord-v2.testnet`, the three jobs as OutLayer projects. Agreement `a6.accord-v2.testnet` ran the whole procurement flow with the real model in the enclave (`DECISIONS.md` 21).
 - Live on Railway: the website at https://accordweb-production.up.railway.app and the app behind it at `/app`, with `/app/try-it` (a visitor's own room with its demo agent) and `/app/api/verify/<id>`.
 - Not deployed: the keeper and the demo agent with the `/try` re-arm (the root `Dockerfile` can now run them, `DEPLOY.md` section 3); market making on testnet waits on an OutLayer payment key (`BLOCKED.md` 3.7).
-- `make test` green on 9 Nov: 72 agreement unit tests (0 ignored), 12 sandbox tests on a local node (1 ignored, reads mainnet), the core, job and factory suites, and the TypeScript suites (sdk 34, cli 42, mcp 10, store 5, live 2, keeper 4, agent 13, app 72).
+- `make test` green on 9 Nov: 72 agreement unit tests (0 ignored), 12 sandbox tests on a local node (1 ignored, reads mainnet), the core, job and factory suites, and the TypeScript suites (sdk 37, cli 42, mcp 10, store 5, live 2, keeper 4, agent 13, app 75).
 - `make verify DEAL=a6.accord-v2.testnet`: `verify: 5 checks ok · 1 partial · 1 not checked` (model: nonce bound, hardware quote not checked here; release: needs `outlayer-verify`).
 
 ## Phase 0: day-one checks and scaffold (31 Oct to 1 Nov)
