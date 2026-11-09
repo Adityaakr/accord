@@ -118,12 +118,13 @@ const Milestones = () => (
   </svg>
 )
 
-type Card = { icon: PixelName; title: string; text: string; runs: Rail[]; art: ReactNode; planned?: boolean }
+/* status: what the read-only status line says when it is not "planned" or plain "demo" (market making runs on a local node, not testnet) */
+type Card = { icon: PixelName; title: string; text: string; runs: Rail[]; art: ReactNode; planned?: boolean; status?: string }
 const CARDS: Card[] = [
   {
     icon: "chart", title: "Pay a market maker for liquidity that showed up",
     text: "A project renews an 18,500 USDC retainer. Each period pays only if four of six readings of the pool, taken at hidden times, meet the agreed spread and depth.",
-    runs: ["rhea", "outlayer", "near"], art: <Liquidity />,
+    runs: ["rhea", "outlayer", "near"], art: <Liquidity />, status: "demo (local node)",
   },
   {
     icon: "bag", title: "Let an agent pay invoices it cannot redirect",
@@ -175,7 +176,7 @@ export function UseCases() {
             </span>
             <h3 className={styles.title}>{c.planned ? <span className={styles.sr}>Planned: </span> : null}{c.title}</h3>
             <p className={styles.text}>{c.text}</p>
-            <p className={styles.sr}>{`Status: ${c.planned ? "planned" : "demo"}. Runs on ${listOf(c.runs.map((r) => RAIL_NAME[r]))}.`}</p>
+            <p className={styles.sr}>{`Status: ${c.planned ? "planned" : c.status ?? "demo"}. Runs on ${listOf(c.runs.map((r) => RAIL_NAME[r]))}.`}</p>
             <p className={styles.runs} aria-hidden="true">
               <span className={styles.by}>runs on</span>
               {c.runs.map((r) => <RailMark key={r} r={r} />)}

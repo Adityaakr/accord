@@ -169,6 +169,22 @@
   border-radius: 4px;
   overflow: hidden;
 }
+/* The "Illustrative" chip at the top of the frame, readable at 390px (12px text, never hidden) */
+.illustrative {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-strong);
+  background: color-mix(in srgb, var(--background) 80%, transparent);
+  border: 1px solid rgba(var(--ink-rgb), 0.16);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+}
 .image img {
   display: block;
   width: 100%;
