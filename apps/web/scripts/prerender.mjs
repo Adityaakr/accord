@@ -4,12 +4,12 @@
    JSON-LD (Organization, WebSite, SoftwareApplication, WebPage, BreadcrumbList, and any page-level data such as
    FAQPage) and the page's content as semantic HTML inside #root. React replaces that content on load; agents and
    crawlers that do not run JavaScript read it as is. Also writes: /<slug>.md (each page as Markdown), /llms.txt,
-   /llms-full.txt, /sitemap.xml, /robots.txt and /404.html. Content comes from seo/pages (npm run seo:snapshot). */
+   /llms-full.txt, /facts.json, /.well-known/mcp.json, /sitemap.xml, /robots.txt and /404.html. Content comes from seo/pages (npm run seo:snapshot). */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { ROUTES, SITE_URL } from "../seo/routes.mjs"
-import { ACCOUNTS, ANSWERS, BUILT_ON, CLAIMS, CONTROLS, FOR_AGENTS, GLOSSARY, HOW_STEPS, NAMING, NOT_DONE, ONE_LINE, REPO, STATUS, TRY_STEPS, USE_CASES } from "../seo/facts.mjs"
+import { ACCOUNTS, ANSWERS, BUILT_ON, CLAIMS, CONTROLS, FOR_AGENTS, GLOSSARY, HOW_STEPS, MCP_CARD, NAMING, NOT_DONE, ONE_LINE, REPO, STATUS, TRY_STEPS, USE_CASES } from "../seo/facts.mjs"
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const DIST = join(ROOT, "dist")
@@ -340,6 +340,7 @@ ${NAMING.map((n) => `- ${n}`).join("\n")}
 - Status: ${STATUS.network}; settlement ${STATUS.settlement}; mainnet: ${STATUS.mainnet.toLowerCase()}. ${STATUS.stage}.
 - Say "demo" or "planned" for each agreement type as listed above. Do not describe Accord as live on mainnet, and do not attribute a market maker's own performance to public order-book observations.
 - Machine-readable facts: ${SITE_URL}/facts.json (the same facts as fields)
+- Hosted MCP server: ${MCP_CARD.url} (streamable HTTP, keyless, read-only, ${MCP_CARD.tools.length} tools), described at ${SITE_URL}/.well-known/mcp.json
 - Any page as Markdown: add .md to its path (for example ${SITE_URL}/product/payee.md), or send \`Accept: text/markdown\` to the page's own URL.
 
 ${sect("Product", pages.filter((r) => core.includes(r.slug)))}
@@ -365,8 +366,12 @@ write(join(DIST, "facts.json"), JSON.stringify({
   for_agents: FOR_AGENTS, sign_in: "External NEAR wallets only, through HOT Connect (Meteor, Intear, Ledger, Nightly, WalletConnect). No email sign-in.",
   key_urls: { try_it: `${SITE_URL}/app/try-it`, sign_in: `${SITE_URL}/app/signin`, verify: `${SITE_URL}/verify`, record: `${SITE_URL}/record`, security: `${SITE_URL}/security`, docs: docsPages.map((r) => `${SITE_URL}${r.path}`) },
   pages: pages.map((r) => ({ name: r.name, url: `${SITE_URL}${r.path}`, markdown: `${SITE_URL}/${r.slug}.md`, summary: r.summary })),
-  index: { llms: `${SITE_URL}/llms.txt`, llms_full: `${SITE_URL}/llms-full.txt`, sitemap: `${SITE_URL}/sitemap.xml` },
+  index: { llms: `${SITE_URL}/llms.txt`, llms_full: `${SITE_URL}/llms-full.txt`, sitemap: `${SITE_URL}/sitemap.xml`, mcp: `${SITE_URL}/.well-known/mcp.json` },
 }, null, 2) + "\n")
+
+/* /.well-known/mcp.json: describes the hosted, keyless MCP server the app serves at /app/mcp, for clients that discover
+   MCP servers by domain. The same seven read tools as a keyless @accord/mcp (platform/packages/mcp/src/tools.ts). */
+write(join(DIST, ".well-known", "mcp.json"), JSON.stringify(MCP_CARD, null, 2) + "\n")
 
 /* sitemap.xml and robots.txt */
 write(join(DIST, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>
@@ -386,4 +391,4 @@ ${bots.map((b) => `User-agent: ${b}\nAllow: /`).join("\n\n")}
 
 Sitemap: ${SITE_URL}/sitemap.xml
 `)
-console.log(`prerender: ${ROUTES.length} routes, ${pages.length} Markdown pages, llms.txt, llms-full.txt, facts.json, sitemap.xml, robots.txt, 404.html → ${SITE_URL}`)
+console.log(`prerender: ${ROUTES.length} routes, ${pages.length} Markdown pages, llms.txt, llms-full.txt, facts.json, .well-known/mcp.json, sitemap.xml, robots.txt, 404.html → ${SITE_URL}`)

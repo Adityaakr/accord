@@ -9,6 +9,7 @@ import { createServer, request } from "node:http"
 import { spawn } from "node:child_process"
 import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
+import { existsSync } from "node:fs"
 import assert from "node:assert/strict"
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -82,6 +83,19 @@ await test("proxied /app responses keep the app's headers and get no site CSP", 
   assert.equal(r.headers["x-app"], "yes")
   assert.equal(r.headers["content-security-policy"], undefined)
 })
+
+if (existsSync(join(here, "..", "dist", ".well-known", "mcp.json"))) {
+  await test("/.well-known/mcp.json describes the hosted MCP server, readable from any origin", async () => {
+    const r = await get("/.well-known/mcp.json")
+    assert.equal(r.status, 200)
+    assert.match(r.headers["content-type"] || "", /application\/json/)
+    assert.equal(r.headers["access-control-allow-origin"], "*")
+    const card = JSON.parse(r.body)
+    assert.equal(card.transport, "streamable-http")
+    assert.match(card.url, /\/app\/mcp$/)
+    assert.equal(card.tools.length, 7)
+  })
+} else console.log("skip /.well-known/mcp.json (no build; run npm run build first)")
 
 site.kill("SIGTERM")
 app.close()

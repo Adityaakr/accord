@@ -133,7 +133,7 @@ ACCORD_FACTORY=accord-v2.testnet pnpm --silent --filter @accord/mcp dev -- --htt
 
 On start it prints `accord-mcp · 7 tools · agent off · principal off` on stderr. An MCP client config runs the first command with `cwd` set to `platform/`.
 
-**Without cloning.** A hosted, keyless, read-only MCP server (streamable HTTP; the 7 read tools; 60 requests a minute per IP). It was added on 9 Nov 2026 and answers once the app is next deployed; until then `/app/mcp` returns `404`, and the local server below works:
+**Without cloning.** A hosted, keyless, read-only MCP server at `https://accordweb-production.up.railway.app/app/mcp` (streamable HTTP; the 7 read tools; any origin; 60 requests a minute per IP). The site describes it at [`/.well-known/mcp.json`](https://accordweb-production.up.railway.app/.well-known/mcp.json):
 
 ```json
 { "mcpServers": { "accord": { "type": "http", "url": "https://accordweb-production.up.railway.app/app/mcp" } } }

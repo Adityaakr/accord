@@ -206,6 +206,8 @@ const server = createServer((req, res) => {
     "Cache-Control": hashed ? "public, max-age=31536000, immutable" : ext === ".html" || ext === ".md" || ext === ".txt" || ext === ".xml" ? "public, max-age=0, must-revalidate" : "public, max-age=3600",
     ...(ext === ".md" ? { Vary: "Accept" } : {}),
     ...(ext === ".html" ? { Link: `${mdLink}</llms.txt>; rel="describedby"; type="text/plain"`, Vary: "Accept" } : {}),
+    // the discovery files agents fetch from other origins (MCP clients in a browser): readable from any origin, GET only
+    ...(status === 200 && (pathOnly.startsWith("/.well-known/") || pathOnly === "/facts.json" || pathOnly === "/llms.txt") ? { "Access-Control-Allow-Origin": "*" } : {}),
     ...HEADERS,
   })
   if (req.method === "HEAD") { res.end(); return }

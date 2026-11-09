@@ -181,9 +181,32 @@ export const ACCOUNTS = [
 export const FOR_AGENTS = [
   { name: "Source", text: "Clone https://github.com/Adityaakr/accord (MIT) and run pnpm install in platform/. Read-only check of the testnet agreement, no keys: make verify DEAL=a6.accord-v2.testnet (it prints verify: 5 checks ok · 1 partial · 1 not checked; 7 checks in all); make verify DEAL=a10.accord-v2.testnet shows release 4, and make verify-usdc DEAL=a1.accord-usdc.testnet the Circle USDC deal. The same checks as JSON: GET https://accordweb-production.up.railway.app/app/api/verify/<agreement>. The MCP server, SDK and CLI live in platform/packages; methods, tools and commands are specified in platform/INTERFACES.md." },
   { name: "MCP server (@accord/mcp)", text: "pnpm --filter @accord/mcp dev from platform/ with ACCORD_FACTORY=accord-v2.testnet; stdio by default, or streamable HTTP at /mcp with --http <port>. Read tools need no key: accord_list_agreements, accord_get_agreement, accord_due_items, accord_preflight, accord_refusals, accord_receipts, accord_verify. accord_pay and accord_request_exception need the agent's function-call key (ACCORD_AGENT_KEY with AGENT_AGREEMENT); accord_pay runs preflight first and the contract checks again. Principal tools (accord_seal_mandate, accord_approve_terms, accord_submit_delivery, accord_propose_recipient) are off unless ACCORD_PRINCIPAL_KEY and ACCORD_PRINCIPAL_ACCOUNT are set; a key is never a tool argument." },
-  { name: "Hosted MCP (no clone)", text: "A keyless, read-only MCP server over streamable HTTP at https://accordweb-production.up.railway.app/app/mcp with the 7 read tools, 60 requests a minute per IP; added 9 Nov 2026, it answers once the app is next deployed (until then it returns 404; run @accord/mcp from a clone instead). Client config: { \"mcpServers\": { \"accord\": { \"type\": \"http\", \"url\": \"https://accordweb-production.up.railway.app/app/mcp\" } } }. The verify API (/app/api/verify/<agreement>) and the record CSV (/app/record.csv) answer any origin (CORS *, GET only) from the same deploy. The packages are not published to npm." },
+  { name: "Hosted MCP (no clone)", text: "A keyless, read-only MCP server over streamable HTTP at https://accordweb-production.up.railway.app/app/mcp with the 7 read tools, 60 requests a minute per IP, any origin (CORS *); described at https://accordweb-production.up.railway.app/.well-known/mcp.json. Client config: { \"mcpServers\": { \"accord\": { \"type\": \"http\", \"url\": \"https://accordweb-production.up.railway.app/app/mcp\" } } }. The verify API (/app/api/verify/<agreement>) and the record CSV (/app/record.csv) answer any origin (CORS *, GET only) from the same deploy. The packages are not published to npm." },
   { name: "SDK (@accord/sdk)", text: "TypeScript on near-api-js: agreements, sealing a mandate, the agent's act, preflight and verify." },
   { name: "Preflight on testnet", text: "accord_preflight and the SDK's preflight() return three signals as unavailable on testnet: age_days and tx_30d (no keyless indexer gives an account's age or transaction count) and code_changed_30d (it needs an archival RPC, NEAR_ARCHIVAL_RPC_URL, not set by default). The rating uses the RPC account read (exists, is a contract), the agreement (authorised recipient, canaries) and the factory's reports, blocklist and recipient stats instead." },
   { name: "CLI (accord)", text: "Every step of an agreement from a terminal (create, seal, negotiate, approve, fund, recipient, deliver, pay, agent revoke, verify and more); read-only commands (show, refusals, receipts, check, verify, watch) need no key. Run it with pnpm --filter @accord/cli dev -- <command>; make verify DEAL=<account> checks any agreement from public data." },
   { name: "Without code", text: "Read /llms.txt, /facts.json, or any page as Markdown (add .md to its path, or send Accept: text/markdown). /verify?agreement=<account> checks an agreement in the browser; testnet.nearblocks.io shows every transaction." },
 ]
+
+/* The hosted MCP server, served as /.well-known/mcp.json by the pre-render and named in llms.txt. The tools are the seven
+   read tools of a keyless @accord/mcp (platform/packages/mcp/src/tools.ts); none signs and none takes a key. */
+export const MCP_CARD = {
+  name: "accord",
+  title: "Accord",
+  description: "Keyless, read-only Accord MCP server on NEAR testnet: list agreements, read one agreement's terms, items, refusals and payments, check a recipient before paying, and run the seven-check verify verdict. No tool signs; any origin; 60 requests a minute per IP.",
+  url: "https://accordweb-production.up.railway.app/app/mcp",
+  transport: "streamable-http",
+  authentication: "none",
+  network: "near-testnet",
+  repository: REPO,
+  documentation: "https://github.com/Adityaakr/accord#use-from-an-agent",
+  tools: [
+    { name: "accord_list_agreements", description: "List agreements on the factories, or those of one party; paginated with limit (default 25, at most 100) and offset." },
+    { name: "accord_get_agreement", description: "One agreement: state, parties, terms, items with status, recipient, agent key, budget and token unit." },
+    { name: "accord_due_items", description: "Items eligible for payment now, with amount and the current recipient." },
+    { name: "accord_preflight", description: "Check a recipient before paying: allow, warn or block with reasons." },
+    { name: "accord_refusals", description: "The agreement's refusal log: code, item, amount, recipient, signer and block." },
+    { name: "accord_receipts", description: "Payments the agreement made: item, amount, recipient, via and block." },
+    { name: "accord_verify", description: "What anyone can check without a key: code, keys, sealed outcome, release, model attestation, payee and record." },
+  ],
+}

@@ -726,6 +726,6 @@ market-making room that has not run on testnet, and three "try" pages with near-
   a 308 to it (`apps/web/scripts/serve.mjs`, tested in `test-serve.mjs`). `transaction_url` is the payment's own
   transaction; the always-empty `inference_cost_usd` column is dropped, because inference cost is not on chain. The verify
   API and the CSV answer any origin (CORS `*`, GET only), and a hosted keyless MCP server with the 7 read tools is at
-  `/app/mcp` (60 requests a minute per IP). These are in the repository; on 9 Nov 2026 the live `/app/mcp` still
-  answered 404, because the app had not been redeployed with them.
+  `/app/mcp` (60 requests a minute per IP). The app was redeployed with them on 9 Nov 2026; the live `/app/mcp` answers
+  `initialize`, `tools/list` and tool calls from any origin.
 
