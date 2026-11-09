@@ -469,7 +469,8 @@ Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is par
 │   ├── tests/                sandbox suite on a local NEAR node
 │   ├── fixtures/             fictional companies, inbox messages, job fixtures
 │   ├── scripts/              setup, wasm build, deploy, dev
-│   └── *.md                  GOAL, ARCHITECTURE, INTERFACES, DECISIONS, PROGRESS, DEPLOY, CLAUDE
+│   ├── docs/build/           PROGRESS (the work queue), BLOCKED, DEMO, KIT, PLATFORM, SUBMISSION
+│   └── *.md                  GOAL, ARCHITECTURE, INTERFACES, DECISIONS, DEPLOY, CHANGELOG, CLAUDE
 ├── docs/
 │   ├── diagrams/             Excalidraw sources with SVG and PNG exports
 │   ├── product/              a pointer to the product kit in platform/
