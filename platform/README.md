@@ -319,4 +319,4 @@ Never a percentage of payments. Free to build on and to verify. Buyers pay per a
 
 ## Built during NEAR HACKATHON
 
-This repository started on 31 Oct 2026, inside the window. Libraries: near-sdk 5.30, near-contract-standards 5.30, near-workspaces 0.24, near-api-js 7.3.1, eciesjs, canonicalize, @noble, Next.js 16, NEAR Connect, the MCP TypeScript SDK. No template. Licence: MIT.
+This repository started on 30 Oct 2026 (first commit `c15c05e`), inside the window. Libraries: near-sdk 5.30, near-contract-standards 5.30, near-workspaces 0.24, near-api-js 7.3.1, eciesjs, canonicalize, @noble, Next.js 16, NEAR Connect, the MCP TypeScript SDK. No template. Licence: MIT.
