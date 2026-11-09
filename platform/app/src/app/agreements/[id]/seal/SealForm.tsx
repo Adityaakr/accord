@@ -7,9 +7,10 @@ import { useMemo, useState } from "react";
 import { AccountId, shortAccount } from "@/components/account/AccountId";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Accord, AccordError, formatUnits, parseUnits, type Kind, type Mandate } from "@accord/sdk";
+import { Accord, formatUnits, parseUnits, type Kind, type Mandate } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { useAppConfig } from "@/components/AppConfig";
+import { errorText } from "@/components/me/client";
 import { Panel, Pill } from "@/components/ui";
 import type { Preset } from "@/server/presets";
 import styles from "../../form.module.css";
@@ -88,7 +89,7 @@ export function SealForm({
       setDone(await client.sealMandate(mandate, { role }));
       router.refresh(); // "Sealed so far" re-reads the commitments
     } catch (e) {
-      setError(e instanceof AccordError ? e.code ?? e.message : (e as Error).message);
+      setError(errorText(e));
     } finally {
       setBusy(false);
     }

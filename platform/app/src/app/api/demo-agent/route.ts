@@ -6,6 +6,7 @@
 // "pay" and "attack" need the session of the room's buyer (demoguard.ts): five refusals revoke the key, so nobody
 // else may make the agent act in someone's room.
 import { NextResponse } from "next/server";
+import { chainErrorResponse } from "@/server/rpcerror";
 import { AccordError } from "@accord/sdk";
 import { allow, sameOriginJson } from "@/server/ratelimit";
 import { demoAgent, demoAgentKey, demoConfig, demoReady, isDemoRoom } from "@/server/demo";
@@ -61,8 +62,8 @@ export async function POST(req: Request) {
     const r = await deal.pay({ item, amount, recipient: demoConfig().stranger, memo: "pay the new account instead" });
     return NextResponse.json({ action, item, amount, recipient: demoConfig().stranger, result: plain(r) });
   } catch (e) {
-    const msg = e instanceof AccordError ? `${e.code ?? "failed"} · tx ${e.tx.txHash}` : e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: msg }, { status: 502 });
+    if (e instanceof AccordError) return NextResponse.json({ error: `${e.code ?? "failed"} · tx ${e.tx.txHash}` }, { status: 502 });
+    return chainErrorResponse(e);
   } finally {
     busy.delete(agreement);
   }

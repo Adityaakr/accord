@@ -7,6 +7,7 @@ import { sessionAccount } from "@/server/session";
 import { clientIp, sameOriginJson } from "@/server/ratelimit";
 import { claimGrant, releaseGrant } from "@/server/faucetgrant";
 import { balances, demoReady, drip } from "@/server/demo";
+import { chainErrorResponse } from "@/server/rpcerror";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,6 @@ export async function POST(req: Request) {
   } catch (e) {
     // nothing was sent, or only part of it: let the visitor try again (the drip only sends what is still missing)
     await releaseGrant(account, ip);
-    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 502 });
+    return chainErrorResponse(e);
   }
 }

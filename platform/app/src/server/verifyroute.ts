@@ -1,7 +1,8 @@
 // /api/verify/<id>'s answers, pure of server-only so they are testable: 400 with a plain message for an id that is not a
 // NEAR account id or a bad nonce (before any RPC call), 404 for a well-formed account that is not an Accord agreement,
-// 502 when the chain or NEAR AI could not be read.
+// 503 with Retry-After when the NEAR RPC is busy, 502 when the chain or NEAR AI could not be read otherwise.
 import { isAccountId, NotAnAgreementError, type VerifyReport } from "@accord/sdk";
+import { chainErrorResponse } from "./rpcerror";
 
 export async function verifyResponse(
   id: string, nonce: string | undefined, run: (id: string, nonce: string | undefined) => Promise<VerifyReport>,
@@ -16,6 +17,6 @@ export async function verifyResponse(
     return Response.json(await run(id, nonce));
   } catch (e) {
     if (e instanceof NotAnAgreementError) return Response.json({ error: e.message }, { status: 404 });
-    return Response.json({ error: (e as Error).message }, { status: 502 });
+    return chainErrorResponse(e);
   }
 }

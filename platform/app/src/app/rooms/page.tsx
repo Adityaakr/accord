@@ -1,6 +1,7 @@
 import { shortAccount } from "@/components/account/short"
 import Link from "next/link";
 import { roomTable, type RoomRow } from "@/server/data";
+import { chainError } from "@/server/rpcerror";
 import { PageHead, Usdc } from "@/components/ui";
 import { KindLabel } from "@/components/rooms/KindLabel";
 import { SourceLine } from "@/components/SourceLine";
@@ -31,7 +32,7 @@ export default async function Rooms({ searchParams }: { searchParams: Promise<{ 
   try {
     data = await roomTable(party);
   } catch (e) {
-    error = (e as Error).message;
+    error = chainError(e).body.error;
   }
   const all = (data?.rows ?? []).filter((r) => !role || !party || r.roles.includes(role as RoomRow["roles"][number]));
   const rows = all.filter((r) => matches(r, type, state));

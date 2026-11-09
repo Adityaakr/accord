@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { KindLabel } from "@/components/rooms/KindLabel";
 import { notFound } from "next/navigation";
+import { isRpcBusy } from "@accord/sdk";
 import { formatUnits, type ItemView, type Refusal } from "@accord/sdk";
 import { room, type Room } from "@/server/data";
 import { config } from "@/server/accord";
@@ -67,7 +68,9 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
   let r: Room;
   try {
     r = await room(id);
-  } catch {
+  } catch (e) {
+    // a busy RPC is not a missing room: error.tsx says so and reads again
+    if (isRpcBusy(e)) throw e;
     notFound();
   }
   const { view: a, terms } = r;

@@ -2,6 +2,7 @@
 
 import "server-only";
 import { NextResponse } from "next/server";
+import { chainErrorResponse } from "./rpcerror";
 
 const ACCOUNT = /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
 
@@ -13,6 +14,6 @@ export async function forAccount<T>(req: Request, read: (account: string) => Pro
   try {
     return NextResponse.json(await read(account), { headers: { "cache-control": "no-store" } });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 502 });
+    return chainErrorResponse(e);
   }
 }

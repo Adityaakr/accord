@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import { allow, clientIp, sameOriginJson } from "@/server/ratelimit";
 import { counterpartyStep, demoReady } from "@/server/demo";
 import { isConfiguredAgreement } from "@/server/accord";
+import { chainErrorResponse } from "@/server/rpcerror";
 
 export const dynamic = "force-dynamic";
 const busy = new Set<string>();
@@ -27,8 +28,8 @@ export async function POST(req: Request) {
   try {
     return NextResponse.json(await counterpartyStep(agreement));
   } catch (e) {
-    const status = (e as { status?: number }).status ?? 502;
-    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status });
+    // a busy RPC is a 503 with Retry-After; the panel backs off quietly
+    return chainErrorResponse(e);
   } finally {
     busy.delete(agreement);
   }

@@ -28,6 +28,7 @@ export function VerifiedPanel({ agreement, model }: { agreement: string; model: 
     setError(null);
     try {
       const res = await fetch(`/api/verify/${encodeURIComponent(agreement)}?nonce=${n}`);
+      if (res.status === 503) throw new Error("The network is busy. Run the check again in a moment.");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setReport((await res.json()) as VerifyReport);
     } catch (e) {

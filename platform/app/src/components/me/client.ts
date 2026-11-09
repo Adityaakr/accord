@@ -4,7 +4,7 @@
 // signing client, to word an error, and to read a decision back from chain right before it is signed.
 
 import { useEffect, useState } from "react";
-import { Accord, AccordError, isDemoEvidence, type Signer } from "@accord/sdk";
+import { Accord, AccordError, isDemoEvidence, isRpcBusy, type Signer } from "@accord/sdk";
 import type { PublicConfig } from "../AppConfig";
 
 const net = (cfg: PublicConfig) => (cfg.network === "sandbox" ? "sandbox" : "testnet");
@@ -20,6 +20,8 @@ export function readClient(cfg: PublicConfig, id: string) {
 }
 
 export function errorText(e: unknown): string {
+  // every RPC endpoint rate limited or down: a calm line, never the RPC's raw JSON-RPC body
+  if (isRpcBusy(e)) return "The network is busy, retrying shortly. Try again in a moment.";
   return e instanceof AccordError ? e.code ?? e.message : (e as Error).message;
 }
 

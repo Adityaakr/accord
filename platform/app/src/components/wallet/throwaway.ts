@@ -6,8 +6,8 @@
 //
 // No "use client": pure apart from the default network calls, so it is unit-tested.
 
-import { Account, JsonRpcProvider, KeyPair, KeyPairSigner, actions, buildDelegateAction, encodeSignedDelegate, type KeyPairString } from "near-api-js";
-import { toTxResult, type Signer, type TxResult } from "@accord/sdk";
+import { Account, KeyPair, KeyPairSigner, actions, buildDelegateAction, encodeSignedDelegate, type KeyPairString } from "near-api-js";
+import { RotatingRpcProvider, isRpcBusy, rpcEndpoints, toTxResult, type Signer, type TxResult } from "@accord/sdk";
 
 export const THROWAWAY_STORAGE_KEY = "accord-throwaway-key";
 /** Blocks a relayed request stays valid for; the relayer accepts up to 7200. */
@@ -37,36 +37,47 @@ export interface ThrowawayDeps {
   direct(receiverId: string, action: ReturnType<typeof actions.functionCall>): Promise<unknown>;
 }
 
-async function rpcAccessKey(rpc: string, accountId: string, publicKey: string) {
-  const r = await fetch(rpc, {
-    method: "POST",
-    signal: AbortSignal.timeout(TIMEOUT_MS),
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      jsonrpc: "2.0", id: "accord", method: "query",
-      params: { request_type: "view_access_key", finality: "final", account_id: accountId, public_key: publicKey },
-    }),
-  });
-  const b = (await r.json()) as { result?: { nonce: number | string; block_height: number | string; error?: string }; error?: { message?: string } };
-  if (!b.result || b.result.error) {
+async function rpcAccessKey(provider: RotatingRpcProvider, accountId: string, publicKey: string) {
+  let r: { nonce: number | string; block_height: number | string };
+  try {
+    r = await provider.request("query", { request_type: "view_access_key", finality: "final", account_id: accountId, public_key: publicKey });
+  } catch (e) {
+    // a busy RPC (every endpoint rate limited or down) keeps its own error; a missing key is the account's state
+    if (isRpcBusy(e)) throw e;
     throw new Error("this throwaway account has no key on chain yet; get test funds first");
   }
-  return { nonce: BigInt(b.result.nonce), height: BigInt(b.result.block_height) };
+  return { nonce: BigInt(r.nonce), height: BigInt(r.block_height) };
 }
 
-async function postRelay(signedDelegate: string): Promise<unknown> {
-  const res = await fetch("/api/relay", {
-    method: "POST", signal: AbortSignal.timeout(TIMEOUT_MS), headers: { "content-type": "application/json" }, body: JSON.stringify({ signedDelegate }),
-  });
-  const body = (await res.json().catch(() => ({}))) as { outcome?: unknown; error?: string };
-  if (!res.ok || !body.outcome) throw new Error(`Accord's relayer could not send this transaction: ${body.error ?? `HTTP ${res.status}`}.`);
-  return body.outcome;
+/** Tries left and the wait before each when the relayer answers 503 (the network busy). */
+const RELAY_BUSY_WAITS_MS = [3_000, 8_000, 15_000];
+
+/**
+ * Posts the delegate; on a 503 "busy" answer waits and posts the same delegate again. Safe: a delegate carries its
+ * own nonce, so if an earlier post did land, the repeat is refused on chain (DelegateActionInvalidNonce) and runs
+ * nothing twice.
+ */
+export async function postRelay(signedDelegate: string, waits: number[] = RELAY_BUSY_WAITS_MS, post: typeof fetch = fetch): Promise<unknown> {
+  for (let attempt = 0; ; attempt++) {
+    const res = await post("/api/relay", {
+      method: "POST", signal: AbortSignal.timeout(TIMEOUT_MS), headers: { "content-type": "application/json" }, body: JSON.stringify({ signedDelegate }),
+    });
+    const body = (await res.json().catch(() => ({}))) as { outcome?: unknown; error?: string; busy?: boolean };
+    if (res.status === 503 && body.busy && attempt < waits.length) {
+      await new Promise((r) => setTimeout(r, waits[attempt]));
+      continue;
+    }
+    if (!res.ok || !body.outcome) throw new Error(`Accord's relayer could not send this transaction: ${body.error ?? `HTTP ${res.status}`}.`);
+    return body.outcome;
+  }
 }
 
 export function defaultDeps(kp: KeyPair, accountId: string, rpc: string): ThrowawayDeps {
-  const account = new Account(accountId, new JsonRpcProvider({ url: rpc }), new KeyPairSigner(kp));
+  // rpc: one URL or a comma list; the public testnet endpoints follow as fallbacks (rate limits and outages only)
+  const provider = new RotatingRpcProvider(rpcEndpoints(rpc, "testnet"), { txTimeoutMs: TIMEOUT_MS });
+  const account = new Account(accountId, provider, new KeyPairSigner(kp));
   return {
-    accessKey: (id, pk) => rpcAccessKey(rpc, id, pk),
+    accessKey: (id, pk) => rpcAccessKey(provider, id, pk),
     relay: postRelay,
     direct: (receiverId, action) => account.signAndSendTransaction({ receiverId, actions: [action], waitUntil: "FINAL", throwOnFailure: false }),
   };

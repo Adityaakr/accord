@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { relay } from "@/server/relay";
 import { decodeSignedDelegate } from "@/server/delegate";
 import { allow, clientIp, sameOriginJson } from "@/server/ratelimit";
+import { chainErrorResponse } from "@/server/rpcerror";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,6 @@ export async function POST(req: Request) {
     const { outcome } = await relay(signedDelegate as string);
     return NextResponse.json({ outcome });
   } catch (e) {
-    const status = (e as { status?: number }).status ?? 502;
-    return NextResponse.json({ error: (e as Error).message }, { status });
+    return chainErrorResponse(e);
   }
 }

@@ -13,12 +13,12 @@ import { tokenSymbol, useAppConfig } from "@/components/AppConfig";
 import { Panel, Pill } from "@/components/ui";
 import { agreementClient, errorText } from "@/components/me/client";
 import { useOrg } from "@/components/org/OrgProvider";
+import { POLL_MS, isBusyStatus, nextPollDelay } from "@/components/pollbackoff";
 import styles from "./demo.module.css";
 
 interface Step { did: string | null; next: string; tx: string | null; yourMove: boolean; error?: string }
 interface AgentOut { action: string; item: number; amount: string; recipient: string | null; result: { status: string; code?: string; txHash: string }; error?: string }
 
-const POLL_MS = 8000;
 
 export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView; explorer: string | null }) {
   const w = useWallet();
@@ -26,6 +26,9 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
   const cfg = useAppConfig();
   const router = useRouter();
   const [step, setStep] = useState<Step | null>(null);
+  // the network is busy: the panel keeps its last state, says so in one quiet line, and polls less often
+  const [netBusy, setNetBusy] = useState(false);
+  const delay = useRef(POLL_MS);
   const [last, setLast] = useState<{ did: string; tx: string | null; at: number } | null>(null);
   const [auto, setAuto] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
@@ -40,16 +43,23 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
   const runStep = useCallback(async () => {
     if (running.current) return;
     running.current = true;
+    const busy = (retryAfter: string | null) => {
+      delay.current = nextPollDelay(delay.current, true, retryAfter ? Number(retryAfter) : null);
+      setNetBusy(true);
+    };
     try {
       const r = await fetch("/api/demo-counterparty/step", {
         method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ agreement: a.account }),
       });
-      const b = (await r.json()) as Step;
+      const b = (await r.json().catch(() => ({}))) as Step;
+      if (isBusyStatus(r.status)) { busy(r.headers.get("retry-after")); return; }
+      delay.current = POLL_MS;
+      setNetBusy(false);
       if (!r.ok) { setStep({ did: null, next: b.error ?? `the counterparty could not act (${r.status})`, tx: null, yourMove: false, error: b.error }); return; }
       setStep(b);
       if (b.did) { setLast({ did: b.did, tx: b.tx, at: Date.now() }); router.refresh(); }
-    } catch (e) {
-      setStep({ did: null, next: (e as Error).message, tx: null, yourMove: false, error: (e as Error).message });
+    } catch {
+      busy(null); // no answer at all (offline, a dropped connection): the same quiet back-off
     } finally {
       running.current = false;
     }
@@ -57,9 +67,14 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
 
   useEffect(() => {
     if (!auto || closed) return;
-    void runStep();
-    const t = setInterval(() => { if (document.visibilityState === "visible") void runStep(); }, POLL_MS);
-    return () => clearInterval(t);
+    let stop = false;
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const tick = async () => {
+      if (document.visibilityState === "visible") await runStep();
+      if (!stop) t = setTimeout(() => void tick(), delay.current);
+    };
+    void tick();
+    return () => { stop = true; clearTimeout(t); };
   }, [auto, closed, runStep]);
 
   useEffect(() => {
@@ -103,7 +118,7 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
       }
       router.refresh();
     } catch (e) {
-      setAgent({ ok: false, text: (e as Error).message });
+      setAgent({ ok: false, text: errorText(e) });
     } finally { setBusy(null); }
   }
 
@@ -122,6 +137,7 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
           ) : <span className="small">None yet in this tab.</span>}
           <span className="eyebrow">next</span>
           <span className={step?.yourMove ? styles.you : undefined}>{step ? step.next : "Reading the room…"}</span>
+          {netBusy && <span className="small" role="status">The network is busy, retrying.</span>}
         </div>
         {!closed && <button type="button" className={styles.btn} disabled={running.current} onClick={() => void runStep()}>Run next step</button>}
 

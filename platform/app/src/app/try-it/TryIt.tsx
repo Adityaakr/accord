@@ -8,14 +8,14 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Accord, AccordError, DEMO_PARAMS, formatUnits, type AgreementView } from "@accord/sdk";
+import { Accord, DEMO_PARAMS, formatUnits, type AgreementView } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { ThrowawayTag } from "@/components/wallet/ThrowawayTag";
 import { CIRCLE_FAUCET, useAppConfig } from "@/components/AppConfig";
 import { useOrg } from "@/components/org/OrgProvider";
 import { IconTile } from "@/components/IconTile";
 import type { PixelName } from "@/components/PixelIcon";
-import { readClient } from "@/components/me/client";
+import { errorText, readClient } from "@/components/me/client";
 import styles from "./tryit.module.css";
 
 interface Demo { vendor: string; authority: string; recipient: string; stranger: string; domain: string }
@@ -103,7 +103,7 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
       if (b.balances) setBal(b.balances);
       setMsg({ step: 2, ok: true, text: b.txs?.length ? "Sent. Your balances are below." : "Your account already had enough.", txs: b.txs });
     } catch (e) {
-      setMsg({ step: 2, ok: false, text: (e as Error).message });
+      setMsg({ step: 2, ok: false, text: errorText(e) });
     } finally { setBusy(null); }
   }
 
@@ -122,7 +122,7 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
       setMsg({ step: 3, ok: true, text: `Opened ${agreement}.`, txs: [{ label: "create_agreement", hash: tx.txHash }] });
       await load();
     } catch (e) {
-      setMsg({ step: 3, ok: false, text: e instanceof AccordError ? e.code ?? e.message : (e as Error).message });
+      setMsg({ step: 3, ok: false, text: errorText(e) });
     } finally { setBusy(null); }
   }
 
