@@ -392,10 +392,10 @@ fn review_closing_flag_stuck_has_no_recovery() {
 
 /// The callback with only its static gas (`BALANCE_CALLBACK_GAS`, raised from 30 to 60 TGas after this finding) can
 /// prepay the refund transfer and its callback and settles.
-/// `#[ignore]`: the mock's `GasExceeded` crosses an `extern "C"` boundary and aborts the test process, so run it
-/// alone: `cargo test review_on_close_balance -- --ignored`. At HEAD it aborts with `HostError(GasExceeded)`.
+/// Before the raise this aborted the test process with `HostError(GasExceeded)` (the mock's panic crosses an
+/// `extern "C"` boundary), so it was `#[ignore]`d; with 60 TGas it passes and runs with the suite. If it ever aborts
+/// the whole run again, the static gas is too low once more.
 #[test]
-#[ignore]
 fn review_on_close_balance_with_only_its_static_gas() {
     let mut a = executing_with(Kind::Procurement, procurement_terms());
     fund(&mut a, 36_000_000);
