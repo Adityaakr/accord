@@ -1,0 +1,68 @@
+/* The agent's work: opens under the agent bar by easing its row height (no bounce), then the card. Message bubbles
+   for what it read, a reply line, the step list in mono with a teal tick per result; red only for a refusal or a
+   revoked key. Reduced motion: it opens without the height ease. */
+.toggle {
+  display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; border-radius: 8px;
+  border: 1px solid var(--hairline-strong); background: transparent; font: inherit; font-size: 12.5px; color: var(--text-medium);
+  cursor: pointer; transition: border-color 0.25s var(--ease), color 0.25s var(--ease), background-color 0.25s var(--ease);
+}
+.toggle:hover { border-color: var(--teal-line); color: var(--text-strong); }
+.toggle:focus-visible { outline: 2px solid var(--teal-line); outline-offset: 2px; }
+.toggle[aria-expanded="true"] { background: var(--teal-wash); border-color: var(--teal-line); color: var(--text-strong); }
+.toggleCount { font-family: var(--font-mono); font-size: 11px; color: var(--text-weak); }
+.chev { transition: transform 0.35s var(--ease); }
+.chevOpen { transform: rotate(180deg); }
+
+.wrap { display: grid; grid-template-rows: 0fr; flex-basis: 100%; transition: grid-template-rows 0.45s var(--ease); }
+.open { grid-template-rows: 1fr; }
+.inner { min-height: 0; overflow: hidden; }
+.card {
+  display: flex; flex-direction: column; gap: 16px; margin-top: 6px; padding: 18px 18px 20px; border-radius: 12px;
+  border: 1px solid var(--hairline); background: rgba(var(--ink-rgb), 0.015);
+  opacity: 0; transform: translateY(-4px); transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+}
+.open .card { opacity: 1; transform: none; }
+.quiet { font-size: 13px; color: var(--text-weak); }
+
+.agent { display: flex; gap: 14px; align-items: flex-start; }
+.agentBody { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
+.answer { font-size: 16px; line-height: 1.4; letter-spacing: -0.02em; color: var(--text-strong); text-wrap: balance; }
+.meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 11.5px; color: var(--text-weak); font-variant-numeric: tabular-nums; }
+.metaBtn { padding: 0; border: 0; background: none; font: inherit; color: var(--teal); cursor: pointer; }
+.metaBtn:hover { text-decoration: underline; text-underline-offset: 2px; }
+.metaBtn:focus-visible { outline: 2px solid var(--teal-line); outline-offset: 2px; border-radius: 4px; }
+
+.trace { list-style: none; margin: 0; padding: 4px 0 0 44px; display: flex; flex-direction: column; gap: 10px; }
+.msg { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin: 4px 0; }
+.msgFrom { display: inline-flex; align-items: baseline; gap: 8px; font-size: 11px; color: var(--text-weak); }
+.bubble {
+  max-width: min(88%, 560px); padding: 11px 14px; border-radius: 16px 16px 4px 16px; background: rgba(var(--ink-rgb), 0.07);
+  font-size: 13.5px; line-height: 1.55; color: var(--text-strong); white-space: pre-line; overflow-wrap: anywhere;
+}
+.step { display: flex; flex-direction: column; gap: 3px; }
+.head { display: flex; gap: 8px; align-items: baseline; }
+.glyph { flex: none; width: 10px; font-family: var(--font-mono); font-size: 11px; color: var(--text-weak); text-align: center; }
+.text { font-family: var(--font-mono); font-size: 12px; line-height: 1.45; color: var(--text-strong); overflow-wrap: anywhere; }
+.k_intent .text { color: var(--text-medium); font-style: italic; }
+.k_call .glyph { color: var(--teal); }
+.out { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding-left: 18px; font-family: var(--font-mono); font-size: 11.5px; line-height: 1.5; color: var(--text-medium); }
+.k_key .out { padding-left: 0; font-family: inherit; font-size: 12.5px; }
+.event { color: var(--teal); }
+.bad .event, .bad .out { color: var(--refusal); }
+.code { padding: 1px 6px; border-radius: 4px; color: var(--refusal); background: var(--refusal-bg); }
+.ok, .no { display: inline-grid; place-items: center; flex: none; width: 14px; height: 14px; border-radius: 4px; }
+.ok { background: var(--teal-wash); color: var(--teal); }
+.no { background: var(--refusal-bg); color: var(--refusal); }
+.when { display: inline-flex; gap: 10px; margin-left: auto; padding-left: 10px; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-weak); }
+.msgFrom .when { margin-left: 0; padding-left: 0; }
+.when a { color: var(--text-medium); text-decoration: none; }
+.when a:hover { color: var(--teal); text-decoration: underline; text-underline-offset: 2px; }
+.when a:focus-visible { outline: 2px solid var(--teal-line); outline-offset: 2px; border-radius: 3px; }
+
+@media (prefers-reduced-motion: reduce) { .wrap, .card, .chev, .toggle { transition: none; } }
+@media (max-width: 640px) {
+  .card { padding: 14px; }
+  .trace { padding-left: 0; }
+  .bubble { max-width: 100%; }
+  .when { margin-left: 0; padding-left: 0; flex-basis: 100%; }
+}

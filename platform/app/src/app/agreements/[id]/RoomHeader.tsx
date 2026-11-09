@@ -5,7 +5,7 @@
 // and the header then says what the network will do with the next call.
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRefreshSoon } from "@/components/refreshSoon";
 import { useWallet } from "@/components/wallet/WalletProvider";
@@ -14,6 +14,8 @@ import { HoldButton } from "@/components/me/Confirm";
 import { agreementClient, errorText, readBack } from "@/components/me/client";
 import { STEPS, STEP_NOTE } from "./pipeline";
 import { IconTile } from "@/components/IconTile";
+import { AgentWork, WorkToggle, useTranscript } from "./AgentWork";
+import { useRoomActivity } from "./useRoomActivity";
 import styles from "./header.module.css";
 
 export interface HeaderProps {
@@ -25,9 +27,18 @@ export interface HeaderProps {
   revokedKeys: number;
   canaryTripped: boolean;
   executing: boolean;
+  /** the room's token symbol, tUSDC or USDC */
+  symbol: string;
+  explorer: string | null;
+  /** changes with the chain state the page shows */
+  version: string;
+  /** an item is due now (the contract lists it in due_items) */
+  dueNow: boolean;
+  /** a test room against Accord's demo vendor, where Accord runs the demo agent */
+  demoRoom: boolean;
 }
 
-export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys, canaryTripped, executing }: HeaderProps) {
+export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys, canaryTripped, executing, symbol, explorer, version, dueNow, demoRoom }: HeaderProps) {
   const w = useWallet();
   const cfg = useAppConfig();
   const router = useRouter();
@@ -56,6 +67,25 @@ export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys,
   const status = revoked || (!agentKey && revokedKeys > 0)
     ? "revoked"
     : agentKey ? "active" : "none";
+
+  // the agent's work: read with the Activity tab's poll, opened from the bar
+  const hasWork = executing || !!agentKey || revokedKeys > 0;
+  const [open, setOpen] = useState(false);
+  const workId = useId();
+  const { data, error: workError } = useRoomActivity(room, version);
+  const transcript = useTranscript(hasWork ? data : null);
+
+  // In a demo room the agent pays a due item on its own. While the buyer has the room open, it is asked to look once
+  // per change of chain state; the server reads the chain and the agent's record and pays at most once.
+  const asked = useRef<string | null>(null);
+  useEffect(() => {
+    if (!demoRoom || !isBuyer || status !== "active" || !dueNow || asked.current === version) return;
+    asked.current = version;
+    void fetch("/api/demo-agent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ agreement: room, action: "tick" }) })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b: { paid?: boolean } | null) => { if (b?.paid) refreshSoon(); })
+      .catch(() => undefined);
+  }, [demoRoom, isBuyer, status, dueNow, version, room, refreshSoon]);
 
   return (
     <div className={styles.header}>
@@ -96,10 +126,12 @@ export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys,
             {executing ? "No agent key yet. The buyer installs it from Actions." : "No agent until the agreement is executing."}
           </span>
         )}
+        {hasWork ? <span className={styles.work}><WorkToggle t={transcript} open={open} onToggle={() => setOpen((v) => !v)} controls={workId} /></span> : null}
         {isBuyer && status === "active" ? (
           <span id="revoke" className={styles.revoke}><HoldButton label="Hold to revoke" onConfirm={() => void revoke()} /></span>
         ) : null}
         {mounted && !w.accountId && status === "active" ? <Link className={styles.signin} href="/signin">Sign in as the buyer to revoke</Link> : null}
+        {hasWork ? <AgentWork t={transcript} open={open} id={workId} onHide={() => setOpen(false)} symbol={symbol} explorer={explorer} loading={!data && !workError} /> : null}
       </div>
       {error ? <p className={styles.error} role="status">{error}</p> : null}
     </div>

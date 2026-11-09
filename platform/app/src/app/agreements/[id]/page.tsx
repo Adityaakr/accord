@@ -192,7 +192,9 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
           {a.params.mode === "demo" && <span className="small faint" title="Shorter timelocks and delays than a live agreement">Demo timings · changes wait {duration(a.params.timelock_secs)}</span>}
         </p>
         <RoomHeader room={a.account} buyer={a.buyer} step={step} terminal={terminal} agentKey={a.agent_key}
-          revokedKeys={a.revoked_keys} canaryTripped={a.canary_tripped} executing={a.state === "Executing"} />
+          revokedKeys={a.revoked_keys} canaryTripped={a.canary_tripped} executing={a.state === "Executing"}
+          symbol={sym} explorer={c.explorer} version={version} dueNow={r.items.some((it) => it.status === "Eligible")}
+          demoRoom={c.network === "testnet" && isDemoRoom(a)} />
       </header>
 
       {created === "1" && <InviteCard room={a.account} buyer={a.buyer} vendor={a.vendor} authority={a.vendor_authority} />}
