@@ -5,10 +5,12 @@
 import { NextResponse } from "next/server";
 import { allow, clientIp, sameOriginJson } from "@/server/ratelimit";
 import { counterpartyStep, demoReady } from "@/server/demo";
-import { isConfiguredAgreement } from "@/server/accord";
+import { accord, isConfiguredAgreement } from "@/server/accord";
 import { chainErrorResponse } from "@/server/rpcerror";
 import { REQUEST_DEADLINE_MS, settleWithin } from "@/server/deadline";
 import { readCache } from "@/server/chainproxy";
+import { sessionAccount } from "@/server/session";
+import { agentTick } from "@/server/demoagent";
 
 export const dynamic = "force-dynamic";
 const busy = new Set<string>();
@@ -30,6 +32,15 @@ export async function POST(req: Request) {
   // The move runs to the end whatever the request does; the room stays locked until it has. Past the deadline the
   // answer is "pending" and the panel polls again (a transaction such as start_negotiation can wait on the enclave).
   const work = counterpartyStep(agreement).finally(() => { readCache.invalidate(agreement); busy.delete(agreement); });
+  // The demo agent's own move rides on the same poll: for the room's buyer only (the same guard as /api/demo-agent),
+  // it pays an item that has come due, once (agentTick reads the chain and the agent's record first).
+  const session = await sessionAccount();
+  if (session && demoReady().agent) {
+    void work.then(async () => {
+      const a = await accord().agreement(agreement).get().catch(() => null);
+      if (a && a.buyer === session) await agentTick(agreement).catch(() => undefined);
+    }).catch(() => undefined);
+  }
   try {
     const r = await settleWithin(work, REQUEST_DEADLINE_MS);
     if (!r.done) {

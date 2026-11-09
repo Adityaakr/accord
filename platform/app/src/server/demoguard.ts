@@ -4,7 +4,8 @@
 // could send five redirect attempts to someone else's room and revoke their agent. The always-open public room at
 // /try runs its own agent from the inbox and does not use this route.
 
-export type AgentAction = "key" | "pay" | "attack";
+// "tick" lets the agent pay a due item on its own; it signs `act` too, so it takes the same guard as "pay".
+export type AgentAction = "key" | "pay" | "attack" | "tick";
 
 export type GuardRefusal = { status: 401 | 403; error: string; code: "no_session" | "not_buyer" };
 
