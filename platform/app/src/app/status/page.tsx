@@ -8,10 +8,20 @@ import styles from "../pages.module.css";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Status" };
 
+// What each service holds, read from services/keeper/src/main.ts, services/agent/src/main.ts and room.ts.
 const SERVICES = [
-  { id: "keeper", label: "Keeper", what: "Starts negotiations, activates recipients, polls the observer, closes periods and agreements." },
-  { id: "agent", label: "Demo agent", what: "Reads the /try inbox and acts on it with its one key." },
-  { id: "rearm", label: "/try re-arm", what: "Installs a new agent key five minutes after a revocation in the public room only." },
+  {
+    id: "keeper", label: "Keeper", what: "Starts negotiations, activates recipients, polls the observer, closes periods and agreements.",
+    holds: "Holds no privileged key: only the key to its own account, which pays gas. Every method it calls is open to anyone, so a party can call them from the app when it is down.",
+  },
+  {
+    id: "agent", label: "Demo agent", what: "Reads the /try inbox and acts on it.",
+    holds: "Holds one act key, for Accord's own public demo room at /try only. The contract still checks every payment it asks for.",
+  },
+  {
+    id: "rearm", label: "/try re-arm", what: "Keeps the public room usable: delivers its items, tops up its NEAR, closes it when it is used up and opens the next.",
+    holds: "Holds the keys of the demo room's own fictional principals, including its buyer key, which it uses to reinstall the agent key there five minutes after a revocation. It touches no other room.",
+  },
 ];
 
 export default async function Status() {
@@ -20,7 +30,7 @@ export default async function Status() {
   const now = Date.now();
   return (
     <div className="container" style={{ maxWidth: 820 }}>
-      <PageHead title="Status" lead="The services that add liveness. None of them holds a key that can change an outcome: every method they call is open to anyone." />
+      <PageHead title="Status" lead="The services that add liveness, and exactly what each one holds. Only the demo agent and the /try re-arm hold keys that act in an agreement, and only in Accord's own public demo room." />
       <Panel title="Chain">
         <div className={styles.statusRow}>
           <span>{c.label} RPC <span className="mono small faint">{c.rpc}</span></span>
@@ -39,6 +49,7 @@ export default async function Status() {
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 <span className="h5">{s.label}</span>
                 <span className="small">{s.what}</span>
+                <span className="small faint">{s.holds}</span>
               </div>
               <Pill tone={ok ? "teal" : "muted"}>{age === null ? "not running on this deployment" : ok ? `${age} s ago` : `last seen ${Math.round(age / 60)} min ago`}</Pill>
             </div>
