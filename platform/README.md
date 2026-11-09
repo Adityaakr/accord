@@ -25,7 +25,7 @@ USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, w
    counterparty panel: `Sealed the vendor's mandate (Halcyon procurement preset)`, then `Started the negotiation in
    the Sealed Table`, and the state moves `Sealed` to `Attested` (on a8: 3 items, 15.00 + 12.00 + 6.00 tUSDC).
 5. Do: approve the terms and fund the escrow. See: `Approved the terms as the vendor`, `Proposed halcyon-mm.testnet
-   as the recipient on accordweb-production.up.railway.app`, `Approved recipient halcyon-mm.testnet as the vendor's
+   as the recipient on useaccord.tech`, `Approved recipient halcyon-mm.testnet as the vendor's
    authority`. Accept the recipient; see `Submitted delivery for item 1`. Accept delivery 1.
 6. Do: **Start the demo agent** (your wallet signs `install_agent_key`), then **Let the agent pay the due item**.
    See: `Paid item 1: 15.00 tUSDC to halcyon-mm.testnet, the active recipient.`

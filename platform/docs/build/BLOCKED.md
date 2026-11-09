@@ -48,14 +48,16 @@ observer through OutLayer's HTTPS API, which needs `OUTLAYER_PAYMENT_KEY` in `.e
 Testnet pages behind sign-in need a real wallet (Meteor or Intear). Sign in once at
 http://localhost:3200/signin as `northwind-demo.testnet`; the public Verify page needs no sign-in.
 
-## 4.7: Railway for the hosted app, agent and keeper
+## 4.7: Railway for the hosted app, agent and keeper (done 9 Nov 2026)
 
-The website is live at https://accordweb-production.up.railway.app. **App part done (9 Nov 2026):** the app service is
-deployed and `/app/try-it` answers at https://accordweb-production.up.railway.app/app/try-it. Still open: the agent (with re-arm) and keeper services; the steps are in `DEPLOY.md`.
+The website is live at https://accordweb-production.up.railway.app. **App done (9 Nov 2026):** the app service is
+deployed and `/app/try-it` answers at https://accordweb-production.up.railway.app/app/try-it. **Agent (with re-arm) and
+keeper done (9 Nov 2026):** both are deployed and their heartbeats show on `/app/status` (`/app/api/status` on 9 Nov:
+`agent`, `keeper` and `rearm` each seconds old, the re-arm holding `a14.accord-v2.testnet`). The steps below are kept as the record; `DEPLOY.md` has them in full.
 
 1. Create a Railway project with four services from this repository: `app` (`pnpm --filter @accord/app build && pnpm --filter @accord/app start`), `agent` (`pnpm --filter @accord/agent start`, `AGENT_REARM=on`), `keeper` (`pnpm --filter @accord/keeper start`) and a Postgres plugin.
 2. Set on all three: `ACCORD_NETWORK=testnet`, `ACCORD_FACTORY`, `NEAR_RPC_URL`, `DATABASE_URL` (from the plugin). On the agent: the `TRY_*` accounts and keys. On the keeper: `KEEPER_ACCOUNT`, `KEEPER_KEY`, `OUTLAYER_OWNER`, `OUTLAYER_PAYMENT_KEY` (the observer runs through OutLayer's HTTPS API). On the app: `INBOX_DAILY_SALT` (any random string), `APP_URL` (its own public URL).
-3. Done: the demo domain is `accordweb-production.up.railway.app`; the Payee proof on `a6.accord-v2.testnet` was made on it.
+3. Done: the demo domain is `useaccord.tech` (a15's Payee proof was made on it, `DECISIONS.md` section 27). The Payee proof on `a6.accord-v2.testnet` was made on the earlier demo domain, `accordweb-production.up.railway.app`.
 
 ## Optional: `outlayer-verify` (0.3 f, `make verify` "release" line)
 
