@@ -4,7 +4,7 @@
 
 import { z } from "zod";
 import {
-  guardedPay, type ActResult, type AgreementClient, type AgreementRecord, type Mandate, type PreflightResult,
+  NOT_AN_AGREEMENT, guardedPay, isAccountId, type ActResult, type AgreementClient, type AgreementRecord, type Mandate, type PreflightResult,
   type TxResult, type VerifyReport,
 } from "@accord/sdk";
 
@@ -43,7 +43,9 @@ export interface ToolDef {
   run(args: Record<string, unknown>, deps: McpDeps): Promise<unknown>;
 }
 
-const account = z.string().min(2).max(64).regex(/^[a-z0-9._-]+$/, "a NEAR account id");
+// The SDK's account id rules, so a malformed id (`bogus..x`) is refused here instead of reaching the RPC.
+const account = z.string().refine(isAccountId,
+  "not a NEAR account id (2 to 64 lowercase letters, digits, - and _, in parts joined by single dots)");
 const baseUnits = z.string().regex(/^\d+$/, "a decimal string in the token's base units (USDC: 6 decimals, \"12000000\" is 12.00)");
 const hex64 = z.string().regex(/^[0-9a-f]{64}$/, "64 lowercase hex");
 const limit = z.number().int().min(1).max(100).optional();
@@ -86,9 +88,16 @@ export const TOOLS: ToolDef[] = [
     needs: "nothing",
     input: { agreement: account },
     run: async (a, d) => {
-      const deal = d.agreement(a.agreement as string);
-      const [view, terms, items] = await Promise.all([deal.get(), deal.terms(), deal.items()]);
-      return { agreement: view, terms, items };
+      const id = a.agreement as string;
+      const deal = d.agreement(id);
+      try {
+        const [view, terms, items] = await Promise.all([deal.get(), deal.terms(), deal.items()]);
+        return { agreement: view, terms, items };
+      } catch (e) {
+        // A missing account, one with no code or one without get_agreement: one line, not the RPC's own text.
+        if (NOT_AN_AGREEMENT.test((e as Error).message ?? "")) throw new Error(`${id} is not an Accord agreement`);
+        throw e;
+      }
     },
   },
   {

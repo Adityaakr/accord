@@ -126,3 +126,41 @@ describe("accord_pay runs preflight first", () => {
     await client.close();
   });
 });
+
+describe("accord_get_agreement on a bad id", () => {
+  const get = TOOLS.find((t) => t.name === "accord_get_agreement")!;
+  const raw = (message: string) => ({
+    get: async () => { throw new Error(message); }, terms: async () => null, items: async () => [],
+  });
+  it("refuses a malformed id before any read, with one clean line", async () => {
+    let reads = 0;
+    const { deps } = fakeDeps("allow");
+    deps.agreement = () => { reads++; return raw("unused") as never; };
+    const server = buildServer(deps, { agent: false, principal: false });
+    const [a, b] = InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: "test", version: "0" });
+    await Promise.all([server.connect(a), client.connect(b)]);
+    for (const bad of ["bogus..x", "Bogus.testnet", ".x.testnet", "a-.testnet", "x"]) {
+      const r = await client.callTool({ name: "accord_get_agreement", arguments: { agreement: bad } });
+      expect(r.isError).toBe(true);
+      const text = (r.content as { text: string }[])[0]!.text;
+      expect(text).toContain("not a NEAR account id");
+      expect(text).not.toMatch(/near-sdk|panicked|Smart contract/i);
+    }
+    expect(reads).toBe(0);
+    await client.close();
+  });
+  it("a well-formed account that is not an agreement is one line, not the RPC's text", async () => {
+    const { deps } = fakeDeps("allow");
+    deps.agreement = () => raw("Server error: account nobody.testnet does not exist while viewing") as never;
+    await expect(get.run({ agreement: "nobody.testnet" }, deps)).rejects.toThrow(/^nobody\.testnet is not an Accord agreement$/);
+    deps.agreement = () => raw("RPC busy") as never;
+    await expect(get.run({ agreement: "a7.accord-v1.testnet" }, deps)).rejects.toThrow("RPC busy");
+  });
+  it("the account schema accepts real ids", () => {
+    const shape = z.object(get.input);
+    for (const ok of ["a7.accord-v1.testnet", "halcyon_mm.testnet", "ab", "a".repeat(64)]) {
+      expect(shape.safeParse({ agreement: ok }).success).toBe(true);
+    }
+  });
+});
