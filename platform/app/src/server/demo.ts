@@ -16,6 +16,7 @@ import { accord, config } from "./accord";
 
 const YOCTO = 10n ** 24n;
 import { FAUCET_NEAR_TARGET, faucetEmpty, isFaucetEmptyError } from "./faucetgrant";
+import { closeMove } from "@/lib/finish";
 export { FAUCET_NEAR_TARGET };
 /** Test USDC the faucet mints (6 decimals): enough for the suggested 40 tUSDC ceiling twice over. */
 export const FAUCET_TUSDC = 100_000_000n;
@@ -145,7 +146,7 @@ export interface FaucetResult { sent: { near: string | null; tusdc: string | nul
 const DRIP_GAS_RESERVE = 10n ** 22n;
 
 /**
- * Tops `account` up to 2.5 NEAR and 100 tUSDC, sending only what it lacks. `nearOnly` skips the test USDC: a visitor
+ * Tops `account` up to 2.35 NEAR and 100 tUSDC, sending only what it lacks. `nearOnly` skips the test USDC: a visitor
  * settling in Circle USDC that already holds enough of it needs only NEAR.
  */
 export async function drip(account: string, opts: { nearOnly?: boolean } = {}): Promise<FaucetResult> {
@@ -288,4 +289,30 @@ export async function counterpartyStep(id: string): Promise<Step> {
     return done(`Submitted delivery for item ${next.id}`, tx.txHash, `Your move: accept delivery ${next.id}, then let the agent pay it.`);
   }
   return wait("The vendor has delivered every item. Nothing left for it to do.");
+}
+
+// ---- closing a test room early --------------------------------------------------------------------------------
+
+/**
+ * The demo vendor's side of an early close the buyer asked for (`mutual_close`): it joins, which closes the room, then
+ * steps `close` until the room is settled (one eligible item per call, then the refund). Only rooms opened against
+ * the demo vendor, and only after the buyer asked on chain, so nobody can end someone else's room through it.
+ */
+export async function vendorClose(id: string, opts: { maxSteps?: number; pause?: (ms: number) => Promise<void> } = {}): Promise<{ state: string; txs: string[] }> {
+  const reader = accord().agreement(id);
+  const pause = opts.pause ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const txs: string[] = [];
+  for (let step = 0; step < (opts.maxSteps ?? 8); step++) {
+    const a = await reader.get();
+    if (step === 0 && !isDemoRoom(a)) throw Object.assign(new Error("this room's vendor is not Accord's demo vendor"), { status: 403 });
+    const move = closeMove(a);
+    if (move === "done") return { state: a.state, txs };
+    if (typeof move === "object") throw Object.assign(new Error(move.refuse), { status: 409 });
+    if (move === "wait") { await pause(2000); continue; }
+    // the vendor pays the gas; mutual_close carries enough for the close it triggers
+    const tx = move === "join" ? await as("vendor", id).mutualClose() : await as("vendor", id).close();
+    txs.push(tx.txHash);
+    await pause(1500);
+  }
+  return { state: (await reader.get()).state, txs };
 }

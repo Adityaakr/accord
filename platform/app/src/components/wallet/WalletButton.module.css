@@ -58,3 +58,4 @@
 .tagAlways { font-size: 13px; white-space: nowrap; color: var(--text-weak); }
 .reset { font-size: 12px; color: var(--text-weak); text-decoration: underline; text-underline-offset: 3px; }
 .reset:hover { color: var(--text-strong); }
+.resetNote { font-size: 12px; color: var(--text-medium); }

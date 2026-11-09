@@ -1,4 +1,4 @@
-// POST /api/faucet: tops the signed-in account up to 2.5 testnet NEAR and 100 test USDC, from Accord's own faucet
+// POST /api/faucet: tops the signed-in account up to 2.35 testnet NEAR and 100 test USDC, from Accord's own faucet
 // account. Testnet only, bound to the session (the account this browser proved), once a UTC day per account and up to
 // FAUCET_PER_IP_PER_DAY (default 10) accounts per client IP (server/faucetgrant.ts: Postgres when DATABASE_URL is set,
 // so a redeploy does not reset it).

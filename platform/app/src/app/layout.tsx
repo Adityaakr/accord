@@ -8,6 +8,7 @@ import { Chrome } from "@/components/Chrome";
 import { WorkspaceProvider } from "@/components/workspace/Workspace";
 import { THEME_SCRIPT } from "@/components/theme/Theme";
 import { config } from "@/server/accord";
+import { demoReady } from "@/server/demo";
 import { BasePathFetch } from "@/components/BasePathFetch";
 import "./globals.css";
 
@@ -30,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <BasePathFetch />
-        <AppConfigProvider value={{ network: c.network, rpc: c.rpc, factory: c.factory, explorer: c.explorer, currencies: c.currencies.map(({ id, factory, label }) => ({ id, factory, label })) }}>
+        <AppConfigProvider value={{ network: c.network, rpc: c.rpc, factory: c.factory, explorer: c.explorer, currencies: c.currencies.map(({ id, factory, label }) => ({ id, factory, label })), faucetAccount: demoReady().faucet ? process.env.FAUCET_ACCOUNT ?? null : null }}>
         <WalletProvider network={c.label}>
         <OrgProvider>
         <WorkspaceProvider>

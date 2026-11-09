@@ -34,8 +34,19 @@ export interface ThrowawayDeps {
   /** Posts a base64 borsh SignedDelegate to Accord's relayer and returns its outcome. */
   relay(signedDelegate: string): Promise<unknown>;
   /** Signs and sends a transaction from the account itself, and returns its outcome. */
-  direct(receiverId: string, action: ReturnType<typeof actions.functionCall>): Promise<unknown>;
+  direct(receiverId: string, action: Action): Promise<unknown>;
 }
+
+type Action = ReturnType<typeof actions.functionCall> | ReturnType<typeof actions.deleteAccount>;
+
+/** The throwaway key's signer: a `Signer`, and it can delete its own account at the end of a visit. */
+export interface ThrowawaySigner extends Signer {
+  /** Deletes this account; every yoctoNEAR it holds goes to `beneficiary` (Accord's faucet). Returns the tx hash. */
+  deleteAccount(beneficiary: string): Promise<string>;
+}
+
+export const isThrowawaySigner = (s: Signer | null | undefined): s is ThrowawaySigner =>
+  !!s && typeof (s as Partial<ThrowawaySigner>).deleteAccount === "function";
 
 async function rpcAccessKey(provider: RotatingRpcProvider, accountId: string, publicKey: string) {
   let r: { nonce: number | string; block_height: number | string };
@@ -93,7 +104,7 @@ export async function signDelegate(kp: KeyPair, senderId: string, receiverId: st
 }
 
 /** A `Signer` for the throwaway key, like the wallet's connectorSigner. Calls run one at a time, so nonces never race. */
-export function throwawaySigner(kp: KeyPair, opts: { rpc: string; deps?: ThrowawayDeps }): Signer {
+export function throwawaySigner(kp: KeyPair, opts: { rpc: string; deps?: ThrowawayDeps }): ThrowawaySigner {
   const accountId = implicitAccountId(kp);
   const publicKey = kp.getPublicKey().toString();
   const deps = opts.deps ?? defaultDeps(kp, accountId, opts.rpc);
@@ -124,6 +135,14 @@ export function throwawaySigner(kp: KeyPair, opts: { rpc: string; deps?: Throwaw
     async signMessage(message, recipient, nonce) {
       const s = await new KeyPairSigner(kp).signNep413Message(accountId, { message, recipient, nonce });
       return { signature: s.signature, publicKey };
+    },
+    deleteAccount(beneficiary) {
+      return serial(async () => {
+        // the account's own transaction (a relayer carries function calls only); its gas comes out of what it sends
+        const r = toTxResult(await deps.direct(accountId, actions.deleteAccount(beneficiary)));
+        if (!r.ok) throw new Error(`the account could not be deleted: ${r.failure ?? "failed"}`);
+        return r.txHash;
+      });
     },
   };
 }

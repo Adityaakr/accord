@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { KeyPair, actions } from "near-api-js";
 import { sha256 } from "@noble/hashes/sha2";
 import { utf8ToBytes } from "@noble/hashes/utils";
-import { implicitAccountId, newThrowawayKey, signDelegate, throwawaySigner, DELEGATE_TTL, type ThrowawayDeps } from "../src/components/wallet/throwaway";
+import { implicitAccountId, isThrowawaySigner, newThrowawayKey, signDelegate, throwawaySigner, DELEGATE_TTL, type ThrowawayDeps } from "../src/components/wallet/throwaway";
 import { isImplicitAccount, keyNamesImplicitAccount, verifyNep413 } from "../src/server/implicit";
 import { decodeSignedDelegate, rejectDelegate } from "../src/server/delegate";
 
@@ -28,7 +28,9 @@ function fakes(nonce = 41n) {
     accessKey: async () => ({ nonce, height: HEIGHT }),
     relay: async (b64) => { sent.relayed.push(b64); return outcome(`relayed-${sent.relayed.length}`); },
     direct: async (receiverId, action) => {
-      const fc = action.functionCall!;
+      const del = (action as { deleteAccount?: { beneficiaryId: string } }).deleteAccount;
+      if (del) { sent.direct.push({ receiverId, deposit: 0n, method: `delete_account:${del.beneficiaryId}` }); return outcome(`direct-${sent.direct.length + 1}`); }
+      const fc = (action as { functionCall?: { deposit: bigint; methodName: string } }).functionCall!;
       sent.direct.push({ receiverId, deposit: fc.deposit, method: fc.methodName });
       return outcome(`direct-${sent.direct.length}`);
     },
@@ -137,5 +139,23 @@ describe("serial calls", () => {
     const [a, b] = await Promise.all([s.call(`a1.${FACTORY}`, "x", {}), s.call(`a1.${FACTORY}`, "y", {})]);
     expect([a.txHash, b.txHash]).toEqual(["11", "12"]);
     expect(order).toEqual(["start 11", "end 11", "start 12", "end 12"]);
+  });
+});
+
+describe("deleting the throwaway account at the end of a visit", () => {
+  it("is the account's own DeleteAccount transaction, with the faucet as beneficiary", async () => {
+    const kp = KeyPair.fromRandom("ed25519");
+    const { deps, sent } = fakes();
+    const s = throwawaySigner(kp, { rpc: "http://unused", deps });
+    const hash = await s.deleteAccount("faucet.accord-v2.testnet");
+    expect(hash).toMatch(/^direct-/);
+    expect(sent.relayed).toHaveLength(0);
+    expect(sent.direct).toEqual([{ receiverId: implicitAccountId(kp), deposit: 0n, method: "delete_account:faucet.accord-v2.testnet" }]);
+  });
+  it("is told apart from a wallet's signer", () => {
+    const { deps } = fakes();
+    expect(isThrowawaySigner(throwawaySigner(KeyPair.fromRandom("ed25519"), { rpc: "x", deps }))).toBe(true);
+    expect(isThrowawaySigner({ accountId: "a.testnet", call: async () => { throw new Error("unused"); } })).toBe(false);
+    expect(isThrowawaySigner(null)).toBe(false);
   });
 });

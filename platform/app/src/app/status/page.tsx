@@ -2,7 +2,7 @@ import Link from "next/link";
 import { config, source } from "@/server/accord";
 import { heartbeats } from "@/server/store";
 import { faucetStatus } from "@/server/demo";
-import { FAUCET_NEAR_TARGET, grantsToday, visitorsLeft } from "@/server/faucetgrant";
+import { FAUCET_NEAR_TARGET, grantsToday, perIpPerDay, visitorsLeft } from "@/server/faucetgrant";
 import { formatNear } from "@accord/sdk";
 import { PageHead, Panel, Pill } from "@/components/ui";
 import { SourceLine } from "@/components/SourceLine";
@@ -64,8 +64,9 @@ export default async function Status() {
               </div>
             )}
             <p className="small" style={{ paddingTop: 14 }}>
-              The estimate assumes every visitor arrives with an empty account and takes the full <span className="mono">{formatNear(FAUCET_NEAR_TARGET, 1)}</span> NEAR plus gas, so it is a floor.
-              Each account and each network gets one drip a UTC day.
+              The estimate assumes every visitor arrives with an empty account and takes the full <span className="mono">{formatNear(FAUCET_NEAR_TARGET, 2)}</span> NEAR plus gas, so it is a floor;
+              a visitor who presses Finish gives most of it back. Each account gets one drip a UTC day, and each connection up
+              to <span className="mono">{perIpPerDay()}</span>.
             </p>
           </>
         )}

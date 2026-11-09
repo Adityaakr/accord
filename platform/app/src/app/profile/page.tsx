@@ -5,6 +5,7 @@
 
 import Link from "next/link";
 import { useAppConfig } from "@/components/AppConfig";
+import { useFinish } from "@/components/wallet/useFinish";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import styles from "./profile.module.css";
 import { useRouter } from "next/navigation";
@@ -17,6 +18,7 @@ const METHOD = { wallet: "NEAR wallet (HOT Connect)", sandbox: "Local sandbox ke
 export default function Profile() {
   const router = useRouter();
   const w = useWallet();
+  const f = useFinish();
   const c = useAppConfig();
   if (!w.accountId) {
     return (
@@ -45,7 +47,11 @@ export default function Profile() {
         <div><dt>Keys</dt><dd>{w.method === "throwaway" ? "A throwaway testnet key made in this tab. It is kept in this tab's sessionStorage, never sent to Accord's server, and gone when you close the tab. Test funds only." : w.method === "sandbox" ? "This is a throwaway sandbox key on this machine. On testnet and mainnet your keys stay in your own wallet." : "Your keys stay in your wallet. Accord never holds a key that can approve terms or move funds."}</dd></div>
       </dl>
       <div className={styles.actions}>
-        <button type="button" className={styles.secondary} onClick={() => void w.disconnect().then(() => router.replace("/signin"))}>{w.method === "throwaway" ? "Reset" : "Disconnect"}</button>
+        <button type="button" className={styles.secondary} disabled={f.running}
+          onClick={() => { if (w.method === "throwaway" && f.available) { void f.run().then((ok) => { if (ok) router.replace("/signin"); }); return; } void w.disconnect().then(() => router.replace("/signin")); }}>
+          {w.method !== "throwaway" ? "Disconnect" : f.running ? "Returning test NEAR…" : "Reset"}
+        </button>
+        {f.error && <p className="small" role="alert">{f.error} <button type="button" className="link small" onClick={() => void w.disconnect().then(() => router.replace("/signin"))}>Reset anyway</button></p>}
         <Link href="/enter" className="small weak">Change workspace</Link>
         <Link href="/settings" className="small weak">Organisation and members</Link>
       </div>

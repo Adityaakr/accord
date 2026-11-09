@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { THROWAWAY_LABEL, useWallet } from "./WalletProvider";
+import { useFinish } from "./useFinish";
 import styles from "./WalletButton.module.css";
 import { Identicon } from "@/components/account/Identicon";
 import { shortAccount as short } from "@/components/account/AccountId";
 
 export function WalletButton() {
   const w = useWallet();
+  const f = useFinish();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -39,9 +41,15 @@ export function WalletButton() {
               </button>
             ))}
             <Link href="/profile" role="menuitem" className={styles.item} onClick={() => setOpen(false)}>Profile</Link>
-            <button type="button" role="menuitem" className={styles.item} onClick={() => { void w.disconnect(); setOpen(false); }}>
-              {w.method === "throwaway" ? "Reset (delete the throwaway key)" : "Disconnect"}
+            <button type="button" role="menuitem" className={styles.item} disabled={f.running}
+              onClick={() => { if (w.method === "throwaway" && f.available) { void f.run(); return; } void w.disconnect(); setOpen(false); }}>
+              {w.method !== "throwaway" ? "Disconnect" : f.running ? "Returning test NEAR…" : f.available ? "Reset (return the test NEAR, delete the key)" : "Reset (delete the throwaway key)"}
             </button>
+            {f.error && (
+              <p className={`small ${styles.resetNote}`} role="alert">{f.error}{" "}
+                <button type="button" className={styles.reset} onClick={() => { void w.disconnect(); setOpen(false); }}>Reset anyway</button>
+              </p>
+            )}
           </div>
         )}
       </div>

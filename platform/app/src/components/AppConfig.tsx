@@ -18,6 +18,8 @@ export interface PublicConfig {
   explorer: string | null;
   /** The default first; a second (Circle USDC) only when the server sets ACCORD_FACTORY_USDC. */
   currencies?: PublicCurrency[];
+  /** Accord's testnet faucet account, when this server runs one: a wallet-free visit returns its NEAR there. */
+  faucetAccount?: string | null;
 }
 
 /** Circle's testnet faucet: about 20 USDC per address every 1 to 2 hours, network "NEAR Testnet". */

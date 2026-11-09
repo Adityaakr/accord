@@ -1,6 +1,7 @@
 import { PageHead, Quiet } from "@/components/ui";
 import { accord, config } from "@/server/accord";
 import { demoConfig, demoReady } from "@/server/demo";
+import { perIpPerDay } from "@/server/faucetgrant";
 import { TryIt } from "./TryIt";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +26,7 @@ export default async function TryItPage() {
         deposit={factory?.create_deposit ?? null}
         demo={demoConfig()}
         ready={demoReady()}
+        perIp={perIpPerDay()}
       />
     </div>
   );

@@ -24,7 +24,7 @@ website service forwards `<site>/app/*` to it, so visitors use one address.
 | `NEXT_PUBLIC_BASE_PATH` | `/app` (default; build-time) |
 | `NEARAI_API_KEY` | optional: only for the agent's LLM planner and the verify relay |
 | `RESEND_API_KEY` | optional: invite and notification emails |
-| `FAUCET_ACCOUNT` | `faucet.accord-v2.testnet`: tops visitors up to 2.5 NEAR and 100 tUSDC on `/app/try-it` |
+| `FAUCET_ACCOUNT` | `faucet.accord-v2.testnet`: tops visitors up to 2.35 NEAR and 100 tUSDC on `/app/try-it` |
 | `FAUCET_KEY` | the faucet account's key (top it up with testnet NEAR when it runs low) |
 | `FAUCET_PER_IP_PER_DAY` | optional: accounts the faucet funds from one client IP each UTC day (default 10; always one per account) |
 | `DEMO_VENDOR_ACCOUNT` | `halcyon-demo.testnet` (the demo counterparty's vendor) |

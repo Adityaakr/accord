@@ -27,10 +27,11 @@ describe("fundingGap", () => {
     expect(fundingGap("default", { near: "0", ft: "0" })).toMatchObject({ faucet: "all", button: "Get test funds", funded: false });
     expect(fundingGap("default", { near: n(3n * NEAR), ft: "0" }).faucet).toBe("all");
   });
-  it("is done with 2.2 NEAR and the preset's ceiling", () => {
-    expect(fundingGap("default", { near: n(22n * NEAR / 10n), ft: "40000000" })).toMatchObject({ funded: true, faucet: null, line: null });
+  it("is done with 2.32 NEAR (the deposit and create_agreement's prepaid gas) and the preset's ceiling", () => {
+    expect(fundingGap("default", { near: n(235n * NEAR / 100n), ft: "40000000" })).toMatchObject({ funded: true, faucet: null, line: null });
     expect(fundingGap("usdc", { near: n(25n * NEAR / 10n), ft: "20000000" }).funded).toBe(true);
-    expect(fundingGap("usdc", { near: n(21n * NEAR / 10n), ft: "20000000" }).funded).toBe(false);
+    // 2.25 NEAR was measured too little for create_agreement on testnet (cost 2.3009)
+    expect(fundingGap("usdc", { near: n(225n * NEAR / 100n), ft: "20000000" }).funded).toBe(false);
   });
   it("formats two decimals", () => {
     expect(usdc2("20000000")).toBe("20.00");

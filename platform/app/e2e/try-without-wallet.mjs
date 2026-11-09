@@ -1,7 +1,8 @@
 // End-to-end: the wallet-free try-it path, driven in a real browser. Not part of CI: it spends testnet funds from
 // Accord's faucet and takes about ten minutes. It opens /app/try-it, chooses "Try without a wallet", and clicks
 // through every buyer step (the faucet and the room open on their own, then seal, approve, accept the recipient,
-// fund, accept the delivery, start the demo agent, pay, ask it to pay a new account, revoke).
+// fund, accept the delivery, start the demo agent, pay, ask it to pay a new account, revoke), then Finish: the room
+// closes early, its NEAR comes back and the throwaway account deletes itself into the faucet.
 //
 // Run with Playwright installed in the current directory (it is resolved from there, not from this file):
 //   cd <dir with node_modules/playwright> && node /path/to/platform/app/e2e/try-without-wallet.mjs [base]
@@ -55,7 +56,8 @@ try {
   await shot(page, "try-it-signed-out");
   await tryBtn.click();
   await page.getByText("Throwaway testnet key").first().waitFor({ timeout: 15_000 });
-  const account = await page.locator("span.mono").filter({ hasText: /^[0-9a-f]{64}$/ }).first().innerText();
+  // the page shows the account short (1121e5…0145) with the full id in its title
+  const account = await page.locator('span.mono[title]').filter({ hasText: /^[0-9a-f]{6}…[0-9a-f]{4}$/ }).first().getAttribute("title");
   mark("throwaway key", account);
   const keyLocation = await page.evaluate(() => ({
     session: !!sessionStorage.getItem("accord-throwaway-key"),
@@ -167,13 +169,36 @@ try {
     await page.waitForTimeout(5000);
   }
 
-  // 6. Reset deletes the key from the tab
-  const reset = page.getByRole("button", { name: "Reset" }).first();
-  if (await visible(reset)) {
-    await reset.click();
-    await page.waitForTimeout(1500);
-    log("after Reset, key in sessionStorage:", await page.evaluate(() => !!sessionStorage.getItem("accord-throwaway-key")));
-  }
+  // 6. Finish: close the room early (mutual_close, the demo vendor joins), withdraw_near, and delete the throwaway
+  // account with the faucet as beneficiary. The faucet's NEAR is read before and after through the app's own API.
+  at("finish");
+  // the read API answers { busy: true } while the network is busy: ask again a few times
+  const near = async (a) => {
+    for (let i = 0; i < 10; i++) {
+      const n = await page.evaluate(async ([base, a]) => (await (await fetch(`${new URL(base).pathname}/api/chain/balances?account=${a}`, { cache: "no-store" })).json()).near ?? null, [BASE, a]);
+      if (n !== null) return n;
+      await page.waitForTimeout(3000);
+    }
+    throw new Error(`could not read ${a}'s NEAR`);
+  };
+  const FAUCET = process.env.FAUCET ?? "faucet.accord-v2.testnet";
+  await page.goto(`${BASE}/try-it`, { waitUntil: "domcontentloaded" });
+  const finish = page.getByRole("button", { name: /^Finish: close the room/ });
+  await finish.waitFor({ timeout: 90_000 });
+  const before = await near(FAUCET);
+  log("faucet before Finish:", before);
+  await finish.click();
+  await page.getByRole("button", { name: "Finishing…" }).waitFor({ timeout: 10_000 }).catch(() => undefined);
+  await page.waitForFunction(() => !Array.from(document.querySelectorAll("button")).some((x) => x.textContent === "Finishing…"), null, { timeout: 300_000, polling: 1000 });
+  const outcome = (await page.locator("[role=status]").allInnerTexts()).join(" | ").replace(/\s+/g, " ");
+  log("finish:", outcome.slice(0, 300));
+  if (!/^Done\./.test(outcome) && !/ Done\./.test(outcome)) throw new Error(`Finish did not complete: ${outcome.slice(0, 200)}`);
+  await page.waitForTimeout(6000);
+  const after = await near(FAUCET);
+  log("faucet after Finish:", after, "gained", (BigInt(after) - BigInt(before)).toString(), "yoctoNEAR");
+  mark("finished", `faucet +${(Number((BigInt(after) - BigInt(before)) / 10n ** 21n) / 1000).toFixed(3)} NEAR`);
+  await shot(page, "finished");
+  log("after Finish, key in sessionStorage:", await page.evaluate(() => !!sessionStorage.getItem("accord-throwaway-key")));
   exit = 0;
 } catch (e) {
   log("FAILED:", e.message);

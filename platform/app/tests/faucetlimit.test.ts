@@ -2,7 +2,7 @@
 // its grants fall back to memory when there is no Postgres (the Postgres half is in packages/store/tests/faucet.test.ts).
 import { describe, expect, it } from "vitest";
 import { clientIp } from "../src/server/clientip";
-import { claimGrant, FAUCET_REFUSAL, faucetEmpty, isFaucetEmptyError, grantsToday, ipHash, perIpPerDay, releaseGrant, visitorsLeft } from "../src/server/faucetgrant";
+import { claimGrant, FAUCET_NEAR_TARGET, FAUCET_REFUSAL, faucetEmpty, isFaucetEmptyError, grantsToday, ipHash, perIpPerDay, releaseGrant, visitorsLeft } from "../src/server/faucetgrant";
 
 const req = (headers: Record<string, string>) => new Request("https://x/app/api/faucet", { method: "POST", headers });
 
@@ -75,9 +75,10 @@ describe("faucet refusals", () => {
 
 describe("visitorsLeft", () => {
   const NEAR = 10n ** 24n;
-  it("counts 2.5 NEAR plus gas a visitor, rounded down", () => {
+  it("counts 2.35 NEAR plus gas a visitor, rounded down", () => {
+    expect(FAUCET_NEAR_TARGET).toBe(235n * NEAR / 100n);
     expect(visitorsLeft(0n)).toBe(0);
-    expect(visitorsLeft(25n * NEAR / 10n)).toBe(0);
-    expect(visitorsLeft(100n * NEAR)).toBe(39);
+    expect(visitorsLeft(235n * NEAR / 100n)).toBe(0);
+    expect(visitorsLeft(100n * NEAR)).toBe(42);
   });
 });

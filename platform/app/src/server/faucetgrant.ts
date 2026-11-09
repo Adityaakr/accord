@@ -26,8 +26,13 @@ export function isFaucetEmptyError(e: unknown): boolean {
   const text = e instanceof Error ? `${e.name} ${e.message}` : String(e);
   return /NotEnoughBalance|LackBalanceForState|not enough balance/i.test(text);
 }
-/** The faucet tops a visitor's account up to 2.5 NEAR: the factory's 2 NEAR creation deposit and gas after it. */
-export const FAUCET_NEAR_TARGET = (25n * YOCTO) / 10n;
+/**
+ * The faucet tops a visitor's account up to 2.35 NEAR: the factory's 2 NEAR creation deposit, plus the prepaid gas
+ * bound the network checks before it runs create_agreement (about 0.30 NEAR at the pessimistic gas price, mostly
+ * refunded), and a little headroom. No more: a wallet-free visit that leaves before Finish (lib/finish.ts) costs the
+ * faucet at most this. 2.25 was measured too low on testnet ("Not enough balance ... cost: 2.3009...").
+ */
+export const FAUCET_NEAR_TARGET = (235n * YOCTO) / 100n;
 
 /**
  * How many more visitors the faucet's NEAR covers: each drip sends at most FAUCET_NEAR_TARGET (a new, empty account

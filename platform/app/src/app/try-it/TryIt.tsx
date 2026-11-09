@@ -20,6 +20,7 @@ import { browserAccord } from "@/components/chainClient";
 import { onVisibleInterval } from "@/components/visible";
 import { AccountId } from "@/components/account/AccountId";
 import { fundingGap, near2, usdc2 } from "@/lib/funding";
+import { useFinish } from "@/components/wallet/useFinish";
 import styles from "./tryit.module.css";
 
 interface Demo { vendor: string; authority: string; recipient: string; stranger: string; domain: string }
@@ -34,8 +35,20 @@ const POLL_MS = 10_000;
 
 type Status = "done" | "now" | "later";
 
-export function TryIt({ network, explorer, deposit, demo, ready }: {
-  network: string; explorer: string | null; token: string | null; deposit: string | null; demo: Demo; ready: Ready;
+/** A faucet refusal never ends the visit: three ways to see Accord work without test funds. */
+function Elsewhere() {
+  return (
+    <p className={`small ${styles.elsewhere}`}>
+      Meanwhile: <Link className="link" href="/try">Watch the public room</Link> (live) · <Link className="link" href={RECORDED_RUN}>See a recorded run</Link> · <Link className="link" href="/verify">Verify any agreement</Link>
+    </p>
+  );
+}
+
+/** A full wallet-free run on testnet: create, seals, negotiation, payment, the refused redirect and the revoke. */
+const RECORDED_RUN = "/agreements/a21.accord-v2.testnet";
+
+export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
+  network: string; explorer: string | null; token: string | null; deposit: string | null; demo: Demo; ready: Ready; perIp: number;
 }) {
   const w = useWallet();
   const org = useOrg();
@@ -48,6 +61,8 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
   const [checked, setChecked] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ step: number; ok: boolean; text: string; txs?: { label: string; hash: string }[] } | null>(null);
+  // the faucet said no (a limit, or empty): step 2 offers the ways to see Accord work without test funds
+  const [faucetRefused, setFaucetRefused] = useState(false);
   // Settlement: test USDC from our faucet by default; Circle's testnet USDC when the server offers it and the visitor
   // picks it. An existing room keeps the currency of the factory that created it.
   const currencies = cfg.currencies ?? [];
@@ -111,7 +126,11 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
       const nearOnly = circle;
       const r = await fetch("/api/faucet", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(nearOnly ? { only: "near" } : {}) });
       const b = (await r.json()) as { error?: string; txs?: { label: string; hash: string }[]; balances?: { near: string; tusdc: string } };
-      if (!r.ok) { setMsg({ step: 2, ok: false, text: b.error ?? `The faucet could not send right now (${r.status}).` }); return; }
+      if (!r.ok) {
+        setMsg({ step: 2, ok: false, text: b.error ?? `The faucet could not send right now (${r.status}).` });
+        if (r.status === 429 || (r.status === 503 && !(b as { busy?: boolean }).busy)) setFaucetRefused(true);
+        return;
+      }
       if (b.balances) {
         const got = b.balances;
         holdBal.current = Date.now() + 6_000;
@@ -162,6 +181,11 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
   const paid = room ? BigInt(room.paid) > 0n : false;
   const s5: Status = paid && room!.refusals > 0 ? "done" : s4 === "done" ? "now" : "later";
 
+  // Finish: after the agent's key is revoked (or any time before leaving), close the room and return the NEAR
+  const fin = useFinish(() => { setRoom(null); setBal(null); setMsg(null); });
+  const revoked = !!room && room.revoked_keys > 0 && !room.agent_key;
+  const s6: Status = fin.deleteTx ? "done" : revoked || s5 === "done" ? "now" : "later";
+
   const roomHref = room ? `/agreements/${room.account}` : null;
   const stage = !room ? null
     : room.state === "Sealed" ? (buyerSealed ? "Both mandates in; the Sealed Table negotiates next." : "Waiting for your mandate.")
@@ -204,8 +228,9 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
 
         <Row n={2} icon="bank" status={s2} title="Get test funds" text={<>
           {circle
-            ? <>Get Circle&apos;s testnet USDC at <a className="link" href={CIRCLE_FAUCET} target="_blank" rel="noreferrer">faucet.circle.com</a> (network NEAR Testnet, your account as the address): about 20 USDC per address every 1 to 2 hours. Our faucet sends the testnet NEAR: up to 2.5 NEAR, for the room&apos;s 2 NEAR deposit (returned when it closes) and gas. Once a day per account.</>
-            : <>The faucet tops your account up to 2.5 testnet NEAR (the room&apos;s 2 NEAR deposit, returned when it closes) and 100 test USDC. Once a day per account.</>}
+            ? <>Get Circle&apos;s testnet USDC at <a className="link" href={CIRCLE_FAUCET} target="_blank" rel="noreferrer">faucet.circle.com</a> (network NEAR Testnet, your account as the address): about 20 USDC per address every 1 to 2 hours. Our faucet sends the testnet NEAR: up to 2.35 NEAR, for the room&apos;s 2 NEAR deposit (returned when it closes) and gas.</>
+            : <>The faucet tops your account up to 2.35 testnet NEAR (the room&apos;s 2 NEAR deposit, returned when it closes, and gas) and 100 test USDC.</>}
+          {" "}Once a day per account, and up to {perIp} accounts per connection a day.
           {shown && <span className={`mono ${styles.bal}`}>{near2(shown.near)} NEAR · {usdc2(shown.ft)} {sym}</span>}
           {gap?.line && s2 !== "done" && <span className={styles.gap}>{gap.line}</span>}
         </>}>
@@ -215,6 +240,7 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
             </button>
           )}
           <Note step={2} />
+          {faucetRefused && s2 !== "done" && <Elsewhere />}
         </Row>
 
         <Row n={3} icon="store" status={s3} title="Open a deal room" text={room
@@ -242,6 +268,24 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
         </>}>
           {roomHref && <Link className={s5 === "now" ? styles.primary : styles.secondary} href={roomHref}>Open the room</Link>}
         </Row>
+
+        {(fin.available || fin.deleteTx || fin.progress) && (
+          <Row n={6} icon="power" status={s6} title="Finish" text={<>
+            Close the room and give the test NEAR back: your throwaway key {room && room.state === "Executing" ? <>asks to close it early (<span className="mono">mutual_close</span>) and the demo vendor agrees, so the escrow comes back</> : <>cancels it</>}, <span className="mono">withdraw_near</span> returns the room&apos;s deposit, and the throwaway account deletes itself with the faucet as beneficiary, so the next visitor can use the NEAR. Reset does the same.
+          </>}>
+            {!fin.deleteTx && (
+              <button type="button" className={s6 === "now" ? styles.primary : styles.secondary} disabled={fin.running || busy !== null} onClick={() => void fin.run()}>
+                {fin.running ? "Finishing…" : "Finish: close the room and return the test NEAR"}
+              </button>
+            )}
+            {(fin.progress || fin.error) && (
+              <div className={fin.error ? styles.note : styles.noteOk} role="status">
+                <span>{fin.error ?? fin.progress}</span>
+                {fin.deleteTx && <a className="mono link small" href={txUrl(fin.deleteTx) ?? "#"} target="_blank" rel="noreferrer">delete_account · tx {fin.deleteTx.slice(0, 8)}</a>}
+              </div>
+            )}
+          </Row>
+        )}
       </ol>
       <p className="small">
         Prefer to read first? <Link className="link" href="/verify">Check any agreement yourself</Link> or see <Link className="link" href="/try">the attack recorded on testnet</Link>.

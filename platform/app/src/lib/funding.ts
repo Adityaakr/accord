@@ -4,8 +4,11 @@
 // unit-tested.
 
 const YOCTO = 10n ** 24n;
-/** The room's 2 NEAR deposit and gas for the calls after it. */
-export const NEAR_NEEDED = 2n * YOCTO + YOCTO / 5n;
+/**
+ * The room's 2 NEAR deposit and the prepaid gas bound create_agreement must cover (about 0.30 NEAR, mostly refunded);
+ * the faucet tops up to 2.35.
+ */
+export const NEAR_NEEDED = 2n * YOCTO + (32n * YOCTO) / 100n;
 /** The buyer preset's ceiling, in the token's 6-decimal units. */
 export const TOKEN_NEEDED = { default: 40_000_000n, usdc: 18_000_000n } as const;
 

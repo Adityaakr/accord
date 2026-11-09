@@ -652,3 +652,31 @@ page retried and got through, but a visitor saw raw RPC errors. Fixed the same d
 - Tests: `packages/sdk/test/rpc.test.ts` (local mock servers: 429, -429, 502/503, contract panic kept, AccessKeyDoesNotExist
   kept, network error, timeout, all failing, cooldown, InvalidNonce after a transport failure, no key in errors) and
   `app/tests/rpcbusy.test.ts`.
+
+## 29. Try-it: per-connection faucet limit, server-side reads, Finish returns the NEAR (9 Nov 2026)
+
+- Faucet limit: one grant per account a UTC day, and up to `FAUCET_PER_IP_PER_DAY` (default 10) accounts per client IP,
+  because visitors behind one office or home connection share an address. `faucet_grants` keeps one `ip` row per
+  account (subject `<salted sha256>:<account>`) and counts them under a Postgres advisory lock, so a burst from one
+  connection cannot pass the limit (`packages/store/tests/faucet.test.ts`, run against a local Postgres).
+- Top-up: 2.35 NEAR, not 2.5. The coordinator asked for 2 NEAR plus about 0.25; a local testnet run measured 2.25 as
+  too little: `create_agreement` from the throwaway account answered "Not enough balance ... (balance:
+  2250000000000000000000000, cost: 2300922087430530000000000)", because the network checks the 2 NEAR deposit plus the
+  transaction's prepaid gas bound before it runs (most of that gas is refunded). Step 2 counts 2.32 NEAR as enough.
+- Reads: the browser reads the chain only through the app (`POST /app/api/chain`, reads only, cached 2.5 s for state
+  and 5 s for balances, always HTTP 200; `GET /app/api/chain/balances`). Watching try-it and a room page for 60 s
+  each on the local app: 0 console errors, 0 failed requests, 0 requests to RPC hosts. The live site's try-it made 50
+  direct public RPC requests in the same 60 s. The throwaway key still submits its own transactions (and reads its
+  nonce) over the public endpoints.
+- Finish (`app/src/lib/finish.ts`): with the throwaway key, a sealed or attested room is cancelled; an executing room
+  is closed early with `mutual_close` (the buyer through the relayer, then Accord's demo vendor through
+  `POST /app/api/demo-counterparty/close`, which acts only after the buyer's own request is on chain); then
+  `withdraw_near`, then the account deletes itself with `faucet.accord-v2.testnet` as beneficiary. Reset runs the same.
+  Local testnet runs (9 Nov 2026):
+  - a24.accord-v2.testnet (still `Sealed`): cancel, withdraw, delete in 12 s; the faucet gained 2.460 NEAR (delete tx
+    `V2vExdob…`).
+  - a28.accord-v2.testnet, the full path through pay, `ERR_PAYEE_MISMATCH` and revoke (`app/e2e/try-without-wallet.mjs`):
+    Finish took about 90 s; a28 is `Settled` with `mutual_close` from both sides and 6.00 tUSDC of escrow refunded; the
+    throwaway account no longer exists; the faucet went from 47.568 to 49.764 NEAR (+2.196 of the 2.35 sent; the rest is
+    gas and a28's 0.129 NEAR storage stake). Delete tx `f9WSjEpS…`.
+  A visitor who closes the tab before Finish still costs the faucet up to 2.35 NEAR.
