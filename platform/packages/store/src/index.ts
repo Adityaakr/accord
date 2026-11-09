@@ -45,6 +45,7 @@ create table if not exists demo_vendors (recipient text primary key, authority t
 create table if not exists try_rooms (agreement text primary key, opened_at timestamptz not null, closed_at timestamptz, items_paid int not null default 0, status text not null);
 create table if not exists heartbeats (service text primary key, at timestamptz, detail jsonb);
 create table if not exists faucet_grants (day date not null, kind text not null check (kind in ('account', 'ip')), subject text not null, granted_at timestamptz not null default now(), primary key (day, kind, subject));
+create table if not exists faucet_days (day date primary key, open_yocto numeric not null, opened_at timestamptz not null default now());
 `;
 
 interface FileDb extends OrgTables, AgentLogTables {
@@ -342,7 +343,7 @@ export type FaucetClaim = "granted" | "account_used" | "ip_used";
 export const faucetDay = (at = new Date()) => at.toISOString().slice(0, 10);
 
 /** Grants per client IP each day unless the caller says otherwise. */
-export const FAUCET_IP_LIMIT_DEFAULT = 10;
+export const FAUCET_IP_LIMIT_DEFAULT = 30;
 
 /**
  * Claims today's grant for `account` from `ip`: the account row and one IP row are inserted together, or neither.
@@ -384,6 +385,20 @@ export async function releaseFaucetGrant(account: string, ip: string, day = fauc
   const p = await db();
   if (!p) return;
   await p.query("delete from faucet_grants where day = $1 and ((kind = 'account' and subject = $2) or (kind = 'ip' and subject = $3))", [day, account, `${ip}:${account}`]);
+}
+
+/**
+ * The faucet's NEAR balance when `day` (UTC) first asked: the first caller's `yocto` is kept, later callers get it
+ * back. The day's net outflow (grants sent minus what Finish returned, plus gas) is this minus the balance now. Null
+ * without Postgres.
+ */
+export async function faucetDayOpen(day: string, yocto: bigint): Promise<bigint | null> {
+  const p = await db();
+  if (!p) return null;
+  await p.query("insert into faucet_days (day, open_yocto) values ($1, $2) on conflict do nothing", [day, yocto.toString()]);
+  const r = await p.query("select open_yocto::text as v from faucet_days where day = $1", [day]);
+  const v = (r.rows[0] as { v?: string } | undefined)?.v;
+  return v ? BigInt(v) : null;
 }
 
 /** Accounts granted on `day`, or null without Postgres. */

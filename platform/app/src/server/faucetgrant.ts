@@ -1,10 +1,11 @@
-// The faucet's limit: one drip per account each UTC day, and up to FAUCET_PER_IP_PER_DAY (default 10) per client IP,
-// because visitors behind one office or home connection share an address. Kept in Postgres through
+// The faucet's limits: one drip per account each UTC day, up to FAUCET_PER_IP_PER_DAY (default 30) per client IP,
+// because visitors behind one office, venue or home connection share an address, and a daily budget of net outflow
+// (FAUCET_DAILY_BUDGET_NEAR, default 25 NEAR), since Finish returns most of each drip. Kept in Postgres through
 // @accord/store when DATABASE_URL is set, so a redeploy does not reset it; in this process's memory otherwise
 // (local development). The IP is stored as a salted sha256, never as the address. Pure of server-only so it is
 // testable.
 import { createHash } from "node:crypto";
-import { claimFaucetGrant, faucetDay, faucetGrantsOn, releaseFaucetGrant, FAUCET_IP_LIMIT_DEFAULT, type FaucetClaim } from "@accord/store";
+import { claimFaucetGrant, faucetDay, faucetDayOpen, faucetGrantsOn, releaseFaucetGrant, FAUCET_IP_LIMIT_DEFAULT, type FaucetClaim } from "@accord/store";
 
 const YOCTO = 10n ** 24n;
 
@@ -12,6 +13,7 @@ const YOCTO = 10n ** 24n;
 export const FAUCET_REFUSAL = {
   account_used: "This account already received test funds today.",
   ip_used: "Too many accounts from this connection today. Try again tomorrow, or connect your own wallet.",
+  budget: "The faucet has given out today's test NEAR for now; it reopens at 00:00 UTC.",
   empty: "The faucet is out of test NEAR for now.",
 } as const;
 
@@ -43,10 +45,44 @@ export function visitorsLeft(near: bigint): number {
   return Number(near / (FAUCET_NEAR_TARGET + YOCTO / 100n));
 }
 
-/** Accounts the faucet funds from one client IP each UTC day: FAUCET_PER_IP_PER_DAY, 10 when unset or not a positive integer. */
+/** Accounts the faucet funds from one client IP each UTC day: FAUCET_PER_IP_PER_DAY, 30 when unset or not a positive integer. */
 export function perIpPerDay(env: string | undefined = process.env.FAUCET_PER_IP_PER_DAY): number {
   const n = Number(env);
   return Number.isInteger(n) && n > 0 ? n : FAUCET_IP_LIMIT_DEFAULT;
+}
+
+/** The faucet's net outflow allowed per UTC day, in NEAR: FAUCET_DAILY_BUDGET_NEAR, 25 when unset or not positive. */
+export const DAILY_BUDGET_NEAR_DEFAULT = 25;
+export function dailyBudgetYocto(env: string | undefined = process.env.FAUCET_DAILY_BUDGET_NEAR): bigint {
+  const n = Number(env);
+  const near = Number.isFinite(n) && n > 0 ? n : DAILY_BUDGET_NEAR_DEFAULT;
+  return BigInt(Math.round(near * 1000)) * (YOCTO / 1000n);
+}
+
+export interface Budget {
+  day: string;
+  /** Net NEAR out of the faucet today: its balance at the day's first check minus its balance now (0 if it grew). */
+  used: bigint;
+  budget: bigint;
+  /** Whether one more full drip fits. */
+  open: boolean;
+  /** False when the day's opening balance lives in this process only (no Postgres). */
+  durable: boolean;
+}
+
+const memOpen = new Map<string, bigint>();
+
+/**
+ * Today's budget, measured on chain: `balance` is the faucet's NEAR now. The first check of a UTC day records the
+ * opening balance; drips lower the balance and Finish's delete_account returns most of a drip, so the difference is
+ * what the day's visits cost. A top-up of the faucet during the day counts as budget given back.
+ */
+export async function budgetToday(balance: bigint, day = faucetDay(), budget = dailyBudgetYocto(), drip = FAUCET_NEAR_TARGET): Promise<Budget> {
+  const stored = await faucetDayOpen(day, balance).catch(() => null);
+  if (stored === null && !memOpen.has(day)) memOpen.set(day, balance);
+  const open = stored ?? memOpen.get(day)!;
+  const used = open > balance ? open - balance : 0n;
+  return { day, used, budget, open: used + drip <= budget, durable: stored !== null };
 }
 
 const memAccounts = new Set<string>();

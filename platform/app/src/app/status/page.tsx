@@ -2,7 +2,7 @@ import Link from "next/link";
 import { config, source } from "@/server/accord";
 import { heartbeats } from "@/server/store";
 import { faucetStatus } from "@/server/demo";
-import { FAUCET_NEAR_TARGET, grantsToday, perIpPerDay, visitorsLeft } from "@/server/faucetgrant";
+import { budgetToday, FAUCET_NEAR_TARGET, grantsToday, perIpPerDay, visitorsLeft, type Budget } from "@/server/faucetgrant";
 import { formatNear } from "@accord/sdk";
 import { PageHead, Panel, Pill } from "@/components/ui";
 import { SourceLine } from "@/components/SourceLine";
@@ -32,6 +32,7 @@ export default async function Status() {
   const [src, beats, faucet, grants] = await Promise.all([
     source().catch(() => null), heartbeats().catch(() => []), faucetStatus().catch(() => undefined), grantsToday().catch(() => null),
   ]);
+  const budget: Budget | null = faucet ? await budgetToday(faucet.near).catch(() => null) : null;
   const now = Date.now();
   return (
     <div className="container" style={{ maxWidth: 820 }}>
@@ -63,10 +64,21 @@ export default async function Status() {
                 <span className="mono">{grants.count}{grants.durable ? "" : " since this process started"}</span>
               </div>
             )}
+            {budget && (
+              <div className={styles.statusRow}>
+                <span>Daily budget used (UTC {budget.day})</span>
+                <span className="mono">
+                  {formatNear(budget.used, 2)} of {formatNear(budget.budget, 0)} NEAR{budget.durable ? "" : " since this process started"}
+                  {!budget.open && <> · <Pill tone="warn">closed until 00:00 UTC</Pill></>}
+                </span>
+              </div>
+            )}
             <p className="small" style={{ paddingTop: 14 }}>
               The estimate assumes every visitor arrives with an empty account and takes the full <span className="mono">{formatNear(FAUCET_NEAR_TARGET, 2)}</span> NEAR plus gas, so it is a floor;
               a visitor who presses Finish gives most of it back. Each account gets one drip a UTC day, and each connection up
-              to <span className="mono">{perIpPerDay()}</span>.
+              to <span className="mono">{perIpPerDay()}</span>. The daily budget is the faucet&apos;s net outflow, its balance at the
+              day&apos;s first check minus its balance now, so what Finish returns counts back in; once a full drip no longer fits,
+              try-it offers a recorded replay and the live <span className="mono">/try</span> room, neither of which needs funds.
             </p>
           </>
         )}

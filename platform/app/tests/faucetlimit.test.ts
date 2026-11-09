@@ -2,7 +2,7 @@
 // its grants fall back to memory when there is no Postgres (the Postgres half is in packages/store/tests/faucet.test.ts).
 import { describe, expect, it } from "vitest";
 import { clientIp } from "../src/server/clientip";
-import { claimGrant, FAUCET_NEAR_TARGET, FAUCET_REFUSAL, faucetEmpty, isFaucetEmptyError, grantsToday, ipHash, perIpPerDay, releaseGrant, visitorsLeft } from "../src/server/faucetgrant";
+import { budgetToday, claimGrant, dailyBudgetYocto, FAUCET_NEAR_TARGET, FAUCET_REFUSAL, faucetEmpty, isFaucetEmptyError, grantsToday, ipHash, perIpPerDay, releaseGrant, visitorsLeft } from "../src/server/faucetgrant";
 
 const req = (headers: Record<string, string>) => new Request("https://x/app/api/faucet", { method: "POST", headers });
 
@@ -45,14 +45,14 @@ describe("faucet grants in memory (no DATABASE_URL)", () => {
 });
 
 describe("perIpPerDay", () => {
-  it("is 10 by default and FAUCET_PER_IP_PER_DAY when it is a positive integer", () => {
-    expect(perIpPerDay(undefined)).toBe(10);
-    expect(perIpPerDay("")).toBe(10);
+  it("is 30 by default and FAUCET_PER_IP_PER_DAY when it is a positive integer", () => {
+    expect(perIpPerDay(undefined)).toBe(30);
+    expect(perIpPerDay("")).toBe(30);
     expect(perIpPerDay("25")).toBe(25);
-    expect(perIpPerDay("0")).toBe(10);
-    expect(perIpPerDay("-3")).toBe(10);
-    expect(perIpPerDay("2.5")).toBe(10);
-    expect(perIpPerDay("lots")).toBe(10);
+    expect(perIpPerDay("0")).toBe(30);
+    expect(perIpPerDay("-3")).toBe(30);
+    expect(perIpPerDay("2.5")).toBe(30);
+    expect(perIpPerDay("lots")).toBe(30);
   });
 });
 
@@ -80,5 +80,32 @@ describe("visitorsLeft", () => {
     expect(visitorsLeft(0n)).toBe(0);
     expect(visitorsLeft(235n * NEAR / 100n)).toBe(0);
     expect(visitorsLeft(100n * NEAR)).toBe(42);
+  });
+});
+
+describe("the daily budget", () => {
+  const N = 10n ** 24n;
+  it("is 25 NEAR by default and FAUCET_DAILY_BUDGET_NEAR when it is a positive number", () => {
+    expect(dailyBudgetYocto(undefined)).toBe(25n * N);
+    expect(dailyBudgetYocto("40")).toBe(40n * N);
+    expect(dailyBudgetYocto("2.5")).toBe(25n * N / 10n);
+    expect(dailyBudgetYocto("0")).toBe(25n * N);
+    expect(dailyBudgetYocto("lots")).toBe(25n * N);
+  });
+  it("counts the net outflow from the day's first balance, and closes when a full drip no longer fits", async () => {
+    const day = "2026-11-11";
+    const first = await budgetToday(100n * N, day, 10n * N);
+    expect(first).toMatchObject({ used: 0n, open: true });
+    // drips out and Finish's returns in: 7.5 NEAR net so far
+    expect((await budgetToday(925n * N / 10n, day, 10n * N))).toMatchObject({ used: 75n * N / 10n, open: true });
+    // 7.7 NEAR used: one more 2.35 NEAR drip would pass 10
+    expect((await budgetToday(923n * N / 10n, day, 10n * N)).open).toBe(false);
+    // a top-up during the day counts as budget given back
+    expect((await budgetToday(120n * N, day, 10n * N))).toMatchObject({ used: 0n, open: true });
+  });
+  it("starts again each UTC day", async () => {
+    await budgetToday(50n * N, "2026-11-12", 10n * N);
+    expect((await budgetToday(30n * N, "2026-11-12", 10n * N)).open).toBe(false);
+    expect((await budgetToday(30n * N, "2026-11-13", 10n * N))).toMatchObject({ used: 0n, open: true });
   });
 });

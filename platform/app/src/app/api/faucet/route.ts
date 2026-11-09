@@ -1,14 +1,15 @@
 // POST /api/faucet: tops the signed-in account up to 2.35 testnet NEAR and 100 test USDC, from Accord's own faucet
 // account. Testnet only, bound to the session (the account this browser proved), once a UTC day per account and up to
-// FAUCET_PER_IP_PER_DAY (default 10) accounts per client IP (server/faucetgrant.ts: Postgres when DATABASE_URL is set,
-// so a redeploy does not reset it).
+// FAUCET_PER_IP_PER_DAY (default 30) accounts per client IP, within a daily budget of net outflow
+// (FAUCET_DAILY_BUDGET_NEAR, default 25 NEAR) (server/faucetgrant.ts: Postgres when DATABASE_URL is set, so a
+// redeploy does not reset it). Refused with code `budget` once a full drip no longer fits today.
 // POST {"only":"near"} sends NEAR only (a Circle USDC visitor who already holds enough USDC). GET returns the session
 // account's balances.
 import { NextResponse } from "next/server";
 import { sessionAccount } from "@/server/session";
 import { clientIp, sameOriginJson } from "@/server/ratelimit";
-import { claimGrant, FAUCET_REFUSAL, releaseGrant } from "@/server/faucetgrant";
-import { balances, demoReady, drip } from "@/server/demo";
+import { budgetToday, claimGrant, FAUCET_REFUSAL, releaseGrant } from "@/server/faucetgrant";
+import { balances, demoReady, drip, faucetStatus } from "@/server/demo";
 import { chainErrorResponse } from "@/server/rpcerror";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +26,9 @@ export async function POST(req: Request) {
   if (!demoReady().faucet) return NextResponse.json({ error: "the faucet is not configured on this server" }, { status: 503 });
   const account = await sessionAccount();
   if (!account) return NextResponse.json({ error: "confirm it's you first, so the faucet knows which account to fund" }, { status: 401 });
+  // the day's budget first: past it nobody is granted, and the page offers the replay and the live room instead
+  const f = await faucetStatus().catch(() => null);
+  if (f && !(await budgetToday(f.near)).open) return NextResponse.json({ error: FAUCET_REFUSAL.budget, code: "budget" }, { status: 429 });
   const ip = clientIp(req);
   const claim = await claimGrant(account, ip);
   if (claim === "account_used") return NextResponse.json({ error: FAUCET_REFUSAL.account_used, code: "account_used" }, { status: 429 });

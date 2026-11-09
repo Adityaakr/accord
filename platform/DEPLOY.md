@@ -26,7 +26,8 @@ website service forwards `<site>/app/*` to it, so visitors use one address.
 | `RESEND_API_KEY` | optional: invite and notification emails |
 | `FAUCET_ACCOUNT` | `faucet.accord-v2.testnet`: tops visitors up to 2.35 NEAR and 100 tUSDC on `/app/try-it` |
 | `FAUCET_KEY` | the faucet account's key (top it up with testnet NEAR when it runs low) |
-| `FAUCET_PER_IP_PER_DAY` | optional: accounts the faucet funds from one client IP each UTC day (default 10; always one per account) |
+| `FAUCET_PER_IP_PER_DAY` | optional: accounts the faucet funds from one client IP each UTC day (default 30; always one per account) |
+| `FAUCET_DAILY_BUDGET_NEAR` | optional: the faucet's net NEAR outflow allowed per UTC day, its balance at the day's first check minus its balance now (default 25); past it the faucet refuses with code `budget` and try-it offers the replay and the live room |
 | `DEMO_VENDOR_ACCOUNT` | `halcyon-demo.testnet` (the demo counterparty's vendor) |
 | `DEMO_VENDOR_KEY` | its key (`VENDOR_KEY` in `accord-app/.env`) |
 | `DEMO_AUTHORITY_ACCOUNT` | `halcyon-auth.testnet` |
