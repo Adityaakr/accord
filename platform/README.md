@@ -18,7 +18,7 @@ Open `/app/try-it`: live at https://accordweb-production.up.railway.app/app/try-
 USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, with its authority
 `halcyon-auth.testnet`), and the agent is a demo agent run by Accord for test rooms; both are labelled in the room.
 
-1. Do: **Connect a NEAR wallet**, a NEAR testnet wallet such as Meteor or Intear. See: `01 Connect a wallet · done`, with your account.
+1. Do: **Connect a NEAR wallet**, a NEAR testnet wallet such as Meteor or Intear, or choose **Try without a wallet**: the page makes a throwaway testnet key in this tab (sessionStorage only, never sent to the server, gone when the tab closes), and steps 2 and 3 run on their own. See: `01 Connect a wallet · done`, with your account; for the throwaway key, a 64-character implicit account labelled `Throwaway testnet key`.
 2. Do: **Get test funds**. See: `0.00 NEAR` become `2.50 NEAR · 100.00 tUSDC`, with both faucet transactions linked.
 3. Do: **Create the room**. See: `Your room is a8.accord-v2.testnet: My first deal room.` (your number will differ).
 4. Do: **Seal your mandate** with the Northwind preset (40 tUSDC ceiling, 2 to 4 items). See, in the room's Demo
