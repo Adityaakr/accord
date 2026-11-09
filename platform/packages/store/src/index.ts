@@ -9,8 +9,10 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
 import { ORG_SCHEMA, orgs, type OrgTables } from "./orgs.js";
+import { AGENT_LOG_SCHEMA, agentLog, type AgentLogTables } from "./agentlog.js";
 
 export * from "./orgs.js";
+export * from "./agentlog.js";
 
 export interface InboxMessage {
   id: string;
@@ -45,7 +47,7 @@ create table if not exists heartbeats (service text primary key, at timestamptz,
 create table if not exists faucet_grants (day date not null, kind text not null check (kind in ('account', 'ip')), subject text not null, granted_at timestamptz not null default now(), primary key (day, kind, subject));
 `;
 
-interface FileDb extends OrgTables {
+interface FileDb extends OrgTables, AgentLogTables {
   inbox: InboxMessage[];
   approvals: Approval[];
   demoVendors: DemoVendor[];
@@ -60,7 +62,7 @@ async function db(): Promise<pg.Pool | null> {
   if (!process.env.DATABASE_URL) return null;
   if (!pool) {
     pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 5 });
-    ready = pool.query(SCHEMA + ORG_SCHEMA).then(() => undefined);
+    ready = pool.query(SCHEMA + ORG_SCHEMA + AGENT_LOG_SCHEMA).then(() => undefined);
   }
   await ready;
   return pool;
@@ -394,3 +396,6 @@ export async function faucetGrantsOn(day = faucetDay()): Promise<number | null> 
 
 /** Organisations, members, roles, invitations and the audit log (./orgs.ts), on the same backend as the rest. */
 export const org = orgs({ db, read: () => readFile(), mutate: (f) => mutate((d) => f(d)) });
+
+/** The demo agent's record of what it was asked and meant to do in each test room (./agentlog.ts). */
+export const agentActions = agentLog({ db, read: () => readFile(), mutate: (f) => mutate((d) => f(d)) });
