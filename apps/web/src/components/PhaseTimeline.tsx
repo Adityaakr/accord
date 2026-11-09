@@ -50,7 +50,7 @@ export function ProofGroup({ label, meta, proofs, note, level = 2 }: { label: st
                 : p.txs.map((t, k) => (
                     <span key={t}>
                       {k > 0 ? <span className={tl.sep}>·</span> : null}
-                      <QuietLink href={t} className={tl.ok} label={`${p.title}: open transaction ${k + 1}`}>{p.txs.length > 1 ? `tx ${k + 1}` : "tx"}</QuietLink>
+                      <QuietLink href={t} className={tl.ok} label={`${p.title}: open transaction ${k + 1}${p.txLabels?.[k] ? `, ${p.txLabels[k]}` : ""}`}>{p.txLabels?.[k] ?? (p.txs.length > 1 ? `tx ${k + 1}` : "tx")}</QuietLink>
                     </span>
                   ))}
             </span>

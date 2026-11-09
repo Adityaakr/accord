@@ -532,7 +532,7 @@ no mock or F1 symbols, 9 agreements match. Agreements created before this keep r
 | finish: pay | a10 | item 1, 12.00 USDC to halcyon-mm.testnet | `Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm` |
 | finish: refused | a10 | ERR_PAYEE_MISMATCH | `51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu` |
 | attack | a11 | ERR_PAYEE_MISMATCH, ERR_AMOUNT_MISMATCH, ERR_CANARY revokes and deletes the key; 0.00 moved | `HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv`, `3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh`, `DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT` |
-| revoke | a13 | DeleteKey; next call AccessKeyDoesNotExist; new key pays item 2 | `8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3`, `DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT`, `24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe` |
+| revoke | a13 | `revoke_agent` deletes the key; the next call fails with AccessKeyDoesNotExist at the RPC (no transaction); `install_agent_key` adds a new key, which pays item 2 (12.00 USDC to halcyon-mm.testnet) | revoke `8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3`, install_agent_key `DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT`, pay `24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe` |
 | verify | a10 | code = release 4 · 5 ok · 1 partial · 1 not checked | |
 
 The first `make revoke` run (a12) stopped at its last step because the script paid item 2 at a fixed 12.00 while the

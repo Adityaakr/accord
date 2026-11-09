@@ -108,7 +108,7 @@ export const RELEASE_TX: Record<string, Record<number, string>> = {
 
 /* Later proofs, from DECISIONS 26 (9 Nov 2026). a6 above stays the original walkthrough. Each row is one proof with
    the transactions behind it; a row with no transaction links the agreement's account. */
-export type Proof = { title: string; agreement: string; mono?: string; refused?: boolean; txs: string[] }
+export type Proof = { title: string; agreement: string; mono?: string; refused?: boolean; txs: string[]; /** What each tx is, when a step has several */ txLabels?: string[] }
 export const RELEASE4 = {
   release: 4,
   agreement: "a10.accord-v2.testnet",
@@ -126,7 +126,7 @@ export const RELEASE4 = {
     { title: "Agent pays item 1", agreement: "a10.accord-v2.testnet", mono: "12.00 USDC", txs: [tx("Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm")] },
     { title: "A redirected payment is refused", agreement: "a10.accord-v2.testnet", mono: "ERR_PAYEE_MISMATCH", refused: true, txs: [tx("51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu")] },
     { title: "Attack: redirect, altered amount, canary", agreement: "a11.accord-v2.testnet", mono: "0.00 moved · key deleted", refused: true, txs: [tx("HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv"), tx("3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh"), tx("DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT")] },
-    { title: "Revoke, then a new key pays item 2", agreement: "a13.accord-v2.testnet", mono: "AccessKeyDoesNotExist", refused: true, txs: [tx("8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3"), tx("DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT"), tx("24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe")] },
+    { title: "Revoke, then a new key pays item 2", agreement: "a13.accord-v2.testnet", mono: "AccessKeyDoesNotExist", refused: true, txs: [tx("8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3"), tx("DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT"), tx("24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe")], txLabels: ["revoke", "new key", "pay item 2"] },
   ] as Proof[],
 }
 export const CIRCLE = {
