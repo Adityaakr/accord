@@ -14,6 +14,8 @@ const TARGETS: Record<string, () => Promise<{ run: Run }>> = {
   "market-making": () => import("./targets/market-making.js"),
   demo: () => import("./targets/demo.js"),
   finish: () => import("./targets/finish.js"),
+  "dispute-close": () => import("./targets/dispute-close.js"),
+  cancel: () => import("./targets/cancel.js"),
   inbox: () => import("./targets/inbox.js"),
   measure: () => import("./targets/measure.js"),
   approve: step("approve"),

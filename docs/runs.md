@@ -13,6 +13,7 @@ Units: agreements of `accord-v2.testnet` settle in test USDC (`tusdc.accord-v1.t
 | `a15.accord-v2.testnet` | 9 Nov 2026 | `/app/try-it` on the public URL, wallet calls relayed | [below](#a15-try-it-on-the-public-url), DECISIONS 27 |
 | `a21.accord-v2.testnet` | 9 Nov 2026 | Try without a wallet on the public URL | [below](#a21-try-without-a-wallet-on-the-public-url), DECISIONS 28 |
 | `a32.accord-v2.testnet` | 9 Nov 2026 | The run [/app/replay](https://accordweb-production.up.railway.app/app/replay) plays back, each step with its transaction; now `Settled` | the replay page |
+| `a48.accord-v2.testnet` | 10 Nov 2026 | Flow proofs: a dispute resolved by re-delivery, a dispute left open, an early mutual close that refunds the unspent escrow | [below](#flow-proofs) |
 
 Market-making agreements have run end to end on a local node only (`make market-making NET=local`, recorded in [`platform/README.md`](../platform/README.md#the-whole-product-on-your-machine)); on testnet they wait on an OutLayer payment key ([`platform/docs/build/BLOCKED.md`](../platform/docs/build/BLOCKED.md) 3.7).
 
@@ -117,3 +118,70 @@ The relayed `create_agreement` failed, so it was signed directly. The relayer pa
 | Buyer revokes the key (relayed); 0 keys on a21 | [`BGJEcstT…`](https://testnet.nearblocks.io/txns/BGJEcstTMS3oNyWiy92y7D8QRZqne2AFaNR2gxj8yy58) |
 
 The free RPC tier rate-limited the run (HTTP 429, JSON-RPC `-429`), and the page showed those as 502s before it got through. Since then the SDK's `RotatingRpcProvider` moves to the next testnet endpoint only on a rate limit or a transport failure and keeps every real error (a contract refusal, `AccessKeyDoesNotExist`) unchanged, and the app answers a busy network with a 503 and "The network is busy, retrying" (DECISIONS 28).
+
+## Flow proofs
+
+10 Nov 2026, release 4, factory `accord-v2.testnet` (tUSDC). One new agreement, [`a48.accord-v2.testnet`](https://testnet.nearblocks.io/address/a48.accord-v2.testnet), taken through the flows the earlier runs did not show: a disputed delivery and how the contract resolves it, and an early close that refunds the unspent escrow to the buyer. Run with `make dispute-close` (from `platform/`, [`packages/live/src/targets/dispute-close.ts`](../platform/packages/live/src/targets/dispute-close.ts)); every call is the SDK's, signed by the demo principals. The run's own checks all passed.
+
+The dispute rules (`contracts/agreement/src/evidence.rs`): the buyer may dispute a `Delivered` item before its acceptance window ends (`Delivered → Disputed`); the agent cannot pay a disputed item; the vendor may deliver it again (`Disputed → Delivered`), which the buyer then accepts or disputes again; a delivery nobody disputes is accepted when its window lapses. At the close only `Eligible` items are paid, so a disputed item's amount goes back to the buyer.
+
+### Setup and first payment
+
+| Step | Account | Transaction | Result |
+| --- | --- | --- | --- |
+| Create | buyer `northwind-demo.testnet` | [`CvwWnucn…`](https://testnet.nearblocks.io/txns/CvwWnucngbNLNeFAGPJzVz6UBC7dMbE1GY5QActCKkDf) | `a48` created on release 4; terms after the Sealed Table: `32.00 tUSDC`, items `12.00`, `12.00`, `8.00` |
+| Fund | buyer | [`CBUZiwDe…`](https://testnet.nearblocks.io/txns/CBUZiwDeLQcCDi6tLog5Sz6Pzn5CW4UnEbSBbCKM7Swo) | `32.00 tUSDC` escrowed on `a48` |
+| Agent key | buyer | [`AwZuY3eY…`](https://testnet.nearblocks.io/txns/AwZuY3eYoYENL2apoAZjeSCw16ppWJjBzCNms4efJSZF) | `install_agent_key`; recipient `halcyon-mm.testnet` proven by the Payee job (rating `allow`) and active |
+| Deliver item 1 | vendor `halcyon-demo.testnet` | [`6RRkmYGk…`](https://testnet.nearblocks.io/txns/6RRkmYGkWs8NqkoLjZef5aESgFXUZFgrPyn1Qu3yvs2u) | `Delivered` |
+| Accept item 1 | buyer | [`9xRQxgis…`](https://testnet.nearblocks.io/txns/9xRQxgisCNG3N1AL13DgaHVjE7th6ERMvsFZd14TQcUq) | `Eligible` |
+| Pay item 1 | agent (key on `a48`) | [`FCoVrHqR…`](https://testnet.nearblocks.io/txns/FCoVrHqR9wxDGosv5Nxxs2Zr4F2LzeFUXi5Ub86m8vX6) | sent, `12.00 tUSDC` to `halcyon-mm.testnet` |
+| Redirect item 2 to `halcyon-markets.testnet` | agent | [`FeHcFAUf…`](https://testnet.nearblocks.io/txns/FeHcFAUf2foZ9wPt2L7wkqrTEnFvMYQFBvdJzGUK21qQ) | refused, `ERR_PAYEE_MISMATCH` |
+
+### Dispute
+
+| Step | Account | Transaction | Result |
+| --- | --- | --- | --- |
+| Deliver item 2 | vendor | [`vnSByk7R…`](https://testnet.nearblocks.io/txns/vnSByk7Rz22VQ1i3mLDW3bPsnFHC4fU3Q8uMVhzmY2L) | `Delivered` |
+| Dispute item 2 | buyer | [`7CLgajAM…`](https://testnet.nearblocks.io/txns/7CLgajAMiU9kkNQb4ZHB2pxa2GLwPDUxUABZuFdu7zRP) | `Disputed` (`dispute_delivery`, inside the acceptance window) |
+| Pay disputed item 2 | agent | [`6PnZEq5V…`](https://testnet.nearblocks.io/txns/6PnZEq5VFzbfPr9mptSj9ruevCLnCU1VrL9WoErCcbK9) | refused, `ERR_NOT_DUE` |
+| Deliver item 2 again | vendor | [`DSZEM7Hi…`](https://testnet.nearblocks.io/txns/DSZEM7Higc4rMatduqstbYeHV7b7dQJ1bAms1akZzzhN) | `Delivered` (a disputed item may be delivered again) |
+| Accept item 2 | buyer | [`CBGEvGKx…`](https://testnet.nearblocks.io/txns/CBGEvGKx4LHewujWnSTYTfYog1veK6XF1x9oPmPyw1uN) | `Eligible` |
+| Pay item 2 | agent | [`EAnXJLi9…`](https://testnet.nearblocks.io/txns/EAnXJLi9rvVAMvGBfdRiaMV1KcFjMaPRCfE3e51h8xjp) | sent, `12.00 tUSDC` to `halcyon-mm.testnet` |
+| Deliver item 3 | vendor | [`4paHKZ1A…`](https://testnet.nearblocks.io/txns/4paHKZ1AE3qzVYnGZE8netter2t9nAkYSUtdKmBdFbV4) | `Delivered` |
+| Dispute item 3 | buyer | [`3tHqEAbu…`](https://testnet.nearblocks.io/txns/3tHqEAbuVzPNre2vcgJ4eZbn7rVqRQPgLoKnGYiVhR19) | `Disputed`, left so |
+| Pay disputed item 3 | agent | [`GnHPSRtW…`](https://testnet.nearblocks.io/txns/GnHPSRtWzgkNdik1fwMs9oKGEjmFPKk4V3XAA3kfBqSx) | refused, `ERR_NOT_DUE` |
+
+### Close and refund
+
+| Step | Account | Transaction | Result |
+| --- | --- | --- | --- |
+| Mutual close | buyer | [`FQEitYiK…`](https://testnet.nearblocks.io/txns/FQEitYiKgceZPsZc7XWHx5iwbTXxqc66DvKuzFnVY2TF) | `mutual_close_requested`; `8.00 tUSDC` still escrowed |
+| Mutual close | vendor | [`3yphF7hW…`](https://testnet.nearblocks.io/txns/3yphF7hWX9Qts4YrZFMowAsAyk9V2XM2hxkCo1LNqdJD) | `Settled`: paid `24.00`, refunded `8.00 tUSDC` to the buyer (`ft_transfer`, memo `accord refund`, in the same transaction); disputed item 3 not paid; the agent key removed at settlement; `0.00` left on `a48` |
+| Withdraw NEAR | buyer | [`G4TZLuco…`](https://testnet.nearblocks.io/txns/G4TZLuco58aKhWv1TTP5kB2PjuvFd7Nzds54vK1fhD6V) | the room's spare NEAR back to the buyer (`a48` keeps `0.133 NEAR` storage) |
+
+Balances (`tUSDC`):
+
+| Account | Before | After | Change |
+| --- | --- | --- | --- |
+| buyer `northwind-demo.testnet` | `331.88` | `307.88` | `-24.00` (funded `32.00`, refunded `8.00`) |
+| recipient `halcyon-mm.testnet` | `415.50` | `439.50` | `+24.00` (items 1 and 2) |
+| agreement `a48.accord-v2.testnet` | `0.00` | `0.00` | held `32.00`, then `8.00` before the close |
+
+`make verify DEAL=a48.accord-v2.testnet`: `code hash ECgsrZwy… = release 4`, `record 2 payments · 3 refusals`, last line `verify: 5 checks ok · 1 partial · 1 not checked` (`model` partial: hardware quote not checked here; `release` needs `outlayer-verify`).
+
+Not shown here: the close after the end of the term. The demo terms run 7 days (`a48` ends 16 Nov 2026), and `close` before then refuses with the term check; the mutual close above is the same `close_step` and refund.
+
+### Revocation
+
+Already on record: `a13` (`revoke_agent`, the next call failing with `AccessKeyDoesNotExist` at the RPC, a new key restoring service, [above](#release-4-security-review-fixes)), `a11` (a canary request revoking the key), and `a1.accord-usdc`, `a15` and `a21`. `a48` adds the key removed at settlement.
+
+### Circle USDC
+
+Not run on 10 Nov 2026. The buyer `northwind-demo.testnet` holds `6.00 USDC` (Circle); the Circle-sized mandates settle between `12.00` (vendor floor) and `18.00` (buyer ceiling), and `a1` settled at `14.00`. It needs at least `12.00 USDC` more to be sure of funding any agreed total: one drip of `20 USDC` at https://faucet.circle.com (network NEAR Testnet) to `northwind-demo.testnet`, then `make dispute-close-usdc` from `platform/`. `a1.accord-usdc.testnet` (release 3) is still `Executing` with `9.00 USDC` unspent (items 2 and 3 open) and could be closed with `accord close --mutual` as buyer then vendor.
+
+### Leftover try-it rooms
+
+| Room | State | What was done | Transaction |
+| --- | --- | --- | --- |
+| `a46.accord-v2.testnet` | was `Sealed`, no terms, `0.00 tUSDC` | cancelled by the demo vendor (`make cancel DEAL=a46.accord-v2.testnet`, the same call as the app's stale room sweep); its `1.99 NEAR` can go back only to its buyer, a throwaway key, through `withdraw_near` | [`6wec2GnU…`](https://testnet.nearblocks.io/txns/6wec2GnUAX2j7GsDDkQz4JdXYysvjpKcRNuKMby7NG7z) |
+| `a47.accord-v2.testnet` | `Executing`, `32.00` funded and `32.00` paid (all 3 items), `0.00 tUSDC` held, agent key `ed25519:DAN56o9d…` installed | nothing: the contract allows `cancel` only before `Executing`, `mutual_close` needs the buyer (a lost throwaway key), and `revoke_agent` is the buyer's. The key can call only `act`, and nothing is left to pay. From 16 Nov 2026 18:01:56 UTC anyone may call `close`, which settles the room and removes the key | none |
