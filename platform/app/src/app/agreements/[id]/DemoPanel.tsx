@@ -15,18 +15,27 @@ import { Panel } from "@/components/ui";
 import { agreementClient, errorText } from "@/components/me/client";
 import { useOrg } from "@/components/org/OrgProvider";
 import { POLL_MS, isBusyStatus, nextPollDelay } from "@/components/pollbackoff";
+import { nextLine, roomFingerprint } from "@/lib/roomfingerprint";
 import styles from "./demo.module.css";
 
 interface Step { did: string | null; next: string; tx: string | null; yourMove: boolean; error?: string }
+/** A step answer and the fingerprint of the room it was asked for (lib/roomfingerprint.ts). */
+type SeenStep = Step & { fp: string };
 interface AgentOut { action: string; item: number; amount: string; recipient: string | null; result: { status: string; code?: string; txHash: string }; error?: string }
 
 
-export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView; explorer: string | null }) {
+export function DemoPanel({ agreement: a, items = [], explorer }: { agreement: AgreementView; items?: { id: number; status: string }[]; explorer: string | null }) {
   const w = useWallet();
   const org = useOrg();
   const cfg = useAppConfig();
   const refreshSoon = useRefreshSoon();
-  const [step, setStep] = useState<Step | null>(null);
+  const [step, setStep] = useState<SeenStep | null>(null);
+  // the room as this render sees it; an answer read for another fingerprint is not shown
+  const fp = roomFingerprint(a, items);
+  const fpRef = useRef(fp);
+  fpRef.current = fp;
+  // the room changed while a step call was in flight: ask again as soon as it returns
+  const again = useRef(false);
   // the network is busy: the panel keeps its last state, says so in one quiet line, and polls less often
   const [netBusy, setNetBusy] = useState(false);
   const delay = useRef(POLL_MS);
@@ -52,8 +61,9 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
   const revoked = a.revoked_keys > 0 && !a.agent_key;
 
   const runStep = useCallback(async () => {
-    if (running.current) return;
+    if (running.current) { again.current = true; return; }
     running.current = true;
+    const asked = fpRef.current;
     const busy = (retryAfter: string | null) => {
       delay.current = nextPollDelay(delay.current, true, retryAfter ? Number(retryAfter) : null);
       setNetBusy(true);
@@ -66,15 +76,25 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
       if (isBusyStatus(r.status)) { busy(r.headers.get("retry-after")); return; }
       delay.current = POLL_MS;
       setNetBusy(false);
-      if (!r.ok) { setStep({ did: null, next: b.error ?? `the counterparty could not act (${r.status})`, tx: null, yourMove: false, error: b.error }); return; }
-      setStep(b);
+      if (!r.ok) { setStep({ did: null, next: b.error ?? `the counterparty could not act (${r.status})`, tx: null, yourMove: false, error: b.error, fp: asked }); return; }
+      // the step's answer describes the room it read, which is the room as it was when the call started
+      setStep({ ...b, fp: asked });
       if (b.did) { setLast({ did: b.did, tx: b.tx, at: Date.now() }); refreshSoon(); }
     } catch {
       busy(null); // no answer at all (offline, a dropped connection): the same quiet back-off
     } finally {
       running.current = false;
+      if (again.current) { again.current = false; if (fpRef.current !== asked) window.setTimeout(() => void runStep(), 0); }
     }
   }, [a.account, refreshSoon]);
+
+  // the room moved on (the page re-read the agreement): read the next step at once instead of at the next poll
+  const firstFp = useRef(true);
+  useEffect(() => {
+    if (firstFp.current) { firstFp.current = false; return; }
+    if (!auto || closed || !signedIn) return;
+    void runStep();
+  }, [fp, auto, closed, signedIn, runStep]);
 
   useEffect(() => {
     if (!auto || closed || !signedIn) return;
@@ -99,7 +119,7 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
     setBusy("start"); setAgent(null);
     try {
       const tx = await client.installAgentKey(agentKey.publicKey, a.params.agent_allowance);
-      setAgent({ ok: true, text: "The demo agent's key is installed on the agreement account.", tx: tx.txHash });
+      setAgent({ ok: true, text: "The demo agent's key is installed on the agreement account. The agent pays the due item within about 2 minutes, or press Let the agent pay the due item.", tx: tx.txHash });
       refreshSoon();
     } catch (e) {
       setAgent({ ok: false, text: `Install the agent key: ${errorText(e)}` });
@@ -161,7 +181,7 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
             <span>{last.did}{last.tx ? <> · {txUrl(last.tx) ? <a className="mono link" href={txUrl(last.tx)!} target="_blank" rel="noreferrer">tx {last.tx.slice(0, 8)}</a> : <span className="mono">tx {last.tx.slice(0, 8)}</span>}</> : null}</span>
           ) : <span className="small">None yet in this tab.</span>}
           <span className="eyebrow">next</span>
-          <span className={step?.yourMove ? styles.you : undefined}>{closed ? closedText : !signedIn ? "Sign in as the buyer to run the demo counterparty in this room." : step ? step.next : "Reading the room…"}</span>
+          <span className={step?.yourMove && step.fp === fp ? styles.you : undefined}>{closed ? closedText : !signedIn ? "Sign in as the buyer to run the demo counterparty in this room." : nextLine(step, fp, auto)}</span>
           {netBusy && <span className="small" role="status">The network is busy, retrying.</span>}
         </div>
         {closed && <Link className={styles.btn} href="/try-it">Open a new room</Link>}
@@ -189,9 +209,12 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
                   </button>
                 </>
               ) : !installed ? (
-                <button type="button" className={`${styles.btn} ${styles.primary}`} disabled={busy !== null || !agentKey || !client} onClick={() => void startAgent()}>
-                  {busy === "start" ? "Waiting for the network…" : "Start the demo agent"}
-                </button>
+                <>
+                  <button type="button" className={`${styles.btn} ${styles.primary}`} disabled={busy !== null || !agentKey || !client} onClick={() => void startAgent()}>
+                    {busy === "start" ? "Waiting for the network…" : "Start the demo agent"}
+                  </button>
+                  <p className="small">Once started, it pays the due item within about 2 minutes.</p>
+                </>
               ) : (
                 <>
                   <button type="button" className={`${styles.btn} ${styles.primary}`} disabled={busy !== null || revoked || !a.agent_key} onClick={() => void agentDo("pay")}>

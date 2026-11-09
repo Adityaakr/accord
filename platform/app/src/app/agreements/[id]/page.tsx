@@ -352,7 +352,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
         </div>
 
         <aside className={styles.side}>
-          {config().network === "testnet" && isDemoRoom(a) && <DemoPanel agreement={a} explorer={config().explorer} />}
+          {config().network === "testnet" && isDemoRoom(a) && <DemoPanel agreement={a} items={r.items.map((it) => ({ id: it.id, status: it.status }))} explorer={config().explorer} />}
           <Actions agreement={a} items={r.items} exceptions={r.exceptions} recipients={r.recipients} periods={r.periods} demoRoom={config().network === "testnet" && isDemoRoom(a)} />
           <Panel title="At a glance">
             <KV rows={[
