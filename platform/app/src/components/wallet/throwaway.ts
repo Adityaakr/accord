@@ -43,6 +43,11 @@ type Action = ReturnType<typeof actions.functionCall> | ReturnType<typeof action
 export interface ThrowawaySigner extends Signer {
   /** Deletes this account; every yoctoNEAR it holds goes to `beneficiary` (Accord's faucet). Returns the tx hash. */
   deleteAccount(beneficiary: string): Promise<string>;
+  /**
+   * ft_transfer of `amount` of `token` to `receiver`, with the 1 yoctoNEAR NEP-141 requires, as this account's own
+   * transaction (Accord's relayer carries token transfers into agreements only). Returns the tx hash.
+   */
+  transferToken(token: string, receiver: string, amount: string): Promise<string>;
 }
 
 export const isThrowawaySigner = (s: Signer | null | undefined): s is ThrowawaySigner =>
@@ -135,6 +140,14 @@ export function throwawaySigner(kp: KeyPair, opts: { rpc: string; deps?: Throwaw
     async signMessage(message, recipient, nonce) {
       const s = await new KeyPairSigner(kp).signNep413Message(accountId, { message, recipient, nonce });
       return { signature: s.signature, publicKey };
+    },
+    transferToken(token, receiver, amount) {
+      return serial(async () => {
+        const action = actions.functionCall("ft_transfer", { receiver_id: receiver, amount, memo: "Accord try-it: test USDC back to the faucet" }, 30_000_000_000_000n, 1n);
+        const r = toTxResult(await deps.direct(token, action));
+        if (!r.ok) throw new Error(`the test USDC could not be returned: ${r.failure ?? "failed"}`);
+        return r.txHash;
+      });
     },
     deleteAccount(beneficiary) {
       return serial(async () => {

@@ -57,7 +57,7 @@ describe("finishThrowaway", () => {
     const c = chain(room("Sealed"));
     const r = await finishThrowaway(ME, ["a24.accord-v2.testnet"], FAUCET, c.deps);
     expect(c.calls).toEqual(["cancel a24.accord-v2.testnet", "withdraw_near a24.accord-v2.testnet", `delete_account -> ${FAUCET}`]);
-    expect(r).toEqual({ rooms: ["a24.accord-v2.testnet"], deleteTx: "DelTx" });
+    expect(r).toEqual({ rooms: ["a24.accord-v2.testnet"], tokenTx: null, deleteTx: "DelTx" });
     expect(c.near().faucet).toBe(50_000n + 230n + 1_961n - 1n);
     expect(c.near().account).toBe(0n);
   });
@@ -94,6 +94,23 @@ describe("finishThrowaway", () => {
     const c = chain(room("Settled"));
     c.deps.withdrawNear = async () => { throw new Error("ERR_WRONG_STATE"); };
     await expect(finishThrowaway(ME, ["a24.accord-v2.testnet"], FAUCET, c.deps)).rejects.toThrow("ERR_WRONG_STATE");
+    expect(c.calls.some((x) => x.startsWith("delete_account"))).toBe(false);
+  });
+
+  it("returns the test USDC to the faucet before the delete, never after", async () => {
+    const c = chain(room("Executing"));
+    let tusdc = 100_000_000n;
+    c.deps.returnTokens = async (b) => { c.calls.push(`ft_transfer ${tusdc} -> ${b}`); tusdc = 0n; return "FtTx"; };
+    const r = await finishThrowaway(ME, ["a24.accord-v2.testnet"], FAUCET, c.deps);
+    expect(c.calls.slice(-2)).toEqual([`ft_transfer 100000000 -> ${FAUCET}`, `delete_account -> ${FAUCET}`]);
+    expect(r.tokenTx).toBe("FtTx");
+    expect(tusdc).toBe(0n);
+  });
+
+  it("a token transfer that fails stops before the delete, so the account can try again", async () => {
+    const c = chain(room("Settled"));
+    c.deps.returnTokens = async () => { throw new Error("the test USDC could not be returned: failed"); };
+    await expect(finishThrowaway(ME, ["a24.accord-v2.testnet"], FAUCET, c.deps)).rejects.toThrow(/could not be returned/);
     expect(c.calls.some((x) => x.startsWith("delete_account"))).toBe(false);
   });
 

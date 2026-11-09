@@ -119,6 +119,17 @@ describe("calls that attach NEAR", () => {
   });
 });
 
+describe("returning the test USDC", () => {
+  it("is an ft_transfer of 1 yoctoNEAR on the token, sent direct from the account", async () => {
+    const { deps, sent } = fakes();
+    const s = throwawaySigner(newThrowawayKey(), { rpc: "http://unused", deps });
+    const h = await s.transferToken("tusdc.accord-v1.testnet", "faucet.accord-v2.testnet", "100000000");
+    expect(h).toBe("direct-1");
+    expect(sent.relayed).toHaveLength(0);
+    expect(sent.direct).toEqual([{ receiverId: "tusdc.accord-v1.testnet", deposit: 1n, method: "ft_transfer" }]);
+  });
+});
+
 describe("serial calls", () => {
   it("run one at a time, each reading the nonce after the last finished", async () => {
     let nonce = 10n;

@@ -6,8 +6,9 @@
 //    (1 yoctoNEAR, through Accord's relayer), then Accord's demo vendor joins it (/api/demo-counterparty/close), and
 //    the second call closes the room: eligible items are paid, the rest of the escrow is refunded to the buyer.
 // 2. `withdraw_near`: the room's spare NEAR (the creation deposit minus its storage) goes back to the buyer.
-// 3. The throwaway account deletes itself with the faucet as beneficiary, which sends all of its NEAR to the faucet.
-//    The test USDC it held is minted for tests and is not returned.
+// 3. The test USDC the account still holds (the faucet's grant, and any escrow refunded by the close) goes back to the
+//    faucet with `ft_transfer`, so none is left on an account about to be deleted.
+// 4. The throwaway account deletes itself with the faucet as beneficiary, which sends all of its NEAR to the faucet.
 //
 // Pure apart from the deps it is given, so it is unit-tested.
 
@@ -48,6 +49,11 @@ export interface FinishDeps {
   withdrawNear(room: string): Promise<unknown>;
   /** Asks Accord's demo vendor to join the close and step it until the room is settled. */
   vendorClose(room: string): Promise<unknown>;
+  /**
+   * Sends the account's whole test USDC balance to `beneficiary` (ft_transfer); returns the transaction hash, or null
+   * when the balance is already 0. Optional: without it nothing is sent.
+   */
+  returnTokens?(beneficiary: string): Promise<string | null>;
   /** Deletes the throwaway account, its NEAR to `beneficiary`; returns the transaction hash. */
   deleteSelf(beneficiary: string): Promise<string>;
   wait(ms: number): Promise<void>;
@@ -56,6 +62,8 @@ export interface FinishDeps {
 
 export interface Finished {
   rooms: string[];
+  /** The ft_transfer that returned the test USDC, or null when there was none to return. */
+  tokenTx: string | null;
   deleteTx: string;
 }
 
@@ -82,7 +90,10 @@ export async function finishThrowaway(account: string, rooms: string[], benefici
       break;
     }
   }
+  // A failed transfer stops here, before the delete, like a failed withdraw: Finish can be run again.
+  deps.progress?.("Returning the test USDC to the faucet…");
+  const tokenTx = deps.returnTokens ? await deps.returnTokens(beneficiary) : null;
   deps.progress?.("Returning the test NEAR to the faucet…");
   const deleteTx = await deps.deleteSelf(beneficiary);
-  return { rooms: done, deleteTx };
+  return { rooms: done, tokenTx, deleteTx };
 }
