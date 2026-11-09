@@ -47,7 +47,7 @@ The reviewed agreement code (`ECgsrZwy…`, global contract `R2qxw4u5…`) is re
 | Redirect refused | `a10` | `ERR_PAYEE_MISMATCH` | [`51TQ8no9…`](https://testnet.nearblocks.io/txns/51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu) |
 | Attack | [`a11`](https://testnet.nearblocks.io/address/a11.accord-v2.testnet) | `ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY` revokes and deletes the key; `0.00` moved | [`HvwpdKDs…`](https://testnet.nearblocks.io/txns/HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv), [`3cTDxHzV…`](https://testnet.nearblocks.io/txns/3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh), [`DPpVoMX9…`](https://testnet.nearblocks.io/txns/DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT) |
 | Revoke | [`a13`](https://testnet.nearblocks.io/address/a13.accord-v2.testnet) | `revoke_agent` deletes the key; the next call fails with `AccessKeyDoesNotExist` at the RPC, so it has no transaction; the buyer installs a new key, which pays item 2 | revoke [`8b8FC1He…`](https://testnet.nearblocks.io/txns/8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3), `install_agent_key` [`DfgMURQA…`](https://testnet.nearblocks.io/txns/DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT), pay item 2 [`24mdebXg…`](https://testnet.nearblocks.io/txns/24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe) |
-| Verify | `a10` | `code = release 4` · `5 ok · 1 partial · 1 not checked` | `make verify DEAL=a10.accord-v2.testnet` |
+| Verify | `a10` | `code = release 4` · `6 ok · 1 partial` with `outlayer-verify` installed (10 Nov 2026; without it `5 ok · 1 partial · 1 not checked`) | `make verify DEAL=a10.accord-v2.testnet` |
 
 The first `make revoke` run (a12) stopped at its last step: the script paid item 2 at a fixed `12.00` while the negotiated amount differed, and the contract refused it with `ERR_AMOUNT_MISMATCH`. The live targets now pay each item at its negotiated amount.
 
@@ -61,11 +61,11 @@ Agreement [`a1.accord-usdc.testnet`](https://testnet.nearblocks.io/address/a1.ac
 | Pay | `5.00 USDC` to `halcyon-mm.testnet` | [`E127BGy3…`](https://testnet.nearblocks.io/txns/E127BGy3Tw6PmhE9JcoFr7vQsKTiHNevTTiAxEjJGWK2) |
 | Redirect refused | `ERR_PAYEE_MISMATCH` | [`9rgsBFA2…`](https://testnet.nearblocks.io/txns/9rgsBFA26yedWuEEJk77sKBDrDGS9mHn9BFMknCaP8BB) |
 | Revoke | the agent's next call fails with `AccessKeyDoesNotExist` | [`FTigDebs…`](https://testnet.nearblocks.io/txns/FTigDebs1kZjLpTN8nC8SZWp4dMM1ChuUyR211JZnzuW) |
-| Verify | release 3 · `5 ok · 1 partial · 1 not checked` | `make verify-usdc DEAL=a1.accord-usdc.testnet` |
+| Verify | release 3 · `6 ok · 1 partial` with `outlayer-verify` installed (10 Nov 2026; without it `5 ok · 1 partial · 1 not checked`) | `make verify-usdc DEAL=a1.accord-usdc.testnet` |
 
 ## a15: try-it on the public URL
 
-9 Nov 2026, `a15.accord-v2.testnet`, release 4. A fresh, unfunded implicit account ran the page's calls against https://accordweb-production.up.railway.app/app, with its wallet calls relayed through `/app/api/relay`. The state went Sealed, Attested, Executing, recipient active, paid, refused and revoked in 5 min 30 s; `/app/api/verify/a15.accord-v2.testnet` gives 5 ok, 1 partial, 1 not checked and 0 failed.
+9 Nov 2026, `a15.accord-v2.testnet`, release 4. A fresh, unfunded implicit account ran the page's calls against https://accordweb-production.up.railway.app/app, with its wallet calls relayed through `/app/api/relay`. The state went Sealed, Attested, Executing, recipient active, paid, refused and revoked in 5 min 30 s; `/app/api/verify/a15.accord-v2.testnet` gave 5 ok, 1 partial, 1 not checked and 0 failed on 9 Nov 2026 (`release` not checked: the server had no `outlayer-verify`).
 
 | Step | Result | Tx |
 | --- | --- | --- |
@@ -93,7 +93,7 @@ The relayed `create_agreement` failed, so it was signed directly. The relayer pa
 
 ## a21: try without a wallet on the public URL
 
-9 Nov 2026, `a21.accord-v2.testnet`, release 4. **Try without a wallet** on https://accordweb-production.up.railway.app/app/try-it, driven by Playwright (`platform/app/e2e/try-without-wallet.mjs`): a throwaway key made in the tab signed the room's create itself and sent every other buyer call through `/app/api/relay`. Create to revoke in 3 min 44 s; `/app/api/verify/a21.accord-v2.testnet` and `make verify DEAL=a21.accord-v2.testnet` give 5 ok, 1 partial (model: hardware quote not checked here), 1 not checked (release: needs `outlayer-verify`), 0 failed. This run predates the change, later on 9 Nov, that makes the demo agent pay a due item on its own.
+9 Nov 2026, `a21.accord-v2.testnet`, release 4. **Try without a wallet** on https://accordweb-production.up.railway.app/app/try-it, driven by Playwright (`platform/app/e2e/try-without-wallet.mjs`): a throwaway key made in the tab signed the room's create itself and sent every other buyer call through `/app/api/relay`. Create to revoke in 3 min 44 s; `/app/api/verify/a21.accord-v2.testnet` and `make verify DEAL=a21.accord-v2.testnet` gave 5 ok, 1 partial (model: hardware quote not checked here), 1 not checked (release: needs `outlayer-verify`), 0 failed on 9 Nov 2026; re-run on 10 Nov 2026 with `outlayer-verify` installed, `make verify DEAL=a21.accord-v2.testnet` gives `verify: 6 checks ok · 1 partial`. This run predates the change, later on 9 Nov, that makes the demo agent pay a due item on its own.
 
 | Step | Transaction |
 | --- | --- |
@@ -168,7 +168,7 @@ Balances (`tUSDC`):
 | recipient `halcyon-mm.testnet` | `415.50` | `439.50` | `+24.00` (items 1 and 2) |
 | agreement `a48.accord-v2.testnet` | `0.00` | `0.00` | held `32.00`, then `8.00` before the close |
 
-`make verify DEAL=a48.accord-v2.testnet`: `code hash ECgsrZwy… = release 4`, `record 2 payments · 3 refusals`, last line `verify: 5 checks ok · 1 partial · 1 not checked` (`model` partial: hardware quote not checked here; `release` needs `outlayer-verify`).
+`make verify DEAL=a48.accord-v2.testnet`: `code hash ECgsrZwy… = release 4`, `record 2 payments · 3 refusals`, last line `verify: 6 checks ok · 1 partial` with `outlayer-verify` installed (10 Nov 2026; `model` partial: hardware quote not checked here; without the tool `release` is not checked and the line reads `5 checks ok · 1 partial · 1 not checked`).
 
 Not shown here: the close after the end of the term. The demo terms run 7 days (`a48` ends 16 Nov 2026), and `close` before then refuses with the term check; the mutual close above is the same `close_step` and refund.
 
@@ -202,7 +202,7 @@ Already on record: `a13` (`revoke_agent`, the next call failing with `AccessKeyD
 | Vendor `mutual_close` | [`9c4unHDq…`](https://testnet.nearblocks.io/txns/9c4unHDqZVCncvJeG6icMpaiWBQ1USTBW1wgNuYbeb7K) | `Settled`: `12.00 USDC` paid, `3.00 USDC` refunded to the buyer, `0.00` left, agent key removed |
 | Buyer withdraws spare NEAR | [`G5P2LHLA…`](https://testnet.nearblocks.io/txns/G5P2LHLAArd4wXhStkTweBvdPMYqze1jQ8mXw895zwp9) |  |
 
-Balances (Circle USDC): buyer `35.00 → 23.00` (funded `15.00`, refunded `3.00`); recipient `5.00 → 17.00` (`+12.00`). `make verify-usdc DEAL=a2.accord-usdc.testnet`: `code hash ECgsrZwy… = release 4` · `verify: 5 checks ok · 1 partial · 1 not checked`.
+Balances (Circle USDC): buyer `35.00 → 23.00` (funded `15.00`, refunded `3.00`); recipient `5.00 → 17.00` (`+12.00`). `make verify-usdc DEAL=a2.accord-usdc.testnet`: `code hash ECgsrZwy… = release 4` · `release   sealed-table run 13990 = task 28883 · … · outlayer-verify proven · ok` · `verify: 6 checks ok · 1 partial` with `outlayer-verify` installed (10 Nov 2026; without it `5 checks ok · 1 partial · 1 not checked`).
 
 **`a1.accord-usdc.testnet` closed** (release 3, 10 Nov 2026), with `make close-usdc DEAL=a1.accord-usdc.testnet`: buyer `mutual_close` [`Gn1CSQHt…`](https://testnet.nearblocks.io/txns/Gn1CSQHtSdqKmPDkFxuUrUYWYcoPQpVYSAMrkj1ToZ24), vendor `mutual_close` [`F2k95QkY…`](https://testnet.nearblocks.io/txns/F2k95QkYLqUcQ67axuJiNWvsnTb9vBtmKZbxufzaVJdL) → `Settled`, `5.00 USDC` paid and the unspent `9.00 USDC` refunded to the buyer (`26.00 → 35.00 USDC`); buyer `withdraw_near` [`ByPi7zLD…`](https://testnet.nearblocks.io/txns/ByPi7zLDRbd4GMkPFGrxX4biUr2fJy6r92YR3HkQsTVq).
 

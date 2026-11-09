@@ -8,7 +8,9 @@ website service forwards `<site>/app/*` to it, so visitors use one address.
 1. In the Railway project, **New → GitHub repo → this repository** (the same repo as the website).
 2. Service **Settings**: keep the root directory at `/` and nothing else to change. The repository's one
    `Dockerfile` builds the app when the service has `ACCORD_NETWORK` set (below) and the website otherwise.
-   Set **Deploy → Healthcheck path** to `/app/api/status`.
+   Set **Deploy → Healthcheck path** to `/app/api/status`. The app image carries `outlayer-verify` (built from commit
+   `90c27d9d` in the Dockerfile's Rust stage; the first build compiles it, a few minutes), so `/app/api/verify/<id>` and
+   `/app/mcp` report `release ok` (`DECISIONS.md` 32).
 3. **Variables** (values from your local `accord-app/.env`; never commit them):
 
 | Variable | Value |
@@ -23,6 +25,7 @@ website service forwards `<site>/app/*` to it, so visitors use one address.
 | `DATABASE_URL` | add a **Postgres** service and reference its URL (`${{Postgres.DATABASE_URL}}`) |
 | `NEXT_PUBLIC_BASE_PATH` | `/app` (default; build-time) |
 | `NEARAI_API_KEY` | optional: only for the agent's LLM planner and the verify relay |
+| `OUTLAYER_VERIFY_TIMEOUT_MS` | optional: how long one `outlayer-verify` run may take before `release` says not checked (default `30000`); `OUTLAYER_VERIFY_BIN` overrides the binary's path |
 | `RESEND_API_KEY` | optional: invite and notification emails |
 | `FAUCET_ACCOUNT` | `faucet.accord-v2.testnet`: tops visitors up to 2.35 NEAR and 100 tUSDC on `/app/try-it` |
 | `FAUCET_KEY` | the faucet account's key (top it up with testnet NEAR when it runs low) |

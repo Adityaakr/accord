@@ -35,7 +35,7 @@ The live record of facts, choices and spec changes. A fact here wins over the sa
 | `@hot-labs/near-connect` | `0.12.0` | Wallet Selector (`10.1.4`) is legacy |
 | `@nearai/inference-sdk` | `0.2.1` (Node 24+) | Optional; the job calls the HTTP API directly |
 | `outlayer-cli`, `outlayer` crate | `0.2.1` | `cargo install outlayer-cli` |
-| `outlayer-verify` | git | `cargo install --git https://github.com/out-layer/outlayer-verify outlayer-verify`; always pass `--api https://testnet-api.outlayer.ai` (its built-in addresses return `410`) |
+| `outlayer-verify` | git, `0.1.0` at commit `90c27d9d` (10 Nov 2026) | `cargo install --locked --git https://github.com/out-layer/outlayer-verify --rev 90c27d9d outlayer-verify`; always pass `--api https://testnet-api.outlayer.ai` (its built-in addresses return `410`) |
 | Node | `24` | Satisfies near-api-js and the NEAR AI SDK |
 
 ## 3. Identifiers
@@ -729,3 +729,31 @@ market-making room that has not run on testnet, and three "try" pages with near-
   `/app/mcp` (60 requests a minute per IP). The app was redeployed with them on 9 Nov 2026; the live `/app/mcp` answers
   `initialize`, `tools/list` and tool calls from any origin.
 
+## 32. outlayer-verify proves the three job runs for release 3 and 4 agreements (10 Nov 2026)
+
+- `outlayer-verify` `0.1.0`, installed with `cargo install --locked --git https://github.com/out-layer/outlayer-verify --rev
+  90c27d9d outlayer-verify` (commit `90c27d9d4fc843194ddc6f8ebaafa4eb320c3bb6`), proves each job key's pubkey run:
+  `outlayer-verify job <task id> --network testnet --api https://testnet-api.outlayer.ai --short` exits `0`
+  (`PROVEN task <id> (execute) …`), which means the TDX quote, the approved measurement and the binding all pass
+  (https://github.com/out-layer/outlayer-verify; exit `1` a layer failed, `2` unproven). The task id comes from the
+  by-request lookup (section 31), never from `pubkey_task_id` itself.
+- Release 4 (`accord-v2.testnet` and `accord-usdc.testnet` share the job builds, different runs): Sealed Table run `13987`
+  = task `28880` (wasm `7c832ce9…`), Payee `13988` = `28881` (`24071443…`), observer `13989` = `28882` (`8240179a…`) on
+  `accord-v2.testnet`; `13990` = `28883`, `13991` = `28884`, `13993` = `28886` on `accord-usdc.testnet`. Release 3: `13682` =
+  `28492`, `13672` = `28478`, `13683` = `28493` on `accord-v2.testnet`; `13909` = `28801`, `13910` = `28802`, `13911` = `28803`
+  on `accord-usdc.testnet`. All twelve proven, each in about 2 to 3 s.
+- `make verify` now prints `release … outlayer-verify proven … · ok` and `verify: 6 checks ok · 1 partial` on
+  `a6`, `a10`, `a21`, `a48` (`accord-v2.testnet`) and `a1`, `a2` (`accord-usdc.testnet`), re-run 10 Nov 2026. The lines in
+  sections 21, 24, 26, 27, 28 and 30 that read `release` not checked (`5 ok · 1 partial · 1 not checked`) are what those runs
+  printed without the tool.
+- What it does not change: `model` stays partial (the hardware quote is not checked by `make verify`); S1 is not set; release 4
+  runs release 3's job builds (the same three wasm hashes), so proving the runs proves those builds made the keys, not that
+  the reviewed builds are deployed; market making is shown from local-node runs only.
+- The app's `/api/verify` and the hosted `/app/mcp` run the same step (`@accord/sdk/node`: `outlayerVerifyProof`, wrapped
+  in `cachedReleaseProof`): one run per job, a 30 s timeout (`OUTLAYER_VERIFY_TIMEOUT_MS`), settled verdicts kept 6 h in
+  memory and a `not checked` one retried after 60 s, concurrent calls sharing one run. Jobs come from the agreement's
+  factory release, so the set of runs it can be asked to prove is small and fixed. The root `Dockerfile` builds the binary
+  at `90c27d9d` in a `rust:1.91-alpine` stage (static musl, ureq with rustls and webpki roots) and copies it into the app
+  image only. Locally (`next start`, binary on PATH), `/app/api/verify/a10.accord-v2.testnet` answered `release ok` in
+  9.4 s on the first call and 3.7 s once cached; without the binary the same call answered `release not checked` in 3.4 to
+  5.6 s. Until the app is redeployed from this image, the live endpoint says `not checked`.

@@ -515,8 +515,8 @@ accord market-making · <agreement> · rhea-dcl <pool short id>
 accord verify · <agreement>
   code      code hash <8>… = release <v> (<global by hash | embedded>) · no deploy method · ok
   keys      <0 | 1> key · FunctionCall · receiver self · methods [act] · no full access · ok
-  release   sealed-table run <request id> = task <task id> · wasm <8>… and caller match · quote not checked (needs outlayer-verify) · payee run … · observer run … · not checked
-            (with outlayer-verify installed: sealed-table run <request id> = task <task id> · wasm <8>… · outlayer-verify proven · … · ok)
+  release   sealed-table run <request id> = task <task id> · wasm <8>… · outlayer-verify proven · payee run … · observer run … · ok
+            (without outlayer-verify: sealed-table run <request id> = task <task id> · wasm <8>… and caller match · quote not checked (needs outlayer-verify) · … · not checked)
   sealed    outcome signature ok · commitments match · nonce matches · ok
   model     <model> · attestation report fetched with fresh nonce <8>… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
   payee     <recipient> · proof <domain> · authority approved · buyer accepted · active · ok
@@ -525,6 +525,8 @@ accord verify · <agreement>
 ```
 
 A check is `ok`, `partial` (part of it ran and passed, the detail names the part not run here), `FAIL` or `not checked`; `partial` and `not checked` never count as `ok`. An account that does not exist or does not run the agreement code prints one line, `verify: <account> is not an Accord agreement`, and exits `1`.
+
+The `release` check is `ok` only when `outlayer-verify` proves all three job keys' pubkey runs (exit `0`), `FAIL` when any run fails a layer or ran other code, and `not checked` without the tool. The CLI, `/api/verify/<id>` and `accord_verify` run the same step (`@accord/sdk/node`); the two servers cache it per job run with a 30 s timeout.
 
 `make verify` fetches NEAR AI's attestation report without a key when the endpoint allows it (it did on 31 Oct); otherwise it uses `NEARAI_API_KEY` if set, or the hosted relay at `/api/verify/<id>` with a nonce it generates itself, and prints which.
 
@@ -582,7 +584,12 @@ type ActResult = { status: "sent" | "failed" | "refused" | "exception_requested"
 
 // checks
 preflight(accord, agreement, recipient): Promise<{ rating: "allow" | "warn" | "block"; reasons: string[]; signals: Signals; approvedByBuyer: boolean }>
-verify(accord, agreement, opts?: { nonce?: string; factories?: string[] }): Promise<VerifyReport>   // `code` fails unless a known factory registered the account as a<id>.<factory>, its job keys are the release's and its token, outlayer and keeper are the factory's
+verify(accord, agreement, opts?: { nonce?: string; factories?: string[]; releaseProof?: ReleaseProof }): Promise<VerifyReport>   // `code` fails unless a known factory registered the account as a<id>.<factory>, its job keys are the release's and its token, outlayer and keeper are the factory's; without `releaseProof`, `release` is not checked
+recordReleaseProof(): ReleaseProof   // browser-safe: the by-request record lookup only (task, wasm, caller); never ok
+
+// @accord/sdk/node (Node only: it spawns a process)
+outlayerVerifyProof(env, opts?: { timeoutMs?: number }): ReleaseProof   // record lookup, then `outlayer-verify job <task id>` (OUTLAYER_VERIFY_BIN, else PATH; OUTLAYER_VERIFY_TIMEOUT_MS); missing tool or timeout: not checked
+cachedReleaseProof(proof, opts?: { ttlMs?: number; retryMs?: number; max?: number }): ReleaseProof   // per job run; ok and fail kept 6 h, not checked retried after 60 s, concurrent calls share one run
 sealedCheck(accord, agreement, as: "buyer" | "vendor", key: DocKeySource): Promise<"ERR_SEALED" | "READABLE">   // a sanity check, not a proof
 ```
 

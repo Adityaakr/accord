@@ -58,19 +58,3 @@ keeper done (9 Nov 2026):** both are deployed and their heartbeats show on `/app
 1. Create a Railway project with four services from this repository: `app` (`pnpm --filter @accord/app build && pnpm --filter @accord/app start`), `agent` (`pnpm --filter @accord/agent start`, `AGENT_REARM=on`), `keeper` (`pnpm --filter @accord/keeper start`) and a Postgres plugin.
 2. Set on all three: `ACCORD_NETWORK=testnet`, `ACCORD_FACTORY`, `NEAR_RPC_URL`, `DATABASE_URL` (from the plugin). On the agent: the `TRY_*` accounts and keys. On the keeper: `KEEPER_ACCOUNT`, `KEEPER_KEY`, `OUTLAYER_OWNER`, `OUTLAYER_PAYMENT_KEY` (the observer runs through OutLayer's HTTPS API). On the app: `INBOX_DAILY_SALT` (any random string), `APP_URL` (its own public URL).
 3. Done: the demo domain is `useaccord.tech` (a15's Payee proof was made on it, `DECISIONS.md` section 27). The Payee proof on `a6.accord-v2.testnet` was made on the earlier demo domain, `accordweb-production.up.railway.app`.
-
-## Optional: `outlayer-verify` (0.3 f, `make verify` "release" line)
-
-`outlayer-cli` 0.2.2 is installed and logged in on testnet as `accord-v1.testnet` (8 Nov). The verifier was not installed:
-the agent's install from git was refused by the session's permission policy (code from an outside repository), so
-Adi runs it once in a terminal:
-
-```
-cargo install --git https://github.com/out-layer/outlayer-verify outlayer-verify
-```
-
-With it installed, `make verify` looks up each job key's pubkey run by its OutLayer **request id** (the release's
-`pubkey_task_id`, e.g. `13987`) at `https://testnet-api.outlayer.ai/attestations/by-request/<request id>`, which gives the
-task id (`13987` → task `28880`), and runs `outlayer-verify job <task id>` on that task, not on the request id
-(`DECISIONS.md` 31).
-
