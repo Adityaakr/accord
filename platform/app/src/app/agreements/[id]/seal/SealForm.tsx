@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import { AccountId, shortAccount } from "@/components/account/AccountId";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { formatUnits, parseUnits, type Kind, type Mandate } from "@accord/sdk";
+import { deriveDocKey, formatUnits, parseUnits, type DocKey, type Kind, type Mandate } from "@accord/sdk";
 import { browserAccord } from "@/components/chainClient";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { useAppConfig } from "@/components/AppConfig";
@@ -67,6 +67,11 @@ export function SealForm({
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ commitment: string; txHash: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // A wallet that opens its own window (Meteor, Intear, ...) can open only one window per click: browsers block a
+  // second pop-up that no click opened. So a wallet seals in two clicks, each opening one window: sign the message
+  // that derives the document key, then send the sealed mandate. A throwaway key opens no window and does both.
+  const twoSteps = w.method === "wallet";
+  const [docKey, setDocKey] = useState<DocKey | null>(null);
 
   const limits = draft ?? (preset ? toDraft(preset.mandate.limits) : {});
   const text = instructions ?? preset?.mandate.instructions ?? "";
@@ -75,6 +80,19 @@ export function SealForm({
     setPresetId(p.id);
     setDraft(toDraft(p.mandate.limits));
     setInstructions(p.mandate.instructions);
+  }
+
+  async function unlock() {
+    if (!w.signer) return;
+    setBusy(true);
+    setError(null);
+    try {
+      setDocKey(await deriveDocKey(w.signer, agreement));
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function seal() {
@@ -87,7 +105,7 @@ export function SealForm({
       };
       const client = browserAccord(cfg, { signer: w.signer })
         .agreement(agreement);
-      setDone(await client.sealMandate(mandate, { role }));
+      setDone(await client.sealMandate(mandate, docKey ? { role, docKey } : { role }));
       router.refresh(); // "Sealed so far" re-reads the commitments
     } catch (e) {
       setError(errorText(e));
@@ -171,12 +189,22 @@ export function SealForm({
             <Link href={`/agreements/${agreement}`} className="small link">Back to the deal room</Link>
           </div>
         ) : (
-          <button type="button" className={styles.submit} onClick={() => void seal()} disabled={busy || !preset || state !== "Sealed"}>
-            {busy ? "Sealing in this browser…" : state !== "Sealed" ? "Negotiation already started" : `Seal as the ${role}`}
-          </button>
+          state !== "Sealed" ? (
+            <button type="button" className={styles.submit} disabled>Negotiation already started</button>
+          ) : twoSteps && !docKey ? (
+            <button type="button" className={styles.submit} onClick={() => void unlock()} disabled={busy || !preset}>
+              {busy ? "Waiting for your wallet…" : "1 · Sign to unlock your document key"}
+            </button>
+          ) : (
+            <button type="button" className={styles.submit} onClick={() => void seal()} disabled={busy || !preset}>
+              {busy ? "Sealing in this browser…" : twoSteps ? `2 · Seal and send as the ${role}` : `Seal as the ${role}`}
+            </button>
+          )
         )}
         {error && <p className={`small mono ${styles.error}`} role="alert">{error}</p>}
-        <p className="small">Your wallet signs a message once to derive your document key, then sends the sealed mandate. No deposit: the agreement pays for its storage.</p>
+        <p className="small">{twoSteps
+          ? docKey ? "Key unlocked. Now send the sealed mandate: your wallet opens once more." : "Two steps, one wallet window each: sign a message to derive your document key, then send the sealed mandate. No deposit: the agreement pays for its storage."
+          : "Your key signs a message to derive your document key, then sends the sealed mandate. No deposit: the agreement pays for its storage."}</p>
       </aside>
     </div>
   );
