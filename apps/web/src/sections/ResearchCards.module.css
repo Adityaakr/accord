@@ -40,7 +40,7 @@
 .dots { display: flex; gap: 5px; }
 .dots i { width: 8px; height: 8px; border-radius: 999px; background: #c8c8cc; }
 .url { flex: 1; text-align: center; font-size: 11px; color: #4f5359; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 34px; }
-.shot { display: block; width: 100%; aspect-ratio: 1100 / 640; object-fit: cover; object-position: top; }
+.shot { display: block; width: 100%; height: auto; /* the height attribute would otherwise win over aspect-ratio */ aspect-ratio: 1100 / 640; object-fit: cover; object-position: top; }
 .chip {
   position: absolute; left: 14px; bottom: 14px;
   display: inline-flex; align-items: center; gap: 7px;
@@ -59,12 +59,18 @@
 @media (max-width: 1199.98px) {
   .research { gap: 32px; padding: 72px 24px; }
   .layout { grid-template-columns: minmax(0, 1fr); }
-  .deck { max-width: 620px; width: 100%; margin: 0 auto; height: 420px; }
+  /* below desktop the deck sizes to the front paper (which stays in flow) instead of a fixed height, so it never
+     overflows or leaves a gap at any width; the papers behind it stay absolute, peeking above */
+  .deck { max-width: 620px; width: 100%; margin: 0 auto; height: auto; padding-top: 60px; }
+  .paper { top: 60px; }
+  .paper.k0 { position: relative; top: auto; margin: 0 4%; }
 }
 @media (max-width: 809.98px) {
   .research { gap: 24px; padding: 72px 16px; }
   .finding { font-size: 16px; }
-  .deck { height: 290px; }
-  .paper { left: 0; right: 0; top: 50px; }
+  .deck { padding-top: 44px; }
+  .paper { left: 0; right: 0; top: 44px; }
+  .paper.k0 { margin: 0; }
+  .chip { left: 10px; bottom: 10px; font-size: 12px; padding: 6px 10px; }
   .k1 { transform: translateY(-18px) scale(0.94); } .k2 { transform: translateY(-34px) scale(0.88); }
 }
