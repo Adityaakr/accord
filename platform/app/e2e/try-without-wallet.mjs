@@ -40,8 +40,11 @@ page.setDefaultTimeout(30_000);
 // requests the page is still waiting on, to say where a stall is
 const pending = new Map();
 page.on("request", (r) => pending.set(r, Date.now()));
-page.on("requestfinished", (r) => pending.delete(r));
-page.on("requestfailed", (r) => { pending.delete(r); if (r.url().includes("/api/")) log("request failed:", r.method(), r.url(), r.failure()?.errorText); });
+// every request's duration, so the run says whether any server request held the page longer than about 20 s
+const durations = [];
+const done = (r) => { const t = pending.get(r); if (t !== undefined) durations.push({ ms: Date.now() - t, what: `${r.method()} ${r.url().replace(BASE, "")}` }); pending.delete(r); };
+page.on("requestfinished", done);
+page.on("requestfailed", (r) => { done(r); if (r.url().includes("/api/")) log("request failed:", r.method(), r.url(), r.failure()?.errorText); });
 page.on("response", (r) => { if (r.url().includes("/api/") && r.status() >= 400) log("http", r.status(), r.request().method(), r.url().replace(BASE, "")); });
 const stalls = () => { for (const [r, t] of pending) if (Date.now() - t > 30_000) log("stalled", Math.round((Date.now() - t) / 1000), "s:", r.method(), r.url().replace(BASE, "")); };
 const visible = async (loc) => (await loc.count()) > 0 && (await loc.first().isVisible().catch(() => false));
@@ -119,7 +122,7 @@ try {
 
     if (await clickIf(page.getByRole("button", { name: "Approve these terms" }), "approve terms")) { mark("approved"); }
     else if (await clickIf(page.getByRole("button", { name: /^Accept recipient / }), "accept recipient")) { mark("recipient accepted"); }
-    else if (await clickIf(page.getByRole("button", { name: /^Fund .* USDC$/ }), "fund")) { mark("fund clicked"); }
+    else if (await clickIf(page.getByRole("button", { name: /^Fund .* t?USDC$/ }), "fund")) { mark("fund clicked"); }
     else if (await clickIf(page.getByRole("button", { name: /^Activate recipient / }), "activate recipient")) { mark("recipient activated"); }
     else if (await clickIf(page.getByRole("button", { name: /^Accept delivery / }), "accept delivery")) { mark("delivery accepted"); }
     else if (await clickIf(page.getByRole("button", { name: "Start the demo agent" }), "start the demo agent")) { mark("agent started"); }
@@ -199,6 +202,14 @@ try {
   mark("finished", `faucet +${(Number((BigInt(after) - BigInt(before)) / 10n ** 21n) / 1000).toFixed(3)} NEAR`);
   await shot(page, "finished");
   log("after Finish, key in sessionStorage:", await page.evaluate(() => !!sessionStorage.getItem("accord-throwaway-key")));
+  // the Done box names the room it closed, with Verify, and keeps it after a reload (sessionStorage)
+  const roomLine = /Room (a\d+\.[a-z0-9.-]+) · Verify it/;
+  const m = outcome.match(roomLine);
+  if (!m) throw new Error(`the Done box does not name the room: ${outcome.slice(0, 200)}`);
+  log("done box:", m[0], "→", await page.getByRole("link", { name: "Verify it →" }).first().getAttribute("href"));
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.getByText(roomLine).first().waitFor({ timeout: 30_000 });
+  mark("room id kept after reload", m[1]);
   exit = 0;
 } catch (e) {
   log("FAILED:", e.message);
@@ -207,6 +218,9 @@ try {
   delete reached.__lastAction;
   clearInterval(watchdog);
   log("summary", JSON.stringify(reached));
+  const slow = durations.filter((d) => d.ms > 20_000);
+  const top = [...durations].sort((a, b) => b.ms - a.ms).slice(0, 5).map((d) => `${(d.ms / 1000).toFixed(1)} s ${d.what.slice(0, 90)}`);
+  log(`requests: ${durations.length}, over 20 s: ${slow.length}; slowest: ${top.join(" | ")}`);
   await browser.close();
   process.exit(exit);
 }
