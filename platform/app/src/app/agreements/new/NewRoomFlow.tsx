@@ -6,6 +6,9 @@
 // timings); the room opens with an invitation card for the counterparty.
 // Everything else on these screens (the brief, company names, domain, figures) stays in this browser
 // (`accord-brief:<room>`): the buyer's own working brief, shown back on the invite card and the seal page, never published.
+//
+// Layout: the website's record language (apps/web "Inspect an agreement"): one centred column, groups with small
+// uppercase labels, hairline-divided rows with a mono number gutter, quiet fields that strengthen on focus.
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -50,27 +53,64 @@ const DOMAIN = /^(?=.{3,253}$)([a-z\d]([a-z\d-]{0,61}[a-z\d])?\.)+[a-z]{2,63}$/;
 
 export interface DemoVendor { vendor: string; authority: string; domain: string }
 
-function Field({ label, hint, error, children, id, optional }: {
-  label: string; hint?: ReactNode; error?: string; children: ReactNode; id: string; optional?: boolean;
-}) {
+const two = (n: number) => String(n).padStart(2, "0");
+
+/** A group of rows: a small uppercase label (with an optional quiet action on the right), an optional note, the rows. */
+function Group({ label, meta, note, children }: { label: ReactNode; meta?: ReactNode; note?: ReactNode; children: ReactNode }) {
   return (
-    <div className={styles.field}>
-      <label htmlFor={id} className={styles.label}>{label}{optional ? <span className={styles.opt}>Optional</span> : null}</label>
-      {children}
-      {error ? <span className={styles.fieldError} role="alert">{error}</span> : hint ? <span className={styles.hint}>{hint}</span> : null}
+    <div className={styles.group}>
+      <div className={styles.groupLabel}><span className={styles.groupName}>{label}</span>{meta}</div>
+      {note ? <p className={styles.note}>{note}</p> : null}
+      <div className={styles.rows}>{children}</div>
     </div>
   );
 }
 
-function Unit({ children, unit }: { children: ReactNode; unit: string }) {
-  return <div className={styles.unitWrap}>{children}<span className={styles.unit}>{unit}</span></div>;
+/** One form row: mono number, label, the control (with its hint or error under it). `end` sets short values on the right. */
+function Row({ n, label, id, labelId, hint, error, end, text, children }: {
+  n: number; label: string; id?: string; labelId?: string; hint?: ReactNode; error?: string; end?: boolean; text?: boolean; children: ReactNode;
+}) {
+  return (
+    <div className={`${styles.row} ${text ? styles.rowText : ""}`} data-invalid={error ? "" : undefined}>
+      <span className={`mono ${styles.num}`}>{two(n)}</span>
+      {id ? <label htmlFor={id} className={styles.name}>{label}</label> : <span id={labelId} className={styles.name}>{label}</span>}
+      <div className={`${styles.control} ${end ? styles.controlEnd : ""}`}>
+        {children}
+        {error ? <span className={styles.fieldError} role="alert">{error}</span> : hint ? <span className={styles.hint}>{hint}</span> : null}
+      </div>
+    </div>
+  );
+}
+
+/** A quiet choice between a few options: a dot and a word each, the chosen one strong with a teal dot. */
+function Choices<T extends string>({ labelledBy, value, options, onChange }: {
+  labelledBy: string; value: T; options: { id: T; label: string; disabled?: boolean }[]; onChange: (v: T) => void;
+}) {
+  return (
+    <div className={styles.choices} role="radiogroup" aria-labelledby={labelledBy}>
+      {options.map((o) => (
+        <button key={o.id} type="button" role="radio" aria-checked={value === o.id} disabled={o.disabled}
+          className={`${styles.choice} ${value === o.id ? styles.choiceOn : ""}`} onClick={() => onChange(o.id)}>
+          <span className={styles.dotMark} aria-hidden="true" />{o.label}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 function Lock() {
   return (
-    <svg className={styles.lock} width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <rect x="3" y="7" width="10" height="7.5" rx="1.6" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" strokeWidth="1.4" />
+    <svg className={styles.lock} width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="3" y="7" width="10" height="7.5" rx="1.6" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function Check({ size = 10 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M2.5 6.3 5 8.6l4.5-5.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -202,31 +242,30 @@ export function NewRoomFlow({ network, deposit, demoAllowed, demoVendor }: {
   const facts = briefFacts(kind, intake, symbol);
   const ease = [0.2, 0.8, 0.3, 1] as const;
   const variants = {
-    enter: (d: number) => (reduce ? { opacity: 0 } : { opacity: 0, x: d * 16 }),
+    enter: (d: number) => (reduce ? { opacity: 0 } : { opacity: 0, x: d * 14 }),
     center: { opacity: 1, x: 0 },
-    exit: (d: number) => (reduce ? { opacity: 0 } : { opacity: 0, x: d * -16 }),
+    exit: (d: number) => (reduce ? { opacity: 0 } : { opacity: 0, x: d * -14 }),
   };
   const head = (id: string, h: string, lead: ReactNode, action?: ReactNode) => (
     <div className={styles.head}>
-      <div className={styles.headText}>
-        <h2 id={id} className={styles.h}>{h}</h2>
-        <p className={styles.lead}>{lead}</p>
-      </div>
+      <h2 id={id} className={styles.h}>{h}</h2>
+      <p className={styles.lead}>{lead}</p>
       {action}
     </div>
   );
+  /** A quiet field: transparent until hovered, a faint fill and the row's teal line on focus; the unit sits in mono on the right. */
   const amountInput = (id: string, k: keyof Intake, unit: string, placeholder: string, numeric = false) => (
-    <Unit unit={unit}>
-      <input id={id} className={styles.input} inputMode={numeric ? "numeric" : "decimal"} value={String(intake[k])} aria-invalid={!!fe(k)}
+    <div className={`${styles.box} ${styles.boxShort}`}>
+      <input id={id} className={`${styles.input} ${styles.mono} ${styles.right}`} inputMode={numeric ? "numeric" : "decimal"} value={String(intake[k])} aria-invalid={!!fe(k)}
         onChange={(e) => set(k, e.target.value as Intake[typeof k])} placeholder={placeholder} />
-    </Unit>
+      <span className={styles.unit}>{unit}</span>
+    </div>
   );
 
   const stepBody = (() => {
     if (step === 0) return (
-      <section aria-labelledby="t-type">
-        <h2 id="t-type" className={styles.h}>What kind of agreement?</h2>
-        <p className={styles.typeLead}>Every type runs the same controls. Only the terms and the evidence that releases a payment change.</p>
+      <section aria-labelledby="t-type" className={styles.wide}>
+        {head("t-type", "What kind of agreement?", "Every type runs the same controls. Only the terms and the evidence that releases a payment change.")}
         <div className={styles.types} role="radiogroup" aria-label="Agreement type">
           {TYPES.map((t) => {
             const on = t.id === typeId, planned = !t.kind;
@@ -236,7 +275,8 @@ export function NewRoomFlow({ network, deposit, demoAllowed, demoVendor }: {
                 onClick={() => { setTypeId(t.id); setError(null); }}>
                 <span className={styles.typeTop}>
                   <IconTile name={t.icon} size={40} />
-                  {planned ? <span className={styles.planned}>Planned</span> : on ? <span className={styles.typeCheck} aria-hidden="true">✓</span> : null}
+                  {planned ? <span className={styles.planned}>Planned</span>
+                    : on ? <span className={styles.typeCheck} aria-hidden="true"><Check size={11} /></span> : null}
                 </span>
                 <span className={styles.typeTitle}>{t.title}</span>
                 <span className={styles.typeText}>{t.text}</span>
@@ -247,167 +287,182 @@ export function NewRoomFlow({ network, deposit, demoAllowed, demoVendor }: {
       </section>
     );
 
-    if (step === 1) return (
-      <section aria-labelledby="t-brief" className={styles.col}>
-        {head("t-brief", "Write the brief", "Only the title is public on NEAR. Everything else stays in this browser.",
-          <button type="button" className={styles.textBtn} onClick={fillSample}>Fill with an example</button>)}
+    if (step === 1) {
+      let n = 0;
+      const k = () => ++n;
+      return (
+        <section aria-labelledby="t-brief" className={styles.col}>
+          {head("t-brief", "Write the brief", "Only the title is required, and only the title is public on NEAR. The rest stays in this browser.",
+            <button type="button" className={styles.quiet} onClick={fillSample}>Fill with an example</button>)}
 
-        <div className={styles.fields}>
-          <Field id="f-title" label="Room title" error={fe("title")}>
-            <input id="f-title" className={`${styles.input} ${styles.text}`} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120}
-              aria-invalid={!!fe("title")} placeholder={proc ? "Treasury reporting integration, phase one" : "NEAR/USDC liquidity retainer, Q1"} />
-          </Field>
-
-          {currencies.length > 1 && (
-            <div className={styles.field}>
-              <span className={styles.label} id="l-cur">Settle in</span>
-              <div className={styles.segment} role="radiogroup" aria-labelledby="l-cur">
-                {currencies.map((c) => (
-                  <button key={c.id} type="button" role="radio" aria-checked={currencyId === c.id}
-                    className={`${styles.segBtn} ${currencyId === c.id ? styles.segOn : ""}`} onClick={() => setCurrencyId(c.id)}>
-                    {c.id === "usdc" ? "Circle USDC" : "Test USDC"}
-                  </button>
-                ))}
+          <Group label="The room">
+            <Row n={k()} id="f-title" label="Title" error={fe("title")}>
+              <div className={styles.box}>
+                <input id="f-title" className={styles.input} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120}
+                  aria-invalid={!!fe("title")} placeholder={proc ? "Treasury reporting integration, phase one" : "NEAR/USDC liquidity retainer, Q1"} />
               </div>
-              {circle && (
-                <span className={styles.hint}>
-                  Fund it from <a className="link" href={CIRCLE_FAUCET} target="_blank" rel="noreferrer">faucet.circle.com</a> (NEAR Testnet), about 20 USDC per address every 1 to 2 hours.
-                </span>
-              )}
-            </div>
-          )}
+            </Row>
 
-          <Field id="f-brief" label={proc ? "Scope" : "Mandate"} optional>
-            <textarea id="f-brief" className={styles.textarea} value={brief} onChange={(e) => setBrief(e.target.value)} maxLength={1200} rows={4}
-              placeholder={proc
-                ? "What you are buying, what counts as delivered, and when to walk away."
-                : "What the desk must keep up, on which pool, and when a period is not paid."} />
-          </Field>
+            {currencies.length > 1 && (
+              <Row n={k()} labelId="l-cur" label="Settle in"
+                hint={circle ? <>Fund it from <a className="link" href={CIRCLE_FAUCET} target="_blank" rel="noreferrer">faucet.circle.com</a> (NEAR Testnet), about 20 USDC per address every 1 to 2 hours.</> : undefined}>
+                <Choices labelledBy="l-cur" value={currencyId} onChange={setCurrencyId}
+                  options={currencies.map((c) => ({ id: c.id, label: c.id === "usdc" ? "Circle USDC" : "Test USDC" }))} />
+              </Row>
+            )}
 
-          {proc ? (
-            <div className={styles.field}>
-              <span className={styles.label}>Milestones<span className={styles.opt}>Optional</span></span>
-              <div className={styles.milestones}>
-                <AnimatePresence initial={false}>
-                  {intake.milestones.map((m, n) => (
-                    <motion.div key={n} className={styles.milestone}
+            <Row n={k()} id="f-brief" label={proc ? "Scope" : "Mandate"} text>
+              <div className={styles.box}>
+                <textarea id="f-brief" className={`${styles.input} ${styles.textarea}`} value={brief} onChange={(e) => setBrief(e.target.value)} maxLength={1200} rows={3}
+                  placeholder={proc
+                    ? "What you are buying, what counts as delivered, and when to walk away."
+                    : "What the desk must keep up, on which pool, and when a period is not paid."} />
+              </div>
+            </Row>
+
+            {!proc && (
+              <Row n={k()} id="f-pair" label="Pair" error={fe("pair")} end>
+                <div className={`${styles.box} ${styles.boxShort}`}>
+                  <input id="f-pair" className={`${styles.input} ${styles.mono} ${styles.right}`} value={intake.pair} onChange={(e) => set("pair", e.target.value.toUpperCase())} maxLength={25} placeholder="NEAR/USDC" aria-invalid={!!fe("pair")} />
+                </div>
+              </Row>
+            )}
+          </Group>
+
+          {proc && (
+            <Group label="Milestones" meta={<span className={`mono ${styles.groupMeta}`}>{intake.milestones.length} of {MAX_MILESTONES}</span>}>
+              <AnimatePresence initial={false}>
+                {intake.milestones.map((m, i) => {
+                  const no = k();
+                  return (
+                    <motion.div key={i} className={styles.msWrap}
                       initial={reduce ? false : { opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={reduce ? { opacity: 0 } : { opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2, ease }}>
-                      <div className={styles.msRow}>
-                        <span className={styles.msNo}>{n + 1}</span>
-                        <input className={`${styles.input} ${styles.text}`} aria-label={`Milestone ${n + 1} name`} value={m.name} maxLength={60}
-                          placeholder={["Data pipeline", "Dashboard", "Handover"][n] ?? "Milestone"}
-                          onChange={(e) => set("milestones", intake.milestones.map((x, j) => (j === n ? { ...x, name: e.target.value } : x)))} />
-                        <input className={`${styles.input} ${styles.text}`} aria-label={`Milestone ${n + 1} deliverable`} value={m.deliverable} maxLength={160}
-                          placeholder="Accepted when…"
-                          onChange={(e) => set("milestones", intake.milestones.map((x, j) => (j === n ? { ...x, deliverable: e.target.value } : x)))} />
-                        <button type="button" className={styles.remove} aria-label={`Remove milestone ${n + 1}`} disabled={intake.milestones.length === 1}
-                          onClick={() => set("milestones", intake.milestones.filter((_, j) => j !== n))}>×</button>
+                      transition={{ duration: 0.22, ease }}>
+                      <div className={styles.msRow} data-invalid={fe(`milestone${i}`) ? "" : undefined}>
+                        <span className={`mono ${styles.num}`}>{two(no)}</span>
+                        <div className={styles.box}>
+                          <input className={styles.input} aria-label={`Milestone ${i + 1} name`} value={m.name} maxLength={60}
+                            placeholder={["Data pipeline", "Dashboard", "Handover"][i] ?? "Milestone"}
+                            onChange={(e) => set("milestones", intake.milestones.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
+                        </div>
+                        <div className={styles.box}>
+                          <input className={`${styles.input} ${styles.soft}`} aria-label={`Milestone ${i + 1} deliverable`} value={m.deliverable} maxLength={160}
+                            placeholder="Accepted when…"
+                            onChange={(e) => set("milestones", intake.milestones.map((x, j) => (j === i ? { ...x, deliverable: e.target.value } : x)))} />
+                        </div>
+                        <button type="button" className={styles.remove} aria-label={`Remove milestone ${i + 1}`} disabled={intake.milestones.length === 1}
+                          onClick={() => set("milestones", intake.milestones.filter((_, j) => j !== i))}>×</button>
+                        {fe(`milestone${i}`) && <span className={`${styles.fieldError} ${styles.msErr}`} role="alert">{fe(`milestone${i}`)}</span>}
                       </div>
-                      {fe(`milestone${n}`) && <span className={`${styles.fieldError} ${styles.msErr}`} role="alert">{fe(`milestone${n}`)}</span>}
                     </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
+                  );
+                })}
+              </AnimatePresence>
               {intake.milestones.length < MAX_MILESTONES && (
-                <button type="button" className={styles.textBtn} onClick={() => set("milestones", [...intake.milestones, { name: "", deliverable: "" }])}>+ Add milestone</button>
+                <div className={styles.addRow}>
+                  <button type="button" className={styles.quiet} onClick={() => set("milestones", [...intake.milestones, { name: "", deliverable: "" }])}>+ Add milestone</button>
+                </div>
               )}
-            </div>
-          ) : (
-            <Field id="f-pair" label="Pair" optional error={fe("pair")}>
-              <input id="f-pair" className={styles.input} value={intake.pair} onChange={(e) => set("pair", e.target.value.toUpperCase())} maxLength={25} placeholder="NEAR/USDC" aria-invalid={!!fe("pair")} />
-            </Field>
+            </Group>
           )}
-        </div>
 
-        <div className={styles.section}>
-          <div className={styles.sectionHead}>
-            <span className={styles.sectionTitle}><Lock />Sealed limits<span className={styles.opt}>Optional</span></span>
-            <span className={styles.sectionNote}>You seal these once the room exists. Only the Sealed Table&apos;s enclave reads them; the vendor never does.</span>
-          </div>
-          <div className={styles.grid}>
+          <Group label={<><Lock />Sealed limits</>} meta={<span className={styles.groupMetaText}>set when you seal</span>}
+            note={<>Only the Sealed Table&apos;s enclave reads these; the vendor never does.</>}>
             {proc ? (
               <>
-                <Field id="f-ceiling" label="Budget ceiling" error={fe("ceiling")}>{amountInput("f-ceiling", "ceiling", symbol, circle ? "18.00" : "40.00")}</Field>
-                <Field id="f-target" label="Target price" error={fe("target")}>{amountInput("f-target", "target", symbol, circle ? "15.00" : "32.00")}</Field>
-                <Field id="f-term" label="Longest term" error={fe("termWeeks")}>{amountInput("f-term", "termWeeks", "weeks", "4", true)}</Field>
-                <Field id="f-review" label="Review time per delivery" error={fe("reviewDays")}>{amountInput("f-review", "reviewDays", "days", "2", true)}</Field>
+                <Row n={k()} id="f-ceiling" label="Budget ceiling" error={fe("ceiling")} end>{amountInput("f-ceiling", "ceiling", symbol, circle ? "18.00" : "40.00")}</Row>
+                <Row n={k()} id="f-target" label="Target price" error={fe("target")} end>{amountInput("f-target", "target", symbol, circle ? "15.00" : "32.00")}</Row>
+                <Row n={k()} id="f-term" label="Longest term" error={fe("termWeeks")} end>{amountInput("f-term", "termWeeks", "weeks", "4", true)}</Row>
+                <Row n={k()} id="f-review" label="Review per delivery" error={fe("reviewDays")} end>{amountInput("f-review", "reviewDays", "days", "2", true)}</Row>
               </>
             ) : (
               <>
-                <Field id="f-ret" label="Retainer per period" error={fe("retainer")}>{amountInput("f-ret", "retainer", symbol, circle ? "4.00" : "8.00")}</Field>
-                <Field id="f-per" label="Periods" error={fe("periods")}>{amountInput("f-per", "periods", "periods", "4", true)}</Field>
-                <Field id="f-spread" label="Widest spread" error={fe("spreadBps")}>{amountInput("f-spread", "spreadBps", "bps", "200", true)}</Field>
-                <Field id="f-depth" label="Depth each side" error={fe("depth")}>{amountInput("f-depth", "depth", symbol, "20.00")}</Field>
-                <Field id="f-slots" label="Readings per period" error={fe("slots")}>{amountInput("f-slots", "slots", "readings", "6", true)}</Field>
-                <Field id="f-thr" label="Readings that must pass" error={fe("threshold")}>{amountInput("f-thr", "threshold", "readings", "4", true)}</Field>
+                <Row n={k()} id="f-ret" label="Retainer per period" error={fe("retainer")} end>{amountInput("f-ret", "retainer", symbol, circle ? "4.00" : "8.00")}</Row>
+                <Row n={k()} id="f-per" label="Periods" error={fe("periods")} end>{amountInput("f-per", "periods", "periods", "4", true)}</Row>
+                <Row n={k()} id="f-spread" label="Widest spread" error={fe("spreadBps")} end>{amountInput("f-spread", "spreadBps", "bps", "200", true)}</Row>
+                <Row n={k()} id="f-depth" label="Depth each side" error={fe("depth")} end>{amountInput("f-depth", "depth", symbol, "20.00")}</Row>
+                <Row n={k()} id="f-slots" label="Readings per period" error={fe("slots")} end>{amountInput("f-slots", "slots", "readings", "6", true)}</Row>
+                <Row n={k()} id="f-thr" label="Readings that must pass" error={fe("threshold")} end>{amountInput("f-thr", "threshold", "readings", "4", true)}</Row>
               </>
             )}
-          </div>
-        </div>
-      </section>
-    );
+          </Group>
+        </section>
+      );
+    }
 
-    if (step === 2) return (
-      <section aria-labelledby="t-party" className={styles.col}>
-        {head("t-party", "Who is the counterparty?", "The vendor seals its own limits. Its settlement authority, a separate account, approves where payments go.",
-          demoVendor && type.kind === "procurement" ? <button type="button" className={styles.textBtn} onClick={applyDemoVendor}>Use the demo vendor</button> : undefined)}
+    if (step === 2) {
+      let n = 0;
+      const k = () => ++n;
+      return (
+        <section aria-labelledby="t-party" className={styles.col}>
+          {head("t-party", "Who is the counterparty?", "The vendor seals its own limits. Its settlement authority, a separate account, approves where payments go.")}
 
-        <div className={styles.fields}>
-          <div className={styles.grid}>
-            <Field id="f-vco" label="Vendor company" optional>
-              <input id="f-vco" className={`${styles.input} ${styles.text}`} value={intake.vendorCompany} onChange={(e) => set("vendorCompany", e.target.value)} maxLength={80} placeholder="Halcyon Markets" />
-            </Field>
-            <Field id="f-domain" label="Domain" optional error={fe("domain")}>
-              <input id="f-domain" className={styles.input} value={domain} onChange={(e) => setDomain(e.target.value.trim().toLowerCase())} placeholder="halcyon.markets" aria-invalid={!!fe("domain")} />
-            </Field>
-          </div>
-          <Field id="f-vendor" label="Vendor account" error={fe("vendor")}>
-            <input id="f-vendor" className={styles.input} value={vendor} onChange={(e) => setVendor(e.target.value.trim().toLowerCase())} placeholder={`halcyon-desk.${suffix}`} aria-invalid={!!fe("vendor")} autoComplete="off" spellCheck={false} />
-          </Field>
-          <Field id="f-auth" label="Settlement authority" error={fe("authority")} hint="A second vendor account. It approves the payout account.">
-            <input id="f-auth" className={styles.input} value={authority} onChange={(e) => setAuthority(e.target.value.trim().toLowerCase())} placeholder={`halcyon-treasury.${suffix}`} aria-invalid={!!fe("authority")} autoComplete="off" spellCheck={false} />
-          </Field>
-        </div>
+          <Group label="Vendor"
+            meta={demoVendor && type.kind === "procurement" ? <button type="button" className={styles.metaLink} onClick={applyDemoVendor}>Use the demo vendor</button> : undefined}>
+            <Row n={k()} id="f-vco" label="Company">
+              <div className={styles.box}>
+                <input id="f-vco" aria-label="Vendor company" className={styles.input} value={intake.vendorCompany} onChange={(e) => set("vendorCompany", e.target.value)} maxLength={80} placeholder="Halcyon Markets" />
+              </div>
+            </Row>
+            <Row n={k()} id="f-domain" label="Domain" error={fe("domain")}>
+              <div className={styles.box}>
+                <input id="f-domain" className={`${styles.input} ${styles.mono}`} value={domain} onChange={(e) => setDomain(e.target.value.trim().toLowerCase())} placeholder="halcyon.markets" aria-invalid={!!fe("domain")} />
+              </div>
+            </Row>
+            <Row n={k()} id="f-vendor" label="NEAR account" error={fe("vendor")}>
+              <div className={styles.box}>
+                <input id="f-vendor" className={`${styles.input} ${styles.mono}`} value={vendor} onChange={(e) => setVendor(e.target.value.trim().toLowerCase())} placeholder={`halcyon-desk.${suffix}`} aria-invalid={!!fe("vendor")} autoComplete="off" spellCheck={false} />
+              </div>
+            </Row>
+            <Row n={k()} id="f-auth" label="Settlement authority" error={fe("authority")} hint="A second vendor account. It approves the payout account.">
+              <div className={styles.box}>
+                <input id="f-auth" className={`${styles.input} ${styles.mono}`} value={authority} onChange={(e) => setAuthority(e.target.value.trim().toLowerCase())} placeholder={`halcyon-treasury.${suffix}`} aria-invalid={!!fe("authority")} autoComplete="off" spellCheck={false} />
+              </div>
+            </Row>
+          </Group>
 
-        <div className={styles.section}>
-          <div className={styles.fields}>
-            <Field id="f-bco" label="Your company" optional hint={w.accountId ? <>Signing as <span className="mono">{shortAccount(w.accountId)}</span></> : "Sign in to set the buyer account."}>
-              <input id="f-bco" className={`${styles.input} ${styles.text}`} value={intake.buyerCompany} onChange={(e) => set("buyerCompany", e.target.value)} maxLength={80} placeholder="Northwind Foundation" />
-            </Field>
-          </div>
-        </div>
+          <Group label="Your company"
+            meta={w.accountId ? <span className={`mono ${styles.groupMeta}`}>{shortAccount(w.accountId)}</span> : <span className={styles.groupMetaText}>not signed in</span>}>
+            <Row n={k()} id="f-bco" label="Company">
+              <div className={styles.box}>
+                <input id="f-bco" aria-label="Your company" className={styles.input} value={intake.buyerCompany} onChange={(e) => set("buyerCompany", e.target.value)} maxLength={80} placeholder="Northwind Foundation" />
+              </div>
+            </Row>
+          </Group>
 
-        <div className={styles.section}>
-          <button type="button" className={styles.advanced} onClick={() => setAdvanced((v) => !v)} aria-expanded={advanced}>
-            <span className={`${styles.chev} ${advanced ? styles.chevOpen : ""}`} aria-hidden="true">›</span>Advanced controls
-          </button>
-          <AnimatePresence initial={false}>
-            {advanced && (
-              <motion.div className={styles.advancedWrap} initial={reduce ? false : { height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
-                exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }} transition={{ duration: 0.24, ease }}>
-                <div className={`${styles.fields} ${styles.advancedBody}`}>
-                  <Field id="f-can" label="Canary accounts" optional error={fe("canaries")}
-                    hint="Accounts nobody should ever pay. A request naming one deletes your agent's key.">
-                    <input id="f-can" className={styles.input} value={canaries} onChange={(e) => setCanaries(e.target.value)} placeholder={`halcyon-payments.${suffix}`} />
-                  </Field>
-                  <div className={styles.field}>
-                    <span className={styles.label} id="l-time">Timings</span>
-                    <div className={styles.segment} role="radiogroup" aria-labelledby="l-time">
-                      <button type="button" role="radio" aria-checked={!demo} className={`${styles.segBtn} ${!demo ? styles.segOn : ""}`} onClick={() => setDemo(false)}>Live</button>
-                      <button type="button" role="radio" aria-checked={demo} disabled={!demoAllowed} className={`${styles.segBtn} ${demo ? styles.segOn : ""}`} onClick={() => setDemo(true)}>Demo</button>
-                    </div>
-                    <span className={styles.hint}>{demo
-                      ? "A recipient change waits 2 minutes and a claim 2 minutes."
-                      : `A recipient change waits 24 hours and a claim 72 hours.${demoAllowed ? "" : " This factory allows live timings only."}`}</span>
+          <div className={styles.group}>
+            <button type="button" className={styles.advanced} onClick={() => setAdvanced((v) => !v)} aria-expanded={advanced}>
+              <span className={styles.groupName}>Advanced controls</span>
+              <span className={`${styles.chev} ${advanced ? styles.chevOpen : ""}`} aria-hidden="true">
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M3 4.5 6 7.5l3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </span>
+            </button>
+            <AnimatePresence initial={false}>
+              {advanced && (
+                <motion.div className={styles.advancedWrap} initial={reduce ? false : { height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
+                  exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }} transition={{ duration: 0.26, ease }}>
+                  <div className={styles.rows}>
+                    <Row n={k()} id="f-can" label="Canary accounts" error={fe("canaries")}
+                      hint="Accounts nobody should ever pay. A request naming one deletes your agent's key.">
+                      <div className={styles.box}>
+                        <input id="f-can" className={`${styles.input} ${styles.mono}`} value={canaries} onChange={(e) => setCanaries(e.target.value)} placeholder={`halcyon-payments.${suffix}`} />
+                      </div>
+                    </Row>
+                    <Row n={k()} labelId="l-time" label="Timings"
+                      hint={demo
+                        ? "A recipient change waits 2 minutes and a claim 2 minutes."
+                        : `A recipient change waits 24 hours and a claim 72 hours.${demoAllowed ? "" : " This factory allows live timings only."}`}>
+                      <Choices labelledBy="l-time" value={demo ? "demo" : "live"} onChange={(v) => setDemo(v === "demo")}
+                        options={[{ id: "live", label: "Live" }, { id: "demo", label: "Demo", disabled: !demoAllowed }]} />
+                    </Row>
                   </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </section>
-    );
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </section>
+      );
+    }
 
     const privateRows: [string, ReactNode, boolean?][] = [
       ...(intake.buyerCompany.trim() ? [["Your company", intake.buyerCompany.trim()] as [string, ReactNode]] : []),
@@ -415,31 +470,43 @@ export function NewRoomFlow({ network, deposit, demoAllowed, demoVendor }: {
       ...(brief.trim() ? [[proc ? "Scope" : "Mandate", <span key="b" className={styles.clamp}>{brief.trim()}</span>] as [string, ReactNode]] : []),
       ...facts.map((f) => [f.label, f.value, true] as [string, ReactNode, boolean]),
     ];
+    const publicRows: [string, ReactNode, boolean?][] = [
+      ["Type", type.title],
+      ["Title", title.trim()],
+      ["Buyer", w.accountId ?? "Not signed in", true],
+      ["Vendor", vendor, true],
+      ["Settlement authority", authority, true],
+      ...(canaryList.length > 0 ? [["Canaries", canaryList.join(", "), true] as [string, ReactNode, boolean]] : []),
+      ["Settles in", symbol, true],
+      ["Timings", demo ? "Demo" : "Live"],
+    ];
+    let n = 0;
+    const list = (rows: [string, ReactNode, boolean?][]) => (
+      <dl className={styles.review}>
+        {rows.map(([label, value, mono]) => {
+          const prose = label === "Scope" || label === "Mandate";
+          return (
+            <div key={label} className={`${styles.rRow} ${prose ? styles.rRowText : ""}`}>
+              <span className={`mono ${styles.num}`} aria-hidden="true">{two(++n)}</span>
+              <dt>{label}</dt>
+              <dd className={mono ? "mono" : undefined}>{value}</dd>
+            </div>
+          );
+        })}
+      </dl>
+    );
     return (
       <section aria-labelledby="t-review" className={styles.col}>
         {head("t-review", "Review and create", "The room becomes its own NEAR account. Nothing is negotiated, funded or paid yet.")}
 
-        <div className={styles.reviewBlock}>
-          <div className={styles.reviewHead}><h3>On NEAR</h3><button type="button" className={styles.edit} onClick={() => go(2)}>Edit</button></div>
-          <dl className={styles.review}>
-            <div><dt>Type</dt><dd>{type.title}</dd></div>
-            <div><dt>Title</dt><dd>{title.trim()}</dd></div>
-            <div><dt>Buyer</dt><dd className="mono">{w.accountId ?? "Not signed in"}</dd></div>
-            <div><dt>Vendor</dt><dd className="mono">{vendor}</dd></div>
-            <div><dt>Settlement authority</dt><dd className="mono">{authority}</dd></div>
-            {canaryList.length > 0 && <div><dt>Canaries</dt><dd className="mono">{canaryList.join(", ")}</dd></div>}
-            <div><dt>Settles in</dt><dd className="mono">{symbol}</dd></div>
-            <div><dt>Timings</dt><dd>{demo ? "Demo" : "Live"}</dd></div>
-          </dl>
+        <div className={styles.group}>
+          <div className={styles.groupLabel}><span className={styles.groupName}>On NEAR</span><button type="button" className={styles.metaLink} onClick={() => go(2)}>Edit</button></div>
+          {list(publicRows)}
         </div>
 
-        <div className={styles.reviewBlock}>
-          <div className={styles.reviewHead}><h3>Private to you</h3><button type="button" className={styles.edit} onClick={() => go(1)}>Edit</button></div>
-          {privateRows.length ? (
-            <dl className={styles.review}>
-              {privateRows.map(([label, value, mono]) => <div key={label}><dt>{label}</dt><dd className={mono ? "mono" : undefined}>{value}</dd></div>)}
-            </dl>
-          ) : <p className={styles.empty}>Nothing added. You can still set your limits when you seal.</p>}
+        <div className={styles.group}>
+          <div className={styles.groupLabel}><span className={styles.groupName}>Private to you</span><button type="button" className={styles.metaLink} onClick={() => go(1)}>Edit</button></div>
+          {privateRows.length ? list(privateRows) : <p className={styles.note}>Nothing added. You can still set your limits when you seal.</p>}
         </div>
 
         <p className={styles.sign}>
@@ -457,32 +524,32 @@ export function NewRoomFlow({ network, deposit, demoAllowed, demoVendor }: {
           {STEPS.map((s, i) => (
             <li key={s} className={`${styles.stepItem} ${i === step ? styles.stepOn : ""} ${i < step ? styles.stepDone : ""}`} aria-current={i === step ? "step" : undefined}>
               <button type="button" onClick={() => { if (i < step) go(i); }} disabled={i >= step}>
-                {i < step ? <span className={styles.check} aria-hidden="true">✓</span> : null}
+                <span className={`mono ${styles.stepNo}`}>{i < step ? <Check /> : two(i + 1)}</span>
                 <span>{s}</span>
               </button>
             </li>
           ))}
         </ol>
-        {/* one thin line under the row that fills as you advance */}
+        {/* one hairline under the row that fills as you advance */}
         <span className={styles.track} aria-hidden="true"><span className={styles.fill} style={{ transform: `scaleX(${(step + 1) / STEPS.length})` }} /></span>
       </div>
 
       <div className={styles.body}>
         <AnimatePresence mode="wait" initial={false} custom={dir}>
           <motion.div key={step} custom={dir} variants={variants} initial="enter" animate="center" exit="exit"
-            transition={{ duration: reduce ? 0.12 : 0.24, ease }}>
+            transition={{ duration: reduce ? 0.12 : 0.26, ease }}>
             {stepBody}
           </motion.div>
         </AnimatePresence>
       </div>
 
       <div className={styles.foot}>
-        <AnimatePresence mode="wait" initial={false}>
-          {error ? (
+        <AnimatePresence initial={false}>
+          {error && (
             <motion.p key={error} className={styles.error} role="alert" initial={reduce ? false : { opacity: 0, y: 3 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
               {error}
             </motion.p>
-          ) : <span key="none" />}
+          )}
         </AnimatePresence>
         <div className={styles.buttons}>
           {step > 0 && <button type="button" className={styles.back} onClick={() => go(step - 1)} disabled={busy}>Back</button>}
