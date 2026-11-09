@@ -534,3 +534,38 @@ Circle USDC, release 3 on accord-usdc: `a1.accord-usdc.testnet` funded 14.00 Cir
 (`4gPohYYMokgQcPcgNhX3tCTTXjA35AfuKkpGs1SpS2no`), paid 5.00 to halcyon-mm.testnet (`E127BGy3Tw6PmhE9JcoFr7vQsKTiHNevTTiAxEjJGWK2`),
 refused a redirect with ERR_PAYEE_MISMATCH (`9rgsBFA26yedWuEEJk77sKBDrDGS9mHn9BFMknCaP8BB`), revoked
 (`FTigDebs1kZjLpTN8nC8SZWp4dMM1ChuUyR211JZnzuW`); the agent's next call failed with AccessKeyDoesNotExist.
+
+
+## 27. Try-it on the public URL (9 Nov 2026)
+
+`/app/try-it` was run against https://accordweb-production.up.railway.app/app by a fresh implicit testnet account
+(`7ab36eba…b5017`, unfunded at the start), with the same HTTP calls the browser makes (`Origin` set to the site) and its
+wallet calls signed as NEP-366 delegates sent to `/app/api/relay`, as Meteor and Intear send them. Agreement
+`a15.accord-v2.testnet` (release 4). It went Sealed, Attested, Executing, recipient active, paid, refused, revoked in 5 min 30 s.
+
+| Step | Result | Tx |
+| --- | --- | --- |
+| Session (NEP-413, unfunded implicit account) | `POST /app/api/session` 200 |  |
+| Faucet, NEAR (to 2.5) | `POST /app/api/faucet` 200 | `GxVw5pg34KZfyVCu2bhYMrbA4NqWai2XJQyfpmUZtZD5` |
+| Faucet, tUSDC (100) | same call | `7dRodXTgVXmKHEHdB53uH87p7fJruHzLbQ688z78pgrC` |
+| Create a15 (signed directly; the relayed create failed, see below) | Sealed | `GNynLq2oxREyQrF1N4rNRhDztCzfVtqJ5DVgmthDRBEy` |
+| Counterparty seals the vendor mandate | counterparty step | `BpwCPtgSg4rjZVNKPnuw4nLUzemEfoJpaoSXRCmKn2PM` |
+| Buyer seals the Northwind mandate (relayed) | both sealed; the negotiation started without a counterparty step (the keeper, most likely; tx not captured) | `6eYVDLtTJ2mFT8J7GrKUWUfWuZZDXUZTd37fhGpN1324` |
+| Counterparty approves the terms | Attested after 67 s | `HEm5P4gaE3LxvyV2ergFVxDHXbmVw8jthFARHH8GoV9q` |
+| Buyer approves the terms (relayed) | Executing | `4nNbyFAk6moLWKHUCX37JLoeoUTFE272cHWLUXwHAeq2` |
+| Counterparty proposes halcyon-mm.testnet on useaccord.tech | Proposed, then Proven | `4xGmfM2xoiRrVMA5ocLWMeiTyq4k2gQYhXVw4RNihZmp` |
+| Buyer funds 33.00 tUSDC (relayed) | funded 33.00 of 33.00 | `HTpF77VeZXZf65v1p2Av3YHE5DK37FG9WAWmjxBHbUrE` |
+| Buyer installs the demo agent key (relayed) | agent key set | `23gimnowmhb8nErdbPUrhzg7oGk7J382weKXYAsyQuBQ` |
+| Authority approves the recipient | AuthorityApproved | `A6VokbSKJfgMWbakATCeARGsR7NbPAhFhBFsYwWx8Bth` |
+| Buyer accepts the recipient (relayed, rating allow) | Accepted, 120 s timelock | `Tg1rtc6CmLHwP9aHwhzxLyEMmsxacMjsMiw6cRrn5uo` |
+| Counterparty submits delivery 1 | recipient active after the timelock (not activated by the counterparty step; the keeper, most likely) | `8ELSpUdszC6p3R7q6CdgLTrg1PJVtFqJvt1eDzsN5Vrd` |
+| Buyer accepts delivery 1 (relayed) | item 1 eligible | `h2xtvzUGeysiQHCYr95zWxXJKJhKTpT1CdN8n8tZBss` |
+| Demo agent pays item 1 | sent, 15.00 tUSDC to halcyon-mm.testnet | `7unm1ZWEE5DH74JAKsG7ZcKywz8t9V8NCNvghUcacXUd` |
+| Demo agent asked to pay halcyon-markets.testnet | refused, ERR_PAYEE_MISMATCH | `7Cjd6cvxVm8racRQTotSJ1CXh5PHdgEvSzJxYszAbptz` |
+| Buyer revokes the key (relayed) | 0 keys on a15; `/api/demo-agent pay` then 409 | `2nyFEeBPB4BLhwxzrWrqMhsEvSQWS4LGVjff8ZuWZAtG` |
+
+`/app/api/verify/a15.accord-v2.testnet`: 5 ok · 1 partial (model: the hardware quote is not checked here) · 1 not checked
+(release: needs `outlayer-verify`) · 0 failed. Code = release 4, 0 keys, payee proof on useaccord.tech, 1 payment, 1 refusal,
+receipts match paid. RPC `view_access_key_list` on a15 returns no keys.
+
+The first try, a relayed `create_agreement`, failed: `POST /app/api/relay` returned 502 `Not enough balance for relay.accord-v2.testnet (balance: 1991837072888958900000000, cost: 2301472081439430000000000)`. In a NEP-366 meta-transaction the relayer pays the deposits inside the delegate (nearcore counts them in the outer transaction's cost), so every relayed create costs the relayer the 2 NEAR room deposit, which goes back to the buyer when the room closes. With 1.99 NEAR left, a Meteor or Intear visitor cannot open a room. The comment in `app/src/server/relay.ts` ("any deposit is inside the delegate and comes from the user's account") is wrong. Proposed fix: `rejectDelegate` refuses delegates whose deposit is more than 1 yoctoNEAR, and the wallet signer sends a call with a larger deposit through `signAndSendTransaction` (the visitor pays it from the faucet's 2.5 NEAR) instead of the relayer; top up the relayer in the meantime. In this run the create was signed directly from the visitor's account, as a wallet that does not relay sends it. Every other buyer call went through `/app/api/relay` and worked; none returned 415 or 403.
