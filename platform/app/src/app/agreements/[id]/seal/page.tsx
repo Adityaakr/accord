@@ -5,6 +5,8 @@ import { accord, config } from "@/server/accord";
 import { isCirclePreset, presets } from "@/server/presets";
 import { PageHead, Pill } from "@/components/ui";
 import { SealForm } from "./SealForm";
+import { isRpcBusy } from "@accord/sdk";
+import { readWithin } from "@/server/deadline";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Seal your mandate" };
@@ -19,9 +21,10 @@ function roomPresets(kind: string, circle: boolean) {
 
 export default async function Seal({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const a = await accord().agreement(id).get().catch(() => null);
+  // at most 12 s on the chain per read: past it the room's error boundary says the network is busy and reads again
+  const a = await readWithin(accord().agreement(id).get(), 12_000, `reading ${id}`).catch((e: unknown) => { if (isRpcBusy(e)) throw e; return null; });
   if (!a) notFound();
-  const commitments = await accord().agreement(id).commitments();
+  const commitments = await readWithin(accord().agreement(id).commitments(), 12_000, `reading ${id}'s commitments`);
   return (
     <div className="container">
       <PageHead
