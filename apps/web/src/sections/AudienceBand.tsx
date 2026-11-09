@@ -325,7 +325,9 @@ const stepsByCap = (trace: Step[]) => CAPS.map((_, c) => trace.filter((_, i) => 
 
 const secs = (n: number) => (n < 60 ? `${n}s` : `${Math.floor(n / 60)}m ${String(n % 60).padStart(2, "0")}s`)
 
-function TraceView({ trace, shown, onOpen }: { trace: Step[]; shown: number; onOpen: (cap: number) => void }) {
+/* visible: the trace is on screen in the active panel. The step buttons are pointer shortcuts (out of the tab order);
+   while the trace is hidden they are also hidden from assistive technology, so no hidden text is announced. */
+function TraceView({ trace, shown, visible, onOpen }: { trace: Step[]; shown: number; visible: boolean; onOpen: (cap: number) => void }) {
   const ref = useRef<HTMLOListElement>(null)
   /* keep the newest step in view, like a terminal */
   useEffect(() => { const box = ref.current?.parentElement; if (box) box.scrollTop = box.scrollHeight }, [shown])
@@ -335,7 +337,7 @@ function TraceView({ trace, shown, onOpen }: { trace: Step[]; shown: number; onO
         const running = i === shown
         return (
           <li key={i} className={`${styles.step} ${styles[`k_${st.k}`]}`}>
-            <button type="button" className={styles.stepBtn} disabled={running} onClick={() => onOpen(capOf(trace, i))} aria-label={`${st.t}: open ${CAPS[capOf(trace, i)]}`} tabIndex={-1}>
+            <button type="button" className={styles.stepBtn} disabled={running} onClick={() => onOpen(capOf(trace, i))} aria-label={`${st.t}: open ${CAPS[capOf(trace, i)]}`} tabIndex={-1} aria-hidden={!visible || undefined}>
             <span className={styles.stepHead}>
               {st.k === "call" ? <span className={styles.glyph}>▸</span> : st.k === "event" ? <span className={styles.glyph}>←</span> : st.k === "think" ? <span className={styles.glyph}>∴</span> : st.k === "wait" ? <span className={styles.glyph}>…</span> : <span className={styles.glyph}>=</span>}
               <span className={styles.stepText}>{st.t}</span>
@@ -392,14 +394,14 @@ function PanelView({ p, planned, active, id, labelledBy, onOpen }: { p: Panel; p
           </div>
           <div className={styles.slot}>
             <div className={`${styles.layer} ${styles.traceLayer} ${traceOn ? styles.layerOn : ""}`} aria-hidden={!traceOn} data-seo-skip>
-              <TraceView trace={p.trace} shown={working ? phase : T} onOpen={onOpen} />
+              <TraceView trace={p.trace} shown={working ? phase : T} visible={active && traceOn} onOpen={onOpen} />
             </div>
             <ul className={`${styles.lines} ${styles.layer} ${traceOn ? "" : styles.layerOn}`}>
               {p.lines.map((l, i) => {
                 const state = done || i < checking ? "pass" : i === checking ? "check" : "wait"
                 return (
                   <li key={i} className={`${styles.line} ${styles[state]}`}>
-                    <button type="button" className={styles.lineBtn} data-seo-keep onClick={() => onOpen(i)} tabIndex={active && !traceOn ? 0 : -1}>
+                    <button type="button" className={styles.lineBtn} data-seo-keep onClick={() => onOpen(i)} tabIndex={active && !traceOn ? 0 : -1} aria-hidden={!(active && !traceOn) || undefined}>
                     <span className={styles.lineText}>{l}</span>
                     <span className={styles.cap}>
                       {state === "pass" ? <span className={styles.ok}><Tick /></span> : state === "check" ? <span className={styles.spin} aria-hidden="true" /> : null}

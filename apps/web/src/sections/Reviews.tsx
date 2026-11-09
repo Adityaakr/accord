@@ -121,8 +121,8 @@ export function Reviews() {
                     </span>
                     <span className={styles.nav}>
                       <span className={styles.count}>{String(i + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}</span>
-                      <button type="button" className={styles.arrow} aria-label="Previous" tabIndex={k === 0 ? 0 : -1} onClick={() => { setHold(true); setActive((active - 1 + n) % n) }}>←</button>
-                      <button type="button" className={styles.arrow} aria-label="Next" tabIndex={k === 0 ? 0 : -1} onClick={() => { setHold(true); setActive((active + 1) % n) }}><Arrow className={styles.arrowIcon} /></button>
+                      <button type="button" className={styles.arrow} aria-label="Previous" tabIndex={k === 0 ? 0 : -1} aria-hidden={k !== 0 || undefined} onClick={() => { setHold(true); setActive((active - 1 + n) % n) }}>←</button>
+                      <button type="button" className={styles.arrow} aria-label="Next" tabIndex={k === 0 ? 0 : -1} aria-hidden={k !== 0 || undefined} onClick={() => { setHold(true); setActive((active + 1) % n) }}><Arrow className={styles.arrowIcon} /></button>
                     </span>
                   </figcaption>
                 </div>
