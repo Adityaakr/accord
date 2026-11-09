@@ -285,13 +285,18 @@ export function WalletProvider({ network, children }: { network: string; childre
   useEffect(() => {
     if (method !== "throwaway") return;
     const warn = (e: BeforeUnloadEvent) => {
+      // only once this account has a room open (try-it remembers it until Finish): before that nothing is at stake,
+      // and a reload keeps the key anyway, so no prompt
+      let open = false;
+      try { open = !!accountId && !!localStorage.getItem(`accord-try-it-room:${accountId}`); } catch { /* no storage */ }
+      if (!open) return;
       e.preventDefault();
       e.returnValue = LEAVE_WARNING;
       return LEAVE_WARNING;
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [method]);
+  }, [method, accountId]);
   const value = useMemo<WalletState>(() => ({
     kind, method, network, accountId, signer, restoring, connecting, error, connect, disconnect, throwawayAvailable, startThrowaway, sandboxPrincipals,
   }), [kind, method, network, accountId, signer, restoring, connecting, error, connect, disconnect, throwawayAvailable, startThrowaway, sandboxPrincipals]);
