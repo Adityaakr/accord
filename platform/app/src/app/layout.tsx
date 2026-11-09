@@ -15,7 +15,7 @@ const host = Host_Grotesk({ subsets: ["latin"], variable: "--font-host-grotesk",
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono", weight: ["400", "500"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "Accord deal rooms", template: "%s · Accord" },
+  title: { default: "Accord app", template: "%s · Accord" },
   description: "The private deal room and control plane for agent-to-agent commerce. Agreements negotiated in private, enforced in public.",
 };
 

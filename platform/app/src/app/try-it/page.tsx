@@ -4,7 +4,7 @@ import { demoConfig, demoReady } from "@/server/demo";
 import { TryIt } from "./TryIt";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Try a deal in 3 minutes" };
+export const metadata = { title: "Try a deal" };
 
 // The guided testnet path: five steps from a wallet to an agent payment and a refused redirect, against Accord's
 // demo vendor. Every step is a real transaction on NEAR testnet with test USDC.

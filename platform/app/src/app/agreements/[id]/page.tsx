@@ -38,7 +38,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  return { title: id };
+  return { title: `Deal room ${id}` };
 }
 
 const ITEM_TONE: Record<string, Tone> = {
