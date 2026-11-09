@@ -146,6 +146,14 @@ export function TryIt({ network, explorer, deposit, demo, ready, perIp }: {
       const nearOnly = circle;
       const r = await fetch("/api/faucet", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(nearOnly ? { only: "near" } : {}) });
       const b = (await r.json()) as { error?: string; txs?: { label: string; hash: string }[]; balances?: { near: string; tusdc: string } };
+      // This account was already funded today, typically by the same drip still landing after a reload: not a refusal.
+      // Read the balances again (now and once the drip is final) instead of offering the no-funds paths.
+      if (r.status === 429 && (b as { code?: string }).code === "account_used") {
+        setMsg({ step: 2, ok: true, text: "Test funds for this account are on their way. Your balances update in a moment." });
+        void load();
+        window.setTimeout(() => void load(), 6_000);
+        return;
+      }
       if (!r.ok) {
         setMsg({ step: 2, ok: false, text: b.error ?? `The faucet could not send right now (${r.status}).` });
         // a limit (this account, this connection, today's budget) or an empty faucet: offer the no-funds paths

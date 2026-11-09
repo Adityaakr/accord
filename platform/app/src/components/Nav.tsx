@@ -100,6 +100,11 @@ export function Sidebar() {
   const settingsOn = path.startsWith("/settings") || path.startsWith("/onboarding");
   /* Signed out, only the pages that work without an account: no workspace switcher, no Settings or Profile
      (they would only bounce to sign-in). The logo and Sign in sit in the top bar. */
+  // While a kept session is read back after a reload, show neither the signed-out nor the signed-in set: an empty
+  // sidebar of the same size, so nothing flashes and swaps a moment later.
+  if (w.restoring) {
+    return <nav className={styles.sidebar} aria-label="Main" aria-busy="true"><div className={`${styles.group} ${styles.bottom}`}><ThemeToggle /></div></nav>;
+  }
   if (!w.accountId) {
     return (
       <nav className={`${styles.sidebar} ${styles.signedOut}`} aria-label="Main">
