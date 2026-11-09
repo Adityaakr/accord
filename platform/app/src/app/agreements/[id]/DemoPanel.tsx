@@ -131,7 +131,7 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
             <p className="small">
               It holds one function-call key on the agreement account, which you install and can revoke. It signs <span className="mono">act</span> itself; nothing is relayed.
             </p>
-            {!isBuyer ? <p className="small">Sign in as the buyer, <span className="mono">{a.buyer}</span>, to start the agent.</p>
+            {!isBuyer ? <p className="small">Sign in as the buyer, <span className="mono" style={{ overflowWrap: "anywhere" }}>{a.buyer}</span>, to start the agent.</p>
               : !installed ? (
                 <button type="button" className={`${styles.btn} ${styles.primary}`} disabled={busy !== null || !agentKey || !client || (!!a.agent_key && !installed)} onClick={() => void startAgent()}>
                   {busy === "start" ? "Waiting for the network…" : a.agent_key ? "Another agent key is installed" : "Start the demo agent"}

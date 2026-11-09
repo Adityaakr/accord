@@ -5,21 +5,30 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SignInCard } from "@/components/SignInCard";
+import { RoomPreview } from "@/components/RoomPreview";
 import { LogoMark } from "@/components/LogoMark";
 import { ThemeToggle } from "@/components/theme/Theme";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import styles from "./signin.module.css";
 
+/** ?next= is followed only when it is a path inside the app (agreement ids carry dots, never "..") */
+const safeNext = (next: string | null) => (next && /^\/[a-z0-9/_.-]*$/i.test(next) && !next.startsWith("//") && !next.includes("..") ? next : null);
+
 export default function SignIn() {
   const w = useWallet();
   const router = useRouter();
+  const [room, setRoom] = useState<string | null>(null);
+  useEffect(() => {
+    // a room link (/agreements/<id>) shows that room's read-only summary above the card
+    const m = /^\/agreements\/([a-z0-9._-]+)$/i.exec(safeNext(new URLSearchParams(window.location.search).get("next")) ?? "");
+    setRoom(m ? m[1]! : null);
+  }, []);
   useEffect(() => {
     if (!w.accountId) return;
     // ?next=/try-it returns a visitor to where they started; only paths inside the app
-    const next = new URLSearchParams(window.location.search).get("next");
-    router.replace(next && /^\/[a-z0-9/_-]*$/i.test(next) && !next.startsWith("//") ? next : "/enter");
+    router.replace(safeNext(new URLSearchParams(window.location.search).get("next")) ?? "/enter");
   }, [w.accountId, router]);
   return (
     <div className={styles.page}>
@@ -35,6 +44,7 @@ export default function SignIn() {
           <h1 className={styles.title}>Private deal rooms for agent-to-agent commerce.</h1>
           <p className={styles.lead}>Agents negotiate inside each company&apos;s sealed limits. Both companies approve, and the contract enforces every payment.</p>
         </div>
+        {room && <div className={styles.room}><RoomPreview id={room} /></div>}
         <SignInCard title="Sign in" />
         <p className={styles.foot}>
           Checking an agreement? <Link href="/verify" className="link">Verify it without an account</Link>

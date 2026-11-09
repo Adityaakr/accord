@@ -28,7 +28,8 @@ export function Chrome({ network, factory, sandbox, children }: { network: strin
   useEffect(() => {
     if (full || open || !ready) return;
     const t = window.setTimeout(() => {
-      if (!w.accountId) router.replace("/signin");
+      // a room link keeps its room: sign-in shows a read-only summary of it and returns there afterwards
+      if (!w.accountId) router.replace(path.startsWith("/agreements/") ? `/signin?next=${encodeURIComponent(path)}` : "/signin");
       else if (!id && path === "/") router.replace("/enter");
     }, 400);
     return () => window.clearTimeout(t);
