@@ -2,18 +2,7 @@
 import "server-only";
 import { fromThisSite } from "./origin";
 
-const hits = new Map<string, number[]>();
-
-/** True if `key` may make another call: at most `max` calls in the last `windowMs`. */
-export function allow(key: string, max: number, windowMs: number): boolean {
-  const now = Date.now();
-  const recent = (hits.get(key) ?? []).filter((t) => now - t < windowMs);
-  if (recent.length >= max) { hits.set(key, recent); return false; }
-  recent.push(now);
-  hits.set(key, recent);
-  return true;
-}
-
+export { allow, takeAll, remaining, type Limit } from "./limiter";
 export { clientIp } from "./clientip";
 
 /** Same-origin JSON only, like the app's other write routes. */

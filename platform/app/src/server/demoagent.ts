@@ -10,7 +10,7 @@ import { demoAgent, demoAgentKey, demoConfig, isDemoRoom } from "./demo";
 import { accord, symbolFor } from "./accord";
 import { agentActions, type AgentTrigger } from "./store";
 import { readCache } from "./chainproxy";
-import { allow } from "./ratelimit";
+import { spendAgentAction } from "./agentlimit";
 import { autoInstruction, decideTick } from "@/lib/agenttick";
 
 /** Rooms where the demo agent is acting right now. */
@@ -58,8 +58,10 @@ export async function agentTick(agreement: string): Promise<TickResult> {
       state: a.state, agentKey: a.agent_key, demoKey, inFlight: !!a.in_flight, recipient: a.recipient?.account ?? null, due, now: a.now, records,
     });
     if (!decision.pay) return { skipped: decision.reason };
-    // the same per-item limit as the pay button: one payment per item per day from this server
-    if (!allow(`agent:pay:${agreement}:${decision.item}`, 1, 24 * 3600_000)) return { skipped: `the demo agent already paid item ${decision.item}` };
+    // one payment per item per day from this server (shared with the pay button), and the agent's own hourly allowance,
+    // kept apart from the buyer's buttons so auto-pay never uses up a visitor's "pay a new account" (agentlimit.ts)
+    const no = spendAgentAction({ kind: "auto", agreement, item: decision.item });
+    if (no) return { skipped: no.error };
     const intent = { item: decision.item, amount: decision.amount, recipient: decision.recipient };
     const paid = await recordedPay(a, "auto", autoInstruction(intent.item, intent.amount, intent.recipient, symbolFor(a.factory)), intent, "demo agent run by Accord");
     return { paid };

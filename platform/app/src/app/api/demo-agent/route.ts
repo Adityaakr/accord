@@ -6,12 +6,15 @@
 //            The room calls it while the buyer has it open, so an accepted delivery is paid without a click.
 // Every act call is written to the agent's record (instruction and intent) before it is signed, for the transcript.
 // The agent signs act itself with the agreement's function-call key; nothing is relayed. Revoke stays the buyer's.
+// Allowances (server/agentlimit.ts): the buyer's "pay" and "attack" share 12 per room an hour; the agent's own payments
+// have their own 30 an hour and one per due item; a tick that sends nothing counts against neither.
 // "pay" and "attack" need the session of the room's buyer (demoguard.ts): five refusals revoke the key, so nobody
 // else may make the agent act in someone's room.
 import { NextResponse } from "next/server";
 import { chainErrorResponse } from "@/server/rpcerror";
 import { AccordError } from "@accord/sdk";
-import { allow, sameOriginJson } from "@/server/ratelimit";
+import { sameOriginJson } from "@/server/ratelimit";
+import { allowTick, spendAgentAction } from "@/server/agentlimit";
 import { demoAgent, demoAgentKey, demoConfig, demoReady, isDemoRoom } from "@/server/demo";
 import { accord, isConfiguredAgreement } from "@/server/accord";
 import { sessionAccount } from "@/server/session";
@@ -37,6 +40,8 @@ export async function POST(req: Request) {
   const key = demoAgentKey(agreement, a.revoked_keys);
   if (action === "key") return NextResponse.json({ publicKey: key.publicKey, installed: a.agent_key === key.publicKey });
   if (action === "tick") {
+    // a tick that sends nothing counts against no action allowance; only a loose read limit (server/agentlimit.ts)
+    if (!allowTick(agreement)) return NextResponse.json({ action, paid: false, reason: "the agent looked recently; it looks again on the next change" });
     try {
       const r = await agentTick(agreement);
       return NextResponse.json("paid" in r ? { action, paid: true, ...r.paid } : { action, paid: false, reason: r.skipped });
@@ -52,7 +57,6 @@ export async function POST(req: Request) {
       : "install the demo agent's key first";
     return NextResponse.json({ error: why }, { status: 409 });
   }
-  if (!allow(`agent:${agreement}`, 6, 3600_000)) return NextResponse.json({ error: "the demo agent has acted enough in this room for an hour" }, { status: 429 });
   if (agentBusy.has(agreement)) return NextResponse.json({ error: "the demo agent is already acting in this room" }, { status: 409 });
   agentBusy.add(agreement);
   try {
@@ -60,7 +64,9 @@ export async function POST(req: Request) {
     const due = (await deal.dueItems()).find((d) => d.eligible_at !== null && d.eligible_at <= a.now) ?? null;
     if (action === "pay") {
       if (!due) return NextResponse.json({ error: "no item is eligible yet: the vendor delivers, you accept, then the agent pays" }, { status: 409 });
-      if (!allow(`agent:pay:${agreement}:${due.item}`, 1, 24 * 3600_000)) return NextResponse.json({ error: `the demo agent already paid item ${due.item}` }, { status: 409 });
+      // the buyer's own allowance and the one-payment-per-item limit, counted only now that a call is about to be signed
+      const no = spendAgentAction({ kind: "pay", agreement, item: due.item });
+      if (no) return NextResponse.json({ error: no.error }, { status: no.status });
       const r = await recordedPay(a, "pay", PAY_INSTRUCTION, { item: due.item, amount: due.amount, recipient: due.recipient ?? a.recipient?.account ?? "" }, "demo agent run by Accord");
       return NextResponse.json({ action, item: due.item, amount: due.amount, recipient: due.recipient, result: r.result });
     }
@@ -68,6 +74,8 @@ export async function POST(req: Request) {
     const items = await deal.items();
     const item = due?.item ?? items.find((it) => it.status !== "Paid")?.id ?? items[0]?.id ?? 0;
     const amount = due?.amount ?? items.find((it) => it.id === item)?.amount ?? "1";
+    const no = spendAgentAction({ kind: "attack", agreement });
+    if (no) return NextResponse.json({ error: no.error }, { status: no.status });
     const r = await recordedPay(a, "attack", attackInstruction(), { item, amount, recipient: demoConfig().stranger }, "pay the new account instead");
     return NextResponse.json({ action, item, amount, recipient: demoConfig().stranger, result: r.result });
   } catch (e) {
