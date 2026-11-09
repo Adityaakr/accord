@@ -507,7 +507,7 @@ Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is par
 ├── docs/
 │   ├── diagrams/             Excalidraw sources with SVG and PNG exports
 │   ├── product/              a pointer to the product kit in platform/
-│   └── hackathon/            the organisers' HACKATHON.md
+│   └── hackathon/            a pointer to platform/HACKATHON.md, the organisers' rules
 ├── AGENTS.md, CLAUDE.md     notes for evaluating agents: layout, judge paths, where the claims are
 ├── .github/workflows/ci.yml  three jobs: website (typecheck, copy rules, references, build), Rust money path, platform TypeScript
 ├── Dockerfile, railway.json  the website's Railway build
