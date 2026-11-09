@@ -48,7 +48,7 @@ export function Docs() {
             Everything here runs on NEAR testnet with test USDC.
           </p>
           <div className={styles.headerActions}>
-            <Button variant="primary" href={LINKS.tryDeal}>Try a deal in about 5 minutes</Button>
+            <Button variant="primary" href={LINKS.tryDeal}>Run your own deal in 5 minutes</Button>
             <Button variant="secondary" href="/docs/quickstart">Read the quickstart</Button>
           </div>
         </header>

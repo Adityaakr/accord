@@ -253,7 +253,7 @@ const agentSections = `Source code (MIT): ${REPO} · Machine-readable facts: ${S
 - Agreement types: six; two are built (vendor contracts, called procurement in code, and market-making agreements) and four are planned.
 - Sign-in: external NEAR wallets, through HOT Connect. On testnet, "Try without a wallet" makes a throwaway key in the browser tab instead (sessionStorage only, never sent to the server). There is no email sign-in.
 
-## Try it (no code, about 5 minutes, NEAR testnet)
+## Run your own deal (no code, about 5 minutes, NEAR testnet)
 
 Start at ${SITE_URL}/app/try-it (walkthrough with screenshots: ${SITE_URL}/docs/quickstart). No wallet needed: choose "Try without a wallet" and the page makes a throwaway testnet key in your browser tab, funded by the faucet. A faucet, a demo counterparty and a demo agent run by Accord are built in; everything uses test USDC.
 
@@ -261,9 +261,11 @@ ${TRY_STEPS.map((t) => `- **${t.n === "After" ? "After" : `Step ${t.n}`}: ${t.na
 
 ## Key URLs
 
-- [Try it](${SITE_URL}/app/try-it): the guided test room on NEAR testnet, with faucet, demo counterparty and demo agent
+- [Run your own deal](${SITE_URL}/app/try-it): the guided test room on NEAR testnet, with faucet, demo counterparty and demo agent
+- [Live attack room](${SITE_URL}/app/try): a pre-funded public room; write to the agent and watch the contract refuse it
+- [Watch the replay](${SITE_URL}/app/replay): a recorded run (a32.accord-v2.testnet) in about 60 seconds, each step with its transaction
 - [Sign in](${SITE_URL}/app/signin): the app, with your own NEAR wallet
-- [Verify an agreement](${SITE_URL}/verify): five public checks of any agreement in the browser, no account and no keys; ${SITE_URL}/verify?agreement=<account> opens one directly
+- [Verify an agreement](${SITE_URL}/verify): the seven-check verdict make verify gives (on a6: 5 ok · 1 partial · 1 not checked), plus five quick reads live from testnet, no account and no keys; ${SITE_URL}/verify?agreement=<account> opens one directly
 - [Public record](${SITE_URL}/record): agreement a6's 12 transactions, each linked to the explorer
 - [Security](${SITE_URL}/security): the claims table with every limit, custody, the privacy boundary and the threat model
 ${docsPages.map((r) => `- [${r.name}](${SITE_URL}${r.path}): ${r.summary}`).join("\n")}

@@ -115,7 +115,7 @@ export function WhyNow() {
         </figcaption>
       </Appear>
 
-      <a href="#try" className={`t-link ${styles.tryLink}`}>Try to move the money<Arrow dir="down" /></a>
+      <a href="#try" className={`t-link ${styles.tryLink}`}>Try it in the live attack room<Arrow dir="down" /></a>
     </section>
   )
 }

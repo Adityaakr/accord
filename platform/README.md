@@ -19,7 +19,7 @@ USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, w
 `halcyon-auth.testnet`), and the agent is a demo agent run by Accord for test rooms; both are labelled in the room.
 
 1. Do: **Connect a NEAR wallet**, a NEAR testnet wallet such as Meteor or Intear, or choose **Try without a wallet**: the page makes a throwaway testnet key in this tab (sessionStorage only, never sent to the server, gone when the tab closes), and steps 2 and 3 run on their own. See: `01 Connect a wallet · done`, with your account; for the throwaway key, a 64-character implicit account labelled `Throwaway testnet key`.
-2. Do: **Get test funds** (once a day per account, up to 30 accounts per connection a day, within a daily budget; if it refuses, the step offers a 60-second replay, the live scam room at `/app/try` and Verify). See: `0.00 NEAR` become
+2. Do: **Get test funds** (once a day per account, up to 30 accounts per connection a day, within a daily budget; if it refuses, the step offers Watch the replay (`/app/replay`), the Live attack room (`/app/try`) and Verify). See: `0.00 NEAR` become
    `2.35 NEAR · 100.00 tUSDC`, with both faucet transactions linked. If the faucet refuses, the step links the public
    room (`/app/try`), a recorded run and `/app/verify` instead.
 3. Do: **Create the room**. See: `Your room is a8.accord-v2.testnet: My first deal room.` (your number will differ).
@@ -30,11 +30,12 @@ USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, w
    - 5a. Do: approve the terms and fund the escrow. See: `Approved the terms as the vendor`, `Proposed halcyon-mm.testnet
      as the recipient on useaccord.tech`, `Approved recipient halcyon-mm.testnet as the vendor's
      authority`. Accept the recipient; see `Submitted delivery for item 1`. Accept delivery 1.
-   - 5b. Do: **Start the demo agent** (your wallet signs `install_agent_key`), then **Let the agent pay the due item**.
-     See: `Paid item 1: 15.00 tUSDC to halcyon-mm.testnet, the active recipient.`
+   - 5b. Do: **Start the demo agent** (your wallet signs `install_agent_key`), then wait: the agent pays the accepted
+     item on its own, with no click. See, in the agent bar and the Activity tab: `Paid item 1: 15.00 tUSDC to
+     halcyon-mm.testnet.` with the `act` transaction (`payment_sent`).
    - 5c. Do: **Ask the agent to pay a new account**. See: `ERR_PAYEE_MISMATCH` and `Asked to pay … to
      halcyon-markets.testnet. The contract refused it and recorded the refusal.`
-   - 5d. Do: revoke the key from the room header. See: `Agent revoked · next call rejected by the network`.
+   - 5d. Do: **Hold to revoke** in the room header. See: `Agent revoked · next call rejected by the network`.
 6. Do, with a throwaway key: **Finish: close the room and return the test NEAR** (Reset does the same). See: `Done. The
    room is closed and its test NEAR and test USDC are back with the faucet.`, with the `ft_transfer` and
    `delete_account` transactions linked, then `Room a8.accord-v2.testnet · Verify it →` (kept for the tab after the
@@ -287,9 +288,9 @@ The reviewed agreement code (`ECgsrZwy…`, global contract `R2qxw4u5…`) is re
 
 | Proof | Agreement | Result | Transaction |
 | --- | --- | --- | --- |
-| Negotiate | [`a10`](https://testnet.nearblocks.io/address/a10.accord-v2.testnet) | Attested in 64 s, `33.00 USDC` in 3 items, attestation ok, `ERR_SEALED` both ways | in the `make negotiate` output |
-| Fund | `a10` | `33.00 USDC` escrowed | [`2mBhRNnX…`](https://testnet.nearblocks.io/txns/2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22) |
-| Pay | `a10` | item 1, `12.00 USDC` to `halcyon-mm.testnet` | [`Bs5dVpr6…`](https://testnet.nearblocks.io/txns/Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm) |
+| Negotiate | [`a10`](https://testnet.nearblocks.io/address/a10.accord-v2.testnet) | Attested in 64 s, `33.00 tUSDC` in 3 items, attestation ok, `ERR_SEALED` both ways | in the `make negotiate` output |
+| Fund | `a10` | `33.00 tUSDC` escrowed | [`2mBhRNnX…`](https://testnet.nearblocks.io/txns/2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22) |
+| Pay | `a10` | item 1, `12.00 tUSDC` to `halcyon-mm.testnet` | [`Bs5dVpr6…`](https://testnet.nearblocks.io/txns/Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm) |
 | Redirect refused | `a10` | `ERR_PAYEE_MISMATCH` | [`51TQ8no9…`](https://testnet.nearblocks.io/txns/51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu) |
 | Attack | [`a11`](https://testnet.nearblocks.io/address/a11.accord-v2.testnet) | `ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY` revokes and deletes the key; `0.00` moved | [`HvwpdKDs…`](https://testnet.nearblocks.io/txns/HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv), [`3cTDxHzV…`](https://testnet.nearblocks.io/txns/3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh), [`DPpVoMX9…`](https://testnet.nearblocks.io/txns/DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT) |
 | Revoke | [`a13`](https://testnet.nearblocks.io/address/a13.accord-v2.testnet) | `revoke_agent` deletes the key; the next call fails with `AccessKeyDoesNotExist` at the RPC, so it has no transaction; the buyer installs a new key, which pays item 2 | revoke [`8b8FC1He…`](https://testnet.nearblocks.io/txns/8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3), `install_agent_key` [`DfgMURQA…`](https://testnet.nearblocks.io/txns/DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT), pay item 2 [`24mdebXg…`](https://testnet.nearblocks.io/txns/24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe) |

@@ -26,7 +26,7 @@ Three jobs run as `wasm32-wasip2` builds in OutLayer's Intel TDX enclaves. Each 
 
 - 03 Observer Draws hidden slot times from its seed, reads the venue at one mainnet block and signs the observation. pubkey · observe
 
-The contract accepts a job result only with a valid signature from the release's key, the stored nonce, matching commitments and matching parameters. Each run's TDX quote is published by OutLayer ([an attestation record](https://testnet-api.outlayer.ai/attestations/13596)); checking a quote against the release build uses the [outlayer-verify](https://app.outlayer.ai/docs/trust-verification) tool.
+The contract accepts a job result only with a valid signature from the release's key, the stored nonce, matching commitments and matching parameters. Each run's TDX quote is published by OutLayer ([an attestation record](https://testnet-api.outlayer.ai/attestations/by-request/13596)); checking a quote against the release build uses the [outlayer-verify](https://app.outlayer.ai/docs/trust-verification) tool.
 
 Limit: under Intel TDX trust assumptions and OutLayer's keystore governance. The deployer owns the seeds and could rebind one to another build.
 
@@ -34,7 +34,7 @@ Limit: under Intel TDX trust assumptions and OutLayer's keystore governance. The
 
 - 01 Model Called by its canonical id with `x-no-aliasing: true` through `https://cloud-api.near.ai/v1`. z-ai/glm-5.3-flash
 
-- 02 Attestation report Fetched once per run with a fresh random nonce. Both parts are verified: the gateway's (TDX quote, `report_data`, compose hash) and the model's (TDX quote, `report_data`, RTMR3 replay, `MRCONFIGID`, GPU evidence through NVIDIA NRAS). [fresh nonce](https://testnet-api.outlayer.ai/attestations/13596)
+- 02 Attestation report Fetched once per run with a fresh random nonce. Both parts are verified: the gateway's (TDX quote, `report_data`, compose hash) and the model's (TDX quote, `report_data`, RTMR3 replay, `MRCONFIGID`, GPU evidence through NVIDIA NRAS). [fresh nonce](https://testnet-api.outlayer.ai/attestations/by-request/13596)
 
 - 03 Response signatures After every completion the job fetches its signature and checks it against the exact request and response bytes; the signer must be a verified model key.
 

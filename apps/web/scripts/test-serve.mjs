@@ -72,6 +72,11 @@ await test("redirects carry them too", async () => {
   assert.equal(r.status, 308)
   assert.ok(r.headers["content-security-policy"])
 })
+await test("/record.csv goes to the app's CSV", async () => {
+  const r = await get("/record.csv")
+  assert.equal(r.status, 308)
+  assert.equal(r.headers.location, "/app/record.csv")
+})
 await test("proxied /app responses keep the app's headers and get no site CSP", async () => {
   const r = await get("/app/api/x")
   assert.equal(r.headers["x-app"], "yes")

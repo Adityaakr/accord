@@ -9,19 +9,12 @@
 Agreements negotiated in private, enforced in public.
 
 [Site](https://accordweb-production.up.railway.app) ·
-[Try a deal](https://accordweb-production.up.railway.app/app/try-it) ·
+[Run your own deal](https://accordweb-production.up.railway.app/app/try-it) ·
+[Live attack room](https://accordweb-production.up.railway.app/app/try) ·
+[Watch the replay](https://accordweb-production.up.railway.app/app/replay) ·
 [Verify](https://accordweb-production.up.railway.app/verify) ·
 [Record](https://accordweb-production.up.railway.app/record) ·
 [Docs](https://accordweb-production.up.railway.app/docs)
-
-**Judge it in 5 minutes**
-
-1. Open [/app/try-it](https://accordweb-production.up.railway.app/app/try-it) and choose "Try without a wallet". It runs one deal on testnet, including a refused redirect.
-2. Open [/verify](https://accordweb-production.up.railway.app/verify) and enter the agreement id it gives you.
-   No funds, no wallet, or the faucet refuses your network: [watch a 60-second replay](https://accordweb-production.up.railway.app/app/replay) of a recorded run (`a32.accord-v2.testnet`, every step with its transaction), or [send a scam to the live room](https://accordweb-production.up.railway.app/app/try) (pre-funded, on chain; the contract refuses it).
-3. Clone the repo and run `cd platform && corepack enable && pnpm install && make verify DEAL=a10.accord-v2.testnet`.
-
-The same site is also served at its custom domain, [useaccord.tech](https://useaccord.tech) (the same Railway service; `www.useaccord.tech` has no certificate yet). The `/app/try-it` rooms propose their demo recipient on `useaccord.tech`, which serves the same `/.well-known/accord.json` as the Railway host.
 
 <a href="https://testnet.nearblocks.io/address/accord-v2.testnet"><img alt="Network: NEAR testnet" src="docs/badges/network.svg" /></a>
 <img alt="Settlement: USDC on NEAR, NEP-141" src="docs/badges/settlement.svg" />
@@ -30,32 +23,154 @@ The same site is also served at its custom domain, [useaccord.tech](https://usea
 
 </div>
 
-Two companies' agents negotiate inside an attested enclave from sealed mandates. Both companies approve the terms. From then on, a NEAR contract holds the USDC and refuses any payment the buyer's agent asks for that differs from the approved item, evidence, amount or recipient.
+Two companies' agents negotiate inside an attested enclave from sealed mandates. Both companies approve the terms. From then on, a NEAR contract holds the USDC and refuses any payment the buyer's agent asks for that differs from the approved item, evidence, amount or recipient. Everything runs on NEAR testnet; mainnet follows an external audit.
+
+## Judge it in 5 minutes
+
+1. **Run your own deal.** Open [/app/try-it](https://accordweb-production.up.railway.app/app/try-it) and choose "Try without a wallet". It runs one deal on testnet, including a refused redirect ([walkthrough](#run-your-own-deal-step-by-step)).
+2. **Verify it.** Open [/verify](https://accordweb-production.up.railway.app/verify) and enter the agreement id it gives you.
+   No funds, no wallet, or the faucet refuses your network: **[Watch the replay](https://accordweb-production.up.railway.app/app/replay)** of a recorded run (`a32.accord-v2.testnet`, about 60 seconds, every step with its transaction), or write to the agent in the **[Live attack room](https://accordweb-production.up.railway.app/app/try)** (pre-funded, on chain; the contract refuses what you ask it to pay).
+3. **Check it from a clone**, no account and no keys: `cd platform && corepack enable && pnpm install && make verify DEAL=a10.accord-v2.testnet`.
+
+The site is also served at [useaccord.tech](https://useaccord.tech) (the same Railway service; `www.useaccord.tech` has no certificate yet). The `/app/try-it` rooms propose their demo recipient on `useaccord.tech`, which serves the same `/.well-known/accord.json` as the Railway host.
 
 <p align="center">
-  <a href="https://accordweb-production.up.railway.app"><img src="docs/diagrams/home-hero.webp" width="820" alt="The Accord home page: The private deal room and control plane for agent-to-agent commerce, with Open the app and Try a deal, above the deal-room view (deal rooms, the agreement's steps, and the activity and refusal log)." /></a>
+  <a href="https://accordweb-production.up.railway.app"><img src="docs/diagrams/home-hero.webp" width="820" alt="The Accord home page: the headline, Open the app and Run your own deal, above a preview of agreement a6.accord-v2.testnet as recorded on NEAR testnet: sealed mandates, 35.50 tUSDC in 3 items approved, recipient halcyon-mm.testnet, item 1 paid, a redirect refused with ERR_PAYEE_MISMATCH, the agent revoked." /></a>
 </p>
 
-<p align="center">
-  <a href="docs/diagrams/accord-architecture.excalidraw"><img src="docs/diagrams/accord-architecture.svg" alt="The big picture. Buyer, vendor and the vendor's settlement authority use the website and the deal-room app on Railway. The app creates agreements through the factory accord-v2.testnet and sends signed delegates through the relayer relay.accord-v2.testnet. Each agreement account a<n>.accord-v2.testnet holds escrowed test USDC, the approved terms, the recipient and the refusal log. OutLayer enclaves (Sealed Table, Payee, Observer) send signed terms, proofs and observations to the agreement; the Sealed Table calls NEAR AI Cloud, Payee reads the vendor's domain, the Observer reads Rhea on NEAR mainnet. The buyer's agent calls act(Pay); inside the terms the agreement pays the authorised recipient, anything else is refused and recorded." width="100%" /></a>
-  <br/><sub>The big picture. Source: <a href="docs/diagrams/accord-architecture.excalidraw"><code>docs/diagrams/accord-architecture.excalidraw</code></a> (open it at excalidraw.com).</sub>
-</p>
+## What is and is not verifiable today
 
-## Contents
+`make verify` runs seven checks on any agreement from public data. On every recorded agreement it prints `verify: 5 checks ok · 1 partial · 1 not checked`. The privacy pillar rests partly on the two that are not fully checked, so read them before any claim:
 
-1. [The problem](#the-problem)
-2. [How it works](#how-it-works)
-3. [Try it in about 5 minutes on testnet](#try-it-in-about-5-minutes-on-testnet)
-4. [Verify any agreement](#verify-any-agreement)
-5. [Use from an agent](#use-from-an-agent)
-6. [Testnet proof](#testnet-proof)
-7. [Where each attack stops](#where-each-attack-stops)
-8. [Claims and their limits](#claims-and-their-limits)
-9. [Security review](#security-review)
-10. [Repository map](#repository-map)
-11. [Run locally](#run-locally)
-12. [Deployment](#deployment)
-13. [Built with](#built-with)
+| Check | Today | What it means |
+| --- | --- | --- |
+| `code`, `keys` | ok | The agreement's code hash is a published release and the account has no full-access key |
+| `sealed` | ok | The terms were signed by the Sealed Table release's key and match both on-chain commitments |
+| `payee`, `record` | ok | The recipient was proven, approved and accepted; every payment matches a receipt |
+| `model` | **partial** | NEAR AI's attestation report is fetched with a fresh nonce and the nonce is bound in it, but it attests the model as served now, not the negotiating run (that run's attestation is bound in the signed outcome). The hardware quote and GPU evidence are not checked by `make verify`; `make probe-ai` checks them with a NEAR AI key |
+| `release` | **not checked** | Which enclave build produced the terms is attested by OutLayer, but `release` stays `not checked` until [`outlayer-verify`](https://github.com/out-layer/outlayer-verify) is installed ([`BLOCKED.md`](platform/docs/build/BLOCKED.md)); with it, `make verify` checks each job key's pubkey run, looked up by OutLayer request id |
+
+Not in place yet, and stated with the claims: on testnet the Sealed Table's seed admits any caller during an agreement's open request window (restricting it to the agreement's own calls, S1, needs a setting only OutLayer's dashboard can make); the reviewed enclave job builds are not deployed (release 4 runs release 3's job builds); end-to-end encryption to the model is not shipped. Market-making agreements have run end to end on a local node, not on testnet. Every claim with its limit: [Claims and their limits](#claims-and-their-limits), from [`platform/GOAL.md`](platform/GOAL.md).
+
+## Testnet proof
+
+Agreement [`a6.accord-v2.testnet`](https://testnet.nearblocks.io/address/a6.accord-v2.testnet) ran the full flow on 8 Nov 2026, on release 3 of factory `accord-v2.testnet`. The Sealed Table negotiation used the real NEAR AI model (`z-ai/glm-5.3-flash`) inside OutLayer's attested enclave: `QUOTE → COUNTER → FINAL → ACCEPT`, `35.50` tUSDC in 3 items. Settlement is a test USDC token (`tusdc.accord-v1.testnet`).
+
+| # | Step | Transaction |
+| --- | --- | --- |
+| 01 | Buyer seals its limits | [`Ek9Zr1wj…`](https://testnet.nearblocks.io/txns/Ek9Zr1wjD6nrWaKHFak8UDv5Jwbaacqrdh1huNp6qwAk) |
+| 02 | Vendor seals its limits | [`2Zq8pfNo…`](https://testnet.nearblocks.io/txns/2Zq8pfNoa1dFzMLAy79aGyek72q3LGcrvRqAjYABisKZ) |
+| 03 | Negotiated in the enclave: `35.50 tUSDC · 3 items` | [`GfX5qKq3…`](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW) |
+| 04 | Buyer approves the terms | [`H6cMyE6k…`](https://testnet.nearblocks.io/txns/H6cMyE6kzs9SdrC4yaP7CvnDxJqH4NSx7ivKeu2rBHSg) |
+| 05 | Vendor approves the terms (state `Executing`) | [`2uv8tTfe…`](https://testnet.nearblocks.io/txns/2uv8tTfeYhe2aZ5cMrVNfFzr88kPL4HeSxwYzNhtmveT) |
+| 06 | Buyer funds the escrow: `35.50 tUSDC` | [`2CeFB18j…`](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy) |
+| 07 | Recipient proven in the enclave (Payee) | [`6koRbw5Q…`](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6) |
+| 08 | Vendor's authority approves | [`FBQnqtKX…`](https://testnet.nearblocks.io/txns/FBQnqtKXs5B5zn1A4F1yCDUmACYMqsi2zM2uez6YxDis) |
+| 09 | Buyer accepts `halcyon-mm.testnet` | [`3d3LSZvz…`](https://testnet.nearblocks.io/txns/3d3LSZvz3yPX5LM1Bk6t9bxiX2x1JDMEt9mfa2fbw11p) |
+| | Agent key installed | [`EUJ86tSV…`](https://testnet.nearblocks.io/txns/EUJ86tSVNuYsgtMVYYZZ9CYbsJmY6jCKm1Uew5doPU1C) |
+| 10 | Agent pays inside the terms: `16.50 tUSDC` to `halcyon-mm.testnet` | [`2k57zg7i…`](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ) |
+| 11 | Redirect to `halcyon-markets.testnet` refused: `ERR_PAYEE_MISMATCH`, nothing sent | [`AB9HLnWv…`](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs) |
+| 12 | Buyer revokes the agent; its next call fails with `AccessKeyDoesNotExist` | [`4ervNQdj…`](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P) |
+
+### Verify it yourself
+
+No account and no keys. In the browser: [/verify](https://accordweb-production.up.railway.app/verify) shows the seven-check verdict and five quick reads live from testnet; [/record](https://accordweb-production.up.railway.app/record) shows a6's 12 steps. In a terminal:
+
+```bash
+git clone https://github.com/Adityaakr/accord.git && cd accord/platform
+corepack enable && pnpm install
+make verify DEAL=a6.accord-v2.testnet
+```
+
+Output, from a run on 9 Nov 2026 (the nonce is fresh on every run; `keys` reads `0 keys` because a6's agent was revoked; `release` stays `not checked` until [`outlayer-verify`](https://github.com/out-layer/outlayer-verify) is installed, and with it `make verify` checks each job key's pubkey run, looked up by OutLayer request id):
+
+```
+accord verify · a6.accord-v2.testnet
+  code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok
+  keys      0 keys · none · no full access · ok
+  sealed    outcome signature ok · commitments match · agreement matches · ok
+  release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) · not checked
+  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 3d293e48… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+  payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
+  record    1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
+verify: 5 checks ok · 1 partial · 1 not checked
+```
+
+`make verify DEAL=a10.accord-v2.testnet` prints `code hash ECgsrZwy… = release 4` and the same last line; `make verify-usdc DEAL=a1.accord-usdc.testnet` checks the Circle USDC deal.
+
+### More runs
+
+| Agreement | What it shows |
+| --- | --- |
+| `a10`, `a11`, `a13.accord-v2.testnet` | Release 4 (the security-review fixes): negotiate, fund, pay, refused redirect; an attack refused three ways (`ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY`, `0.00` moved); revoke, then a new key pays |
+| `a1.accord-usdc.testnet` | A deal in Circle's testnet USDC: `14.00 USDC` funded, `5.00` paid, redirect refused, revoked |
+| `a8`, `a15`, `a21.accord-v2.testnet` | `/app/try-it` with a fresh account, on the public URL with relayed wallet calls, and without a wallet |
+| `a32.accord-v2.testnet` | The run [Watch the replay](https://accordweb-production.up.railway.app/app/replay) plays back |
+
+Every transaction of these runs is linked in [`docs/runs.md`](docs/runs.md); the notes behind them are in [`platform/DECISIONS.md`](platform/DECISIONS.md) sections 21 and 24 to 28.
+
+| Infrastructure | Account or link |
+| --- | --- |
+| Factory | [`accord-v2.testnet`](https://testnet.nearblocks.io/address/accord-v2.testnet), release `4` ([publish tx](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)); release `3` ([publish tx](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh)) for a6 |
+| Circle USDC factory | [`accord-usdc.testnet`](https://testnet.nearblocks.io/address/accord-usdc.testnet), release `4` ([publish tx](https://testnet.nearblocks.io/txns/GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai)); token `3e2210e1…afcb8af` (Circle USDC, 6 decimals) |
+| Test USDC | [`tusdc.accord-v1.testnet`](https://testnet.nearblocks.io/address/tusdc.accord-v1.testnet) (NEP-141, 6 decimals) |
+| Relayer | `relay.accord-v2.testnet` ([a relayed tx](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC)) |
+| OutLayer jobs | Sealed Table, Payee and observer, as OutLayer projects `accord-v1.testnet/accord-{sealed-table,payee,observer}`; release 3 pubkey runs `13682`, `13672`, `13683` |
+| OutLayer attestation of a Sealed Table run (request `13596`, task `28391`) | [testnet-api.outlayer.ai/attestations/by-request/13596](https://testnet-api.outlayer.ai/attestations/by-request/13596) |
+| Demo accounts | vendor `halcyon-demo.testnet`, authority `halcyon-auth.testnet`, recipient `halcyon-mm.testnet` |
+| Demo vendor's domain | `useaccord.tech` (from 9 Nov 2026; `accordweb-production.up.railway.app` before), Accord's own site, serving the Payee file ([`/.well-known/accord.json`](https://accordweb-production.up.railway.app/.well-known/accord.json)) for Halcyon, a fictional company. A real vendor serves the same file on its own domain |
+
+## Use from an agent
+
+Everything below reads NEAR testnet with no account and no keys. Run it from `platform/` after `corepack enable && pnpm install`.
+
+**MCP server** (`@accord/mcp`, stdio by default). With no key in the environment it serves 7 read-only tools: `accord_list_agreements`, `accord_get_agreement`, `accord_due_items`, `accord_preflight`, `accord_refusals`, `accord_receipts` and `accord_verify`. The paying and principal tools appear only when their keys are set ([`platform/INTERFACES.md`](platform/INTERFACES.md) section 12).
+
+```bash
+ACCORD_FACTORY=accord-v2.testnet pnpm --silent --filter @accord/mcp dev            # stdio
+ACCORD_FACTORY=accord-v2.testnet pnpm --silent --filter @accord/mcp dev -- --http 3333   # streamable HTTP at http://127.0.0.1:3333/mcp
+```
+
+On start it prints `accord-mcp · 7 tools · agent off · principal off` on stderr. An MCP client config runs the first command with `cwd` set to `platform/`.
+
+**Without cloning.** A hosted, keyless, read-only MCP server (streamable HTTP; the 7 read tools; 60 requests a minute per IP). It was added on 9 Nov 2026 and answers once the app is next deployed; until then `/app/mcp` returns `404`, and the local server below works:
+
+```json
+{ "mcpServers": { "accord": { "type": "http", "url": "https://accordweb-production.up.railway.app/app/mcp" } } }
+```
+
+Local stdio, from a clone (`cd platform && corepack enable && pnpm install` builds it):
+
+```json
+{ "mcpServers": { "accord": { "command": "node", "args": ["/path/to/repo/platform/packages/mcp/dist/main.js"] } } }
+```
+
+With the same deploy, the verify API and the public record CSV can be read from any origin (CORS `*`, GET only): `curl -H 'Origin: https://example.com' https://accordweb-production.up.railway.app/app/api/verify/a10.accord-v2.testnet`; the CSV is at `/app/record.csv`. Amounts are in the agreement token's own unit: tUSDC is the test token (`tusdc.accord-v1.testnet`, no value), USDC is Circle's testnet USDC (`accord-usdc.testnet` agreements). The packages are not published to npm yet.
+
+Preflight on testnet: three of its signals, `age_days`, `tx_30d` and `code_changed_30d`, return `unavailable`. No keyless indexer gives an account's age or its transaction count, and `code_changed_30d` needs an archival RPC (`NEAR_ARCHIVAL_RPC_URL`), which is not set by default and which did not serve testnet state from 30 days back when tried on 9 Nov 2026. The rating comes from the RPC account read (exists, is a contract), the agreement (authorised recipient, canaries) and the factory's reports, blocklist and recipient stats.
+
+**CLI** (`accord`; read-only commands need no key):
+
+```bash
+ACCORD_FACTORY=accord-v2.testnet pnpm --silent --filter @accord/cli dev -- show --agreement a6.accord-v2.testnet
+ACCORD_FACTORY=accord-v2.testnet pnpm --silent --filter @accord/cli dev -- receipts --agreement a6.accord-v2.testnet --json
+```
+
+**SDK** (`@accord/sdk`, TypeScript on `near-api-js`; `pnpm install` builds it):
+
+```ts
+import { Accord, verify } from "@accord/sdk";
+const accord = new Accord({ network: "testnet", factory: "accord-v2.testnet" });
+const report = await verify(accord, "a6.accord-v2.testnet"); // { checks: [{ name, status, detail }], ok, partial, failed, notChecked }
+```
+
+**HTTP**: the live app returns the same seven-check report as JSON, with a nonce you choose (64 hex characters) or one it generates:
+
+```bash
+curl -s https://accordweb-production.up.railway.app/app/api/verify/a6.accord-v2.testnet
+```
+
+An account that is not an Accord agreement answers `404` with `{"error":"<account> is not an Accord agreement"}` (live: `/app/api/verify/nobody.testnet`). The site also serves [/llms.txt](https://accordweb-production.up.railway.app/llms.txt) and [/facts.json](https://accordweb-production.up.railway.app/facts.json).
 
 ## The problem
 
@@ -74,68 +189,28 @@ Four parts, named the same in the app, the docs and the code:
 
 > The model never decides where money goes. The contract does. The worst a hijacked agent can do is make a payment you already approved, to the recipient you already accepted, when it falls due.
 
-### System architecture
-
-```mermaid
-flowchart TB
-    subgraph People["People"]
-        B["Buyer<br/>browser + NEAR wallet"]
-        V["Vendor<br/>browser + NEAR wallet"]
-        SA["Vendor's settlement authority"]
-    end
-
-    subgraph Railway["accordweb-production.up.railway.app"]
-        SITE["Website · apps/web<br/>/ · /verify · /record · /docs"]
-        APP["Deal-room app · platform/app<br/>Next.js, basePath /app"]
-    end
-
-    subgraph NEAR["NEAR testnet"]
-        REL["Relayer<br/>relay.accord-v2.testnet"]
-        FAC["Factory<br/>accord-v2.testnet · release 4"]
-        AGR{{"Agreement controls<br/>a&lt;n&gt;.accord-v2.testnet<br/>USDC escrow · terms · recipient · refusal log"}}
-        TOK["tusdc.accord-v1.testnet<br/>NEP-141 test USDC"]
-    end
-
-    subgraph OL["OutLayer · Intel TDX"]
-        ST["Sealed Table<br/>jobs/sealed-table"]
-        PY["Payee<br/>jobs/payee"]
-        OB["Observer<br/>jobs/observer"]
-    end
-
-    AI["NEAR AI Cloud<br/>TEE models"]
-    DOM["Vendor domain<br/>/.well-known/accord.json"]
-    RHEA["Rhea USDC/wNEAR<br/>NEAR mainnet, read only"]
-    AG["Buyer's agent<br/>one key: act only"]
-    RCP["Authorised recipient"]
-
-    B --> SITE
-    V --> APP
-    SA --> APP
-    SITE -- "proxies /app/*<br/>(APP_ORIGIN)" --> APP
-    APP -- "signed delegates (NEP-366)" --> REL
-    APP -- "create_agreement" --> FAC
-    REL --> AGR
-    FAC -- "creates, code pinned by hash" --> AGR
-    TOK -- "ft_transfer_call (fund)" --> AGR
-    ST -- "signed terms" --> AGR
-    PY -- "signed recipient proof" --> AGR
-    OB -- "signed observations" --> AGR
-    ST --- AI
-    PY --- DOM
-    OB --- RHEA
-    AG -- "act(Pay)" --> AGR
-    AGR -- "ft_transfer, inside the terms" --> RCP
-    REF["Refused and recorded<br/>ERR_PAYEE_MISMATCH · ERR_AMOUNT_MISMATCH · ..."]
-    AGR -- "anything else" --> REF
-    classDef refuse fill:#ffe3e3,stroke:#c92a2a,color:#c92a2a
-    classDef ok fill:#ccfbf1,stroke:#0f766e,color:#134e4a
-    class REF refuse
-    class AGR,RCP ok
-```
+<p align="center">
+  <a href="docs/diagrams/accord-architecture.excalidraw"><img src="docs/diagrams/accord-architecture.svg" alt="The big picture. Buyer, vendor and the vendor's settlement authority use the website and the deal-room app on Railway. The app creates agreements through the factory accord-v2.testnet and sends signed delegates through the relayer relay.accord-v2.testnet. Each agreement account a<n>.accord-v2.testnet holds escrowed test USDC, the approved terms, the recipient and the refusal log. OutLayer enclaves (Sealed Table, Payee, Observer) send signed terms, proofs and observations to the agreement; the Sealed Table calls NEAR AI Cloud, Payee reads the vendor's domain, the Observer reads Rhea on NEAR mainnet. The buyer's agent calls act(Pay); inside the terms the agreement pays the authorised recipient, anything else is refused and recorded." width="100%" /></a>
+  <br/><sub>The big picture. Source: <a href="docs/diagrams/accord-architecture.excalidraw"><code>docs/diagrams/accord-architecture.excalidraw</code></a> (open it at excalidraw.com). The full design: <a href="platform/ARCHITECTURE.md"><code>platform/ARCHITECTURE.md</code></a>.</sub>
+</p>
 
 The relayer pays gas for the calls a visitor's wallet signs as NEP-366 delegates (Meteor and Intear send through it), and it carries only calls that attach at most 1 yoctoNEAR; the room's 2 NEAR deposit is signed and paid by the user's own wallet, in its own transaction. It never carries `act`: the contract identifies the agent by its signing key, and a relayer's key would replace it.
 
-### Agreement lifecycle
+**The `act()` gates.** Authentication comes first (the signing key must be the current agent key or a recently revoked one; anything else panics with `ERR_UNAUTHORIZED` and is not recorded). Then six gates in a fixed order; the first failure is recorded and `act` returns `Refused{code}`. A refusal never panics, so it is on the record. Five refusals by the same key inside an hour revoke it automatically.
+
+| Gate | Checks | Refusal codes |
+| --- | --- | --- |
+| 1. Key and state | The key is not revoked; state is `Executing` | `ERR_REVOKED`, `ERR_NOT_EXECUTING` |
+| 2. Recipient | Not a canary (a canary also deletes the key); an active authorised recipient exists; the request names it | `ERR_CANARY`, `ERR_NO_RECIPIENT`, `ERR_PAYEE_MISMATCH` |
+| 3. Item | The item exists and is unpaid | `ERR_UNKNOWN_ITEM`, `ERR_ALREADY_PAID` |
+| 4. Evidence | Delivery accepted (or the window lapsed undisputed); for market making, the period closed `Eligible`; or an approved exception waives it | `ERR_NOT_DUE`, `ERR_PERIOD_WITHHELD` |
+| 5. Amount | Equals the item amount (or its approved exception); stays within the total; the escrow covers it | `ERR_AMOUNT_MISMATCH`, `ERR_CAP_EXCEEDED`, `ERR_INSUFFICIENT_FUNDS` |
+| 6. Lock | No payment in flight | `ERR_IN_FLIGHT` |
+
+Source: [`platform/ARCHITECTURE.md`](platform/ARCHITECTURE.md) section 6.
+
+<details>
+<summary>Diagrams: the agreement lifecycle, and one deal end to end (a6)</summary>
 
 ```mermaid
 stateDiagram-v2
@@ -156,11 +231,7 @@ stateDiagram-v2
     Cancelled --> [*]
 ```
 
-States are the contract's own (`State` in [`platform/crates/accord-core/src/types.rs`](platform/crates/accord-core/src/types.rs)). A refusal never panics: `act` records it, emits the event and returns normally, so the refusal is on the record.
-
-### One deal, end to end
-
-The values are from agreement `a6.accord-v2.testnet` ([proof table](#testnet-proof)).
+States are the contract's own (`State` in [`platform/crates/accord-core/src/types.rs`](platform/crates/accord-core/src/types.rs)).
 
 ```mermaid
 sequenceDiagram
@@ -172,7 +243,6 @@ sequenceDiagram
     participant AC as Agreement controls<br/>(a6.accord-v2.testnet)
     participant PY as Payee<br/>(OutLayer enclave)
     participant Agent as Buyer's agent<br/>(one act key)
-
     Buyer->>AC: commit_mandate (ciphertext + commitment hash)
     Vendor->>AC: commit_mandate (ciphertext + commitment hash)
     AC->>ST: start_negotiation (agreement id + fresh nonce)
@@ -198,63 +268,25 @@ sequenceDiagram
     Agent-xAC: next call: AccessKeyDoesNotExist (rejected by the network)
 ```
 
-### The `act()` gates
+</details>
 
-Authentication comes first (the signing key must be the current agent key or a recently revoked one; anything else panics with `ERR_UNAUTHORIZED` and is not recorded). Then six gates in a fixed order; the first failure is recorded and `act` returns `Refused{code}`.
+## Run your own deal, step by step
 
-```mermaid
-flowchart LR
-    REQ(["act(Pay) signed by<br/>the agent's one key"]) --> G1
-    G1["1 · Key and state"] -->|pass| G2["2 · Recipient"]
-    G2 -->|pass| G3["3 · Item"]
-    G3 -->|pass| G4["4 · Evidence"]
-    G4 -->|pass| G5["5 · Amount"]
-    G5 -->|pass| G6["6 · Lock"]
-    G6 -->|pass| PAY(["Pay: ft_transfer to the<br/>authorised recipient"])
-
-    G1 -->|fail| E1["ERR_REVOKED<br/>ERR_NOT_EXECUTING"]
-    G2 -->|fail| E2["ERR_CANARY (revokes the key)<br/>ERR_NO_RECIPIENT<br/>ERR_PAYEE_MISMATCH"]
-    G3 -->|fail| E3["ERR_UNKNOWN_ITEM<br/>ERR_ALREADY_PAID"]
-    G4 -->|fail| E4["ERR_NOT_DUE<br/>ERR_PERIOD_WITHHELD"]
-    G5 -->|fail| E5["ERR_AMOUNT_MISMATCH<br/>ERR_CAP_EXCEEDED<br/>ERR_INSUFFICIENT_FUNDS"]
-    G6 -->|fail| E6["ERR_IN_FLIGHT"]
-
-    classDef refuse fill:#ffe3e3,stroke:#c92a2a,color:#c92a2a
-    classDef ok fill:#ccfbf1,stroke:#0f766e,color:#134e4a
-    class E1,E2,E3,E4,E5,E6 refuse
-    class PAY ok
-```
-
-| Gate | Checks | Refusal codes |
-| --- | --- | --- |
-| 1. Key and state | The key is not revoked; state is `Executing` | `ERR_REVOKED`, `ERR_NOT_EXECUTING` |
-| 2. Recipient | Not a canary (a canary also deletes the key); an active authorised recipient exists; the request names it | `ERR_CANARY`, `ERR_NO_RECIPIENT`, `ERR_PAYEE_MISMATCH` |
-| 3. Item | The item exists and is unpaid | `ERR_UNKNOWN_ITEM`, `ERR_ALREADY_PAID` |
-| 4. Evidence | Delivery accepted (or the window lapsed undisputed); for market making, the period closed `Eligible`; or an approved exception waives it | `ERR_NOT_DUE`, `ERR_PERIOD_WITHHELD` |
-| 5. Amount | Equals the item amount (or its approved exception); stays within the total; the escrow covers it | `ERR_AMOUNT_MISMATCH`, `ERR_CAP_EXCEEDED`, `ERR_INSUFFICIENT_FUNDS` |
-| 6. Lock | No payment in flight | `ERR_IN_FLIGHT` |
-
-Source: [`platform/ARCHITECTURE.md`](platform/ARCHITECTURE.md) section 6. Five refusals by the same key inside an hour revoke it automatically.
-
-## Try it in about 5 minutes on testnet
-
-> [!NOTE]
-> The app is live at https://accordweb-production.up.railway.app/app/try-it (since 9 Nov 2026). The transactions below show this exact path run on 8 Nov 2026, and [Verify any agreement](#verify-any-agreement) works with no account. To run the page yourself instead, start the app ([Run locally](#run-locally)) and open http://localhost:3100/app/try-it; the faucet, demo counterparty and demo agent need the `FAUCET_*`, `DEMO_*` and `RELAYER_*` variables named in [`platform/.env.example`](platform/.env.example).
-
-Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it). Everything there is NEAR testnet with test USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, authority `halcyon-auth.testnet`) and the agent is a demo agent run by Accord for test rooms; both are labelled in the room.
+Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it) (live since 9 Nov 2026; to run it locally, see [Run locally](#run-locally); the faucet, demo counterparty and demo agent need the `FAUCET_*`, `DEMO_*` and `RELAYER_*` variables named in [`platform/.env.example`](platform/.env.example)). Everything there is NEAR testnet with test USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, authority `halcyon-auth.testnet`) and the agent is a demo agent run by Accord for test rooms; both are labelled in the room. Amounts differ from room to room: they are what the negotiation produced.
 
 | # | Do | See |
 | --- | --- | --- |
-| 1 | **Try without a wallet**, or **Connect a wallet**: a NEAR testnet wallet such as Meteor or Intear. Without a wallet, the page makes a throwaway testnet key in this tab (sessionStorage only, never sent to the server, gone when the tab closes), and steps 2 and 3 run on their own | `01` marked done, with your account; for the throwaway key, a 64-character implicit account labelled `Throwaway testnet key` |
-| 2 | **Get test funds** (once a day per account, up to 30 accounts per connection a day, within a daily budget; if the faucet refuses, the step offers the 60-second replay, the live scam room and Verify) | `0.00 NEAR` becomes `2.35 NEAR · 100.00 tUSDC`, both faucet transactions linked |
+| 1 | **Try without a wallet**, or **Connect a wallet** (a NEAR testnet wallet such as Meteor or Intear). Without a wallet, the page makes a throwaway testnet key in this tab (sessionStorage only, never sent to the server, gone when the tab closes), and steps 2 and 3 run on their own | `01` marked done, with your account; for the throwaway key, its implicit account labelled `Throwaway testnet key` |
+| 2 | **Get test funds** (once a day per account, up to 30 accounts per connection a day, within a daily budget; if the faucet refuses, the step offers Watch the replay, the Live attack room and Verify) | `0.00 NEAR` becomes `2.35 NEAR · 100.00 tUSDC`, both faucet transactions linked |
 | 3 | **Create the room** | `Your room is a8.accord-v2.testnet: My first deal room.` (your number will differ) |
 | 4 | **Seal your mandate** with the Northwind preset (`40` tUSDC ceiling, 2 to 4 items) | In the Demo counterparty panel: `Sealed the vendor's mandate (Halcyon procurement preset)`, then `Started the negotiation in the Sealed Table`; the state moves `Sealed` to `Attested` |
-| 5 | **Watch the demo counterparty act**, in your room, in four parts: | |
-| 5a | Approve the terms and fund the escrow; accept the recipient; accept delivery 1 | `Approved the terms as the vendor`, `Proposed halcyon-mm.testnet as the recipient on useaccord.tech`, `Submitted delivery for item 1` |
-| 5b | **Start the demo agent** (your wallet signs `install_agent_key`), then **Let the agent pay the due item** | `Paid item 1: 15.00 tUSDC to halcyon-mm.testnet, the active recipient.` |
+| 5a | In your room, **approve the terms**, **fund** the escrow, **accept the recipient**, then **accept delivery 1** as the counterparty acts | `Approved the terms as the vendor`, `Proposed halcyon-mm.testnet as the recipient on useaccord.tech`, `Submitted delivery for item 1` |
+| 5b | **Start the demo agent** (your wallet or throwaway key signs `install_agent_key`). Then wait: the agent pays the accepted item on its own, with no click | The agent bar and the Activity tab: `Paid item 1: 16.50 tUSDC to halcyon-mm.testnet.` with the `act` transaction (`payment_sent`) |
 | 5c | **Ask the agent to pay a new account** | `ERR_PAYEE_MISMATCH` and `Asked to pay … to halcyon-markets.testnet. The contract refused it and recorded the refusal.` |
-| 5d | Revoke the key from the room header | `Agent revoked · next call rejected by the network` |
-| 6 | With a throwaway key: **Finish: close the room and return the test NEAR** (Reset does the same) | `Done. The room is closed and its test NEAR and test USDC are back with the faucet.` with the `ft_transfer` and `delete_account` transactions linked, then `Room a8.accord-v2.testnet · Verify it →` (kept for the tab after the reset): the room closes by `mutual_close` with the demo vendor, `withdraw_near` returns its deposit, the account's test USDC goes back to the faucet with `ft_transfer`, and the throwaway account deletes itself into the faucet |
+| 5d | **Hold to revoke** in the room header | `Agent revoked · next call rejected by the network` |
+| 6 | With a throwaway key: **Finish: close the room and return the test NEAR** (Reset does the same) | `Done. The room is closed and its test NEAR and test USDC are back with the faucet.` with the `ft_transfer` and `delete_account` transactions linked, then `Room a<n>.accord-v2.testnet · Verify it →`. The room closes by `mutual_close` with the demo vendor, `withdraw_near` returns its deposit, the test USDC goes back to the faucet, and the throwaway account deletes itself into the faucet |
+
+The literal path is [`platform/app/e2e/try-without-wallet.mjs`](platform/app/e2e/try-without-wallet.mjs) (Playwright; it never clicks a pay button). The server side is [`platform/app/src/server/demo.ts`](platform/app/src/server/demo.ts) and [`demoagent.ts`](platform/app/src/server/demoagent.ts): the counterparty makes the vendor's next valid move, so calling it twice does nothing twice; the demo agent's key is derived per room and signs `act` itself, never through the relayer.
 
 <p align="center">
   <img src="apps/web/public/docs/agent-paid.webp" width="300" alt="The demo agent panel after a payment inside the terms: Paid item 2, 12.00 tUSDC to halcyon-mm.testnet, the active recipient, with the act transaction linked." />
@@ -263,245 +295,28 @@ Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it). Ev
   <br/><sub>The demo agent's panel: a payment inside the terms, then a redirect the contract refused.</sub>
 </p>
 
-<details>
-<summary>The same path, run with a fresh account on 8 Nov 2026 (agreement <code>a8.accord-v2.testnet</code>)</summary>
+### Settle in Circle USDC
 
-| Step | Transaction |
-| --- | --- |
-| Faucet, NEAR | [`935XqMoe…`](https://testnet.nearblocks.io/txns/935XqMoeb4Jt7fBQQHK9T7o9ZWJrWUoZYYCkdPGqhBoa) |
-| Faucet, tUSDC | [`3t7SSAkT…`](https://testnet.nearblocks.io/txns/3t7SSAkTzQt7Aj2d6FwkhpG7BzKfC2mhCcWMR2E46PQ3) |
-| Create | [`5xdpHZTz…`](https://testnet.nearblocks.io/txns/5xdpHZTzQyjFiZcxApbwPDH2o3DQNKYhE9szxfjAjgDq) |
-| Negotiation started | [`HFk6XgoF…`](https://testnet.nearblocks.io/txns/HFk6XgoFmkZt2mDBrtE3zzD4mXPMEQUKnVyTGwqi9143) |
-| Fund | [`91knP5Ez…`](https://testnet.nearblocks.io/txns/91knP5EzbKV5ajEXdfETkCXJqucQ5niJoPLBF2dbipng) |
-| Agent pays item 1 | [`HxYDHTRL…`](https://testnet.nearblocks.io/txns/HxYDHTRLteGfGYoeEptehVMKbFgBdVWBqrejUJhsjSnb) |
-| Redirect refused | [`37zUgEoe…`](https://testnet.nearblocks.io/txns/37zUgEoe8jbqnqQQhSe8L1VPBMRrrqXdsDorgDY7cEYL) |
-| Revoke | [`F67Qcofq…`](https://testnet.nearblocks.io/txns/F67Qcofq9CmVuGze7URoVD3E1HfucQ7qooBjDJjANHiG) |
-
-The server side is [`platform/app/src/server/demo.ts`](platform/app/src/server/demo.ts): the faucet sends only what an account lacks, one grant per account per day, up to 30 accounts per connection per day, within a daily budget of 25 NEAR net (what Finish returns counts back); the counterparty reads the room and makes the vendor's next valid move, so calling it twice does nothing twice; the demo agent's key is derived per room and signs `act` itself, never through the relayer.
-
-</details>
-
-<details>
-<summary>Try-it on the public URL (9 Nov 2026), agreement <code>a15.accord-v2.testnet</code></summary>
-
-A fresh, unfunded implicit account ran the page's calls against https://accordweb-production.up.railway.app/app, with its wallet calls relayed through `/app/api/relay`. The state went Sealed, Attested, Executing, recipient active, paid, refused and revoked in 5 min 30 s; `/app/api/verify/a15.accord-v2.testnet` gives 5 ok, 1 partial, 1 not checked and 0 failed.
-
-| Step | Result | Tx |
-| --- | --- | --- |
-| Session (NEP-413, unfunded implicit account) | `POST /app/api/session` 200 |  |
-| Faucet, NEAR (to 2.5) | `POST /app/api/faucet` 200 | [`GxVw5pg3…`](https://testnet.nearblocks.io/txns/GxVw5pg34KZfyVCu2bhYMrbA4NqWai2XJQyfpmUZtZD5) |
-| Faucet, tUSDC (100) | same call | [`7dRodXTg…`](https://testnet.nearblocks.io/txns/7dRodXTgVXmKHEHdB53uH87p7fJruHzLbQ688z78pgrC) |
-| Create a15 (signed directly; the relayed create failed, see below) | Sealed | [`GNynLq2o…`](https://testnet.nearblocks.io/txns/GNynLq2oxREyQrF1N4rNRhDztCzfVtqJ5DVgmthDRBEy) |
-| Counterparty seals the vendor mandate | counterparty step | [`BpwCPtgS…`](https://testnet.nearblocks.io/txns/BpwCPtgSg4rjZVNKPnuw4nLUzemEfoJpaoSXRCmKn2PM) |
-| Buyer seals the Northwind mandate (relayed) | both sealed | [`6eYVDLtT…`](https://testnet.nearblocks.io/txns/6eYVDLtTJ2mFT8J7GrKUWUfWuZZDXUZTd37fhGpN1324) |
-| Keeper (`accord-keeper.testnet`) calls `start_negotiation`, 00:17:28 UTC | `negotiation_requested`; the Sealed Table ran in OutLayer and `terms_proposed` landed in the same transaction | [`Gp9JqBvY…`](https://testnet.nearblocks.io/txns/Gp9JqBvYPgxw7Aqi4JKb28gWmTztM3Xw3RhJbVGtnWqT) |
-| Counterparty approves the terms | Attested after 67 s | [`HEm5P4ga…`](https://testnet.nearblocks.io/txns/HEm5P4gaE3LxvyV2ergFVxDHXbmVw8jthFARHH8GoV9q) |
-| Buyer approves the terms (relayed) | Executing | [`4nNbyFAk…`](https://testnet.nearblocks.io/txns/4nNbyFAk6moLWKHUCX37JLoeoUTFE272cHWLUXwHAeq2) |
-| Counterparty proposes halcyon-mm.testnet on useaccord.tech | Proposed, then Proven | [`4xGmfM2x…`](https://testnet.nearblocks.io/txns/4xGmfM2xoiRrVMA5ocLWMeiTyq4k2gQYhXVw4RNihZmp) |
-| Buyer funds 33.00 tUSDC (relayed) | funded 33.00 of 33.00 | [`HTpF77Ve…`](https://testnet.nearblocks.io/txns/HTpF77VeZXZf65v1p2Av3YHE5DK37FG9WAWmjxBHbUrE) |
-| Buyer installs the demo agent key (relayed) | agent key set | [`23gimnow…`](https://testnet.nearblocks.io/txns/23gimnowmhb8nErdbPUrhzg7oGk7J382weKXYAsyQuBQ) |
-| Authority approves the recipient | AuthorityApproved | [`A6VokbSK…`](https://testnet.nearblocks.io/txns/A6VokbSKJfgMWbakATCeARGsR7NbPAhFhBFsYwWx8Bth) |
-| Buyer accepts the recipient (relayed, rating allow) | `recipient_accepted` and `recipient_active` in the same transaction: a first recipient has no timelock (the 120 s wait applies to a change) | [`Tg1rtc6C…`](https://testnet.nearblocks.io/txns/Tg1rtc6CmLHwP9aHwhzxLyEMmsxacMjsMiw6cRrn5uo) |
-| Counterparty submits delivery 1 | delivery 1 submitted | [`8ELSpUds…`](https://testnet.nearblocks.io/txns/8ELSpUdszC6p3R7q6CdgLTrg1PJVtFqJvt1eDzsN5Vrd) |
-| Buyer accepts delivery 1 (relayed) | item 1 eligible | [`h2xtvzUG…`](https://testnet.nearblocks.io/txns/h2xtvzUGeysiQHCYr95zWxXJKJhKTpT1CdN8n8tZBss) |
-| Demo agent pays item 1 | sent, 15.00 tUSDC to halcyon-mm.testnet | [`7unm1ZWE…`](https://testnet.nearblocks.io/txns/7unm1ZWEE5DH74JAKsG7ZcKywz8t9V8NCNvghUcacXUd) |
-| Demo agent asked to pay halcyon-markets.testnet | refused, ERR_PAYEE_MISMATCH | [`7Cjd6cvx…`](https://testnet.nearblocks.io/txns/7Cjd6cvxVm8racRQTotSJ1CXh5PHdgEvSzJxYszAbptz) |
-| Buyer revokes the key (relayed) | 0 keys on a15; `/api/demo-agent pay` then 409 | [`2nyFEeBP…`](https://testnet.nearblocks.io/txns/2nyFEeBPB4BLhwxzrWrqMhsEvSQWS4LGVjff8ZuWZAtG) |
-
-The relayed `create_agreement` failed, so it was signed directly. The relayer pays the 2 NEAR deposit inside a delegate and had 1.99 NEAR left (`platform/DECISIONS.md` 27). Fixed the same day (commit `8b3d51b`): the room deposit is paid by the visitor's wallet; the relayer carries at most 1 yoctoNEAR.
-
-</details>
-
-<details>
-<summary>Try without a wallet on the public URL (9 Nov 2026), agreement <code>a21.accord-v2.testnet</code></summary>
-
-**Try without a wallet** on https://accordweb-production.up.railway.app/app/try-it, driven by Playwright (`platform/app/e2e/try-without-wallet.mjs`): a throwaway key made in the tab signed the room's create itself and sent every other buyer call through `/app/api/relay`. Create to revoke in 3 min 44 s; `/app/api/verify/a21.accord-v2.testnet` and `make verify DEAL=a21.accord-v2.testnet` give 5 ok, 1 partial (model: hardware quote not checked here), 1 not checked (release: needs `outlayer-verify`), 0 failed.
-
-| Step | Transaction |
-| --- | --- |
-| Faucet, NEAR (2.5) | [`27e15dD5…`](https://testnet.nearblocks.io/txns/27e15dD5akxXayuDCmhfvUqjJaPwwhShvFuxH39HwbGU) |
-| Faucet, tUSDC (100) | [`25w7o9hR…`](https://testnet.nearblocks.io/txns/25w7o9hRNFFPZ4kGbzktvyd4dhW9Cxaqeb764MHR7rdT) |
-| Create a21 (signed by the throwaway account) | [`2bXYcG7P…`](https://testnet.nearblocks.io/txns/2bXYcG7PGewYBswgXBmf4R9axkBoMQaRQn3bVniGhpt4) |
-| Buyer seals the Northwind mandate (relayed) | [`Ag4FA6Yr…`](https://testnet.nearblocks.io/txns/Ag4FA6YrePLU8BxeY7WkXACHZA55MT3tcisoEpXriQc9) |
-| Counterparty seals the vendor mandate | [`9vqBbLsL…`](https://testnet.nearblocks.io/txns/9vqBbLsLsUfV6c61CDh4RBnNboCgoFVv36ugwDXQhzf1) |
-| Negotiation started; `terms_proposed` in the same transaction | [`D6941SND…`](https://testnet.nearblocks.io/txns/D6941SNDMAFTPHCc6XApwG8jGrebhXa4XQobExU6xFGx) |
-| Buyer approves the terms (relayed) | [`7ypCffmb…`](https://testnet.nearblocks.io/txns/7ypCffmbMwfTsQUjtR5EGi526Xf41WwBzUyHj6sGjaT6) |
-| Counterparty approves the terms | [`yC8Wkyoc…`](https://testnet.nearblocks.io/txns/yC8Wkyocr8ZyC4VLoHe4SHsoWC4anpaSjdWMYFow1Ji) |
-| Recipient halcyon-mm.testnet proposed and proven | [`2Qj2RU2k…`](https://testnet.nearblocks.io/txns/2Qj2RU2kVB11JTCQXupAzJ2feYyxXfHzy8Fx8gzQu3NB) |
-| Buyer funds 35.00 tUSDC (relayed) | [`hds2yoNK…`](https://testnet.nearblocks.io/txns/hds2yoNKgQTaqdpkX562XvkA1tDxJr7YeakwE3sXpse) |
-| Buyer installs the demo agent key (relayed) | [`8fYwP9wU…`](https://testnet.nearblocks.io/txns/8fYwP9wUanudAmpjJ17pxmppJM1jhaYCtN6zv9z4Ai5i) |
-| Authority approves the recipient | [`5pz4sz8c…`](https://testnet.nearblocks.io/txns/5pz4sz8cqv1ufp9sdA7SedubwAhzvTDeQbWzVLiA61gy) |
-| Buyer accepts the recipient (relayed); active | [`EoYnYBv6…`](https://testnet.nearblocks.io/txns/EoYnYBv6zZegNvPdfjqstM4wsaLnbzzjinzJcyyfa1ke) |
-| Delivery 1 submitted | [`HQ9qQdWe…`](https://testnet.nearblocks.io/txns/HQ9qQdWew8D8v6sbKhxa2b4xPhybGaV6CeCzSZBHuSCb) |
-| Buyer accepts delivery 1 (relayed) | [`3nT451ch…`](https://testnet.nearblocks.io/txns/3nT451chF9m6JXq9JYxhHUndDARi6wm21szZTdrep7oK) |
-| Agent pays item 1: 16.50 tUSDC to halcyon-mm.testnet | [`5vKHipEb…`](https://testnet.nearblocks.io/txns/5vKHipEbqk9r4rxra1q9uhYNrnFGJttQYprEL3g2x3ZG) |
-| Redirect to halcyon-markets.testnet refused: `ERR_PAYEE_MISMATCH` | [`DaRuHG2t…`](https://testnet.nearblocks.io/txns/DaRuHG2tLsA5FP4f2CHouMjgABnbenUfZcGSnDeUDDmH) |
-| Delivery 2 submitted | [`498cCzSW…`](https://testnet.nearblocks.io/txns/498cCzSWagrQk7NUnUWJpF9sLXugJHsv1tsu7UQo15NT) |
-| Buyer accepts delivery 2 (relayed) | [`Dhrg1sfM…`](https://testnet.nearblocks.io/txns/Dhrg1sfMe9L9QQQNcVRc16BcpPhpH3bijrntquKieuyY) |
-| Buyer revokes the key (relayed); 0 keys on a21 | [`BGJEcstT…`](https://testnet.nearblocks.io/txns/BGJEcstTMS3oNyWiy92y7D8QRZqne2AFaNR2gxj8yy58) |
-
-The free RPC tier rate-limited the run (HTTP 429, JSON-RPC `-429`), and the page showed those as 502s before it got through. Since then the SDK's `RotatingRpcProvider` moves to the next testnet endpoint only on a rate limit or a transport failure and keeps every real error (a contract refusal, `AccessKeyDoesNotExist`) unchanged, and the app answers a busy network with a 503 and "The network is busy, retrying" ([`platform/DECISIONS.md`](platform/DECISIONS.md) 28).
-
-</details>
-
-### Settle in Circle USDC (testnet)
-
-A second factory, `accord-usdc.testnet`, runs the same code as `accord-v2.testnet` (release 3 at first, release 4 since 9 Nov 2026; the same job builds and keys) and settles in Circle's USDC on NEAR testnet, `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (6 decimals). Each agreement copies its factory's token at creation and keeps it for life, so `a<n>.accord-usdc.testnet` takes only Circle USDC and `a<n>.accord-v2.testnet` only test USDC. `/app/try-it` defaults to test USDC from the app's faucet; Circle USDC is offered next to it where the server sets `ACCORD_FACTORY_USDC`.
+A second factory, `accord-usdc.testnet`, runs the same code (release 4 since 9 Nov 2026) and settles in Circle's USDC on NEAR testnet, `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (6 decimals). Each agreement keeps its factory's token for life, so `a<n>.accord-usdc.testnet` takes only Circle USDC and `a<n>.accord-v2.testnet` only test USDC. `/app/try-it` defaults to test USDC; Circle USDC is offered next to it where the server sets `ACCORD_FACTORY_USDC`.
 
 | Do | See |
 | --- | --- |
 | Get Circle testnet USDC at https://faucet.circle.com, network `NEAR Testnet`, your account as the address | about `20 USDC` per address every 1 to 2 hours |
-| `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as plain `make verify DEAL=a1.accord-usdc.testnet`, which reads the factory from the id) | `code hash 8wMuMRre… = release 3 (global by hash)` · `keys from pubkey run 13909` · `verify: 5 checks ok · 1 partial · 1 not checked` |
+| `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as `make verify DEAL=a1.accord-usdc.testnet`, which reads the factory from the id) | `code hash 8wMuMRre… = release 3 (global by hash)` · `keys from pubkey run 13909` · `verify: 5 checks ok · 1 partial · 1 not checked` |
 | `make negotiate-usdc`, then `make finish-usdc DEAL=<agreement>` once the buyer holds the terms' total | the same blocks as `make negotiate` and `make finish`, with Circle USDC; the presets fit one faucet drip (buyer ceiling `18`, vendor floor `12`) |
 
-`a1.accord-usdc.testnet` (release 3) was negotiated on 9 Nov 2026 (`14.00 USDC` in 3 items, `QUOTE → COUNTER → ACCEPT`, glm-5.3-flash in OutLayer's enclave), approved, funded, paid `5.00` and refused a redirect, then revoked: [Circle USDC proof](#circle-usdc). Transactions: `platform/DECISIONS.md` sections 24 and 26.
+## What the agent's key can and cannot do
 
-## Verify any agreement
-
-No account and no keys.
-
-| Where | Do | See |
-| --- | --- | --- |
-| Browser | Open [/verify](https://accordweb-production.up.railway.app/verify) and enter an agreement, e.g. `a6.accord-v2.testnet` | Each public check with its result and the transaction behind it |
-| Browser | Open [/record](https://accordweb-production.up.railway.app/record) | Agreement `a6`'s 12 steps, each linked to its transaction |
-| Terminal | The commands below | `verify: 5 checks ok · 1 partial · 1 not checked` |
-
-```bash
-git clone https://github.com/Adityaakr/accord.git && cd accord/platform
-corepack enable && pnpm install
-make verify DEAL=a6.accord-v2.testnet
-```
-
-<details>
-<summary>Output, from a run on 9 Nov 2026</summary>
-
-```
-accord verify · a6.accord-v2.testnet
-  code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok
-  keys      0 keys · none · no full access · ok
-  sealed    outcome signature ok · commitments match · agreement matches · ok
-  release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) · not checked
-  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 3d293e48… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
-  payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
-  record    1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
-verify: 5 checks ok · 1 partial · 1 not checked
-```
-
-The nonce is fresh on every run. `model` is `partial`: the report is fetched with that nonce and the nonce is bound in it, but it attests the model as served now, not the negotiating run (the run's own attestation is bound in the signed outcome, which `sealed` checks), and the hardware quote and GPU evidence are not checked by `make verify` (`make probe-ai` checks them, with a NEAR AI key). `release` is `not checked` until the `outlayer-verify` tool is installed ([`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md)). `keys` reads `0 keys` because a6's agent was revoked.
-
-</details>
-
-## Use from an agent
-
-Everything below reads NEAR testnet with no account and no keys. Run it from `platform/` after `corepack enable && pnpm install`.
-
-**MCP server** (`@accord/mcp`, stdio by default). With no key in the environment it serves 7 read-only tools: `accord_list_agreements`, `accord_get_agreement`, `accord_due_items`, `accord_preflight`, `accord_refusals`, `accord_receipts` and `accord_verify`. The paying and principal tools appear only when their keys are set ([`platform/INTERFACES.md`](platform/INTERFACES.md) section 12).
-
-Preflight on testnet: three of its signals, `age_days`, `tx_30d` and `code_changed_30d`, return `unavailable`. No keyless indexer gives an account's age or its transaction count, and `code_changed_30d` needs an archival RPC (`NEAR_ARCHIVAL_RPC_URL`), which is not set by default and which did not serve testnet state from 30 days back when tried on 9 Nov 2026. The rating comes from the RPC account read (exists, is a contract), the agreement (authorised recipient, canaries) and the factory's reports, blocklist and recipient stats.
-
-```bash
-ACCORD_FACTORY=accord-v2.testnet pnpm --silent --filter @accord/mcp dev            # stdio
-ACCORD_FACTORY=accord-v2.testnet pnpm --silent --filter @accord/mcp dev -- --http 3333   # streamable HTTP at http://127.0.0.1:3333/mcp
-```
-
-On start it prints `accord-mcp · 7 tools · agent off · principal off` on stderr. An MCP client config runs the first command with `cwd` set to `platform/`.
-
-**CLI** (`accord`; read-only commands need no key):
-
-```bash
-ACCORD_FACTORY=accord-v2.testnet pnpm --silent --filter @accord/cli dev -- show --agreement a6.accord-v2.testnet
-ACCORD_FACTORY=accord-v2.testnet pnpm --silent --filter @accord/cli dev -- receipts --agreement a6.accord-v2.testnet --json
-```
-
-**SDK** (`@accord/sdk`, TypeScript on `near-api-js`; build it once with `pnpm --filter @accord/sdk build`):
-
-```ts
-import { Accord, verify } from "@accord/sdk";
-const accord = new Accord({ network: "testnet", factory: "accord-v2.testnet" });
-const report = await verify(accord, "a6.accord-v2.testnet"); // { checks: [{ name, status, detail }], ok, partial, failed, notChecked }
-```
-
-**HTTP**: the live app returns the same report as JSON, with a nonce you choose (64 hex characters) or one it generates:
-
-```bash
-curl -s https://accordweb-production.up.railway.app/app/api/verify/a6.accord-v2.testnet
-```
-
-An account that is not an Accord agreement answers `404` with `{"error":"<account> is not an Accord agreement"}` (live: `/app/api/verify/nobody.testnet`). The site also serves [/llms.txt](https://accordweb-production.up.railway.app/llms.txt) and [/facts.json](https://accordweb-production.up.railway.app/facts.json).
-
-## Testnet proof
-
-Agreement [`a6.accord-v2.testnet`](https://testnet.nearblocks.io/address/a6.accord-v2.testnet) ran the full flow on 8 Nov 2026, on release 3 of factory `accord-v2.testnet`. It is the original walkthrough; the proofs on release 4 and in Circle USDC follow it. The Sealed Table negotiation used the real NEAR AI model (`z-ai/glm-5.3-flash`) inside OutLayer's attested enclave: `QUOTE → COUNTER → FINAL → ACCEPT`, `35.50` tUSDC in 3 items. Settlement is a test USDC token.
-
-| # | Step | Transaction |
-| --- | --- | --- |
-| 01 | Buyer seals its limits | [`Ek9Zr1wj…`](https://testnet.nearblocks.io/txns/Ek9Zr1wjD6nrWaKHFak8UDv5Jwbaacqrdh1huNp6qwAk) |
-| 02 | Vendor seals its limits | [`2Zq8pfNo…`](https://testnet.nearblocks.io/txns/2Zq8pfNoa1dFzMLAy79aGyek72q3LGcrvRqAjYABisKZ) |
-| 03 | Negotiated in the enclave: `35.50 tUSDC · 3 items` | [`GfX5qKq3…`](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW) |
-| 04 | Buyer approves the terms | [`H6cMyE6k…`](https://testnet.nearblocks.io/txns/H6cMyE6kzs9SdrC4yaP7CvnDxJqH4NSx7ivKeu2rBHSg) |
-| 05 | Vendor approves the terms (state `Executing`) | [`2uv8tTfe…`](https://testnet.nearblocks.io/txns/2uv8tTfeYhe2aZ5cMrVNfFzr88kPL4HeSxwYzNhtmveT) |
-| 06 | Buyer funds the escrow: `35.50 tUSDC` | [`2CeFB18j…`](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy) |
-| 07 | Recipient proven in the enclave (Payee) | [`6koRbw5Q…`](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6) |
-| 08 | Vendor's authority approves | [`FBQnqtKX…`](https://testnet.nearblocks.io/txns/FBQnqtKXs5B5zn1A4F1yCDUmACYMqsi2zM2uez6YxDis) |
-| 09 | Buyer accepts `halcyon-mm.testnet` | [`3d3LSZvz…`](https://testnet.nearblocks.io/txns/3d3LSZvz3yPX5LM1Bk6t9bxiX2x1JDMEt9mfa2fbw11p) |
-| | Agent key installed | [`EUJ86tSV…`](https://testnet.nearblocks.io/txns/EUJ86tSVNuYsgtMVYYZZ9CYbsJmY6jCKm1Uew5doPU1C) |
-| 10 | Agent pays inside the terms: `16.50 tUSDC` to `halcyon-mm.testnet` | [`2k57zg7i…`](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ) |
-| 11 | Redirect to `halcyon-markets.testnet` refused: `ERR_PAYEE_MISMATCH`, nothing sent | [`AB9HLnWv…`](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs) |
-| 12 | Buyer revokes the agent; its next call fails with `AccessKeyDoesNotExist` | [`4ervNQdj…`](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P) |
-
-### Release 4 (security-review fixes)
-
-The reviewed agreement code (`ECgsrZwy…`, global contract `R2qxw4u5…`) is release 4 on both factories since 9 Nov 2026: `accord-v2.testnet` ([publish](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU), [set current](https://testnet.nearblocks.io/txns/J9uADVqQSkY6f1uMYbMbWoPnB4oiwuS3CtLayKojtgeC)) and `accord-usdc.testnet` ([publish](https://testnet.nearblocks.io/txns/GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai), [set current](https://testnet.nearblocks.io/txns/5D9LxPuU4phUXTgRawd97TmhZPGiPjWzSPWCYXJteoLJ)). Agreements created before keep release 3 (code pinned by hash), so a6 above is unchanged. The proofs ran again on new release 4 agreements of `accord-v2.testnet` (test USDC):
-
-| Proof | Agreement | Result | Transaction |
-| --- | --- | --- | --- |
-| Negotiate | [`a10`](https://testnet.nearblocks.io/address/a10.accord-v2.testnet) | Attested in 64 s, `33.00 tUSDC` in 3 items, attestation ok, `ERR_SEALED` both ways | in the `make negotiate` output |
-| Fund | `a10` | `33.00 tUSDC` escrowed | [`2mBhRNnX…`](https://testnet.nearblocks.io/txns/2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22) |
-| Pay | `a10` | item 1, `12.00 tUSDC` to `halcyon-mm.testnet` | [`Bs5dVpr6…`](https://testnet.nearblocks.io/txns/Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm) |
-| Redirect refused | `a10` | `ERR_PAYEE_MISMATCH` | [`51TQ8no9…`](https://testnet.nearblocks.io/txns/51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu) |
-| Attack | [`a11`](https://testnet.nearblocks.io/address/a11.accord-v2.testnet) | `ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY` revokes and deletes the key; `0.00` moved | [`HvwpdKDs…`](https://testnet.nearblocks.io/txns/HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv), [`3cTDxHzV…`](https://testnet.nearblocks.io/txns/3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh), [`DPpVoMX9…`](https://testnet.nearblocks.io/txns/DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT) |
-| Revoke | [`a13`](https://testnet.nearblocks.io/address/a13.accord-v2.testnet) | `revoke_agent` deletes the key; the next call fails with `AccessKeyDoesNotExist` at the RPC, so it has no transaction; the buyer installs a new key, which pays item 2 | revoke [`8b8FC1He…`](https://testnet.nearblocks.io/txns/8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3), `install_agent_key` [`DfgMURQA…`](https://testnet.nearblocks.io/txns/DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT), pay item 2 [`24mdebXg…`](https://testnet.nearblocks.io/txns/24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe) |
-| Verify | `a10` | `code = release 4` · `5 ok · 1 partial · 1 not checked` | `make verify DEAL=a10.accord-v2.testnet` |
-
-The first `make revoke` run (a12) stopped at its last step: the script paid item 2 at a fixed `12.00` while the negotiated amount differed, and the contract refused it with `ERR_AMOUNT_MISMATCH`. The live targets now pay each item at its negotiated amount.
-
-### Circle USDC
-
-Agreement [`a1.accord-usdc.testnet`](https://testnet.nearblocks.io/address/a1.accord-usdc.testnet), created on release 3 of the second factory, ran a deal in Circle's testnet USDC on 9 Nov 2026:
-
-| Step | Result | Transaction |
-| --- | --- | --- |
-| Fund | `14.00 USDC` (Circle) escrowed | [`4gPohYYM…`](https://testnet.nearblocks.io/txns/4gPohYYMokgQcPcgNhX3tCTTXjA35AfuKkpGs1SpS2no) |
-| Pay | `5.00 USDC` to `halcyon-mm.testnet` | [`E127BGy3…`](https://testnet.nearblocks.io/txns/E127BGy3Tw6PmhE9JcoFr7vQsKTiHNevTTiAxEjJGWK2) |
-| Redirect refused | `ERR_PAYEE_MISMATCH` | [`9rgsBFA2…`](https://testnet.nearblocks.io/txns/9rgsBFA26yedWuEEJk77sKBDrDGS9mHn9BFMknCaP8BB) |
-| Revoke | the agent's next call fails with `AccessKeyDoesNotExist` | [`FTigDebs…`](https://testnet.nearblocks.io/txns/FTigDebs1kZjLpTN8nC8SZWp4dMM1ChuUyR211JZnzuW) |
-| Verify | release 3 · `5 ok · 1 partial · 1 not checked` | `make verify-usdc DEAL=a1.accord-usdc.testnet` |
-
-| Infrastructure | Account or link |
-| --- | --- |
-| Factory | [`accord-v2.testnet`](https://testnet.nearblocks.io/address/accord-v2.testnet), release `4` ([publish tx](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)); release `3` ([publish tx](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh)) for a6 |
-| Circle USDC factory | [`accord-usdc.testnet`](https://testnet.nearblocks.io/address/accord-usdc.testnet), release `4` ([publish tx](https://testnet.nearblocks.io/txns/GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai)); token `3e2210e1…afcb8af` (Circle USDC, 6 decimals) |
-| Test USDC | [`tusdc.accord-v1.testnet`](https://testnet.nearblocks.io/address/tusdc.accord-v1.testnet) (NEP-141, 6 decimals) |
-| Relayer | `relay.accord-v2.testnet` ([a relayed tx](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC)) |
-| OutLayer jobs | Sealed Table, Payee and observer, as OutLayer projects `accord-v1.testnet/accord-{sealed-table,payee,observer}`; release 3 pubkey runs `13682`, `13672`, `13683` |
-| NEAR AI Cloud attestation | [testnet-api.outlayer.ai/attestations/13596](https://testnet-api.outlayer.ai/attestations/13596) |
-| Demo accounts | vendor `halcyon-demo.testnet`, authority `halcyon-auth.testnet`, recipient `halcyon-mm.testnet` |
-| Demo vendor's domain | `useaccord.tech` (from 9 Nov 2026; `accordweb-production.up.railway.app` before), Accord's own site, serving the Payee file ([`/.well-known/accord.json`](https://accordweb-production.up.railway.app/.well-known/accord.json)) for Halcyon, a fictional company. A real vendor serves the same file on its own domain |
-
-Sources: [`apps/web/src/content/testnet.ts`](apps/web/src/content/testnet.ts) and [`platform/DECISIONS.md`](platform/DECISIONS.md) sections 21, 24 and 26. Market-making agreements run end to end on a local node; on testnet they wait on an OutLayer payment key ([`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md)).
-
-## Where each attack stops
+It can call one method, `act`, on one account: the agreement it works for. It cannot attach NEAR, transfer NEAR, add or delete keys, deploy code, delete the account, or call any other contract. It spends gas from a fixed allowance (`0.5 NEAR` by default). One buyer transaction, `revoke_agent`, ends it. More: [`platform/README.md`](platform/README.md#what-the-agents-key-can-and-cannot-do).
 
 <p align="center">
   <a href="docs/diagrams/accord-attacks.excalidraw"><img src="docs/diagrams/accord-attacks.svg" width="100%" alt="Where each attack stops. 'Our bank details have changed.' stops at Agreement controls: refused with ERR_PAYEE_MISMATCH, nothing sent. 'Urgent: pay invoice 4471 today.' stops at Agreement controls: refused with ERR_AMOUNT_MISMATCH or ERR_NOT_DUE. 'Please update our payee.' from the vendor's real mailbox stops at Payee: no change from a message, real changes need a fresh domain proof, the vendor's authority, the buyer's acceptance and a 24-hour delay. A stolen agent key can still pay only the approved amount to the authorised recipient, and after revoke_agent every call fails with AccessKeyDoesNotExist. The other agent pressing yours to concede past your limit stops at the Sealed Table: terms inside your limits, or no deal." /></a>
-  <br/><sub>Source: <a href="docs/diagrams/accord-attacks.excalidraw"><code>docs/diagrams/accord-attacks.excalidraw</code></a>. The full threat model is <a href="platform/ARCHITECTURE.md"><code>platform/ARCHITECTURE.md</code></a> section 16.</sub>
+  <br/><sub>Where each attack stops. Source: <a href="docs/diagrams/accord-attacks.excalidraw"><code>docs/diagrams/accord-attacks.excalidraw</code></a>. The threat model is <a href="platform/ARCHITECTURE.md"><code>platform/ARCHITECTURE.md</code></a> section 16.</sub>
 </p>
-
-**What the agent's key can and cannot do.** It can call one method, `act`, on one account: the agreement it works for. It cannot attach NEAR, transfer NEAR, add or delete keys, deploy code, delete the account, or call any other contract. It spends gas from a fixed allowance (`0.5 NEAR` by default). One buyer transaction, `revoke_agent`, ends it.
 
 ## Claims and their limits
 
-Verbatim from [`platform/GOAL.md`](platform/GOAL.md). Every public statement about Accord is one of these, stated with its limit.
+Verbatim from [`platform/GOAL.md`](platform/GOAL.md). Every public statement about Accord is one of these, stated with its limit. The site's [/security](https://accordweb-production.up.railway.app/security) page shows the same table.
 
 | We claim | Because | Limit, stated next to it |
 | --- | --- | --- |
@@ -512,19 +327,55 @@ Verbatim from [`platform/GOAL.md`](platform/GOAL.md). Every public statement abo
 | Negotiation is private; settlement is public | Mandates and the transcript stay inside enclaves; only the terms, commitment hashes, a transcript hash and attestation references leave; the commercial terms document is encrypted to the two parties | The enforced schedule (amounts, dates, recipient) and every payment are public on NEAR, as with any stablecoin payment |
 | A market-making agreement's payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception | Each slot's time is drawn inside the observer's enclave from a seed generated there; the observation is taken at the first NEAR mainnet block after that time, signed by the observer's key, and checked by the contract against the agreed spread, depth and two-sided quoting; anyone can recompute it from an archival node | A market-making agreement's observer measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment |
 
-The site's [/security](https://accordweb-production.up.railway.app/security) page shows the same table.
+Custody per piece and the privacy boundary: [`platform/README.md`](platform/README.md#custody-per-piece).
+
+### What we keep
+
+The app's server never sees a mandate and no route accepts one ([`platform/app/tests/no-mandate-routes.test.ts`](platform/app/tests/no-mandate-routes.test.ts) fails if one does). It stores only the `/try` inbox (with a salted daily hash of the visitor, never the IP address), the buyer's signed approvals of warned recipients, demo-domain registrations, the `/try` rooms, the faucet's per-account grants and daily balance, and service heartbeats; see [`platform/app/src/server/README.md`](platform/app/src/server/README.md). The Sealed Table holds a mandate's plaintext only in memory during its run.
 
 ## Security review
 
-An internal security review, not a third-party audit: five AI-assisted review passes, each on a separate code area (the payment path; authorisation and keys; creation and code integrity; funds; the enclave jobs), with every finding re-checked by separate AI review passes that reproduced it as a test, found 1 High and 5 Medium issues (one of them Medium-Low), plus 4 groups of Low findings (13 individual items). The High one was a close-refund drain: a deposit sent during `close` could make the refund to the buyer spend the vendor's reserve; the refund is now capped at the ledger while anything is owed to the vendor. Severities are self-assigned. Each fix landed together with a failing test that it makes pass, and the tests stay in the suite. CI (`.github/workflows/ci.yml`) runs the contract and factory tests, the review tests among them (`cargo test -p accord-core -p accord-agreement -p accord-factory`, on the mocked chain), `pnpm -r typecheck` and every package, service and app test (`packages/*`, `services/*` and `@accord/app`, including the SDK's `verify`, `preflight` and `yocto` tests), and the website's `npm run check`, `test:serve` and build; the sandbox tests on a local node (`make sandbox`, including `tests/tests/audit.rs`) and the enclave job tests (`jobs/*/tests`) run locally only. The contract and factory fixes are live as release 4 on both testnet factories ([proofs](#release-4-security-review-fixes)).
+An internal security review, not a third-party audit: five AI-assisted review passes, each on a separate code area (the payment path; authorisation and keys; creation and code integrity; funds; the enclave jobs), with every finding re-checked by separate AI review passes that reproduced it as a test, found 1 High and 5 Medium issues (one of them Medium-Low), plus 4 groups of Low findings (13 individual items). The High one was a close-refund drain: a deposit sent during `close` could make the refund to the buyer spend the vendor's reserve; the refund is now capped at the ledger while anything is owed to the vendor. Severities are self-assigned. Each fix landed with a failing test that it makes pass. The contract and factory fixes are live as release 4 on both testnet factories ([proofs](docs/runs.md#release-4-security-review-fixes)); agreements created before (a6, a8 and a1.accord-usdc.testnet) keep release 3's code by hash, so they keep the close-refund issue.
 
-Agreements created before release 4 (a6, a8 and a1.accord-usdc.testnet) keep release 3's code by hash, so they keep the close-refund issue; new agreements get release 4.
+Scope: the contracts, the factory and the enclave jobs. The app server, the relayer and the demo endpoints were outside it; the relayer deposit issue (`platform/DECISIONS.md` 27) was found later by a live run and fixed the same day. Changed limit: an item left `AssumedPaid` (its transfer sent, its callback not yet answered) is no longer refunded to the buyer at `Settled`; its amount stays on the agreement's account until that payment's callback answers. Limit: S1 is partial (see [What is and is not verifiable today](#what-is-and-is-not-verifiable-today)). Every finding, fix, test and commit: [`platform/DECISIONS.md`](platform/DECISIONS.md) section 25. Mainnet follows an external audit, which has not happened yet.
 
-Scope: the review covered the contracts, the factory and the enclave jobs. The app server, the relayer and the demo endpoints were outside it; the relayer deposit issue (`platform/DECISIONS.md` 27) was found later by a live run on the public URL and fixed the same day.
+CI (`.github/workflows/ci.yml`) runs the contract and factory tests, the review tests among them (`cargo test -p accord-core -p accord-agreement -p accord-factory`), `pnpm -r typecheck` and every package, service and app test, and the website's `npm run check`, `test:serve` and build; the sandbox tests on a local node (`make sandbox`, including `tests/tests/audit.rs`) and the enclave job tests (`jobs/*/tests`) run locally only.
 
-Changed limit: an item left `AssumedPaid` (its transfer sent, its callback not yet answered) is no longer refunded to the buyer at `Settled`; its amount stays on the agreement's account until that payment's callback answers (a failure sets it `Reserved` for the vendor to claim, a success leaves it paid), and if that callback never runs, the amount stays on the account.
+## Track by track
 
-Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is partial. The jobs now serve only factory agreements in code, but those job builds are not deployed yet (release 4 runs release 3's job builds), and S1 itself needs the seed's access condition in OutLayer, which only its dashboard can set and which is not set yet. Every finding, fix, test and commit: [`platform/DECISIONS.md`](platform/DECISIONS.md) section 25. Mainnet follows an external audit, which has not happened yet.
+The organisers' requirements per track ([`platform/GOAL.md`](platform/GOAL.md) "Track requirements"), and where each is shown.
+
+| Track | Requirement | Shown by |
+| --- | --- | --- |
+| `security` | The agent signs with a function-call key scoped to one contract, never a full-access key | [What the agent's key can and cannot do](#what-the-agents-key-can-and-cannot-do); `make verify` `keys` line |
+| `security` | A prompt-injected agent tries to pay a bad address and is stopped, with the log | The [Live attack room](https://accordweb-production.up.railway.app/app/try); `make attack`; a11's three refusals in [`docs/runs.md`](docs/runs.md#release-4-security-review-fixes) |
+| `security` | A wrapper that blocks or asks a human, with data sources per signal | `preflight()` in the SDK and `accord_preflight` return `allow`, `warn` or `block`; `warn` waits for the buyer in the app; signals and sources in [`platform/ARCHITECTURE.md`](platform/ARCHITECTURE.md) section 7.3. Three signals are `unavailable` on testnet ([above](#use-from-an-agent)) |
+| `privacy` | NEAR AI Cloud, a TEE model, attestation with a fresh nonce, a Verified panel | `z-ai/glm-5.3-flash` in the Sealed Table; the room's Verified panel and `/verify`; `make probe-ai`. The model check is `partial` in `make verify` ([why](#what-is-and-is-not-verifiable-today)) |
+| `privacy` | Keep nothing server-side; fictional sample documents | [What we keep](#what-we-keep); [`platform/fixtures/companies`](platform/fixtures/companies) (Northwind, Halcyon) |
+| `agents` | Negotiate: counter once with reasons, then accept or walk away | a6: `QUOTE → COUNTER → FINAL → ACCEPT`; `make negotiate` |
+| `agents` | Payments in USDC; a receipt per task | tUSDC and Circle USDC on NEAR; `/record`, `/app/record.csv`, `accord receipts` |
+| `agents` | Agent Market: how jobs are posted and paid, or say there is no public way | Checked 31 Oct 2026: Agent Market is mainnet-only and holds payments in its own ledger, with no hook for an outside escrow, so Accord does not integrate it (`platform/DECISIONS.md` section 7) |
+| `business` | Humans set the constraints; a kill switch | Mandates, both approvals, exceptions; `revoke_agent` (`make revoke`, a13) |
+| `business` | Every sale and payout on a public ledger; a demo loop under two minutes | `/record`; `make demo NET=local` ran the loop in 14 s on a local node (3 Nov 2026). `make demo` has not run on testnet; there the flow ran as `make negotiate`, `finish`, `attack` and `revoke` |
+
+Not claimed: `realworld`, `social` and `swarms`. Their extra requirements (an invoice view paid through 1Click, a Sputnik DAO as the buyer, a sealed tender) are not built.
+
+## Related NEAR tools
+
+| Tool | How Accord relates |
+| --- | --- |
+| NEAR AI Cloud | Used: private inference for both negotiators, with attestations fetched with a fresh nonce |
+| OutLayer | Used: Intel TDX enclaves for the Sealed Table, Payee and the observer; outputs signed with seed-derived keys and checked on chain |
+| HOT Connect | Used: wallet sign-in in the app (Meteor, Intear, Ledger, Nightly, WalletConnect) |
+| NEAR Intents Agent API | Not used. It gives one owner a policy-bound wallet for an agent (limits, allowlist, timelocks, approval, freeze). Accord is the policy two companies negotiated and both approved, enforced on an account neither can drain alone, with payments gated by evidence. The two could meet: an agreement's recipient and caps could be exported into such a policy (not built) |
+| NEAR Intents 1Click | Not used: no testnet. Funding an agreement from other chains is planned |
+| Agent Market | Not integrated: mainnet-only, with payments held in its own ledger and no outside escrow hook |
+| Sputnik DAO, Trezu | Not integrated. A DAO as the buyer (proposals to create, fund and approve) was designed and not built; Trezu is mainnet-only |
+| Chain Signatures | Not used: settlement is USDC on NEAR from the agreement's own account |
+
+## Business model (hypothesis)
+
+Free on testnet with test funds. Planned, still a hypothesis: buyers pay per agreement, and vendors pay per recipient authorisation. Building on Accord and verifying an agreement stay free. Never a percentage of payments. Production prices are published before launch.
 
 ## Repository map
 
@@ -548,72 +399,48 @@ Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is par
 │   ├── docs/build/           PROGRESS (the work queue), BLOCKED, DEMO, KIT, PLATFORM, SUBMISSION
 │   └── *.md                  GOAL, ARCHITECTURE, INTERFACES, DECISIONS, DEPLOY, CHANGELOG, CLAUDE
 ├── docs/
+│   ├── runs.md               every recorded testnet run, each transaction linked
 │   ├── diagrams/             Excalidraw sources with SVG and PNG exports
 │   ├── product/              a pointer to the product kit in platform/
 │   └── hackathon/            a pointer to platform/HACKATHON.md, the organisers' rules
-├── AGENTS.md, CLAUDE.md     notes for evaluating agents: layout, judge paths, where the claims are
-├── .github/workflows/ci.yml  three jobs: website (typecheck, copy rules, references, site server test, build), Rust money path (cargo test of core, agreement, factory), platform TypeScript (typecheck, then every package, service and app test)
+├── AGENTS.md, CLAUDE.md      notes for evaluating agents: layout, judge paths, where the claims are
+├── .github/workflows/ci.yml  website, Rust money path, platform TypeScript
 ├── Dockerfile, railway.json  the website's Railway build
 └── package.json              npm workspace for apps/*
 ```
 
 ## Run locally
 
-### The website
+**The website** (Node `22`, `.nvmrc`): `npm ci`, then `npm run dev` (Vite on http://localhost:5180), `npm run check` (typecheck, `check-copy: clean`, the reference check), `npm run build` (into `apps/web/dist`) and `npm start` (`serve.mjs` on `$PORT`, default `5180`, with `/healthz`; `APP_ORIGIN=http://localhost:3100 npm start` proxies `/app` to a local app).
 
-Needs Node `22` (`.nvmrc`; `package.json` asks for `>=20.19`).
-
-| Do | See |
-| --- | --- |
-| `npm ci` | Dependencies for the `apps/*` workspace |
-| `npm run dev` | Vite on http://localhost:5180 |
-| `npm run check` | Typecheck, then `check-copy: clean` and the reference check |
-| `npm run build` | `tsc -b`, `vite build`, then the prerender into `apps/web/dist` |
-| `npm start` | `apps/web/scripts/serve.mjs` serving `dist` on `$PORT` (default `5180`), with `/healthz` |
-| `APP_ORIGIN=http://localhost:3100 npm start` | `/app` and `/app/*` proxied to a local app; without `APP_ORIGIN`, `/app` shows a "starting up" page |
-
-### The app and the contracts
-
-Needs Node `>=22`, pnpm `10.30.2` (`corepack enable`), and for contracts and jobs the Rust toolchain in `platform/rust-toolchain.toml` (`1.97.0`, with `wasm32-unknown-unknown` and `wasm32-wasip2`). `make setup-check` lists each tool with its version and `ok`, or the install command.
-
-```bash
-cd platform
-corepack enable && pnpm install
-```
+**The app and the contracts** need Node `>=22`, pnpm `10.30.2` (`corepack enable`), and for contracts and jobs the Rust toolchain in `platform/rust-toolchain.toml` (`1.97.0`, with `wasm32-unknown-unknown` and `wasm32-wasip2`). `make setup-check` lists each tool with its version and `ok`, or the install command. From `platform/`, after `corepack enable && pnpm install`:
 
 | Do | See |
 | --- | --- |
-| `pnpm --filter @accord/app dev` | The app at http://localhost:3100/app, reading testnet (`accord-v2.testnet` by default). The faucet, demo counterparty and relayer need the variables in `platform/.env.example` |
-| `make dev` | A local NEAR node with the real contracts, the three jobs' own code run natively (only the model is replaced, labelled `model.local`), a test USDC faucet, the keeper, the demo agent and the app at http://localhost:3100 |
+| `pnpm --filter @accord/app dev` | The app at http://localhost:3100/app, reading testnet (`accord-v2.testnet` by default) |
+| `make dev` | A local NEAR node with the real contracts, the three jobs' own code run natively (only the model is replaced, labelled `model.local`), a faucet, the keeper, the demo agent and the app |
 | `make sandbox` | The full procurement flow and one market-making period on a local sandbox, mocked steps marked `[mock]`, ending `sandbox: all checks passed` |
 | `make test` | `cargo test` for the workspace, then the package, service and app tests |
-| `pnpm -r typecheck && pnpm -r test` | The TypeScript typecheck and tests alone, no Rust needed (`pnpm install` has already built `@accord/sdk` and `@accord/store`, which the other packages import) |
+| `pnpm -r typecheck && pnpm -r test` | The TypeScript typecheck and tests alone, no Rust needed |
 | `make attack NET=local` | `ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY` with the key revoked and deleted, then `AccessKeyDoesNotExist`, and `0.00 USDC moved by attempts` |
 | `make demo NET=local` | The whole loop from fresh accounts (14 s on 3 Nov 2026) |
 | `make market-making NET=local` | Two market-making agreements on Rhea's USDC/wNEAR pool, observed at real mainnet blocks: one period `Eligible` and paid, the stricter one `Withheld` and refused `ERR_PERIOD_WITHHELD` |
 
-Every live target (`negotiate`, `approve`, `fund`, `payee`, `pay`, `attack`, `revoke`, `claim`, `exception`, `payee-change`, `market-making`, `demo`, `inbox`) runs against testnet without `NET=local`, using the accounts and keys named in `platform/.env.example`. Their printed lines are defined in [`platform/INTERFACES.md`](platform/INTERFACES.md) section 10; recorded runs are in [`platform/README.md`](platform/README.md).
+Every live target (`negotiate`, `approve`, `fund`, `payee`, `pay`, `attack`, `revoke`, `claim`, `exception`, `payee-change`, `market-making`, `demo`, `inbox`) runs against testnet without `NET=local`, using the accounts and keys named in `platform/.env.example`. Their printed lines are in [`platform/INTERFACES.md`](platform/INTERFACES.md) section 10; recorded outputs are in [`platform/README.md`](platform/README.md).
 
-## Deployment
+**Deployment**: two Railway services from this repository, one public address. The website builds from the root [`Dockerfile`](Dockerfile) ([`railway.json`](railway.json), health `/healthz`); the app from [`platform/Dockerfile`](platform/Dockerfile) ([`platform/railway.json`](platform/railway.json), health `/app/api/status`). The website's `APP_ORIGIN` points at the app and `serve.mjs` forwards `/app/*` to it. Variables and steps: [`platform/DEPLOY.md`](platform/DEPLOY.md). No key is built into either image.
 
-Two Railway services from this repository, one public address:
+## How NEAR is used
 
-| Service | Root | Build | Health check |
-| --- | --- | --- | --- |
-| Website | repository root | [`Dockerfile`](Dockerfile) via [`railway.json`](railway.json) | `/healthz` |
-| App | `platform` | [`platform/Dockerfile`](platform/Dockerfile) via [`platform/railway.json`](platform/railway.json) | `/app/api/status` |
+| | Used for | Where |
+| --- | --- | --- |
+| Function-call access keys | The agent's only key: `act` on its own agreement account, installed and deleted by the contract | [`contracts/agreement/src/payments.rs`](platform/contracts/agreement/src/payments.rs) |
+| Sub-accounts and pinned code (NEP-591) | One account per agreement, no `AddKey`, code fixed by hash | [`contracts/factory/src/lib.rs`](platform/contracts/factory/src/lib.rs) |
+| NEP-141, NEP-145 | USDC escrow by `ft_transfer_call`, payments by `ft_transfer` under a payment lock | [`contracts/agreement/src/payments.rs`](platform/contracts/agreement/src/payments.rs) |
+| NEP-297 events | Every refusal, payment, observation and approval on the record | [`contracts/agreement/src/events.rs`](platform/contracts/agreement/src/events.rs) |
+| NEP-413, NEP-366 | Signed messages for document keys and sessions; relayed delegates for wallet calls (never `act`) | [`packages/sdk/src/sealing.ts`](platform/packages/sdk/src/sealing.ts), [`app/src/server/relay.ts`](platform/app/src/server/relay.ts) |
+| Rhea | The USDC/wNEAR pool the market-making observer reads, read only | [`platform/jobs/observer`](platform/jobs/observer) |
 
-The website's `APP_ORIGIN` points at the app service, and `serve.mjs` forwards `/app/*` to it. Variable names and steps are in [`platform/DEPLOY.md`](platform/DEPLOY.md). No key is built into either image; every secret is a runtime variable.
+Libraries: near-sdk `5.30.0`, near-contract-standards `5.30.0`, near-api-js `7.3.1`, eciesjs, canonicalize, @noble, Next.js `16`, HOT Connect (`@hot-labs/near-connect`), the MCP TypeScript SDK; the website on React `19` and Vite `7`. No template. No partnership is claimed.
 
-## Built with
-
-| | Used for |
-| --- | --- |
-| NEAR | The agreement contract, its escrowed USDC and the record of every payment and refusal: function-call access keys, sub-accounts with code pinned by hash (NEP-591), NEP-141, NEP-145, NEP-297 events, NEP-413, NEP-366 |
-| [NEAR AI Cloud](https://cloud.near.ai) | Private inference for the negotiating agents, with attestations fetched with a fresh nonce |
-| [OutLayer](https://app.outlayer.ai/docs/getting-started) | Intel TDX enclaves for the Sealed Table, Payee and the observer |
-| USDC on NEAR | Settlement as a NEP-141 token (`tUSDC` on testnet) |
-| Rhea | The USDC/wNEAR pool the market-making observer reads, read only |
-| Libraries | near-sdk `5.30.0`, near-contract-standards `5.30.0`, near-api-js `7.3.1`, eciesjs, canonicalize, @noble, Next.js `16`, HOT Connect (`@hot-labs/near-connect`, wallet sign-in), the MCP TypeScript SDK; the website on React `19` and Vite `7` |
-
-No partnership is claimed. Built for NEAR HACKATHON (development closes 14 Nov 2026). Licence: [MIT](LICENSE).
+Built during NEAR HACKATHON: this repository started on 30 Oct 2026 (first commit `c15c05e`), inside the window; development closes 14 Nov 2026. Licence: [MIT](LICENSE).

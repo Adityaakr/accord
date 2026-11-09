@@ -293,6 +293,8 @@ Kept as stated limits: an item can be reopened from `AssumedPaid` by one excepti
   config; both buyers are already registered with Circle's token.
 - **Task ids are OutLayer request ids.** The `execution_requested` event's `request_id` (13596, 13597, 13598) is the
   task id: `GET https://testnet-api.outlayer.ai/attestations/<id>` returns the TDX quote for that run.
+  **Corrected 9 Nov 2026 (section 31):** a request id is not a task id. `/attestations/<id>` looks up a task id, so
+  `/attestations/13596` is an unrelated run; the run for request 13596 is `/attestations/by-request/13596` (task 28391).
 - **Live flow:** `create` sized its buyer check for embedded (20 NEAR); it now reads the factory's `create_deposit`
   and adds 6 NEAR. `make verify DEAL=` passed the agreement positionally; it now passes `--agreement`.
 
@@ -360,7 +362,9 @@ Kept as stated limits: an item can be reopened from `AssumedPaid` by one excepti
     https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs
   - revoked: https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P; the agent's next call is
     rejected by the network with `AccessKeyDoesNotExist`
-  - `make verify DEAL=a6.accord-v2.testnet`: 6 checks ok · 1 not checked (release: needs `outlayer-verify`)
+  - `make verify DEAL=a6.accord-v2.testnet`: 6 checks ok · 1 not checked (release: needs `outlayer-verify`), as it printed
+    then; since 9 Nov 2026 the model check reports `partial` (nonce bound, hardware quote not checked there), so the same
+    agreement prints `verify: 5 checks ok · 1 partial · 1 not checked`
 
 ## 22. Naming: one product, six agreement types (8 Nov 2026)
 
@@ -527,12 +531,12 @@ no mock or F1 symbols, 9 agreements match. Agreements created before this keep r
 
 | Proof | Agreement | Result | Tx |
 |---|---|---|---|
-| negotiate | a10 | Attested in 64 s, 33.00 USDC in 3 items, attestation ok, `ERR_SEALED` both ways | (see `make negotiate` output) |
-| finish: fund | a10 | 33.00 USDC escrowed | `2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22` |
-| finish: pay | a10 | item 1, 12.00 USDC to halcyon-mm.testnet | `Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm` |
+| negotiate | a10 | Attested in 64 s, 33.00 tUSDC in 3 items, attestation ok, `ERR_SEALED` both ways | (see `make negotiate` output) |
+| finish: fund | a10 | 33.00 tUSDC escrowed | `2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22` |
+| finish: pay | a10 | item 1, 12.00 tUSDC to halcyon-mm.testnet | `Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm` |
 | finish: refused | a10 | ERR_PAYEE_MISMATCH | `51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu` |
 | attack | a11 | ERR_PAYEE_MISMATCH, ERR_AMOUNT_MISMATCH, ERR_CANARY revokes and deletes the key; 0.00 moved | `HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv`, `3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh`, `DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT` |
-| revoke | a13 | `revoke_agent` deletes the key; the next call fails with AccessKeyDoesNotExist at the RPC (no transaction); `install_agent_key` adds a new key, which pays item 2 (12.00 USDC to halcyon-mm.testnet) | revoke `8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3`, install_agent_key `DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT`, pay `24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe` |
+| revoke | a13 | `revoke_agent` deletes the key; the next call fails with AccessKeyDoesNotExist at the RPC (no transaction); `install_agent_key` adds a new key, which pays item 2 (12.00 tUSDC to halcyon-mm.testnet) | revoke `8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3`, install_agent_key `DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT`, pay `24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe` |
 | verify | a10 | code = release 4 · 5 ok · 1 partial · 1 not checked | |
 
 The first `make revoke` run (a12) stopped at its last step because the script paid item 2 at a fixed 12.00 while the
@@ -680,3 +684,48 @@ page retried and got through, but a visitor saw raw RPC errors. Fixed the same d
     throwaway account no longer exists; the faucet went from 47.568 to 49.764 NEAR (+2.196 of the 2.35 sent; the rest is
     gas and a28's 0.129 NEAR storage stake). Delete tx `f9WSjEpS…`.
   A visitor who closes the tab before Finish still costs the faucet up to 2.35 NEAR.
+
+## 30. The README, the runs page and the site's hero (9 Nov 2026)
+
+An independent review found the README too long for its "judge it in 5 minutes" promise, the site's hero showing a
+market-making room that has not run on testnet, and three "try" pages with near-identical names. Decisions:
+
+- **README.** The top is now: what it is, the 5-minute path, what is and is not verifiable today (the `model` check is
+  partial and `release` is not checked without `outlayer-verify`; S1 and the reviewed job builds are not deployed), the
+  a6 proof with its 12 transactions, `make verify` with its literal output, and use from an agent. The repeated run
+  tables (a8, a15, a21, release 4 on a10 to a13, a1.accord-usdc) moved to `docs/runs.md`, every transaction still
+  linked; this file keeps the notes behind them (sections 21 and 24 to 28). GOAL.md's README requirements are met with
+  short sections: Track by track, Related NEAR tools, Business model (hypothesis), What we keep. `realworld`, `social`
+  and `swarms` are stated as not claimed.
+- **Hero.** The home hero preview now shows agreement a6 with its real numbers (35.50 tUSDC in 3 items, 16.50 paid to
+  halcyon-mm.testnet, the redirect refused with `ERR_PAYEE_MISMATCH`, the agent revoked) and links to `/record`; its
+  room list names agreements that exist on testnet with the states `get_agreement` returned on 9 Nov 2026 (a6, a10,
+  a1.accord-usdc Executing; a32 Settled), and one market-making room labelled `Local node`. The caption says market
+  making has run on a local node, not yet on testnet. Chosen over a "local node" label on the old mock because the
+  testnet record is the stronger true statement.
+- **Verify.** The site's `/verify` headlines the full seven-check verdict (`5 ok · 1 partial · 1 not checked`), the
+  same as `make verify` and the app; the five browser reads are labelled "quick reads". llms.txt, facts.json and the
+  docs say the same. Amounts on `accord-v2.testnet` agreements are tUSDC everywhere (a10 was written `33.00 USDC`).
+- **Names.** One name per destination on the site and in the README: "Run your own deal" (`/app/try-it`), "Live attack
+  room" (`/app/try`), "Watch the replay" (`/app/replay`); the site's `/try` page is "Refused attacks" and links to all
+  three. App routes are unchanged.
+- **Try-it walkthrough.** Step 5b no longer says to click "Let the agent pay the due item": the demo agent pays an
+  accepted item on its own (`server/demoagent.ts`, `e2e/try-without-wallet.mjs` "auto-pay: never clicked"); 5d is
+  "Hold to revoke".
+
+## 31. OutLayer request ids are not task ids; the record CSV (9 Nov 2026)
+
+- A release's `pubkey_task_id` (for example `13987`) is OutLayer's **request id**, not its task id. `GET
+  https://testnet-api.outlayer.ai/attestations/13987` returns an unrelated run (that path takes a task id). The right
+  lookup is `GET https://testnet-api.outlayer.ai/attestations/by-request/<request id>`: `13987` → task `28880`
+  (sealed-table), `13988` → `28881` (payee), `13989` → `28882` (observer). The same holds for the attestation the site and
+  README linked as `/attestations/13596`: it is now `/attestations/by-request/13596` (task `28391`). The CLI's `release`
+  check looks the pubkey runs up by request id (commit `3cb3132`); without `outlayer-verify` it stays `not checked`, and
+  with it `make verify` checks each job key's pubkey run.
+- The record CSV is served at `/app/record.csv`, and the site answers `/record.csv` (the path GOAL.md names) with
+  a 308 to it (`apps/web/scripts/serve.mjs`, tested in `test-serve.mjs`). `transaction_url` is the payment's own
+  transaction; the always-empty `inference_cost_usd` column is dropped, because inference cost is not on chain. The verify
+  API and the CSV answer any origin (CORS `*`, GET only), and a hosted keyless MCP server with the 7 read tools is at
+  `/app/mcp` (60 requests a minute per IP). These are in the repository; on 9 Nov 2026 the live `/app/mcp` still
+  answered 404, because the app had not been redeployed with them.
+

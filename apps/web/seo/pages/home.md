@@ -4,13 +4,13 @@ Built on NEAR
 
 Accord turns private negotiations into enforceable payment rules. Agents negotiate within each business’s confidential limits. Both parties approve the terms, and the contract enforces who can authorise payments, who can receive them, how much can be paid and what evidence is required.
 
-[Open the app](/app/signin) [Try a deal in about 5 minutes](/app/try-it)
+[Open the app](/app/signin) [Run your own deal in 5 minutes](/app/try-it)
 
 [Testnet record: procurement agreement a6, each step with its transaction](/record)
 
-> Illustrative Accord product: the deal-room list, a market-making agreement shown as its seven-step pipeline from sealed mandates to the USDC transfer on NEAR, and the agreement's activity: a refused payment, a missed observation slot and a settled period.
+> Agreement a6.accord-v2.testnet as recorded on NEAR testnet on 8 Nov 2026: sealed mandates, terms of 35.50 test USDC in 3 items approved by both companies, recipient halcyon-mm.testnet proven and accepted, delivery accepted, the agent paid item 1 (16.50 tUSDC), a redirect to halcyon-markets.testnet refused with ERR_PAYEE_MISMATCH and nothing sent, then the agent revoked. The room list shows other testnet agreements and one market-making agreement that has run on a local node only.
 
-Illustrative mock-up. On testnet today: procurement agreement [a6](/record), every step on chain.
+Agreement [a6.accord-v2.testnet](/record) as recorded on NEAR testnet, every step with its transaction; [verify it](/verify?agreement=a6.accord-v2.testnet) with no account. Market-making agreements have run end to end on a local node, not yet on testnet.
 
 ## Sealed Table
 
@@ -484,7 +484,7 @@ Not stopped by the contract: a person approving the wrong terms, or a payment th
 
 Where each attack stops. Each attack ends at a check in code; the tags give the closest entry in the OWASP Top 10 for Agentic Applications.[9](/research#owasp-agentic-2026)
 
-Try to move the money
+Try it in the live attack room
 
 Live on NEAR testnet
 
@@ -500,7 +500,7 @@ Sealed
 
 - 02 Vendor seals its limits [tx](https://testnet.nearblocks.io/txns/2Zq8pfNoa1dFzMLAy79aGyek72q3LGcrvRqAjYABisKZ)
 
-- 03 Negotiated in the enclave 35.50 USDC · 3 items [tx](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW)
+- 03 Negotiated in the enclave 35.50 tUSDC · 3 items [tx](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW)
 
 Agreed
 
@@ -510,7 +510,7 @@ Agreed
 
 Funded and bound
 
-- 06 Buyer funds the escrow 35.50 USDC [tx](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy)
+- 06 Buyer funds the escrow 35.50 tUSDC [tx](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy)
 
 - 07 Recipient proven in the enclave [tx](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6)
 
@@ -520,7 +520,7 @@ Funded and bound
 
 Paid, refused, revoked
 
-- 10 Agent pays inside the terms 16.50 USDC [tx](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ)
+- 10 Agent pays inside the terms 16.50 tUSDC [tx](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ)
 
 - 11 A redirected payment is refused ERR_PAYEE_MISMATCH [tx](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs)
 
@@ -538,17 +538,17 @@ Re-run on release 4 (security-review fixes): [a10](https://testnet.nearblocks.io
 
 - [Relayer tx](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC)
 
-- [Attestations](https://testnet-api.outlayer.ai/attestations/13596)
+- [Attestations](https://testnet-api.outlayer.ai/attestations/by-request/13596)
 
 [How to start](/join)
 
 > Illustrative: the demonstration agent's inbox. A message with new bank details and an urgent invoice are both refused by the contract with their reasons; the scheduled payment to the authorised recipient goes through.
 
-## Try to move the money.
+## Live attack room: try to move the money.
 
 In the public demonstration room, the agent's inbox is open to anyone while the room runs. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it, and your attempt appears in the public refusal log with the contract's reason. Revocation is shown exactly: the agent's only key is deleted in one transaction, and anything it signs afterwards is rejected by the network before it reaches the contract.
 
-[See the demonstration](/try)
+[See the refused attacks](/try)
 
 Privacy and control
 

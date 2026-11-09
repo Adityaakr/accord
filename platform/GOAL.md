@@ -85,6 +85,17 @@ Every line passes on a fresh clone by a reader who has never spoken to us. "Prin
 | Repository | Public by 14 Nov 23:59 UTC with `main` as the default branch; the build kit moved to `docs/build/` and a short evaluator `CLAUDE.md` and `AGENTS.md` at the root (PROGRESS 7.3); tag `hackathon-submission` on the submitted commit |
 | Submission | `201` from the API after Adi confirms the printed payload |
 
+### Where this stands (9 Nov 2026)
+
+Not met yet, said plainly:
+
+- `make demo` on testnet: not run (`docs/build/PROGRESS.md` 5.2 is blocked on funds). It runs on a local node, 14 s on 3 Nov 2026. On testnet the same flow ran as `make negotiate`, `make finish`, `make attack` and `make revoke` (`DECISIONS.md` 26) and through `/app/try-it` (`docs/runs.md`).
+- `make market-making`: runs on a local node only, against real mainnet blocks. No market-making observation is recorded on testnet (`docs/build/BLOCKED.md` 3.7, an OutLayer payment key).
+- Hosted demo: the app is live with `/status`, but there is no live market-making agreement on testnet, for the same reason.
+- `make verify`: prints `verify: 5 checks ok · 1 partial · 1 not checked`, not all checks ok. `model` is partial (the hardware quote is not checked there) and `release` needs the `outlayer-verify` tool (`docs/build/BLOCKED.md`).
+- `make release-check`, the video, the public repository and the submission: not done yet (`docs/build/PROGRESS.md` 7.4, 7.5, 8).
+- README: the claims table, "What the agent's key can and cannot do" and "What we keep" are in the root `README.md`; the custody table and the privacy boundary are in `platform/README.md`, linked from it.
+
 ## Track requirements
 
 The organisers' prompts say to keep the requirements and the checkpoint. Each one is met by a feature and shown by a step the README numbers.
@@ -107,7 +118,7 @@ The organisers' prompts say to keep the requirements and the checkpoint. Each on
 | `agents` | Checkpoint: how the agent holds its keys and what it cannot do without the human | README section "What the agent's key can and cannot do" | README |
 | `business` | Humans only set the constraints; a kill switch they can flip at any time | Mandates, approvals, exceptions; `revoke_agent` | `make revoke` |
 | `business` | The agent's own NEAR account; never a full-access key in plain text; OutLayer custody or a scoped function-call key | Each agreement account is the agent's working account for that agreement, holding no full-access key; the agent's only credential is a scoped function-call key on it, stored only in the agent's environment | README; `make verify` |
-| `business` | Every sale, cost and payout on a public ledger page | `/record` with payments, refusals, exceptions, gas and inference costs per agreement | `/record` |
+| `business` | Every sale, cost and payout on a public ledger page | `/record` with payments, refusals, exceptions and gas per agreement; `/record.csv` (redirects to `/app/record.csv`), whose `transaction_url` is the payment transaction. Inference cost is not stored on chain, so it is not in the record or the CSV | `/record` |
 | `business` | A demo mode that runs one full loop on testnet in under two minutes | `make demo` | Its elapsed line |
 | `realworld` (if lever 4 passes) | Gasless for the vendor through a relayer that only pays for calls to our own contracts | `commit_mandate` takes no deposit; a NEP-366 relayer that relays only delegate actions to Accord agreements or the factory, and refuses `act` | A vendor account with `0` NEAR completes its steps; a test shows the relayer refusing other receivers |
 | `realworld` (if lever 4 passes) | Status a bookkeeper can trust; a CSV an accountant opens without questions | Paid, pending and refunded with transaction links; `/record.csv` | `/record` |

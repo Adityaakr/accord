@@ -69,3 +69,8 @@ Adi runs it once in a terminal:
 cargo install --git https://github.com/out-layer/outlayer-verify outlayer-verify
 ```
 
+With it installed, `make verify` looks up each job key's pubkey run by its OutLayer **request id** (the release's
+`pubkey_task_id`, e.g. `13987`) at `https://testnet-api.outlayer.ai/attestations/by-request/<request id>`, which gives the
+task id (`13987` → task `28880`), and runs `outlayer-verify job <task id>` on that task, not on the request id
+(`DECISIONS.md` 31).
+

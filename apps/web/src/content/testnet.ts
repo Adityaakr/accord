@@ -19,14 +19,14 @@ export type Step = { n: string; title: string; detail: string; href: string; ref
 export const FLOW: Step[] = [
   { n: "01", title: "Buyer seals its limits", detail: "Only a commitment and ciphertext go on chain", href: tx("Ek9Zr1wjD6nrWaKHFak8UDv5Jwbaacqrdh1huNp6qwAk") },
   { n: "02", title: "Vendor seals its limits", detail: "The other side never sees the numbers", href: tx("2Zq8pfNoa1dFzMLAy79aGyek72q3LGcrvRqAjYABisKZ") },
-  { n: "03", title: "Negotiated in the enclave", detail: "35.50 test USDC in 3 items, signed by the Sealed Table", href: tx("GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW"), mono: "35.50 USDC · 3 items" },
+  { n: "03", title: "Negotiated in the enclave", detail: "35.50 test USDC in 3 items, signed by the Sealed Table", href: tx("GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW"), mono: "35.50 tUSDC · 3 items" },
   { n: "04", title: "Buyer approves the terms", detail: "Approval recorded on the agreement", href: tx("H6cMyE6kzs9SdrC4yaP7CvnDxJqH4NSx7ivKeu2rBHSg") },
   { n: "05", title: "Vendor approves the terms", detail: "The agreement starts executing", href: tx("2uv8tTfeYhe2aZ5cMrVNfFzr88kPL4HeSxwYzNhtmveT") },
-  { n: "06", title: "Buyer funds the escrow", detail: "35.50 test USDC into the agreement's own account", href: tx("2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy"), mono: "35.50 USDC" },
+  { n: "06", title: "Buyer funds the escrow", detail: "35.50 test USDC into the agreement's own account", href: tx("2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy"), mono: "35.50 tUSDC" },
   { n: "07", title: "Recipient proven in the enclave", detail: "Payee checks the vendor's domain", href: tx("6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6") },
   { n: "08", title: "Vendor's authority approves", detail: "A separate account signs off the recipient", href: tx("FBQnqtKXs5B5zn1A4F1yCDUmACYMqsi2zM2uez6YxDis") },
   { n: "09", title: "Buyer accepts the recipient", detail: "halcyon-mm.testnet is now the only destination", href: tx("3d3LSZvz3yPX5LM1Bk6t9bxiX2x1JDMEt9mfa2fbw11p") },
-  { n: "10", title: "Agent pays inside the terms", detail: "16.50 test USDC to halcyon-mm.testnet", href: tx("2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ"), mono: "16.50 USDC" },
+  { n: "10", title: "Agent pays inside the terms", detail: "16.50 test USDC to halcyon-mm.testnet", href: tx("2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ"), mono: "16.50 tUSDC" },
   { n: "11", title: "A redirected payment is refused", detail: "ERR_PAYEE_MISMATCH, nothing sent", href: tx("AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs"), refused: true, mono: "ERR_PAYEE_MISMATCH" },
   { n: "12", title: "Buyer revokes the agent", detail: "Its next call fails: AccessKeyDoesNotExist", href: tx("4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P"), refused: true, mono: "AccessKeyDoesNotExist" },
 ]
@@ -45,7 +45,7 @@ export const INFRA = [
   { label: "Release 3", href: tx("7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh") },
   { label: "Release 4", href: tx("EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU") },
   { label: "Relayer tx", href: tx("DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC") },
-  { label: "Attestations", href: "https://testnet-api.outlayer.ai/attestations/13596" },
+  { label: "Attestations", href: "https://testnet-api.outlayer.ai/attestations/by-request/13596" },
 ]
 
 /* make verify on a6, as it printed (9 Nov 2026): each check with what it means in plain words */
@@ -56,7 +56,7 @@ export const CHECKS: Check[] = [
   { id: "keys", name: "Agreement keys", meaning: "No full-access key", status: "ok", href: `${acct("a6.accord-v2.testnet")}?tab=accesskeys` },
   { id: "sealed", name: "Sealed outcome", meaning: "Signed inside the enclave", status: "ok", href: tx("GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW") },
   { id: "release", name: "Enclave release", meaning: "Needs the outlayer-verify tool", status: "not checked", href: "https://app.outlayer.ai/docs/trust-verification" },
-  { id: "model", name: "Model attestation", meaning: "The model as served now, fresh nonce bound; the run's attestation is in the sealed outcome", status: "partial", href: "https://testnet-api.outlayer.ai/attestations/13596" },
+  { id: "model", name: "Model attestation", meaning: "The model as served now, fresh nonce bound; the run's attestation is in the sealed outcome", status: "partial", href: "https://testnet-api.outlayer.ai/attestations/by-request/13596" },
   { id: "payee", name: "Recipient", meaning: "Proven on the vendor's domain", status: "ok", href: tx("6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6") },
   { id: "record", name: "Record", meaning: "Payments match the receipts", status: "ok", href: tx("2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ") },
 ]
@@ -121,9 +121,9 @@ export const RELEASE4 = {
   verify: "make verify DEAL=a10.accord-v2.testnet",
   verifyResult: "code = release 4 · 5 ok · 1 partial · 1 not checked",
   steps: [
-    { title: "Negotiated in the enclave", agreement: "a10.accord-v2.testnet", mono: "33.00 USDC · 3 items", txs: [] },
-    { title: "Buyer funds the escrow", agreement: "a10.accord-v2.testnet", mono: "33.00 USDC", txs: [tx("2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22")] },
-    { title: "Agent pays item 1", agreement: "a10.accord-v2.testnet", mono: "12.00 USDC", txs: [tx("Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm")] },
+    { title: "Negotiated in the enclave", agreement: "a10.accord-v2.testnet", mono: "33.00 tUSDC · 3 items", txs: [] },
+    { title: "Buyer funds the escrow", agreement: "a10.accord-v2.testnet", mono: "33.00 tUSDC", txs: [tx("2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22")] },
+    { title: "Agent pays item 1", agreement: "a10.accord-v2.testnet", mono: "12.00 tUSDC", txs: [tx("Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm")] },
     { title: "A redirected payment is refused", agreement: "a10.accord-v2.testnet", mono: "ERR_PAYEE_MISMATCH", refused: true, txs: [tx("51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu")] },
     { title: "Attack: redirect, altered amount, canary", agreement: "a11.accord-v2.testnet", mono: "0.00 moved · key deleted", refused: true, txs: [tx("HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv"), tx("3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh"), tx("DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT")] },
     { title: "Revoke, then a new key pays item 2", agreement: "a13.accord-v2.testnet", mono: "AccessKeyDoesNotExist", refused: true, txs: [tx("8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3"), tx("DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT"), tx("24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe")], txLabels: ["revoke", "new key", "pay item 2"] },

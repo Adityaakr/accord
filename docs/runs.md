@@ -1,0 +1,119 @@
+# Recorded testnet runs
+
+Every recorded run of Accord on NEAR testnet, with each transaction linked. The flagship run, agreement `a6.accord-v2.testnet`, is in the [README](../README.md#testnet-proof); this page holds the others. The design notes behind each run are in [`platform/DECISIONS.md`](../platform/DECISIONS.md) (section numbers given per run).
+
+Units: agreements of `accord-v2.testnet` settle in test USDC (`tusdc.accord-v1.testnet`, written `tUSDC`); agreements of `accord-usdc.testnet` settle in Circle's testnet USDC (written `USDC`). Both have 6 decimals.
+
+| Agreement | Date | What it shows | Section |
+| --- | --- | --- | --- |
+| `a6.accord-v2.testnet` | 8 Nov 2026 | The full flow on release 3 (the flagship) | [README](../README.md#testnet-proof), DECISIONS 21 |
+| `a8.accord-v2.testnet` | 8 Nov 2026 | `/app/try-it` with a fresh account | [below](#a8-try-it-with-a-fresh-account) |
+| `a10`, `a11`, `a13.accord-v2.testnet` | 9 Nov 2026 | The proofs again on release 4 | [below](#release-4-security-review-fixes), DECISIONS 26 |
+| `a1.accord-usdc.testnet` | 9 Nov 2026 | A deal in Circle's testnet USDC | [below](#circle-usdc), DECISIONS 24 and 26 |
+| `a15.accord-v2.testnet` | 9 Nov 2026 | `/app/try-it` on the public URL, wallet calls relayed | [below](#a15-try-it-on-the-public-url), DECISIONS 27 |
+| `a21.accord-v2.testnet` | 9 Nov 2026 | Try without a wallet on the public URL | [below](#a21-try-without-a-wallet-on-the-public-url), DECISIONS 28 |
+| `a32.accord-v2.testnet` | 9 Nov 2026 | The run [/app/replay](https://accordweb-production.up.railway.app/app/replay) plays back, each step with its transaction; now `Settled` | the replay page |
+
+Market-making agreements have run end to end on a local node only (`make market-making NET=local`, recorded in [`platform/README.md`](../platform/README.md#the-whole-product-on-your-machine)); on testnet they wait on an OutLayer payment key ([`platform/docs/build/BLOCKED.md`](../platform/docs/build/BLOCKED.md) 3.7).
+
+## a8: try-it with a fresh account
+
+8 Nov 2026, `a8.accord-v2.testnet`, release 3. The same path as the README's walkthrough, run with a fresh account through the app's own routes.
+
+| Step | Transaction |
+| --- | --- |
+| Faucet, NEAR | [`935XqMoe…`](https://testnet.nearblocks.io/txns/935XqMoeb4Jt7fBQQHK9T7o9ZWJrWUoZYYCkdPGqhBoa) |
+| Faucet, tUSDC | [`3t7SSAkT…`](https://testnet.nearblocks.io/txns/3t7SSAkTzQt7Aj2d6FwkhpG7BzKfC2mhCcWMR2E46PQ3) |
+| Create | [`5xdpHZTz…`](https://testnet.nearblocks.io/txns/5xdpHZTzQyjFiZcxApbwPDH2o3DQNKYhE9szxfjAjgDq) |
+| Negotiation started | [`HFk6XgoF…`](https://testnet.nearblocks.io/txns/HFk6XgoFmkZt2mDBrtE3zzD4mXPMEQUKnVyTGwqi9143) |
+| Fund | [`91knP5Ez…`](https://testnet.nearblocks.io/txns/91knP5EzbKV5ajEXdfETkCXJqucQ5niJoPLBF2dbipng) |
+| Agent pays item 1 | [`HxYDHTRL…`](https://testnet.nearblocks.io/txns/HxYDHTRLteGfGYoeEptehVMKbFgBdVWBqrejUJhsjSnb) |
+| Redirect refused | [`37zUgEoe…`](https://testnet.nearblocks.io/txns/37zUgEoe8jbqnqQQhSe8L1VPBMRrrqXdsDorgDY7cEYL) |
+| Revoke | [`F67Qcofq…`](https://testnet.nearblocks.io/txns/F67Qcofq9CmVuGze7URoVD3E1HfucQ7qooBjDJjANHiG) |
+
+The server side is [`platform/app/src/server/demo.ts`](../platform/app/src/server/demo.ts): the faucet sends only what an account lacks, one grant per account per day, up to 30 accounts per connection per day, within a daily budget of 25 NEAR net (what Finish returns counts back); the counterparty reads the room and makes the vendor's next valid move, so calling it twice does nothing twice; the demo agent's key is derived per room and signs `act` itself, never through the relayer.
+
+## Release 4 (security-review fixes)
+
+The reviewed agreement code (`ECgsrZwy…`, global contract `R2qxw4u5…`) is release 4 on both factories since 9 Nov 2026: `accord-v2.testnet` ([publish](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU), [set current](https://testnet.nearblocks.io/txns/J9uADVqQSkY6f1uMYbMbWoPnB4oiwuS3CtLayKojtgeC)) and `accord-usdc.testnet` ([publish](https://testnet.nearblocks.io/txns/GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai), [set current](https://testnet.nearblocks.io/txns/5D9LxPuU4phUXTgRawd97TmhZPGiPjWzSPWCYXJteoLJ)). Agreements created before keep release 3 (code pinned by hash), so a6 is unchanged. The proofs ran again on new release 4 agreements of `accord-v2.testnet` (test USDC):
+
+| Proof | Agreement | Result | Transaction |
+| --- | --- | --- | --- |
+| Negotiate | [`a10`](https://testnet.nearblocks.io/address/a10.accord-v2.testnet) | Attested in 64 s, `33.00 tUSDC` in 3 items, attestation ok, `ERR_SEALED` both ways | in the `make negotiate` output |
+| Fund | `a10` | `33.00 tUSDC` escrowed | [`2mBhRNnX…`](https://testnet.nearblocks.io/txns/2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22) |
+| Pay | `a10` | item 1, `12.00 tUSDC` to `halcyon-mm.testnet` | [`Bs5dVpr6…`](https://testnet.nearblocks.io/txns/Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm) |
+| Redirect refused | `a10` | `ERR_PAYEE_MISMATCH` | [`51TQ8no9…`](https://testnet.nearblocks.io/txns/51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu) |
+| Attack | [`a11`](https://testnet.nearblocks.io/address/a11.accord-v2.testnet) | `ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY` revokes and deletes the key; `0.00` moved | [`HvwpdKDs…`](https://testnet.nearblocks.io/txns/HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv), [`3cTDxHzV…`](https://testnet.nearblocks.io/txns/3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh), [`DPpVoMX9…`](https://testnet.nearblocks.io/txns/DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT) |
+| Revoke | [`a13`](https://testnet.nearblocks.io/address/a13.accord-v2.testnet) | `revoke_agent` deletes the key; the next call fails with `AccessKeyDoesNotExist` at the RPC, so it has no transaction; the buyer installs a new key, which pays item 2 | revoke [`8b8FC1He…`](https://testnet.nearblocks.io/txns/8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3), `install_agent_key` [`DfgMURQA…`](https://testnet.nearblocks.io/txns/DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT), pay item 2 [`24mdebXg…`](https://testnet.nearblocks.io/txns/24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe) |
+| Verify | `a10` | `code = release 4` · `5 ok · 1 partial · 1 not checked` | `make verify DEAL=a10.accord-v2.testnet` |
+
+The first `make revoke` run (a12) stopped at its last step: the script paid item 2 at a fixed `12.00` while the negotiated amount differed, and the contract refused it with `ERR_AMOUNT_MISMATCH`. The live targets now pay each item at its negotiated amount.
+
+## Circle USDC
+
+Agreement [`a1.accord-usdc.testnet`](https://testnet.nearblocks.io/address/a1.accord-usdc.testnet), created on release 3 of the second factory, was negotiated on 9 Nov 2026 (`14.00 USDC` in 3 items, `QUOTE → COUNTER → ACCEPT`, glm-5.3-flash in OutLayer's enclave) and ran a deal in Circle's testnet USDC:
+
+| Step | Result | Transaction |
+| --- | --- | --- |
+| Fund | `14.00 USDC` (Circle) escrowed | [`4gPohYYM…`](https://testnet.nearblocks.io/txns/4gPohYYMokgQcPcgNhX3tCTTXjA35AfuKkpGs1SpS2no) |
+| Pay | `5.00 USDC` to `halcyon-mm.testnet` | [`E127BGy3…`](https://testnet.nearblocks.io/txns/E127BGy3Tw6PmhE9JcoFr7vQsKTiHNevTTiAxEjJGWK2) |
+| Redirect refused | `ERR_PAYEE_MISMATCH` | [`9rgsBFA2…`](https://testnet.nearblocks.io/txns/9rgsBFA26yedWuEEJk77sKBDrDGS9mHn9BFMknCaP8BB) |
+| Revoke | the agent's next call fails with `AccessKeyDoesNotExist` | [`FTigDebs…`](https://testnet.nearblocks.io/txns/FTigDebs1kZjLpTN8nC8SZWp4dMM1ChuUyR211JZnzuW) |
+| Verify | release 3 · `5 ok · 1 partial · 1 not checked` | `make verify-usdc DEAL=a1.accord-usdc.testnet` |
+
+## a15: try-it on the public URL
+
+9 Nov 2026, `a15.accord-v2.testnet`, release 4. A fresh, unfunded implicit account ran the page's calls against https://accordweb-production.up.railway.app/app, with its wallet calls relayed through `/app/api/relay`. The state went Sealed, Attested, Executing, recipient active, paid, refused and revoked in 5 min 30 s; `/app/api/verify/a15.accord-v2.testnet` gives 5 ok, 1 partial, 1 not checked and 0 failed.
+
+| Step | Result | Tx |
+| --- | --- | --- |
+| Session (NEP-413, unfunded implicit account) | `POST /app/api/session` 200 |  |
+| Faucet, NEAR (to 2.5) | `POST /app/api/faucet` 200 | [`GxVw5pg3…`](https://testnet.nearblocks.io/txns/GxVw5pg34KZfyVCu2bhYMrbA4NqWai2XJQyfpmUZtZD5) |
+| Faucet, tUSDC (100) | same call | [`7dRodXTg…`](https://testnet.nearblocks.io/txns/7dRodXTgVXmKHEHdB53uH87p7fJruHzLbQ688z78pgrC) |
+| Create a15 (signed directly; the relayed create failed, see below) | Sealed | [`GNynLq2o…`](https://testnet.nearblocks.io/txns/GNynLq2oxREyQrF1N4rNRhDztCzfVtqJ5DVgmthDRBEy) |
+| Counterparty seals the vendor mandate | counterparty step | [`BpwCPtgS…`](https://testnet.nearblocks.io/txns/BpwCPtgSg4rjZVNKPnuw4nLUzemEfoJpaoSXRCmKn2PM) |
+| Buyer seals the Northwind mandate (relayed) | both sealed | [`6eYVDLtT…`](https://testnet.nearblocks.io/txns/6eYVDLtTJ2mFT8J7GrKUWUfWuZZDXUZTd37fhGpN1324) |
+| Keeper (`accord-keeper.testnet`) calls `start_negotiation`, 00:17:28 UTC | `negotiation_requested`; the Sealed Table ran in OutLayer and `terms_proposed` landed in the same transaction | [`Gp9JqBvY…`](https://testnet.nearblocks.io/txns/Gp9JqBvYPgxw7Aqi4JKb28gWmTztM3Xw3RhJbVGtnWqT) |
+| Counterparty approves the terms | Attested after 67 s | [`HEm5P4ga…`](https://testnet.nearblocks.io/txns/HEm5P4gaE3LxvyV2ergFVxDHXbmVw8jthFARHH8GoV9q) |
+| Buyer approves the terms (relayed) | Executing | [`4nNbyFAk…`](https://testnet.nearblocks.io/txns/4nNbyFAk6moLWKHUCX37JLoeoUTFE272cHWLUXwHAeq2) |
+| Counterparty proposes halcyon-mm.testnet on useaccord.tech | Proposed, then Proven | [`4xGmfM2x…`](https://testnet.nearblocks.io/txns/4xGmfM2xoiRrVMA5ocLWMeiTyq4k2gQYhXVw4RNihZmp) |
+| Buyer funds 33.00 tUSDC (relayed) | funded 33.00 of 33.00 | [`HTpF77Ve…`](https://testnet.nearblocks.io/txns/HTpF77VeZXZf65v1p2Av3YHE5DK37FG9WAWmjxBHbUrE) |
+| Buyer installs the demo agent key (relayed) | agent key set | [`23gimnow…`](https://testnet.nearblocks.io/txns/23gimnowmhb8nErdbPUrhzg7oGk7J382weKXYAsyQuBQ) |
+| Authority approves the recipient | AuthorityApproved | [`A6VokbSK…`](https://testnet.nearblocks.io/txns/A6VokbSKJfgMWbakATCeARGsR7NbPAhFhBFsYwWx8Bth) |
+| Buyer accepts the recipient (relayed, rating allow) | `recipient_accepted` and `recipient_active` in the same transaction: a first recipient has no timelock (the 120 s wait applies to a change) | [`Tg1rtc6C…`](https://testnet.nearblocks.io/txns/Tg1rtc6CmLHwP9aHwhzxLyEMmsxacMjsMiw6cRrn5uo) |
+| Counterparty submits delivery 1 | delivery 1 submitted | [`8ELSpUds…`](https://testnet.nearblocks.io/txns/8ELSpUdszC6p3R7q6CdgLTrg1PJVtFqJvt1eDzsN5Vrd) |
+| Buyer accepts delivery 1 (relayed) | item 1 eligible | [`h2xtvzUG…`](https://testnet.nearblocks.io/txns/h2xtvzUGeysiQHCYr95zWxXJKJhKTpT1CdN8n8tZBss) |
+| Demo agent pays item 1 | sent, 15.00 tUSDC to halcyon-mm.testnet | [`7unm1ZWE…`](https://testnet.nearblocks.io/txns/7unm1ZWEE5DH74JAKsG7ZcKywz8t9V8NCNvghUcacXUd) |
+| Demo agent asked to pay halcyon-markets.testnet | refused, ERR_PAYEE_MISMATCH | [`7Cjd6cvx…`](https://testnet.nearblocks.io/txns/7Cjd6cvxVm8racRQTotSJ1CXh5PHdgEvSzJxYszAbptz) |
+| Buyer revokes the key (relayed) | 0 keys on a15; `/api/demo-agent pay` then 409 | [`2nyFEeBP…`](https://testnet.nearblocks.io/txns/2nyFEeBPB4BLhwxzrWrqMhsEvSQWS4LGVjff8ZuWZAtG) |
+
+The relayed `create_agreement` failed, so it was signed directly. The relayer pays the 2 NEAR deposit inside a delegate and had 1.99 NEAR left (DECISIONS 27). Fixed the same day (commit `8b3d51b`): the room deposit is paid by the visitor's wallet; the relayer carries at most 1 yoctoNEAR.
+
+## a21: try without a wallet on the public URL
+
+9 Nov 2026, `a21.accord-v2.testnet`, release 4. **Try without a wallet** on https://accordweb-production.up.railway.app/app/try-it, driven by Playwright (`platform/app/e2e/try-without-wallet.mjs`): a throwaway key made in the tab signed the room's create itself and sent every other buyer call through `/app/api/relay`. Create to revoke in 3 min 44 s; `/app/api/verify/a21.accord-v2.testnet` and `make verify DEAL=a21.accord-v2.testnet` give 5 ok, 1 partial (model: hardware quote not checked here), 1 not checked (release: needs `outlayer-verify`), 0 failed. This run predates the change, later on 9 Nov, that makes the demo agent pay a due item on its own.
+
+| Step | Transaction |
+| --- | --- |
+| Faucet, NEAR (2.5) | [`27e15dD5…`](https://testnet.nearblocks.io/txns/27e15dD5akxXayuDCmhfvUqjJaPwwhShvFuxH39HwbGU) |
+| Faucet, tUSDC (100) | [`25w7o9hR…`](https://testnet.nearblocks.io/txns/25w7o9hRNFFPZ4kGbzktvyd4dhW9Cxaqeb764MHR7rdT) |
+| Create a21 (signed by the throwaway account) | [`2bXYcG7P…`](https://testnet.nearblocks.io/txns/2bXYcG7PGewYBswgXBmf4R9axkBoMQaRQn3bVniGhpt4) |
+| Buyer seals the Northwind mandate (relayed) | [`Ag4FA6Yr…`](https://testnet.nearblocks.io/txns/Ag4FA6YrePLU8BxeY7WkXACHZA55MT3tcisoEpXriQc9) |
+| Counterparty seals the vendor mandate | [`9vqBbLsL…`](https://testnet.nearblocks.io/txns/9vqBbLsLsUfV6c61CDh4RBnNboCgoFVv36ugwDXQhzf1) |
+| Negotiation started; `terms_proposed` in the same transaction | [`D6941SND…`](https://testnet.nearblocks.io/txns/D6941SNDMAFTPHCc6XApwG8jGrebhXa4XQobExU6xFGx) |
+| Buyer approves the terms (relayed) | [`7ypCffmb…`](https://testnet.nearblocks.io/txns/7ypCffmbMwfTsQUjtR5EGi526Xf41WwBzUyHj6sGjaT6) |
+| Counterparty approves the terms | [`yC8Wkyoc…`](https://testnet.nearblocks.io/txns/yC8Wkyocr8ZyC4VLoHe4SHsoWC4anpaSjdWMYFow1Ji) |
+| Recipient halcyon-mm.testnet proposed and proven | [`2Qj2RU2k…`](https://testnet.nearblocks.io/txns/2Qj2RU2kVB11JTCQXupAzJ2feYyxXfHzy8Fx8gzQu3NB) |
+| Buyer funds 35.00 tUSDC (relayed) | [`hds2yoNK…`](https://testnet.nearblocks.io/txns/hds2yoNKgQTaqdpkX562XvkA1tDxJr7YeakwE3sXpse) |
+| Buyer installs the demo agent key (relayed) | [`8fYwP9wU…`](https://testnet.nearblocks.io/txns/8fYwP9wUanudAmpjJ17pxmppJM1jhaYCtN6zv9z4Ai5i) |
+| Authority approves the recipient | [`5pz4sz8c…`](https://testnet.nearblocks.io/txns/5pz4sz8cqv1ufp9sdA7SedubwAhzvTDeQbWzVLiA61gy) |
+| Buyer accepts the recipient (relayed); active | [`EoYnYBv6…`](https://testnet.nearblocks.io/txns/EoYnYBv6zZegNvPdfjqstM4wsaLnbzzjinzJcyyfa1ke) |
+| Delivery 1 submitted | [`HQ9qQdWe…`](https://testnet.nearblocks.io/txns/HQ9qQdWew8D8v6sbKhxa2b4xPhybGaV6CeCzSZBHuSCb) |
+| Buyer accepts delivery 1 (relayed) | [`3nT451ch…`](https://testnet.nearblocks.io/txns/3nT451chF9m6JXq9JYxhHUndDARi6wm21szZTdrep7oK) |
+| Agent pays item 1: 16.50 tUSDC to halcyon-mm.testnet | [`5vKHipEb…`](https://testnet.nearblocks.io/txns/5vKHipEbqk9r4rxra1q9uhYNrnFGJttQYprEL3g2x3ZG) |
+| Redirect to halcyon-markets.testnet refused: `ERR_PAYEE_MISMATCH` | [`DaRuHG2t…`](https://testnet.nearblocks.io/txns/DaRuHG2tLsA5FP4f2CHouMjgABnbenUfZcGSnDeUDDmH) |
+| Delivery 2 submitted | [`498cCzSW…`](https://testnet.nearblocks.io/txns/498cCzSWagrQk7NUnUWJpF9sLXugJHsv1tsu7UQo15NT) |
+| Buyer accepts delivery 2 (relayed) | [`Dhrg1sfM…`](https://testnet.nearblocks.io/txns/Dhrg1sfMe9L9QQQNcVRc16BcpPhpH3bijrntquKieuyY) |
+| Buyer revokes the key (relayed); 0 keys on a21 | [`BGJEcstT…`](https://testnet.nearblocks.io/txns/BGJEcstTMS3oNyWiy92y7D8QRZqne2AFaNR2gxj8yy58) |
+
+The free RPC tier rate-limited the run (HTTP 429, JSON-RPC `-429`), and the page showed those as 502s before it got through. Since then the SDK's `RotatingRpcProvider` moves to the next testnet endpoint only on a rate limit or a transport failure and keeps every real error (a contract refusal, `AccessKeyDoesNotExist`) unchanged, and the app answers a busy network with a 503 and "The network is busy, retrying" (DECISIONS 28).

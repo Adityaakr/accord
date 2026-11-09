@@ -12,7 +12,7 @@ Agreement [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord
 
 - 02 Vendor seals its limits [tx](https://testnet.nearblocks.io/txns/2Zq8pfNoa1dFzMLAy79aGyek72q3LGcrvRqAjYABisKZ)
 
-- 03 Negotiated in the enclave 35.50 USDC · 3 items [tx](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW)
+- 03 Negotiated in the enclave 35.50 tUSDC · 3 items [tx](https://testnet.nearblocks.io/txns/GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW)
 
 ## Agreed
 
@@ -22,7 +22,7 @@ Agreement [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord
 
 ## Funded and bound
 
-- 06 Buyer funds the escrow 35.50 USDC [tx](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy)
+- 06 Buyer funds the escrow 35.50 tUSDC [tx](https://testnet.nearblocks.io/txns/2CeFB18jenw2iggWE8mQZy9DehwZ2f97TYXwi3RVeXPy)
 
 - 07 Recipient proven in the enclave [tx](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6)
 
@@ -32,7 +32,7 @@ Agreement [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord
 
 ## Paid, refused, revoked
 
-- 10 Agent pays inside the terms 16.50 USDC [tx](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ)
+- 10 Agent pays inside the terms 16.50 tUSDC [tx](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ)
 
 - 11 A redirected payment is refused ERR_PAYEE_MISMATCH [tx](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs)
 
@@ -60,11 +60,11 @@ Agreement [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord
 
 ## Latest on release 4 [verify a10](/verify?agreement=a10.accord-v2.testnet)
 
-- 01 Negotiated in the enclave [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)·33.00 USDC · 3 items·[account](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)
+- 01 Negotiated in the enclave [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)·33.00 tUSDC · 3 items·[account](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)
 
-- 02 Buyer funds the escrow [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)·33.00 USDC·[tx](https://testnet.nearblocks.io/txns/2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22)
+- 02 Buyer funds the escrow [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)·33.00 tUSDC·[tx](https://testnet.nearblocks.io/txns/2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22)
 
-- 03 Agent pays item 1 [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)·12.00 USDC·[tx](https://testnet.nearblocks.io/txns/Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm)
+- 03 Agent pays item 1 [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)·12.00 tUSDC·[tx](https://testnet.nearblocks.io/txns/Bs5dVpr6DnR5jXjYKXbGsp9HP36smmoJRFmvJP4tGqAm)
 
 - 04 A redirected payment is refused [a10](https://testnet.nearblocks.io/address/a10.accord-v2.testnet)·ERR_PAYEE_MISMATCH·[tx](https://testnet.nearblocks.io/txns/51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu)
 
@@ -86,4 +86,4 @@ Release 4 carries the security-review fixes and is current on both factories sin
 
 The second factory, accord-usdc.testnet, settles in Circle's testnet USDC. Agreement a1 was created on its release 3.
 
-release 3 · test USDC [Factory](https://testnet.nearblocks.io/address/accord-v2.testnet) [Release 3](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh) [Release 4](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU) [Relayer tx](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC) [Attestations](https://testnet-api.outlayer.ai/attestations/13596) [Verify it](/verify)
+release 3 · test USDC [Factory](https://testnet.nearblocks.io/address/accord-v2.testnet) [Release 3](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh) [Release 4](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU) [Relayer tx](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC) [Attestations](https://testnet-api.outlayer.ai/attestations/by-request/13596) [Verify it](/verify)

@@ -156,12 +156,12 @@ function fileFor(urlPath) {
 let REDIRECTS = {}
 try { REDIRECTS = JSON.parse(readFileSync(join(DIST, "redirects.json"), "utf8")) } catch { /* none */ }
 
-const APP_ONLY = /^\/(signin|try-it|rooms|agreements|enter|profile|settings|onboarding|approvals|deliveries|invite|recipients|payout|agents|market-making)(\/|$)/
+const APP_ONLY = /^\/(record\.csv|signin|try-it|rooms|agreements|enter|profile|settings|onboarding|approvals|deliveries|invite|recipients|payout|agents|market-making)(\/|$)/
 
 const server = createServer((req, res) => {
   const path = (req.url || "/").split("?")[0]
   if (path === "/app" || path.startsWith("/app/")) return proxyToApp(req, res)
-  /* App-only paths typed or linked without the /app prefix (e.g. /signin): send them to the app */
+  /* App-only paths typed or linked without the /app prefix (e.g. /signin, or /record.csv, which GOAL.md names and the app serves at /app/record.csv): send them to the app */
   if (APP_ONLY.test(path)) {
     res.writeHead(308, { Location: "/app" + (req.url || "/"), ...HEADERS }).end()
     return

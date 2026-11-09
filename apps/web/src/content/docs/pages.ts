@@ -22,7 +22,7 @@ const A6 = {
   release: TESTNET.releaseUrl,
   relayer: tx("DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC"),
 }
-const ATTESTATION = "https://testnet-api.outlayer.ai/attestations/13596"
+const ATTESTATION = "https://testnet-api.outlayer.ai/attestations/by-request/13596"
 const OUTLAYER_VERIFY = "https://app.outlayer.ai/docs/trust-verification"
 const NEAR_AI_VERIFY = "https://docs.near.ai/cloud/verification"
 
@@ -32,7 +32,7 @@ export const DOC_PAGES: DocPage[] = [
     slug: "quickstart",
     group: "Get started",
     title: "Quickstart",
-    summary: "Run one deal on NEAR testnet at /app/try-it in about 5 minutes, with or without a wallet: sign in, get test funds, seal your limits, let the demo agent pay, watch a redirect get refused, and revoke the key.",
+    summary: "Run your own deal on NEAR testnet at /app/try-it in about 5 minutes, with or without a wallet: sign in, get test funds, seal your limits, start the demo agent (it pays the due item on its own), watch a redirect get refused, and revoke the key.",
     sections: [
       {
         id: "before",
@@ -44,7 +44,7 @@ export const DOC_PAGES: DocPage[] = [
               { name: "Network", value: "NEAR testnet", detail: "Everything on this path is testnet with a test USDC token. Nothing here moves real money." },
               { name: "No wallet", value: "Try without a wallet", detail: "The page makes a throwaway testnet key in your browser tab, funded by Accord's faucet. It is kept in the tab's sessionStorage, never sent to the server, and gone when you close the tab. Test funds only." },
               { name: "Sign-in", value: "Meteor · Intear · Ledger · Nightly · WalletConnect", detail: "Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit)." },
-              { name: "Test funds", value: "2.35 NEAR · 100 tUSDC", detail: "The faucet tops your account up once a day per account, up to 30 accounts per connection a day, within a daily budget. The room's `2 NEAR` deposit is returned when it closes. If the faucet refuses, step 2 offers a [60-second replay](/app/replay) of a recorded run, the live scam room at [/app/try](/app/try) (pre-funded, no funds needed) and [/app/verify](/app/verify)." },
+              { name: "Test funds", value: "2.35 NEAR · 100 tUSDC", detail: "The faucet tops your account up once a day per account, up to 30 accounts per connection a day, within a daily budget. The room's `2 NEAR` deposit is returned when it closes. If the faucet refuses, step 2 offers a [60-second replay](/app/replay) of a recorded run, the live attack room at [/app/try](/app/try) (pre-funded, no funds needed) and [/app/verify](/app/verify)." },
               { name: "Counterparty", value: "halcyon-demo.testnet", href: acct("halcyon-demo.testnet"), detail: "Accord's demo vendor, with its authority `halcyon-auth.testnet`. The demo vendor and the demo agent are Accord's own testnet accounts, labelled in the room." },
               { name: "Time", value: "about 5 minutes" },
             ],
@@ -108,16 +108,16 @@ export const DOC_PAGES: DocPage[] = [
             kind: "steps",
             steps: [
               {
-                title: "Start the demo agent, then let it pay the due item.",
-                body: "Starting the agent asks your wallet to sign `install_agent_key`: one function-call key on the agreement account that can call `act` and nothing else.",
-                see: "`Paid item 1: <amount> tUSDC to halcyon-mm.testnet`, the active recipient, with the `act` transaction linked. The amount is what the negotiated terms say (`15.00` on a8).",
+                title: "Start the demo agent. It pays the due item on its own.",
+                body: "Starting the agent asks your wallet to sign `install_agent_key`: one function-call key on the agreement account that can call `act` and nothing else. You do not click pay: once the delivery is accepted, the agent pays the item by itself.",
+                see: "The agent bar and the Activity tab read `Paid item 1: <amount> tUSDC to halcyon-mm.testnet`, with the `act` transaction linked. The amount is what the negotiated terms say (`15.00` on a8).",
               },
               {
                 title: "Ask the agent to pay a new account.",
                 see: "`ERR_PAYEE_MISMATCH`: the contract refused it and recorded the refusal. Nothing moves; the refusal appears in the room's activity.",
               },
               {
-                title: "Revoke the key from the room header.",
+                title: "Hold to revoke in the room header.",
                 see: "`Agent revoked · next call rejected by the network`. Starting the demo agent again installs a new key.",
               },
               {
@@ -453,7 +453,7 @@ export const DOC_PAGES: DocPage[] = [
         id: "in-browser",
         title: "In the browser",
         blocks: [
-          { kind: "p", text: "[/verify](/verify) runs five public checks on any agreement id, live from NEAR testnet: the agreement, the contract code, the access keys, the recipient and the record. No account, no keys." },
+          { kind: "p", text: "[/verify](/verify) headlines the full seven-check verdict that `make verify` gives (on a6: `5 ok · 1 partial · 1 not checked`), then five quick reads of any agreement id live from NEAR testnet: the agreement, the contract code, the access keys, the recipient and the record. No account, no keys." },
           { kind: "image", image: { id: "verify", alt: "The site's /verify page checking a6.accord-v2.testnet: five live rows read from testnet (agreement, contract code, access keys, recipient, record) each marked ok, then the full make verify result: 5 ok, 1 partial, 1 not checked.", caption: "/verify on a6.accord-v2.testnet." } },
           { kind: "note", text: "The sealed outcome, the model attestation and the release attestation are checked by `make verify` and in the app, not by /verify." },
         ],

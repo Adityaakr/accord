@@ -50,7 +50,7 @@ export function Join() {
             </p>
             <div className={styles.actions}>
               <Button variant="primary" href={LINKS.openDealRoom}>Open the app</Button>
-              <Button variant="secondary" href={LINKS.tryDeal}>Try a deal in about 5 minutes</Button>
+              <Button variant="secondary" href={LINKS.tryDeal}>Run your own deal in 5 minutes</Button>
               <Button variant="secondary" href="/docs/quickstart">Read the quickstart</Button>
             </div>
             <p className={tl.note}>Questions? <Link to={LINKS.contact} className={tl.noteLink}>Contact the team</Link></p>

@@ -8,7 +8,9 @@ Examples
 
 Agreement [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
 
-Live from testnet 5 of 5 ok
+Verdict 5 ok · 1 partial · 1 not checked · 7 checks, recorded for a6.accord-v2.testnet
+
+Quick reads from testnet 5 of 5 reads ok
 
 - 01 Agreement [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet) · by [accord-v2.testnet](https://testnet.nearblocks.io/address/accord-v2.testnet) ok
 
@@ -34,7 +36,7 @@ Full check · make verify Recorded for a6.accord-v2.testnet
 
 - 04 Enclave release [Needs the outlayer-verify tool](https://app.outlayer.ai/docs/trust-verification) not checked
 
-- 05 Model attestation [The model as served now, fresh nonce bound; the run's attestation is in the sealed outcome](https://testnet-api.outlayer.ai/attestations/13596) partial
+- 05 Model attestation [The model as served now, fresh nonce bound; the run's attestation is in the sealed outcome](https://testnet-api.outlayer.ai/attestations/by-request/13596) partial
 
 - 06 Recipient [Proven on the vendor's domain](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6) ok
 

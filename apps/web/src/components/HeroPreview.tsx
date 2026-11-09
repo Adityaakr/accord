@@ -4,8 +4,10 @@ import styles from "./HeroPreview.module.css"
 
 /* Hero product preview, built to the template's original hero image (assets/hero-image-2.png): misty backdrop, a
    light app window with stacked windows behind it, an icon rail, a list panel, a canvas of numbered nodes, and an
-   assistant-style side panel. The content is Accord's: the deal-room list, the market-making agreement as its seven-step
-   pipeline, and the agreement's activity. Illustrative (labelled so); nothing is read from a live source.
+   assistant-style side panel. The content is real: agreement a6.accord-v2.testnet as its record shows it on NEAR testnet
+   (8 Nov 2026), and the room list names agreements that exist on testnet, each with the state and amounts get_agreement
+   returned on 9 Nov 2026. Market making is listed as a local-node run, because it has not run on testnet
+   (platform/docs/build/BLOCKED.md). Nothing is read live; the numbers are copied from chain.
    Scales with its container: 1em = container width / 108. */
 
 /* ---------- icons (Lucide-style, 24 grid, 1.75 stroke) ---------- */
@@ -40,49 +42,45 @@ function I({ n, className = "" }: { n: keyof typeof P; className?: string }) {
 }
 
 /* ---------- content ---------- */
-type Room = { icon: keyof typeof P; name: string; sub: string; state: "Executing" | "Attested" | "Sealed" | "Settled"; active?: boolean }
+type State = "Executing" | "Attested" | "Sealed" | "Settled" | "Local"
+type Room = { icon: keyof typeof P; name: string; sub: string; state: State; active?: boolean }
+const STATE_LABEL: Record<State, string> = { Executing: "Executing", Attested: "Attested", Sealed: "Sealed", Settled: "Settled", Local: "Local node" }
 const GROUPS: { label: string; rooms: Room[] }[] = [
+  { label: "On NEAR testnet", rooms: [
+    { icon: "file", name: "a6 · Liquidity reporting", sub: "3 items · 35.50 tUSDC", state: "Executing", active: true },
+    { icon: "file", name: "a10 · release 4", sub: "3 items · 33.00 tUSDC", state: "Executing" },
+    { icon: "file", name: "a1 · Circle USDC", sub: "3 items · 14.00 USDC", state: "Executing" },
+    { icon: "file", name: "a32 · the replayed run", sub: "35.00 tUSDC · closed", state: "Settled" },
+  ] },
   { label: "Market making", rooms: [
-    { icon: "chart", name: "Market making · NEAR/USDC", sub: "Retainer · 18,500 USDC", state: "Executing", active: true },
-    { icon: "chart", name: "Market making · L2/USDC", sub: "Retainer · 12,500 USDC", state: "Attested" },
-  ] },
-  { label: "Vendors and invoices", rooms: [
-    { icon: "file", name: "Cloud GPU capacity", sub: "Invoice · 48,000 USDC", state: "Executing" },
-    { icon: "file", name: "Indexer hosting, Q1", sub: "3 milestones · 36,000 USDC", state: "Attested" },
-    { icon: "badge", name: "Smart contract audit", sub: "2 milestones · 60,000 USDC", state: "Sealed" },
-  ] },
-  { label: "Agent services", rooms: [
-    { icon: "spark", name: "Inference API credits", sub: "Usage cap · 5,000 USDC", state: "Executing" },
-    { icon: "swap", name: "Market data feed", sub: "Licence · 18,000 USDC / year", state: "Settled" },
-  ] },
-  { label: "Foundations", rooms: [
-    { icon: "branch", name: "Ecosystem grant", sub: "4 milestones · 80,000 USDC", state: "Sealed" },
+    { icon: "chart", name: "NEAR/USDC retainer", sub: "Rhea pool · local node only", state: "Local" },
   ] },
 ]
+const ROOM_COUNT = GROUPS.reduce((n, g) => n + g.rooms.length, 0)
 
-type Node = { n: number; icon: keyof typeof P; title: string; sub: string; kind: string; status: "done" | "now" | "next"; slots?: boolean }
+type Node = { n: number; icon: keyof typeof P; title: string; sub: string; kind: string; status: "done" | "now" | "next"; refused?: boolean }
 const NODES: Record<string, Node> = {
   a: { n: 1, icon: "lock", title: "Sealed mandates", sub: "Both companies sealed limits", kind: "Sealed Table", status: "done" },
-  b: { n: 2, icon: "file", title: "Approved terms", sub: "18,500 USDC / period", kind: "Agreement", status: "done" },
-  c: { n: 3, icon: "badge", title: "Authorised recipient", sub: "halcyon-mm.near · v1", kind: "Payee", status: "done" },
-  d: { n: 4, icon: "eye", title: "Observation slots", sub: "Period 3", kind: "Agreed observer", status: "done", slots: true },
-  e: { n: 5, icon: "branch", title: "Period decision", sub: "5 of 6 passed · eligible", kind: "Decision", status: "done" },
-  f: { n: 6, icon: "send", title: "Payment request", sub: "18,500 USDC → halcyon-mm", kind: "Agreement controls", status: "now" },
-  g: { n: 7, icon: "swap", title: "Transfer", sub: "USDC on NEAR testnet", kind: "Settlement", status: "next" },
+  b: { n: 2, icon: "file", title: "Approved terms", sub: "35.50 tUSDC · 3 items", kind: "Both companies", status: "done" },
+  c: { n: 3, icon: "badge", title: "Authorised recipient", sub: "halcyon-mm.testnet", kind: "Payee", status: "done" },
+  d: { n: 4, icon: "eye", title: "Delivery accepted", sub: "Item 1 is due", kind: "Evidence checks", status: "done" },
+  e: { n: 5, icon: "send", title: "Agent pays item 1", sub: "16.50 tUSDC → halcyon-mm", kind: "Agreement controls", status: "done" },
+  f: { n: 6, icon: "ban", title: "Redirect refused", sub: "ERR_PAYEE_MISMATCH · nothing sent", kind: "Agreement controls", status: "done", refused: true },
+  g: { n: 7, icon: "x", title: "Agent revoked", sub: "Next call: AccessKeyDoesNotExist", kind: "Buyer", status: "done", refused: true },
 }
-const SLOTS = [1, 1, 0, 1, 1, 1]
 
-/* Canvas layout: three columns (25% wide, 10% gutters), rows 10em apart, nodes 8em tall (the slots node is taller) */
+/* Canvas layout: three columns (25% wide, 10% gutters), rows 10em apart, nodes 8em tall */
 const COLS = ["2.5%", "37.5%", "72.5%"]
 const ROWS_EM = [1.6, 11.6, 21.6, 31.6]
 const PLACED: [keyof typeof NODES, number, number][] = [["a", 0, 0], ["b", 1, 0], ["c", 2, 0], ["d", 1, 1], ["e", 2, 1], ["f", 2, 2], ["g", 2, 3]]
 const MID = 3.1 // em below a node's top: the head row's centre
-const CONDITIONS: [string, string][] = [["Spread", "≤ 60 bps"], ["Depth ±2%", "≥ 12,000 USDC"], ["Quoting", "both sides"], ["Pass rule", "4 of 6 slots"]]
+/* a6's approved items (get_items), and its one recipient */
+const CONDITIONS: [string, string][] = [["Item 1", "16.50 tUSDC"], ["Item 2", "13.00 tUSDC"], ["Item 3", "6.00 tUSDC"], ["Recipient", "halcyon-mm"]]
 const WIRES: { v?: boolean; x: string; y: number; w?: string; len?: number; dashed?: boolean }[] = [
   { x: "27.5%", y: 1.6 + MID, w: "10%" },          // 1 → 2
   { x: "62.5%", y: 1.6 + MID, w: "10%" },          // 2 → 3
   { x: "62.5%", y: 11.6 + MID, w: "10%" },         // 4 → 5
-  { x: "27.5%", y: 11.6 + MID, w: "10%", dashed: true },  // conditions → 4
+  { x: "27.5%", y: 11.6 + MID, w: "10%", dashed: true },  // terms → 4
   { v: true, x: "50%", y: 9.6, len: 2 },           // 2 → 4
   { v: true, x: "85%", y: 9.6, len: 2 },           // 3 → 5
   { v: true, x: "85%", y: 19.6, len: 2 },          // 5 → 6
@@ -90,32 +88,29 @@ const WIRES: { v?: boolean; x: string; y: number; w?: string; len?: number; dash
 ]
 
 const INSIGHTS = [
-  { icon: "ban" as const, tone: "refuse", title: "Payment refused", text: "ERR_PAYEE_MISMATCH: the account is not the authorised recipient. Nothing was sent.", link: "View in refusal log" },
-  { icon: "alert" as const, tone: "warn", title: "Slot 3 missed", text: "Depth below 12,000 USDC for this observation; period still eligible.", link: "Inspect attestation" },
-  { icon: "check" as const, tone: "ok", title: "Period 2 settled", text: "18,500 USDC confirmed to halcyon-mm.near.", link: "Open transaction" },
+  { icon: "ban" as const, tone: "refuse", title: "Payment refused", text: "ERR_PAYEE_MISMATCH: halcyon-markets.testnet is not the authorised recipient. Nothing was sent.", link: "Transaction AB9HLnWv" },
+  { icon: "x" as const, tone: "warn", title: "Agent revoked", text: "The key was deleted in one transaction; the agent's next call failed at the network.", link: "Transaction 4ervNQdj" },
+  { icon: "check" as const, tone: "ok", title: "Item 1 paid", text: "16.50 tUSDC to halcyon-mm.testnet, inside the approved terms.", link: "Transaction 2k57zg7i" },
 ]
 const EVENTS = [
-  { t: "Attempt refused, nothing paid", ago: "12m ago" },
-  { t: "Period 2 payment confirmed", ago: "2h ago" },
-  { t: "Recipient v1 approved", ago: "3d ago" },
+  { t: "Agent revoked", ago: "8 Nov" },
+  { t: "Redirect refused, nothing paid", ago: "8 Nov" },
+  { t: "Item 1 paid, 16.50 tUSDC", ago: "8 Nov" },
 ]
-const ACTIONS = ["Verify", "Revoke key", "Export record", "Propose change"]
+const ACTIONS = ["Verify", "Revoke key", "Export record", "Open record"]
 
 function NodeCard({ node, style }: { node: Node; style: CSSProperties }) {
   return (
-    <div className={`${styles.node} ${styles[node.status]}`} style={style}>
+    <div className={`${styles.node} ${styles[node.status]} ${node.refused ? styles.nodeRefused : ""}`} style={style}>
       <div className={styles.nodeHead}>
         <span className={styles.nodeIcon}><I n={node.icon} /></span>
         <span className={styles.nodeNum}>{node.n}</span>
-        <span className={styles.nodeState}>{node.status === "done" ? <I n="check" /> : node.status === "now" ? <span className={styles.liveDot} /> : null}</span>
+        <span className={styles.nodeState}>{node.refused ? <I n="x" /> : node.status === "done" ? <I n="check" /> : node.status === "now" ? <span className={styles.liveDot} /> : null}</span>
         <I n="more" className={styles.dim} />
       </div>
       <div className={styles.nodeBody}>
         <div className={styles.nodeTitle}>{node.title}</div>
         <div className={styles.nodeSub}>{node.sub}</div>
-        {node.slots ? (
-          <div className={styles.slots}>{SLOTS.map((ok, i) => <span key={i} className={ok ? styles.pass : styles.fail}>{ok ? <I n="check" /> : <I n="x" />}</span>)}</div>
-        ) : null}
       </div>
       <div className={styles.nodeFoot}>{node.kind}</div>
     </div>
@@ -124,7 +119,7 @@ function NodeCard({ node, style }: { node: Node; style: CSSProperties }) {
 
 export function HeroPreview() {
   return (
-    <div className={styles.stage} role="img" aria-label="Illustrative Accord product: the deal-room list, a market-making agreement shown as its seven-step pipeline from sealed mandates to the USDC transfer on NEAR, and the agreement's activity: a refused payment, a missed observation slot and a settled period.">
+    <div className={styles.stage} role="img" aria-label="Agreement a6.accord-v2.testnet as recorded on NEAR testnet on 8 Nov 2026: sealed mandates, terms of 35.50 test USDC in 3 items approved by both companies, recipient halcyon-mm.testnet proven and accepted, delivery accepted, the agent paid item 1 (16.50 tUSDC), a redirect to halcyon-markets.testnet refused with ERR_PAYEE_MISMATCH and nothing sent, then the agent revoked. The room list shows other testnet agreements and one market-making agreement that has run on a local node only.">
       <span className={styles.sheet2} aria-hidden="true" />
       <span className={styles.sheet1} aria-hidden="true" />
       <div className={styles.window}>
@@ -141,7 +136,7 @@ export function HeroPreview() {
 
         {/* Deal rooms */}
         <section className={styles.list}>
-          <header className={styles.listHead}><b>Deal rooms <span className={styles.count}>8</span></b><span className={styles.tools}><I n="search" /><I n="plus" /></span></header>
+          <header className={styles.listHead}><b>Deal rooms <span className={styles.count}>{ROOM_COUNT}</span></b><span className={styles.tools}><I n="search" /><I n="plus" /></span></header>
           <div className={styles.chips}><span className={styles.chip}>All rooms <I n="down" /></span><span className={styles.chip}>Any state <I n="down" /></span></div>
           {GROUPS.map((g) => (
             <div key={g.label} className={styles.group}>
@@ -150,7 +145,7 @@ export function HeroPreview() {
                 <div key={r.name} className={`${styles.room} ${r.active ? styles.roomOn : ""}`}>
                   <span className={styles.roomIcon}><I n={r.icon} /></span>
                   <span className={styles.roomText}><span className={styles.roomName}>{r.name}</span><span className={styles.roomSub}>{r.sub}</span></span>
-                  <span className={`${styles.state} ${styles["st" + r.state]}`}><span className={styles.stDot} />{r.state}</span>
+                  <span className={`${styles.state} ${styles["st" + r.state]}`}><span className={styles.stDot} />{STATE_LABEL[r.state]}</span>
                 </div>
               ))}
             </div>
@@ -160,30 +155,30 @@ export function HeroPreview() {
         {/* Agreement */}
         <section className={styles.main}>
           <header className={styles.mainHead}>
-            <span className={styles.mainTitle}>Market making · NEAR/USDC</span>
+            <span className={styles.mainTitle}>a6 · Liquidity reporting integration</span>
             <I n="star" className={styles.dim} />
             <I n="more" className={styles.dim} />
-            <span className={styles.tag}>Illustrative</span>
+            <span className={styles.tag}>Testnet record</span>
             <span className={styles.grow} />
             <span className={styles.btnGhost}>Verify</span>
             <span className={styles.btnDark}>Open record</span>
           </header>
           <div className={styles.toolbar}>
-            <span className={styles.btnSmall}><I n="plus" /> Propose change</span>
+            <span className={styles.btnSmall}><I n="file" /> Procurement</span>
             <span className={styles.sep} />
-            <span className={styles.meta}>7 steps</span>
+            <span className={styles.meta}>12 transactions</span>
             <span className={styles.metaDot}>·</span>
             <span className={styles.metaLive}>Executing</span>
             <span className={styles.grow} />
-            <span className={styles.meta}>NEAR testnet · USDC</span>
+            <span className={styles.meta}>NEAR testnet · tUSDC</span>
           </div>
           <div className={styles.canvas}>
             {/* connectors: x in % of the canvas, y in em, matching the node grid below */}
             {WIRES.map((w, i) => <span key={i} className={`${w.v ? styles.wireV : styles.wireH} ${w.dashed ? styles.dashed : ""}`} style={w.v ? { left: w.x, top: `${w.y}em`, height: `${w.len}em` } : { left: w.x, top: `${w.y}em`, width: w.w }} />)}
             {PLACED.map(([k, col, row]) => <NodeCard key={k} node={NODES[k]} style={{ left: COLS[col], top: `${ROWS_EM[row]}em` }} />)}
-            {/* The measured conditions, wired into the observer */}
+            {/* The approved items, wired into the evidence check */}
             <div className={styles.terms} style={{ left: COLS[0], top: `${ROWS_EM[1]}em` }}>
-              <div className={styles.termsHead}><I n="eye" /> Measured conditions</div>
+              <div className={styles.termsHead}><I n="file" /> Approved items</div>
               {CONDITIONS.map(([k, v]) => <div key={k} className={styles.termRow}><span>{k}</span><code>{v}</code></div>)}
               <div className={styles.termsFoot}>Approved by both companies</div>
             </div>

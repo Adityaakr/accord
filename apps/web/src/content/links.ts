@@ -7,7 +7,12 @@ const app = env.VITE_APP_URL || "/app" // empty (an unset Docker build arg) mean
 
 /** Primary CTA: always the app (<site>/app/signin). The guided testnet path is LINKS.tryDeal. */
 export const PRIMARY_CTA = "Open the app"
-export const TRY_CTA = "Try a deal in about 5 minutes"
+/* Three ways to see Accord work, each with one name used on the site and in the README:
+   "Run your own deal" (/app/try-it), "Live attack room" (/app/try) and "Watch the replay" (/app/replay). The site's own /try
+   page lists the refused attacks and links to all three. */
+export const TRY_CTA = "Run your own deal in 5 minutes"
+export const ATTACK_ROOM = "Live attack room"
+export const REPLAY = "Watch the replay"
 
 export const LINKS = {
   /* app routes */
@@ -28,6 +33,8 @@ export const LINKS = {
   /* /demo is retired (it redirects to /#testnet); `demo` stays only until the hero CTA rework drops it */
   demo: "/#testnet",
   tryDeal: `${app}/try-it`,
+  replay: `${app}/replay`,
+  attackRoom: `${app}/try`,
   record: "/record",
   product: "/product",
   sealedTable: "/product/sealed-table",

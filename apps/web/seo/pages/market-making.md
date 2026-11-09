@@ -4,7 +4,7 @@ Use case · Market-making agreements
 
 Agree on the market conditions to measure, inspect the observations, and apply the results to the payment rules in the deal room.
 
-[Explore an example agreement](/record) [Try a deal](/app/try-it)
+[Explore an example agreement](/record) [Run your own deal](/app/try-it)
 
 > Illustrative: The liquidity conditions both sides approved before the engagement.
 

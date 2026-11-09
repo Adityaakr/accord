@@ -169,7 +169,7 @@
   border-radius: 4px;
   overflow: hidden;
 }
-/* The "Illustrative" chip at the top of the frame, readable at 390px (12px text, never hidden) */
+/* The chip at the top of the frame ("NEAR testnet · agreement a6"), readable at 390px (12px text, never hidden) */
 .illustrative {
   position: absolute;
   top: 10px;
@@ -260,3 +260,7 @@
 }
 .h1Soft { color: rgba(var(--ink-rgb), 0.58); }
 .hy { display: inline-block; transform: scaleX(0.62); margin: 0 -0.06em; }
+
+/* The preview is agreement a6's record: the whole frame opens /record */
+.previewLink { display: block; width: 100%; height: 100%; color: inherit; text-decoration: none; }
+.previewLink:focus-visible { outline: 2px solid var(--text-strong); outline-offset: 2px; }

@@ -11,11 +11,11 @@ import attackSvg from "../assets/diagrams/attack.svg?raw"
 import tl from "../styles/Timeline.module.css"
 import styles from "./Verify.module.css"
 
-/* /try: the attack as recorded on NEAR testnet (agreements a6, a8, a10, a11 and a15: the agent told to pay a new
+/* /try ("Refused attacks"): the attack as recorded on NEAR testnet (agreements a6, a8, a10, a11 and a15: the agent told to pay a new
    account, a different amount, or to follow a canary; refused by the contract each time), then the two ways to run it:
    the always-open public room at /app/try, offered only once the browser has read /app/api/inbox/stats and found it
    open (lib/room.ts), and your own room at /app/try-it. The prerendered page claims neither state. */
-const LEAD = "Tell the agent to pay someone else. On NEAR testnet the demonstration agent was told to pay a new account, a different amount, or to follow a planted instruction, and the contract refused each payment. Write to the agent in the public room when it is open, or run the same attack in your own deal room in about five minutes."
+const LEAD = "On NEAR testnet the demonstration agent was told to pay a new account, a different amount, or to follow a planted instruction, and the contract refused each payment. Three ways to see it yourself: run your own deal (about five minutes), write to the agent in the live attack room, or watch the 60-second replay of a recorded run."
 const GOAL_LINE = "A successful attempt can only ever produce a payment to the authorised recipient at the approved amount."
 
 const short = (id: string) => id.split(".")[0]
@@ -25,26 +25,26 @@ function RoomLine() {
   if (room.kind === "open") {
     return (
       <p className={tl.note}>
-        <a href={ROOM_URL} className={tl.noteLink}>Open now: write to the agent</a>{" "}
-        in the public room, agreement <span className="mono">{room.agreement}</span>. Anyone can send it a message; its refusals land on that agreement&apos;s record.
+        <a href={ROOM_URL} className={tl.noteLink}>Live attack room, open now</a>{" "}
+        (write to the agent), agreement <span className="mono">{room.agreement}</span>. Anyone can send it a message; its refusals land on that agreement&apos;s record.
       </p>
     )
   }
   if (room.kind === "closed") {
-    return <p className={`${tl.note} ${tl.weak}`}>The always-open public room is closed right now. The refusals above stand on the record, and your own room works at any time.</p>
+    return <p className={`${tl.note} ${tl.weak}`}>The live attack room is closed right now. The refusals above stand on the record, and your own room works at any time.</p>
   }
-  return <p className={`${tl.note} ${tl.weak}`}>The always-open public room, where anyone can write to the agent: <a href={ROOM_URL} className={tl.noteLink}>see whether it is open</a>.</p>
+  return <p className={`${tl.note} ${tl.weak}`}>Live attack room, where anyone can write to the agent: <a href={ROOM_URL} className={tl.noteLink}>see whether it is open</a>.</p>
 }
 
 export function Try() {
-  usePageMeta("Accord: Try to move the money", "The attack recorded on NEAR testnet: the Accord demonstration agent told to pay a new account or a different amount, and the contract refusing it. Write to the agent in the public room at /app/try when it is open, or run it yourself at /app/try-it.")
+  usePageMeta("Accord: Refused attacks", "The attacks recorded on NEAR testnet: the Accord demonstration agent told to pay a new account or a different amount, and the contract refusing it. Run your own deal at /app/try-it, write to the agent in the live attack room at /app/try, or watch the replay at /app/replay.")
   return (
     <div className={styles.page}>
       <PageHero
-        pill="Try"
-        title="Try to move the money."
+        pill="Refused attacks"
+        title="Attempts to move the money, refused on testnet."
         lead={LEAD}
-        actions={[{ label: "Run it in your own room", href: LINKS.tryDeal, variant: "primary" }, { label: "Verify a6", href: "/verify", variant: "secondary" }]}
+        actions={[{ label: "Run your own deal", href: LINKS.tryDeal, variant: "primary" }, { label: "Live attack room", href: LINKS.attackRoom, variant: "secondary" }, { label: "Watch the replay", href: LINKS.replay, variant: "secondary" }]}
       />
       <section id="try" className={`section ${styles.main}`}>
         <KitFigure svg={attackSvg} minWidth={720} />

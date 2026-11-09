@@ -194,10 +194,18 @@ export function Verify() {
             </span>
           </div>
 
+          {/* The verdict is the full seven-check result make verify prints, never the five quick reads alone */}
+          <div className={tl.head}>
+            <span className={tl.headLabel}>Verdict</span>
+            <span className={`mono ${styles.verdict}`} aria-live="polite">
+              {full.state === "loading" ? "reading" : failedId ? "no result" : `${fullSummary} · ${full.state === "live" ? "7 checks, live" : `7 checks, recorded for ${TESTNET.agreement}`}`}
+            </span>
+          </div>
+
           <div className={tl.group}>
             <p className={tl.groupLabel}>
-              <span>Live from testnet</span>
-              <span className={tl.groupMeta} aria-live="polite">{reading ? "reading" : `${okLive} of ${rows.length} ok`}</span>
+              <span>Quick reads from testnet</span>
+              <span className={tl.groupMeta} aria-live="polite">{reading ? "reading" : `${okLive} of ${rows.length} reads ok`}</span>
             </p>
             <ol className={tl.rows} aria-busy={reading}>
               {rows.map((r, i) => (

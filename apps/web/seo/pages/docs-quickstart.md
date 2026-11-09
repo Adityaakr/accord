@@ -2,7 +2,7 @@ Quickstart
 
 # Quickstart
 
-Run one deal on NEAR testnet at /app/try-it in about 5 minutes, with or without a wallet: sign in, get test funds, seal your limits, let the demo agent pay, watch a redirect get refused, and revoke the key.
+Run your own deal on NEAR testnet at /app/try-it in about 5 minutes, with or without a wallet: sign in, get test funds, seal your limits, start the demo agent (it pays the due item on its own), watch a redirect get refused, and revoke the key.
 
 ## Before you start
 
@@ -12,7 +12,7 @@ Run one deal on NEAR testnet at /app/try-it in about 5 minutes, with or without 
 
 - 03 Sign-in Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit). Meteor · Intear · Ledger · Nightly · WalletConnect
 
-- 04 Test funds The faucet tops your account up once a day per account, up to 30 accounts per connection a day, within a daily budget. The room's `2 NEAR` deposit is returned when it closes. If the faucet refuses, step 2 offers a [60-second replay](/app/replay) of a recorded run, the live scam room at [/app/try](/app/try) (pre-funded, no funds needed) and [/app/verify](/app/verify). 2.35 NEAR · 100 tUSDC
+- 04 Test funds The faucet tops your account up once a day per account, up to 30 accounts per connection a day, within a daily budget. The room's `2 NEAR` deposit is returned when it closes. If the faucet refuses, step 2 offers a [60-second replay](/app/replay) of a recorded run, the live attack room at [/app/try](/app/try) (pre-funded, no funds needed) and [/app/verify](/app/verify). 2.35 NEAR · 100 tUSDC
 
 - 05 Counterparty Accord's demo vendor, with its authority `halcyon-auth.testnet`. The demo vendor and the demo agent are Accord's own testnet accounts, labelled in the room. [halcyon-demo.testnet](https://testnet.nearblocks.io/address/halcyon-demo.testnet)
 
@@ -38,11 +38,11 @@ The counterparty reads the room and makes the vendor's next valid move, so press
 
 ## Pay, refuse, revoke
 
-- 01 Start the demo agent, then let it pay the due item. Starting the agent asks your wallet to sign `install_agent_key`: one function-call key on the agreement account that can call `act` and nothing else. You see `Paid item 1: <amount> tUSDC to halcyon-mm.testnet`, the active recipient, with the `act` transaction linked. The amount is what the negotiated terms say (`15.00` on a8).
+- 01 Start the demo agent. It pays the due item on its own. Starting the agent asks your wallet to sign `install_agent_key`: one function-call key on the agreement account that can call `act` and nothing else. You do not click pay: once the delivery is accepted, the agent pays the item by itself. You see The agent bar and the Activity tab read `Paid item 1: <amount> tUSDC to halcyon-mm.testnet`, with the `act` transaction linked. The amount is what the negotiated terms say (`15.00` on a8).
 
 - 02 Ask the agent to pay a new account. You see `ERR_PAYEE_MISMATCH`: the contract refused it and recorded the refusal. Nothing moves; the refusal appears in the room's activity.
 
-- 03 Revoke the key from the room header. You see `Agent revoked · next call rejected by the network`. Starting the demo agent again installs a new key.
+- 03 Hold to revoke in the room header. You see `Agent revoked · next call rejected by the network`. Starting the demo agent again installs a new key.
 
 - 04 With a throwaway key, click **Finish: close the room and return the test NEAR**. The room closes early by `mutual_close` with the demo vendor (the escrow comes back to your account), `withdraw_near` returns the room's deposit, the account's test USDC goes back to the faucet with `ft_transfer`, and the throwaway account deletes itself with the faucet as beneficiary, so the next visitor can use the NEAR. Reset does the same. You see `Done. The room is closed and its test NEAR and test USDC are back with the faucet.`, with the `ft_transfer` and `delete_account` transactions linked, then the room's id with a Verify link, kept for the tab after the reset.
 

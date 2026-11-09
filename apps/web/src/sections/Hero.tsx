@@ -128,8 +128,8 @@ const H1_WORDS = HEADLINE.split(" ")
 const ACCENT = new Set([H1_WORDS.indexOf("deal"), H1_WORDS.indexOf("room"), H1_WORDS.indexOf("control"), H1_WORDS.indexOf("plane")])
 const headlineWord = (i: number) => (ACCENT.has(i) ? styles.h1Accent : i > H1_BREAK_AFTER ? styles.h1Soft : undefined)
 const LEAD = "Accord turns private negotiations into enforceable payment rules. Agents negotiate within each business’s confidential limits. Both parties approve the terms, and the contract enforces who can authorise payments, who can receive them, how much can be paid and what evidence is required."
-/* The line under the buttons links to the record of agreement a6 (it replaced the Accord Atlas announcement, 8 Nov 2026).
-   It names the agreement it points to, so it is not read as a caption of the illustrative mock-up below it. */
+/* The line under the buttons links to the record of agreement a6 (it replaced the earlier market-making announcement,
+   8 Nov 2026). The preview below shows the same agreement, with its real numbers. */
 const PROOF_LINK = "Testnet record: procurement agreement a6, each step with its transaction"
 
 export function Hero() {
@@ -194,15 +194,17 @@ export function Hero() {
             in the same appear (Body Small, text-weak, max-width 640) */}
         <Mount y={32} delay="0.6s" className={styles.preview}>
           <div className={styles.image}>
-            <HeroPreview />
-            {/* On a phone the caption below falls under the fold while the "live testnet" link sits above the image,
-                so the frame itself says it is a mock-up */}
-            <span className={styles.illustrative} aria-hidden="true">Illustrative</span>
+            <Link to={LINKS.record} className={styles.previewLink} aria-label="Open agreement a6's record: every step with its transaction">
+              <HeroPreview />
+            </Link>
+            {/* On a phone the caption below falls under the fold, so the frame itself says what it shows */}
+            <span className={styles.illustrative} aria-hidden="true">NEAR testnet · agreement a6</span>
           </div>
-          {/* The mock-up shows the product's shape, not a running deployment: say so in words a visitor reads */}
+          {/* What the preview is, in words a visitor reads: real numbers from chain, and where market making stands */}
           <p className={`t-body-sm ${styles.caption}`}>
-            Illustrative mock-up. On testnet today: procurement agreement{" "}
-            <Link to={LINKS.record} className="ls-link-inline">a6</Link>, every step on chain.
+            Agreement <Link to={LINKS.record} className="ls-link-inline">a6.accord-v2.testnet</Link> as recorded on NEAR testnet,
+            every step with its transaction; <Link to={`${LINKS.verify}?agreement=a6.accord-v2.testnet`} className="ls-link-inline">verify it</Link> with
+            no account. Market-making agreements have run end to end on a local node, not yet on testnet.
           </p>
         </Mount>
 

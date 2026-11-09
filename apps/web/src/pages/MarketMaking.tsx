@@ -143,7 +143,7 @@ export function MarketMaking() {
         lead="Agree on the market conditions to measure, inspect the observations, and apply the results to the payment rules in the deal room."
         actions={[
           { label: "Explore an example agreement", href: LINKS.record, variant: "primary" },
-          { label: "Try a deal", href: LINKS.tryDeal, variant: "secondary" },
+          { label: "Run your own deal", href: LINKS.tryDeal, variant: "secondary" },
         ]}
       />
 

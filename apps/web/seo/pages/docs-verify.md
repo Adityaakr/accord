@@ -32,7 +32,7 @@ Other agreements to check
 
 - 04 Enclave release The Sealed Table build (`7c832ce9…`) and its keys from pubkey run `13682`. Checking the run's attestation needs the outlayer-verify tool. [not checked](https://app.outlayer.ai/docs/trust-verification)
 
-- 05 Model attestation The real model (`z-ai/glm-5.3-flash`): the attestation report is fetched with a fresh nonce and the nonce is bound in it. This attests the model as served now, not the negotiating run; the run's own attestation is bound in the signed outcome, which the sealed check verifies. The hardware quote and GPU evidence are not checked by `make verify`; `make probe-ai` checks them. [partial](https://testnet-api.outlayer.ai/attestations/13596)
+- 05 Model attestation The real model (`z-ai/glm-5.3-flash`): the attestation report is fetched with a fresh nonce and the nonce is bound in it. This attests the model as served now, not the negotiating run; the run's own attestation is bound in the signed outcome, which the sealed check verifies. The hardware quote and GPU evidence are not checked by `make verify`; `make probe-ai` checks them. [partial](https://testnet-api.outlayer.ai/attestations/by-request/13596)
 
 - 06 Recipient `halcyon-mm.testnet`, proven on the vendor's domain `accordweb-production.up.railway.app`, signed by the release's Payee key. [ok](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6)
 
@@ -64,7 +64,7 @@ accord verify · a6.accord-v2.testnet
 
 ## In the browser
 
-[/verify](/verify) runs five public checks on any agreement id, live from NEAR testnet: the agreement, the contract code, the access keys, the recipient and the record. No account, no keys.
+[/verify](/verify) headlines the full seven-check verdict that `make verify` gives (on a6: `5 ok · 1 partial · 1 not checked`), then five quick reads of any agreement id live from NEAR testnet: the agreement, the contract code, the access keys, the recipient and the record. No account, no keys.
 
 /verify on a6.accord-v2.testnet.
 

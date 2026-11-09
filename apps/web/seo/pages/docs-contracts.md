@@ -22,7 +22,7 @@ The accounts and endpoints Accord uses on NEAR testnet, and the agreement contra
 
 - 08 OutLayer [outlayer.testnet](https://testnet.nearblocks.io/address/outlayer.testnet)
 
-- 09 Attestations `/attestations/<id>` returns the TDX quote for that run. [testnet-api.outlayer.ai](https://testnet-api.outlayer.ai/attestations/13596)
+- 09 Attestations `/attestations/<id>` returns the TDX quote for that run. [testnet-api.outlayer.ai](https://testnet-api.outlayer.ai/attestations/by-request/13596)
 
 - 10 Relayer Linked: a transaction it relayed. [relay.accord-v2.testnet](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC)
 
