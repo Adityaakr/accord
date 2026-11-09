@@ -68,12 +68,12 @@ export const checkSummary = (checks: { status: CheckStatus }[]) => {
 export const VERIFY_COMMAND = "make verify DEAL=a6.accord-v2.testnet"
 export const VERIFY_RAW = `accord verify · a6.accord-v2.testnet
 code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok
-keys      0 key · none · no full access · ok
+keys      0 keys · none · no full access · ok
 sealed    outcome signature ok · commitments match · agreement matches · ok
 release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) · not checked
-model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce f9e049d1… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
-payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · ok
-record    1 payments · 1 refusals · 0 exceptions · receipts match paid · ok
+model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 6413cc81… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
+record    1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
 verify: 5 checks ok · 1 partial · 1 not checked`
 
 /* Transactions behind agreement a6's record, so /verify's live rows link to the exact evidence for a6; any other
@@ -118,7 +118,7 @@ export const RELEASE4 = {
   current: tx("J9uADVqQSkY6f1uMYbMbWoPnB4oiwuS3CtLayKojtgeC"),
   usdcPublish: tx("GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai"),
   usdcCurrent: tx("5D9LxPuU4phUXTgRawd97TmhZPGiPjWzSPWCYXJteoLJ"),
-  verify: "ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a10.accord-v2.testnet",
+  verify: "make verify DEAL=a10.accord-v2.testnet",
   verifyResult: "code = release 4 · 5 ok · 1 partial · 1 not checked",
   steps: [
     { title: "Negotiated in the enclave", agreement: "a10.accord-v2.testnet", mono: "33.00 USDC · 3 items", txs: [] },
@@ -135,7 +135,7 @@ export const CIRCLE = {
   agreement: "a1.accord-usdc.testnet",
   agreementUrl: acct("a1.accord-usdc.testnet"),
   release: 3,
-  verify: "make verify-usdc DEAL=a1.accord-usdc.testnet",
+  verify: "make verify DEAL=a1.accord-usdc.testnet",
   steps: [
     { title: "Buyer funds the escrow", agreement: "a1.accord-usdc.testnet", mono: "14.00 USDC", txs: [tx("4gPohYYMokgQcPcgNhX3tCTTXjA35AfuKkpGs1SpS2no")] },
     { title: "Agent pays item 1", agreement: "a1.accord-usdc.testnet", mono: "5.00 USDC", txs: [tx("E127BGy3Tw6PmhE9JcoFr7vQsKTiHNevTTiAxEjJGWK2")] },

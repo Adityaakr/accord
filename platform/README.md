@@ -50,7 +50,7 @@ the demo agent's key is derived per room and signs `act` itself, never through t
 
 Three ways, cheapest first. None needs our keys.
 
-1. **Read-only check of a live agreement** (about a minute, no account): `ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a6.accord-v2.testnet` after `pnpm install` (with a `.env` that sets `ACCORD_FACTORY`, plain `make verify DEAL=a6.accord-v2.testnet`). Output below.
+1. **Read-only check of a live agreement** (about a minute, no account): `make verify DEAL=a6.accord-v2.testnet` after `pnpm install`. No `.env` is needed: the CLI reads the factory from the id's `a<n>.<factory>` suffix when it is a known one (`accord-v2.testnet` or `accord-usdc.testnet`); any other factory needs `ACCORD_FACTORY` or `--factory`. Output below.
 2. **Full flow on a local NEAR sandbox** (no network; the enclave jobs are replaced by a mock signer and every mocked line says `[mock]`): `make sandbox`
 3. **Full live loop on testnet** (faucet accounts, under two minutes): `make demo`. The procurement flow ran on testnet on release 3 as `a6.accord-v2.testnet` (`make negotiate`, then `make finish DEAL=a6.accord-v2.testnet`; every transaction in `DECISIONS.md` section 21).
 
@@ -59,16 +59,16 @@ Three ways, cheapest first. None needs our keys.
 ```
 accord verify · a6.accord-v2.testnet
   code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok
-  keys      0 key · none · no full access · ok
+  keys      0 keys · none · no full access · ok
   sealed    outcome signature ok · commitments match · agreement matches · ok
   release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) · not checked
-  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce f9e049d1… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 6413cc81… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
   payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
-  record    1 payments · 1 refusals (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
+  record    1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
 verify: 5 checks ok · 1 partial · 1 not checked
 ```
 
-`model` is `partial`: the nonce is bound in the attestation report, but the hardware quote and GPU evidence are not checked here (`make probe-ai` checks them). `release` stays `not checked` until `outlayer-verify` is installed (`docs/build/BLOCKED.md`). `keys` reads `0 key` because a6's agent was revoked.
+`model` is `partial`: the nonce is bound in the attestation report, but the hardware quote and GPU evidence are not checked here (`make probe-ai` checks them). `release` stays `not checked` until `outlayer-verify` is installed (`docs/build/BLOCKED.md`). `keys` reads `0 keys` because a6's agent was revoked.
 
 `make sandbox`, from a real run on 3 Nov 2026 (the market-making line was then labelled `atlas`; the sandbox now prints `market`):
 
@@ -270,7 +270,7 @@ The audited agreement code (`ECgsrZwy…`, global contract `R2qxw4u5…`) is rel
 | Redirect refused | `a10` | `ERR_PAYEE_MISMATCH` | [`51TQ8no9…`](https://testnet.nearblocks.io/txns/51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu) |
 | Attack | [`a11`](https://testnet.nearblocks.io/address/a11.accord-v2.testnet) | `ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY` revokes and deletes the key; `0.00` moved | [`HvwpdKDs…`](https://testnet.nearblocks.io/txns/HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv), [`3cTDxHzV…`](https://testnet.nearblocks.io/txns/3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh), [`DPpVoMX9…`](https://testnet.nearblocks.io/txns/DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT) |
 | Revoke | [`a13`](https://testnet.nearblocks.io/address/a13.accord-v2.testnet) | `DeleteKey`; the next call fails with `AccessKeyDoesNotExist`; a new key pays item 2 | [`8b8FC1He…`](https://testnet.nearblocks.io/txns/8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3), [`DfgMURQA…`](https://testnet.nearblocks.io/txns/DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT), [`24mdebXg…`](https://testnet.nearblocks.io/txns/24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe) |
-| Verify | `a10` | `code = release 4` · `5 ok · 1 partial · 1 not checked` | `ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a10.accord-v2.testnet` |
+| Verify | `a10` | `code = release 4` · `5 ok · 1 partial · 1 not checked` | `make verify DEAL=a10.accord-v2.testnet` |
 
 The first `make revoke` run (a12) stopped at its last step: the script paid item 2 at a fixed `12.00` while the negotiated amount differed, and the contract refused it with `ERR_AMOUNT_MISMATCH`. The live targets now pay each item at its negotiated amount.
 

@@ -277,7 +277,7 @@ A second factory, `accord-usdc.testnet`, runs the same code as `accord-v2.testne
 | Do | See |
 | --- | --- |
 | Get Circle testnet USDC at https://faucet.circle.com, network `NEAR Testnet`, your account as the address | about `20 USDC` per address every 1 to 2 hours |
-| `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as `ACCORD_FACTORY=accord-usdc.testnet make verify`) | `code hash 8wMuMRre… = release 3 (global by hash)` · `keys from pubkey run 13909` · `verify: 5 checks ok · 1 partial · 1 not checked` |
+| `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as plain `make verify DEAL=a1.accord-usdc.testnet`, which reads the factory from the id) | `code hash 8wMuMRre… = release 3 (global by hash)` · `keys from pubkey run 13909` · `verify: 5 checks ok · 1 partial · 1 not checked` |
 | `make negotiate-usdc`, then `make finish-usdc DEAL=<agreement>` once the buyer holds the terms' total | the same blocks as `make negotiate` and `make finish`, with Circle USDC; the presets fit one faucet drip (buyer ceiling `18`, vendor floor `12`) |
 
 `a1.accord-usdc.testnet` (release 3) was negotiated on 9 Nov 2026 (`14.00 USDC` in 3 items, `QUOTE → COUNTER → ACCEPT`, glm-5.3-flash in OutLayer's enclave), approved, funded, paid `5.00` and refused a redirect, then revoked: [Circle USDC proof](#circle-usdc). Transactions: `platform/DECISIONS.md` sections 24 and 26.
@@ -295,7 +295,7 @@ No account and no keys.
 ```bash
 git clone https://github.com/Adityaakr/accord.git && cd accord/platform
 corepack enable && pnpm install
-ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a6.accord-v2.testnet
+make verify DEAL=a6.accord-v2.testnet
 ```
 
 <details>
@@ -304,16 +304,16 @@ ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a6.accord-v2.testnet
 ```
 accord verify · a6.accord-v2.testnet
   code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok
-  keys      0 key · none · no full access · ok
+  keys      0 keys · none · no full access · ok
   sealed    outcome signature ok · commitments match · agreement matches · ok
   release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) · not checked
-  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce f9e049d1… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 6413cc81… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
   payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
-  record    1 payments · 1 refusals (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
+  record    1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
 verify: 5 checks ok · 1 partial · 1 not checked
 ```
 
-The nonce is fresh on every run. `model` is `partial`: the report is fetched with that nonce and the nonce is bound in it, but the hardware quote and GPU evidence are not checked by `make verify` (`make probe-ai` checks them, with a NEAR AI key). `release` is `not checked` until the `outlayer-verify` tool is installed ([`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md)). `keys` reads `0 key` because a6's agent was revoked.
+The nonce is fresh on every run. `model` is `partial`: the report is fetched with that nonce and the nonce is bound in it, but the hardware quote and GPU evidence are not checked by `make verify` (`make probe-ai` checks them, with a NEAR AI key). `release` is `not checked` until the `outlayer-verify` tool is installed ([`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md)). `keys` reads `0 keys` because a6's agent was revoked.
 
 </details>
 
@@ -385,7 +385,7 @@ The audited agreement code (`ECgsrZwy…`, global contract `R2qxw4u5…`) is rel
 | Redirect refused | `a10` | `ERR_PAYEE_MISMATCH` | [`51TQ8no9…`](https://testnet.nearblocks.io/txns/51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu) |
 | Attack | [`a11`](https://testnet.nearblocks.io/address/a11.accord-v2.testnet) | `ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY` revokes and deletes the key; `0.00` moved | [`HvwpdKDs…`](https://testnet.nearblocks.io/txns/HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv), [`3cTDxHzV…`](https://testnet.nearblocks.io/txns/3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh), [`DPpVoMX9…`](https://testnet.nearblocks.io/txns/DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT) |
 | Revoke | [`a13`](https://testnet.nearblocks.io/address/a13.accord-v2.testnet) | `DeleteKey`; the next call fails with `AccessKeyDoesNotExist`; a new key pays item 2 | [`8b8FC1He…`](https://testnet.nearblocks.io/txns/8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3), [`DfgMURQA…`](https://testnet.nearblocks.io/txns/DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT), [`24mdebXg…`](https://testnet.nearblocks.io/txns/24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe) |
-| Verify | `a10` | `code = release 4` · `5 ok · 1 partial · 1 not checked` | `ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a10.accord-v2.testnet` |
+| Verify | `a10` | `code = release 4` · `5 ok · 1 partial · 1 not checked` | `make verify DEAL=a10.accord-v2.testnet` |
 
 The first `make revoke` run (a12) stopped at its last step: the script paid item 2 at a fixed `12.00` while the negotiated amount differed, and the contract refused it with `ERR_AMOUNT_MISMATCH`. The live targets now pay each item at its negotiated amount.
 

@@ -18,7 +18,7 @@ Start with [`README.md`](README.md). The product is in [`platform/`](platform) (
 
 Facts: factory `accord-v2.testnet` (test USDC `tusdc.accord-v1.testnet`) and factory `accord-usdc.testnet` (Circle testnet USDC), relayer `relay.accord-v2.testnet`. Agreement types in code: `procurement` and `market-making`.
 
-Release 4 (the security-audit fixes, `platform/DECISIONS.md` sections 25 and 26) is current on both factories since 9 Nov 2026; agreements created before keep release 3. `ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a10.accord-v2.testnet` (from `platform/`) prints `code hash ECgsrZwy… = release 4` and `verify: 5 checks ok · 1 partial · 1 not checked`, and `make verify-usdc DEAL=a1.accord-usdc.testnet` checks the Circle USDC deal.
+Release 4 (the security-audit fixes, `platform/DECISIONS.md` sections 25 and 26) is current on both factories since 9 Nov 2026; agreements created before keep release 3. `make verify DEAL=a10.accord-v2.testnet` (from `platform/`) prints `code hash ECgsrZwy… = release 4` and `verify: 5 checks ok · 1 partial · 1 not checked`, and `make verify-usdc DEAL=a1.accord-usdc.testnet` checks the Circle USDC deal.
 
 ## Check it, cheapest first
 
@@ -27,7 +27,7 @@ Release 4 (the security-audit fixes, `platform/DECISIONS.md` sections 25 and 26)
 
    ```bash
    cd platform && corepack enable && pnpm install
-   ACCORD_FACTORY=accord-v2.testnet make verify DEAL=a6.accord-v2.testnet
+   make verify DEAL=a6.accord-v2.testnet
    ```
 
    Expected last line: `verify: 5 checks ok · 1 partial · 1 not checked` (`model` is partial: the nonce is bound in the attestation report, the hardware quote is not checked here; the `release` check needs the `outlayer-verify` tool).
