@@ -54,6 +54,24 @@ const visible = async (loc) => (await loc.count()) > 0 && (await loc.first().isV
 const enabled = async (loc) => (await visible(loc)) && (await loc.first().isEnabled().catch(() => false));
 
 let exit = 1;
+// set once the run clicks Finish itself; a run that fails before then Finishes on its way out (finally, below)
+let finished = false;
+/* Best effort, after a failure: open /try-it in the same context (the throwaway key is in its sessionStorage) and click
+   Finish if the page offers it, so the faucet's NEAR, the test USDC and the room's deposit are not stranded. */
+async function finishFallback() {
+  try {
+    log("fallback: Finish on /try-it so the faucet funds go back");
+    await page.goto(`${BASE}/try-it`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    const btn = page.getByRole("button", { name: /^Finish: close the room/ });
+    await btn.waitFor({ timeout: 60_000 });
+    await btn.click();
+    await page.waitForFunction(() => !Array.from(document.querySelectorAll("button")).some((x) => x.textContent === "Finishing…"), null, { timeout: 300_000, polling: 1000 }).catch(() => undefined);
+    const outcome = (await page.locator("[role=status]").allInnerTexts().catch(() => [])).join(" | ").replace(/\s+/g, " ");
+    log("fallback finish:", outcome.slice(0, 300) || "(no status)");
+  } catch (e) {
+    log("fallback: no Finish (", e.message.split("\n")[0], "); the throwaway key leaves with this browser");
+  }
+}
 try {
   // 1. choose "Try without a wallet"
   await page.goto(`${BASE}/try-it`, { waitUntil: "domcontentloaded" });
@@ -214,6 +232,7 @@ try {
   log(`faucet before Finish: ${fmtNear(before)} NEAR (${before} yocto), ft_balance_of ${fmtUsdc(usdcBefore)} tUSDC (${usdcBefore})`);
   await finish.click();
   await page.getByRole("button", { name: "Finishing…" }).waitFor({ timeout: 10_000 }).catch(() => undefined);
+  finished = true;
   await page.waitForFunction(() => !Array.from(document.querySelectorAll("button")).some((x) => x.textContent === "Finishing…"), null, { timeout: 300_000, polling: 1000 });
   const outcome = (await page.locator("[role=status]").allInnerTexts()).join(" | ").replace(/\s+/g, " ");
   log("finish:", outcome.slice(0, 300));
@@ -242,6 +261,7 @@ try {
   log("FAILED:", e.message);
   await shot(page, "failed").catch(() => undefined);
 } finally {
+  if (!finished) await finishFallback();
   delete reached.__lastAction;
   clearInterval(watchdog);
   log("summary", JSON.stringify(reached));
