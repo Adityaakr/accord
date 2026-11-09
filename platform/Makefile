@@ -58,6 +58,9 @@ USDC_ENV = ACCORD_FACTORY=$(USDC_FACTORY) ACCORD_TOKEN=$(USDC_TOKEN) ACCORD_FACT
 negotiate-usdc: ; @$(USDC_ENV) $(LIVE) negotiate
 finish-usdc: ; @$(USDC_ENV) DEAL=$(DEAL) $(LIVE) finish
 dispute-close-usdc: ; @$(USDC_ENV) $(LIVE) dispute-close
+# Both parties mutual-close an Executing agreement (refunds the unspent escrow), then the buyer withdraws spare NEAR.
+close: ; @DEAL=$(DEAL) $(LIVE) close
+close-usdc: ; @$(USDC_ENV) DEAL=$(DEAL) $(LIVE) close
 verify-usdc: ; @$(USDC_ENV) pnpm --silent --filter @accord/cli dev -- verify --agreement $(DEAL)
 measure: ; @$(LIVE) measure
 demo-reset: ; $(call todo,7.1 make demo-reset)
@@ -65,4 +68,4 @@ inbox: ; @$(LIVE) inbox
 release-check: ; $(call todo,7.4 make release-check)
 submission-check: ; $(call todo,8.2 make submission-check)
 
-.PHONY: help setup-check ci test wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate negotiate-usdc finish-usdc dispute-close dispute-close-usdc cancel verify-usdc approve fund payee pay attack revoke claim exception payee-change market-making atlas verify demo measure demo-reset inbox release-check submission-check
+.PHONY: help setup-check ci test wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate negotiate-usdc finish-usdc dispute-close dispute-close-usdc close close-usdc cancel verify-usdc approve fund payee pay attack revoke claim exception payee-change market-making atlas verify demo measure demo-reset inbox release-check submission-check

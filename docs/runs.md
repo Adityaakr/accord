@@ -9,7 +9,8 @@ Units: agreements of `accord-v2.testnet` settle in test USDC (`tusdc.accord-v1.t
 | `a6.accord-v2.testnet` | 8 Nov 2026 | The full flow on release 3 (the flagship) | [README](../README.md#testnet-proof), DECISIONS 21 |
 | `a8.accord-v2.testnet` | 8 Nov 2026 | `/app/try-it` with a fresh account | [below](#a8-try-it-with-a-fresh-account) |
 | `a10`, `a11`, `a13.accord-v2.testnet` | 9 Nov 2026 | The proofs again on release 4 | [below](#release-4-security-review-fixes), DECISIONS 26 |
-| `a1.accord-usdc.testnet` | 9 Nov 2026 | A deal in Circle's testnet USDC | [below](#circle-usdc), DECISIONS 24 and 26 |
+| `a1.accord-usdc.testnet` | 9 Nov 2026 | A deal in Circle's testnet USDC (closed with a refund on 10 Nov) | [below](#circle-usdc), DECISIONS 24 and 26 |
+| `a2.accord-usdc.testnet` | 10 Nov 2026 | Dispute, re-delivery and early close with refund, in Circle testnet USDC | [Flow proofs](#circle-usdc) |
 | `a15.accord-v2.testnet` | 9 Nov 2026 | `/app/try-it` on the public URL, wallet calls relayed | [below](#a15-try-it-on-the-public-url), DECISIONS 27 |
 | `a21.accord-v2.testnet` | 9 Nov 2026 | Try without a wallet on the public URL | [below](#a21-try-without-a-wallet-on-the-public-url), DECISIONS 28 |
 | `a32.accord-v2.testnet` | 9 Nov 2026 | The run [/app/replay](https://accordweb-production.up.railway.app/app/replay) plays back, each step with its transaction; now `Settled` | the replay page |
@@ -177,7 +178,33 @@ Already on record: `a13` (`revoke_agent`, the next call failing with `AccessKeyD
 
 ### Circle USDC
 
-Not run on 10 Nov 2026. The buyer `northwind-demo.testnet` holds `6.00 USDC` (Circle); the Circle-sized mandates settle between `12.00` (vendor floor) and `18.00` (buyer ceiling), and `a1` settled at `14.00`. It needs at least `12.00 USDC` more to be sure of funding any agreed total: one drip of `20 USDC` at https://faucet.circle.com (network NEAR Testnet) to `northwind-demo.testnet`, then `make dispute-close-usdc` from `platform/`. `a1.accord-usdc.testnet` (release 3) is still `Executing` with `9.00 USDC` unspent (items 2 and 3 open) and could be closed with `accord close --mutual` as buyer then vendor.
+**`a2.accord-usdc.testnet`** (release 4, Circle's testnet USDC `3e2210e1…`, 10 Nov 2026): the same dispute, re-delivery and early close, settled in real Circle testnet USDC. Run with `make dispute-close-usdc` from `platform/`.
+
+| Step | Transaction | Result |
+| --- | --- | --- |
+| Create (buyer `northwind-demo.testnet`) | [`CD458Kbc…`](https://testnet.nearblocks.io/txns/CD458Kbczwn26DhN6Tw7xya41UDJ7YuEzhvqRV5utt75) | terms `15.00 USDC`: items `6.50`, `5.50`, `3.00` |
+| Fund | [`Gkseuroh…`](https://testnet.nearblocks.io/txns/Gkseuroh1PvGyKTzAHoz4EkABogK6YoF2cvjmab3czS5) | `15.00 USDC` escrowed; recipient `halcyon-mm.testnet` proven by the Payee job, rated allow, active |
+| Install the agent key | [`AYgYFMxL…`](https://testnet.nearblocks.io/txns/AYgYFMxLwVP84o2hYQBiBmgkraWzuDPReijGNQfv5Uy2) |  |
+| Item 1 delivered | [`3vToAv14…`](https://testnet.nearblocks.io/txns/3vToAv14ttVskarPc82FG15J2EDeGmR5BKnbV186xqJR) |  |
+| Item 1 accepted | [`8jCA3e8v…`](https://testnet.nearblocks.io/txns/8jCA3e8vrF9VHM7c7rcCsx6qF5peVJx3NXXFu76vj6Wn) |  |
+| Agent pays item 1 | [`2HPCqQxU…`](https://testnet.nearblocks.io/txns/2HPCqQxUpdJdWFBChYb9bjyuAtSmowM7bP6pcwCt7uAd) | `6.50 USDC` to `halcyon-mm.testnet` |
+| Agent redirects item 2 to `halcyon-markets.testnet` | [`2DmorsFM…`](https://testnet.nearblocks.io/txns/2DmorsFMkY2jz68wjdZ7hJ8SuohouHEKMX2FwUZmSWam) | refused, `ERR_PAYEE_MISMATCH` |
+| Item 2 delivered | [`8xCgH8uW…`](https://testnet.nearblocks.io/txns/8xCgH8uWWE5BaH9auHny3m69HWKm6VhKGEn6qWzadrRD) |  |
+| Buyer disputes item 2 | [`4VbzaAb9…`](https://testnet.nearblocks.io/txns/4VbzaAb9xpBSBoxHG6Nu9mTSUwsQnmHWsk5Su26ZMG9T) | `Disputed` |
+| Agent tries to pay item 2 | [`7xuNCbpK…`](https://testnet.nearblocks.io/txns/7xuNCbpKBnyWjiWPPsWnmdsZm2z8S612krguKehKpX6C) | refused, `ERR_NOT_DUE` |
+| Vendor re-delivers item 2 | [`piAPJUuM…`](https://testnet.nearblocks.io/txns/piAPJUuMku9dG3HvVd4EgcDCUyiReeroggSGi86Sypw) | `Delivered` |
+| Item 2 accepted | [`AgXJq11s…`](https://testnet.nearblocks.io/txns/AgXJq11sBXzdLngKiN2RdSQuuGgnMS8zQrxEqvWrT2Gz) |  |
+| Agent pays item 2 | [`A17AxW8W…`](https://testnet.nearblocks.io/txns/A17AxW8WCbJuxp21RX2uXGZjMBafueHFq8BB2Gn9eASe) | `5.50 USDC` |
+| Item 3 delivered | [`7ra1qnYR…`](https://testnet.nearblocks.io/txns/7ra1qnYRuzeUrp7kttGxsUFJtC42gLFFKBZSV7DnQ2Jx) |  |
+| Buyer disputes item 3 | [`B52Rdmgk…`](https://testnet.nearblocks.io/txns/B52RdmgknjkAjfvivCof1beBS1vQ6G8fcXsJvoDa2Yr7) | left disputed |
+| Agent tries to pay item 3 | [`7KgbXbaL…`](https://testnet.nearblocks.io/txns/7KgbXbaLgRQD4uv9hm6Kap11agpYMAb42rj6cuUSzCKB) | refused, `ERR_NOT_DUE` |
+| Buyer `mutual_close` | [`Bki6MhNR…`](https://testnet.nearblocks.io/txns/Bki6MhNRndRUn5e3WdBXkti4Ev7TsQKpMMYMB9wLuuuz) |  |
+| Vendor `mutual_close` | [`9c4unHDq…`](https://testnet.nearblocks.io/txns/9c4unHDqZVCncvJeG6icMpaiWBQ1USTBW1wgNuYbeb7K) | `Settled`: `12.00 USDC` paid, `3.00 USDC` refunded to the buyer, `0.00` left, agent key removed |
+| Buyer withdraws spare NEAR | [`G5P2LHLA…`](https://testnet.nearblocks.io/txns/G5P2LHLAArd4wXhStkTweBvdPMYqze1jQ8mXw895zwp9) |  |
+
+Balances (Circle USDC): buyer `35.00 → 23.00` (funded `15.00`, refunded `3.00`); recipient `5.00 → 17.00` (`+12.00`). `make verify-usdc DEAL=a2.accord-usdc.testnet`: `code hash ECgsrZwy… = release 4` · `verify: 5 checks ok · 1 partial · 1 not checked`.
+
+**`a1.accord-usdc.testnet` closed** (release 3, 10 Nov 2026), with `make close-usdc DEAL=a1.accord-usdc.testnet`: buyer `mutual_close` [`Gn1CSQHt…`](https://testnet.nearblocks.io/txns/Gn1CSQHtSdqKmPDkFxuUrUYWYcoPQpVYSAMrkj1ToZ24), vendor `mutual_close` [`F2k95QkY…`](https://testnet.nearblocks.io/txns/F2k95QkYLqUcQ67axuJiNWvsnTb9vBtmKZbxufzaVJdL) → `Settled`, `5.00 USDC` paid and the unspent `9.00 USDC` refunded to the buyer (`26.00 → 35.00 USDC`); buyer `withdraw_near` [`ByPi7zLD…`](https://testnet.nearblocks.io/txns/ByPi7zLDRbd4GMkPFGrxX4biUr2fJy6r92YR3HkQsTVq).
 
 ### Leftover try-it rooms
 
