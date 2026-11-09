@@ -49,8 +49,8 @@ faucet [NEAR](https://testnet.nearblocks.io/txns/935XqMoeb4Jt7fBQQHK9T7o9ZWJrWUo
 [agent pays item 1](https://testnet.nearblocks.io/txns/HxYDHTRLteGfGYoeEptehVMKbFgBdVWBqrejUJhsjSnb),
 [redirect refused](https://testnet.nearblocks.io/txns/37zUgEoe8jbqnqQQhSe8L1VPBMRrrqXdsDorgDY7cEYL),
 [revoke](https://testnet.nearblocks.io/txns/F67Qcofq9CmVuGze7URoVD3E1HfucQ7qooBjDJjANHiG).
-The server side is `app/src/server/demo.ts`: the faucet sends only what an account lacks, once a day per account and
-per IP; the counterparty reads the room and makes the vendor's next valid move, so calling it twice does nothing twice;
+The server side is `app/src/server/demo.ts`: the faucet sends only what an account lacks, one grant per account per day,
+up to 10 accounts per connection per day; the counterparty reads the room and makes the vendor's next valid move, so calling it twice does nothing twice;
 the demo agent's key is derived per room and signs `act` itself, never through the relayer.
 
 <details>

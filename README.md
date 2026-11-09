@@ -276,7 +276,7 @@ Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it). Ev
 | Redirect refused | [`37zUgEoe…`](https://testnet.nearblocks.io/txns/37zUgEoe8jbqnqQQhSe8L1VPBMRrrqXdsDorgDY7cEYL) |
 | Revoke | [`F67Qcofq…`](https://testnet.nearblocks.io/txns/F67Qcofq9CmVuGze7URoVD3E1HfucQ7qooBjDJjANHiG) |
 
-The server side is [`platform/app/src/server/demo.ts`](platform/app/src/server/demo.ts): the faucet sends only what an account lacks, once a day per account and per IP; the counterparty reads the room and makes the vendor's next valid move, so calling it twice does nothing twice; the demo agent's key is derived per room and signs `act` itself, never through the relayer.
+The server side is [`platform/app/src/server/demo.ts`](platform/app/src/server/demo.ts): the faucet sends only what an account lacks, one grant per account per day, up to 10 accounts per connection per day; the counterparty reads the room and makes the vendor's next valid move, so calling it twice does nothing twice; the demo agent's key is derived per room and signs `act` itself, never through the relayer.
 
 </details>
 
