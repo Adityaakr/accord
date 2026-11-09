@@ -41,6 +41,14 @@ describe("global options", () => {
     const g = globalOptions(parseArgv(["show", "--factory", "f.testnet", "--rpc", "http://x", "--json", "--as", "vendor"]), env);
     expect(g).toMatchObject({ factory: "f.testnet", rpc: "http://x", json: true, role: "vendor" });
   });
+  it("infers a known factory from an a<n>.<factory> agreement id when ACCORD_FACTORY is unset", () => {
+    const bare = { BUYER_ACCOUNT: "b.testnet" };
+    expect(globalOptions(parseArgv(["verify", "--agreement", "a6.accord-v2.testnet"]), bare).factory).toBe("accord-v2.testnet");
+    expect(globalOptions(parseArgv(["verify", "--agreement", "a1.accord-usdc.testnet"]), bare).factory).toBe("accord-usdc.testnet");
+    expect(globalOptions(parseArgv(["verify", "--agreement", "a1.evil.testnet"]), bare).factory).toBe("");
+    expect(globalOptions(parseArgv(["verify", "--agreement", "accord-v2.testnet"]), bare).factory).toBe("");
+    expect(globalOptions(parseArgv(["verify", "--agreement", "a6.accord-v2.testnet"]), env).factory).toBe("accord-v1.testnet");
+  });
   it("refuses an unknown --as", () => {
     expect(() => globalOptions(parseArgv(["show", "--as", "recipient"]), env)).toThrow(/--as must be one of/);
   });

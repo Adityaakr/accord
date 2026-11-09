@@ -103,7 +103,7 @@ export async function verify(
     return fc.receiver_id === agreement && fc.method_names.length === 1 && fc.method_names[0] === "act";
   });
   add("keys", keysOk ? "ok" : "fail",
-    `${keys.length} key · ${keys.length ? "FunctionCall · receiver self · methods [act]" : "none"} · no full access`);
+    `${pluralCount(keys.length, "key")} · ${keys.length ? "FunctionCall · receiver self · methods [act]" : "none"} · no full access`);
 
   // sealed: the Sealed Table's signed outcome, against the release's key, with the commitments on chain.
   const outText = await deal.sealedOutput();
@@ -149,7 +149,7 @@ export async function verify(
   const assumed = items.filter((i) => i.status === "AssumedPaid").reduce((s, i) => s + BigInt(i.settled), 0n);
   const ledgerOk = paidFromReceipts + assumed === BigInt(a.paid);
   add("record", ledgerOk ? "ok" : "fail",
-    `${receipts.length} payments · ${a.refusals} refusals (${refusals.length} in the log) · ${exceptions.length} exceptions · ${items.filter((i) => i.status === "Reserved").length} set aside · ${a.observation_conflicts} observation conflicts · receipts ${ledgerOk ? "match" : "do not match"} paid`);
+    `${pluralCount(receipts.length, "payment")} · ${pluralCount(a.refusals, "refusal")} (${refusals.length} in the log) · ${pluralCount(exceptions.length, "exception")} · ${items.filter((i) => i.status === "Reserved").length} set aside · ${pluralCount(a.observation_conflicts, "observation conflict")} · receipts ${ledgerOk ? "match" : "do not match"} paid`);
 
   return {
     agreement,
@@ -159,6 +159,11 @@ export async function verify(
     failed: checks.filter((c) => c.status === "fail").length,
     notChecked: checks.filter((c) => c.status === "not_checked").length,
   };
+}
+
+/** `1 payment`, `2 payments`, `0 payments`. */
+export function pluralCount(n: number, noun: string): string {
+  return `${n} ${noun}${n === 1 ? "" : "s"}`;
 }
 
 /** The factories `verify` accepts: this client's factory, the network's known ones, and any the caller adds. */

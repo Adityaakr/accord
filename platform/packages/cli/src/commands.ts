@@ -1,7 +1,7 @@
 // Command handlers. Each takes a `Ctx` with injected dependencies (an Accord-like factory client, agreement
 // clients, preflight, verify, files) and writes one block of text or one JSON value, so tests run with fakes.
 
-import { NotAnAgreementError, guardedPay, sha256Hex, type AgreementClient, type CreateArgs, type Kind, type Mandate, type Params,
+import { NotAnAgreementError, guardedPay, pluralCount, sha256Hex, type AgreementClient, type CreateArgs, type Kind, type Mandate, type Params,
   type PreflightResult, type TxResult, type VerifyReport } from "@accord/sdk";
 import { flagBool, flagInt, flagString, requireFlag, toInt, type ParsedArgs } from "./args.js";
 import { DEFAULT_ALLOWANCE, parseAmount, parseNear } from "./amount.js";
@@ -422,7 +422,7 @@ const watch: Handler = async (ctx) => {
     const [v, rec] = await Promise.all([deal.get(), deal.receipts()]);
     const now = { state: v.state, refusals: v.refusals, receipts: rec.length, funded: v.funded, agentKey: v.agent_key, recipient: v.recipient?.account ?? null };
     const changes: string[] = [];
-    if (!last) changes.push(line("watching", `${now.state} · ${now.refusals} refusals · ${now.receipts} payments · funded ${usdc(now.funded)}`));
+    if (!last) changes.push(line("watching", `${now.state} · ${pluralCount(now.refusals, "refusal")} · ${pluralCount(now.receipts, "payment")} · funded ${usdc(now.funded)}`));
     else {
       if (now.state !== last.state) changes.push(line("state", `${last.state} → ${now.state}`));
       if (now.funded !== last.funded) changes.push(line("funded", usdc(now.funded)));

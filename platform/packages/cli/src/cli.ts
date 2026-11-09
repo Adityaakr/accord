@@ -5,7 +5,7 @@ import { flagBool, flagString, parseArgv } from "./args.js";
 import { COMMANDS, READ_ONLY, USAGE, type Deps, type Output } from "./commands.js";
 import { parseRole, redact, secretValues, selectIdentity, type Env, type Identity, type Role } from "./env.js";
 import { toJson } from "./format.js";
-import type { Network } from "@accord/sdk";
+import { KNOWN_FACTORIES, type Network } from "@accord/sdk";
 
 export interface GlobalOptions {
   network: Network;
@@ -20,7 +20,7 @@ export function globalOptions(flags: ReturnType<typeof parseArgv>, env: Env): Gl
   if (network !== "testnet" && network !== "mainnet" && network !== "sandbox") {
     throw new Error("--network is testnet, mainnet or sandbox");
   }
-  const factory = flagString(flags, "factory") ?? env.ACCORD_FACTORY ?? "";
+  const factory = flagString(flags, "factory") || env.ACCORD_FACTORY || factoryOf(flagString(flags, "agreement"), network);
   const asFlag = flagString(flags, "as");
   return {
     network,
@@ -29,6 +29,17 @@ export function globalOptions(flags: ReturnType<typeof parseArgv>, env: Env): Gl
     json: flagBool(flags, "json"),
     role: asFlag === undefined ? undefined : parseRole(asFlag),
   };
+}
+
+/**
+ * The factory an agreement id names: `a<n>.<factory>`, accepted only when that factory is a known one for the
+ * network (KNOWN_FACTORIES), so `accord verify --agreement a6.accord-v2.testnet` works with no ACCORD_FACTORY set.
+ * Anything else returns "" and the caller still asks for --factory.
+ */
+export function factoryOf(agreement: string | undefined, network: Network): string {
+  const m = agreement?.match(/^a\d+\.(.+)$/);
+  if (!m) return "";
+  return (KNOWN_FACTORIES[network] ?? []).some((f) => f.factory === m[1]) ? m[1]! : "";
 }
 
 export interface Io {

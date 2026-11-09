@@ -39,6 +39,7 @@ payee-change: ; @$(LIVE) payee-change
 market-making: ; @$(LIVE) market-making
 # hidden alias kept so recorded `make atlas` runs still reproduce (the old name, retired 8 Nov 2026)
 atlas: ; @$(LIVE) market-making
+# verify needs no ACCORD_FACTORY for a known factory: the CLI reads it from the a<n>.<factory> id (KNOWN_FACTORIES).
 verify: ; @pnpm --silent --filter @accord/cli dev -- verify --agreement $(DEAL)
 demo: ; @$(LIVE) demo
 finish: ; @DEAL=$(DEAL) $(LIVE) finish
