@@ -17,7 +17,7 @@ import styles from "./Reviews.module.css"
        Tag hQMlOmTGC (horizontal, gap 8, center; appear y32/1s)  → Indicator 14×8 Lime pill + "In their words" (Body Small)
        Text OIDybPoKq (vertical, gap 20; appear y32/1s delay 0.2s) → Title (H2) + Description (Body Large)
    - Testimonial Cards I5_WLVgPf (grid 3 cols, gap 16, rows fit; appear y32/1s) → 6 Testimonial card instances,
-     six rows of the old brief's §4.3 People table with real photos from public/assets/people/<slug>.jpg.
+     rows of the old brief's §4.3 People table, text only (no headshots on the homepage; no hackathon judge is quoted here).
      Verbatim quotes keep their marks; paraphrases carry none. The label line reads "verbatim · source" /
      "paraphrase · source", the "source" being an .ls-link-inline link to the row in references.ts.
      No footnote markers on the homepage; the §4.3 bibliography tables live on /research. */
@@ -25,14 +25,6 @@ import styles from "./Reviews.module.css"
 type Card = { id: string; slug: string; name: string; position: string; kind: "verbatim" | "paraphrase"; ref: number; text: string }
 
 const CARDS: Card[] = [
-  { id: "WfU6P5iO4", slug: "illia-polosukhin", name: "Illia Polosukhin", position: "NEAR co-founder · 14 May 2026", kind: "verbatim", ref: 8,
-    text: "\"Businesses will not deploy agents that expose their revenue, counterparties, or financial operations on a public ledger.\"" },
-  { id: "uhx_b8IHU", slug: "illia-polosukhin", name: "Illia Polosukhin", position: "NEAR co-founder · 26 Feb 2026", kind: "paraphrase", ref: 10,
-    text: "Agents should be treated as hostile by default, with policy caps that hold even if the model is compromised" },
-  { id: "FXpHz9c5X", slug: "eddy-lazzarin", name: "Eddy Lazzarin", position: "a16z crypto · 28 Apr 2026", kind: "paraphrase", ref: 12,
-    text: "The core unsolved problem is authorization: proving to a counterparty that an agent represents you" },
-  { id: "XsFNjeSw0", slug: "haseeb-qureshi", name: "Haseeb Qureshi", position: "Dragonfly · 7 Oct 2026", kind: "paraphrase", ref: 13,
-    text: "The delegation model that works is sub-cards with owner-set limits; privacy wins when it is easy" },
   { id: "WHpmrxnQt", slug: "jack-forestell", name: "Jack Forestell", position: "Visa · 30 Apr 2025", kind: "verbatim", ref: 38,
     text: "\"These agents will need to be trusted with payments, not only by users, but by banks and sellers as well.\"" },
   { id: "exUDHoYhH", slug: "simon-willison", name: "Simon Willison", position: "16 Jun 2025", kind: "paraphrase", ref: 35,
@@ -91,7 +83,6 @@ export function Reviews() {
             <li key={c.id}>
               <button type="button" className={`${styles.person} ${i === active ? styles.personOn : ""}`}
                 onMouseEnter={() => { setActive(i); setHold(true) }} onFocus={() => { setActive(i); setHold(true) }} onClick={() => setActive(i)}>
-                <img className={styles.pAvatar} src={`/assets/people/${c.slug}.jpg`} alt="" width={36} height={36} loading="lazy" decoding="async" />
                 <span className={styles.pText}><span className={styles.pName}>{c.name}</span><span className={styles.pRole}>{c.position}</span></span>
                 {i === active && !reduce && !hold && inView ? <span key={active} className={styles.bar} aria-hidden="true" /> : null}
               </button>
@@ -107,7 +98,6 @@ export function Reviews() {
             const cls = k === 0 ? styles.k0 : k === 1 ? styles.k1 : k === 2 ? styles.k2 : styles.kHide
             return (
               <figure key={k === n - 1 ? `${c.id}-${active}` : c.id} className={`${styles.quote} ${cls} ${k === n - 1 && moved ? styles.out : ""}`} aria-hidden={k !== 0}>
-                <div className={styles.portrait} style={{ backgroundImage: `url(/assets/people/${c.slug}.jpg)` }} role="img" aria-label={c.name} />
                 <div className={styles.qMain}>
                   <div className={styles.qTop}>
                     {c.kind === "verbatim" ? <span className={styles.qMark} aria-hidden="true">“</span> : <span />}

@@ -111,7 +111,7 @@
 .deck { position: relative; height: 400px; }
 .quote {
   position: absolute; left: 0; right: 0; top: 56px; margin: 0;
-  display: grid; grid-template-columns: 34% minmax(0, 1fr);
+  display: grid; grid-template-columns: minmax(0, 1fr);
   min-height: 330px; border-radius: 16px; overflow: hidden;
   background: var(--elevation-strong); border: 1px solid rgba(var(--ink-rgb), 0.12);
   box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.7);
@@ -153,7 +153,7 @@
   .people { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 12px; }
   .pRole { font-size: 12px; }
   .deck { height: 510px; }
-  .quote { top: 40px; grid-template-columns: minmax(0, 1fr); grid-template-rows: 170px auto; min-height: 460px; }
+  .quote { top: 40px; grid-template-columns: minmax(0, 1fr); min-height: 0; }
   .portrait { background-position: center 32%; }
   .portrait::after { background: linear-gradient(180deg, transparent 50%, var(--elevation-strong)); }
   .qMain { padding: 4px 20px 18px; }
