@@ -4,7 +4,7 @@ Built on NEAR
 
 Accord turns private negotiations into enforceable payment rules. Agents negotiate within each business’s confidential limits. Both parties approve the terms, and the contract enforces who can authorise payments, who can receive them, how much can be paid and what evidence is required.
 
-[Open the app](/app/signin) [Try a deal in 3 minutes](/app/try-it)
+[Open the app](/app/signin) [Try a deal in about 5 minutes](/app/try-it)
 
 [Every step of a live testnet agreement, on chain](/#testnet)
 
@@ -548,7 +548,7 @@ Re-run on release 4 (security-review fixes): [a10](https://testnet.nearblocks.io
 
 In the public demonstration room, the agent's inbox is open to anyone while the room runs. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it, and your attempt appears in the public refusal log with the contract's reason. Revocation is shown exactly: the agent's only key is deleted in one transaction, and anything it signs afterwards is rejected by the network before it reaches the contract.
 
-[See the demonstration](/try)
+[See the recorded attempts](/try)
 
 Privacy and control
 

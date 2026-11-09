@@ -138,7 +138,7 @@ accord atlas · a14.accord.test.near · market-making · rhea-dcl 17208628…|wr
 
 - 01 Verify Read-only checks of a live agreement; no keys needed. [make verify DEAL=<agreement>](/docs/verify#checks)
 
-- 02 Full loop From nothing: faucet accounts, a new agreement, negotiation, approvals, funding, recipient, delivery, payment and one refused attack, with the elapsed time. make demo
+- 02 Full loop On a local node (`NET=local`), from nothing: fresh accounts, a new agreement, negotiation, approvals, funding, recipient, delivery, payment and one refused attack, with the elapsed time. It has not been run on testnet yet; there, `make negotiate`, `make finish`, `make attack` and `make revoke` run the same flow, each recorded on release 4. make demo NET=local
 
 - 03 Finish an agreement Runs the steps after the negotiation on an existing agreement; a6 ran `make negotiate`, then `make finish DEAL=a6.accord-v2.testnet`. make finish DEAL=<agreement>
 
@@ -150,7 +150,7 @@ accord atlas · a14.accord.test.near · market-making · rhea-dcl 17208628…|wr
 
 Copy
 
-`make verify DEAL=a6.accord-v2.testnet` `make demo`
+`make verify DEAL=a6.accord-v2.testnet` `make demo NET=local`
 
 On this page
 

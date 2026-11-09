@@ -14,6 +14,12 @@ Agreements negotiated in private, enforced in public.
 [Record](https://accordweb-production.up.railway.app/record) ·
 [Docs](https://accordweb-production.up.railway.app/docs)
 
+**Judge it in 5 minutes**
+
+1. Open [/app/try-it](https://accordweb-production.up.railway.app/app/try-it) and choose "Try without a wallet". It runs one deal on testnet, including a refused redirect.
+2. Open [/verify](https://accordweb-production.up.railway.app/verify) and enter the agreement id it gives you.
+3. Clone the repo and run `make verify DEAL=a10.accord-v2.testnet` (from `platform/`).
+
 The same site is also served at its custom domain, [useaccord.tech](https://useaccord.tech) (the same Railway service; `www.useaccord.tech` has no certificate yet). The `/app/try-it` rooms propose their demo recipient on `useaccord.tech`, which serves the same `/.well-known/accord.json` as the Railway host.
 
 <a href="https://testnet.nearblocks.io/address/accord-v2.testnet"><img alt="Network: NEAR testnet" src="docs/badges/network.svg" /></a>
@@ -238,7 +244,7 @@ Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it). Ev
 
 | # | Do | See |
 | --- | --- | --- |
-| 1 | **Connect a NEAR wallet**: a NEAR testnet wallet such as Meteor or Intear | `01 Connect a wallet` marked done, with your account |
+| 1 | **Try without a wallet**, or **Connect a wallet**: a NEAR testnet wallet such as Meteor or Intear. Without a wallet, the page makes a throwaway testnet key in this tab (sessionStorage only, never sent to the server, gone when the tab closes), and steps 2 and 3 run on their own | `01` marked done, with your account; for the throwaway key, a 64-character implicit account labelled `Throwaway testnet key` |
 | 2 | **Get test funds** | `0.00 NEAR` becomes `2.50 NEAR · 100.00 tUSDC`, both faucet transactions linked |
 | 3 | **Create the room** | `Your room is a8.accord-v2.testnet: My first deal room.` (your number will differ) |
 | 4 | **Seal your mandate** with the Northwind preset (`40` tUSDC ceiling, 2 to 4 items) | In the Demo counterparty panel: `Sealed the vendor's mandate (Halcyon procurement preset)`, then `Started the negotiation in the Sealed Table`; the state moves `Sealed` to `Attested` |

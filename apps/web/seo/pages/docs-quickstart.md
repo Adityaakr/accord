@@ -2,25 +2,27 @@ Quickstart
 
 # Quickstart
 
-Run one deal on NEAR testnet at /app/try-it in about 3 minutes: sign in, get test funds, seal your limits, let the demo agent pay, watch a redirect get refused, and revoke the key.
+Run one deal on NEAR testnet at /app/try-it in about 5 minutes, with or without a wallet: sign in, get test funds, seal your limits, let the demo agent pay, watch a redirect get refused, and revoke the key.
 
 ## Before you start
 
 - 01 Network Everything on this path is testnet with a test USDC token. Nothing here moves real money. NEAR testnet
 
-- 02 Sign-in Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit). Meteor · Intear · Ledger · Nightly · WalletConnect
+- 02 No wallet The page makes a throwaway testnet key in your browser tab, funded by Accord's faucet. It is kept in the tab's sessionStorage, never sent to the server, and gone when you close the tab. Test funds only. Try without a wallet
 
-- 03 Test funds The faucet tops your account up once a day per account. The room's `2 NEAR` deposit is returned when it closes. 2.50 NEAR · 100 tUSDC
+- 03 Sign-in Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit). Meteor · Intear · Ledger · Nightly · WalletConnect
 
-- 04 Counterparty Accord's demo vendor, with its authority `halcyon-auth.testnet`. The demo vendor and the demo agent are Accord's own testnet accounts, labelled in the room. [halcyon-demo.testnet](https://testnet.nearblocks.io/address/halcyon-demo.testnet)
+- 04 Test funds The faucet tops your account up once a day per account. The room's `2 NEAR` deposit is returned when it closes. 2.50 NEAR · 100 tUSDC
 
-- 05 Time about 3 minutes
+- 05 Counterparty Accord's demo vendor, with its authority `halcyon-auth.testnet`. The demo vendor and the demo agent are Accord's own testnet accounts, labelled in the room. [halcyon-demo.testnet](https://testnet.nearblocks.io/address/halcyon-demo.testnet)
+
+- 06 Time about 5 minutes
 
 Sealing a mandate takes a wallet signature (NEP-413) that derives your document key, so the key never leaves your browser.
 
 ## Sign in and open a room
 
-- 01 Open [/app/try-it](/app/try-it) and sign in with Meteor or Intear on testnet. You see Step 1 marked done with your account name. `/app/try-it` before sign-in. Each step turns to done as you go.
+- 01 Open [/app/try-it](/app/try-it) and choose "Try without a wallet", or sign in with Meteor or Intear on testnet. Without a wallet, the page makes a throwaway testnet key in this tab and signs each step with it; the faucet and the room then run on their own. You see Step 1 marked done with your account. A throwaway key shows a 64-character implicit account labelled `Throwaway testnet key`. `/app/try-it` before sign-in. Each step turns to done as you go.
 
 - 02 Get test funds. You see Your balance reads `2.50 NEAR` and `100 tUSDC`, with both faucet transactions linked.
 
@@ -52,7 +54,7 @@ The demo agent's key is derived per room and signs `act` itself, never through t
 
 - 02 Read a full record Agreement a6's 12 steps, each linked to its transaction. [/record](/record)
 
-- 03 Run it from a terminal The full loop on testnet from fresh faucet accounts. [make demo](/docs/cli#verify-demo)
+- 03 Run it from a terminal The full loop from fresh accounts on a local node (`NET=local`). On testnet, `make negotiate`, `make finish`, `make attack` and `make revoke` run the same flow. [make demo NET=local](/docs/cli#verify-demo)
 
 - 04 What each state means [Concepts](/docs/concepts#lifecycle)
 

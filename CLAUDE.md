@@ -22,6 +22,14 @@ Release 4 (the security-review fixes, `platform/DECISIONS.md` sections 25 and 26
 
 ## Check it, cheapest first
 
+**Judge it in 5 minutes**
+
+1. Open [/app/try-it](https://accordweb-production.up.railway.app/app/try-it) and choose "Try without a wallet". It runs one deal on testnet, including a refused redirect.
+2. Open [/verify](https://accordweb-production.up.railway.app/verify) and enter the agreement id it gives you.
+3. Clone the repo and run `make verify DEAL=a10.accord-v2.testnet` (from `platform/`).
+
+Then, in more depth:
+
 1. **Read the testnet proof.** Agreement `a6.accord-v2.testnet` ran the full flow on 8 Nov 2026; every transaction is linked in [`README.md`](README.md#testnet-proof) and in `platform/DECISIONS.md` section 21.
 2. **Verify an agreement, no account and no keys** (Node `>=22`, pnpm via corepack):
 

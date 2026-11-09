@@ -32,7 +32,7 @@ export const DOC_PAGES: DocPage[] = [
     slug: "quickstart",
     group: "Get started",
     title: "Quickstart",
-    summary: "Run one deal on NEAR testnet at /app/try-it in about 5 minutes: sign in, get test funds, seal your limits, let the demo agent pay, watch a redirect get refused, and revoke the key.",
+    summary: "Run one deal on NEAR testnet at /app/try-it in about 5 minutes, with or without a wallet: sign in, get test funds, seal your limits, let the demo agent pay, watch a redirect get refused, and revoke the key.",
     sections: [
       {
         id: "before",
@@ -42,6 +42,7 @@ export const DOC_PAGES: DocPage[] = [
             kind: "rows",
             rows: [
               { name: "Network", value: "NEAR testnet", detail: "Everything on this path is testnet with a test USDC token. Nothing here moves real money." },
+              { name: "No wallet", value: "Try without a wallet", detail: "The page makes a throwaway testnet key in your browser tab, funded by Accord's faucet. It is kept in the tab's sessionStorage, never sent to the server, and gone when you close the tab. Test funds only." },
               { name: "Sign-in", value: "Meteor · Intear · Ledger · Nightly · WalletConnect", detail: "Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit)." },
               { name: "Test funds", value: "2.50 NEAR · 100 tUSDC", detail: "The faucet tops your account up once a day per account. The room's `2 NEAR` deposit is returned when it closes." },
               { name: "Counterparty", value: "halcyon-demo.testnet", href: acct("halcyon-demo.testnet"), detail: "Accord's demo vendor, with its authority `halcyon-auth.testnet`. The demo vendor and the demo agent are Accord's own testnet accounts, labelled in the room." },
@@ -59,8 +60,9 @@ export const DOC_PAGES: DocPage[] = [
             kind: "steps",
             steps: [
               {
-                title: "Open [/app/try-it](/app/try-it) and sign in with Meteor or Intear on testnet.",
-                see: "Step 1 marked done with your account name.",
+                title: "Open [/app/try-it](/app/try-it) and choose \"Try without a wallet\", or sign in with Meteor or Intear on testnet.",
+                body: "Without a wallet, the page makes a throwaway testnet key in this tab and signs each step with it; the faucet and the room then run on their own.",
+                see: "Step 1 marked done with your account. A throwaway key shows a 64-character implicit account labelled `Throwaway testnet key`.",
                 image: { id: "tryit-signed-out", alt: "The /app/try-it page before sign-in: five numbered steps, the first one, Connect a wallet, offering Meteor or Intear.", caption: "`/app/try-it` before sign-in. Each step turns to done as you go." },
               },
               {

@@ -251,11 +251,11 @@ const agentSections = `Source code (MIT): ${REPO} · Machine-readable facts: ${S
 - Security review: ${STATUS.audit}
 - Settlement: USDC on NEAR (NEP-141), from each agreement's own account; on testnet a test USDC token (tUSDC) on accord-v2.testnet, and Circle's testnet USDC on accord-usdc.testnet.
 - Agreement types: six; two are built (vendor contracts, called procurement in code, and market-making agreements) and four are planned.
-- Sign-in: external NEAR wallets only, through HOT Connect. There is no email sign-in.
+- Sign-in: external NEAR wallets, through HOT Connect. On testnet, "Try without a wallet" makes a throwaway key in the browser tab instead (sessionStorage only, never sent to the server). There is no email sign-in.
 
 ## Try it (no code, about 5 minutes, NEAR testnet)
 
-Start at ${SITE_URL}/app/try-it (walkthrough with screenshots: ${SITE_URL}/docs/quickstart). A faucet, a demo counterparty and a demo agent run by Accord are built in; everything uses test USDC.
+Start at ${SITE_URL}/app/try-it (walkthrough with screenshots: ${SITE_URL}/docs/quickstart). No wallet needed: choose "Try without a wallet" and the page makes a throwaway testnet key in your browser tab, funded by the faucet. A faucet, a demo counterparty and a demo agent run by Accord are built in; everything uses test USDC.
 
 ${TRY_STEPS.map((t, i) => `${i + 1}. **${t.name}.** Do: ${t.do} See: ${t.see}`).join("\n")}
 
