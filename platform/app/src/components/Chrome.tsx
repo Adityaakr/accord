@@ -6,7 +6,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { Nav, Sidebar } from "./Nav";
 import { LogoMark } from "./LogoMark";
 import { useWallet } from "./wallet/WalletProvider";
@@ -18,11 +18,26 @@ const PUBLIC = ["/verify", "/record", "/docs", "/status", "/replay", "/try", "/j
 // Read-only pages that never depend on who is signed in: they render at once, even while a session is being restored.
 const READ_ONLY = ["/verify", "/record", "/docs", "/status", "/replay"];
 
+// A not-found page (app/not-found.tsx) marks itself here, so an unknown address shows "page not found" instead of
+// sending a signed-out visitor to sign-in.
+const NotFoundContext = createContext<(on: boolean) => void>(() => {});
+
+/** Rendered by not-found pages: while it is mounted, Chrome does not redirect to sign-in. */
+export function NotFoundMark() {
+  const mark = useContext(NotFoundContext);
+  useEffect(() => {
+    mark(true);
+    return () => mark(false);
+  }, [mark]);
+  return null;
+}
+
 export function Chrome({ network, factory, sandbox, children }: { network: string; factory: string; sandbox: boolean; children: ReactNode }) {
   const path = usePathname() ?? "/";
   const router = useRouter();
   const w = useWallet();
   const { id, ready } = useWorkspace();
+  const [notFound, setNotFound] = useState(false);
   const full = FULL.some((p) => path === p);
   const open = PUBLIC.some((p) => path.startsWith(p));
   // after a reload the kept session (throwaway key or wallet) takes a moment to come back; until it does, a page that
@@ -31,23 +46,25 @@ export function Chrome({ network, factory, sandbox, children }: { network: strin
 
   // wallet state settles after mount; wait a beat before deciding
   useEffect(() => {
-    if (full || open || !ready || w.restoring) return;
+    if (full || open || notFound || !ready || w.restoring) return;
     const t = window.setTimeout(() => {
       // a room link keeps its room: sign-in shows a read-only summary of it and returns there afterwards
       if (!w.accountId) router.replace(path.startsWith("/agreements/") ? `/signin?next=${encodeURIComponent(path)}` : "/signin");
       else if (!id && path === "/") router.replace("/enter");
     }, 400);
     return () => window.clearTimeout(t);
-  }, [full, open, ready, w.restoring, w.accountId, id, path, router]);
+  }, [full, open, notFound, ready, w.restoring, w.accountId, id, path, router]);
 
   const restoringLine = (
     <div className={styles.restoring} role="status" aria-live="polite">
       <span className={styles.restoringDot} aria-hidden="true" />Restoring your session…
     </div>
   );
-  if (full) return <main id="main">{waiting ? restoringLine : children}</main>;
+  // a not-found page never waits for the session: it is the same for everyone
+  const body = waiting && !notFound ? restoringLine : children;
+  if (full) return <NotFoundContext.Provider value={setNotFound}><main id="main">{body}</main></NotFoundContext.Provider>;
   return (
-    <>
+    <NotFoundContext.Provider value={setNotFound}>
       <Nav network={network} />
       {sandbox && (
         <div className={styles.banner} role="note">
@@ -56,7 +73,7 @@ export function Chrome({ network, factory, sandbox, children }: { network: strin
       )}
       <div className={styles.shell}>
         <Sidebar />
-        <main id="main" className={`${styles.main} texture`}><div key={path} className="page-in">{waiting ? restoringLine : children}</div></main>
+        <main id="main" className={`${styles.main} texture`}><div key={path} className="page-in">{body}</div></main>
       </div>
       <footer className={styles.footer}>
         <div className={`container ${styles.footerInner}`}>
@@ -71,6 +88,6 @@ export function Chrome({ network, factory, sandbox, children }: { network: strin
           <span className="small mono">{network} · factory {factory}</span>
         </div>
       </footer>
-    </>
+    </NotFoundContext.Provider>
   );
 }
