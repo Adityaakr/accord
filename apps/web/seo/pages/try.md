@@ -2,7 +2,7 @@ Try
 
 # Try to move the money.
 
-Tell the agent to pay someone else. On NEAR testnet the demonstration agent was told to pay a new account, a different amount, or to follow a planted instruction, and the contract refused each payment. Write to the agent in the public room when it is open, or run the same attack in your own deal room in about three minutes.
+Tell the agent to pay someone else. On NEAR testnet the demonstration agent was told to pay a new account, a different amount, or to follow a planted instruction, and the contract refused each payment. Write to the agent in the public room when it is open, or run the same attack in your own deal room in about five minutes.
 
 [Run it in your own room](/app/try-it) [Verify a6](/verify)
 

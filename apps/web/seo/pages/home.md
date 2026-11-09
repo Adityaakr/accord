@@ -548,7 +548,7 @@ Re-run on release 4 (security-review fixes): [a10](https://testnet.nearblocks.io
 
 In the public demonstration room, the agent's inbox is open to anyone while the room runs. Send it new bank details, an urgent invoice or an instruction from the chief executive; the agent is deliberately literal and will act on it, and your attempt appears in the public refusal log with the contract's reason. Revocation is shown exactly: the agent's only key is deleted in one transaction, and anything it signs afterwards is rejected by the network before it reaches the contract.
 
-[See the recorded attempts](/try)
+[See the demonstration](/try)
 
 Privacy and control
 

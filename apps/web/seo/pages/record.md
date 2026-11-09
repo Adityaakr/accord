@@ -70,7 +70,7 @@ Agreement [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord
 
 - 05 Attack: redirect, altered amount, canary [a11](https://testnet.nearblocks.io/address/a11.accord-v2.testnet)·0.00 moved · key deleted·[tx 1](https://testnet.nearblocks.io/txns/HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv)·[tx 2](https://testnet.nearblocks.io/txns/3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh)·[tx 3](https://testnet.nearblocks.io/txns/DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT)
 
-- 06 Revoke, then a new key pays item 2 [a13](https://testnet.nearblocks.io/address/a13.accord-v2.testnet)·AccessKeyDoesNotExist·[tx 1](https://testnet.nearblocks.io/txns/8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3)·[tx 2](https://testnet.nearblocks.io/txns/DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT)·[tx 3](https://testnet.nearblocks.io/txns/24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe)
+- 06 Revoke, then a new key pays item 2 [a13](https://testnet.nearblocks.io/address/a13.accord-v2.testnet)·AccessKeyDoesNotExist·[revoke](https://testnet.nearblocks.io/txns/8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3)·[new key](https://testnet.nearblocks.io/txns/DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT)·[pay item 2](https://testnet.nearblocks.io/txns/24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe)
 
 Release 4 carries the security-review fixes and is current on both factories since 9 Nov 2026 ([published](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)); agreements created before it, a6 among them, keep release 3. The proofs ran again on new agreements a10, a11 and a13.
 
