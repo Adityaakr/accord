@@ -12,6 +12,8 @@ import { toTxResult, type Signer, type TxResult } from "@accord/sdk";
 export const THROWAWAY_STORAGE_KEY = "accord-throwaway-key";
 /** Blocks a relayed request stays valid for; the relayer accepts up to 7200. */
 export const DELEGATE_TTL = 300n;
+/** No request may hold the signer's queue for longer than this. */
+const TIMEOUT_MS = 90_000;
 
 const toHex = (b: Uint8Array) => Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
 const toB64 = (b: Uint8Array) => {
@@ -38,6 +40,7 @@ export interface ThrowawayDeps {
 async function rpcAccessKey(rpc: string, accountId: string, publicKey: string) {
   const r = await fetch(rpc, {
     method: "POST",
+    signal: AbortSignal.timeout(TIMEOUT_MS),
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       jsonrpc: "2.0", id: "accord", method: "query",
@@ -53,7 +56,7 @@ async function rpcAccessKey(rpc: string, accountId: string, publicKey: string) {
 
 async function postRelay(signedDelegate: string): Promise<unknown> {
   const res = await fetch("/api/relay", {
-    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ signedDelegate }),
+    method: "POST", signal: AbortSignal.timeout(TIMEOUT_MS), headers: { "content-type": "application/json" }, body: JSON.stringify({ signedDelegate }),
   });
   const body = (await res.json().catch(() => ({}))) as { outcome?: unknown; error?: string };
   if (!res.ok || !body.outcome) throw new Error(`Accord's relayer could not send this transaction: ${body.error ?? `HTTP ${res.status}`}.`);

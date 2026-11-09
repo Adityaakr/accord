@@ -21,6 +21,12 @@ if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 const t0 = Date.now();
 const log = (...a) => console.log(`[${String(Math.round((Date.now() - t0) / 1000)).padStart(4)}s]`, ...a);
 const reached = {};
+// a watchdog: if one step takes more than a minute, say which one, with a viewport screenshot
+let step = "start", stepAt = Date.now();
+const at = (name) => { step = name; stepAt = Date.now(); };
+const watchdog = setInterval(() => {
+  if (Date.now() - stepAt > 60_000) { log(`watchdog: still on "${step}" after ${Math.round((Date.now() - stepAt) / 1000)} s`); stepAt = Date.now(); }
+}, 10_000);
 const mark = (k, extra = "") => { if (!reached[k]) { reached[k] = Math.round((Date.now() - t0) / 1000); log("REACHED", k, extra); } };
 let shotN = 0;
 const shot = async (p, name) => { if (SHOTS) await p.screenshot({ path: path.join(SHOTS, `${String(++shotN).padStart(2, "0")}-${name}.png`), fullPage: true }); };
@@ -29,6 +35,14 @@ const browser = await chromium.launch({ headless: !process.env.HEADED });
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: "dark" });
 const page = await ctx.newPage();
 page.on("pageerror", (e) => log("pageerror", e.message));
+page.setDefaultTimeout(30_000);
+// requests the page is still waiting on, to say where a stall is
+const pending = new Map();
+page.on("request", (r) => pending.set(r, Date.now()));
+page.on("requestfinished", (r) => pending.delete(r));
+page.on("requestfailed", (r) => { pending.delete(r); if (r.url().includes("/api/")) log("request failed:", r.method(), r.url(), r.failure()?.errorText); });
+page.on("response", (r) => { if (r.url().includes("/api/") && r.status() >= 400) log("http", r.status(), r.request().method(), r.url().replace(BASE, "")); });
+const stalls = () => { for (const [r, t] of pending) if (Date.now() - t > 30_000) log("stalled", Math.round((Date.now() - t) / 1000), "s:", r.method(), r.url().replace(BASE, "")); };
 const visible = async (loc) => (await loc.count()) > 0 && (await loc.first().isVisible().catch(() => false));
 const enabled = async (loc) => (await visible(loc)) && (await loc.first().isEnabled().catch(() => false));
 
@@ -79,33 +93,55 @@ try {
   const clickIf = async (loc, what) => {
     if (!(await enabled(loc))) return false;
     log("click:", what);
-    await loc.first().click();
+    try { await loc.first().click({ timeout: 15_000 }); } catch (e) { log("click failed:", what, e.message.split("\n")[0]); return false; }
     return true;
   };
   let lastAgentNote = "";
+  let lastNext = "";
   let paidAt = 0;
   while (!reached.revoked) {
     if (Date.now() > DEADLINE) throw new Error("the deadline passed before revoke");
-    const body = await page.locator("main").innerText().catch(() => "");
-    if (/Executing/.test(body)) mark("executing");
+    at("room loop");
+    // a refresh that lands on a failed chain read (an RPC rate limit) shows the 404 page; read the room again
+    if (await visible(page.getByText("This page could not be found"))) {
+      log("the room page answered 404 (a failed chain read); reloading");
+      await page.goto(`${BASE}/agreements/${room}`, { waitUntil: "domcontentloaded" }).catch(() => undefined);
+      await page.waitForTimeout(3000);
+      continue;
+    }
+    stalls();
+    // the Demo counterparty panel's "next" line says whose move it is
+    const next = await page.locator("span.eyebrow", { hasText: /^next$/ }).locator("xpath=following-sibling::span[1]").first().innerText().catch(() => "");
+    if (next && next !== lastNext) { lastNext = next; log("counterparty next:", next.replace(/\s+/g, " ").slice(0, 200)); }
+    if (await visible(page.getByText("demo agent run by Accord for this test room"))) mark("executing");
 
     if (await clickIf(page.getByRole("button", { name: "Approve these terms" }), "approve terms")) { mark("approved"); }
     else if (await clickIf(page.getByRole("button", { name: /^Accept recipient / }), "accept recipient")) { mark("recipient accepted"); }
     else if (await clickIf(page.getByRole("button", { name: /^Fund .* USDC$/ }), "fund")) { mark("fund clicked"); }
+    else if (await clickIf(page.getByRole("button", { name: /^Activate recipient / }), "activate recipient")) { mark("recipient activated"); }
     else if (await clickIf(page.getByRole("button", { name: /^Accept delivery / }), "accept delivery")) { mark("delivery accepted"); }
     else if (await clickIf(page.getByRole("button", { name: "Start the demo agent" }), "start the demo agent")) { mark("agent started"); }
-    else if (!reached.paid && Date.now() - paidAt > 15_000 && await clickIf(page.getByRole("button", { name: "Let the agent pay the due item" }), "agent pay")) { paidAt = Date.now(); }
+    else if (reached["delivery accepted"] && !reached.paid && Date.now() - paidAt > 15_000 && await clickIf(page.getByRole("button", { name: "Let the agent pay the due item" }), "agent pay")) { paidAt = Date.now(); }
     else if (reached.paid && !reached.refused && await clickIf(page.getByRole("button", { name: "Ask the agent to pay a new account" }), "agent pay a new account")) { /* result below */ }
     else if (reached.refused) {
       const hold = page.getByRole("button", { name: /Hold to revoke/ });
       if (await enabled(hold)) {
+        // the hold button confirms on a held Space key as well as a held pointer; the key is the steadier gesture here
         log("hold: revoke");
-        const box = await hold.first().boundingBox();
-        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-        await page.mouse.down();
-        await page.waitForTimeout(1600);
-        await page.mouse.up();
-        await page.getByText(/Agent revoked/).waitFor({ timeout: 120_000 });
+        at("hold to revoke");
+        await hold.first().focus();
+        await page.keyboard.down("Space");
+        await page.waitForTimeout(1800);
+        await page.keyboard.up("Space");
+        at("wait for Agent revoked");
+        const ok = await page.getByText(/Agent revoked/).first().waitFor({ timeout: 90_000 }).then(() => true, () => false);
+        if (!ok) {
+          const err = await page.locator("[role=status]").allInnerTexts().catch(() => []);
+          log("no revoke yet; status lines:", JSON.stringify(err).slice(0, 400), "; trying again");
+          await page.goto(`${BASE}/agreements/${room}`, { waitUntil: "domcontentloaded" }).catch(() => undefined);
+          await page.waitForTimeout(3000);
+          continue;
+        }
         mark("revoked");
         await shot(page, "revoked");
         break;
@@ -113,8 +149,10 @@ try {
     }
 
     // wait for a click's outcome, then read the demo agent's last result
-    await page.waitForFunction(() => !/Waiting for the network…|Opening the room…|Sealing in this browser…/.test(document.body.innerText), null, { timeout: 180_000 }).catch(() => undefined);
+    at("wait for the network");
+    await page.waitForFunction(() => !/Waiting for the network…|Opening the room…|Sealing in this browser…/.test(document.body.innerText), null, { timeout: 180_000 }).catch(() => log("still waiting for the network after 180 s"));
     const agentBox = page.locator("[role=status]").filter({ hasText: /Paid item|refused|Item \d|could not|Asked to pay/ });
+    at("read results");
     if (await visible(agentBox)) {
       const t = (await agentBox.first().innerText()).replace(/\s+/g, " ");
       if (t !== lastAgentNote) { lastAgentNote = t; log("agent:", t.slice(0, 300)); }
@@ -142,6 +180,7 @@ try {
   await shot(page, "failed").catch(() => undefined);
 } finally {
   delete reached.__lastAction;
+  clearInterval(watchdog);
   log("summary", JSON.stringify(reached));
   await browser.close();
   process.exit(exit);
