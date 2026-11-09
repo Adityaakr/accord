@@ -75,13 +75,13 @@ accord verify · a6.accord-v2.testnet
   keys      0 keys · none · no full access · ok
   sealed    outcome signature ok · commitments match · agreement matches · ok
   release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) · not checked
-  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 6413cc81… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 3d293e48… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
   payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
   record    1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
 verify: 5 checks ok · 1 partial · 1 not checked
 ```
 
-`model` is `partial`: the nonce is bound in the attestation report, but the hardware quote and GPU evidence are not checked here (`make probe-ai` checks them). `release` stays `not checked` until `outlayer-verify` is installed (`docs/build/BLOCKED.md`). `keys` reads `0 keys` because a6's agent was revoked.
+`model` is `partial`: the nonce is bound in the attestation report, but it attests the model as served now, not the negotiating run (the run's own attestation is bound in the signed outcome, which `sealed` checks), and the hardware quote and GPU evidence are not checked here (`make probe-ai` checks them). `release` stays `not checked` until `outlayer-verify` is installed (`docs/build/BLOCKED.md`). `keys` reads `0 keys` because a6's agent was revoked.
 
 `make sandbox`, from a real run on 3 Nov 2026 (the market-making line was then labelled `atlas`; the sandbox now prints `market`):
 

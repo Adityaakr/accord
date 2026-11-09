@@ -184,8 +184,10 @@ async function modelCheck(model: string, nonce: string, key?: string): Promise<[
     const text = await res.text();
     const bound = text.toLowerCase().includes(nonce.toLowerCase());
     // Only the nonce binding is checked here; the hardware quote and the GPU evidence are not, so a pass is partial.
+    // The report is for the model as served today, not the negotiating run; that run's attestation (its nonce,
+    // gateway and candidates) is in the outcome the Sealed Table signed, which the sealed check verifies.
     return bound
-      ? ["model", "partial", `${model} · attestation report fetched with fresh nonce ${nonce.slice(0, 8)}… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them)`]
+      ? ["model", "partial", `${model} · attestation report fetched with fresh nonce ${nonce.slice(0, 8)}… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them)`]
       : ["model", "fail", `${model} · attestation report fetched with fresh nonce ${nonce.slice(0, 8)}… · nonce not found in the report`];
   } catch (e) {
     return ["model", "not_checked", `${model} · ${(e as Error).message}`];

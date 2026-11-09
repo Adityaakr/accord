@@ -56,7 +56,7 @@ export const CHECKS: Check[] = [
   { id: "keys", name: "Agreement keys", meaning: "No full-access key", status: "ok", href: `${acct("a6.accord-v2.testnet")}?tab=accesskeys` },
   { id: "sealed", name: "Sealed outcome", meaning: "Signed inside the enclave", status: "ok", href: tx("GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW") },
   { id: "release", name: "Enclave release", meaning: "Needs the outlayer-verify tool", status: "not checked", href: "https://app.outlayer.ai/docs/trust-verification" },
-  { id: "model", name: "Model attestation", meaning: "The real model, fresh nonce bound; hardware quote not checked here", status: "partial", href: "https://testnet-api.outlayer.ai/attestations/13596" },
+  { id: "model", name: "Model attestation", meaning: "The model as served now, fresh nonce bound; the run's attestation is in the sealed outcome", status: "partial", href: "https://testnet-api.outlayer.ai/attestations/13596" },
   { id: "payee", name: "Recipient", meaning: "Proven on the vendor's domain", status: "ok", href: tx("6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6") },
   { id: "record", name: "Record", meaning: "Payments match the receipts", status: "ok", href: tx("2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ") },
 ]
@@ -71,7 +71,7 @@ code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method
 keys      0 keys · none · no full access · ok
 sealed    outcome signature ok · commitments match · agreement matches · ok
 release   sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) · not checked
-model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 6413cc81… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 3d293e48… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
 payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
 record    1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
 verify: 5 checks ok · 1 partial · 1 not checked`

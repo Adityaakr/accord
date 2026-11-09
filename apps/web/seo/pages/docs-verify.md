@@ -32,7 +32,7 @@ Other agreements to check
 
 - 04 Enclave release The Sealed Table build (`7c832ce9…`) and its keys from pubkey run `13682`. Checking the run's attestation needs the outlayer-verify tool. [not checked](https://app.outlayer.ai/docs/trust-verification)
 
-- 05 Model attestation The real model (`z-ai/glm-5.3-flash`): the attestation report is fetched with a fresh nonce and the nonce is bound in it. The hardware quote and GPU evidence are not checked by `make verify`; `make probe-ai` checks them. [partial](https://testnet-api.outlayer.ai/attestations/13596)
+- 05 Model attestation The real model (`z-ai/glm-5.3-flash`): the attestation report is fetched with a fresh nonce and the nonce is bound in it. This attests the model as served now, not the negotiating run; the run's own attestation is bound in the signed outcome, which the sealed check verifies. The hardware quote and GPU evidence are not checked by `make verify`; `make probe-ai` checks them. [partial](https://testnet-api.outlayer.ai/attestations/13596)
 
 - 06 Recipient `halcyon-mm.testnet`, proven on the vendor's domain `accordweb-production.up.railway.app`, signed by the release's Payee key. [ok](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6)
 
@@ -52,7 +52,7 @@ accord verify · a6.accord-v2.testnet
 
 - release sealed-table wasm 7c832ce9… · keys from pubkey run 13682 · OutLayer attestation record not checked here (needs outlayer-verify) not checked
 
-- model z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 6413cc81… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+- model z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 3d293e48… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
 
 - payee halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active ok
 

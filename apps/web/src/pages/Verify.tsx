@@ -59,7 +59,7 @@ type FullCheck =
 const CHECK_NAMES: Record<string, string> = Object.fromEntries(CHECKS.map((c) => [c.id, c.name]))
 const CHECK_MEANINGS: Record<string, string> = {
   code: "Matches a published release", keys: "No full-access key", sealed: "Signed inside the enclave",
-  release: "Needs the outlayer-verify tool", model: "The real model, fresh nonce", payee: "Proven on the vendor's domain",
+  release: "Needs the outlayer-verify tool", model: "The model as served now, fresh nonce", payee: "Proven on the vendor's domain",
   record: "Payments match the receipts",
 }
 const liveResult = (s: string): Result => (s === "ok" ? "ok" : s === "not_checked" ? "not checked" : s === "partial" ? "partial" : "not ok")

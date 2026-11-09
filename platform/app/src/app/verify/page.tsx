@@ -26,7 +26,7 @@ export default function Verify() {
         <Panel title="code"><p className="body">The account runs exactly its release&apos;s code, and has no method that deploys code.</p></Panel>
         <Panel title="keys"><p className="body">At most one key: a function-call key for <span className="mono">act</span> on the account itself. Never a full-access key.</p></Panel>
         <Panel title="sealed"><p className="body">The Sealed Table&apos;s outcome is signed by the release&apos;s key and names this agreement and both commitments on chain.</p></Panel>
-        <Panel title="model"><p className="body">NEAR AI Cloud&apos;s attestation report, fetched with a fresh nonce, binds that nonce.</p></Panel>
+        <Panel title="model"><p className="body">NEAR AI Cloud&apos;s attestation report, fetched with a fresh nonce, binds that nonce. It attests the model as served now; the negotiating run&apos;s own attestation is bound in the signed outcome (the sealed check).</p></Panel>
         <Panel title="payee"><p className="body">The active recipient&apos;s domain proof is signed by the release&apos;s Payee key, approved by the authority and accepted by the buyer.</p></Panel>
         <Panel title="record"><p className="body">Payments, refusals, exceptions, reserved items and observation conflicts, with receipts that add up to what was paid.</p></Panel>
       </div>

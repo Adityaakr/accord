@@ -517,7 +517,7 @@ accord verify · <agreement>
   keys      <0 | 1> key · FunctionCall · receiver self · methods [act] · no full access · ok
   release   sealed-table wasm <8>… · keys from pubkey run <task id> · attestation verified · seed binding <shown | not exposed> · ok
   sealed    outcome signature ok · commitments match · nonce matches · ok
-  model     <model> · attestation report fetched with fresh nonce <8>… · nonce bound in the report · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+  model     <model> · attestation report fetched with fresh nonce <8>… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
   payee     <recipient> · proof <domain> · authority approved · buyer accepted · active · ok
   record    <n> payments · <n> refusals · <n> exceptions · <n> set aside · <n> observation conflicts · events match state · ok
   verify: <n> checks ok[ · <n> partial][ · <n> failed][ · <n> not checked]
