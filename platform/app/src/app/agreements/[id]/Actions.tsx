@@ -19,6 +19,7 @@ import { can, useOrg, type Capability } from "@/components/org/OrgProvider";
 import styles from "./actions.module.css";
 import { withBase } from "@/lib/basePath";
 import { TxLink } from "@/components/TxLink";
+import Link from "next/link";
 
 type Role = "buyer" | "vendor" | "authority" | "viewer";
 
@@ -57,6 +58,7 @@ export function Actions({
 
   const open = (label: string, fn: () => Promise<unknown>) => () => void run(label, fn);
   const now = a.now;
+  const ended = a.state === "NoDeal" || a.state === "Cancelled" || a.state === "Settled";
   const entries: ReactNode[] = [];
   let hidden = 0;
   // The organisation role shapes what is shown (an operator sees no Fund or Approve); the contract still checks the signer.
@@ -182,7 +184,9 @@ export function Actions({
       aside={w.accountId ? <span className={`${styles.role} ${role === "viewer" ? styles.roleViewer : ""}`}>{role === "viewer" ? "Not a party" : role === "authority" ? "Authority" : role.charAt(0).toUpperCase() + role.slice(1)}</span> : undefined}
     >
       {!w.accountId && <p className="small">Anyone can read this room. Only its buyer, vendor and settlement authority can act, each with their own wallet.</p>}
-      {w.accountId && entries.length === 0 && hidden === 0 && <p className="small">Nothing for you to do here right now.</p>}
+      {w.accountId && entries.length === 0 && hidden === 0 && (ended
+        ? <p className="small">{a.state === "NoDeal" ? "This room ended with no deal, so there is nothing left to sign." : `This room is ${a.state === "Cancelled" ? "cancelled" : "settled"}. Nothing left to sign.`} <Link className="link" href="/try-it">Open a new room</Link> or <Link className="link" href="/agreements/new">create an agreement</Link>.</p>
+        : <p className="small">Nothing for you to do here right now.</p>)}
       {hidden > 0 && <p className="small">{hidden === 1 ? "One action here is" : `${hidden} actions here are`} for other roles in {org.data?.org?.name ?? "your organisation"}. Your role is <span className="mono">{org.role}</span>; an admin can change it in Settings.</p>}
       {org.data?.org && w.accountId && role === "viewer" && (
         <p className="small">Your wallet is not one of this room&apos;s parties. Only <span className="mono">{a.buyer}</span> can sign its buyer actions, whatever role {org.data.org.name} gives you.</p>

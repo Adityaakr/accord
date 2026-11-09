@@ -40,6 +40,11 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
   const txUrl = (h: string) => (explorer ? `${explorer}/txns/${h}` : null);
   const client = useMemo(() => (w.signer ? agreementClient(w.signer, cfg, a.account) : null), [w.signer, cfg, a.account]);
   const closed = a.state === "Settled" || a.state === "Cancelled" || a.state === "NoDeal";
+  // A closed room is never polled, so the panel says why it ended instead of waiting for a step that will not come.
+  const sym = tokenSymbol(cfg, a.factory);
+  const closedText = a.state === "NoDeal"
+    ? `No deal: the buyer's ceiling was below the vendor's floor, so the Sealed Table agreed nothing and no money moved. Open a new room with a ceiling of at least ${sym === "USDC" ? 12 : 30} ${sym}.`
+    : a.state === "Cancelled" ? "This room was cancelled before execution. Nothing left to do." : "This room is settled. Nothing left to do.";
   // Signed out, the panel only describes the room: it never calls the demo endpoints (the counterparty and the agent
   // act for a signed-in visitor, in practice the room's buyer).
   const signedIn = !!w.accountId;
@@ -142,9 +147,10 @@ export function DemoPanel({ agreement: a, explorer }: { agreement: AgreementView
             <span>{last.did}{last.tx ? <> · {txUrl(last.tx) ? <a className="mono link" href={txUrl(last.tx)!} target="_blank" rel="noreferrer">tx {last.tx.slice(0, 8)}</a> : <span className="mono">tx {last.tx.slice(0, 8)}</span>}</> : null}</span>
           ) : <span className="small">None yet in this tab.</span>}
           <span className="eyebrow">next</span>
-          <span className={step?.yourMove ? styles.you : undefined}>{!signedIn ? "Sign in as the buyer to run the demo counterparty in this room." : step ? step.next : "Reading the room…"}</span>
+          <span className={step?.yourMove ? styles.you : undefined}>{closed ? closedText : !signedIn ? "Sign in as the buyer to run the demo counterparty in this room." : step ? step.next : "Reading the room…"}</span>
           {netBusy && <span className="small" role="status">The network is busy, retrying.</span>}
         </div>
+        {closed && <Link className={styles.btn} href="/try-it">Open a new room</Link>}
         {!closed && signedIn && <button type="button" className={styles.btn} disabled={running.current} onClick={() => void runStep()}>Run next step</button>}
 
         {a.state === "Executing" && (

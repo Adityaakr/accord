@@ -9,7 +9,7 @@
 .btn {
   display: inline-flex; align-items: center; justify-content: center; width: 100%;
   padding: 9px 12px; border-radius: var(--radius); background: var(--elevation-medium); color: var(--text-medium);
-  font-weight: 500; transition: background-color 0.3s var(--ease), color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  font-weight: 500; transition: background-color 0.3s var(--ease), color 0.3s var(--ease), box-shadow 0.3s var(--ease); text-decoration: none;
 }
 .btn:hover:not(:disabled) { background: var(--elevation-weak); color: var(--text-strong); }
 .btn:disabled { opacity: 0.55; cursor: default; }
