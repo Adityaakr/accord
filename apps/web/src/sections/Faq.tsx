@@ -37,7 +37,7 @@ const COLUMN_1: Item[] = [
     delay: 0.1,
     title: "Who can see my mandate?",
     description:
-      "No one outside the attested enclaves that run the negotiation. Your browser encrypts it to a key that exists only inside the Sealed Table, the chain stores the ciphertext and a hash, and the Sealed Table decrypts it for one negotiation, in which the negotiators run on NEAR AI Cloud's private inference. The other side sees the agreed terms. What the terms reveal is what any signed agreement reveals: that you were willing to accept them. This rests on the enclave hardware, on your browser running the published code (the command-line tool is the alternative), and on the operator never moving the key to a different build.",
+      "No one outside the attested enclaves that run the negotiation. Your browser encrypts it to a key that exists only inside the Sealed Table, the chain stores the ciphertext and a hash, and the Sealed Table decrypts it for one negotiation, in which the negotiators run on NEAR AI Cloud's private inference. The other side sees the agreed terms. What the terms reveal is what any signed agreement reveals: that you were willing to accept them. This rests on the enclave hardware, on your browser running the published code (the command-line tool is the alternative), and on the operator never moving the key to a different build. On testnet the job's seed condition admits any caller during an agreement's open request window, so an outside party could request extra runs then and learn bounds on the limits; restricting the seed to the agreement's own calls is the next step.",
   },
   {
     id: "PI0KF9DiP",
@@ -58,7 +58,7 @@ const COLUMN_1: Item[] = [
     delay: 0.4,
     title: "Our vendor really did change banks. What happens?",
     description:
-      "The vendor proposes the new account, an enclave fetches a fresh domain proof, the vendor's settlement authority approves, the buyer accepts, and a 24-hour delay runs before the first payment can reach it. One stolen key, on either side, cannot do it.",
+      "The vendor proposes the new account, an enclave fetches a fresh domain proof, the vendor's settlement authority approves, the buyer accepts, and a 24-hour delay runs before the first payment can reach it. One stolen key, on either side, cannot do it. Testnet agreements run in demo mode, where the delay is 120 s. The domain proof and the authority's approval show control of the domain, not that the company legally exists.",
   },
 ]
 /* Column dOcBK4qsU */
