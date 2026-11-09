@@ -2,7 +2,7 @@
 // whole path from argv to output is testable offline.
 
 import { flagBool, flagString, parseArgv } from "./args.js";
-import { COMMANDS, READ_ONLY, USAGE, type Deps, type Output } from "./commands.js";
+import { COMMANDS, READ_ONLY, USAGE, notAnAgreementText, type Deps, type Output } from "./commands.js";
 import { parseRole, redact, secretValues, selectIdentity, type Env, type Identity, type Role } from "./env.js";
 import { toJson } from "./format.js";
 import { KNOWN_FACTORIES, type Network } from "@accord/sdk";
@@ -68,7 +68,19 @@ export async function run(argv: readonly string[], env: Env, io: Io, makeDeps: D
     if (g.network === "mainnet" && !READ_ONLY.has(command)) {
       throw new Error("the CLI signs on testnet only; mainnet is read-only here");
     }
-    if (!g.factory && command !== "recycle") throw new Error("missing --factory (or ACCORD_FACTORY)");
+    if (!g.factory && command !== "recycle") {
+      const id = flagString(args, "agreement");
+      const named = id?.match(/^a\d+\.(.+)$/);
+      if (id && !named) {
+        // Not shaped like an agreement at all: the same one line `verify` prints for an account with no agreement.
+        const error = notAnAgreementText(id);
+        if (g.json) say(toJson({ agreement: id, error }));
+        else io.stderr(redact(`${command}: ${error}`, secrets));
+        return 1;
+      }
+      if (named) throw new Error(`${named[1]} is not a known Accord factory on ${g.network}; pass --factory (or ACCORD_FACTORY)`);
+      throw new Error("missing --factory (or ACCORD_FACTORY)");
+    }
     const identity = command === "recycle" ? selectIdentity("recipient", env)
       : g.role ? selectIdentity(g.role, env) : undefined;
     const deps = makeDeps({ ...g, identity, env });

@@ -384,6 +384,12 @@ const check: Handler = async (ctx) => {
   return p.rating === "block" ? 1 : 0;
 };
 
+/** `<id> is not an Accord agreement`, naming the a<n>.<factory> shape when the id does not have it. */
+export function notAnAgreementText(id: string): string {
+  return /^a\d+\./.test(id) ? `${id} is not an Accord agreement`
+    : `${id} is not an Accord agreement (Accord agreements are named a<n>.<factory>)`;
+}
+
 const verifyCmd: Handler = async (ctx) => {
   const id = agreementId(ctx);
   let r: VerifyReport;
@@ -391,7 +397,8 @@ const verifyCmd: Handler = async (ctx) => {
     r = await ctx.deps.verify(id);
   } catch (e) {
     if (!(e instanceof NotAnAgreementError)) throw e;
-    ctx.out.fail(`verify: ${e.message}`, { agreement: id, error: e.message });
+    const error = notAnAgreementText(id);
+    ctx.out.fail(`verify: ${error}`, { agreement: id, error });
     return 1;
   }
   ctx.out.block(formatVerify(r), r);

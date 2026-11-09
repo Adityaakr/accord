@@ -187,6 +187,29 @@ describe("other commands", () => {
     expect(r.out).toBe("");
     expect(r.err).toBe("verify: a999.accord-v2.testnet is not an Accord agreement");
   });
+  it("verify on an id that is not shaped a<n>.<factory> says so, with or without a factory set", async () => {
+    const bare = { ...env, ACCORD_FACTORY: "" };
+    const io = () => {
+      const out: string[] = [];
+      const err: string[] = [];
+      return { out, err, io: { stdout: (t: string) => out.push(t), stderr: (t: string) => err.push(t) } };
+    };
+    const a = io();
+    expect(await run(["verify", "--agreement", "nobody.testnet"], bare, a.io, fakes().factory)).toBe(1);
+    expect(a.out).toEqual([]);
+    expect(a.err.join("\n")).toBe("verify: nobody.testnet is not an Accord agreement (Accord agreements are named a<n>.<factory>)");
+    const j = io();
+    expect(await run(["verify", "--agreement", "nobody.testnet", "--json"], bare, j.io, fakes().factory)).toBe(1);
+    expect(JSON.parse(j.out.join(""))).toEqual({
+      agreement: "nobody.testnet", error: "nobody.testnet is not an Accord agreement (Accord agreements are named a<n>.<factory>)",
+    });
+    const u = io();
+    expect(await run(["verify", "--agreement", "a1.evil.testnet"], bare, u.io, fakes().factory)).toBe(1);
+    expect(u.err.join("\n")).toBe("error: evil.testnet is not a known Accord factory on testnet; pass --factory (or ACCORD_FACTORY)");
+    const r = await cli(["verify", "--agreement", "nobody.testnet"], fakes({ verifyError: new NotAnAgreementError("nobody.testnet") }));
+    expect(r.code).toBe(1);
+    expect(r.err).toBe("verify: nobody.testnet is not an Accord agreement (Accord agreements are named a<n>.<factory>)");
+  });
   it("check exits 1 on block; --json gives the full preflight", async () => {
     const r = await cli(["check", "x.testnet", "--agreement", ID, "--json"], fakes({ rating: "block" }));
     expect(r.code).toBe(1);
