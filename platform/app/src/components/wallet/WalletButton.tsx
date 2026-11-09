@@ -7,11 +7,13 @@ import { useFinish } from "./useFinish";
 import styles from "./WalletButton.module.css";
 import { Identicon } from "@/components/account/Identicon";
 import { shortAccount as short } from "@/components/account/AccountId";
+import { fmt, useBalances } from "./useBalances";
 
 export function WalletButton() {
   const w = useWallet();
   const f = useFinish();
   const [open, setOpen] = useState(false);
+  const bal = useBalances(w.kind === "sandbox" ? null : w.accountId ?? null);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,6 +29,13 @@ export function WalletButton() {
         <button type="button" className={styles.account} onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           <Identicon id={w.accountId} size={24} radius={6} />
           <span className={`mono ${styles.id}`} title={w.accountId}>{short(w.accountId)}</span>
+          {w.kind !== "sandbox" && (
+            <span className={`mono ${styles.bal}`} aria-label="Available balance">
+              <span className={styles.balItem}>{fmt(bal.near, 24)} <span className={styles.balUnit}>NEAR</span></span>
+              <span className={styles.balItem}>{fmt(bal.tusdc, 6)} <span className={styles.balUnit}>tUSDC</span></span>
+              {bal.usdc !== null && <span className={styles.balItem}>{fmt(bal.usdc, 6)} <span className={styles.balUnit}>USDC</span></span>}
+            </span>
+          )}
           {w.method === "throwaway" && <span className={styles.tag}>{THROWAWAY_LABEL}</span>}
         </button>
         {open && (

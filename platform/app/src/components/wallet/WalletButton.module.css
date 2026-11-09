@@ -24,7 +24,7 @@
   transition: background-color 0.2s var(--ease), color 0.2s var(--ease);
 }
 .account:hover { background: var(--elevation-weak); color: var(--text-strong); }
-.account { max-width: 260px; min-width: 0; }
+.account { max-width: 560px; min-width: 0; }
 .id { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .menu {
   position: absolute;
@@ -59,3 +59,10 @@
 .reset { font-size: 12px; color: var(--text-weak); text-decoration: underline; text-underline-offset: 3px; }
 .reset:hover { color: var(--text-strong); }
 .resetNote { font-size: 12px; color: var(--text-medium); }
+
+/* available balance beside the account (useBalances): quiet, mono, separated by hairlines */
+.bal { display: inline-flex; align-items: center; gap: 0; padding-left: 10px; margin-left: 2px; border-left: 1px solid var(--hairline); font-size: 12px; color: var(--text-medium); white-space: nowrap; }
+.balItem + .balItem { margin-left: 10px; padding-left: 10px; border-left: 1px solid var(--hairline); }
+.balUnit { color: var(--text-weak); }
+@media (max-width: 899.98px) { .bal .balItem:nth-child(n+2) { display: none; } }
+@media (max-width: 599.98px) { .bal { display: none; } }
