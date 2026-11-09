@@ -107,6 +107,8 @@ verify: 5 checks ok · 1 partial · 1 not checked
 | `a8`, `a15`, `a21.accord-v2.testnet` | `/app/try-it` with a fresh account, on the public URL with relayed wallet calls, and without a wallet |
 | `a32.accord-v2.testnet` | The run [Watch the replay](https://accordweb-production.up.railway.app/app/replay) plays back |
 
+**Flow proofs.** A dispute, a re-delivery, a payment refused while an item is disputed, and an early close that refunds the unspent escrow ran on testnet in `a48.accord-v2.testnet` (10 Nov 2026), each step linked in [`docs/runs.md`](docs/runs.md#flow-proofs). Reproduce with `cd platform && make dispute-close`.
+
 Every transaction of these runs is linked in [`docs/runs.md`](docs/runs.md); the notes behind them are in [`platform/DECISIONS.md`](platform/DECISIONS.md) sections 21 and 24 to 28.
 
 | Infrastructure | Account or link |
