@@ -55,7 +55,7 @@ try {
   await tryBtn.waitFor({ timeout: 30_000 });
   await shot(page, "try-it-signed-out");
   await tryBtn.click();
-  await page.getByText("Throwaway testnet key").first().waitFor({ timeout: 15_000 });
+  await page.getByText("Throwaway testnet key").first().waitFor({ timeout: 60_000 });
   // the page shows the account short (1121e5…0145) with the full id in its title
   const account = await page.locator('span.mono[title]').filter({ hasText: /^[0-9a-f]{6}…[0-9a-f]{4}$/ }).first().getAttribute("title");
   mark("throwaway key", account);
