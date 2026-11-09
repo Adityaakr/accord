@@ -1,7 +1,8 @@
 "use client";
 
-// The one way in: the person's own NEAR wallet through HOT Connect (@hot-labs/near-connect). On the local sandbox the
-// wallet choice becomes "Act as…" a sandbox principal.
+// The way in: the person's own NEAR wallet through HOT Connect (@hot-labs/near-connect). On testnet a visitor without
+// a wallet can try with a throwaway key made in this tab instead. On the local sandbox the wallet choice becomes
+// "Act as…" a sandbox principal.
 
 import { shortAccount } from "@/components/account/AccountId";
 import { useWallet } from "./wallet/WalletProvider";
@@ -13,6 +14,7 @@ export function SignInCard({ title = "Sign in to Accord" }: { title?: string }) 
     <div className={styles.card}>
       <div className={styles.head}>
         <p className={styles.title}>{title}</p>
+        {w.kind !== "sandbox" && <p className={styles.lead}>Use your NEAR wallet to open and approve deal rooms.</p>}
       </div>
 
       {w.kind === "sandbox" ? (
@@ -30,10 +32,22 @@ export function SignInCard({ title = "Sign in to Accord" }: { title?: string }) 
         </div>
       ) : (
         <>
-          <button type="button" className={styles.wallet} onClick={() => void w.connect()} disabled={w.connecting}>
-            <WalletIcon />
-            <span>{w.connecting ? "Opening your wallet…" : "Connect a NEAR wallet"}</span>
-          </button>
+          <div className={styles.group}>
+            <button type="button" className={styles.wallet} onClick={() => void w.connect()} disabled={w.connecting}>
+              <WalletIcon />
+              <span>{w.connecting ? "Opening your wallet…" : "Connect a NEAR wallet"}</span>
+            </button>
+            <p className={styles.note}>Non-custodial: your keys never leave your wallet.</p>
+          </div>
+          {/* offered on testnet only (WalletProvider.throwawayAvailable) */}
+          {w.throwawayAvailable && (
+            <div className={styles.group}>
+              <button type="button" className={styles.alt} onClick={() => void w.startThrowaway()} disabled={w.connecting}>
+                <span>Try without a wallet</span>
+              </button>
+              <p className={styles.note}>Creates a temporary key in this browser tab. Closing the tab removes it.</p>
+            </div>
+          )}
         </>
       )}
       {w.error && <p className={styles.error} role="alert">{w.error}</p>}

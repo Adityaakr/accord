@@ -2,7 +2,7 @@
 .card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
   width: 100%;
   max-width: 420px;
   padding: 28px 26px 24px;
@@ -11,7 +11,7 @@
   border: 1px solid rgba(var(--ink-rgb), 0.09);
   box-shadow: 0 40px 80px -40px rgba(var(--shadow-rgb), 0.7);
 }
-.head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
 .title { font-size: 22px; letter-spacing: -0.03em; color: var(--text-strong); }
 .lead { font-size: 13.5px; line-height: 1.55; color: var(--text-weak); }
 .wallet {
@@ -27,6 +27,22 @@
 .wallet { background: var(--white); color: var(--on-white); }
 .wallet:hover:not(:disabled) { box-shadow: 0 0 0 2px rgba(var(--ink-rgb), 0.45); }
 .wallet:disabled { opacity: 0.7; cursor: progress; }
+.group { display: flex; flex-direction: column; gap: 10px; }
+.alt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-weight: 500;
+  color: var(--text-medium);
+  background: transparent;
+  border: 1px solid var(--hairline-strong);
+  transition: background-color 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.alt:hover:not(:disabled) { background: rgba(var(--ink-rgb), 0.04); color: var(--text-strong); border-color: var(--teal-line); }
+.alt:disabled { opacity: 0.7; cursor: progress; }
 .note { font-size: 12.5px; line-height: 1.5; color: var(--text-faint); text-align: center; }
 .sandbox { display: flex; flex-direction: column; gap: 10px; }
 .roles { display: flex; flex-direction: column; gap: 6px; }

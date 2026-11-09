@@ -51,3 +51,25 @@
   color: var(--text-medium);
 }
 .item:hover { background: var(--elevation-medium); color: var(--text-strong); }
+.tag {
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--teal);
+  background: var(--teal-wash);
+  border: 1px solid var(--teal-line);
+}
+@media (max-width: 640px) { .tag { display: none; } }
+.throwaway { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tagAlways {
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--teal);
+  background: var(--teal-wash);
+  border: 1px solid var(--teal-line);
+}
+.reset { font-size: 12px; color: var(--text-weak); text-decoration: underline; text-underline-offset: 3px; }
+.reset:hover { color: var(--text-strong); }

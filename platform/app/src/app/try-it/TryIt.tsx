@@ -1,13 +1,16 @@
 "use client";
 
 // Five steps, each with its live status read from the chain (or the faucet) and one button. The visitor signs every
-// buyer step in their own wallet; Accord's demo vendor answers in the room.
+// buyer step in their own wallet, or with a throwaway testnet key made in this tab ("Try without a wallet"); Accord's
+// demo vendor answers in the room. With the throwaway key the faucet and the room open on their own: there is no
+// wallet prompt to wait for, and every call is still signed in this browser.
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Accord, AccordError, DEMO_PARAMS, formatUnits, type AgreementView } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
+import { ThrowawayTag } from "@/components/wallet/ThrowawayTag";
 import { CIRCLE_FAUCET, useAppConfig } from "@/components/AppConfig";
 import { useOrg } from "@/components/org/OrgProvider";
 import { IconTile } from "@/components/IconTile";
@@ -36,6 +39,8 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
   const [bal, setBal] = useState<Balances | null>(null);
   const [room, setRoom] = useState<AgreementView | null>(null);
   const [buyerSealed, setBuyerSealed] = useState(false);
+  // the account whose room lookup has finished, so the throwaway flow never opens a second room while it reads
+  const [checked, setChecked] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ step: number; ok: boolean; text: string; txs?: { label: string; hash: string }[] } | null>(null);
   // Settlement: test USDC from our faucet by default; Circle's testnet USDC when the server offers it and the visitor
@@ -50,7 +55,7 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
   const txUrl = (h: string) => (explorer ? `${explorer}/txns/${h}` : null);
 
   const load = useCallback(async () => {
-    if (!w.accountId) { setBal(null); setRoom(null); return; }
+    if (!w.accountId) { setBal(null); setRoom(null); setChecked(null); return; }
     const a = new Accord({ network: network === "sandbox" ? "sandbox" : "testnet", factory, rpc: cfg.rpc });
     try {
       const ft = (await a.config()).token;
@@ -74,7 +79,9 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
       const [v, cm] = await Promise.all([c.get().catch(() => null), c.commitments().catch(() => null)]);
       setRoom(v);
       setBuyerSealed(!!cm?.buyer || (v ? v.state !== "Sealed" : false));
-    } else setRoom(null);
+      // an unreadable room (slow RPC) stays unchecked, so nothing opens a new one in its place
+      if (v) setChecked(w.accountId);
+    } else { setRoom(null); setChecked(w.accountId); }
   }, [w.accountId, network, cfg, demo.vendor, factory]);
 
   useEffect(() => {
@@ -119,6 +126,19 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
     } finally { setBusy(null); }
   }
 
+  // The throwaway key signs without a prompt, so the flow moves on by itself: faucet, then the room. Each runs once
+  // per page load; a failure stays on screen with its button, as with a wallet.
+  const auto = useRef({ faucet: false, create: false });
+  const throwaway = w.method === "throwaway";
+  useEffect(() => {
+    if (!throwaway || !bal || busy !== null || room || checked !== w.accountId) return;
+    if (!funded && ready.faucet && !auto.current.faucet) { auto.current.faucet = true; void faucet(); return; }
+    if (funded && !auto.current.create) { auto.current.create = true; void create(); }
+    // faucet and create read the latest state when they run
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [throwaway, bal, busy, room, funded, ready.faucet, checked, w.accountId]);
+  useEffect(() => { if (!throwaway) auto.current = { faucet: false, create: false }; }, [throwaway]);
+
   const s1: Status = w.accountId ? "done" : "now";
   const s2: Status = !w.accountId ? "later" : funded || room ? "done" : "now";
   const s3: Status = room ? "done" : s2 === "done" ? "now" : "later";
@@ -156,10 +176,14 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
         </fieldset>
       )}
       <ol className={styles.steps}>
-        <Row n={1} icon="key" status={s1} title="Connect a wallet" text={w.accountId
-          ? <>Signed in as <span className="mono">{w.accountId}</span>.</>
-          : <>A NEAR testnet wallet: <a className="link" href="https://wallet.meteorwallet.app" target="_blank" rel="noreferrer">Meteor</a> or <a className="link" href="https://wallet.intear.tech" target="_blank" rel="noreferrer">Intear</a> (switch it to testnet). Ledger, Nightly and WalletConnect work too. Meteor and Intear send through Accord&apos;s relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit from the faucet&apos;s NEAR).</>}>
-          {!w.accountId && <Link className={styles.primary} href="/signin?next=/try-it">Sign in</Link>}
+        <Row n={1} icon="key" status={s1} title="Connect a wallet, or try without one" text={w.accountId
+          ? <>Signed in as <span className="mono" style={{ overflowWrap: "anywhere" }}>{w.accountId}</span>. <ThrowawayTag />{throwaway && <> The faucet funds it and the room opens on their own; every call is signed in this tab.</>}</>
+          : <>{w.throwawayAvailable && <>No wallet? Try without one: the page creates a temporary key in this browser tab, funded by Accord&apos;s faucet. Closing the tab removes it. Or connect your</>}{!w.throwawayAvailable && <>Your</>} NEAR wallet: <a className="link" href="https://wallet.meteorwallet.app" target="_blank" rel="noreferrer">Meteor</a> or <a className="link" href="https://wallet.intear.tech" target="_blank" rel="noreferrer">Intear</a>. Ledger, Nightly and WalletConnect work too. Meteor and Intear send through Accord&apos;s relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit from the faucet&apos;s NEAR).</>}>
+          {!w.accountId && w.throwawayAvailable && (
+            <button type="button" className={styles.primary} onClick={() => void w.startThrowaway()}>Try without a wallet</button>
+          )}
+          {!w.accountId && <Link className={w.throwawayAvailable ? styles.secondary : styles.primary} href="/signin?next=/try-it">Connect a wallet</Link>}
+          {w.error && !w.accountId && <p className="small" role="alert">{w.error}</p>}
         </Row>
 
         <Row n={2} icon="bank" status={s2} title="Get test funds" text={<>
@@ -178,10 +202,10 @@ export function TryIt({ network, explorer, deposit, demo, ready }: {
 
         <Row n={3} icon="store" status={s3} title="Open a deal room" text={room
           ? <>Your room is <Link className="mono link" href={roomHref!}>{room.account}</Link>: {room.title}.</>
-          : <>Prefilled: a vendor contract with <span className="mono">{demo.vendor}</span>, its authority <span className="mono">{demo.authority}</span>, domain <span className="mono">{demo.domain}</span>, titled &quot;{TITLE}&quot;. Your wallet signs <span className="mono">create_agreement</span> with a {deposit ? formatUnits(deposit, 24) : "2"} NEAR deposit.</>}>
+          : <>Prefilled: a vendor contract with <span className="mono">{demo.vendor}</span>, its authority <span className="mono">{demo.authority}</span>, domain <span className="mono">{demo.domain}</span>, titled &quot;{TITLE}&quot;. {throwaway ? "Your throwaway key signs" : "Your wallet signs"} <span className="mono">create_agreement</span> with a {deposit ? formatUnits(deposit, 24) : "2"} NEAR deposit.</>}>
           {!room && w.accountId && (
             <button type="button" className={styles.primary} disabled={busy !== null || s3 !== "now"} onClick={() => void create()}>
-              {busy === "create" ? "Waiting for your wallet…" : "Create the room"}
+              {busy === "create" ? (throwaway ? "Opening the room…" : "Waiting for your wallet…") : "Create the room"}
             </button>
           )}
           <Note step={3} />

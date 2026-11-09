@@ -2,15 +2,22 @@
 
 // The connected principal and a `Signer` for the SDK. On testnet it is the party's own wallet through NEAR Connect;
 // on the local sandbox (`make serve`) it is a labelled stand-in that signs with the sandbox's throwaway keys on the
-// local server. Mandates are sealed in this browser either way; only ciphertext leaves it.
+// local server. On testnet a visitor without a wallet can also use a throwaway key made in this tab (./throwaway.ts):
+// it stays in sessionStorage, is never sent to the server, and is gone when the tab closes. Mandates are sealed in
+// this browser either way; only ciphertext leaves it.
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { fromBase64, toTxResult, type Signer, type TxResult } from "@accord/sdk";
 import { friendlyWalletError, isWalletNetworkError, rawWalletError, walletErrorMessage } from "./txError";
+import { useAppConfig } from "@/components/AppConfig";
+import { clearThrowawayKey, implicitAccountId, loadThrowawayKey, newThrowawayKey, saveThrowawayKey, throwawaySigner } from "./throwaway";
 
 export type WalletKind = "near-connect" | "sandbox";
-/** How the person signed in: their own NEAR wallet, or a local sandbox key. */
-export type SignInMethod = "wallet" | "sandbox";
+/** How the person signed in: their own NEAR wallet, a local sandbox key, or a throwaway testnet key in this tab. */
+export type SignInMethod = "wallet" | "sandbox" | "throwaway";
+
+/** The label the app shows for an account signed in with a throwaway key. */
+export const THROWAWAY_LABEL = "Throwaway testnet key";
 
 export interface WalletState {
   kind: WalletKind;
@@ -22,6 +29,10 @@ export interface WalletState {
   error: string | null;
   connect: (sandboxRole?: string) => Promise<void>;
   disconnect: () => Promise<void>;
+  /** True on testnet, where "Try without a wallet" is offered. Hidden everywhere else. */
+  throwawayAvailable: boolean;
+  /** Makes a throwaway testnet key in this tab and signs in with it. */
+  startThrowaway: () => Promise<void>;
   sandboxPrincipals: { role: string; account: string }[];
 }
 
@@ -142,6 +153,9 @@ function sandboxSigner(role: string, accountId: string): Signer {
 export function WalletProvider({ network, children }: { network: string; children: ReactNode }) {
   const kind: WalletKind = network === "local sandbox" ? "sandbox" : "near-connect";
   const chain: "mainnet" | "testnet" = network === "mainnet" ? "mainnet" : "testnet";
+  const { rpc } = useAppConfig();
+  const throwawayAvailable = kind === "near-connect" && network === "testnet";
+  const [throwaway, setThrowaway] = useState(false);
   const [connector, setConnector] = useState<Connector | null>(null);
   const [accountId, setAccountId] = useState<string | null>(null);
   const [signer, setSigner] = useState<Signer | null>(null);
@@ -173,6 +187,14 @@ export function WalletProvider({ network, children }: { network: string; childre
       if (isWalletNetworkError(rawWalletError(ev.reason))) ev.preventDefault();
     };
     window.addEventListener("unhandledrejection", quiet);
+    // a throwaway key in this tab's sessionStorage (testnet only) signs in again on reload
+    const kept = throwawayAvailable ? loadThrowawayKey() : null;
+    if (kept) {
+      const id = implicitAccountId(kept);
+      setAccountId(id);
+      setSigner(throwawaySigner(kept, { rpc }));
+      setThrowaway(true);
+    }
     (async () => {
       const { NearConnector } = await import("@hot-labs/near-connect");
       const c = new NearConnector({ network: chain }) as unknown as Connector;
@@ -182,19 +204,32 @@ export function WalletProvider({ network, children }: { network: string; childre
       c.on("wallet:signIn", async () => {
         const { wallet, accounts } = await c.getConnectedWallet();
         const id = accounts[0]?.accountId ?? null;
+        // connecting a real wallet replaces the throwaway key
+        if (id) { clearThrowawayKey(); setThrowaway(false); }
         setAccountId(id);
         setSigner(id ? connectorSigner(wallet, id, chain) : null);
       });
       try {
         const { wallet, accounts } = await c.getConnectedWallet();
         const id = accounts[0]?.accountId ?? null;
-        if (live && id) { setAccountId(id); setSigner(connectorSigner(wallet, id, chain)); }
+        if (live && id && !kept) { setAccountId(id); setSigner(connectorSigner(wallet, id, chain)); }
       } catch {
         // no wallet connected yet
       }
     })();
     return () => { live = false; window.removeEventListener("unhandledrejection", quiet); };
-  }, [kind, chain]);
+  }, [kind, chain, throwawayAvailable, rpc]);
+
+  const startThrowaway = useCallback(async () => {
+    setError(null);
+    if (!throwawayAvailable) { setError("A throwaway key is offered on testnet only."); return; }
+    const kp = loadThrowawayKey() ?? newThrowawayKey();
+    if (!saveThrowawayKey(kp)) { setError("This browser blocks sessionStorage, so a throwaway key cannot be kept. Connect a wallet instead."); return; }
+    const id = implicitAccountId(kp);
+    setAccountId(id);
+    setSigner(throwawaySigner(kp, { rpc }));
+    setThrowaway(true);
+  }, [throwawayAvailable, rpc]);
 
   const connect = useCallback(async (sandboxRole?: string) => {
     setError(null);
@@ -218,19 +253,23 @@ export function WalletProvider({ network, children }: { network: string; childre
   }, [kind, connector, sandboxPrincipals]);
 
   const disconnect = useCallback(async () => {
-    if (kind === "sandbox") {
+    if (throwaway) {
+      // Reset: the key is deleted from this tab; its test funds stay with the account on testnet
+      clearThrowawayKey();
+      setThrowaway(false);
+    } else if (kind === "sandbox") {
       try { localStorage.removeItem("accord-sandbox-principal"); } catch { /* nothing stored */ }
     } else {
       await connector?.disconnect().catch(() => undefined);
     }
     setAccountId(null);
     setSigner(null);
-  }, [kind, connector]);
+  }, [kind, connector, throwaway]);
 
-  const method: SignInMethod | null = accountId ? (kind === "sandbox" ? "sandbox" : "wallet") : null;
+  const method: SignInMethod | null = accountId ? (throwaway ? "throwaway" : kind === "sandbox" ? "sandbox" : "wallet") : null;
   const value = useMemo<WalletState>(() => ({
-    kind, method, network, accountId, signer, connecting, error, connect, disconnect, sandboxPrincipals,
-  }), [kind, method, network, accountId, signer, connecting, error, connect, disconnect, sandboxPrincipals]);
+    kind, method, network, accountId, signer, connecting, error, connect, disconnect, throwawayAvailable, startThrowaway, sandboxPrincipals,
+  }), [kind, method, network, accountId, signer, connecting, error, connect, disconnect, throwawayAvailable, startThrowaway, sandboxPrincipals]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

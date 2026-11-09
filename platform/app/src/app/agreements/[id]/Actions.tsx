@@ -11,6 +11,7 @@ import {
   type AgreementView, type ExceptionView, type ItemView, type PeriodView, type RecipientVersion,
 } from "@accord/sdk";
 import { useWallet } from "@/components/wallet/WalletProvider";
+import { ThrowawayTag } from "@/components/wallet/ThrowawayTag";
 import { useAppConfig } from "@/components/AppConfig";
 import { Panel } from "@/components/ui";
 import { agreementClient, errorText, txLine } from "@/components/me/client";
@@ -176,7 +177,7 @@ export function Actions({
   return (
     <Panel
       title="Your actions"
-      eyebrow={w.accountId ? <>Signed in as <AccountId id={w.accountId} /></> : "Connect a wallet to act as a party"}
+      eyebrow={w.accountId ? <>Signed in as <AccountId id={w.accountId} /> <ThrowawayTag /></> : "Connect a wallet to act as a party"}
       aside={w.accountId ? <span className={`${styles.role} ${role === "viewer" ? styles.roleViewer : ""}`}>{role === "viewer" ? "Not a party" : role === "authority" ? "Authority" : role.charAt(0).toUpperCase() + role.slice(1)}</span> : undefined}
     >
       {!w.accountId && <p className="small">Anyone can read this room. Only its buyer, vendor and settlement authority can act, each with their own wallet.</p>}

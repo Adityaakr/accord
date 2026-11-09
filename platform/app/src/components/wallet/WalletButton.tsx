@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useWallet } from "./WalletProvider";
+import { THROWAWAY_LABEL, useWallet } from "./WalletProvider";
 import styles from "./WalletButton.module.css";
 import { Identicon } from "@/components/account/Identicon";
 import { shortAccount as short } from "@/components/account/AccountId";
@@ -25,10 +25,13 @@ export function WalletButton() {
         <button type="button" className={styles.account} onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           <Identicon id={w.accountId} size={24} radius={6} />
           <span className={`mono ${styles.id}`} title={w.accountId}>{short(w.accountId)}</span>
+          {w.method === "throwaway" && <span className={styles.tag}>{THROWAWAY_LABEL}</span>}
         </button>
         {open && (
           <div className={styles.menu} role="menu">
-            <p className="small">{w.kind === "sandbox" ? "Signing with a local sandbox key" : "Connected through NEAR Connect"}</p>
+            <p className="small">{w.method === "throwaway"
+              ? <><strong>{THROWAWAY_LABEL}</strong>. It lives in this tab only and is gone when you close it. Test funds only.</>
+              : w.kind === "sandbox" ? "Signing with a local sandbox key" : "Connected through NEAR Connect"}</p>
             {w.kind === "sandbox" && w.sandboxPrincipals.map((p) => (
               <button key={p.role} type="button" role="menuitem" className={styles.item}
                 onClick={() => { void w.connect(p.role); setOpen(false); }}>
@@ -37,7 +40,7 @@ export function WalletButton() {
             ))}
             <Link href="/profile" role="menuitem" className={styles.item} onClick={() => setOpen(false)}>Profile</Link>
             <button type="button" role="menuitem" className={styles.item} onClick={() => { void w.disconnect(); setOpen(false); }}>
-              Disconnect
+              {w.method === "throwaway" ? "Reset (delete the throwaway key)" : "Disconnect"}
             </button>
           </div>
         )}

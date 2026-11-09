@@ -12,7 +12,7 @@ import { ThemeToggle } from "@/components/theme/Theme";
 import { Identicon } from "@/components/account/Identicon";
 import { AccountId } from "@/components/account/AccountId";
 
-const METHOD = { wallet: "NEAR wallet (HOT Connect)", sandbox: "Local sandbox key" } as const;
+const METHOD = { wallet: "NEAR wallet (HOT Connect)", sandbox: "Local sandbox key", throwaway: "Throwaway testnet key (this tab only)" } as const;
 
 export default function Profile() {
   const router = useRouter();
@@ -42,10 +42,10 @@ export default function Profile() {
         <div><dt>Network</dt><dd className="mono">{w.network}</dd></div>
         <div><dt>Factory</dt><dd className="mono">{c.factory}</dd></div>
         <div><dt>Theme</dt><dd><ThemeToggle /></dd></div>
-        <div><dt>Keys</dt><dd>{w.method === "sandbox" ? "This is a throwaway sandbox key on this machine. On testnet and mainnet your keys stay in your own wallet." : "Your keys stay in your wallet. Accord never holds a key that can approve terms or move funds."}</dd></div>
+        <div><dt>Keys</dt><dd>{w.method === "throwaway" ? "A throwaway testnet key made in this tab. It is kept in this tab's sessionStorage, never sent to Accord's server, and gone when you close the tab. Test funds only." : w.method === "sandbox" ? "This is a throwaway sandbox key on this machine. On testnet and mainnet your keys stay in your own wallet." : "Your keys stay in your wallet. Accord never holds a key that can approve terms or move funds."}</dd></div>
       </dl>
       <div className={styles.actions}>
-        <button type="button" className={styles.secondary} onClick={() => void w.disconnect().then(() => router.replace("/signin"))}>Disconnect</button>
+        <button type="button" className={styles.secondary} onClick={() => void w.disconnect().then(() => router.replace("/signin"))}>{w.method === "throwaway" ? "Reset" : "Disconnect"}</button>
         <Link href="/enter" className="small weak">Change workspace</Link>
         <Link href="/settings" className="small weak">Organisation and members</Link>
       </div>

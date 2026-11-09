@@ -28,8 +28,9 @@ export default function SignIn() {
   useEffect(() => {
     if (!w.accountId) return;
     // ?next=/try-it returns a visitor to where they started; only paths inside the app
-    router.replace(safeNext(new URLSearchParams(window.location.search).get("next")) ?? "/enter");
-  }, [w.accountId, router]);
+    // a throwaway testnet key is for trying one deal, so it goes to the guided path unless a ?next= says otherwise
+    router.replace(safeNext(new URLSearchParams(window.location.search).get("next")) ?? (w.method === "throwaway" ? "/try-it" : "/enter"));
+  }, [w.accountId, w.method, router]);
   return (
     <div className={styles.page}>
       <span className={styles.weave} aria-hidden="true" />
