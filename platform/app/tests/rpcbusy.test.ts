@@ -54,20 +54,20 @@ describe("postRelay", () => {
         ? Response.json({ error: RPC_BUSY_TEXT, busy: true }, { status: 503, headers: { "Retry-After": "5" } })
         : Response.json({ outcome: { ok: 1 } });
     }) as typeof fetch;
-    expect(await postRelay("AAAA", [0, 0], post)).toEqual({ ok: 1 });
+    expect(await postRelay("AAAA", { busyWaits: [0, 0], post })).toEqual({ ok: 1 });
     expect(bodies).toHaveLength(2);
     expect(bodies[0]).toBe(bodies[1]);
   });
 
   it("gives up with the calm line after its retries", async () => {
     const post = (async () => Response.json({ error: RPC_BUSY_TEXT, busy: true }, { status: 503 })) as typeof fetch;
-    await expect(postRelay("AAAA", [0], post)).rejects.toThrow(/network is busy/);
+    await expect(postRelay("AAAA", { busyWaits: [0], post })).rejects.toThrow(/network is busy/);
   });
 
   it("does not retry a refusal", async () => {
     let n = 0;
     const post = (async () => { n++; return Response.json({ error: "ERR_NOT_ALLOWED" }, { status: 400 }); }) as typeof fetch;
-    await expect(postRelay("AAAA", [0, 0], post)).rejects.toThrow(/ERR_NOT_ALLOWED/);
+    await expect(postRelay("AAAA", { busyWaits: [0, 0], post })).rejects.toThrow(/ERR_NOT_ALLOWED/);
     expect(n).toBe(1);
   });
 });

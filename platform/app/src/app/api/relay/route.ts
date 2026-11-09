@@ -1,8 +1,9 @@
 // Submits a user's NEP-366 signed delegate action through Accord's relayer (testnet). Same-origin JSON only,
-// rate-limited per sender and per client, and only for calls into Accord (checked in relay()). The relayer pays gas
-// and nothing else.
+// rate-limited per sender and per client, and only for calls into Accord (checked in relaySubmit()). The relayer pays
+// gas and nothing else. Answers with the relayer transaction's hash within about 10 s, once it is INCLUDED or still on
+// its way; the page then polls GET /api/relay/status?hash=…&sender=… until the call is final.
 import { NextResponse } from "next/server";
-import { relay } from "@/server/relay";
+import { relaySubmit } from "@/server/relay";
 import { decodeSignedDelegate } from "@/server/delegate";
 import { allow, clientIp, sameOriginJson } from "@/server/ratelimit";
 import { chainErrorResponse } from "@/server/rpcerror";
@@ -24,10 +25,10 @@ export async function POST(req: Request) {
   }
   if (!allow(`relay:${sender}`, 60, 3600_000)) return NextResponse.json({ error: "too many relayed calls this hour" }, { status: 429 });
   try {
-    const { outcome } = await relay(signedDelegate as string);
+    const r = await relaySubmit(signedDelegate as string);
     // the next read of the room (or the token, or the sender) sees this call, not a cached copy from before it
-    readCache.invalidate(sender, decodeSignedDelegate(signedDelegate as string).delegateAction.receiverId);
-    return NextResponse.json({ outcome });
+    readCache.invalidate(r.sender, r.receiver);
+    return NextResponse.json({ hash: r.hash, sender: r.sender, included: r.included });
   } catch (e) {
     return chainErrorResponse(e);
   }

@@ -10,6 +10,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { fromBase64, toTxResult, type Signer, type TxResult } from "@accord/sdk";
 import { friendlyWalletError, isWalletNetworkError, rawWalletError, walletErrorMessage } from "./txError";
 import { useAppConfig } from "@/components/AppConfig";
+import { relayAndWait } from "./relayClient";
 import { clearThrowawayKey, implicitAccountId, loadThrowawayKey, newThrowawayKey, saveThrowawayKey, throwawaySigner } from "./throwaway";
 
 export type WalletKind = "near-connect" | "sandbox";
@@ -68,12 +69,12 @@ async function sendRelayed(wallet: ConnectorWallet, accountId: string, chain: st
   const signed = await wallet.signDelegateActions!({ signerId: accountId, network: chain, delegateActions: [{ receiverId, actions: [action] }] });
   const signedDelegate = signed?.signedDelegateActions?.[0];
   if (!signedDelegate) throw new Error("the wallet returned no signed request");
-  const res = await fetch("/api/relay", {
-    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ signedDelegate }),
-  });
-  const body = (await res.json().catch(() => ({}))) as { outcome?: unknown; error?: string };
-  if (!res.ok || !body.outcome) throw Object.assign(new Error(body.error ?? `HTTP ${res.status}`), { relay: true });
-  return body.outcome;
+  // a short post that answers with the hash, then status polls until the call is final (./relayClient)
+  try {
+    return await relayAndWait(signedDelegate);
+  } catch (e) {
+    throw Object.assign(new Error((e as Error).message), { relay: true });
+  }
 }
 
 function connectorSigner(wallet: ConnectorWallet, accountId: string, chain: string): Signer {

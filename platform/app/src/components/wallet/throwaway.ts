@@ -8,6 +8,7 @@
 
 import { Account, KeyPair, KeyPairSigner, actions, buildDelegateAction, encodeSignedDelegate, type KeyPairString } from "near-api-js";
 import { RotatingRpcProvider, isRpcBusy, rpcEndpoints, toTxResult, type Signer, type TxResult } from "@accord/sdk";
+import { relayAndWait, type RelayClientOptions } from "./relayClient";
 
 export const THROWAWAY_STORAGE_KEY = "accord-throwaway-key";
 /** Blocks a relayed request stays valid for; the relayer accepts up to 7200. */
@@ -65,26 +66,16 @@ async function rpcAccessKey(provider: RotatingRpcProvider, accountId: string, pu
   return { nonce: BigInt(r.nonce), height: BigInt(r.block_height) };
 }
 
-/** Tries left and the wait before each when the relayer answers 503 (the network busy). */
-const RELAY_BUSY_WAITS_MS = [3_000, 8_000, 15_000];
-
 /**
- * Posts the delegate; on a 503 "busy" answer waits and posts the same delegate again. Safe: a delegate carries its
- * own nonce, so if an earlier post did land, the repeat is refused on chain (DelegateActionInvalidNonce) and runs
- * nothing twice.
+ * Sends the delegate through Accord's relayer and waits for its final outcome (./relayClient: a short post, then
+ * status polls). A busy 503 posts the same delegate again; a delegate carries its own nonce, so a repeat runs nothing
+ * twice.
  */
-export async function postRelay(signedDelegate: string, waits: number[] = RELAY_BUSY_WAITS_MS, post: typeof fetch = fetch): Promise<unknown> {
-  for (let attempt = 0; ; attempt++) {
-    const res = await post("/api/relay", {
-      method: "POST", signal: AbortSignal.timeout(TIMEOUT_MS), headers: { "content-type": "application/json" }, body: JSON.stringify({ signedDelegate }),
-    });
-    const body = (await res.json().catch(() => ({}))) as { outcome?: unknown; error?: string; busy?: boolean };
-    if (res.status === 503 && body.busy && attempt < waits.length) {
-      await new Promise((r) => setTimeout(r, waits[attempt]));
-      continue;
-    }
-    if (!res.ok || !body.outcome) throw new Error(`Accord's relayer could not send this transaction: ${body.error ?? `HTTP ${res.status}`}.`);
-    return body.outcome;
+export async function postRelay(signedDelegate: string, opts: RelayClientOptions = {}): Promise<unknown> {
+  try {
+    return await relayAndWait(signedDelegate, opts);
+  } catch (e) {
+    throw new Error(`Accord's relayer could not send this transaction: ${(e as Error).message}.`);
   }
 }
 
@@ -94,7 +85,7 @@ export function defaultDeps(kp: KeyPair, accountId: string, rpc: string): Throwa
   const account = new Account(accountId, provider, new KeyPairSigner(kp));
   return {
     accessKey: (id, pk) => rpcAccessKey(provider, id, pk),
-    relay: postRelay,
+    relay: (b64) => postRelay(b64),
     direct: (receiverId, action) => account.signAndSendTransaction({ receiverId, actions: [action], waitUntil: "FINAL", throwOnFailure: false }),
   };
 }

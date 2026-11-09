@@ -146,3 +146,60 @@ export function innerStatus(tx: RawTx, receiverId: string): Status {
   }
   return o.outcome.status;
 }
+
+// ---- reading a relayed transaction back (GET /api/relay/status) ----
+
+/** The `tx` RPC answer for a relayed transaction, as far as the status route reads it. */
+export interface RelayedTx extends RawTx {
+  final_execution_status?: string;
+  transaction: { hash: string; signer_id?: string; receiver_id?: string; actions?: unknown[] };
+}
+
+/** The receiver of the delegate inside a relayed transaction (the contract the user called), or null. */
+export function delegateReceiver(tx: RelayedTx): string | null {
+  for (const a of tx.transaction.actions ?? []) {
+    const r = (a as { Delegate?: { delegate_action?: { receiver_id?: unknown } } })?.Delegate?.delegate_action?.receiver_id;
+    if (typeof r === "string") return r;
+  }
+  return null;
+}
+
+/**
+ * The words for a failure of the relayer's own transaction (the delegate itself did not run: its key is gone, its
+ * nonce is used, it expired). Names the nearcore error kind as it is, such as `DelegateActionAccessKeyError` with
+ * `AccessKeyNotFound`, so the caller can tell a revoked or deleted key from anything else.
+ */
+export function outerFailureMessage(failure: unknown): string {
+  const f = failure as { ActionError?: { kind?: unknown }; InvalidTxError?: unknown };
+  const kind = f?.ActionError?.kind ?? f?.InvalidTxError ?? failure;
+  if (typeof kind === "string") return kind;
+  const name = kind && typeof kind === "object" ? Object.keys(kind)[0] : undefined;
+  const detail = name ? JSON.stringify((kind as Record<string, unknown>)[name]) : JSON.stringify(kind);
+  return `${name ?? "the relayed transaction failed"}${detail && detail !== "{}" && detail !== "null" ? ` ${detail.slice(0, 300)}` : ""}`;
+}
+
+export type RelayRead = { final: false; status: string } | { final: true; outcome: RawTx };
+
+/**
+ * What the status route answers for one `tx` read. Not final yet: keep polling. Final: the outcome with the user's own
+ * call as its status (innerStatus), as the old waiting route returned it. The relayer's own transaction failed: throws
+ * with nearcore's error kind, as near-api-js did when the route waited. Throws (404) for a transaction that is not
+ * this relayer's for this sender, so the route reports only relayed calls.
+ */
+export function readRelayed(tx: RelayedTx, o: { relayer: string; sender: string }): RelayRead {
+  const t = tx.transaction;
+  if ((t.signer_id && t.signer_id !== o.relayer) || (t.receiver_id && t.receiver_id !== o.sender)) {
+    throw Object.assign(new Error("not a relayed transaction of this sender"), { status: 404 });
+  }
+  const s = tx.final_execution_status ?? "FINAL";
+  if (s !== "FINAL" || !tx.transaction_outcome || !tx.receipts_outcome) return { final: false, status: s };
+  if (tx.status && typeof tx.status === "object" && tx.status.Failure !== undefined) {
+    throw Object.assign(new Error(outerFailureMessage(tx.status.Failure)), { status: 502 });
+  }
+  const receiver = delegateReceiver(tx);
+  return { final: true, outcome: { ...tx, status: receiver ? innerStatus(tx, receiver) : tx.status } };
+}
+
+/** nearcore's answer for a hash it has not seen (yet): a relayed call still on its way, not an error. */
+export const isUnknownTx = (e: unknown): boolean =>
+  (e as Error)?.name === "UnknownTransactionError" || /UNKNOWN_TRANSACTION|^Unknown transaction/i.test(String((e as Error)?.message ?? e));

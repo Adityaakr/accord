@@ -623,6 +623,8 @@ Pages: `/` (deal rooms), `/agreements/new`, `/agreements/[id]` (deal room: the f
 | `/api/payee/check` | GET | the file check result | Advisory onboarding check from the server; the binding proof is the Payee job's |
 | `/api/preflight/approve` | POST | `{ ok }` | `{ agreement, recipient, signature, public_key }`: a NEP-413 signature by the buyer over `accord:preflight:v1:<agreement>:<recipient>`; checked against the buyer's keys over RPC |
 | `/api/preflight/approvals` | GET | approvals | Read by the MCP server |
+| `/api/relay` | POST | `{ hash, sender, included }` | `{ signedDelegate }` (NEP-366, base64 borsh); testnet; calls into Accord only, at most 1 yoctoNEAR attached, never `act`; answers within about 10 s once the relayer's transaction is `INCLUDED` or on its way |
+| `/api/relay/status` | GET | `{ final: false, status }` or `{ final: true, outcome }` | `?hash=&sender=`; the outcome's status is the user's own call; a failed relayer transaction is an error with nearcore's kind (`AccessKeyNotFound`); short cache, rotating provider |
 | `/api/demo-vendor/register` | POST | `{ ok }` | `{ recipient, authority, signature, public_key }`; NEP-413 by the recipient; adds the pair to the demo domain for 24 hours |
 | `/.well-known/accord.json` | GET | the demo domain's list-form file | Only registered pairs; `contact`: "Accord demo domain" |
 | `/api/status` | GET | heartbeats | Keeper, agent, re-arm (the open room, rooms opened today against the cap), last job runs, RPC |
