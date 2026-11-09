@@ -245,7 +245,7 @@ Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it). Ev
 | # | Do | See |
 | --- | --- | --- |
 | 1 | **Try without a wallet**, or **Connect a wallet**: a NEAR testnet wallet such as Meteor or Intear. Without a wallet, the page makes a throwaway testnet key in this tab (sessionStorage only, never sent to the server, gone when the tab closes), and steps 2 and 3 run on their own | `01` marked done, with your account; for the throwaway key, a 64-character implicit account labelled `Throwaway testnet key` |
-| 2 | **Get test funds** | `0.00 NEAR` becomes `2.50 NEAR · 100.00 tUSDC`, both faucet transactions linked |
+| 2 | **Get test funds** (once a day per account, up to 10 accounts per connection a day; if the faucet refuses, the step links the public room, a recorded run and Verify) | `0.00 NEAR` becomes `2.35 NEAR · 100.00 tUSDC`, both faucet transactions linked |
 | 3 | **Create the room** | `Your room is a8.accord-v2.testnet: My first deal room.` (your number will differ) |
 | 4 | **Seal your mandate** with the Northwind preset (`40` tUSDC ceiling, 2 to 4 items) | In the Demo counterparty panel: `Sealed the vendor's mandate (Halcyon procurement preset)`, then `Started the negotiation in the Sealed Table`; the state moves `Sealed` to `Attested` |
 | 5 | **Watch the demo counterparty act**, in your room, in four parts: | |
@@ -253,6 +253,7 @@ Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it). Ev
 | 5b | **Start the demo agent** (your wallet signs `install_agent_key`), then **Let the agent pay the due item** | `Paid item 1: 15.00 tUSDC to halcyon-mm.testnet, the active recipient.` |
 | 5c | **Ask the agent to pay a new account** | `ERR_PAYEE_MISMATCH` and `Asked to pay … to halcyon-markets.testnet. The contract refused it and recorded the refusal.` |
 | 5d | Revoke the key from the room header | `Agent revoked · next call rejected by the network` |
+| 6 | With a throwaway key: **Finish: close the room and return the test NEAR** (Reset does the same) | `Done. The room is closed and its test NEAR is back with the faucet.` with the `delete_account` transaction linked: the room closes by `mutual_close` with the demo vendor, `withdraw_near` returns its deposit, and the throwaway account deletes itself into the faucet |
 
 <p align="center">
   <img src="apps/web/public/docs/agent-paid.webp" width="300" alt="The demo agent panel after a payment inside the terms: Paid item 2, 12.00 tUSDC to halcyon-mm.testnet, the active recipient, with the act transaction linked." />

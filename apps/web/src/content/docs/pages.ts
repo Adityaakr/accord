@@ -44,7 +44,7 @@ export const DOC_PAGES: DocPage[] = [
               { name: "Network", value: "NEAR testnet", detail: "Everything on this path is testnet with a test USDC token. Nothing here moves real money." },
               { name: "No wallet", value: "Try without a wallet", detail: "The page makes a throwaway testnet key in your browser tab, funded by Accord's faucet. It is kept in the tab's sessionStorage, never sent to the server, and gone when you close the tab. Test funds only." },
               { name: "Sign-in", value: "Meteor · Intear · Ledger · Nightly · WalletConnect", detail: "Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit)." },
-              { name: "Test funds", value: "2.50 NEAR · 100 tUSDC", detail: "The faucet tops your account up once a day per account. The room's `2 NEAR` deposit is returned when it closes." },
+              { name: "Test funds", value: "2.35 NEAR · 100 tUSDC", detail: "The faucet tops your account up once a day per account, and up to 10 accounts per connection a day. The room's `2 NEAR` deposit is returned when it closes. If the faucet refuses, step 2 offers the public room at [/app/try](/app/try), a recorded run and [/app/verify](/app/verify)." },
               { name: "Counterparty", value: "halcyon-demo.testnet", href: acct("halcyon-demo.testnet"), detail: "Accord's demo vendor, with its authority `halcyon-auth.testnet`. The demo vendor and the demo agent are Accord's own testnet accounts, labelled in the room." },
               { name: "Time", value: "about 5 minutes" },
             ],
@@ -62,12 +62,12 @@ export const DOC_PAGES: DocPage[] = [
               {
                 title: "Open [/app/try-it](/app/try-it) and choose \"Try without a wallet\", or sign in with Meteor or Intear on testnet.",
                 body: "Without a wallet, the page makes a throwaway testnet key in this tab and signs each step with it; the faucet and the room then run on their own.",
-                see: "Step 1 marked done with your account. A throwaway key shows a 64-character implicit account labelled `Throwaway testnet key`.",
+                see: "Step 1 marked done with your account. A throwaway key shows its implicit account short, such as `477577…e512`, with a copy button, labelled `Throwaway testnet key`.",
                 image: { id: "tryit-signed-out", alt: "The /app/try-it page before sign-in: five numbered steps, the first one, Connect a wallet, offering Meteor or Intear.", caption: "`/app/try-it` before sign-in. Each step turns to done as you go." },
               },
               {
                 title: "Get test funds.",
-                see: "Your balance reads `2.50 NEAR` and `100 tUSDC`, with both faucet transactions linked.",
+                see: "Your balance reads `2.35 NEAR` and `100 tUSDC`, with both faucet transactions linked.",
               },
               {
                 title: "Create the room, prefilled against `halcyon-demo.testnet`.",
@@ -119,6 +119,11 @@ export const DOC_PAGES: DocPage[] = [
               {
                 title: "Revoke the key from the room header.",
                 see: "`Agent revoked · next call rejected by the network`. Starting the demo agent again installs a new key.",
+              },
+              {
+                title: "With a throwaway key, click **Finish: close the room and return the test NEAR**.",
+                body: "The room closes early by `mutual_close` with the demo vendor (the escrow comes back to your account), `withdraw_near` returns the room's deposit, and the throwaway account deletes itself with the faucet as beneficiary, so the next visitor can use the NEAR. Reset does the same.",
+                see: "`Done. The room is closed and its test NEAR is back with the faucet.`, with the `delete_account` transaction linked.",
               },
             ],
           },

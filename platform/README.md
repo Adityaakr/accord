@@ -19,7 +19,9 @@ USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, w
 `halcyon-auth.testnet`), and the agent is a demo agent run by Accord for test rooms; both are labelled in the room.
 
 1. Do: **Connect a NEAR wallet**, a NEAR testnet wallet such as Meteor or Intear, or choose **Try without a wallet**: the page makes a throwaway testnet key in this tab (sessionStorage only, never sent to the server, gone when the tab closes), and steps 2 and 3 run on their own. See: `01 Connect a wallet · done`, with your account; for the throwaway key, a 64-character implicit account labelled `Throwaway testnet key`.
-2. Do: **Get test funds**. See: `0.00 NEAR` become `2.50 NEAR · 100.00 tUSDC`, with both faucet transactions linked.
+2. Do: **Get test funds** (once a day per account, up to 10 accounts per connection a day). See: `0.00 NEAR` become
+   `2.35 NEAR · 100.00 tUSDC`, with both faucet transactions linked. If the faucet refuses, the step links the public
+   room (`/app/try`), a recorded run and `/app/verify` instead.
 3. Do: **Create the room**. See: `Your room is a8.accord-v2.testnet: My first deal room.` (your number will differ).
 4. Do: **Seal your mandate** with the Northwind preset (40 tUSDC ceiling, 2 to 4 items). See, in the room's Demo
    counterparty panel: `Sealed the vendor's mandate (Halcyon procurement preset)`, then `Started the negotiation in
@@ -33,6 +35,10 @@ USDC. The vendor in your room is Accord's demo vendor (`halcyon-demo.testnet`, w
    - 5c. Do: **Ask the agent to pay a new account**. See: `ERR_PAYEE_MISMATCH` and `Asked to pay … to
      halcyon-markets.testnet. The contract refused it and recorded the refusal.`
    - 5d. Do: revoke the key from the room header. See: `Agent revoked · next call rejected by the network`.
+6. Do, with a throwaway key: **Finish: close the room and return the test NEAR** (Reset does the same). See: `Done. The
+   room is closed and its test NEAR is back with the faucet.`, with the `delete_account` transaction linked. The room
+   closes by `mutual_close` with the demo vendor, `withdraw_near` returns its deposit, and the throwaway account
+   deletes itself with `faucet.accord-v2.testnet` as beneficiary.
 
 The same path, run with a fresh account through the app's own routes on 8 Nov 2026 (agreement `a8.accord-v2.testnet`):
 faucet [NEAR](https://testnet.nearblocks.io/txns/935XqMoeb4Jt7fBQQHK9T7o9ZWJrWUoZYYCkdPGqhBoa) and

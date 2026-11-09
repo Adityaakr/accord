@@ -12,7 +12,7 @@ Run one deal on NEAR testnet at /app/try-it in about 5 minutes, with or without 
 
 - 03 Sign-in Your own NEAR wallet, switched to testnet. Meteor and Intear send through Accord's relayer, so you pay no gas after opening the room (your wallet pays its 2 NEAR deposit). Meteor · Intear · Ledger · Nightly · WalletConnect
 
-- 04 Test funds The faucet tops your account up once a day per account. The room's `2 NEAR` deposit is returned when it closes. 2.50 NEAR · 100 tUSDC
+- 04 Test funds The faucet tops your account up once a day per account, and up to 10 accounts per connection a day. The room's `2 NEAR` deposit is returned when it closes. If the faucet refuses, step 2 offers the public room at [/app/try](/app/try), a recorded run and [/app/verify](/app/verify). 2.35 NEAR · 100 tUSDC
 
 - 05 Counterparty Accord's demo vendor, with its authority `halcyon-auth.testnet`. The demo vendor and the demo agent are Accord's own testnet accounts, labelled in the room. [halcyon-demo.testnet](https://testnet.nearblocks.io/address/halcyon-demo.testnet)
 
@@ -22,9 +22,9 @@ Sealing a mandate takes a wallet signature (NEP-413) that derives your document 
 
 ## Sign in and open a room
 
-- 01 Open [/app/try-it](/app/try-it) and choose "Try without a wallet", or sign in with Meteor or Intear on testnet. Without a wallet, the page makes a throwaway testnet key in this tab and signs each step with it; the faucet and the room then run on their own. You see Step 1 marked done with your account. A throwaway key shows a 64-character implicit account labelled `Throwaway testnet key`. `/app/try-it` before sign-in. Each step turns to done as you go.
+- 01 Open [/app/try-it](/app/try-it) and choose "Try without a wallet", or sign in with Meteor or Intear on testnet. Without a wallet, the page makes a throwaway testnet key in this tab and signs each step with it; the faucet and the room then run on their own. You see Step 1 marked done with your account. A throwaway key shows its implicit account short, such as `477577…e512`, with a copy button, labelled `Throwaway testnet key`. `/app/try-it` before sign-in. Each step turns to done as you go.
 
-- 02 Get test funds. You see Your balance reads `2.50 NEAR` and `100 tUSDC`, with both faucet transactions linked.
+- 02 Get test funds. You see Your balance reads `2.35 NEAR` and `100 tUSDC`, with both faucet transactions linked.
 
 - 03 Create the room, prefilled against `halcyon-demo.testnet`. Your wallet signs `create_agreement` on the factory `accord-v2.testnet` with a `2 NEAR` deposit. You see A new agreement account such as `a8.accord-v2.testnet`, in state `Sealed`.
 
@@ -43,6 +43,7 @@ The counterparty reads the room and makes the vendor's next valid move, so press
 - 02 Ask the agent to pay a new account. You see `ERR_PAYEE_MISMATCH`: the contract refused it and recorded the refusal. Nothing moves; the refusal appears in the room's activity.
 
 - 03 Revoke the key from the room header. You see `Agent revoked · next call rejected by the network`. Starting the demo agent again installs a new key.
+- 04 With a throwaway key, click **Finish: close the room and return the test NEAR**. The room closes early by `mutual_close` with the demo vendor (the escrow comes back to your account), `withdraw_near` returns the room's deposit, and the throwaway account deletes itself with the faucet as beneficiary, so the next visitor can use the NEAR. Reset does the same. You see `Done. The room is closed and its test NEAR is back with the faucet.`, with the `delete_account` transaction linked.
 
 The demo agent's panel in a test room: a payment inside the terms, then a redirect the contract refused.
 
