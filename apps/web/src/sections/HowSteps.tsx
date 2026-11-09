@@ -54,8 +54,8 @@ const STEPS: Step[] = [
   },
   {
     n: "05", icon: "chart", title: "Checked", short: "Evidence decides each payment", state: "Executing",
-    body: "A payment becomes eligible only when the agreed evidence is recorded: observations of a market at hidden times, the buyer's acceptance of a delivery, or a named reviewer's approval. Otherwise it is withheld for both sides to review.",
-    who: "An attested observer, the buyer or a named reviewer; a keeper triggers scheduled steps", onChain: "Each observation or acceptance, and the result", never: "The keeper moving funds or changing an outcome",
+    body: "A payment becomes eligible only when the agreed evidence is recorded: observations of a market at hidden times or the buyer's acceptance of a delivery; a named reviewer's approval is planned. Otherwise it is withheld for both sides to review.",
+    who: "An attested observer or the buyer (a named reviewer is planned); a keeper triggers scheduled steps", onChain: "Each observation or acceptance, and the result", never: "The keeper moving funds or changing an outcome",
     answer: "Evidence decides: eligible, or withheld for review.",
   },
   {

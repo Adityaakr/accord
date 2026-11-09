@@ -20,7 +20,9 @@ const CAPS = ["Confidential negotiation", "Agent permissions", "Payment controls
    s is the step's illustrative duration in seconds, summed into "Worked for …".
    c pins a step to a capability when its call name doesn't decide it (see capOf). */
 type Step = { k: "think" | "call" | "wait" | "event" | "out"; t: string; r?: string; s: number; bad?: boolean; c?: number }
-type Panel = { room: string; ask: string; answer: string; lines: ReactNode[]; trace: Step[]; detail: Detail }
+/* planned on a panel: the type is built but this panel shows more than it does today (the vendor batch across many
+   agreements), so the panel carries "Planned" while its tab does not. */
+type Panel = { room: string; ask: string; answer: string; lines: ReactNode[]; trace: Step[]; detail: Detail; planned?: boolean }
 type Use = { label: string; icon: PixelName; line: string; planned?: boolean; panel: Panel }
 
 const c = (t: string) => <code>{t}</code>
@@ -71,7 +73,7 @@ const USES: Use[] = [
   {
     label: "Vendor contracts", icon: "bag", line: "Invoices and renewals, paid only against approved obligations",
     panel: {
-      room: "Vendor invoices, October run",
+      room: "Vendor invoices, October run", planned: true,
       ask: "Process October's vendor invoices, 214 in the queue. Pay each one only if it matches its purchase order and a confirmed delivery, only to the vendor's proven address, and hold anything that doesn't.",
       answer: "212 invoices cleared. Two held for you.",
       lines: [
@@ -486,7 +488,7 @@ export function AudienceBand() {
           <span className={styles.weave} aria-hidden="true" />
           <span className={styles.sheen} aria-hidden="true" />
           <div className={styles.stack}>
-            {USES.map((u, i) => <PanelView key={u.label} p={u.panel} planned={u.planned} active={i === active} id={`use-panel-${i}`} labelledBy={`use-tab-${i}`} onOpen={(cap) => setOpen({ use: i, cap })} />)}
+            {USES.map((u, i) => <PanelView key={u.label} p={u.panel} planned={u.planned || u.panel.planned} active={i === active} id={`use-panel-${i}`} labelledBy={`use-tab-${i}`} onOpen={(cap) => setOpen({ use: i, cap })} />)}
           </div>
         </div>
       </div>
