@@ -228,6 +228,7 @@ const agentSections = `Source code (MIT): ${REPO} · Machine-readable facts: ${S
 ## Status
 
 - Network: NEAR testnet only. Mainnet follows an external audit and is not live.
+- Hosts: ${STATUS.hosts}
 - Proof: agreement a6.accord-v2.testnet ran the full flow on 8 Nov 2026 on factory accord-v2.testnet, release 3: sealed limits, the Sealed Table negotiation by the real NEAR AI model inside OutLayer's attested enclave, approvals, funding, a payment, a refused redirect (ERR_PAYEE_MISMATCH) and a revocation. Each of its 12 transactions is linked at ${SITE_URL}/record
 - ${STATUS.release4}
 - ${STATUS.circleUsdc}

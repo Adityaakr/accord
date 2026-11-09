@@ -14,6 +14,8 @@ Agreements negotiated in private, enforced in public.
 [Record](https://accordweb-production.up.railway.app/record) ·
 [Docs](https://accordweb-production.up.railway.app/docs)
 
+The same site is also served at its custom domain, [useaccord.tech](https://useaccord.tech) (the same Railway service; `www.useaccord.tech` has no certificate yet). The `/app/try-it` rooms propose their demo recipient on `useaccord.tech`, which serves the same `/.well-known/accord.json` as the Railway host.
+
 <a href="https://testnet.nearblocks.io/address/accord-v2.testnet"><img alt="Network: NEAR testnet" src="docs/badges/network.svg" /></a>
 <img alt="Settlement: USDC on NEAR, NEP-141" src="docs/badges/settlement.svg" />
 <img alt="Mainnet: after audit" src="docs/badges/mainnet.svg" />
@@ -351,7 +353,7 @@ const report = await verify(accord, "a6.accord-v2.testnet"); // { checks: [{ nam
 curl -s https://accordweb-production.up.railway.app/app/api/verify/a6.accord-v2.testnet
 ```
 
-An account that is not an Accord agreement answers `404` with `{"error":"<account> is not an Accord agreement"}` once the app runs this commit. The site also serves [/llms.txt](https://accordweb-production.up.railway.app/llms.txt) and [/facts.json](https://accordweb-production.up.railway.app/facts.json).
+An account that is not an Accord agreement answers `404` with `{"error":"<account> is not an Accord agreement"}` (live: `/app/api/verify/nobody.testnet`). The site also serves [/llms.txt](https://accordweb-production.up.railway.app/llms.txt) and [/facts.json](https://accordweb-production.up.railway.app/facts.json).
 
 ## Testnet proof
 

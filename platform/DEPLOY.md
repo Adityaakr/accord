@@ -32,7 +32,7 @@ website service forwards `<site>/app/*` to it, so visitors use one address.
 | `DEMO_AUTHORITY_KEY` | its key (`AUTHORITY_KEY` in `accord-app/.env`) |
 | `DEMO_RECIPIENT` | `halcyon-mm.testnet` |
 | `DEMO_STRANGER` | `halcyon-markets.testnet` (the account the redirect attempt names) |
-| `DEMO_DOMAIN` | `accordweb-production.up.railway.app` (serves the Payee file for the demo recipient) |
+| `DEMO_DOMAIN` | `accordweb-production.up.railway.app` or the custom domain `useaccord.tech` (both serve the same Payee file for the demo recipient; the hosted app uses `useaccord.tech`) |
 | `DEMO_AGENT_SEED` | a long random string (`openssl rand -hex 32`); the demo agent's per-room keys derive from it |
 
 4. Deploy. Check `https://<app-service>.up.railway.app/app/api/status` returns JSON with a testnet block.
