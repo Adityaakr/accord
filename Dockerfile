@@ -61,12 +61,21 @@ EXPOSE 3100
 CMD ["sh", "-c", "pnpm exec next start -p ${PORT:-3100}"]
 
 # ---- the keeper or the demo agent (platform/services), from the same build as the app ----
+# The keeper and the demo agent need only the workspace and the two built packages they import, not the Next.js app:
+# building the app would fetch Google Fonts at build time, which a background service has no reason to depend on.
+FROM node:24-alpine AS svc-build
+WORKDIR /repo
+RUN corepack enable
+COPY platform/ .
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @accord/sdk --filter @accord/store build
+
 FROM node:24-alpine AS target-app-svc
 WORKDIR /repo
 RUN corepack enable
 ARG ACCORD_SERVICE
 ENV NODE_ENV=production ACCORD_SERVICE=$ACCORD_SERVICE
-COPY --from=app-build /repo /repo
+COPY --from=svc-build /repo /repo
 CMD ["sh", "-c", "case \"$ACCORD_SERVICE\" in keeper|agent) exec pnpm --filter \"@accord/$ACCORD_SERVICE\" start ;; *) echo \"ACCORD_SERVICE must be keeper or agent, not '$ACCORD_SERVICE'\" >&2; exit 1 ;; esac"]
 
 # ACCORD_SERVICE without ACCORD_NETWORK: the same service (it defaults to testnet).
