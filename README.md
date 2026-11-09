@@ -242,7 +242,7 @@ Open [`/app/try-it`](https://accordweb-production.up.railway.app/app/try-it). Ev
 | 2 | **Get test funds** | `0.00 NEAR` becomes `2.50 NEAR · 100.00 tUSDC`, both faucet transactions linked |
 | 3 | **Create the room** | `Your room is a8.accord-v2.testnet: My first deal room.` (your number will differ) |
 | 4 | **Seal your mandate** with the Northwind preset (`40` tUSDC ceiling, 2 to 4 items) | In the Demo counterparty panel: `Sealed the vendor's mandate (Halcyon procurement preset)`, then `Started the negotiation in the Sealed Table`; the state moves `Sealed` to `Attested` |
-| 5 | Approve the terms and fund the escrow; accept the recipient; accept delivery 1 | `Approved the terms as the vendor`, `Proposed halcyon-mm.testnet as the recipient on accordweb-production.up.railway.app`, `Submitted delivery for item 1` |
+| 5 | Approve the terms and fund the escrow; accept the recipient; accept delivery 1 | `Approved the terms as the vendor`, `Proposed halcyon-mm.testnet as the recipient on useaccord.tech`, `Submitted delivery for item 1` |
 | 6 | **Start the demo agent** (your wallet signs `install_agent_key`), then **Let the agent pay the due item** | `Paid item 1: 15.00 tUSDC to halcyon-mm.testnet, the active recipient.` |
 | 7 | **Ask the agent to pay a new account** | `ERR_PAYEE_MISMATCH` and `Asked to pay … to halcyon-markets.testnet. The contract refused it and recorded the refusal.` |
 | 8 | Revoke the key from the room header | `Agent revoked · next call rejected by the network` |
@@ -284,21 +284,22 @@ A fresh, unfunded implicit account ran the page's calls against https://accordwe
 | Faucet, tUSDC (100) | same call | [`7dRodXTg…`](https://testnet.nearblocks.io/txns/7dRodXTgVXmKHEHdB53uH87p7fJruHzLbQ688z78pgrC) |
 | Create a15 (signed directly; the relayed create failed, see below) | Sealed | [`GNynLq2o…`](https://testnet.nearblocks.io/txns/GNynLq2oxREyQrF1N4rNRhDztCzfVtqJ5DVgmthDRBEy) |
 | Counterparty seals the vendor mandate | counterparty step | [`BpwCPtgS…`](https://testnet.nearblocks.io/txns/BpwCPtgSg4rjZVNKPnuw4nLUzemEfoJpaoSXRCmKn2PM) |
-| Buyer seals the Northwind mandate (relayed) | both sealed; the negotiation started without a counterparty step (the keeper, most likely; tx not captured) | [`6eYVDLtT…`](https://testnet.nearblocks.io/txns/6eYVDLtTJ2mFT8J7GrKUWUfWuZZDXUZTd37fhGpN1324) |
+| Buyer seals the Northwind mandate (relayed) | both sealed | [`6eYVDLtT…`](https://testnet.nearblocks.io/txns/6eYVDLtTJ2mFT8J7GrKUWUfWuZZDXUZTd37fhGpN1324) |
+| Keeper (`accord-keeper.testnet`) calls `start_negotiation`, 00:17:28 UTC | `negotiation_requested`; the Sealed Table ran in OutLayer and `terms_proposed` landed in the same transaction | [`Gp9JqBvY…`](https://testnet.nearblocks.io/txns/Gp9JqBvYPgxw7Aqi4JKb28gWmTztM3Xw3RhJbVGtnWqT) |
 | Counterparty approves the terms | Attested after 67 s | [`HEm5P4ga…`](https://testnet.nearblocks.io/txns/HEm5P4gaE3LxvyV2ergFVxDHXbmVw8jthFARHH8GoV9q) |
 | Buyer approves the terms (relayed) | Executing | [`4nNbyFAk…`](https://testnet.nearblocks.io/txns/4nNbyFAk6moLWKHUCX37JLoeoUTFE272cHWLUXwHAeq2) |
 | Counterparty proposes halcyon-mm.testnet on useaccord.tech | Proposed, then Proven | [`4xGmfM2x…`](https://testnet.nearblocks.io/txns/4xGmfM2xoiRrVMA5ocLWMeiTyq4k2gQYhXVw4RNihZmp) |
 | Buyer funds 33.00 tUSDC (relayed) | funded 33.00 of 33.00 | [`HTpF77Ve…`](https://testnet.nearblocks.io/txns/HTpF77VeZXZf65v1p2Av3YHE5DK37FG9WAWmjxBHbUrE) |
 | Buyer installs the demo agent key (relayed) | agent key set | [`23gimnow…`](https://testnet.nearblocks.io/txns/23gimnowmhb8nErdbPUrhzg7oGk7J382weKXYAsyQuBQ) |
 | Authority approves the recipient | AuthorityApproved | [`A6VokbSK…`](https://testnet.nearblocks.io/txns/A6VokbSKJfgMWbakATCeARGsR7NbPAhFhBFsYwWx8Bth) |
-| Buyer accepts the recipient (relayed, rating allow) | Accepted, 120 s timelock | [`Tg1rtc6C…`](https://testnet.nearblocks.io/txns/Tg1rtc6CmLHwP9aHwhzxLyEMmsxacMjsMiw6cRrn5uo) |
-| Counterparty submits delivery 1 | recipient active after the timelock (not activated by the counterparty step; the keeper, most likely) | [`8ELSpUds…`](https://testnet.nearblocks.io/txns/8ELSpUdszC6p3R7q6CdgLTrg1PJVtFqJvt1eDzsN5Vrd) |
+| Buyer accepts the recipient (relayed, rating allow) | `recipient_accepted` and `recipient_active` in the same transaction: a first recipient has no timelock (the 120 s wait applies to a change) | [`Tg1rtc6C…`](https://testnet.nearblocks.io/txns/Tg1rtc6CmLHwP9aHwhzxLyEMmsxacMjsMiw6cRrn5uo) |
+| Counterparty submits delivery 1 | delivery 1 submitted | [`8ELSpUds…`](https://testnet.nearblocks.io/txns/8ELSpUdszC6p3R7q6CdgLTrg1PJVtFqJvt1eDzsN5Vrd) |
 | Buyer accepts delivery 1 (relayed) | item 1 eligible | [`h2xtvzUG…`](https://testnet.nearblocks.io/txns/h2xtvzUGeysiQHCYr95zWxXJKJhKTpT1CdN8n8tZBss) |
 | Demo agent pays item 1 | sent, 15.00 tUSDC to halcyon-mm.testnet | [`7unm1ZWE…`](https://testnet.nearblocks.io/txns/7unm1ZWEE5DH74JAKsG7ZcKywz8t9V8NCNvghUcacXUd) |
 | Demo agent asked to pay halcyon-markets.testnet | refused, ERR_PAYEE_MISMATCH | [`7Cjd6cvx…`](https://testnet.nearblocks.io/txns/7Cjd6cvxVm8racRQTotSJ1CXh5PHdgEvSzJxYszAbptz) |
 | Buyer revokes the key (relayed) | 0 keys on a15; `/api/demo-agent pay` then 409 | [`2nyFEeBP…`](https://testnet.nearblocks.io/txns/2nyFEeBPB4BLhwxzrWrqMhsEvSQWS4LGVjff8ZuWZAtG) |
 
-The relayed `create_agreement` failed, so it was signed directly. The relayer pays the 2 NEAR deposit inside a delegate and had 1.99 NEAR left (`platform/DECISIONS.md` 27).
+The relayed `create_agreement` failed, so it was signed directly. The relayer pays the 2 NEAR deposit inside a delegate and had 1.99 NEAR left (`platform/DECISIONS.md` 27). Fixed the same day (commit `8b3d51b`): the room deposit is paid by the visitor's wallet; the relayer carries at most 1 yoctoNEAR.
 
 </details>
 
@@ -442,7 +443,7 @@ Agreement [`a1.accord-usdc.testnet`](https://testnet.nearblocks.io/address/a1.ac
 | OutLayer jobs | Sealed Table, Payee and observer, as OutLayer projects `accord-v1.testnet/accord-{sealed-table,payee,observer}`; release 3 pubkey runs `13682`, `13672`, `13683` |
 | NEAR AI Cloud attestation | [testnet-api.outlayer.ai/attestations/13596](https://testnet-api.outlayer.ai/attestations/13596) |
 | Demo accounts | vendor `halcyon-demo.testnet`, authority `halcyon-auth.testnet`, recipient `halcyon-mm.testnet` |
-| Demo vendor's domain | `accordweb-production.up.railway.app`, Accord's own site, serving the Payee file ([`/.well-known/accord.json`](https://accordweb-production.up.railway.app/.well-known/accord.json)) for Halcyon, a fictional company. A real vendor serves the same file on its own domain |
+| Demo vendor's domain | `useaccord.tech` (from 9 Nov 2026; `accordweb-production.up.railway.app` before), Accord's own site, serving the Payee file ([`/.well-known/accord.json`](https://accordweb-production.up.railway.app/.well-known/accord.json)) for Halcyon, a fictional company. A real vendor serves the same file on its own domain |
 
 Sources: [`apps/web/src/content/testnet.ts`](apps/web/src/content/testnet.ts) and [`platform/DECISIONS.md`](platform/DECISIONS.md) sections 21, 24 and 26. Market-making agreements run end to end on a local node; on testnet they wait on an OutLayer payment key ([`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md)).
 
@@ -506,7 +507,7 @@ Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is par
 │   ├── product/              a pointer to the product kit in platform/
 │   └── hackathon/            the organisers' HACKATHON.md
 ├── AGENTS.md, CLAUDE.md     notes for evaluating agents: layout, judge paths, where the claims are
-├── .github/workflows/ci.yml  website: typecheck, copy rules, references, build
+├── .github/workflows/ci.yml  three jobs: website (typecheck, copy rules, references, build), Rust money path, platform TypeScript
 ├── Dockerfile, railway.json  the website's Railway build
 └── package.json              npm workspace for apps/*
 ```

@@ -550,15 +550,16 @@ wallet calls signed as NEP-366 delegates sent to `/app/api/relay`, as Meteor and
 | Faucet, tUSDC (100) | same call | `7dRodXTgVXmKHEHdB53uH87p7fJruHzLbQ688z78pgrC` |
 | Create a15 (signed directly; the relayed create failed, see below) | Sealed | `GNynLq2oxREyQrF1N4rNRhDztCzfVtqJ5DVgmthDRBEy` |
 | Counterparty seals the vendor mandate | counterparty step | `BpwCPtgSg4rjZVNKPnuw4nLUzemEfoJpaoSXRCmKn2PM` |
-| Buyer seals the Northwind mandate (relayed) | both sealed; the negotiation started without a counterparty step (the keeper, most likely; tx not captured) | `6eYVDLtTJ2mFT8J7GrKUWUfWuZZDXUZTd37fhGpN1324` |
+| Buyer seals the Northwind mandate (relayed) | both sealed | `6eYVDLtTJ2mFT8J7GrKUWUfWuZZDXUZTd37fhGpN1324` |
+| Keeper (`accord-keeper.testnet`) calls `start_negotiation`, block 276847191, 00:17:28 UTC | `negotiation_requested`, OutLayer request 14079, `terms_proposed` in the same transaction | `Gp9JqBvYPgxw7Aqi4JKb28gWmTztM3Xw3RhJbVGtnWqT` |
 | Counterparty approves the terms | Attested after 67 s | `HEm5P4gaE3LxvyV2ergFVxDHXbmVw8jthFARHH8GoV9q` |
 | Buyer approves the terms (relayed) | Executing | `4nNbyFAk6moLWKHUCX37JLoeoUTFE272cHWLUXwHAeq2` |
 | Counterparty proposes halcyon-mm.testnet on useaccord.tech | Proposed, then Proven | `4xGmfM2xoiRrVMA5ocLWMeiTyq4k2gQYhXVw4RNihZmp` |
 | Buyer funds 33.00 tUSDC (relayed) | funded 33.00 of 33.00 | `HTpF77VeZXZf65v1p2Av3YHE5DK37FG9WAWmjxBHbUrE` |
 | Buyer installs the demo agent key (relayed) | agent key set | `23gimnowmhb8nErdbPUrhzg7oGk7J382weKXYAsyQuBQ` |
 | Authority approves the recipient | AuthorityApproved | `A6VokbSKJfgMWbakATCeARGsR7NbPAhFhBFsYwWx8Bth` |
-| Buyer accepts the recipient (relayed, rating allow) | Accepted, 120 s timelock | `Tg1rtc6CmLHwP9aHwhzxLyEMmsxacMjsMiw6cRrn5uo` |
-| Counterparty submits delivery 1 | recipient active after the timelock (not activated by the counterparty step; the keeper, most likely) | `8ELSpUdszC6p3R7q6CdgLTrg1PJVtFqJvt1eDzsN5Vrd` |
+| Buyer accepts the recipient (relayed, rating allow) | `recipient_accepted` and `recipient_active` in the same receipt: a first recipient has no timelock (`recipients.rs`, `active_at = now` when there is no current recipient) | `Tg1rtc6CmLHwP9aHwhzxLyEMmsxacMjsMiw6cRrn5uo` |
+| Counterparty submits delivery 1 | delivery 1 submitted | `8ELSpUdszC6p3R7q6CdgLTrg1PJVtFqJvt1eDzsN5Vrd` |
 | Buyer accepts delivery 1 (relayed) | item 1 eligible | `h2xtvzUGeysiQHCYr95zWxXJKJhKTpT1CdN8n8tZBss` |
 | Demo agent pays item 1 | sent, 15.00 tUSDC to halcyon-mm.testnet | `7unm1ZWEE5DH74JAKsG7ZcKywz8t9V8NCNvghUcacXUd` |
 | Demo agent asked to pay halcyon-markets.testnet | refused, ERR_PAYEE_MISMATCH | `7Cjd6cvxVm8racRQTotSJ1CXh5PHdgEvSzJxYszAbptz` |
@@ -571,3 +572,8 @@ receipts match paid. RPC `view_access_key_list` on a15 returns no keys.
 The first try, a relayed `create_agreement`, failed: `POST /app/api/relay` returned 502 `Not enough balance for relay.accord-v2.testnet (balance: 1991837072888958900000000, cost: 2301472081439430000000000)`. In a NEP-366 meta-transaction the relayer pays the deposits inside the delegate (nearcore counts them in the outer transaction's cost), so every relayed create costs the relayer the 2 NEAR room deposit, which goes back to the buyer when the room closes. With 1.99 NEAR left, a Meteor or Intear visitor cannot open a room. The comment in `app/src/server/relay.ts` ("any deposit is inside the delegate and comes from the user's account") is wrong. Proposed fix: `rejectDelegate` refuses delegates whose deposit is more than 1 yoctoNEAR, and the wallet signer sends a call with a larger deposit through `signAndSendTransaction` (the visitor pays it from the faucet's 2.5 NEAR) instead of the relayer; top up the relayer in the meantime. In this run the create was signed directly from the visitor's account, as a wallet that does not relay sends it. Every other buyer call went through `/app/api/relay` and worked; none returned 415 or 403.
 
 Fixed the same day: the relayer now carries only calls that attach at most 1 yoctoNEAR (`rejectDelegate`), and the app sends a call that attaches more (the room deposit of `create_agreement`) through the visitor's own wallet, which the faucet has funded; tests in `app/tests/relay.test.ts`.
+
+Correction (9 Nov 2026, read back from RPC and `tx.test.fastnear.com`): the earlier rows guessed who started the
+negotiation and said the recipient waited out a timelock. On chain, `accord-keeper.testnet` sent `start_negotiation`
+(`Gp9JqBvY…`), and `Tg1rtc6C…` emitted `recipient_accepted` and `recipient_active` together, because a first recipient
+has no timelock; the 120 s wait applies to a recipient change.
