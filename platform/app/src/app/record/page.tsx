@@ -30,6 +30,7 @@ export default async function Record({ searchParams }: { searchParams: Promise<{
       <nav className={rstyles.scopes} aria-label="Record scope">
         <Link href="/record" className={`${rstyles.scope} ${scope === "public" ? rstyles.scopeOn : ""}`} aria-current={scope === "public" ? "page" : undefined}>Public ledger</Link>
         <Link href="/record?scope=org" className={`${rstyles.scope} ${scope === "org" ? rstyles.scopeOn : ""}`} aria-current={scope === "org" ? "page" : undefined}>Your organisation</Link>
+        {scope === "public" ? <span className={rstyles.scopeNote}>{l.factories.join(" · ")}</span> : null}
         {l.org ? <span className={rstyles.scopeNote}>{l.org.name} · {l.rooms.length} room{l.rooms.length === 1 ? "" : "s"} · {l.org.members.length} member{l.org.members.length === 1 ? "" : "s"}</span> : null}
       </nav>
       {l.unavailable ? (
