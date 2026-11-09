@@ -40,3 +40,14 @@
 .headValue, .seg { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
 .seg { white-space: normal; }
 .recordedNote { margin: 0 0 4px; }
+
+/* An entered id with no full check: a6's recording sits folded under a plain label, greyed, never read as a pass */
+.fold > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary:focus { outline: none; }
+.fold > summary:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 3px; border-radius: 3px; }
+.foldSummary:hover .toggle { text-decoration: underline; text-underline-offset: 3px; }
+.fold[open] .toggleIcon { transform: rotate(180deg); }
+.foldBody { margin-top: 8px; opacity: 0.55; filter: grayscale(1); }
+/* The command wraps on a narrow screen rather than being cut */
+@media (max-width: 809.98px) { .cmd { white-space: normal; overflow-wrap: anywhere; } }

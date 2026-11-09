@@ -148,6 +148,9 @@ export function Verify() {
   const recorded = full.state === "recorded"
   const fullId = recorded ? TESTNET.agreement : id
   const fullCommand = `make verify DEAL=${fullId}`
+  /* The entered id has no full check (not an agreement, or the app could not answer for it): a6's recording folds away */
+  const failedId = recorded && id !== TESTNET.agreement
+  const fullBody = <FullRows full={full} id={id} fullCommand={fullCommand} />
   const failedLive = full.state === "live" ? full.checks.filter((c) => liveResult(c.status) === "not ok").length : 0
   const fullSummary = full.state === "live"
     ? [checkSummary(full.checks.filter((c) => liveResult(c.status) !== "not ok").map((c) => ({ status: liveResult(c.status) as CheckStatus }))), failedLive ? `${failedLive} failed` : ""].filter(Boolean).join(" · ")
@@ -220,14 +223,50 @@ export function Verify() {
                 {full.state === "loading" ? "reading" : full.state === "live" ? `${fullSummary} · live` : `Recorded for ${TESTNET.agreement}`}
               </span>
             </p>
-            {recorded && id !== TESTNET.agreement ? (
+            {failedId ? (
               <p className={`${tl.note} ${styles.recordedNote}`}>
                 {full.reason ? `${full.reason} ` : "The full check is not reachable from this page right now. "}
-                Below is the recorded result for <span className="mono">{TESTNET.agreement}</span>, not for <span className="mono">{id}</span>.
+                Nothing here is a result for <span className="mono">{id}</span>.
               </p>
             ) : null}
+            {failedId ? (
+              <details className={styles.fold}>
+                <summary className={`${tl.note} ${styles.foldSummary}`}>
+                  <span className={styles.toggle}>Show the recorded result for <span className="mono">{TESTNET.agreement}</span> instead</span>
+                  <Arrow dir="down" className={styles.toggleIcon} />
+                </summary>
+                <div className={styles.foldBody}>{fullBody}</div>
+              </details>
+            ) : fullBody}
+          </div>
+
+          {full.state === "loading" || failedId ? null : (
+            <details className={`${tl.foot} ${styles.foot}`}>
+              <summary>
+                <span className="mono">{fullSummary}</span>
+                <span className={styles.sep} aria-hidden="true">·</span>
+                <span className={styles.headValue}>
+                  <QuietLink href={`https://testnet.nearblocks.io/address/${fullId}`} className={styles.footLink}>{fullId}</QuietLink>
+                  <CopyButton text={fullId} />
+                </span>
+                {recorded ? <><span className={styles.sep} aria-hidden="true">·</span><span>recorded</span></> : null}
+                <span className={styles.sep} aria-hidden="true">·</span>
+                <span className={styles.toggle}>Show raw output<Arrow dir="down" className={styles.toggleIcon} /></span>
+              </summary>
+              <pre className={styles.raw}>{full.state === "live" ? rawOf(id, full.checks) : VERIFY_RAW}</pre>
+            </details>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+function FullRows({ full, id, fullCommand }: { full: FullCheck; id: string; fullCommand: string }) {
+  return (
+          <>
             <div className={tl.cmdRow}>
-              <Link to="/docs/cli" className={`${tl.cmd} ${tl.link}`}><span className={tl.prompt} aria-hidden="true">$</span>{fullCommand}<Arrow /></Link>
+              <Link to="/docs/cli" className={`${tl.cmd} ${tl.link} ${styles.cmd}`}><span className={tl.prompt} aria-hidden="true">$</span>{fullCommand}<Arrow /></Link>
               <CopyButton text={fullCommand} label="the make verify command" />
             </div>
             <ol className={tl.rows} aria-busy={full.state === "loading"}>
@@ -258,26 +297,6 @@ export function Verify() {
                     </li>
                   ))}
             </ol>
-          </div>
-
-          {full.state === "loading" ? null : (
-            <details className={`${tl.foot} ${styles.foot}`}>
-              <summary>
-                <span className="mono">{fullSummary}</span>
-                <span className={styles.sep} aria-hidden="true">·</span>
-                <span className={styles.headValue}>
-                  <QuietLink href={`https://testnet.nearblocks.io/address/${fullId}`} className={styles.footLink}>{fullId}</QuietLink>
-                  <CopyButton text={fullId} />
-                </span>
-                {recorded ? <><span className={styles.sep} aria-hidden="true">·</span><span>recorded</span></> : null}
-                <span className={styles.sep} aria-hidden="true">·</span>
-                <span className={styles.toggle}>Show raw output<Arrow dir="down" className={styles.toggleIcon} /></span>
-              </summary>
-              <pre className={styles.raw}>{full.state === "live" ? rawOf(id, full.checks) : VERIFY_RAW}</pre>
-            </details>
-          )}
-        </div>
-      </section>
-    </div>
+          </>
   )
 }
