@@ -102,6 +102,8 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
     verifyHref: `/verify/${a.account}`,
   };
 
+  // changes whenever the chain state the page shows changes: the timeline and the transcript read again at once
+  const version = [a.state, a.paid, a.funded, a.refusals, a.agent_key ?? "", a.revoked_keys, a.recipient?.version ?? 0, r.items.map((it) => it.status).join("")].join("|");
   const due = new Map(r.items.map((it) => [it.id, it.due_amount]));
   const events: Event[] = [
     ...r.refusals.map((x): Event => ({
@@ -309,11 +311,11 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
           {tab === "activity" && (
             <Panel
               title="Activity"
-              eyebrow="every payment, refusal and exception, newest first"
+              eyebrow="every step of this room, read from its own transactions, newest first"
               aside={<span className={`mono ${a.refusals > 0 ? styles.refusalCount : "faint"}`}>{a.refusals}</span>}
               flush
             >
-              <Activity events={events} now={now} symbol={sym} />
+              <Activity agreement={a.account} now={now} symbol={sym} explorer={c.explorer} fallback={events} version={version} />
             </Panel>
           )}
 

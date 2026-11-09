@@ -1,26 +1,71 @@
-/* Activity feed: flat rows on the elevation token; a refusal row carries the room's only red. New rows slide in
-   once with a blur crossfade; nothing shakes. */
+/* Activity: a timeline of flat rows on the elevation token. A short bar at the left says the row's group (teal for
+   money that moved, red for a refusal or revocation, a hairline otherwise). Values, codes and hashes in mono. New
+   rows slide in once with a blur; nothing shakes. */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 20px; border-bottom: 1px solid var(--hairline); }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px;
+  border: 1px solid var(--hairline-strong); background: transparent; font: inherit; font-size: 12.5px; color: var(--text-medium);
+  cursor: pointer; transition: background-color 0.25s var(--ease), border-color 0.25s var(--ease), color 0.25s var(--ease);
+}
+.chip:hover:not(:disabled) { border-color: var(--teal-line); color: var(--text-strong); }
+.chip:disabled { opacity: 0.45; cursor: default; }
+.chip:focus-visible { outline: 2px solid var(--teal-line); outline-offset: 2px; }
+.chipOn { background: var(--teal-wash); border-color: var(--teal-line); color: var(--text-strong); }
+.chipCount { font-family: var(--font-mono); font-size: 11px; color: var(--text-weak); }
+.chipRed .chipCount { color: var(--refusal); }
+
 .feed { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-.row { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 14px 20px; border-bottom: 1px solid var(--hairline); }
+.row {
+  position: relative; display: grid; grid-template-columns: 3px minmax(0, 1fr) auto; align-items: start; gap: 14px;
+  padding: 13px 20px 13px 17px; border-bottom: 1px solid var(--hairline);
+}
 .row:last-child { border-bottom: 0; }
-.kind { font-size: 12px; color: var(--text-weak); }
-.paid { color: var(--teal); }
-.refusal .kind { color: var(--refusal); }
-.body { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-width: 0; }
-.code { padding: 3px 8px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px; color: var(--refusal); background: var(--refusal-bg); }
-.amount { font-family: var(--font-mono); font-size: 13px; color: var(--text-strong); }
-.detail { font-size: 12.5px; color: var(--text-medium); }
-.detail b { font-family: var(--font-mono); font-weight: 400; color: var(--text-strong); }
-.nothing { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-weak); }
-.meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-weak); white-space: nowrap; }
-.empty { padding: 16px 20px; font-size: 13px; color: var(--text-weak); }
+.mark { width: 3px; height: 18px; margin-top: 1px; border-radius: 2px; background: var(--hairline-strong); }
+.g_payments { background: var(--teal); }
+.g_refusals { background: var(--refusal); }
+.red .mark { background: var(--refusal); }
+
+.main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.line { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.label { font-size: 13.5px; font-weight: 500; letter-spacing: -0.005em; color: var(--text-strong); }
+.red .label { color: var(--refusal); }
+.code { padding: 2px 7px; border-radius: 4px; font-family: var(--font-mono); font-size: 11.5px; color: var(--refusal); background: var(--refusal-bg); }
+.amount { font-family: var(--font-mono); font-size: 13px; color: var(--text-strong); font-variant-numeric: tabular-nums; }
+.unit { font-size: 11px; color: var(--text-weak); }
+.detail { font-size: 12.5px; line-height: 1.5; color: var(--text-weak); overflow-wrap: anywhere; }
+.mono { font-family: var(--font-mono); font-size: 11.5px; }
+.acct { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-medium); text-decoration: none; }
+a.acct:hover { color: var(--text-strong); text-decoration: underline; text-decoration-color: var(--teal-line); text-underline-offset: 3px; }
+
+.meta { display: flex; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--text-weak); white-space: nowrap; }
+.actor { padding: 1px 7px; border-radius: 4px; border: 1px solid var(--hairline-strong); color: var(--text-medium); }
+.actorAgent { border-color: var(--teal-line); color: var(--teal); }
+.time { min-width: 68px; text-align: right; cursor: default; }
+.tx { display: inline-flex; align-items: center; gap: 3px; color: var(--text-medium); text-decoration: none; transition: color 0.2s var(--ease); }
+a.tx:hover { color: var(--teal); }
+a.tx:focus-visible, a.acct:focus-visible { outline: 2px solid var(--teal-line); outline-offset: 2px; border-radius: 3px; }
+
+.empty, .note { padding: 16px 20px; font-size: 13px; color: var(--text-weak); }
+.note { padding-top: 10px; font-size: 12px; }
+
+.loading { display: flex; flex-direction: column; gap: 10px; padding: 18px 20px; }
+.skel {
+  height: 14px; width: calc(92% - var(--i) * 14%); border-radius: 4px;
+  background: linear-gradient(90deg, rgba(var(--ink-rgb), 0.05), rgba(var(--ink-rgb), 0.1), rgba(var(--ink-rgb), 0.05));
+  background-size: 200% 100%; animation: skel 1.8s var(--ease) infinite; animation-delay: calc(var(--i) * 0.12s);
+}
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .arrive { animation: slideIn 0.6s var(--ease); }
-.refusal.arrive { background: linear-gradient(90deg, var(--refusal-bg), transparent 60%); transition: background 1.2s var(--ease); }
+.red.arrive { background: linear-gradient(90deg, var(--refusal-bg), transparent 60%); }
 @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes skel { from { background-position: 100% 0; } to { background-position: -100% 0; } }
 
-@media (prefers-reduced-motion: reduce) { .arrive { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .arrive, .skel { animation: none; } .chip, .tx { transition: none; } }
 @media (max-width: 809.98px) {
-  .row { grid-template-columns: 1fr; gap: 6px; padding: 12px 16px; }
-  .meta { white-space: normal; }
+  .chips { padding: 12px 16px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .chip { flex: none; }
+  .row { grid-template-columns: 3px minmax(0, 1fr); gap: 6px 12px; padding: 12px 16px 12px 13px; }
+  .meta { grid-column: 2; flex-wrap: wrap; gap: 10px; }
+  .time { min-width: 0; text-align: left; }
 }

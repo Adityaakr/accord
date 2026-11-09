@@ -108,7 +108,8 @@ export class ReadCache {
   private readonly gen = new Map<string, number>();
   constructor(private readonly max = 2_000, private readonly now: () => number = Date.now) {}
 
-  async read(b: RpcRequestBody, load: () => Promise<RpcResponseBody | null>): Promise<RpcResponseBody | null> {
+  /** `ttl` overrides the read's own (ttlFor) for a body this proxy does not forward, such as the activity list. */
+  async read(b: RpcRequestBody, load: () => Promise<RpcResponseBody | null>, ttl?: number): Promise<RpcResponseBody | null> {
     const key = readKey(b);
     const account = typeof b.params.account_id === "string" ? b.params.account_id : null;
     const hit = this.done.get(key);
@@ -119,7 +120,7 @@ export class ReadCache {
     const p = load()
       .then((body) => {
         // a read that started before an invalidation may carry the old state: answer it, never cache it
-        if (body && (!account || (this.gen.get(account) ?? 0) === gen)) this.put(key, ttlFor(b), body, account);
+        if (body && (!account || (this.gen.get(account) ?? 0) === gen)) this.put(key, ttl ?? ttlFor(b), body, account);
         return body;
       })
       .finally(() => { if (this.flying.get(key) === p) this.flying.delete(key); });
