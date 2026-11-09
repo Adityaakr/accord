@@ -26,7 +26,7 @@ Release 4 (the security-review fixes, `platform/DECISIONS.md` sections 25 and 26
 
 1. Open [/app/try-it](https://accordweb-production.up.railway.app/app/try-it) and choose "Try without a wallet". It runs one deal on testnet, including a refused redirect.
 2. Open [/verify](https://accordweb-production.up.railway.app/verify) and enter the agreement id it gives you.
-3. Clone the repo and run `make verify DEAL=a10.accord-v2.testnet` (from `platform/`).
+3. Clone the repo and run `cd platform && corepack enable && pnpm install && make verify DEAL=a10.accord-v2.testnet`.
 
 Then, in more depth:
 

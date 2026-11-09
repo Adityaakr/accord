@@ -18,7 +18,7 @@ Agreements negotiated in private, enforced in public.
 
 1. Open [/app/try-it](https://accordweb-production.up.railway.app/app/try-it) and choose "Try without a wallet". It runs one deal on testnet, including a refused redirect.
 2. Open [/verify](https://accordweb-production.up.railway.app/verify) and enter the agreement id it gives you.
-3. Clone the repo and run `make verify DEAL=a10.accord-v2.testnet` (from `platform/`).
+3. Clone the repo and run `cd platform && corepack enable && pnpm install && make verify DEAL=a10.accord-v2.testnet`.
 
 The same site is also served at its custom domain, [useaccord.tech](https://useaccord.tech) (the same Railway service; `www.useaccord.tech` has no certificate yet). The `/app/try-it` rooms propose their demo recipient on `useaccord.tech`, which serves the same `/.well-known/accord.json` as the Railway host.
 
