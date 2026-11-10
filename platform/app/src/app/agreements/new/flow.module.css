@@ -6,7 +6,7 @@
    Steps slide and fade (motion/react); prefers-reduced-motion turns the movement off. */
 
 /* hero: PageHero centred (pill 14x8 indicator, H1 48 / -0.04em, Body Large lead) */
-.hero { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 56px 0 44px; text-align: center; }
+.hero { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 48px 0 36px; text-align: center; }
 .pill { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-medium); }
 .indicator { width: 14px; height: 8px; border-radius: 999px; background: var(--text-strong); }
 .title { margin: 0; font-size: 48px; font-weight: 400; line-height: 110%; letter-spacing: -0.04em; color: var(--text-strong); text-wrap: balance; }
@@ -31,7 +31,7 @@
 .fill { position: absolute; inset: 0; background: var(--teal); transform-origin: left; transition: transform 0.7s var(--ease); }
 
 /* the moving body: clips the slide; wide enough for the Type grid */
-.body { width: 100%; max-width: 960px; overflow: hidden; padding-top: 40px; }
+.body { width: 100%; max-width: 960px; overflow: hidden; padding-top: 32px; }
 
 /* step head: centred title, one lead line, an optional quiet action under it */
 .head { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 auto 36px; max-width: 560px; text-align: center; }
@@ -59,9 +59,23 @@
 .typeTitle { font-size: 16px; font-weight: 500; letter-spacing: -0.02em; color: var(--text-strong); }
 .typeText { font-size: 13px; line-height: 150%; color: var(--text-weak); }
 
+/* The "New" strip: Type step only, between the hero and the stepper; a teal wash on a hairline, one line on a
+   desktop, two on a phone (the label, then the links). */
+.strip { width: 100%; max-width: 720px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 14px; margin: -12px 0 32px; padding: 10px 16px; border: 1px solid var(--teal-line); border-radius: var(--radius-lg); background: var(--teal-wash); font-size: 13.5px; line-height: 150%; }
+.stripHead, .stripLinks { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 10px; }
+.stripTag { padding: 1px 8px; border: 1px solid var(--teal-line); border-radius: 999px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal); }
+.stripLead { color: var(--text-strong); }
+.stripItem { display: inline-flex; align-items: center; gap: 8px; }
+.stripDot { color: var(--text-faint); }
+.stripLink, .stripMore { padding: 0; color: var(--text-medium); text-decoration: underline; text-decoration-color: var(--teal-line); text-underline-offset: 3px; transition: color 0.2s var(--ease), text-decoration-color 0.2s var(--ease); }
+.stripLink:hover, .stripMore:hover { color: var(--text-strong); text-decoration-color: var(--teal); }
+.stripMore { color: var(--teal); text-decoration: none; }
+.stripMore:hover { color: var(--teal); text-decoration: underline; }
+.stripLink:focus-visible, .stripMore:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 3px; border-radius: 3px; }
+
 /* Payment controls: after the step's Continue, behind a hairline. A "New" pill, a heading the size of the step's,
    then a Live row (links with an "Open" arrow) and a Planned row (muted, inert). Same cards as the types. */
-.tools { margin-top: 72px; padding-top: 56px; border-top: 1px solid var(--hairline-strong); scroll-margin-top: 84px; }
+.tools { margin-top: 36px; padding-top: 0; scroll-margin-top: 84px; }
 .toolsHead { gap: 12px; margin-bottom: 32px; }
 .toolsHead .h { margin-top: 4px; }
 .toolRow { display: flex; flex-direction: column; gap: 10px; }
@@ -165,7 +179,7 @@
 .dot { margin: 0 8px; color: var(--text-faint); }
 
 /* foot: centred under the column */
-.foot { width: 100%; max-width: 720px; display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--hairline); }
+.foot { width: 100%; max-width: 720px; display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--hairline); }
 .buttons { display: flex; align-items: center; justify-content: center; gap: 20px; }
 .primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 150px; padding: 11px 22px; border-radius: var(--radius); background: var(--white); color: var(--on-white); font-weight: 500; letter-spacing: -0.02em; transition: box-shadow 0.3s var(--ease), opacity 0.2s, transform 0.2s var(--ease); }
 .primary:hover:not(:disabled) { box-shadow: 0 0 0 3px rgba(var(--ink-rgb), 0.14); }
@@ -199,7 +213,8 @@
   .h { font-size: 22px; }
   .col { gap: 30px; }
   .types { grid-template-columns: minmax(0, 1fr); }
-  .tools { margin-top: 56px; padding-top: 44px; }
+  .tools { margin-top: 36px; }
+  .strip { margin: -8px 0 24px; padding: 10px 12px; }
   .groupLabel, .note, .addRow { padding-left: 36px; }
   .advanced { padding-left: 36px; }
   .row { grid-template-columns: 24px minmax(0, 1fr); column-gap: 12px; row-gap: 2px; padding: 12px 0 8px; min-height: 0; align-items: baseline; }

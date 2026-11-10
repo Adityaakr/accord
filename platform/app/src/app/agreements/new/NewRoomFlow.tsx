@@ -338,10 +338,7 @@ export function NewRoomFlow({ network, deposit, demoAllowed, demoVendor }: {
   const stepBody = (() => {
     if (step === 0) return (
       <section aria-labelledby="t-type" className={styles.wide}>
-        {head("t-type", "What kind of agreement?", "Every type runs the same controls. Only the terms and the evidence that releases a payment change.",
-          <button type="button" className={styles.quiet} onClick={() => document.getElementById("payment-controls")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })}>
-            New: payment controls ↓
-          </button>)}
+        {head("t-type", "What kind of agreement?", "Every type runs the same controls. Only the terms and the evidence that releases a payment change.")}
         <div className={styles.types} role="radiogroup" aria-label="Agreement type">
           {TYPES.map((t) => {
             const on = t.id === typeId, planned = !t.kind;
@@ -595,6 +592,27 @@ export function NewRoomFlow({ network, deposit, demoAllowed, demoVendor }: {
 
   return (
     <div className={styles.flow}>
+      {/* Type step only: a quiet strip so the payment controls are seen before anyone presses Continue */}
+      {step === 0 && (
+        <nav className={styles.strip} aria-label="New: payment controls">
+          <span className={styles.stripHead}>
+            <span className={styles.stripTag}>New</span>
+            <span className={styles.stripLead}>Payment controls for your agent:</span>
+          </span>
+          <span className={styles.stripLinks}>
+            {TOOLS.filter((t) => t.href).map((t, i) => (
+              <span key={t.id} className={styles.stripItem}>
+                {i > 0 ? <span className={styles.stripDot} aria-hidden="true">·</span> : null}
+                <Link href={t.href!} prefetch={false} className={styles.stripLink}>{t.title}</Link>
+              </span>
+            ))}
+            <button type="button" className={styles.stripMore}
+              onClick={() => document.getElementById("payment-controls")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })}>
+              +3 planned ↓
+            </button>
+          </span>
+        </nav>
+      )}
       <div className={styles.stepper} ref={headRef}>
         <ol className={styles.steps} aria-label="Steps">
           {STEPS.map((s, i) => (
