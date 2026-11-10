@@ -32,7 +32,7 @@
 .whyTitle { color: var(--text-strong); text-wrap: balance; }
 .whyNote { flex: none; font-size: 12px; color: var(--text-weak); }
 /* Each card spans three subgrid rows (who, quote, answer) so those parts line up across every card in a row */
-.whyGrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.whyGrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .whyCard {
   display: grid; grid-template-rows: subgrid; grid-row: span 3; row-gap: 14px;
   padding: 16px 16px 14px;
@@ -256,7 +256,7 @@
   .head { grid-template-columns: minmax(0, 1fr); grid-template-areas: "tag" "title" "copy"; row-gap: 20px; }
   .headRight { max-width: 760px; top: 0; }
   .whyHead { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .whyGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .whyGrid { grid-template-columns: minmax(0, 1fr); }
   .whoRow { grid-template-areas: "logo text src"; align-items: start; }
   .stage { padding: 32px 20px; }
 }

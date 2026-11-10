@@ -244,13 +244,10 @@ function Monitor() {
   )
 }
 
-/* Why market-making agreements: four public voices on market-making deals, each paired with the part of the agreement that answers it.
-   Paraphrases, checked against the sources on 31 Oct 2026; each card links its source (rows 45–48 in references.ts).
+/* Why market-making agreements: three public voices on market-making deals, each paired with the part of the agreement that answers it.
+   Paraphrases, checked against the sources on 31 Oct 2026; each card links its source (rows 46–48 in references.ts).
    No accused firm is named, and nothing claims the problem is unsolved elsewhere. */
 const WHY: { who: string; role: string; org: string; logo: string; date: string; ref: number; said: string; answer: string }[] = [
-  { who: "Kain Warwick", role: "Founder", org: "Synthetix", logo: "synthetix.svg", date: "Mar 2025", ref: 45,
-    said: "Projects paid market makers $50k to $300k+ a month in the 2017 cycle. Many exercised their call options and dumped.",
-    answer: "ties pay to the agreed spread, depth and two-sided quoting." },
   { who: "Jelle Buth", role: "Co-founder", org: "Enflux, market maker", logo: "enflux.png", date: "Apr 2025", ref: 46,
     said: "Projects should set liquidity KPIs before they commit. In loan-option deals they are often missing or vague.",
     answer: "turns the KPIs into the payment conditions." },

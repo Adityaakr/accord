@@ -6,7 +6,7 @@ Accord turns private negotiations into enforceable payment rules. Agents negotia
 
 [Open the app](/app/signin) [Run your own deal in 5 minutes](/app/try-it)
 
-[Testnet record: procurement agreement a6, each step with its transaction](/record)
+[Live on NEAR testnet: agreement a6 ran end to end 35.50 tUSDC agreed in the enclave across 3 items. 16.50 paid, only to the proven recipient. A redirected payment refused with ERR_PAYEE_MISMATCH. 12 steps, each a transaction you can open.](/record)
 
 > Agreement a6.accord-v2.testnet as recorded on NEAR testnet on 8 Nov 2026: sealed mandates, terms of 35.50 test USDC in 3 items approved by both companies, recipient halcyon-mm.testnet proven and accepted, delivery accepted, the agent paid item 1 (16.50 tUSDC), a redirect to halcyon-markets.testnet refused with ERR_PAYEE_MISMATCH and nothing sent, then the agent revoked. The room list shows other testnet agreements and market-making agreement a56.accord-v2.testnet, whose period 1 was observed and paid on testnet.
 
@@ -179,8 +179,6 @@ Why it matters
 Projects, market makers and exchanges keep pointing at the same gap.
 
 Paraphrased from public sources, linked on each card.
-
-- Kain Warwick Founder · Synthetix [Mar 2025](https://bitcoinist.com/disturbing-truth-about-crypto-market-makers/) Projects paid market makers $50k to $300k+ a month in the 2017 cycle. Many exercised their call options and dumped. **Accord** ties pay to the agreed spread, depth and two-sided quoting.
 
 - Jelle Buth Co-founder · Enflux, market maker [Apr 2025](https://cointelegraph.com/magazine/market-maker-deals-quietly-killing-crypto-projects) Projects should set liquidity KPIs before they commit. In loan-option deals they are often missing or vague. **Accord** turns the KPIs into the payment conditions.
 
@@ -676,21 +674,27 @@ In their words
 
 ## Who has named this problem.
 
-Verbatim where marked; everything else paraphrases the linked source.
+Payment networks, a security researcher, a procurement leader and a market maker, in their own published words. Each quote links its source.
 
 Quoted for context; no endorsement implied.
 
-Verbatim
+- Jack Forestell Visa · 30 Apr 2025
 
-> "These agents will need to be trusted with payments, not only by users, but by banks and sellers as well."
+- Simon Willison simonwillison.net · 16 Jun 2025
 
-Jack Forestell Visa · 30 Apr 2025 · [source](https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21361.html) 01 / 02
+- Michael DeWitt Walmart · 8 Nov 2022
 
-Paraphrase
+- Jelle Buth Enflux · 16 Apr 2025
 
-> The lethal trifecta: access to private data, exposure to untrusted content, and the ability to communicate externally; combine the three and an attacker can trick the agent into sending your data to them
+- Jorn Lambert Mastercard · 29 Apr 2025
 
-Simon Willison 16 Jun 2025 · [source](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/) 02 / 02
+Verbatim 01 / 05
+
+> “Soon people will have AI agents browse, select, purchase and manage on their behalf. These agents will need to be trusted with payments, not only by users, but by banks and sellers as well.”
+
+Jack Forestell Chief Product and Strategy Officer, Visa · 30 Apr 2025
+
+[Read the source](https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21361.html)
 
 FAQ
 
