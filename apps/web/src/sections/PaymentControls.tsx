@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react"
-import { AnimatePresence, animate, motion, useInView, useReducedMotion } from "motion/react"
+import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react"
 import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { SectionHeading } from "../components/SectionHeading"
 import { PixelIcon, type PixelName } from "../components/PixelIcon"
@@ -15,14 +15,13 @@ import styles from "./PaymentControls.module.css"
    teal stage and step text are reused: `ab`, `hs`). Each opens its page in the app. The two planned controls are one
    quiet line under the stage, with no scene.
 
-   Each tab's scene plays a short story when it becomes active (motion/react, ease [0.22, 1, 0.36, 1]) and then holds
-   its end state: Check types the request and resolves the six gates in the contract's order; Alerts carries the
-   refusal from the contract to the alert, its channels and the payload, then the hold-to-revoke button; Exports writes
-   the CSV rows and switches the layout from QuickBooks to Xero. Every value is from agreement a48.accord-v2.testnet
-   (10 Nov 2026, docs/runs.md "Flow proofs"): the redirect of item 2 to halcyon-markets.testnet that the contract
-   refused with ERR_PAYEE_MISMATCH, as the SDK's simulatePayment resolves it over the recorded views, as the refusal
-   webhook carries it (app lib/alerts.ts payloadFor), and the two paid items as the QuickBooks Online and Xero exports
-   lay them out (app lib/exports.ts).
+   Each tab's scene is one idea told calmly, then held: Check resolves the six gates in the contract's order and
+   stops on gate 2's ERR_PAYEE_MISMATCH; Alerts brings in the refusal notification, ticks its three channels to
+   delivered and fills the hold-to-revoke button; Exports writes the two paid rows and switches the layout from
+   QuickBooks to Xero. Every value is from agreement a48.accord-v2.testnet (10 Nov 2026, docs/runs.md "Flow proofs"):
+   the redirect of item 2 to halcyon-markets.testnet that the contract refused, gate by gate as the SDK's
+   simulatePayment resolves it over the recorded views, as the refusal alert carries it (app lib/alerts.ts), and the
+   two paid items as the QuickBooks Online and Xero exports lay them out (app lib/exports.ts).
 
    One clock: tabs advance every DWELL ms while the band is in view; hover or keyboard focus pauses; choosing a tab, or
    the band coming back into view, restarts the timer and the story. The teal bar glides to the active tab and fills
@@ -193,17 +192,7 @@ export function PaymentControls() {
                     ))}
                   </div>
                   <div className={styles.side}>
-                    <div className={styles.canvas} aria-hidden="true">
-                      <Still.Provider value={reduce}>
-                        <AnimatePresence mode="wait" initial={false}>
-                          <motion.div key={`${active}-${cycle}`} className={styles.sceneWrap}
-                            initial={reduce ? false : { opacity: 0, y: 10, scale: 0.985 }} animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -8, scale: 0.985, transition: { duration: 0.22, ease: E } }} transition={{ duration: 0.45, ease: E }}>
-                            <a.Scene />
-                          </motion.div>
-                        </AnimatePresence>
-                      </Still.Provider>
-                    </div>
+                    <Canvas still={reduce} sceneKey={`${active}-${cycle}`} Scene={a.Scene} />
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.p key={active} className={`${hs.answer} ${styles.answer}`} initial={reduce ? false : { opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, transition: { duration: 0.15 } }} transition={{ duration: 0.4, ease: E, delay: 0.15 }}>{a.answer}</motion.p>
@@ -220,17 +209,38 @@ export function PaymentControls() {
   )
 }
 
-/* ---------- story helpers: everything keyed to seconds after the scene mounts; reduced motion shows the end ---------- */
+/* ---------- the scenes ----------
+   One idea per scene, a handful of elements, typography doing the work. Motion is opacity and an 8-10 px rise or
+   slide on E, 0.35-0.6 s, staggered calmly; the segmented control's pill is the one spring. Sans for words and
+   amounts; mono only for on-chain identifiers and codes. Teal means passed; red appears once per scene, on the
+   refusal code. Every scene runs on one clock (seconds after it mounts) and holds its end state; Still (reduced
+   motion) renders the end state at once. */
 
 const E = [0.22, 1, 0.36, 1] as const
 const Still = createContext(false)
 
-/** props for a motion element that enters at `at` seconds (opacity and a small rise by default) */
+function Canvas({ still, sceneKey, Scene }: { still: boolean; sceneKey: string; Scene: () => ReactNode }) {
+  return (
+    <div className={styles.canvas} aria-hidden="true">
+      <Still.Provider value={still}>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div key={sceneKey} className={styles.sceneWrap}
+            initial={still ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, transition: { duration: 0.2, ease: E } }} transition={{ duration: 0.5, ease: E }}>
+            <Scene />
+          </motion.div>
+        </AnimatePresence>
+      </Still.Provider>
+    </div>
+  )
+}
+
+/** props for an element that enters at `at` seconds: a fade with a small rise (or slide) */
 function useEnter() {
   const still = useContext(Still)
   return (at: number, from: Record<string, number> = { opacity: 0, y: 8 }, dur = 0.5) => ({
     initial: still ? false : from,
-    animate: { opacity: 1, x: 0, y: 0, scale: 1 },
+    animate: { opacity: 1, x: 0, y: 0 },
     transition: { delay: at, duration: dur, ease: E },
   })
 }
@@ -248,216 +258,163 @@ function usePhase(times: number[]) {
   return p
 }
 
-/** text that types in from `at` seconds */
-function Typed({ text, at, cps = 48 }: { text: string; at: number; cps?: number }) {
-  const still = useContext(Still)
-  const [n, setN] = useState(still ? text.length : 0)
-  useEffect(() => {
-    if (still) return
-    const c = animate(0, text.length, { delay: at, duration: text.length / cps, ease: "linear", onUpdate: (v) => setN(Math.round(v)) })
-    return () => c.stop()
-  }, [still, text, at, cps])
-  return <>{text.slice(0, n)}{n > 0 && n < text.length ? <span className={styles.caret} /> : null}</>
-}
-
-/** a number counting up from 0 from `at` seconds, written with 2 decimals */
-function Count({ to, at, dur = 0.7, sign = "" }: { to: number; at: number; dur?: number; sign?: string }) {
-  const still = useContext(Still)
-  const [v, setV] = useState(still ? to : 0)
-  useEffect(() => {
-    if (still) return
-    const c = animate(0, to, { delay: at, duration: dur, ease: E, onUpdate: setV })
-    return () => c.stop()
-  }, [still, to, at, dur])
-  return <>{sign}{v.toFixed(2)}</>
-}
-
-/** a dot travelling along a dashed line, once or as keyframes */
-function Packet({ at, keys = ["0%", "100%"], bad, dur = 0.9 }: { at: number; keys?: string[]; bad?: boolean; dur?: number }) {
-  const still = useContext(Still)
-  if (still) return null
+function Check({ className }: { className?: string }) {
   return (
-    <motion.span className={`${styles.packet} ${bad ? styles.packetBad : ""}`} initial={{ left: keys[0], opacity: 0 }}
-      animate={{ left: keys, opacity: [0, 1, 1, 0] }} transition={{ delay: at, duration: dur, ease: E, opacity: { delay: at, duration: dur, times: [0, 0.1, 0.85, 1] } }} />
+    <svg viewBox="0 0 12 12" className={`${styles.check} ${className ?? ""}`} aria-hidden="true">
+      <path d="M2.5 6.4 5 8.8l4.6-5.4" />
+    </svg>
   )
 }
 
-/* ---------- Check a payment: the request types in, the six gates resolve in the contract's order ---------- */
+/** a status that fades in once its moment comes */
+function Status({ on, children }: { on: boolean; children: ReactNode }) {
+  const still = useContext(Still)
+  return (
+    <AnimatePresence initial={false}>
+      {on ? <motion.span className={styles.status} initial={still ? false : { opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, ease: E }}>{children}</motion.span> : null}
+    </AnimatePresence>
+  )
+}
 
-const GATES: { label: string; pass: boolean; code?: string; decisive?: boolean }[] = [
+/* ---------- Check a payment: the six gates resolve in the contract's order; gate 2 decides ---------- */
+
+const GATES: { label: string; pass: boolean; code?: string }[] = [
   { label: "Key and state", pass: true },
-  { label: "Recipient", pass: false, code: "ERR_PAYEE_MISMATCH", decisive: true },
+  { label: "Recipient", pass: false, code: "ERR_PAYEE_MISMATCH" },
   { label: "Item", pass: true },
   { label: "Evidence", pass: false, code: "ERR_NOT_DUE" },
   { label: "Amount", pass: true },
   { label: "Lock", pass: true },
 ]
-const GATE_AT = 1.95, GATE_STEP = 0.36
+/* gate 1, gate 2 (the decision), then gates 3 to 6 together, quieter */
+const GATE_T = [0.85, 1.4, 2.1, 2.18, 2.26, 2.34]
 
 function SceneCheck() {
   const enter = useEnter()
-  const p = usePhase(GATES.map((_, k) => GATE_AT + k * GATE_STEP))
-  const still = useContext(Still)
+  const p = usePhase(GATE_T)
   return (
     <div className={styles.win}>
-      <motion.div className={styles.winHead} {...enter(0)}>
-        <span className={styles.winTitle}>Check a payment</span>
-        <span className={`mono ${styles.chip}`}>read-only</span>
-      </motion.div>
-      <motion.p className={`mono ${styles.req}`} {...enter(0.15)}>
-        <span className={styles.reqLine}><Typed text="a48.accord-v2.testnet · item 2" at={0.35} /></span>
-        <span className={styles.reqLine}><Typed text="12.00 tUSDC → halcyon-markets.testnet" at={1.05} /></span>
-      </motion.p>
-      <ol className={styles.gates}>
+      <motion.p className={`mono ${styles.meta}`} {...enter(0)}>a48 · item 2 · 12.00 tUSDC → <span className={styles.nowrap}>halcyon-markets.testnet</span></motion.p>
+      <ol className={styles.rows}>
         {GATES.map((g, k) => {
-          const done = p > k
-          const key = done && g.decisive
+          const after = k > 1 // evaluated, but the decision is already made at gate 2
           return (
-            <motion.li key={g.label} className={`${styles.gate} ${key ? styles.gateKey : ""}`} {...enter(1.6 + k * 0.05, { opacity: 0, y: 4 }, 0.35)}>
-              <motion.span className={styles.gateRow}
-                animate={key && !still ? { x: [0, -5, 5, -3, 3, 0] } : { x: 0 }} transition={{ duration: 0.45, ease: "easeOut" }}>
-                <span className={`mono ${styles.gNum}`}>0{k + 1}</span>
-                <span className={`${styles.gName} ${done ? "" : styles.gWait}`}>{g.label}</span>
-                <AnimatePresence initial={false}>
-                  {done && g.code ? (
-                    <motion.span key="c" className={`mono ${styles.gCode}`} initial={still ? false : { opacity: 0, x: 6 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, ease: E }}>{g.code}</motion.span>
-                  ) : null}
-                </AnimatePresence>
-                <span className={`${styles.mark} ${!done ? styles.markWait : g.pass ? styles.markOk : styles.markBad}`}>
-                  {!done ? <span className={styles.spin} /> : (
-                    <motion.span initial={still ? false : { scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 520, damping: 22 }}>{g.pass ? "✓" : "✕"}</motion.span>
-                  )}
-                </span>
-              </motion.span>
-              {key && !still ? <motion.span className={styles.pulse} initial={{ opacity: 0.7, scale: 1 }} animate={{ opacity: 0, scale: 1.04 }} transition={{ duration: 0.9, ease: "easeOut" }} /> : null}
+            <motion.li key={g.label} className={`${styles.row} ${after && p > 1 ? styles.rowDim : ""}`} {...enter(0.15 + k * 0.07)}>
+              <span className={styles.rowName}>{g.label}</span>
+              <Status on={p > k}>
+                {g.pass ? <Check className={after ? styles.checkDim : ""} /> : <span className={`mono ${k === 1 ? styles.code : styles.codeDim}`}>{g.code}</span>}
+              </Status>
             </motion.li>
           )
         })}
       </ol>
-      <motion.div className={styles.verdict} {...enter(GATE_AT + GATES.length * GATE_STEP + 0.25, { opacity: 0, y: 14 }, 0.55)}>
-        <span className={styles.vText}>Would be refused</span>
-        <span className={`mono ${styles.vCode}`}>ERR_PAYEE_MISMATCH</span>
+      <motion.div className={styles.close} {...enter(2.9)}>
+        <span className={styles.closeTitle}>Would be refused</span>
+        <span className={styles.closeNote}>The first failing gate decides.</span>
       </motion.div>
     </div>
   )
 }
 
-/* ---------- Refusal alerts: the refusal travels from the contract to the alert, its channels, the payload, revoke ---------- */
+/* ---------- Refusal alerts: one notification, three channels delivered, hold to revoke ---------- */
 
 const CHANNELS = ["Webhook", "Telegram", "Email"]
 
 function SceneAlerts() {
   const enter = useEnter()
   const still = useContext(Still)
-  const p = usePhase([1.55, 1.85, 2.15])
+  const p = usePhase([1.3, 1.6, 1.9])
   return (
-    <div className={styles.alertStack}>
-      <motion.div className={styles.route} {...enter(0)}>
-        <span className={`mono ${styles.node}`}>a48 · act</span>
-        <span className={styles.wireLine}><Packet at={0.25} bad dur={0.55} /></span>
-        <span className={`mono ${styles.node} ${styles.nodeBad}`}>refused</span>
-        <span className={styles.wireLine}><Packet at={0.7} bad dur={0.45} /></span>
-        <span className={`mono ${styles.node}`}>your alerts</span>
-      </motion.div>
-      <motion.div className={styles.toast} {...enter(0.95, { opacity: 0, y: -12, scale: 0.97 }, 0.55)}>
-        <span className={styles.toastIcon}>!</span>
-        <div className={styles.toastText}>
-          <p className={styles.toastTitle}>Agent refused <span className={`mono ${styles.now}`}>a48.accord-v2.testnet</span></p>
-          <p className={styles.toastBody}>12.00 tUSDC to <span className={styles.nowrap}>halcyon-markets.testnet</span>; approved <span className={styles.nowrap}>halcyon-mm.testnet</span></p>
-        </div>
-      </motion.div>
-      <motion.div className={styles.channels} {...enter(1.3)}>
+    <div className={styles.win}>
+      <div className={styles.group}>
+        <motion.div className={styles.noteHead} {...enter(0.1)}>
+          <span className={styles.noteApp}>Accord</span>
+          <span className={styles.noteTime}>now</span>
+        </motion.div>
+        <motion.p className={styles.noteTitle} {...enter(0.2)}>Agent payment refused</motion.p>
+        <motion.p className={styles.noteBody} {...enter(0.3)}>
+          12.00 tUSDC to <span className={`mono ${styles.id}`}>halcyon-markets.testnet</span> · approved <span className={`mono ${styles.id}`}>halcyon-mm.testnet</span>
+        </motion.p>
+        <motion.p className={styles.noteCode} {...enter(0.4)}>
+          <span className={`mono ${styles.code}`}>ERR_PAYEE_MISMATCH</span>
+          <span className={`mono ${styles.idMuted}`}>a48.accord-v2.testnet</span>
+        </motion.p>
+      </div>
+      <motion.ul className={styles.channels} {...enter(0.9)}>
         {CHANNELS.map((ch, k) => (
-          <span key={ch} className={`${styles.channel} ${p > k ? styles.channelOn : ""}`}>
-            <span className={styles.chDot}>{p > k ? <motion.span initial={still ? false : { scale: 0.3 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 520, damping: 22 }}>✓</motion.span> : null}</span>
-            {ch}<span className={`mono ${styles.chState}`}>{p > k ? "delivered" : "…"}</span>
-          </span>
+          <li key={ch} className={styles.channel}>
+            <span className={styles.chName}>{ch}</span>
+            <span className={styles.chState}>
+              {p > k ? <motion.span className={styles.chDone} initial={still ? false : { opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: E }}><Check />delivered</motion.span> : <span className={styles.chWait}>sending</span>}
+            </span>
+          </li>
         ))}
-      </motion.div>
-      <motion.pre className={`mono ${styles.payload}`} {...enter(2.4)}>
-        <span className={styles.pk}>X-Accord-Signature:</span> t=…,v1=…{"\n"}
-        {"{"} <span className={styles.pk}>"code"</span>: <span className={styles.pBad}>"ERR_PAYEE_MISMATCH"</span>, <span className={styles.pk}>"item"</span>: 2,{"\n"}
-        {"  "}<span className={styles.pk}>"attempted"</span>: {"{"} "amount": "12.00",{"\n"}{"    "}"recipient": "halcyon-markets.testnet" {"}"},{"\n"}
-        {"  "}<span className={styles.pk}>"approved"</span>: {"{"}{"\n"}{"    "}"recipient": "halcyon-mm.testnet" {"}"} {"}"}
-      </motion.pre>
-      <motion.div className={styles.revokeRow} {...enter(2.9)}>
-        <span className={styles.revokeNote}>Incident view: tried beside approved</span>
-        <span className={styles.revoke}>
-          {still ? null : <motion.span className={styles.revokeFill} initial={{ scaleX: 0 }} animate={{ scaleX: [0, 1, 1, 0] }} transition={{ delay: 3.4, duration: 2.0, times: [0, 0.6, 0.8, 1], ease: "easeInOut" }} />}
-          <span className={styles.revokeLabel}>Hold to revoke</span>
+      </motion.ul>
+      <motion.div className={styles.actions} {...enter(2.3)}>
+        <span className={styles.hold}>
+          {still ? null : <motion.span className={styles.holdFill} initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 2.9, duration: 1.6, ease: "linear" }} />}
+          <span className={styles.holdLabel}>Hold to revoke</span>
         </span>
+        <span className={styles.actionNote}>Incident view: what was tried beside what was approved</span>
       </motion.div>
     </div>
   )
 }
 
-/* ---------- Finance exports: rows write in, the PO lights, then the layout switches QuickBooks → Xero ---------- */
+/* ---------- Finance exports: two real rows write in, then the layout switches QuickBooks → Xero ---------- */
 
-const FORMATS = ["QuickBooks", "Xero", "Accord CSV"]
+/* a48's two paid items (docs/runs.md "Flow proofs"): 12.00 tUSDC each to halcyon-mm.testnet on 10 Nov 2026. QuickBooks
+   Online's 3 columns; Xero's statement shown by its *Date, Reference, Payee and *Amount columns. */
+const HEADS = { qbo: ["Date", "Description", "Amount"], xero: ["*Date", "Reference · Payee", "*Amount"] }
 
 function SceneExports() {
   const enter = useEnter()
   const still = useContext(Still)
-  const p = usePhase([2.5, 4.3])
-  const xero = p >= 2
-  const po = p >= 1
-  const fmt = xero ? 1 : 0
+  const p = usePhase([3.0])
+  const fmt = p >= 1 ? "xero" : "qbo"
+  const fade = { initial: still ? false : { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.35, ease: E } }
   return (
     <div className={styles.win}>
-      <motion.div className={styles.winHead} {...enter(0)}>
-        <span className={styles.winTitles}><span className={styles.winTitle}>Export</span><span className={`mono ${styles.winSub}`}>a48.accord-v2.testnet · tUSDC</span></span>
+      <motion.div className={styles.exHead} {...enter(0)}>
+        <span className={styles.exTitles}>
+          <span className={styles.exTitle}>Export</span>
+          <span className={`mono ${styles.idMuted}`}>a48.accord-v2.testnet</span>
+        </span>
         <span className={styles.seg}>
-          {FORMATS.map((f, k) => (
-            <span key={f} className={`${styles.segItem} ${k === fmt ? styles.segOn : ""}`}>
-              {k === fmt ? <motion.span layoutId="pc-seg" className={styles.segPill} transition={still ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 36 }} /> : null}
-              <span className={styles.segLabel}>{f}</span>
+          {(["qbo", "xero"] as const).map((f) => (
+            <span key={f} className={`${styles.segItem} ${f === fmt ? styles.segOn : ""}`}>
+              {f === fmt ? <motion.span layoutId="pc-seg" className={styles.segPill} transition={still ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 34 }} /> : null}
+              <span className={styles.segLabel}>{f === "qbo" ? "QuickBooks" : "Xero"}</span>
             </span>
           ))}
         </span>
       </motion.div>
-      <motion.div className={`mono ${styles.sheet}`} {...enter(0.3)}>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div key={xero ? "xero" : "qbo"} initial={still ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.3, ease: E }}>
-            {xero ? (
-              <div className={`${styles.sRow} ${styles.sX} ${styles.sHead}`}><span>*Date</span><span>*Amount</span><span>Payee</span><span>Reference</span></div>
-            ) : (
-              <div className={`${styles.sRow} ${styles.sHead}`}><span>Date</span><span>Description</span><span>Amount</span></div>
-            )}
-            {[1, 2].map((n, k) => xero ? (
-              <div key={n} className={`${styles.sRow} ${styles.sX}`}>
-                <span>10/11/2026</span><span>-12.00</span>
-                <span className={styles.sDesc}><span className={styles.sMain}>halcyon-demo.testnet</span><span className={styles.sSub}>Liquidity reporting integration / item {n} / a48.accord-v2.testnet</span></span>
-                <span><span className={`${styles.po} ${styles.poOn}`}>PO-2026-0148</span></span>
-              </div>
-            ) : (
-              <motion.div key={n} className={styles.sRow} {...enter(0.7 + k * 0.6, { opacity: 0, x: -8 }, 0.45)}>
-                <span>10/11/2026</span>
-                <span className={styles.sDesc}>
-                  <span className={styles.sMain}><span className={`${styles.po} ${po ? styles.poOn : ""}`}>PO-2026-0148</span> / Liquidity reporting integration</span>
-                  <span className={styles.sSub}>/ item {n} / a48.accord-v2.testnet</span>
-                </span>
-                <span className={styles.sAmt}><Count to={12} sign="-" at={0.9 + k * 0.6} /></span>
-              </motion.div>
-            ))}
+      <div className={styles.table}>
+        <motion.div className={`${styles.tr} ${styles.th}`} {...enter(0.2)}>
+          {HEADS.qbo.map((_, c) => (
+            <span key={c} className={`${styles.td} ${c === 0 ? styles.tdDate : ""}`}>
+              <AnimatePresence mode="wait" initial={false}><motion.span key={`${fmt}-${c}`} {...fade}>{HEADS[fmt][c]}</motion.span></AnimatePresence>
+            </span>
+          ))}
+        </motion.div>
+        {[1, 2].map((n, k) => (
+          <motion.div key={n} className={styles.tr} {...enter(0.55 + k * 0.09, { opacity: 0, x: -10 })}>
+            <span className={`${styles.td} ${styles.tdDate}`}>10/11/2026</span>
+            <span className={`${styles.td} ${styles.tdText}`}>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span key={`${fmt}-d${n}`} {...fade} className={styles.clamp}>{fmt === "qbo" ? `PO-2026-0148 / Liquidity reporting integration / item ${n}` : <>PO-2026-0148<br /><span className={`mono ${styles.idMuted}`}>halcyon-demo.testnet</span></>}</motion.span>
+              </AnimatePresence>
+            </span>
+            <span className={`${styles.td} ${styles.num}`}>-12.00</span>
           </motion.div>
-        </AnimatePresence>
-      </motion.div>
-      <motion.div className={styles.match} {...enter(2.7)}>
-        <span className={styles.okDot}>✓</span>
-        <span className={styles.matchText}>
-          <span className={styles.matchTitle}>PO-2026-0148 matched · 2 payments</span>
-          <span className={`mono ${styles.matchSub}`}>to halcyon-mm.testnet · reference off chain</span>
-        </span>
-        <span className={`mono ${styles.matchAmt}`}><Count to={24} sign="-" at={2.9} dur={0.9} /> tUSDC</span>
-      </motion.div>
-      <motion.div className={styles.dl} {...enter(3.2)}>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span key={fmt} className={`mono ${styles.dlNote}`} initial={still ? false : { opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.25, ease: E }}>
-            {xero ? "Xero bank statement" : "QuickBooks Online · 3 columns"}
-          </motion.span>
-        </AnimatePresence>
-        <span className={styles.dlBtn}>Download CSV</span>
-      </motion.div>
+        ))}
+        <motion.div className={`${styles.tr} ${styles.tfoot}`} {...enter(0.9)}>
+          <span className={`${styles.td} ${styles.tdDate}`}>2 payments</span>
+          <span className={`${styles.td} ${styles.tdText}`}><span className={`mono ${styles.idMuted}`}>to halcyon-mm.testnet</span></span>
+          <span className={`${styles.td} ${styles.num}`}>-24.00</span>
+        </motion.div>
+      </div>
+      <motion.p className={styles.foot} {...enter(1.2)}>Amounts in tUSDC. References stay with your organisation, never on chain.</motion.p>
     </div>
   )
 }
