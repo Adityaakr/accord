@@ -15,6 +15,7 @@ import { AutoRefresh } from "@/components/AutoRefresh";
 import { CountUp } from "@/components/CountUp";
 import { VerifiedPanel } from "./VerifiedPanel";
 import { Actions } from "./Actions";
+import { FundQuote } from "./FundQuote";
 import { DemoPanel } from "./DemoPanel";
 import { isDemoRoom } from "@/server/demo";
 import { Periods } from "./Periods";
@@ -375,6 +376,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
               ["Recipient", a.recipient ? <span key="rc" className="mono" title={a.recipient.account}>{shortAccount(a.recipient.account)}</span> : <span key="rc" className="faint">none yet</span>],
             ]} />
           </Panel>
+          {a.state !== "Sealed" && a.state !== "NoDeal" && a.state !== "Cancelled" && <FundQuote agreement={a.account} />}
         </aside>
       </div>
     </div>

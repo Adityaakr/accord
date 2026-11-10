@@ -1,7 +1,7 @@
 // Command handlers. Each takes a `Ctx` with injected dependencies (an Accord-like factory client, agreement
 // clients, preflight, verify, files) and writes one block of text or one JSON value, so tests run with fakes.
 
-import { NotAnAgreementError, guardedPay, pluralCount, sha256Hex, type AgreementClient, type CreateArgs, type Kind, type Mandate, type Params,
+import { FUNDING_SOURCES, NotAnAgreementError, fundingQuotes, guardedPay, isFundingSource, type FundingQuote, type FundingSource, pluralCount, sha256Hex, type AgreementClient, type CreateArgs, type Kind, type Mandate, type Params,
   type PreflightResult, type TxResult, type VerifyReport } from "@accord/sdk";
 import { flagBool, flagInt, flagString, requireFlag, toInt, type ParsedArgs } from "./args.js";
 import { DEFAULT_ALLOWANCE, parseAmount, parseNear } from "./amount.js";
@@ -37,6 +37,8 @@ export interface Deps {
   writeSecretFile(path: string, content: string): Promise<void>;
   readText(path: string): Promise<string>;
   sleep(ms: number): Promise<void>;
+  /** NEAR Intents 1Click dry quotes (the SDK's fundingQuotes); injected in tests. */
+  fundingQuotes?: typeof fundingQuotes;
 }
 
 export interface Output {
@@ -408,6 +410,29 @@ const receipts: Handler = async (ctx) => {
   ctx.out.block(formatReceipts(id, list, unit), { agreement: id, unit, receipts: list });
 };
 
+/** `fund-quote`: what funding the agreement's total from another chain would cost, from NEAR Intents' 1Click. Dry
+ *  quotes only: nothing is signed or sent, and 1Click is mainnet-only, so for a testnet agreement it is a price. */
+const fundQuote: Handler = async (ctx) => {
+  const id = agreementId(ctx);
+  const from = flagString(ctx.args, "from");
+  if (from !== undefined && !isFundingSource(from)) throw new Error(`--from is one of ${Object.keys(FUNDING_SOURCES).join(", ")}`);
+  const [terms, unit] = await Promise.all([ctx.deps.agreement(id).terms(), agreementUnit(ctx, id)]);
+  if (!terms) throw new Error(`${id} has no terms yet: a quote needs the agreed total`);
+  const quote = ctx.deps.fundingQuotes ?? fundingQuotes;
+  const list = await quote({ amount: terms.total, sources: from ? [from as FundingSource] : undefined });
+  const lines = [header(`fund-quote · ${id} · total ${units(terms.total, unit, 6)} · NEAR Intents 1Click, dry quote: nothing is signed or sent`)];
+  for (const q of list) {
+    lines.push("error" in q
+      ? line(q.source, `${q.label}: ${q.error}`)
+      : line(q.source, `send ${(q as FundingQuote).amountInFormatted} ${q.label} → ${units(q.amountOut, "USDC", 6)} on NEAR${(q as FundingQuote).seconds ? ` · about ${(q as FundingQuote).seconds} s` : ""}`));
+  }
+  const signed = list.find((q): q is FundingQuote => !("error" in q));
+  if (signed) lines.push(line("signed", `by 1Click ${signed.signature.slice(0, 18)}… at ${signed.timestamp}`));
+  lines.push(line("scope", "1Click runs on NEAR mainnet only: this prices the same total on mainnet; a testnet agreement cannot receive it"));
+  ctx.out.block(lines, { agreement: id, total: terms.total, unit, dry: true, quotes: list });
+  return list.every((q) => "error" in q) ? 1 : 0;
+};
+
 const check: Handler = async (ctx) => {
   const account = pos(ctx, 0, "account");
   const id = agreementId(ctx);
@@ -512,11 +537,11 @@ const recycle: Handler = async (ctx) => {
 
 export const COMMANDS: Record<string, Handler> = {
   create, seal, negotiate, approve, fund, recipient, deliver, accept, dispute, agent, pay, exception, period, claim,
-  close, withdraw, show, refusals, receipts, check, verify: verifyCmd, "sealed-check": sealedCheck, watch, recycle,
+  close, withdraw, show, refusals, receipts, check, "fund-quote": fundQuote, verify: verifyCmd, "sealed-check": sealedCheck, watch, recycle,
 };
 
 /** Commands that read only; they run without `--as`. */
-export const READ_ONLY = new Set(["show", "refusals", "receipts", "check", "verify", "watch"]);
+export const READ_ONLY = new Set(["show", "refusals", "receipts", "check", "fund-quote", "verify", "watch"]);
 
 export const USAGE = `accord <command> [--network testnet] [--factory <id>] [--as buyer|vendor|authority|agent|keeper] [--json] [--rpc <url>]
 
@@ -534,6 +559,7 @@ export const USAGE = `accord <command> [--network testnet] [--factory <id>] [--a
   period resolve <n> --pay|--close | period close <n>
   claim <item> | close [--mutual] | withdraw
   show | refusals [--from n] [--limit n] | receipts | check <account> | verify   --agreement <a>
+  fund-quote --agreement <a> [--from base|eth|arb|sol]        (NEAR Intents 1Click, dry quote)
   sealed-check --agreement <a>                                (--as buyer|vendor)
   watch --agreement <a> [--interval <s>] [--count <n>]
   recycle [--token <id>] [--to <account>] [--amount <x>]      (signs as RECIPIENT_ACCOUNT)

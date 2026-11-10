@@ -46,7 +46,7 @@ interface Recorder {
   files: Record<string, string>;
 }
 
-function fakes(opts: { rating?: Rating; approved?: boolean; payResult?: ActResult; verify?: VerifyReport; verifyError?: Error; symbol?: string } = {}) {
+function fakes(opts: { rating?: Rating; approved?: boolean; payResult?: ActResult; verify?: VerifyReport; verifyError?: Error; symbol?: string; quotes?: Deps["fundingQuotes"] } = {}) {
   const rec: Recorder = { calls: [], files: {} };
   const deal = {
     id: ID,
@@ -81,6 +81,7 @@ function fakes(opts: { rating?: Rating; approved?: boolean; payResult?: ActResul
       writeSecretFile: async (p, c) => { rec.files[p] = c; },
       readText: async () => "",
       sleep: async () => {},
+      ...(opts.quotes ? { fundingQuotes: opts.quotes } : {}),
     };
     return deps;
   };
@@ -234,9 +235,29 @@ describe("other commands", () => {
   it("every listed command is dispatched", async () => {
     const { COMMANDS } = await import("../src/commands.js");
     expect(Object.keys(COMMANDS).sort()).toEqual([
-      "accept", "agent", "approve", "check", "claim", "close", "create", "deliver", "dispute", "exception", "fund",
+      "accept", "agent", "approve", "check", "claim", "close", "create", "deliver", "dispute", "exception", "fund", "fund-quote",
       "negotiate", "pay", "period", "receipts", "recipient", "recycle", "refusals", "seal", "sealed-check", "show",
       "verify", "watch", "withdraw",
     ]);
+  });
+});
+
+describe("fund-quote", () => {
+  it("prices the agreement's total from each chain, read-only, and says the quote is dry", async () => {
+    const asked: unknown[] = [];
+    const quotes: Deps["fundingQuotes"] = async (o) => {
+      asked.push(o);
+      return [
+        { source: "base", label: "USDC on Base", amountOut: "32000000", amountIn: "32330000", amountInFormatted: "32.33", minAmountIn: "32000000", amountInUsd: "32.3", seconds: 35, signature: "ed25519:abcdefghijklmnopqrstu", timestamp: "2026-11-10T20:00:00Z", dry: true },
+        { source: "sol", label: "USDC on Solana", error: "1Click: no route" },
+      ];
+    };
+    const r = await cli(["fund-quote", "--agreement", ID], fakes({ quotes }));
+    expect(r.code).toBe(0);
+    expect(asked[0]).toMatchObject({ amount: "32000000" });
+    expect(r.out).toContain("dry quote: nothing is signed or sent");
+    expect(r.out).toContain("send 32.33 USDC on Base");
+    expect(r.out).toContain("USDC on Solana: 1Click: no route");
+    expect((await cli(["fund-quote", "--agreement", ID, "--from", "dogecoin"], fakes({ quotes }))).code).toBe(1);
   });
 });

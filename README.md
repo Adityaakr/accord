@@ -72,22 +72,22 @@ Agreement [`a6.accord-v2.testnet`](https://testnet.nearblocks.io/address/a6.acco
 | 11 | Redirect to `halcyon-markets.testnet` refused: `ERR_PAYEE_MISMATCH`, nothing sent | [`AB9HLnWv…`](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs) |
 | 12 | Buyer revokes the agent; its next call fails with `AccessKeyDoesNotExist` | [`4ervNQdj…`](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P) |
 
-**Release 5, end to end in one command.** On 10 Nov 2026 (UTC) `make demo` ran the whole loop on testnet from fresh accounts against the hosted app: agreement [`a63.accord-v2.testnet`](https://testnet.nearblocks.io/address/a63.accord-v2.testnet), release 5 (the security-review fixes and the reviewed enclave job builds), test USDC:
+**Release 5, end to end in one command, in `1:29`.** On 10 Nov 2026 (UTC) `make demo` ran the whole loop on testnet from fresh accounts against the hosted app: agreement [`a65.accord-v2.testnet`](https://testnet.nearblocks.io/address/a65.accord-v2.testnet), release 5 (the security-review fixes and the reviewed enclave job builds), test USDC. The two companies sign side by side, and the Payee job proves the recipient while the Sealed Table negotiates:
 
 ```
-  00:09  accounts   demo-mwb4ek7m-buyer.northwind-demo.testnet · …-vendor · …-auth · …-pay
-  00:15  created    a63.accord-v2.testnet · demo timings
-  00:25  sealed     both mandates committed
-  01:36  recipient  proven on the demo domain · approved · accepted · active
-  01:36  attested   35.00 USDC · 3 items
-  02:00  executing  approved by both · funded 35.00 USDC
-  02:13  delivery   item 1 submitted · accepted
-  02:19  paid       item 1 · 13.00 USDC → demo-mwb4ek7m-pay.northwind-demo.testnet
-  02:23  refused    ERR_PAYEE_MISMATCH (one attack)
-demo: full loop in 2:23
+  00:09  accounts   demo-mwb5hpl7-buyer.northwind-demo.testnet · …-vendor · …-auth · …-pay
+  00:16  created    a65.accord-v2.testnet · demo timings
+  00:20  sealed     both mandates committed
+  00:54  recipient  proven on the demo domain · approved · accepted · active
+  00:59  attested   33.00 USDC · 3 items
+  01:10  executing  approved by both · funded 33.00 USDC
+  01:19  delivery   item 1 submitted · accepted
+  01:24  paid       item 1 · 15.00 USDC → demo-mwb5hpl7-pay.northwind-demo.testnet
+  01:29  refused    ERR_PAYEE_MISMATCH (one attack)
+demo: full loop in 1:29
 ```
 
-(`USDC` in this output is the test token `tusdc.accord-v1.testnet`.) `make verify DEAL=a63.accord-v2.testnet` prints `code hash ECgsrZwy… = release 5`, `keys 1 key · FunctionCall · receiver self · methods [act] · no full access · ok`, the reviewed job builds `outlayer-verify proven`, and `verify: 6 checks ok · 1 partial`.
+(`USDC` in this output is the test token `tusdc.accord-v1.testnet`.) `make verify DEAL=a65.accord-v2.testnet` prints `code hash ECgsrZwy… = release 5`, `keys 1 key · FunctionCall · receiver self · methods [act] · no full access · ok`, the reviewed job builds `outlayer-verify proven`, and `verify: 6 checks ok · 1 partial`. The time follows the enclave negotiation (`39 s` here); earlier runs the same night took `2:23` (a63, steps one after another) and `2:20` (a64, a `64 s` negotiation), and both verify the same way.
 
 ### Verify it yourself
 
@@ -146,6 +146,18 @@ Every transaction of these runs is linked in [`docs/runs.md`](docs/runs.md); the
 Everything below reads NEAR testnet with no account and no keys. Run it from `platform/` after `corepack enable && pnpm install`.
 
 **Check a payment before signing.** [`/app/check`](https://accordweb-production.up.railway.app/app/check), or as JSON: `GET https://accordweb-production.up.railway.app/app/api/check?agreement=a48.accord-v2.testnet&item=3&amount=8.00&recipient=halcyon-mm.testnet`. It answers whether the agreement's contract would pay or refuse that payment, gate by gate (CORS any origin, GET only, 30 a minute per IP). It is a read-only simulation of `accord-core`'s `check_pay`, the function `act` calls, over chain state at one block: no transaction, and the contract decides at the time of the real call. Replayed against 24 recorded payments and refusals, it matches every one.
+
+**Price funding from another chain.** `pnpm --silent --filter @accord/cli dev -- fund-quote --agreement a6.accord-v2.testnet`, or `GET https://accordweb-production.up.railway.app/app/api/fund-quote/a6.accord-v2.testnet` (CORS any origin, cached 60 s). NEAR Intents' 1Click prices delivering the agreement's total as native USDC on NEAR from USDC on Base, Ethereum, Arbitrum and Solana. Every request is `dry: true`: 1Click signs the quote and returns no deposit address, so nothing is signed or sent. A run on 10 Nov 2026:
+
+```
+accord fund-quote · a6.accord-v2.testnet · total 35.50 tUSDC · NEAR Intents 1Click, dry quote: nothing is signed or sent
+  base      send 35.865347 USDC on Base → 35.50 USDC on NEAR · about 35 s
+  eth       send 35.86546 USDC on Ethereum → 35.50 USDC on NEAR · about 45 s
+  arb       send 35.865438 USDC on Arbitrum → 35.50 USDC on NEAR · about 25 s
+  sol       send 35.865438 USDC on Solana → 35.50 USDC on NEAR · about 20 s
+  signed    by 1Click ed25519:5vbW1wjAKv… at 2026-11-10T20:35:46.054Z
+  scope     1Click runs on NEAR mainnet only: this prices the same total on mainnet; a testnet agreement cannot receive it
+```
 
 **MCP server** (`@accord/mcp`, stdio by default). With no key in the environment it serves 7 read-only tools: `accord_list_agreements`, `accord_get_agreement`, `accord_due_items`, `accord_preflight`, `accord_refusals`, `accord_receipts` and `accord_verify`. The paying and principal tools appear only when their keys are set ([`platform/INTERFACES.md`](platform/INTERFACES.md) section 12).
 
@@ -405,7 +417,7 @@ The organisers' requirements per track ([`platform/GOAL.md`](platform/GOAL.md) "
 | `agents` | Payments in USDC; a receipt per task | tUSDC and Circle USDC on NEAR; `/record`, `/app/record.csv`, `accord receipts` |
 | `agents` | Agent Market: how jobs are posted and paid, or say there is no public way | Checked 31 Oct 2026: Agent Market is mainnet-only and holds payments in its own ledger, with no hook for an outside escrow, so Accord does not integrate it (`platform/DECISIONS.md` section 7) |
 | `business` | Humans set the constraints; a kill switch | Mandates, both approvals, exceptions; `revoke_agent` (`make revoke`, a13) |
-| `business` | Every sale and payout on a public ledger; a demo loop under two minutes | `/record`; `make demo` ran the loop on testnet in 2:23 from fresh accounts (a63, 10 Nov 2026, [above](#testnet-proof)): most of it is the enclave negotiation and the Payee proof; on a local node it ran in 14 s (3 Nov 2026). Under two minutes on testnet is not met |
+| `business` | Every sale and payout on a public ledger; a demo loop under two minutes | `/record`; `make demo` ran the loop on testnet in `1:29` from fresh accounts (a65, 10 Nov 2026 UTC: the two companies sign side by side and the Payee proof runs during the negotiation); the time moves with the enclave negotiation, which took `39 s` there and `64 s` in a slower run (a64, `2:20`). On a local node it runs in 14 s |
 
 Not claimed: `realworld`, `social` and `swarms`. Their extra requirements (an invoice view paid through 1Click, a Sputnik DAO as the buyer, a sealed tender) are not built.
 
@@ -417,7 +429,7 @@ Not claimed: `realworld`, `social` and `swarms`. Their extra requirements (an in
 | OutLayer | Used: Intel TDX enclaves for the Sealed Table, Payee and the observer; outputs signed with seed-derived keys and checked on chain |
 | HOT Connect | Used: wallet sign-in in the app (Meteor, Intear, Ledger, Nightly, WalletConnect) |
 | NEAR Intents Agent API | Not used. It gives one owner a policy-bound wallet for an agent (limits, allowlist, timelocks, approval, freeze). Accord is the policy two companies negotiated and both approved, enforced on an account neither can drain alone, with payments gated by evidence. The two could meet: an agreement's recipient and caps could be exported into such a policy (not built) |
-| NEAR Intents 1Click | Not used: no testnet. Funding an agreement from other chains is planned |
+| NEAR Intents 1Click | Used, quote only: what funding an agreement's total from USDC on Base, Ethereum, Arbitrum or Solana would cost, as `dry: true` quotes (nothing signed or sent). `accord fund-quote --agreement a6.accord-v2.testnet`, `GET /app/api/fund-quote/<agreement>` and the room's "Fund from another chain" panel. 1Click has no testnet, so for a testnet agreement it is a mainnet price |
 | Agent Market | Not integrated: mainnet-only, with payments held in its own ledger and no outside escrow hook |
 | Sputnik DAO, Trezu | Not integrated. A DAO as the buyer (proposals to create, fund and approve) was designed and not built; Trezu is mainnet-only |
 | Chain Signatures | Not used: settlement is USDC on NEAR from the agreement's own account |
@@ -450,15 +462,15 @@ Candidates, not partners: no relationship with any of them is claimed.
 | [x402](https://www.x402.org/) | HTTP-native stablecoin payments, with NEAR among its launch collaborators | An x402 payment could be gated by the agreement's recipient and amount checks |
 | [Rhea Finance](https://www.rhea.finance/) | NEAR DEX | The market-making observer already measures a Rhea pool (a56, a57) |
 | Exchanges that police market-maker deals ([Binance](https://www.binance.com/en/blog/community/483141898861583811)) | Due diligence on token projects' market makers | A market-making agreement's on-chain record of measured periods is evidence a project can show a listing team |
-| [NEAR Intents / 1Click](https://docs.near-intents.org/), [OutLayer](https://app.outlayer.ai/), [NEAR AI Cloud](https://docs.near.ai/cloud/private-inference) | Cross-chain swaps; enclave compute; private inference | Funding an agreement from other chains (planned); OutLayer and NEAR AI Cloud already run Accord's enclave jobs and model calls |
+| [NEAR Intents / 1Click](https://docs.near-intents.org/), [OutLayer](https://app.outlayer.ai/), [NEAR AI Cloud](https://docs.near.ai/cloud/private-inference) | Cross-chain swaps; enclave compute; private inference | Quotes for funding an agreement from other chains (`accord fund-quote`, dry, live); OutLayer and NEAR AI Cloud already run Accord's enclave jobs and model calls |
 
 ### What keeps working, and what is left
 
 - **Agreements do not depend on Accord's servers.** Each agreement is its own NEAR account with no full-access key and code pinned by hash; its rules, ledger and refusals are on chain, and `make verify` and the MCP server read the chain directly.
-- **The hosted demo stays up and funded through 18 Nov 2026**: the site, the app, the faucet (refilled twice a day when it falls under 15 NEAR) and the pre-funded `/try` room.
+- **The hosted demo stays up and funded through 25 Nov 2026**: the site, the app, the faucet (refilled twice a day when it falls under 15 NEAR) and the pre-funded `/try` room.
 - **Open source, MIT**, with CI on every push (website checks, TypeScript typecheck and tests, the Rust money-path tests).
 - **Before mainnet, in order:** restrict the Sealed Table's seed to the agreement's own calls (S1, an OutLayer setting); remove release 3's job builds from the seeds' access; check the hardware quote in `make verify`; a third-party audit of the contracts; then the factory on mainnet with Circle USDC. Tracked in [`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md) and [`platform/DECISIONS.md`](platform/DECISIONS.md).
-- **Next in the product:** an organisation-wide spend limit across all its agreements, funding an agreement from other chains through NEAR Intents, and a DAO as the buyer.
+- **Next in the product:** an organisation-wide spend limit across all its agreements, funding an agreement from other chains through NEAR Intents (priced today with dry quotes; executing them waits for mainnet), and a DAO as the buyer.
 
 ## Repository map
 

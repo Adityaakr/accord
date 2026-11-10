@@ -4,12 +4,14 @@
 
 import { sha256 } from "@noble/hashes/sha2";
 import { utf8ToBytes } from "@noble/hashes/utils";
-import { KeySigner, toBase64 } from "@accord/sdk";
+import { KeySigner, demoDelivery, demoDeliveryPath, toBase64 } from "@accord/sdk";
 import {
-  activate, approveBoth, client, create, deliverAndAccept, fundTotal, installAgent, negotiate, procurementPreset, say, sealBoth,
-  usdc, waitFor,
+  activate, client, companyMandate, create, fundTotal, installAgent, negotiate, procurementPreset, say, usdc, waitFor,
 } from "../flow.js";
 import type { Principal, World } from "../world.js";
+
+/** The buyer's test USDC sent ahead, up to the procurement preset's ceiling (40 tUSDC). */
+const PREFUND = 40_000_000n;
 
 function clock(started: number): string {
   const s = Math.floor((Date.now() - started) / 1000);
@@ -45,34 +47,50 @@ export async function run(base: World): Promise<void> {
 
   const id = await create(w, "procurement", "Liquidity reporting integration");
   at("created", `${id} · demo timings`);
-  await sealBoth(w, id, procurementPreset(w));
+
+  // Each account signs its own calls in order; different accounts run side by side. Both mandates are sealed at once
+  // so the Sealed Table (the longest step) starts as early as it can; the vendor then proposes its recipient, and the
+  // Payee job proves it while the negotiation runs.
+  const preset = procurementPreset(w);
+  const registered = registerDemoVendor(w, recipient!, authority!.account);
+  // the buyer's test USDC, sent ahead from the demo's funder up to the preset's ceiling (fundTotal tops it up if short)
+  const prefund = w.fund(buyer!.account, PREFUND);
+  await Promise.all([
+    client(w, "vendor", id).sealMandate(companyMandate(preset.vendor), { role: "vendor" }),
+    client(w, "buyer", id).sealMandate(companyMandate(preset.buyer), { role: "buyer" }),
+  ]);
   at("sealed", "both mandates committed");
 
-  // The recipient is proven while the Sealed Table negotiates.
   const negotiation = negotiate(w, id);
-  await registerDemoVendor(w, recipient!, authority!.account);
-  const prop = await client(w, "vendor", id).proposeRecipient(recipient!.account, w.app.demoDomain);
-  const version = Number(prop.value);
-  const proven = await waitFor("the Payee job's proof", 120, async () => {
-    const v = (await w.reader.agreement(id).recipients())[version - 1];
-    if (v?.status === "ProofFailed") throw new Error(`the payee proof failed: ${v.failure}`);
-    return v && v.status !== "Proposed" ? v : undefined;
-  });
-  await client(w, "authority", id).approveRecipient(version);
-  await client(w, "buyer", id).acceptRecipient(version, { acknowledgeWarnings: proven.rating === "warn" });
-  await activate(w, id, version);
-  at("recipient", `proven on the demo domain · approved · accepted · active`);
-  const a = await negotiation;
+  const recipientReady = (async () => {
+    await registered;
+    const version = Number((await client(w, "vendor", id).proposeRecipient(recipient!.account, w.app.demoDomain)).value);
+    const proven = await waitFor("the Payee job's proof", 150, async () => {
+      const v = (await w.reader.agreement(id).recipients())[version - 1];
+      if (v?.status === "ProofFailed") throw new Error(`the payee proof failed: ${v.failure}`);
+      return v && v.status !== "Proposed" ? v : undefined;
+    });
+    await client(w, "authority", id).approveRecipient(version);
+    await client(w, "buyer", id).acceptRecipient(version, { acknowledgeWarnings: proven.rating === "warn" });
+    await activate(w, id, version);
+    at("recipient", "proven on the demo domain · approved · accepted · active");
+  })();
+  const [a] = await Promise.all([negotiation, recipientReady, prefund]);
   if (a.state !== "Attested") throw new Error(`${id}: ${a.state} after the negotiation`);
   const terms = (await w.reader.agreement(id).terms())!;
   at("attested", `${usdc(terms.total)} · ${terms.items.length} items`);
 
-  await approveBoth(w, id);
+  await Promise.all([client(w, "buyer", id).approveTerms(a.terms_hash!), client(w, "vendor", id).approveTerms(a.terms_hash!)]);
   const { total } = await fundTotal(w, id);
   at("executing", `approved by both · funded ${usdc(total)}`);
 
-  const agent = await installAgent(w, id);
-  await deliverAndAccept(w, id, 1);
+  // the vendor delivers while the buyer installs the agent's key; the buyer accepts after
+  const evidence = demoDelivery(id, 1);
+  const [agent] = await Promise.all([
+    installAgent(w, id),
+    client(w, "vendor", id).submitDelivery(1, evidence.hash, `https://${w.domain}${demoDeliveryPath(id, 1)}`),
+  ]);
+  await client(w, "buyer", id).acceptDelivery(1);
   at("delivery", "item 1 submitted · accepted");
   const item = terms.items[0]!;
   const paid = await agent.deal.pay({ item: 1, amount: item.amount, recipient: recipient!.account });

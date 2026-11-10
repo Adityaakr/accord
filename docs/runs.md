@@ -21,6 +21,10 @@ Market-making agreements ran end to end on testnet on 10 Nov 2026 ([below](#mark
 
 ## make demo on testnet (release 5)
 
+**Faster run, `1:29`** (10 Nov 2026, about 20:40 UTC): the demo now seals both mandates at once, proposes the recipient while the Sealed Table negotiates, sends the buyer's test USDC ahead, and has the vendor deliver while the buyer installs the agent key. [`a65.accord-v2.testnet`](https://testnet.nearblocks.io/address/a65.accord-v2.testnet): sealed `00:20`, recipient active `00:54`, attested `00:59` (a `39 s` negotiation), executing `01:10`, delivery `01:19`, paid `01:24` (15.00 tUSDC), redirect refused `ERR_PAYEE_MISMATCH` `01:29`; `make verify`: release 5, `6 checks ok · 1 partial`. An earlier parallel run, [`a64`](https://testnet.nearblocks.io/address/a64.accord-v2.testnet), took `2:20` because its negotiation took `64 s`.
+
+The first full run, in order, step after step:
+
 10 Nov 2026 (about 20:05 UTC), release 5, factory `accord-v2.testnet` (tUSDC). `make demo` (from `platform/`, `APP_URL=https://accordweb-production.up.railway.app/app`, [`packages/live/src/targets/demo.ts`](../platform/packages/live/src/targets/demo.ts)) created four fresh sub-accounts of `northwind-demo.testnet`, opened [`a63.accord-v2.testnet`](https://testnet.nearblocks.io/address/a63.accord-v2.testnet), sealed both mandates, proved the recipient on the hosted demo domain while the Sealed Table negotiated, approved, funded, delivered, paid item 1 and had the contract refuse one redirect, in `2:23`. `make verify DEAL=a63.accord-v2.testnet`: `release 5`, `1 key · FunctionCall · receiver self · methods [act]`, the reviewed job builds `outlayer-verify proven`, `verify: 6 checks ok · 1 partial`. Three earlier attempts the same night failed and were fixed before this run: the demo buyer was funded 22 NEAR when 10 is enough, APP_URL lost its `/app` path, the site's `/.well-known/accord.json` did not list the app's demo vendors, and a fresh account was used before every RPC node saw it (agreements `a61` and `a62` stopped after sealing).
 
 ## Market making on testnet
