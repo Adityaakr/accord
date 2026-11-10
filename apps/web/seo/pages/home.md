@@ -2,15 +2,15 @@ Built on NEAR
 
 # The private deal room and control plane for agent-to-agent commerce.
 
-Accord turns private negotiations into enforceable payment rules. Agents negotiate within each business’s confidential limits. Both parties approve the terms, and the contract enforces who can authorise payments, who can receive them, how much can be paid and what evidence is required.
+Agents negotiate inside each company’s confidential limits. Both companies approve the terms, and a NEAR contract refuses any payment outside them.
 
 [Open the app](/app/signin) [Run your own deal in 5 minutes](/app/try-it)
 
-[Live on NEAR testnet: agreement a6 ran end to end 35.50 tUSDC agreed in the enclave across 3 items. 16.50 paid, only to the proven recipient. A redirected payment refused with ERR_PAYEE_MISMATCH. 12 steps, each a transaction you can open.](/record)
+> NEAR
+
+Live on NEAR testnet A redirected payment refused on chain with ERR_PAYEE_MISMATCH. [Open agreement a6](/record), every step a transaction, or [verify it](/verify?agreement=a6.accord-v2.testnet) with no account.
 
 > Agreement a6.accord-v2.testnet as recorded on NEAR testnet on 8 Nov 2026: sealed mandates, terms of 35.50 test USDC in 3 items approved by both companies, recipient halcyon-mm.testnet proven and accepted, delivery accepted, the agent paid item 1 (16.50 tUSDC), a redirect to halcyon-markets.testnet refused with ERR_PAYEE_MISMATCH and nothing sent, then the agent revoked. The room list shows other testnet agreements and market-making agreement a56.accord-v2.testnet, whose period 1 was observed and paid on testnet.
-
-Agreement [a6.accord-v2.testnet](/record) as recorded on NEAR testnet, every step with its transaction; [verify it](/verify?agreement=a6.accord-v2.testnet) with no account. Market-making agreements have run on testnet too: in [a56.accord-v2.testnet](/verify?agreement=a56.accord-v2.testnet) a period observed on Rhea's mainnet pool passed and was paid in test USDC; a stricter agreement's withheld period was refused.
 
 ## Sealed Table
 
@@ -163,32 +163,6 @@ Fund grant G-114 for the wallet SDK: up to 45,000 USDC in three tranches, each o
 - Paying `sdkworks.near` only, bound to sdkworks.xyz Recipient authorisation · passed
 
 - Each tranche becomes payable when two of three reviewers accept the report Conditional settlement · passed
-
-Featured agreement · Demo
-
-## Market-making agreements in Accord.
-
-A market-making agreement connects the retainer to the liquidity conditions both parties approve. An attested observer samples the venue's public liquidity at hidden times within an agreed schedule, checking spread, depth and two-sided quoting against the agreement.
-
-When the required observations pass, payment becomes eligible for release under Accord's payment controls. Otherwise, it remains withheld for both parties to review. Each payment decision is linked to the terms and observations behind it.
-
-[Explore the agreement](/use-cases/market-making) [See a market-making period on testnet](/docs/cli#market-making)
-
-Why it matters
-
-Projects, market makers and exchanges keep pointing at the same gap.
-
-Paraphrased from public sources, linked on each card.
-
-- Jelle Buth Co-founder · Enflux, market maker [Apr 2025](https://cointelegraph.com/magazine/market-maker-deals-quietly-killing-crypto-projects) Projects should set liquidity KPIs before they commit. In loan-option deals they are often missing or vague. **Accord** turns the KPIs into the payment conditions.
-
-- LO:TECH Survey · commissioned by a market maker [Aug 2025](https://www.theblock.co/post/367243/global-survey-reveals-deep-mistrust-in-crypto-market-making-urgent-call-for-transparency) 52% of 2,000+ respondents do not trust market makers. The report recommends enforceable contracts. **Accord** lets attested observations decide each payment.
-
-- Binance Exchange guidance · for listed projects [Mar 2026](https://finance.yahoo.com/markets/crypto/articles/binance-requests-market-maker-transparency-191855624.html) Projects must disclose their market maker's legal entity and contract terms to the exchange. **Accord** measures whether those terms were met.
-
-> Illustrative monitor for a NEAR/USDC market-making agreement on Rhea's USDC/wNEAR pool. Approved conditions: spread at most 60 bps, at least 12,000 USDC of depth within 2% of the mid on each side, both sides quoted, 4 of 6 observation slots to pass. The pool is read at six times drawn inside the observer's enclave and each slot is attested; slot 3 fails with 9,820 USDC of depth. 5 of 6 pass, the period is eligible and 18,500 USDC is settled to halcyon-mm.near in USDC on NEAR.
-
-Scope The demonstration proves condition-linked payment, not account-level performance attribution. Public order-book observations measure the venue's liquidity, not the hired market maker's own contribution. Verification using the market maker's authenticated account data is planned.
 
 How it works
 
@@ -367,6 +341,80 @@ Verify
 One command checks an agreement from public data, with no keys: the contract code, the agent's key, the recipient proof and the record. The enclave release check follows the testnet release.
 
 [Each claim and its limit, on Security](/security)
+
+Market making · ran on NEAR testnet
+
+## Market-making agreements in Accord.
+
+A market-making agreement ties the retainer to liquidity conditions both parties approve. An observer in an enclave reads the venue at times it keeps hidden, and the contract pays a period only when enough readings pass. Below, the two agreements recorded on NEAR testnet, reading Rhea's pool on NEAR mainnet.
+
+[Explore the agreement](/use-cases/market-making) [See a market-making period on testnet](/docs/cli#market-making)
+
+Why it matters
+
+Projects, market makers and exchanges keep pointing at the same gap.
+
+Paraphrased from public sources, linked on each card.
+
+- Jelle Buth Co-founder · Enflux, market maker [Apr 2025](https://cointelegraph.com/magazine/market-maker-deals-quietly-killing-crypto-projects) Projects should set liquidity KPIs before they commit. In loan-option deals they are often missing or vague. **Accord** turns the KPIs into the payment conditions.
+
+- LO:TECH Survey · commissioned by a market maker [Aug 2025](https://www.theblock.co/post/367243/global-survey-reveals-deep-mistrust-in-crypto-market-making-urgent-call-for-transparency) 52% of 2,000+ respondents do not trust market makers. The report recommends enforceable contracts. **Accord** lets attested observations decide each payment.
+
+- Binance Exchange guidance · for listed projects [Mar 2026](https://finance.yahoo.com/markets/crypto/articles/binance-requests-market-maker-transparency-191855624.html) Projects must disclose their market maker's legal entity and contract terms to the exchange. **Accord** measures whether those terms were met.
+
+NEAR/USDC Rhea pool · NEAR mainnet
+
+Settled
+
+- a56 paid
+
+- a57 withheld
+
+- Approved conditions
+
+- Observation slot
+
+- Attestation
+
+- Period decision
+
+- 5 Payment on NEAR
+
+Step 5 of 5 · Payment on NEAR
+
+Pool liquidity · ±3% of mid Bids Asks
+
+Spread
+
+176 bps
+
+Depth, bid / ask
+
+36.56 / 55.00
+
+Uptime, observed
+
+100%
+
+Approved conditions Period 1
+
+- Spread **176 bps** ≤ 200 bps
+
+- Depth ±3%, each side **36.56 USDC** ≥ 25.00
+
+- Two-sided quoting **Both sides** required
+
+Pass rule 4 of 6 slots per period
+
+Retainer 6.00 tUSDC → halcyon-mm.testnet
+
+Period 1 · slot times drawn inside the enclave **6** of 6 passed · 4 required **S1** · [pass](https://testnet.nearblocks.io/txns/DWHLpSyEoATLfBVANmgHWLY8LKqJwQ4QLaTxWbfLphGv) **S2** · [pass](https://testnet.nearblocks.io/txns/8LRPEr78vL51XMZkFMwSqvnh8aEHh6TTAofq6CWycBij) **S3** · [pass](https://testnet.nearblocks.io/txns/CyC4kYYweGeTxzE5ebbGNPWdPfuRAzbsZ59PGvf71mrt) **S4** · [pass](https://testnet.nearblocks.io/txns/2ekPpnWMdYASKb5z1xyCj1mcahQU9EqrcDJe6SCgvULx) **S5** · [pass](https://testnet.nearblocks.io/txns/EGzVre5Mdyy7MaaiHDcsduHoKnZaGziNnxXqgg7Hj3v1) **S6** · [pass](https://testnet.nearblocks.io/txns/5gdkJi7wLBxMpqV7d497ETvC9VBQdpvkxfHnqSB6wUHT)
+
+Awaiting the period's observations Eligible · 6 of 6 slots passed, 4 required Paid to halcyon-mm.testnet [6.00 tUSDC](https://testnet.nearblocks.io/txns/42HuyHX2SPWNbnT7tKKni6WwyKKCK556vmKo3TydVPeD)
+
+Recorded on NEAR testnet, 10 Nov 2026, release 5, test USDC. [Verify a56.accord-v2.testnet](/verify?agreement=a56.accord-v2.testnet) · 6 checks ok · 1 partial
+
+Scope The demonstration proves condition-linked payment, not account-level performance attribution. Public order-book observations measure the venue's liquidity, not the hired market maker's own contribution. Verification using the market maker's authenticated account data is planned.
 
 Use cases
 

@@ -30,9 +30,9 @@ export function Home() {
       <Hero />
       <BuiltOn />
       <AudienceBand />
-      <Compliance />
       <HowSteps />
       <CoreFeatures />
+      <Compliance />
       <UseCases />
       <WhyNow />
       <LiveTestnet />

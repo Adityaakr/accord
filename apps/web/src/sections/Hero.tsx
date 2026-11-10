@@ -1,6 +1,4 @@
-import { FLOW } from "../content/testnet"
 import { useRef, type ReactNode } from "react"
-import { Arrow } from "../components/Arrow"
 import { motion, useInView, type Transition } from "motion/react"
 import { Appear, EASE_APPEAR, EASE_UI, toTransition, type AppearEffect, type FramerTween } from "../lib/motion"
 import { Link } from "react-router-dom"
@@ -9,8 +7,8 @@ import { Dots } from "../components/Dots"
 import { ActionCard, ActionCardIcon, type IconPath } from "../components/ActionCard"
 import { LINKS, PRIMARY_CTA, TRY_CTA } from "../content/links"
 import { HeroPreview } from "../components/HeroPreview"
-import { LogoMark } from "../components/Logo"
 import { NearLogo } from "../components/NearLogo"
+import { LogoMark } from "../components/Logo"
 import styles from "./Hero.module.css"
 
 /* ------------------------------------------------------------------
@@ -128,10 +126,7 @@ const H1_BREAK_AFTER = HEADLINE.split(" ").indexOf("plane")
 const H1_WORDS = HEADLINE.split(" ")
 const ACCENT = new Set([H1_WORDS.indexOf("deal"), H1_WORDS.indexOf("room"), H1_WORDS.indexOf("control"), H1_WORDS.indexOf("plane")])
 const headlineWord = (i: number) => (ACCENT.has(i) ? styles.h1Accent : i > H1_BREAK_AFTER ? styles.h1Soft : undefined)
-const LEAD = "Accord turns private negotiations into enforceable payment rules. Agents negotiate within each business’s confidential limits. Both parties approve the terms, and the contract enforces who can authorise payments, who can receive them, how much can be paid and what evidence is required."
-/* The line under the buttons links to the record of agreement a6 (it replaced the earlier market-making announcement,
-   8 Nov 2026). The preview below shows the same agreement, with its real numbers. */
-const PROOF_LINK = "Testnet record: procurement agreement a6, each step with its transaction"
+const LEAD = "Agents negotiate inside each company’s confidential limits. Both companies approve the terms, and a NEAR contract refuses any payment outside them."
 
 export function Hero() {
   return (
@@ -179,24 +174,27 @@ export function Hero() {
             </Mount>
           </div>
 
-          {/* The demonstration, below the buttons: the hero reads headline, lead, actions, then the walkthrough */}
-          <Mount y={16} delay="0.7s" className={styles.announce}>
-            <Link to={LINKS.record} className={styles.announceLink}>
-              <LogoMark size={18} />
-              <span className={styles.announceBody}>
-                <span className={styles.announceName}>Live on NEAR testnet: agreement a6 ran end to end</span>
-                <Arrow className={styles.announceArrow} />
-                <span className={styles.announceSub}>
-                  35.50 tUSDC agreed in the enclave across 3 items. 16.50 paid, only to the proven recipient. A redirected payment refused with ERR_PAYEE_MISMATCH. {FLOW.length} steps, each a transaction you can open.
-                </span>
-              </span>
-            </Link>
-          </Mount>
         </div>
 
         {/* Image (Mksz61xjD): appear onMount y32 1.4s delay 0.6s; the Part A "Product preview caption" sits under it
             in the same appear (Body Small, text-weak, max-width 640) */}
         <Mount y={32} delay="0.6s" className={styles.preview}>
+          {/* One quiet line above the frame says what it is and where to check it (it replaced the proof block and the caption) */}
+          <div className={styles.live}>
+            <span className={styles.liveMarks} aria-label="Accord on NEAR">
+              <span className={styles.liveAccord}><LogoMark size={16} /></span>
+              <span className={styles.liveX} aria-hidden="true">×</span>
+              <NearLogo variant="tile" className={styles.liveNear} />
+            </span>
+            <p className={styles.liveText}>
+              <span className={styles.liveTitle}>Live on NEAR testnet</span>
+              <span>
+                A redirected payment refused on chain with <span className={styles.liveCode}>ERR_PAYEE_MISMATCH</span>.{" "}
+                <Link to={LINKS.record} className={styles.liveLink}>Open agreement a6</Link>, every step a transaction, or{" "}
+                <Link to={`${LINKS.verify}?agreement=a6.accord-v2.testnet`} className={styles.liveLink}>verify it</Link> with no account.
+              </span>
+            </p>
+          </div>
           <div className={styles.image}>
             <Link to={LINKS.record} className={styles.previewLink} aria-label="Open agreement a6's record: every step with its transaction">
               <HeroPreview />
@@ -204,13 +202,6 @@ export function Hero() {
             {/* On a phone the caption below falls under the fold, so the frame itself says what it shows */}
             <span className={styles.illustrative} aria-hidden="true">NEAR testnet · agreement a6</span>
           </div>
-          {/* What the preview is, in words a visitor reads: real numbers from chain, and where market making stands */}
-          <p className={`t-body-sm ${styles.caption}`}>
-            Agreement <Link to={LINKS.record} className="ls-link-inline">a6.accord-v2.testnet</Link> as recorded on NEAR testnet,
-            every step with its transaction; <Link to={`${LINKS.verify}?agreement=a6.accord-v2.testnet`} className="ls-link-inline">verify it</Link> with
-            no account. Market-making agreements have run on testnet too: in <Link to={`${LINKS.verify}?agreement=a56.accord-v2.testnet`} className="ls-link-inline">a56.accord-v2.testnet</Link> a
-            period observed on Rhea's mainnet pool passed and was paid in test USDC; a stricter agreement's withheld period was refused.
-          </p>
         </Mount>
 
         {/* Action cards (mZ8KywPOa) */}

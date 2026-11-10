@@ -265,3 +265,18 @@
 .previewLink { display: block; width: 100%; height: 100%; color: inherit; text-decoration: none; }
 .previewLink:focus-visible { outline: 2px solid var(--text-strong); outline-offset: 2px; }
 .announceLink > svg:first-child { flex: none; margin-top: 2px; }
+
+/* The live line above the frame (11 Nov 2026): Accord × NEAR marks, then two short lines, in place of the proof block and the caption */
+.live { display: flex; align-items: center; gap: 14px; margin: 0 0 4px; }
+.liveMarks { display: inline-flex; align-items: center; gap: 6px; flex: none; padding: 5px 8px 5px 6px; border-radius: 999px; border: 1px solid var(--hairline); background: rgba(var(--ink-rgb), 0.03); }
+.liveAccord { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; background: rgba(var(--ink-rgb), 0.08); color: var(--text-strong); }
+.liveX { font-size: 12px; color: var(--text-weak); }
+.liveNear { width: 24px; height: 24px; border-radius: 7px; }
+.liveText { display: flex; flex-direction: column; gap: 2px; margin: 0; max-width: 720px; text-wrap: pretty; font-size: 14.5px; line-height: 1.5; letter-spacing: -0.01em; color: var(--text-medium); }
+.liveTitle { font-size: 15px; font-weight: 500; color: var(--text-strong); }
+.liveCode { font-family: var(--font-mono, ui-monospace, monospace); font-size: 0.9em; color: var(--text-strong); }
+.liveLink { color: var(--text-strong); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(var(--ink-rgb), 0.35); transition: text-decoration-color 0.2s ease; }
+.liveLink:hover { text-decoration-color: currentColor; }
+/* the frame's own label is for phones only, where the line above can wrap away from it */
+@media (min-width: 810px) { .illustrative { display: none; } }
+@media (max-width: 809.98px) { .live { align-items: flex-start; } .liveText { font-size: 14px; } }
