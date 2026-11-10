@@ -21,6 +21,7 @@ const PAGES: Entry[] = [
   { id: "p-record", group: "Pages", label: "Record", href: "/record" },
   { id: "p-settings", group: "Pages", label: "Settings", href: "/settings" },
   { id: "p-verify", group: "Pages", label: "Verify an agreement", href: "/verify" },
+  { id: "p-check", group: "Pages", label: "Check a payment", href: "/check" },
   { id: "p-profile", group: "Pages", label: "Profile", href: "/profile" },
 ];
 

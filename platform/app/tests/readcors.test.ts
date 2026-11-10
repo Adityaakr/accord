@@ -19,7 +19,7 @@ describe("read-only CORS", () => {
   });
 
   it("only read routes answer a CORS preflight; no write route does", () => {
-    const allowed = new Set(["api/verify/[id]/route.ts", "api/record.csv/route.ts", "record.csv/route.ts", "mcp/route.ts"]);
+    const allowed = new Set(["api/verify/[id]/route.ts", "api/check/route.ts", "api/record.csv/route.ts", "record.csv/route.ts", "mcp/route.ts"]);
     const root = join(__dirname, "../src/app");
     const found: string[] = [];
     const walk = (dir: string) => {

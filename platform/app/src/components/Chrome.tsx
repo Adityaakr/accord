@@ -2,7 +2,7 @@
 
 // The app's frame. Sign-in and the workspace chooser are full screen, outside the app; every other page sits in the
 // shell (top bar, workspace sidebar, footer). Signed out, product pages send people to /signin; signed in without
-// a workspace chosen, they go to /enter first. Public pages (verify, the public record, docs, the demo) stay open.
+// a workspace chosen, they go to /enter first. Public pages (verify, check a payment, the public record, docs, the demo) stay open.
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -14,9 +14,9 @@ import { useWorkspace } from "./workspace/Workspace";
 import styles from "./Chrome.module.css";
 
 const FULL = ["/signin", "/enter"];
-const PUBLIC = ["/verify", "/record", "/docs", "/status", "/replay", "/try", "/join", "/market-making", "/atlas", "/payee", "/invite"];
+const PUBLIC = ["/verify", "/check", "/record", "/docs", "/status", "/replay", "/try", "/join", "/market-making", "/atlas", "/payee", "/invite"];
 // Read-only pages that never depend on who is signed in: they render at once, even while a session is being restored.
-const READ_ONLY = ["/verify", "/record", "/docs", "/status", "/replay"];
+const READ_ONLY = ["/verify", "/check", "/record", "/docs", "/status", "/replay"];
 
 // A not-found page (app/not-found.tsx) marks itself here, so an unknown address shows "page not found" instead of
 // sending a signed-out visitor to sign-in.
@@ -81,6 +81,7 @@ export function Chrome({ network, factory, sandbox, children }: { network: strin
           <nav className={styles.footerLinks} aria-label="Footer">
             <Link href="/status">Status</Link>
             <Link href="/docs">Docs</Link>
+            <Link href="/check">Check a payment</Link>
             <Link href="/try-it">Try a deal</Link>
             <Link href="/try">Recorded attack</Link>
             <a href="https://accordweb-production.up.railway.app" target="_blank" rel="noreferrer">accord site</a>
