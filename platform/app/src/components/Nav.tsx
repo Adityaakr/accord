@@ -32,6 +32,7 @@ const ICONS = {
   chart: <path d="M3 13V9M6.5 13V6M10 13V8M13.5 13V3.5" />,
   verify: <><path d="M8 2 13 4v4c0 3-2.2 5-5 6-2.8-1-5-3-5-6V4z" /><path d="m6 8 1.5 1.5L10.5 6.5" /></>,
   try: <path d="M5 3.5v9l7.5-4.5z" />,
+  check: <><circle cx="8" cy="8" r="5.5" /><path d="m5.6 8.1 1.7 1.7 3.2-3.5" /></>,
   deliveries: <><path d="M2.5 5.5 8 2.5l5.5 3v5L8 13.5l-5.5-3z" /><path d="M2.5 5.5 8 8.5l5.5-3M8 8.5v5" /></>,
   payout: <><rect x="2" y="4" width="12" height="8.5" rx="1.8" /><path d="M2 7h12M4.5 10h2.5" /></>,
   profile: <><circle cx="8" cy="6" r="2.6" /><path d="M3 13.5c.8-2.3 2.7-3.4 5-3.4s4.2 1.1 5 3.4" /></>,
@@ -76,6 +77,7 @@ const PUBLIC_NAV: NavItem[] = [
   { href: "/try-it", label: "Try a deal", icon: "try", match: (p) => p.startsWith("/try-it") },
   { href: "/verify", label: "Verify", icon: "verify", match: (p) => p.startsWith("/verify") },
   { href: "/record", label: "Public record", icon: "record", match: (p) => p.startsWith("/record") },
+  { href: "/check", label: "Check a payment", icon: "check", match: (p) => p.startsWith("/check") },
   { href: "/status", label: "Status", icon: "chart", match: (p) => p.startsWith("/status") },
 ];
 

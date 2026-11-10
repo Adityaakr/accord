@@ -9,7 +9,7 @@ import type { PixelName } from "../PixelIcon";
 import { useWallet } from "../wallet/WalletProvider";
 
 export type WorkspaceId = "buyer" | "vendor" | "authority" | "reviewer" | "auditor";
-export type NavIcon = "home" | "rooms" | "approvals" | "agents" | "recipients" | "record" | "verify" | "deliveries" | "payout" | "try" | "chart";
+export type NavIcon = "home" | "rooms" | "approvals" | "agents" | "recipients" | "record" | "verify" | "deliveries" | "payout" | "try" | "chart" | "check";
 export interface NavItem { href: string; label: string; icon: NavIcon; match: (p: string) => boolean }
 
 export interface Workspace {
@@ -40,6 +40,7 @@ export const WORKSPACES: Workspace[] = [
       { href: "/approvals", label: "Approvals", icon: "approvals", match: starts("/approvals") },
       { href: "/agents", label: "Agents", icon: "agents", match: starts("/agents") },
       { href: "/record", label: "Record", icon: "record", match: starts("/record") },
+      { href: "/check", label: "Check a payment", icon: "check", match: starts("/check") },
       { href: "/try-it", label: "Try a deal", icon: "try", match: starts("/try-it") },
     ],
   },
@@ -53,6 +54,7 @@ export const WORKSPACES: Workspace[] = [
       { href: "/payout", label: "Payout account", icon: "payout", match: starts("/payout") },
       { href: "/deliveries", label: "Deliveries and claims", icon: "deliveries", match: starts("/deliveries") },
       { href: "/record", label: "Record", icon: "record", match: starts("/record") },
+      { href: "/check", label: "Check a payment", icon: "check", match: starts("/check") },
     ],
   },
   {
@@ -80,6 +82,7 @@ export const WORKSPACES: Workspace[] = [
     nav: [
       { href: "/verify", label: "Verify", icon: "verify", match: starts("/verify") },
       { href: "/record", label: "Public record", icon: "record", match: starts("/record") },
+      { href: "/check", label: "Check a payment", icon: "check", match: starts("/check") },
     ],
   },
 ];
