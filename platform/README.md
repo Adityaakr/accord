@@ -126,6 +126,29 @@ sandbox: all checks passed · 38 s
 
 The sandbox's slot values are the venue probe's real readings of Rhea's USDC/wNEAR pool (`make probe-venue`); the sandbox has no mainnet, so there they are fixtures.
 
+### Market making on testnet
+
+`make market-making` (testnet is the default), from a real run on 10 Nov 2026, factory `accord-v2.testnet`, release 5, test USDC. Both agreements were negotiated by the Sealed Table (`z-ai/glm-5.3-flash` in OutLayer's enclave); the observer ran in OutLayer's enclave over its HTTPS API (it needs `OUTLAYER_PAYMENT_KEY` in `.env`) and read Rhea DCL's USDC/wNEAR pool on NEAR mainnet with view calls only. Agent key line left out:
+
+```
+accord market-making · a56.accord-v2.testnet · rhea-dcl 17208628…|wrap.near|2000
+  period 1  slot times held in the observer's enclave
+  slot 1    mainnet block 223872080 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  slot 2    mainnet block 223872216 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  slot 3    mainnet block 223872370 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  observer  a56.accord-v2.testnet · period 1 slot 4 · The operation was aborted due to timeout
+  slot 4    mainnet block 223872453 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  slot 5    mainnet block 223872525 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  slot 6    mainnet block 223872659 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  closed    6 of 6 passed · threshold 4 · uptime 100% · Eligible
+  paid      agent pays period 1 · payment_sent 6.00 USDC → halcyon-mm.testnet · tx 42HuyHX2SPWNbnT7tKKni6WwyKKCK556vmKo3TydVPeD
+  strict    a57.accord-v2.testnet · period 1 · 0 of 6 passed · threshold 5 · Withheld
+  withheld  agent asks to pay it anyway: ERR_PERIOD_WITHHELD · tx 4W1Ud2GVRPZnJL4uJdyEjAfdB5igT3S1DGTJxxLNcS1Y
+  scope     venue-level liquidity, not the market maker's own orders
+```
+
+`6.00 USDC` is `6.00 tUSDC`. `a56` agreed a spread of at most `200 bps` and depth of at least `25.00 USDC` on both sides within `300 bps`; `a57` agreed `25 bps` and `200.00 USDC` within `100 bps`, which the pool did not meet (`10.37 / 12.81 USDC` within `100 bps`). The slot 4 timeout was one HTTPS call over 30 s; the next ask observed the slot. The run watched period 1 of each agreement only. `make verify DEAL=a56.accord-v2.testnet` and `DEAL=a57.accord-v2.testnet` each print `verify: 6 checks ok · 1 partial` with `outlayer-verify` installed. Every transaction, and the earlier attempts that failed (`a50`, `a54`, `a55`): [`docs/runs.md`](../docs/runs.md#market-making-on-testnet).
+
 ### The whole product on your machine
 
 `make dev` starts a local NEAR node with everything around it: the real contracts, the three enclave jobs' own code run natively (only the negotiating model is replaced, by a deterministic negotiator inside both mandates' limits, and every output it signs says `model.local`), a test USDC faucet, the keeper, the demo agent with the `/try` re-arm, and the app at http://localhost:3100. Market-making agreements are measured from real NEAR mainnet blocks. In a second terminal, every live target runs against it with `NET=local`; on testnet the same code runs without the flag.
@@ -265,7 +288,7 @@ tests/                  sandbox suite, make sandbox, make serve
 
 ## Status
 
-Built on 3 Nov 2026 and tested again on 9 Nov 2026: the contracts (72 agreement unit tests pass on the mocked chain, none ignored, including a 400-sequence `act` fuzz test; 12 sandbox tests pass on a real local node, 1 ignored, which reads mainnet; `make sandbox`), the three enclave jobs (fixture tests, and run natively against a local node), the SDK, CLI and MCP server, the app, the agent with the `/try` re-arm, the keeper, and every live target on a local node (`make dev`, then `NET=local`). Live on NEAR testnet since 8 Nov 2026: factory `accord-v2.testnet`, on release `4` (the security-review fixes) since 9 Nov 2026 after release `3` (Sealed Table build `7c832ce9…`, release 3 pubkey runs `13682`, `13672`, `13683`; release 4 keeps those job builds), the second factory `accord-usdc.testnet` (Circle USDC, also on release `4`), test USDC `tusdc.accord-v1.testnet`, relayer `relay.accord-v2.testnet`, the three jobs as OutLayer projects `accord-v1.testnet/accord-{sealed-table,payee,observer}`, and the app with `/app/try-it` at https://accordweb-production.up.railway.app/app. Market making on testnet waits on an OutLayer payment key (`docs/build/BLOCKED.md`); it runs end to end on a local node.
+Built on 3 Nov 2026 and tested again on 9 Nov 2026: the contracts (72 agreement unit tests pass on the mocked chain, none ignored, including a 400-sequence `act` fuzz test; 12 sandbox tests pass on a real local node, 1 ignored, which reads mainnet; `make sandbox`), the three enclave jobs (fixture tests, and run natively against a local node), the SDK, CLI and MCP server, the app, the agent with the `/try` re-arm, the keeper, and every live target on a local node (`make dev`, then `NET=local`). Live on NEAR testnet since 8 Nov 2026: factory `accord-v2.testnet`, on release `4` (the security-review fixes) since 9 Nov 2026 after release `3` (Sealed Table build `7c832ce9…`, release 3 pubkey runs `13682`, `13672`, `13683`; release 4 keeps those job builds), the second factory `accord-usdc.testnet` (Circle USDC, also on release `4`), test USDC `tusdc.accord-v1.testnet`, relayer `relay.accord-v2.testnet`, the three jobs as OutLayer projects `accord-v1.testnet/accord-{sealed-table,payee,observer}`, and the app with `/app/try-it` at https://accordweb-production.up.railway.app/app. Market making ran end to end on testnet on 10 Nov 2026 (`a56` and `a57.accord-v2.testnet`, release 5, period 1 of each; [below](#market-making-on-testnet)); it also runs end to end on a local node.
 
 Agreement `a6.accord-v2.testnet`, the original walkthrough, ran the full procurement flow on release 3, with the real NEAR AI model (`z-ai/glm-5.3-flash`) negotiating inside OutLayer's enclave (`QUOTE → COUNTER → FINAL → ACCEPT`, `35.50` tUSDC in 3 items, 59 s):
 
