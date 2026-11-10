@@ -18,7 +18,7 @@ Start with [`README.md`](README.md). The product is in [`platform/`](platform) (
 
 Facts: factory `accord-v2.testnet` (test USDC `tusdc.accord-v1.testnet`) and factory `accord-usdc.testnet` (Circle testnet USDC), relayer `relay.accord-v2.testnet`. Agreement types in code: `procurement` and `market-making`.
 
-Release 4 (the security-review fixes, `platform/DECISIONS.md` sections 25 and 26) is current on both factories since 9 Nov 2026; agreements created before keep release 3. `make verify DEAL=a10.accord-v2.testnet` (from `platform/`) prints `code hash ECgsrZwy… = release 4` and, with [`outlayer-verify`](https://github.com/out-layer/outlayer-verify) installed, `verify: 6 checks ok · 1 partial` (without it, `release` is `not checked`: `5 checks ok · 1 partial · 1 not checked`), and `make verify-usdc DEAL=a1.accord-usdc.testnet` checks the Circle USDC deal.
+Release 5 is current on both factories since 10 Nov 2026: release 4's agreement code (the security-review fixes, `platform/DECISIONS.md` sections 25 and 26) on the reviewed enclave job builds (section 33). Agreements keep the release they were created on (a6 release 3, a10 release 4); `make verify DEAL=a52.accord-v2.testnet` checks a release 5 agreement. `make verify DEAL=a10.accord-v2.testnet` (from `platform/`) prints `code hash ECgsrZwy… = release 4` and, with [`outlayer-verify`](https://github.com/out-layer/outlayer-verify) installed, `verify: 6 checks ok · 1 partial` (without it, `release` is `not checked`: `5 checks ok · 1 partial · 1 not checked`), and `make verify-usdc DEAL=a1.accord-usdc.testnet` checks the Circle USDC deal.
 
 ## Check it, cheapest first
 

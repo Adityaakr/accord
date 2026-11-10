@@ -48,9 +48,9 @@ The site is also served at [useaccord.tech](https://useaccord.tech) (the same Ra
 | `sealed` | ok | The terms were signed by the Sealed Table release's key and match both on-chain commitments |
 | `payee`, `record` | ok | The recipient was proven, approved and accepted; every payment matches a receipt |
 | `model` | **partial** | NEAR AI's attestation report is fetched with a fresh nonce and the nonce is bound in it, but it attests the model as served now, not the negotiating run (that run's attestation is bound in the signed outcome). The hardware quote and GPU evidence are not checked by `make verify`; `make probe-ai` checks them with a NEAR AI key |
-| `release` | ok, with `outlayer-verify` installed | Each job key's pubkey run (Sealed Table, Payee, observer) is looked up by OutLayer request id, its task, wasm and caller are checked against the release, and [`outlayer-verify`](https://github.com/out-layer/outlayer-verify) (commit `90c27d9d`) proves that task's TDX quote, approved measurement and binding. It proves the keys came from the release's wasm in an enclave; it does not make release 4's job builds the reviewed ones (release 4 runs release 3's job builds). Without the tool the check is `not checked`. The app's `/api/verify` and `/app/mcp` run the same step where their image carries the tool |
+| `release` | ok, with `outlayer-verify` installed | Each job key's pubkey run (Sealed Table, Payee, observer) is looked up by OutLayer request id, its task, wasm and caller are checked against the release, and [`outlayer-verify`](https://github.com/out-layer/outlayer-verify) (commit `90c27d9d`) proves that task's TDX quote, approved measurement and binding. It proves the keys came from the release's wasm in an enclave: release 5 agreements name the reviewed job builds (Sealed Table `64a354a0…`, Payee `b5a0c473…`, observer `0dcc55e8…`), release 3 and 4 agreements release 3's (`7c832ce9…`, `24071443…`, `8240179a…`). Without the tool the check is `not checked`. The app's `/api/verify` and `/app/mcp` run the same step where their image carries the tool |
 
-Not in place yet, and stated with the claims: on testnet the Sealed Table's seed admits any caller during an agreement's open request window (restricting it to the agreement's own calls, S1, needs a setting only OutLayer's dashboard can make); the reviewed enclave job builds are not deployed (release 4 runs release 3's job builds); end-to-end encryption to the model is not shipped. Market-making agreements have run end to end on a local node, not on testnet. Every claim with its limit: [Claims and their limits](#claims-and-their-limits), from [`platform/GOAL.md`](platform/GOAL.md).
+Not in place yet, and stated with the claims: on testnet the Sealed Table's seed admits any caller during an agreement's open request window (restricting it to the agreement's own calls, S1, needs a setting only OutLayer's dashboard can make); the reviewed enclave job builds run release 5 (10 Nov 2026), but the seeds still also admit release 3's job builds, which lack the factory-only check, so that release 3 and 4 rooms keep working; end-to-end encryption to the model is not shipped. Market-making agreements have run end to end on a local node, not on testnet. Every claim with its limit: [Claims and their limits](#claims-and-their-limits), from [`platform/GOAL.md`](platform/GOAL.md).
 
 ## Testnet proof
 
@@ -96,13 +96,14 @@ accord verify · a6.accord-v2.testnet
 verify: 6 checks ok · 1 partial
 ```
 
-`make verify DEAL=a10.accord-v2.testnet` prints `code hash ECgsrZwy… = release 4`, `release   sealed-table run 13987 = task 28880 · wasm 7c832ce9… · outlayer-verify proven · payee run 13988 = task 28881 · wasm 24071443… · outlayer-verify proven · observer run 13989 = task 28882 · wasm 8240179a… · outlayer-verify proven · ok` and the same last line; `make verify-usdc DEAL=a1.accord-usdc.testnet` checks the Circle USDC deal.
+`make verify DEAL=a10.accord-v2.testnet` prints `code hash ECgsrZwy… = release 4`, `release   sealed-table run 13987 = task 28880 · wasm 7c832ce9… · outlayer-verify proven · payee run 13988 = task 28881 · wasm 24071443… · outlayer-verify proven · observer run 13989 = task 28882 · wasm 8240179a… · outlayer-verify proven · ok` and the same last line; `make verify-usdc DEAL=a1.accord-usdc.testnet` checks the Circle USDC deal. A release 5 agreement, `make verify DEAL=a52.accord-v2.testnet`, prints `code hash ECgsrZwy… = release 5` and `release   sealed-table run 15085 = task 30189 · wasm 64a354a0… · outlayer-verify proven · payee run 15086 = task 30191 · wasm b5a0c473… · outlayer-verify proven · observer run 15082 = task 30185 · wasm 0dcc55e8… · outlayer-verify proven · ok` (it is only negotiated, so `payee` is `not checked`: `verify: 5 checks ok · 1 partial · 1 not checked`).
 
 ### More runs
 
 | Agreement | What it shows |
 | --- | --- |
 | `a10`, `a11`, `a13.accord-v2.testnet` | Release 4 (the security-review fixes): negotiate, fund, pay, refused redirect; an attack refused three ways (`ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY`, `0.00` moved); revoke, then a new key pays |
+| `a52.accord-v2.testnet`, `a3.accord-usdc.testnet` | Release 5 (10 Nov 2026): negotiated by the reviewed Sealed Table build `64a354a0…` (`33.00 tUSDC` and `14.00 USDC`, 3 items each, attestation ok, `ERR_SEALED` both ways) |
 | `a1.accord-usdc.testnet` | A deal in Circle's testnet USDC: `14.00 USDC` funded, `5.00` paid, redirect refused, revoked |
 | `a8`, `a15`, `a21.accord-v2.testnet` | `/app/try-it` with a fresh account, on the public URL with relayed wallet calls, and without a wallet |
 | `a32.accord-v2.testnet` | The run [Watch the replay](https://accordweb-production.up.railway.app/app/replay) plays back |
@@ -299,7 +300,7 @@ The literal path is [`platform/app/e2e/try-without-wallet.mjs`](platform/app/e2e
 
 ### Settle in Circle USDC
 
-A second factory, `accord-usdc.testnet`, runs the same code (release 4 since 9 Nov 2026) and settles in Circle's USDC on NEAR testnet, `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (6 decimals). Each agreement keeps its factory's token for life, so `a<n>.accord-usdc.testnet` takes only Circle USDC and `a<n>.accord-v2.testnet` only test USDC. `/app/try-it` defaults to test USDC; Circle USDC is offered next to it where the server sets `ACCORD_FACTORY_USDC`.
+A second factory, `accord-usdc.testnet`, runs the same code (release 5 since 10 Nov 2026) and settles in Circle's USDC on NEAR testnet, `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (6 decimals). Each agreement keeps its factory's token for life, so `a<n>.accord-usdc.testnet` takes only Circle USDC and `a<n>.accord-v2.testnet` only test USDC. `/app/try-it` defaults to test USDC; Circle USDC is offered next to it where the server sets `ACCORD_FACTORY_USDC`.
 
 | Do | See |
 | --- | --- |

@@ -167,7 +167,7 @@ accord attack · a9.accord.test.near · agent key ed25519:BPDWuq96f5k4XjZbGYkXHC
 
 ## Settle in Circle USDC (testnet)
 
-A second factory, `accord-usdc.testnet`, runs the same code as `accord-v2.testnet` (release 3 at first, release 4 since 9 Nov 2026; the same job builds and keys) and settles in Circle's USDC on NEAR testnet, `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (6 decimals). Each agreement copies its factory's token at creation and keeps it for life, so `a<n>.accord-usdc.testnet` takes only Circle USDC and `a<n>.accord-v2.testnet` only test USDC. `/app/try-it` defaults to test USDC from the app's faucet; Circle USDC is offered next to it where the server sets `ACCORD_FACTORY_USDC`.
+A second factory, `accord-usdc.testnet`, runs the same code as `accord-v2.testnet` (release 3 at first, release 4 since 9 Nov 2026, release 5 since 10 Nov 2026; the same job builds and keys) and settles in Circle's USDC on NEAR testnet, `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (6 decimals). Each agreement copies its factory's token at creation and keeps it for life, so `a<n>.accord-usdc.testnet` takes only Circle USDC and `a<n>.accord-v2.testnet` only test USDC. `/app/try-it` defaults to test USDC from the app's faucet; Circle USDC is offered next to it where the server sets `ACCORD_FACTORY_USDC`.
 
 | Do | See |
 | --- | --- |
@@ -298,6 +298,10 @@ The reviewed agreement code (`ECgsrZwy…`, global contract `R2qxw4u5…`) is re
 
 The first `make revoke` run (a12) stopped at its last step: the script paid item 2 at a fixed `12.00` while the negotiated amount differed, and the contract refused it with `ERR_AMOUNT_MISMATCH`. The live targets now pay each item at its negotiated amount.
 
+### Release 5 (the reviewed job builds)
+
+Release 5 (10 Nov 2026) keeps release 4's agreement code (`ECgsrZwy…`, the same global contract) and names the reviewed enclave job builds: Sealed Table `64a354a0…`, Payee `b5a0c473…`, observer `0dcc55e8…` (security-review findings 4 and 5: an off-curve doc key is a final `BAD_INPUT`, and the jobs serve only agreements an Accord factory created). The seeds are unchanged, so the three signing keys and the mandate key equal release 4's. Published and current on `accord-v2.testnet` ([publish](https://testnet.nearblocks.io/txns/dFiMTwcYygycxQFSMpYqFfRaMaBU9uMrKtzpJQzRsmG), [set current](https://testnet.nearblocks.io/txns/8jSfWk6a3qzZRMrzqJj731njUGtRCYmWPLqLAqc3RAgF)) and `accord-usdc.testnet` ([publish](https://testnet.nearblocks.io/txns/9QVU3RU1u2TcAgmS6TV8hxxjF6hCF5UB1wtF817kGcwC), [set current](https://testnet.nearblocks.io/txns/3wK4mZVZtF8x6XNwSGbzDSyLR2nPwDqkjktsmpaoKAwi)). `make negotiate` reached `Attested` on `a52.accord-v2.testnet` (`33.00 tUSDC`, 52 s) and `make negotiate-usdc` on `a3.accord-usdc.testnet` (`14.00 USDC`, 53 s), both with `wasm 64a354a0…`; `make verify` on each prints `code hash ECgsrZwy… = release 5` and `release … outlayer-verify proven … · ok`. Release 3 and 4 agreements are unchanged: each job secret's access is "build `7c832ce9…` (or `24071443…`, `8240179a…`) or the reviewed build", so their rooms keep running on the builds they name (`DECISIONS.md` 33).
+
 ### Circle USDC
 
 Agreement [`a1.accord-usdc.testnet`](https://testnet.nearblocks.io/address/a1.accord-usdc.testnet), created on release 3 of the second factory, ran a deal in Circle's testnet USDC on 9 Nov 2026:
@@ -320,7 +324,7 @@ Scope: the review covered the contracts, the factory and the enclave jobs. The a
 
 Changed limit: an item left `AssumedPaid` (its transfer sent, its callback not yet answered) is no longer refunded to the buyer at `Settled`; its amount stays on the agreement's account until that payment's callback answers (a failure sets it `Reserved` for the vendor to claim, a success leaves it paid), and if that callback never runs, the amount stays on the account.
 
-Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is partial. The jobs now serve only factory agreements in code, but those job builds are not deployed yet (release 4 runs release 3's job builds), and S1 itself needs the seed's access condition in OutLayer, which only its dashboard can set and which is not set yet. Every finding, fix, test and commit: [`DECISIONS.md`](DECISIONS.md) section 25. Mainnet follows an external audit, which has not happened yet.
+Limit: S1 (only an agreement's own calls can use the Sealed Table's seed) is partial. The jobs serve only factory agreements, and those builds run release 5 since 10 Nov 2026 ([release 5](#release-5-the-reviewed-job-builds)); the seeds still also admit release 3's job builds (which release 3 and 4 agreements name, and which lack that check) until that access is removed, and S1 itself needs the seed's access condition in OutLayer, which only its dashboard can set and which is not set yet. Every finding, fix, test and commit: [`DECISIONS.md`](DECISIONS.md) section 25. Mainnet follows an external audit, which has not happened yet.
 
 ## Business model (hypothesis)
 
