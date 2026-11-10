@@ -349,24 +349,24 @@ const CHANNELS = ["Webhook", "Telegram", "Email"]
 function SceneAlerts() {
   const enter = useEnter()
   const still = useContext(Still)
-  const p = usePhase([2.0, 2.35, 2.7])
+  const p = usePhase([1.55, 1.85, 2.15])
   return (
     <div className={styles.alertStack}>
       <motion.div className={styles.route} {...enter(0)}>
         <span className={`mono ${styles.node}`}>a48 · act</span>
-        <span className={styles.wireLine}><Packet at={0.35} bad dur={0.8} /></span>
+        <span className={styles.wireLine}><Packet at={0.25} bad dur={0.55} /></span>
         <span className={`mono ${styles.node} ${styles.nodeBad}`}>refused</span>
-        <span className={styles.wireLine}><Packet at={0.95} bad dur={0.6} /></span>
+        <span className={styles.wireLine}><Packet at={0.7} bad dur={0.45} /></span>
         <span className={`mono ${styles.node}`}>your alerts</span>
       </motion.div>
-      <motion.div className={styles.toast} {...enter(1.35, { opacity: 0, y: -12, scale: 0.97 }, 0.55)}>
+      <motion.div className={styles.toast} {...enter(0.95, { opacity: 0, y: -12, scale: 0.97 }, 0.55)}>
         <span className={styles.toastIcon}>!</span>
         <div className={styles.toastText}>
           <p className={styles.toastTitle}>Agent refused <span className={`mono ${styles.now}`}>a48.accord-v2.testnet</span></p>
           <p className={styles.toastBody}>12.00 tUSDC to <span className={styles.nowrap}>halcyon-markets.testnet</span>; approved <span className={styles.nowrap}>halcyon-mm.testnet</span></p>
         </div>
       </motion.div>
-      <motion.div className={styles.channels} {...enter(1.8)}>
+      <motion.div className={styles.channels} {...enter(1.3)}>
         {CHANNELS.map((ch, k) => (
           <span key={ch} className={`${styles.channel} ${p > k ? styles.channelOn : ""}`}>
             <span className={styles.chDot}>{p > k ? <motion.span initial={still ? false : { scale: 0.3 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 520, damping: 22 }}>✓</motion.span> : null}</span>
@@ -374,16 +374,16 @@ function SceneAlerts() {
           </span>
         ))}
       </motion.div>
-      <motion.pre className={`mono ${styles.payload}`} {...enter(3.0)}>
+      <motion.pre className={`mono ${styles.payload}`} {...enter(2.4)}>
         <span className={styles.pk}>X-Accord-Signature:</span> t=…,v1=…{"\n"}
         {"{"} <span className={styles.pk}>"code"</span>: <span className={styles.pBad}>"ERR_PAYEE_MISMATCH"</span>, <span className={styles.pk}>"item"</span>: 2,{"\n"}
         {"  "}<span className={styles.pk}>"attempted"</span>: {"{"} "amount": "12.00",{"\n"}{"    "}"recipient": "halcyon-markets.testnet" {"}"},{"\n"}
         {"  "}<span className={styles.pk}>"approved"</span>: {"{"}{"\n"}{"    "}"recipient": "halcyon-mm.testnet" {"}"} {"}"}
       </motion.pre>
-      <motion.div className={styles.revokeRow} {...enter(3.6)}>
+      <motion.div className={styles.revokeRow} {...enter(2.9)}>
         <span className={styles.revokeNote}>Incident view: tried beside approved</span>
         <span className={styles.revoke}>
-          {still ? null : <motion.span className={styles.revokeFill} initial={{ scaleX: 0 }} animate={{ scaleX: [0, 1, 1, 0] }} transition={{ delay: 3.9, duration: 2.0, times: [0, 0.6, 0.8, 1], ease: "easeInOut" }} />}
+          {still ? null : <motion.span className={styles.revokeFill} initial={{ scaleX: 0 }} animate={{ scaleX: [0, 1, 1, 0] }} transition={{ delay: 3.4, duration: 2.0, times: [0, 0.6, 0.8, 1], ease: "easeInOut" }} />}
           <span className={styles.revokeLabel}>Hold to revoke</span>
         </span>
       </motion.div>
