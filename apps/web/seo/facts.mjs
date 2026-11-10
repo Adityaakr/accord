@@ -112,6 +112,18 @@ export const CONTROLS = [
   { name: "Checkable from public data", text: "make verify checks the contract code, the agent key, the recipient proof and the record with no keys; the release attestation check proves the three job runs with the outlayer-verify tool when it is installed." },
 ]
 
+/* Payment controls: the home page's #payment-controls (PaymentControls) and the app's /app/controls. All three are
+   live in the app today; PAYMENT_CONTROLS_NEXT names the planned ones in one line. */
+export const PAYMENT_CONTROLS = [
+  { name: "Check a payment", when: "before", status: "live", url: "/app/check", api: "/app/api/check",
+    text: "Before signing, see whether a room's contract would pay or refuse a payment, gate by gate. It runs accord-core's own check_pay (the function the contract's act calls) over the agreement's chain state at one block; replayed against 24 recorded payments and refusals, it matched every one. Read-only, no transaction; as JSON at /app/api/check (CORS: any origin)." },
+  { name: "Refusal alerts", when: "during", status: "live", url: "/app/settings?tab=alerts", api: null,
+    text: "Webhook, Telegram or email the moment the contract refuses your agent, with an incident view and revoke. Webhooks are signed (X-Accord-Signature, HMAC-SHA256 over the timestamp and the body), retried and kept in a delivery log; the incident view shows what was tried beside what was approved, with hold-to-revoke. The alert reports a refusal the contract already made." },
+  { name: "Finance exports", when: "after", status: "live", url: "/app/record?scope=org", api: null,
+    text: "Every payment matched to your PO or invoice, ready for QuickBooks or Xero: QuickBooks Online (3 or 4 columns), a Xero bank statement, or Accord's CSV with token, recipient, transaction link and evidence hash. References stay private to the organisation, never on chain." },
+]
+export const PAYMENT_CONTROLS_NEXT = "Next (planned): continuous monitoring, Accord Guard"
+
 /* Built on: the strip under the hero. No partnership is claimed. */
 export const BUILT_ON = [
   { name: "NEAR", role: "The agreement contract, its escrowed USDC and the on-chain record of every payment and refusal." },

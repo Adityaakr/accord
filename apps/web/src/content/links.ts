@@ -35,6 +35,12 @@ export const LINKS = {
   tryDeal: `${app}/try-it`,
   replay: `${app}/replay`,
   attackRoom: `${app}/try`,
+  /* payment controls (the home page's #payment-controls; the app's /controls holds the same six cards) */
+  paymentControls: "/#payment-controls",
+  appControls: `${app}/controls`,
+  checkPayment: `${app}/check`,
+  refusalAlerts: `${app}/settings?tab=alerts`,
+  financeExports: `${app}/record?scope=org`,
   record: "/record",
   product: "/product",
   sealedTable: "/product/sealed-table",

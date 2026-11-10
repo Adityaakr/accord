@@ -10,7 +10,7 @@ import { LINKS, PRIMARY_CTA } from "../content/links"
 import styles from "./Nav.module.css"
 
 /* Navigation (template component xfh9lOiA3) per copy brief ACCORD_LANDING_PAGE_SPEC.md §2.1, regrouped 8 Nov 2026 around one
-   product: centre: Use cases · Product (menu: Overview, Sealed Table, Agreement controls, Payee) · How it works · Security ·
+   product: centre: Use cases · Product (menu: Overview, Sealed Table, Agreement controls, Payee, Payment controls) · How it works · Security ·
    Verify · Research · Docs; right: GitHub (icon + label, only when configured) and the primary button.
    Phone menu: the same links in the same order, the Product group set out under its label, plus Join and Record. */
 
@@ -20,6 +20,7 @@ const PRODUCT: NavItem[] = [
   { label: "Sealed Table", href: LINKS.sealedTable, note: "Confidential negotiation between agents" },
   { label: "Agreement controls", href: LINKS.agreementControls, note: "The approved terms govern every payment" },
   { label: "Payee", href: LINKS.payee, note: "Payment only to an authorised recipient" },
+  { label: "Payment controls", href: LINKS.paymentControls, note: "Check, alert on and export every agent payment" },
 ]
 const BEFORE: NavItem[] = [{ label: "Use cases", href: LINKS.useCases }]
 const AFTER: NavItem[] = [

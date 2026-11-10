@@ -9,7 +9,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { ROUTES, SITE_URL } from "../seo/routes.mjs"
-import { ACCOUNTS, ANSWERS, BUILT_ON, CLAIMS, CONTROLS, FOR_AGENTS, GLOSSARY, HOW_STEPS, MCP_CARD, NAMING, NOT_DONE, ONE_LINE, REPO, STATUS, TRY_STEPS, USE_CASES } from "../seo/facts.mjs"
+import { ACCOUNTS, ANSWERS, BUILT_ON, CLAIMS, CONTROLS, FOR_AGENTS, GLOSSARY, HOW_STEPS, MCP_CARD, NAMING, NOT_DONE, ONE_LINE, PAYMENT_CONTROLS, PAYMENT_CONTROLS_NEXT, REPO, STATUS, TRY_STEPS, USE_CASES } from "../seo/facts.mjs"
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const DIST = join(ROOT, "dist")
@@ -314,6 +314,13 @@ ${HOW_STEPS.map((h, i) => `${i + 1}. **${h.name}**: ${h.text}`).join("\n")}
 
 ${CONTROLS.map((c) => `- **${c.name}**: ${c.text}`).join("\n")}
 
+## Payment controls (live in the app)
+
+Before, during and after an agent pays. All three are live on NEAR testnet in the app today: ${SITE_URL}/app/controls
+
+${PAYMENT_CONTROLS.map((c) => `- **${c.name}** (${c.when}; ${SITE_URL}${c.url}${c.api ? `; JSON: ${SITE_URL}${c.api}` : ""}): ${c.text}`).join("\n")}
+- ${PAYMENT_CONTROLS_NEXT}.
+
 ## Built on
 
 ${BUILT_ON.map((b) => `- **${b.name}**: ${b.role}`).join("\n")}
@@ -360,7 +367,8 @@ write(join(DIST, "facts.json"), JSON.stringify({
   name: "Accord", url: `${SITE_URL}/`, repository: REPO, license: "MIT", tagline: TAGLINE, summary: ONE_LINE, updated: TODAY, status: STATUS,
   parts: GLOSSARY.filter((g) => ["Sealed Table", "Agreement controls", "Payee", "Evidence checks"].includes(g.term)),
   agreement_types: USE_CASES.map((u) => ({ ...u, url: abs(u.url) })),
-  how_a_deal_room_works: HOW_STEPS, core_controls: CONTROLS, built_on: BUILT_ON,
+  how_a_deal_room_works: HOW_STEPS, core_controls: CONTROLS,
+  payment_controls: { live: PAYMENT_CONTROLS.map((c) => ({ ...c, url: `${SITE_URL}${c.url}`, api: c.api ? `${SITE_URL}${c.api}` : null })), next: PAYMENT_CONTROLS_NEXT }, built_on: BUILT_ON,
   glossary: GLOSSARY, answers: ANSWERS, naming: NAMING,
   claims: CLAIMS, not_done_yet: NOT_DONE, testnet_accounts: ACCOUNTS.map((a) => ({ ...a, explorer: near(a.account) })),
   try_it: { url: `${SITE_URL}/app/try-it`, guide: `${SITE_URL}/docs/quickstart`, steps: TRY_STEPS },

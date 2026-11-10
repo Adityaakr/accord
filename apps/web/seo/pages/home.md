@@ -550,6 +550,82 @@ In the public demonstration room, the agent's inbox is open to anyone while the 
 
 [See the refused attacks](/try)
 
+Payment controls
+
+## Before, during and after an agent pays.
+
+Check a payment before anyone signs it, get an alert the moment the contract refuses one, and hand finance an export matched to the PO. All three are live in the app today, shown here with the real records of testnet agreement a48.
+
+- 01 Check
+
+- 02 Alerts
+
+- 03 Exports
+
+01 of 03 · Before · Live
+
+### Check a payment: see the contract's answer before anyone signs.
+
+Before signing, see whether a room's contract would pay or refuse a payment, gate by gate. The check runs accord-core's own `check_pay`, the function the contract's `act` calls, over the room's chain state at one block. Replayed against 24 recorded payments and refusals, it matched every one.
+
+What it does
+
+Pay or refuse, with each of the six gates and its reason
+
+Where
+
+`/app/check`, and as JSON at `/app/api/check` from any origin
+
+Limit
+
+Read-only: no sign-in, no key, no transaction. It answers for one block's state
+
+[Open in the app](/app/check)
+
+02 of 03 · During · Live
+
+### Refusal alerts: know the moment your agent is refused.
+
+Webhook, Telegram or email the moment the contract refuses your agent, with an incident view and revoke. Webhooks are signed (`X-Accord-Signature`, HMAC-SHA256 over the timestamp and the body), retried and logged.
+
+What it does
+
+An alert per refusal, and an incident view: what was tried beside what was approved
+
+Where
+
+Settings, Alerts in the app (`/app/settings?tab=alerts`)
+
+Limit
+
+It reports a refusal the contract already made; revoking the key stays the buyer's choice
+
+[Open in the app](/app/settings?tab=alerts)
+
+03 of 03 · After · Live
+
+### Finance exports: every payment matched to its PO.
+
+Every payment matched to your PO or invoice, ready for QuickBooks or Xero: QuickBooks Online in 3 or 4 columns, a Xero bank statement, or Accord's CSV with the token, recipient, transaction link and evidence hash.
+
+What it does
+
+Exports each payment of your organisation's rooms, one row per payment
+
+Where
+
+The organisation's record in the app (`/app/record?scope=org`)
+
+Privacy
+
+PO and invoice references stay with your organisation, never on chain
+
+[Open in the app](/app/record?scope=org)
+
+Would be refused at gate 2: the recipient is not the approved one.
+
+Next Continuous monitoring and Accord Guard.
+
 Privacy and control
 
 ## What stays private, what is public, and what Accord does not do.
