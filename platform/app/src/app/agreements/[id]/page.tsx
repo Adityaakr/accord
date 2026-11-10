@@ -23,6 +23,8 @@ import { RoomHeader } from "./RoomHeader";
 import { Negotiation, type NegotiationProps } from "./Negotiation";
 import { Activity, type Event } from "./Activity";
 import { currentStep } from "./pipeline";
+import { FundsExport } from "./FundsExport";
+import { Incident, type IncidentRefusal } from "./Incident";
 import styles from "./room.module.css";
 
 /* The room's tabs (docs/build/PLATFORM.md §6). The tab lives in the URL (?tab=) so it survives the live refresh and can be
@@ -62,9 +64,9 @@ function when(t: number | null | undefined, now: number): string {
   return d >= 0 ? `in ${s}` : `${s} ago`;
 }
 
-export default async function DealRoom({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string; created?: string }> }) {
+export default async function DealRoom({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string; created?: string; incident?: string }> }) {
   const { id } = await params;
-  const { tab: tabParam, created } = await searchParams;
+  const { tab: tabParam, created, incident } = await searchParams;
   let r: Room;
   try {
     r = await room(id);
@@ -108,7 +110,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
   const due = new Map(r.items.map((it) => [it.id, it.due_amount]));
   const events: Event[] = [
     ...r.refusals.map((x): Event => ({
-      kind: "refusal", key: `r${x.seq}`, at: x.at, seq: x.seq, code: x.code, item: x.item, via: x.via,
+      kind: "refusal", key: `r${x.seq}`, at: x.at, seq: x.seq, block: x.block, code: x.code, item: x.item, via: x.via,
       amount: x.amount !== "0" ? usd(x.amount) : null, recipient: x.recipient || null,
       allowedAmount: x.code === "ERR_AMOUNT_MISMATCH" && due.has(x.item) ? usd(due.get(x.item)!) : null,
       allowedRecipient: x.code === "ERR_PAYEE_MISMATCH" ? a.recipient?.account ?? null : null,
@@ -116,6 +118,11 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
     ...r.receipts.map((x): Event => ({ kind: "payment", key: `p${x.payment_id}`, at: x.at, id: x.payment_id, item: x.item, amount: usd(x.amount), recipient: x.recipient, via: x.via, block: x.block })),
     ...r.exceptions.map((x): Event => ({ kind: "exception", key: `e${x.id}`, at: x.at, id: x.id, item: x.item, amount: usd(x.amount), status: x.status, by: x.by, reason: x.reason })),
   ].sort((p, q) => q.at - p.at);
+  // the incident view's refusals, newest first (r.refusals is already newest first)
+  const incidents: IncidentRefusal[] = r.refusals.slice(0, 20).map((x) => ({
+    seq: x.seq, at: x.at, block: x.block, code: x.code, item: x.item, via: x.via, amount: x.amount !== "0" ? usd(x.amount) : null,
+    recipient: x.recipient || null, approvedAmount: due.has(x.item) ? usd(due.get(x.item)!) : null,
+  }));
 
   const termsPanel = (
     <Panel
@@ -283,6 +290,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
                 )}
               </Panel>
               <Receipts receipts={r.receipts} agreement={a.account} symbol={sym} />
+              <FundsExport room={a.account} parties={[a.buyer, a.vendor, a.vendor_authority]} items={r.items.map((it) => it.id)} symbol={sym} payments={r.receipts.length} />
             </>
           )}
 
@@ -311,6 +319,11 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
             </>
           )}
 
+          {tab === "activity" && incidents.length > 0 && (
+            <Incident room={a.account} buyer={a.buyer} symbol={sym} explorer={c.explorer} version={version} refusals={incidents} total={a.refusals}
+              approvedRecipient={a.recipient?.account ?? null} agentKey={a.agent_key} revokedKeys={a.revoked_keys} canaryTripped={a.canary_tripped}
+              initial={incident && /^\d+$/.test(incident) ? Number(incident) : null} key={incident ?? "latest"} />
+          )}
           {tab === "activity" && (
             <Panel
               title="Activity"

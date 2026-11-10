@@ -15,6 +15,8 @@ import { WORKSPACES, useWorkspace, type NavItem } from "./workspace/Workspace";
 import { WalletButton } from "./wallet/WalletButton";
 import { useWallet } from "./wallet/WalletProvider";
 import styles from "./Nav.module.css";
+import fstyles from "./finance.module.css";
+import { useAlertCount } from "./org/AlertsList";
 import { IconTile } from "@/components/IconTile";
 
 /* 16-px line icons, one stroke weight */
@@ -25,6 +27,7 @@ const ICONS = {
   agents: <><circle cx="5" cy="8" r="2.5" /><circle cx="11" cy="8" r="2.5" /><path d="M7.5 8h1" /></>,
   recipients: <><circle cx="8" cy="5.5" r="2.5" /><path d="M3.5 13.5c.6-2.3 2.3-3.5 4.5-3.5s3.9 1.2 4.5 3.5" /></>,
   record: <><path d="M4 2.5h6l2.5 2.5v8.5h-8.5z" /><path d="M6 8h4M6 10.5h4" /></>,
+  bell: <><path d="M4 11.5V7.5a4 4 0 0 1 8 0v4l1 1.2H3z" /><path d="M6.6 13.6a1.5 1.5 0 0 0 2.8 0" /></>,
   settings: <><circle cx="8" cy="8" r="2" /><path d="M8 1.8v2M8 12.2v2M14.2 8h-2M3.8 8h-2M12.4 3.6 11 5M5 11l-1.4 1.4M12.4 12.4 11 11M5 5 3.6 3.6" /></>,
   chart: <path d="M3 13V9M6.5 13V6M10 13V8M13.5 13V3.5" />,
   verify: <><path d="M8 2 13 4v4c0 3-2.2 5-5 6-2.8-1-5-3-5-6V4z" /><path d="m6 8 1.5 1.5L10.5 6.5" /></>,
@@ -100,6 +103,8 @@ export function Sidebar() {
   // Settings says "Set up" until the organisation is confirmed and set up
   const orgPending = Boolean(w.accountId) && !o.checking && (!o.session || (o.data && !o.data.org));
   const settingsOn = path.startsWith("/settings") || path.startsWith("/onboarding");
+  const hasOrg = Boolean(o.session && o.data?.org);
+  const unread = useAlertCount(hasOrg);
   /* Signed out, only the pages that work without an account: no workspace switcher, no Settings or Profile
      (they would only bounce to sign-in). The logo and Sign in sit in the top bar. */
   // While a kept session is read back after a reload, show neither the signed-out nor the signed-in set: an empty
@@ -139,6 +144,14 @@ export function Sidebar() {
       </div>
       <div className={styles.group}>{ws.nav.map(link)}</div>
       <div className={`${styles.group} ${styles.bottom}`}>
+        {hasOrg ? (
+          <Link href="/alerts" prefetch={false} className={`${styles.side} ${path.startsWith("/alerts") ? styles.on : ""}`} aria-current={path.startsWith("/alerts") ? "page" : undefined}>
+            {path.startsWith("/alerts") ? <Pill /> : null}
+            <Icon name="bell" />
+            <span>Alerts</span>
+            {unread > 0 ? <span className={fstyles.badge} aria-label={`${unread} unread`}>{unread > 99 ? "99+" : unread}</span> : null}
+          </Link>
+        ) : null}
         <Link href="/settings" prefetch={false} className={`${styles.side} ${settingsOn ? styles.on : ""}`} aria-current={settingsOn ? "page" : undefined}>
           {settingsOn ? <Pill /> : null}
           <Icon name="settings" />

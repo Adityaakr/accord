@@ -8,6 +8,7 @@ import { roomActivity } from "@/server/activity";
 import { agentActions, recentMessages } from "@/server/store";
 import { allow, clientIp } from "@/server/ratelimit";
 import { chainErrorResponse } from "@/server/rpcerror";
+import { maybeAlerts } from "@/server/alerts";
 import type { TranscriptMessage } from "@/lib/transcript";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +22,8 @@ function planned(p: unknown): TranscriptMessage["intent"] {
 
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
+  // a room someone is watching is a good moment to look for new refusals (rate-limited, idempotent; server/alerts.ts)
+  maybeAlerts();
   if (!isConfiguredAgreement(id)) return NextResponse.json({ error: "not an agreement of this factory" }, { status: 400 });
   if (!allow(`activity:${clientIp(req)}`, 120, 60_000)) return NextResponse.json({ error: "too many requests; wait a minute" }, { status: 429, headers: { "retry-after": "20" } });
   try {

@@ -6,13 +6,11 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useRefreshSoon } from "@/components/refreshSoon";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { useOrg } from "@/components/org/OrgProvider";
-import { useAppConfig } from "@/components/AppConfig";
 import { HoldButton } from "@/components/me/Confirm";
-import { agreementClient, errorText, readBack } from "@/components/me/client";
+import { useRevoke } from "./useRevoke";
 import { STEPS, STEP_NOTE } from "./pipeline";
 import { IconTile } from "@/components/IconTile";
 import { AgentWork, WorkToggle, useTranscript } from "./AgentWork";
@@ -42,29 +40,12 @@ export interface HeaderProps {
 
 export function RoomHeader({ room, buyer, step, terminal, agentKey, revokedKeys, canaryTripped, executing, symbol, explorer, version, dueNow, demoRoom }: HeaderProps) {
   const w = useWallet();
-  const cfg = useAppConfig();
-  const router = useRouter();
   const refreshSoon = useRefreshSoon();
-  const [revoked, setRevoked] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { revoke, revoked, error } = useRevoke(room, agentKey);
   // The wallet is known only in the browser; render the signed-in parts after mount so server and client agree.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const isBuyer = mounted && !!w.accountId && w.accountId === buyer;
-
-  const revoke = useCallback(async () => {
-    if (!w.signer) return;
-    setError(null);
-    try {
-      const rb = await readBack(cfg, room, { kind: "revoke", key: agentKey });
-      if (rb.stale) { setError(`${rb.stale} Nothing was signed.`); router.refresh(); return; }
-      const tx = await agreementClient(w.signer, cfg, room).revokeAgent();
-      setRevoked(tx.txHash);
-      refreshSoon();
-    } catch (e) {
-      setError(errorText(e));
-    }
-  }, [w.signer, cfg, room, agentKey, router, refreshSoon]);
 
   const status = revoked || (!agentKey && revokedKeys > 0)
     ? "revoked"

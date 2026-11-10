@@ -12,11 +12,12 @@ import { SignInCard } from "../SignInCard";
 import { Stage } from "../Stage";
 import { ConfirmYou } from "./ConfirmYou";
 import { DomainProof } from "./DomainProof";
+import { AlertSettings } from "./AlertSettings";
 import { ROLE_INFO, useOrg, type OrgRole } from "./OrgProvider";
 import styles from "./org.module.css";
 
-type Tab = "organisation" | "members" | "notifications" | "developers" | "billing";
-const TABS: [Tab, string][] = [["organisation", "Organisation"], ["members", "Members and roles"], ["notifications", "Notifications"], ["developers", "Developers"], ["billing", "Billing"]];
+type Tab = "organisation" | "members" | "notifications" | "alerts" | "developers" | "billing";
+const TABS: [Tab, string][] = [["organisation", "Organisation"], ["members", "Members and roles"], ["notifications", "Notifications"], ["alerts", "Alerts"], ["developers", "Developers"], ["billing", "Billing"]];
 const ROLES = ROLE_INFO.map((r) => r.role);
 const date = (s: string) => new Date(s).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 const dateTime = (s: string) => new Date(s).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -57,6 +58,7 @@ export function Settings({ tab }: { tab: Tab }) {
       {tab === "organisation" && <Organisation />}
       {tab === "members" && <Members />}
       {tab === "notifications" && <Notifications />}
+      {tab === "alerts" && <AlertSettings />}
       {tab === "developers" && <Developers />}
       {tab === "billing" && <Billing />}
     </div>
@@ -128,6 +130,7 @@ function describe(action: string, d: Record<string, unknown> | null): string {
     case "invite.revoked": return "Withdrew an invitation";
     case "member.role": return `Changed ${String(x.account)} from ${String(x.from)} to ${String(x.to)}`;
     case "member.removed": return `Removed ${String(x.account)}`;
+    case "alerts.channels": return `Changed where alerts go${x.rotated ? " and rotated the webhook secret" : ""}`;
     default: return action;
   }
 }
@@ -250,8 +253,8 @@ function Notifications() {
   };
   return (
     <section className={styles.panel} style={{ maxWidth: 720 }}>
-      <div className={styles.panelHead}><h2 className="h5">Tell me when</h2><span className={styles.badgeWait}>delivery starts when email is configured</span></div>
-      <p className="small">Your choices are saved now. Accord sends nothing yet; email, Slack and webhook delivery come with the email provider.</p>
+      <div className={styles.panelHead}><h2 className="h5">Tell me when</h2><span className={styles.badgeWait}>saved per member</span></div>
+      <p className="small">Your choices are saved now. Refused payments already reach your organisation in the app and on the channels in <Link className="link" href="/settings?tab=alerts">Alerts</Link>; the other events are kept as choices until they are sent too.</p>
       <div>
         {EVENTS.map(([k, label, hint]) => (
           <div key={k} className={styles.toggle}>

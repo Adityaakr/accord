@@ -3,7 +3,7 @@ import { Settings } from "@/components/org/Settings";
 export const metadata = { title: "Settings" };
 export const dynamic = "force-dynamic";
 
-const TABS = ["organisation", "members", "notifications", "developers", "billing"] as const;
+const TABS = ["organisation", "members", "notifications", "alerts", "developers", "billing"] as const;
 export type SettingsTab = (typeof TABS)[number];
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {

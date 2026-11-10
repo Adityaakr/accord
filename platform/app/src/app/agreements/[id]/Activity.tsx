@@ -8,6 +8,7 @@
 // once; rows there on load do not move. If the transaction history cannot be read, the contract's own records
 // (payments, refusals, exceptions) show instead, and the tab says so.
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ActivityEntry, Group } from "@/lib/activity";
 import { ago, clock, nearAmount, tokenAmount, useRoomActivity } from "./useRoomActivity";
@@ -15,7 +16,7 @@ import styles from "./activity.module.css";
 
 /** The contract's own records, used when the transaction history cannot be read. */
 export type Event =
-  | { kind: "refusal"; key: string; at: number; seq: number; code: string; item: number; amount: string | null; recipient: string | null;
+  | { kind: "refusal"; key: string; at: number; seq: number; block: number; code: string; item: number; amount: string | null; recipient: string | null;
       allowedAmount: string | null; allowedRecipient: string | null; via: string }
   | { kind: "payment"; key: string; at: number; id: number; item: number; amount: string; recipient: string; via: string; block: number }
   | { kind: "exception"; key: string; at: number; id: number; item: number; amount: string; status: string; by: string; reason: string };
@@ -54,6 +55,8 @@ export function Activity({ agreement, now, symbol = "USDC", explorer, fallback, 
   const counts = useMemo(() => Object.fromEntries(CHIPS.map(([k, , f]) => [k, (entries ?? []).filter((e) => f(e.group)).length])), [entries]);
   const shown = (entries ?? []).filter((e) => CHIPS.find(([k]) => k === chip)![2](e.group));
   const tx = (h: string) => (explorer ? `${explorer}/txns/${h}` : null);
+  // a refused row opens the incident view above: matched to the contract's refusal record by block, code and item
+  const seqOf = (e: ActivityEntry) => fallback.find((f) => f.kind === "refusal" && f.block === e.block && f.code === e.code && f.item === e.item)?.key.slice(1) ?? null;
   const addr = (a: string) => (explorer ? `${explorer}/address/${a}` : null);
 
   if (!entries) {
@@ -80,7 +83,7 @@ export function Activity({ agreement, now, symbol = "USDC", explorer, fallback, 
         <p className={styles.empty}>{entries.length ? "Nothing of this kind yet." : "No activity yet. Every step of the room appears here as it happens."}</p>
       ) : (
         <ol className={styles.feed} aria-live="polite" aria-relevant="additions">
-          {shown.map((e) => <Row key={e.key} e={e} now={clockNow} symbol={symbol} tx={tx(e.tx)} addr={addr} arriving={fresh.includes(e.key)} />)}
+          {shown.map((e) => <Row key={e.key} e={e} now={clockNow} symbol={symbol} tx={tx(e.tx)} addr={addr} arriving={fresh.includes(e.key)} incident={e.event === "act_refused" ? seqOf(e) : null} />)}
         </ol>
       )}
       {!data?.complete && <p className={styles.note}>Some transactions could not be read yet; they appear on the next refresh.</p>}
@@ -88,7 +91,7 @@ export function Activity({ agreement, now, symbol = "USDC", explorer, fallback, 
   );
 }
 
-function Row({ e, now, symbol, tx, addr, arriving }: { e: ActivityEntry; now: number; symbol: string; tx: string | null; addr: (a: string) => string | null; arriving: boolean }) {
+function Row({ e, now, symbol, tx, addr, arriving, incident }: { e: ActivityEntry; now: number; symbol: string; tx: string | null; addr: (a: string) => string | null; arriving: boolean; incident: string | null }) {
   const acct = (a: string) => {
     const h = addr(a);
     return h ? <a className={styles.acct} href={h} target="_blank" rel="noreferrer" title={a}>{shortAcct(a)}</a> : <span className={styles.acct} title={a}>{shortAcct(a)}</span>;
@@ -106,7 +109,7 @@ function Row({ e, now, symbol, tx, addr, arriving }: { e: ActivityEntry; now: nu
           {amount}
         </div>
         <div className={styles.detail}>
-          {e.event === "act_refused" ? <>{e.account ? <>to {acct(e.account)} · </> : null}item {e.item} · nothing sent</>
+          {e.event === "act_refused" ? <>{e.account ? <>to {acct(e.account)} · </> : null}item {e.item} · nothing sent{incident ? <> · <Link className={styles.acct} href={`?tab=activity&incident=${incident}#incident`} scroll={false}>open the incident</Link></> : null}</>
             : e.event === "payment_sent" ? <>to {e.account ? acct(e.account) : "the recipient"}{e.detail ? ` · ${e.detail}` : ""}</>
             : <>
                 {e.account ? acct(e.account) : null}
