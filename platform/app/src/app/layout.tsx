@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Host_Grotesk, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { WalletProvider } from "@/components/wallet/WalletProvider";
 import { OrgProvider } from "@/components/org/OrgProvider";
 import { AppConfigProvider } from "@/components/AppConfig";
@@ -12,8 +12,9 @@ import { demoReady } from "@/server/demo";
 import { BasePathFetch } from "@/components/BasePathFetch";
 import "./globals.css";
 
-const host = Host_Grotesk({ subsets: ["latin"], variable: "--font-host-grotesk", display: "swap" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono", weight: ["400", "500"], display: "swap" });
+// Kept in the repository (fonts/README.md), so the build never fetches from Google Fonts.
+const host = localFont({ src: "./fonts/HostGrotesk-latin.woff2", weight: "300 800", variable: "--font-host-grotesk", display: "swap" });
+const mono = localFont({ src: "./fonts/JetBrainsMono-latin.woff2", weight: "400 500", variable: "--font-jetbrains-mono", display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "Accord app", template: "%s · Accord" },
