@@ -1,0 +1,20 @@
+[package]
+name = "accord-check"
+description = "Check a payment: accord-core's own gates (check_pay) over an agreement's view state, built to wasm for the app"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+accord-core = { path = "../accord-core" }
+serde.workspace = true
+serde_json.workspace = true
+# The same crate and version near-sdk 5.30.0 parses `AccountId` with, so a malformed recipient is judged as `act` judges it.
+near-account-id = { version = "=3.0.0", default-features = false }
+
+[dev-dependencies]
+proptest.workspace = true

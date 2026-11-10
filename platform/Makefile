@@ -20,6 +20,8 @@ LIBS = pnpm --silent --filter @accord/sdk --filter @accord/store build
 ci: wasm ; @cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && $(LIBS) && pnpm -r typecheck && pnpm -r --filter './packages/*' --filter './services/*' --filter @accord/app test
 test: wasm ; @cargo test --workspace && $(LIBS) && pnpm -r --filter './packages/*' --filter './services/*' --filter @accord/app test
 wasm: ; @bash scripts/build-wasm.sh
+# accord-core's check_pay as wasm for @accord/sdk/check; CHECK=1 fails if the committed module differs from a fresh build.
+check-wasm: ; @bash scripts/build-check-wasm.sh
 
 setup: ; @bash scripts/setup.sh
 probe-ai: ; @cd scripts/probe-ai && pnpm install --ignore-workspace --frozen-lockfile --silent && pnpm exec tsx probe-ai.ts
@@ -68,4 +70,4 @@ inbox: ; @$(LIVE) inbox
 release-check: ; $(call todo,7.4 make release-check)
 submission-check: ; $(call todo,8.2 make submission-check)
 
-.PHONY: help setup-check ci test wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate negotiate-usdc finish-usdc dispute-close dispute-close-usdc close close-usdc cancel verify-usdc approve fund payee pay attack revoke claim exception payee-change market-making atlas verify demo measure demo-reset inbox release-check submission-check
+.PHONY: help setup-check ci test wasm check-wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate negotiate-usdc finish-usdc dispute-close dispute-close-usdc close close-usdc cancel verify-usdc approve fund payee pay attack revoke claim exception payee-change market-making atlas verify demo measure demo-reset inbox release-check submission-check

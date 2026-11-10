@@ -25,6 +25,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "accord-check"
+version = "0.1.0"
+dependencies = [
+ "accord-core",
+ "near-account-id",
+ "proptest",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "accord-core"
 version = "0.1.0"
 dependencies = [

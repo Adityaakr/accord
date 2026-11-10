@@ -1,0 +1,815 @@
+{
+ "agreement": "a2.accord-usdc.testnet",
+ "code_hash": "ECgsrZwyoZvoHDjawYhRnFbxoWtt6Sx9iaPsEzqwTTGz",
+ "token": {
+  "id": "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af",
+  "symbol": "USDC",
+  "decimals": 6
+ },
+ "captured_from": "https://archival-rpc.testnet.fastnear.com",
+ "captured_at": "2026-11-10T05:15:16.016Z",
+ "cases": [
+  {
+   "block": 276967965,
+   "item": 1,
+   "amount": "6500000",
+   "recipient": "halcyon-mm.testnet",
+   "recorded": {
+    "verdict": "pay",
+    "code": null,
+    "payment_id": 1,
+    "receipt_block": 276967967
+   },
+   "views_at": 276967964,
+   "agreement": {
+    "id": 2,
+    "account": "a2.accord-usdc.testnet",
+    "factory": "accord-usdc.testnet",
+    "release": 4,
+    "kind": "procurement",
+    "title": "Liquidity reporting integration",
+    "state": "Executing",
+    "negotiation": "Done",
+    "buyer": "northwind-demo.testnet",
+    "vendor": "halcyon-demo.testnet",
+    "vendor_authority": "halcyon-auth.testnet",
+    "token": "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af",
+    "keeper": "accord-keeper.testnet",
+    "outlayer": "outlayer.testnet",
+    "model": "z-ai/glm-5.3-flash",
+    "jobs": {
+     "sealed_table": {
+      "project": "accord-v1.testnet/accord-sealed-table",
+      "wasm_hash": "7c832ce9bbea56effda01e9ddf9c413f0d8d2c8baed837e1a524c77529f0a2e1",
+      "signing_pubkey": "ed25519:GgC8gEhKzpQ2UV5bfaqMgVeLaJvmC7SJB3ZiqmWFmk7p"
+     },
+     "payee": {
+      "project": "accord-v1.testnet/accord-payee",
+      "wasm_hash": "24071443f098c10bbc2ddc0eef79ab99ec696039cf6eb06c14aa813d73e7e876",
+      "signing_pubkey": "ed25519:FAbZHA2MneL9ip9VsMeGNdiZt1WgdHtKQnGJHs4EoejL"
+     },
+     "observer": {
+      "project": "accord-v1.testnet/accord-observer",
+      "wasm_hash": "8240179af031fc4e5cdcea367bec113a0f8608015575319f97bd192d6c19a96d",
+      "signing_pubkey": "ed25519:CXZzXC5mxJgjaA519JWHQpQ9E8QGgjaHdidN9Sx24xgY"
+     }
+    },
+    "canaries": [
+     "halcyon-mm-payments.testnet",
+     "halcyon-treasury.testnet"
+    ],
+    "params": {
+     "mode": "demo",
+     "timelock_secs": 120,
+     "claim_delay_secs": 120,
+     "grace_secs": 600,
+     "min_acceptance_window_secs": 60,
+     "max_acceptance_window_secs": 604800,
+     "require_two_sided": true,
+     "observation_grace_secs": 60,
+     "refusal_limit": 5,
+     "refusal_window_secs": 3600,
+     "agent_allowance": "500000000000000000000000"
+    },
+    "terms_hash": "14d5941d4f65cc12ecd55e1d71b3616ff806ecce683ef6fb815869678a6a395f",
+    "approvals": {
+     "buyer": true,
+     "vendor": true
+    },
+    "executing_at": 1794255343,
+    "ends_at": 1794860143,
+    "funded": "15000000",
+    "paid": "0",
+    "reserved": "0",
+    "refunded": "0",
+    "total": "15000000",
+    "in_flight": null,
+    "closing": false,
+    "mutual_close": {
+     "buyer": false,
+     "vendor": false
+    },
+    "recipient": {
+     "version": 1,
+     "account": "halcyon-mm.testnet",
+     "domain": "accordweb-production.up.railway.app"
+    },
+    "domain": "accordweb-production.up.railway.app",
+    "pending_recipient": null,
+    "agent_key": "ed25519:GzRYHAuTNNPMXYhuYXRibGCzCXGVjWfA1SjB4RS3iZ51",
+    "revoked_keys": 0,
+    "canary_tripped": false,
+    "refusals": 0,
+    "exceptions": 0,
+    "observation_conflicts": 0,
+    "periods": [],
+    "budget": {
+     "balance": "1985886440700000000000006",
+     "storage_stake": "129680000000000000000000",
+     "liquid": "1856206440700000000000006"
+    },
+    "now": 1794255394
+   },
+   "items": [
+    {
+     "id": 1,
+     "amount": "6500000",
+     "due_offset_secs": 432000,
+     "evidence": "DeliveryAccepted",
+     "status": "Eligible",
+     "delivery": {
+      "evidence_hash": "8ce97a513c590a003fb475f68cf67794a2338d76ae5c4e9021c804a35e9e53e1",
+      "uri": "https://accordweb-production.up.railway.app/app/api/deliveries/a2.accord-usdc.testnet/1",
+      "at": 1794255387,
+      "window_end": 1794255507
+     },
+     "eligible_at": 1794255391,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "0",
+     "settled_by": null,
+     "due_at": 1794687343,
+     "due_amount": "6500000"
+    },
+    {
+     "id": 2,
+     "amount": "5500000",
+     "due_offset_secs": 518400,
+     "evidence": "DeliveryAccepted",
+     "status": "Open",
+     "delivery": null,
+     "eligible_at": null,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "0",
+     "settled_by": null,
+     "due_at": 1794773743,
+     "due_amount": "5500000"
+    },
+    {
+     "id": 3,
+     "amount": "3000000",
+     "due_offset_secs": 604800,
+     "evidence": "DeliveryAccepted",
+     "status": "Open",
+     "delivery": null,
+     "eligible_at": null,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "0",
+     "settled_by": null,
+     "due_at": 1794860143,
+     "due_amount": "3000000"
+    }
+   ]
+  },
+  {
+   "block": 276967975,
+   "item": 2,
+   "amount": "5500000",
+   "recipient": "halcyon-markets.testnet",
+   "recorded": {
+    "verdict": "refuse",
+    "code": "ERR_PAYEE_MISMATCH",
+    "seq": 1
+   },
+   "views_at": 276967974,
+   "agreement": {
+    "id": 2,
+    "account": "a2.accord-usdc.testnet",
+    "factory": "accord-usdc.testnet",
+    "release": 4,
+    "kind": "procurement",
+    "title": "Liquidity reporting integration",
+    "state": "Executing",
+    "negotiation": "Done",
+    "buyer": "northwind-demo.testnet",
+    "vendor": "halcyon-demo.testnet",
+    "vendor_authority": "halcyon-auth.testnet",
+    "token": "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af",
+    "keeper": "accord-keeper.testnet",
+    "outlayer": "outlayer.testnet",
+    "model": "z-ai/glm-5.3-flash",
+    "jobs": {
+     "sealed_table": {
+      "project": "accord-v1.testnet/accord-sealed-table",
+      "wasm_hash": "7c832ce9bbea56effda01e9ddf9c413f0d8d2c8baed837e1a524c77529f0a2e1",
+      "signing_pubkey": "ed25519:GgC8gEhKzpQ2UV5bfaqMgVeLaJvmC7SJB3ZiqmWFmk7p"
+     },
+     "payee": {
+      "project": "accord-v1.testnet/accord-payee",
+      "wasm_hash": "24071443f098c10bbc2ddc0eef79ab99ec696039cf6eb06c14aa813d73e7e876",
+      "signing_pubkey": "ed25519:FAbZHA2MneL9ip9VsMeGNdiZt1WgdHtKQnGJHs4EoejL"
+     },
+     "observer": {
+      "project": "accord-v1.testnet/accord-observer",
+      "wasm_hash": "8240179af031fc4e5cdcea367bec113a0f8608015575319f97bd192d6c19a96d",
+      "signing_pubkey": "ed25519:CXZzXC5mxJgjaA519JWHQpQ9E8QGgjaHdidN9Sx24xgY"
+     }
+    },
+    "canaries": [
+     "halcyon-mm-payments.testnet",
+     "halcyon-treasury.testnet"
+    ],
+    "params": {
+     "mode": "demo",
+     "timelock_secs": 120,
+     "claim_delay_secs": 120,
+     "grace_secs": 600,
+     "min_acceptance_window_secs": 60,
+     "max_acceptance_window_secs": 604800,
+     "require_two_sided": true,
+     "observation_grace_secs": 60,
+     "refusal_limit": 5,
+     "refusal_window_secs": 3600,
+     "agent_allowance": "500000000000000000000000"
+    },
+    "terms_hash": "14d5941d4f65cc12ecd55e1d71b3616ff806ecce683ef6fb815869678a6a395f",
+    "approvals": {
+     "buyer": true,
+     "vendor": true
+    },
+    "executing_at": 1794255343,
+    "ends_at": 1794860143,
+    "funded": "15000000",
+    "paid": "6500000",
+    "reserved": "0",
+    "refunded": "0",
+    "total": "15000000",
+    "in_flight": null,
+    "closing": false,
+    "mutual_close": {
+     "buyer": false,
+     "vendor": false
+    },
+    "recipient": {
+     "version": 1,
+     "account": "halcyon-mm.testnet",
+     "domain": "accordweb-production.up.railway.app"
+    },
+    "domain": "accordweb-production.up.railway.app",
+    "pending_recipient": null,
+    "agent_key": "ed25519:GzRYHAuTNNPMXYhuYXRibGCzCXGVjWfA1SjB4RS3iZ51",
+    "revoked_keys": 0,
+    "canary_tripped": false,
+    "refusals": 0,
+    "exceptions": 0,
+    "observation_conflicts": 0,
+    "periods": [],
+    "budget": {
+     "balance": "1984856451540929600000005",
+     "storage_stake": "131570000000000000000000",
+     "liquid": "1853286451540929600000005"
+    },
+    "now": 1794255399
+   },
+   "items": [
+    {
+     "id": 1,
+     "amount": "6500000",
+     "due_offset_secs": 432000,
+     "evidence": "DeliveryAccepted",
+     "status": "Paid",
+     "delivery": {
+      "evidence_hash": "8ce97a513c590a003fb475f68cf67794a2338d76ae5c4e9021c804a35e9e53e1",
+      "uri": "https://accordweb-production.up.railway.app/app/api/deliveries/a2.accord-usdc.testnet/1",
+      "at": 1794255387,
+      "window_end": 1794255507
+     },
+     "eligible_at": 1794255391,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "6500000",
+     "settled_by": 1,
+     "due_at": 1794687343,
+     "due_amount": "6500000"
+    },
+    {
+     "id": 2,
+     "amount": "5500000",
+     "due_offset_secs": 518400,
+     "evidence": "DeliveryAccepted",
+     "status": "Open",
+     "delivery": null,
+     "eligible_at": null,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "0",
+     "settled_by": null,
+     "due_at": 1794773743,
+     "due_amount": "5500000"
+    },
+    {
+     "id": 3,
+     "amount": "3000000",
+     "due_offset_secs": 604800,
+     "evidence": "DeliveryAccepted",
+     "status": "Open",
+     "delivery": null,
+     "eligible_at": null,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "0",
+     "settled_by": null,
+     "due_at": 1794860143,
+     "due_amount": "3000000"
+    }
+   ]
+  },
+  {
+   "block": 276967997,
+   "item": 2,
+   "amount": "5500000",
+   "recipient": "halcyon-mm.testnet",
+   "recorded": {
+    "verdict": "refuse",
+    "code": "ERR_NOT_DUE",
+    "seq": 2
+   },
+   "views_at": 276967996,
+   "agreement": {
+    "id": 2,
+    "account": "a2.accord-usdc.testnet",
+    "factory": "accord-usdc.testnet",
+    "release": 4,
+    "kind": "procurement",
+    "title": "Liquidity reporting integration",
+    "state": "Executing",
+    "negotiation": "Done",
+    "buyer": "northwind-demo.testnet",
+    "vendor": "halcyon-demo.testnet",
+    "vendor_authority": "halcyon-auth.testnet",
+    "token": "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af",
+    "keeper": "accord-keeper.testnet",
+    "outlayer": "outlayer.testnet",
+    "model": "z-ai/glm-5.3-flash",
+    "jobs": {
+     "sealed_table": {
+      "project": "accord-v1.testnet/accord-sealed-table",
+      "wasm_hash": "7c832ce9bbea56effda01e9ddf9c413f0d8d2c8baed837e1a524c77529f0a2e1",
+      "signing_pubkey": "ed25519:GgC8gEhKzpQ2UV5bfaqMgVeLaJvmC7SJB3ZiqmWFmk7p"
+     },
+     "payee": {
+      "project": "accord-v1.testnet/accord-payee",
+      "wasm_hash": "24071443f098c10bbc2ddc0eef79ab99ec696039cf6eb06c14aa813d73e7e876",
+      "signing_pubkey": "ed25519:FAbZHA2MneL9ip9VsMeGNdiZt1WgdHtKQnGJHs4EoejL"
+     },
+     "observer": {
+      "project": "accord-v1.testnet/accord-observer",
+      "wasm_hash": "8240179af031fc4e5cdcea367bec113a0f8608015575319f97bd192d6c19a96d",
+      "signing_pubkey": "ed25519:CXZzXC5mxJgjaA519JWHQpQ9E8QGgjaHdidN9Sx24xgY"
+     }
+    },
+    "canaries": [
+     "halcyon-mm-payments.testnet",
+     "halcyon-treasury.testnet"
+    ],
+    "params": {
+     "mode": "demo",
+     "timelock_secs": 120,
+     "claim_delay_secs": 120,
+     "grace_secs": 600,
+     "min_acceptance_window_secs": 60,
+     "max_acceptance_window_secs": 604800,
+     "require_two_sided": true,
+     "observation_grace_secs": 60,
+     "refusal_limit": 5,
+     "refusal_window_secs": 3600,
+     "agent_allowance": "500000000000000000000000"
+    },
+    "terms_hash": "14d5941d4f65cc12ecd55e1d71b3616ff806ecce683ef6fb815869678a6a395f",
+    "approvals": {
+     "buyer": true,
+     "vendor": true
+    },
+    "executing_at": 1794255343,
+    "ends_at": 1794860143,
+    "funded": "15000000",
+    "paid": "6500000",
+    "reserved": "0",
+    "refunded": "0",
+    "total": "15000000",
+    "in_flight": null,
+    "closing": false,
+    "mutual_close": {
+     "buyer": false,
+     "vendor": false
+    },
+    "recipient": {
+     "version": 1,
+     "account": "halcyon-mm.testnet",
+     "domain": "accordweb-production.up.railway.app"
+    },
+    "domain": "accordweb-production.up.railway.app",
+    "pending_recipient": null,
+    "agent_key": "ed25519:GzRYHAuTNNPMXYhuYXRibGCzCXGVjWfA1SjB4RS3iZ51",
+    "revoked_keys": 0,
+    "canary_tripped": false,
+    "refusals": 1,
+    "exceptions": 0,
+    "observation_conflicts": 0,
+    "periods": [],
+    "budget": {
+     "balance": "1984322083691792100000005",
+     "storage_stake": "135000000000000000000000",
+     "liquid": "1849322083691792100000005"
+    },
+    "now": 1794255411
+   },
+   "items": [
+    {
+     "id": 1,
+     "amount": "6500000",
+     "due_offset_secs": 432000,
+     "evidence": "DeliveryAccepted",
+     "status": "Paid",
+     "delivery": {
+      "evidence_hash": "8ce97a513c590a003fb475f68cf67794a2338d76ae5c4e9021c804a35e9e53e1",
+      "uri": "https://accordweb-production.up.railway.app/app/api/deliveries/a2.accord-usdc.testnet/1",
+      "at": 1794255387,
+      "window_end": 1794255507
+     },
+     "eligible_at": 1794255391,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "6500000",
+     "settled_by": 1,
+     "due_at": 1794687343,
+     "due_amount": "6500000"
+    },
+    {
+     "id": 2,
+     "amount": "5500000",
+     "due_offset_secs": 518400,
+     "evidence": "DeliveryAccepted",
+     "status": "Disputed",
+     "delivery": {
+      "evidence_hash": "9464ee51ac49a86aa5cb48776ef19c88045767c5d2c30e19a6a4ce40a583c372",
+      "uri": "https://accordweb-production.up.railway.app/app/api/deliveries/a2.accord-usdc.testnet/2",
+      "at": 1794255404,
+      "window_end": 1794255524
+     },
+     "eligible_at": null,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "0",
+     "settled_by": null,
+     "due_at": 1794773743,
+     "due_amount": "5500000"
+    },
+    {
+     "id": 3,
+     "amount": "3000000",
+     "due_offset_secs": 604800,
+     "evidence": "DeliveryAccepted",
+     "status": "Open",
+     "delivery": null,
+     "eligible_at": null,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "0",
+     "settled_by": null,
+     "due_at": 1794860143,
+     "due_amount": "3000000"
+    }
+   ]
+  },
+  {
+   "block": 276968017,
+   "item": 2,
+   "amount": "5500000",
+   "recipient": "halcyon-mm.testnet",
+   "recorded": {
+    "verdict": "pay",
+    "code": null,
+    "payment_id": 2,
+    "receipt_block": 276968019
+   },
+   "views_at": 276968016,
+   "agreement": {
+    "id": 2,
+    "account": "a2.accord-usdc.testnet",
+    "factory": "accord-usdc.testnet",
+    "release": 4,
+    "kind": "procurement",
+    "title": "Liquidity reporting integration",
+    "state": "Executing",
+    "negotiation": "Done",
+    "buyer": "northwind-demo.testnet",
+    "vendor": "halcyon-demo.testnet",
+    "vendor_authority": "halcyon-auth.testnet",
+    "token": "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af",
+    "keeper": "accord-keeper.testnet",
+    "outlayer": "outlayer.testnet",
+    "model": "z-ai/glm-5.3-flash",
+    "jobs": {
+     "sealed_table": {
+      "project": "accord-v1.testnet/accord-sealed-table",
+      "wasm_hash": "7c832ce9bbea56effda01e9ddf9c413f0d8d2c8baed837e1a524c77529f0a2e1",
+      "signing_pubkey": "ed25519:GgC8gEhKzpQ2UV5bfaqMgVeLaJvmC7SJB3ZiqmWFmk7p"
+     },
+     "payee": {
+      "project": "accord-v1.testnet/accord-payee",
+      "wasm_hash": "24071443f098c10bbc2ddc0eef79ab99ec696039cf6eb06c14aa813d73e7e876",
+      "signing_pubkey": "ed25519:FAbZHA2MneL9ip9VsMeGNdiZt1WgdHtKQnGJHs4EoejL"
+     },
+     "observer": {
+      "project": "accord-v1.testnet/accord-observer",
+      "wasm_hash": "8240179af031fc4e5cdcea367bec113a0f8608015575319f97bd192d6c19a96d",
+      "signing_pubkey": "ed25519:CXZzXC5mxJgjaA519JWHQpQ9E8QGgjaHdidN9Sx24xgY"
+     }
+    },
+    "canaries": [
+     "halcyon-mm-payments.testnet",
+     "halcyon-treasury.testnet"
+    ],
+    "params": {
+     "mode": "demo",
+     "timelock_secs": 120,
+     "claim_delay_secs": 120,
+     "grace_secs": 600,
+     "min_acceptance_window_secs": 60,
+     "max_acceptance_window_secs": 604800,
+     "require_two_sided": true,
+     "observation_grace_secs": 60,
+     "refusal_limit": 5,
+     "refusal_window_secs": 3600,
+     "agent_allowance": "500000000000000000000000"
+    },
+    "terms_hash": "14d5941d4f65cc12ecd55e1d71b3616ff806ecce683ef6fb815869678a6a395f",
+    "approvals": {
+     "buyer": true,
+     "vendor": true
+    },
+    "executing_at": 1794255343,
+    "ends_at": 1794860143,
+    "funded": "15000000",
+    "paid": "6500000",
+    "reserved": "0",
+    "refunded": "0",
+    "total": "15000000",
+    "in_flight": null,
+    "closing": false,
+    "mutual_close": {
+     "buyer": false,
+     "vendor": false
+    },
+    "recipient": {
+     "version": 1,
+     "account": "halcyon-mm.testnet",
+     "domain": "accordweb-production.up.railway.app"
+    },
+    "domain": "accordweb-production.up.railway.app",
+    "pending_recipient": null,
+    "agent_key": "ed25519:GzRYHAuTNNPMXYhuYXRibGCzCXGVjWfA1SjB4RS3iZ51",
+    "revoked_keys": 0,
+    "canary_tripped": false,
+    "refusals": 2,
+    "exceptions": 0,
+    "observation_conflicts": 0,
+    "periods": [],
+    "budget": {
+     "balance": "1984028860582881000000006",
+     "storage_stake": "136710000000000000000000",
+     "liquid": "1847318860582881000000006"
+    },
+    "now": 1794255422
+   },
+   "items": [
+    {
+     "id": 1,
+     "amount": "6500000",
+     "due_offset_secs": 432000,
+     "evidence": "DeliveryAccepted",
+     "status": "Paid",
+     "delivery": {
+      "evidence_hash": "8ce97a513c590a003fb475f68cf67794a2338d76ae5c4e9021c804a35e9e53e1",
+      "uri": "https://accordweb-production.up.railway.app/app/api/deliveries/a2.accord-usdc.testnet/1",
+      "at": 1794255387,
+      "window_end": 1794255507
+     },
+     "eligible_at": 1794255391,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "6500000",
+     "settled_by": 1,
+     "due_at": 1794687343,
+     "due_amount": "6500000"
+    },
+    {
+     "id": 2,
+     "amount": "5500000",
+     "due_offset_secs": 518400,
+     "evidence": "DeliveryAccepted",
+     "status": "Eligible",
+     "delivery": {
+      "evidence_hash": "9464ee51ac49a86aa5cb48776ef19c88045767c5d2c30e19a6a4ce40a583c372",
+      "uri": "https://accordweb-production.up.railway.app/app/api/deliveries/a2.accord-usdc.testnet/2",
+      "at": 1794255416,
+      "window_end": 1794255536
+     },
+     "eligible_at": 1794255420,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "0",
+     "settled_by": null,
+     "due_at": 1794773743,
+     "due_amount": "5500000"
+    },
+    {
+     "id": 3,
+     "amount": "3000000",
+     "due_offset_secs": 604800,
+     "evidence": "DeliveryAccepted",
+     "status": "Open",
+     "delivery": null,
+     "eligible_at": null,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "0",
+     "settled_by": null,
+     "due_at": 1794860143,
+     "due_amount": "3000000"
+    }
+   ]
+  },
+  {
+   "block": 276968040,
+   "item": 3,
+   "amount": "3000000",
+   "recipient": "halcyon-mm.testnet",
+   "recorded": {
+    "verdict": "refuse",
+    "code": "ERR_NOT_DUE",
+    "seq": 3
+   },
+   "views_at": 276968039,
+   "agreement": {
+    "id": 2,
+    "account": "a2.accord-usdc.testnet",
+    "factory": "accord-usdc.testnet",
+    "release": 4,
+    "kind": "procurement",
+    "title": "Liquidity reporting integration",
+    "state": "Executing",
+    "negotiation": "Done",
+    "buyer": "northwind-demo.testnet",
+    "vendor": "halcyon-demo.testnet",
+    "vendor_authority": "halcyon-auth.testnet",
+    "token": "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af",
+    "keeper": "accord-keeper.testnet",
+    "outlayer": "outlayer.testnet",
+    "model": "z-ai/glm-5.3-flash",
+    "jobs": {
+     "sealed_table": {
+      "project": "accord-v1.testnet/accord-sealed-table",
+      "wasm_hash": "7c832ce9bbea56effda01e9ddf9c413f0d8d2c8baed837e1a524c77529f0a2e1",
+      "signing_pubkey": "ed25519:GgC8gEhKzpQ2UV5bfaqMgVeLaJvmC7SJB3ZiqmWFmk7p"
+     },
+     "payee": {
+      "project": "accord-v1.testnet/accord-payee",
+      "wasm_hash": "24071443f098c10bbc2ddc0eef79ab99ec696039cf6eb06c14aa813d73e7e876",
+      "signing_pubkey": "ed25519:FAbZHA2MneL9ip9VsMeGNdiZt1WgdHtKQnGJHs4EoejL"
+     },
+     "observer": {
+      "project": "accord-v1.testnet/accord-observer",
+      "wasm_hash": "8240179af031fc4e5cdcea367bec113a0f8608015575319f97bd192d6c19a96d",
+      "signing_pubkey": "ed25519:CXZzXC5mxJgjaA519JWHQpQ9E8QGgjaHdidN9Sx24xgY"
+     }
+    },
+    "canaries": [
+     "halcyon-mm-payments.testnet",
+     "halcyon-treasury.testnet"
+    ],
+    "params": {
+     "mode": "demo",
+     "timelock_secs": 120,
+     "claim_delay_secs": 120,
+     "grace_secs": 600,
+     "min_acceptance_window_secs": 60,
+     "max_acceptance_window_secs": 604800,
+     "require_two_sided": true,
+     "observation_grace_secs": 60,
+     "refusal_limit": 5,
+     "refusal_window_secs": 3600,
+     "agent_allowance": "500000000000000000000000"
+    },
+    "terms_hash": "14d5941d4f65cc12ecd55e1d71b3616ff806ecce683ef6fb815869678a6a395f",
+    "approvals": {
+     "buyer": true,
+     "vendor": true
+    },
+    "executing_at": 1794255343,
+    "ends_at": 1794860143,
+    "funded": "15000000",
+    "paid": "12000000",
+    "reserved": "0",
+    "refunded": "0",
+    "total": "15000000",
+    "in_flight": null,
+    "closing": false,
+    "mutual_close": {
+     "buyer": false,
+     "vendor": false
+    },
+    "recipient": {
+     "version": 1,
+     "account": "halcyon-mm.testnet",
+     "domain": "accordweb-production.up.railway.app"
+    },
+    "domain": "accordweb-production.up.railway.app",
+    "pending_recipient": null,
+    "agent_key": "ed25519:GzRYHAuTNNPMXYhuYXRibGCzCXGVjWfA1SjB4RS3iZ51",
+    "revoked_keys": 0,
+    "canary_tripped": false,
+    "refusals": 2,
+    "exceptions": 0,
+    "observation_conflicts": 0,
+    "periods": [],
+    "budget": {
+     "balance": "1982981639184079200000005",
+     "storage_stake": "140350000000000000000000",
+     "liquid": "1842631639184079200000005"
+    },
+    "now": 1794255436
+   },
+   "items": [
+    {
+     "id": 1,
+     "amount": "6500000",
+     "due_offset_secs": 432000,
+     "evidence": "DeliveryAccepted",
+     "status": "Paid",
+     "delivery": {
+      "evidence_hash": "8ce97a513c590a003fb475f68cf67794a2338d76ae5c4e9021c804a35e9e53e1",
+      "uri": "https://accordweb-production.up.railway.app/app/api/deliveries/a2.accord-usdc.testnet/1",
+      "at": 1794255387,
+      "window_end": 1794255507
+     },
+     "eligible_at": 1794255391,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "6500000",
+     "settled_by": 1,
+     "due_at": 1794687343,
+     "due_amount": "6500000"
+    },
+    {
+     "id": 2,
+     "amount": "5500000",
+     "due_offset_secs": 518400,
+     "evidence": "DeliveryAccepted",
+     "status": "Paid",
+     "delivery": {
+      "evidence_hash": "9464ee51ac49a86aa5cb48776ef19c88045767c5d2c30e19a6a4ce40a583c372",
+      "uri": "https://accordweb-production.up.railway.app/app/api/deliveries/a2.accord-usdc.testnet/2",
+      "at": 1794255416,
+      "window_end": 1794255536
+     },
+     "eligible_at": 1794255420,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "5500000",
+     "settled_by": 2,
+     "due_at": 1794773743,
+     "due_amount": "5500000"
+    },
+    {
+     "id": 3,
+     "amount": "3000000",
+     "due_offset_secs": 604800,
+     "evidence": "DeliveryAccepted",
+     "status": "Disputed",
+     "delivery": {
+      "evidence_hash": "0e85065b7ab11b12321d834e49e2a3bbd0fde829c845c2c8c8d444fe98a86013",
+      "uri": "https://accordweb-production.up.railway.app/app/api/deliveries/a2.accord-usdc.testnet/3",
+      "at": 1794255429,
+      "window_end": 1794255549
+     },
+     "eligible_at": null,
+     "exception": null,
+     "exception_used": false,
+     "pending_exception": null,
+     "settled": "0",
+     "settled_by": null,
+     "due_at": 1794860143,
+     "due_amount": "3000000"
+    }
+   ]
+  }
+ ]
+}
