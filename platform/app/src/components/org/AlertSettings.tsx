@@ -2,7 +2,7 @@
 
 // Settings > Alerts: where the organisation hears about a refused payment in a room where it is the buyer. In the
 // app (the Alerts page and its badge) always; and, set by an admin, a signed webhook, a Telegram chat and an email
-// address. The webhook's signing secret is shown once, when it is created or rotated. Telegram and email need the
+// address. Telegram connects in one tap: a signed link opens the bot, Start connects that chat. The webhook's signing secret is shown once, when it is created or rotated. Telegram and email need the
 // server's TELEGRAM_BOT_TOKEN and RESEND_API_KEY; without them the option says so and stays off.
 
 import Link from "next/link";
@@ -39,6 +39,7 @@ export function AlertSettings() {
   const [secret, setSecret] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [waiting, setWaiting] = useState<{ chat: string; before: string | null; until: number } | null>(null);
 
   const load = useCallback(async () => {
     const r = await fetch("/api/org/channels", { cache: "no-store" });
@@ -50,6 +51,20 @@ export function AlertSettings() {
   useEffect(() => {
     void load().then((b) => { if (b) { setUrl(b.webhook_url ?? ""); setChat(b.telegram_chat ?? ""); setEmail(b.email_to ?? ""); } });
   }, [load]);
+  useEffect(() => {
+    if (!waiting) return;
+    const t = setInterval(async () => {
+      if (Date.now() > waiting.until) { setWaiting(null); return; }
+      const r = await fetch("/api/org/channels?watch=telegram", { cache: "no-store" }).catch(() => null);
+      if (!r?.ok) return;
+      const b = (await r.json()) as Channels;
+      if (b.telegram_chat && b.telegram_chat !== waiting.before) {
+        setC(b); setChat(b.telegram_chat); setWaiting(null);
+        setMsg({ ok: true, text: "Telegram connected. A confirmation is in the chat." });
+      }
+    }, 2500);
+    return () => clearInterval(t);
+  }, [waiting]);
 
   const call = async (method: string, payload: unknown) => {
     const r = await fetch("/api/org/channels", { method, headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
@@ -73,6 +88,25 @@ export function AlertSettings() {
       const x = b.results[0];
       setMsg(x?.ok ? { ok: true, text: `Test sent by ${x.channel}${x.code ? ` · HTTP ${x.code}` : ""}.` } : { ok: false, text: `Test ${x?.channel ?? channel} failed: ${x?.error ?? "no answer"}. It is retried on the schedule below.` });
       await load();
+    } catch (e) { setMsg({ ok: false, text: (e as Error).message }); } finally { setBusy(false); }
+  };
+
+  // Connect: ask for a signed t.me link, open it, then watch (each read polls the bot) until the chat arrives.
+  const connect = async (group: boolean) => {
+    setMsg(null); setBusy(true);
+    const tab = window.open("", "_blank");
+    try {
+      const b = (await call("POST", { action: "telegram-link" })) as { chat: string; group: string };
+      const href = group ? b.group : b.chat;
+      if (tab) tab.location.href = href; else window.location.href = href;
+      setWaiting({ chat: href, before: c?.telegram_chat ?? null, until: Date.now() + 15 * 60_000 });
+    } catch (e) { tab?.close(); setMsg({ ok: false, text: (e as Error).message }); } finally { setBusy(false); }
+  };
+  const disconnect = async () => {
+    setMsg(null); setBusy(true);
+    try {
+      await call("PUT", { webhook_url: c?.webhook_url ?? "", telegram_chat: "", email_to: c?.email_to ?? "" });
+      setChat(""); setMsg({ ok: true, text: "Telegram disconnected." }); await load();
     } catch (e) { setMsg({ ok: false, text: (e as Error).message }); } finally { setBusy(false); }
   };
 
@@ -114,13 +148,40 @@ export function AlertSettings() {
         </section>
 
         <section className={ostyles.panel}>
-          <div className={ostyles.panelHead}><h2 className="h5">Telegram</h2>{!c.available.telegram ? <span className={ostyles.badgeWait}>unavailable</span> : c.telegram_chat ? <span className={ostyles.badgeOk}>on</span> : <span className={ostyles.badgeWait}>off</span>}</div>
+          <div className={ostyles.panelHead}><h2 className="h5">Telegram</h2>{!c.available.telegram ? <span className={ostyles.badgeWait}>unavailable</span> : c.telegram_chat ? <span className={ostyles.badgeOk}>connected</span> : waiting ? <span className={ostyles.badgeWait}>waiting for Start</span> : <span className={ostyles.badgeWait}>off</span>}</div>
           {c.available.telegram ? (
             <>
-              <label className={styles.field}><span>Chat id (add Accord&apos;s bot to the chat first)</span>
-                <input className={styles.input} value={chat} onChange={(e) => setChat(e.target.value)} placeholder="-1001234567890" disabled={!admin} aria-label="Telegram chat id" />
-              </label>
-              {admin && <div className={ostyles.inline}><button type="button" className={`${styles.btn} ${styles.quiet}`} onClick={() => void test("telegram")} disabled={busy || !c.telegram_chat || dirty}>Send test</button></div>}
+              {c.telegram_chat ? (
+                <p className={styles.note}>Alerts go to chat <span className="mono">{c.telegram_chat}</span>{c.updated_by === "telegram" ? ", connected from Telegram" : ""}.</p>
+              ) : waiting ? (
+                <p className={styles.note}>Telegram opened in a new tab. Tap <b>Start</b> there; this page updates by itself. The link works for 15 minutes. <a className="link" href={waiting.chat} target="_blank" rel="noreferrer">Open it again</a></p>
+              ) : (
+                <p className={styles.note}>One tap: Telegram opens, you press Start, and this chat is connected. Nothing to copy.</p>
+              )}
+              {admin && (
+                <div className={ostyles.inline}>
+                  {c.telegram_chat ? (
+                    <>
+                      <button type="button" className={`${styles.btn} ${styles.quiet}`} onClick={() => void test("telegram")} disabled={busy || dirty}>Send test</button>
+                      <button type="button" className={`${styles.btn} ${styles.quiet}`} onClick={() => void connect(false)} disabled={busy}>Use another chat</button>
+                      <button type="button" className={`${styles.btn} ${styles.quiet}`} onClick={() => void disconnect()} disabled={busy}>Disconnect</button>
+                    </>
+                  ) : (
+                    <>
+                      <button type="button" className={styles.btn} onClick={() => void connect(false)} disabled={busy}>Connect Telegram</button>
+                      <button type="button" className={`${styles.btn} ${styles.quiet}`} onClick={() => void connect(true)} disabled={busy}>Connect a group</button>
+                    </>
+                  )}
+                </div>
+              )}
+              {admin && (
+                <details className={styles.details}>
+                  <summary>Enter a chat id instead</summary>
+                  <label className={styles.field} style={{ marginTop: 8 }}><span>Chat id (add Accord&apos;s bot to the chat first), then Save</span>
+                    <input className={styles.input} value={chat} onChange={(e) => setChat(e.target.value)} placeholder="-1001234567890" aria-label="Telegram chat id" />
+                  </label>
+                </details>
+              )}
             </>
           ) : <p className={styles.note}>Telegram alerts start when this server has a bot token (TELEGRAM_BOT_TOKEN).</p>}
         </section>
