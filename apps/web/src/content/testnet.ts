@@ -99,12 +99,13 @@ export const KNOWN_TX: Record<string, { payment: string; refusal: string; recipi
 }
 
 /* The factories and the transaction that published each release on each (publish_release), so a code check links
-   to the right one. Release 4 (the security-review fixes, DECISIONS 25 and 26) is current on both since 9 Nov 2026; an
-   agreement keeps the release it was created on. */
+   to the right one. Release 4 (the security-review fixes, DECISIONS 25 and 26) went live on both on 9 Nov 2026; release 5
+   (the same agreement code on the reviewed job builds, DECISIONS 33) is current on both since 10 Nov 2026; an agreement
+   keeps the release it was created on. */
 export const FACTORIES = ["accord-v2.testnet", "accord-usdc.testnet"] as const
 export const RELEASE_TX: Record<string, Record<number, string>> = {
-  "accord-v2.testnet": { 3: tx("7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh"), 4: tx("EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU") },
-  "accord-usdc.testnet": { 3: tx("H5UYzV98Rwx68W2mvbQRqJ6bss9ZRRxDwi5LxKVJHmcg"), 4: tx("GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai") },
+  "accord-v2.testnet": { 3: tx("7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh"), 4: tx("EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU"), 5: tx("dFiMTwcYygycxQFSMpYqFfRaMaBU9uMrKtzpJQzRsmG") },
+  "accord-usdc.testnet": { 3: tx("H5UYzV98Rwx68W2mvbQRqJ6bss9ZRRxDwi5LxKVJHmcg"), 4: tx("GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai"), 5: tx("9QVU3RU1u2TcAgmS6TV8hxxjF6hCF5UB1wtF817kGcwC") },
 }
 
 /* Later proofs, from DECISIONS 26 (9 Nov 2026). a6 above stays the original walkthrough. Each row is one proof with
