@@ -1,3 +1,4 @@
+import { FLOW } from "../content/testnet"
 import { useRef, type ReactNode } from "react"
 import { Arrow } from "../components/Arrow"
 import { motion, useInView, type Transition } from "motion/react"
@@ -180,11 +181,18 @@ export function Hero() {
 
           {/* The demonstration, below the buttons: the hero reads headline, lead, actions, then the walkthrough */}
           <Mount y={16} delay="0.7s" className={styles.announce}>
-            <Link to={LINKS.record} className={styles.announceLink}>
-              <LogoMark size={18} />
-              <span className={styles.announceBody}>
-                <span className={styles.announceQuiet}>{PROOF_LINK}</span>
-                <Arrow className={styles.announceArrow} />
+            <Link to={LINKS.record} className={styles.proof} aria-label="Testnet record of agreement a6: every step with its transaction">
+              <span className={styles.proofHead}>
+                <LogoMark size={16} />
+                <span className={styles.proofKicker}>On NEAR testnet</span>
+                <span className={styles.proofId}>a6.accord-v2.testnet</span>
+                <span className={styles.proofOpen}>View the record<Arrow className={styles.announceArrow} /></span>
+              </span>
+              <span className={styles.proofStats}>
+                <span className={styles.proofStat}><span className={styles.proofValue}>35.50 tUSDC</span><span className={styles.proofLabel}>agreed in 3 items</span></span>
+                <span className={styles.proofStat}><span className={styles.proofValue}>16.50 paid</span><span className={styles.proofLabel}>to the proven recipient</span></span>
+                <span className={styles.proofStat}><span className={`${styles.proofValue} ${styles.proofRefused}`}>ERR_PAYEE_MISMATCH</span><span className={styles.proofLabel}>redirect refused</span></span>
+                <span className={styles.proofStat}><span className={styles.proofValue}>{FLOW.length} transactions</span><span className={styles.proofLabel}>each one linked</span></span>
               </span>
             </Link>
           </Mount>
