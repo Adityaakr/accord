@@ -9,7 +9,7 @@ HACKATHON.md asks for a public X post that says the project was built at NEAR HA
 3. Revocation: one buyer transaction deletes the agent's only key; nothing the agent signs after that reaches the contract. (`make revoke`)
 4. Market making: a market-making retainer became payable because the observations passed, and still went only to the authorised recipient. (`make market-making`)
 
-Procurement leads: the 6 Nov gate (G-Atlas) did not pass on testnet, so procurement leads and market making gets the 30 seconds before the close, from a local-node run labelled as such.
+Procurement leads: the 6 Nov gate (G-Atlas) did not pass on testnet by its date, so procurement leads and market making gets the 30 seconds before the close. Market making ran end to end on testnet on 10 Nov 2026 (`a56.accord-v2.testnet` observed and paid, `a57.accord-v2.testnet` withheld and refused, `docs/runs.md`), so show that run; label any local-node footage as such.
 
 ## Two cuts
 

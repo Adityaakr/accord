@@ -38,14 +38,35 @@ is left:
    place, set the build part to the new build only instead). Then say in the README that release 3 and 4 rooms can no
    longer request job runs.
 
-## 3.7: market making on testnet needs an OutLayer payment key
+## 3.7: market making on testnet (done 10 Nov 2026)
 
-The full procurement flow runs on testnet (`a6.accord-v2.testnet`, DECISIONS 21). `make market-making NET=testnet` asks the
-observer through OutLayer's HTTPS API, which needs `OUTLAYER_PAYMENT_KEY` in `.env`; it is not set.
+Done: `OUTLAYER_PAYMENT_KEY` is in `.env` (payment key 1), and `make market-making NET=testnet` ran end to end on factory
+`accord-v2.testnet`, release 5. `a56.accord-v2.testnet` observed period 1 `6 of 6` on Rhea's USDC/wNEAR pool on NEAR mainnet
+(spread `176 bps`, depth `36.56 / 55.00 USDC` within `300 bps`), closed `Eligible`, and the agent paid `6.00 tUSDC`
+(`42HuyHX2SPWNbnT7tKKni6WwyKKCK556vmKo3TydVPeD`); `a57.accord-v2.testnet` passed `0 of 6`, closed `Withheld`, and the agent's
+payment was refused `ERR_PERIOD_WITHHELD` (`4W1Ud2GVRPZnJL4uJdyEjAfdB5igT3S1DGTJxxLNcS1Y`). Both verify `6 checks ok · 1
+partial`. Every transaction: `docs/runs.md` at the repository root, "Market making on testnet"; what failed first:
+`DECISIONS.md` 34. The keeper fix the run needed (`fa0c884`: the observer's HTTPS call sends `secrets_ref` and
+`version_key`) is deployed.
 
-1. `outlayer keys create --project accord-v1.testnet/accord-observer`, then `outlayer keys topup` (top-ups are paid in
-   OutLayer's stablecoin, which the testnet accounts do not hold).
-2. Put the key (`outlayer keys show`) in `.env` as `OUTLAYER_PAYMENT_KEY=…` and tell me; I run `make market-making NET=testnet`.
+Left for Adi: the Railway keeper service has no `OUTLAYER_PAYMENT_KEY`, so the hosted keeper does not observe
+testnet market-making rooms on its own (it starts negotiations, activates recipients and closes periods, but asks the
+observer for no slot). To have it observe them: in Railway, on the `keeper` service, set `OUTLAYER_PAYMENT_KEY` (and
+`OUTLAYER_OWNER`, the observer project's owner `accord-v1.testnet`, if not set) and redeploy; then a new `make market-making` room, or the keeper's next
+poll of an open period, shows `record_observation` calls signed by `accord-keeper.testnet` without the make target running.
+The key spends OutLayer credit per observation (one call per open slot every `30 s` until observed).
+
+## Known issue: the Sealed Table prompts are written for procurement (for a future job build, not fixed now)
+
+`jobs/sealed-table/prompts/buyer.md` and `vendor.md` describe procurement terms only (items, `due_offset_secs`, the sum of
+item amounts). For a market-making agreement they do not state the structure rules code enforces on `terms.atlas` (for
+example, a threshold may not exceed `slots_per_period`, and the schedule comes from the buyer's request), and the retry
+after an undeliverable proposal says only "the terms are outside your own limits or the agreement's structure", not which
+rule failed. That is how `a50.accord-v2.testnet` ended `WALK_AWAY` (`DECISIONS.md` 34). The fixtures now avoid it (the
+buyer's `shared` names the schedule), but any buyer whose `shared` part leaves the schedule out can hit it. Fix in a
+future job build: a market-making section in both prompts with the structure rules, and a retry message that names the
+failed rule without revealing the other side's limits. It changes the Sealed Table's wasm hash, so it needs a new build,
+a seed access change and a new release (as in `DECISIONS.md` 33).
 
 ## Signed-in app screenshots on testnet
 

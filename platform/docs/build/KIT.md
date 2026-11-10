@@ -45,7 +45,7 @@ Into the product repository go this file and every file above except `LOOP_PROMP
 | --- | --- | --- |
 | 1 Nov | G0 | The NEAR AI, OutLayer and key probes printed real output into `DECISIONS.md` |
 | 3 Nov | G1 | `make sandbox` passes; `make test` green |
-| 6 Nov | G-Atlas | One live market-making observation on chain with a valid signature. Not passed on testnet (`BLOCKED.md` 3.7), so procurement leads |
+| 6 Nov | G-Atlas | One live market-making observation on chain with a valid signature. Not passed on testnet by its date, so procurement leads; done on testnet on 10 Nov 2026 (`a56`, `DECISIONS.md` 34) |
 | 8 Nov | G2 | `make negotiate`, `make attack`, `make revoke` print live on testnet |
 | 10 Nov | G3 | The hosted app is up; `/try` and `/verify/<id>` work |
 | 12 to 13 Nov | | Release candidate, two rehearsals, the video and X post (Adi), the repository public (Adi) |

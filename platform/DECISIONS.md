@@ -815,3 +815,28 @@ market-making room that has not run on testnet, and three "try" pages with near-
   refusal. Every run a release 5 agreement requests has both, but an outside caller can still go around the factory-only
   check by naming an old build, until the old-build leaf is removed; removing it stops job runs for release 3 and 4 rooms
   (`docs/build/BLOCKED.md`). Claim 1's testnet sentence stays.
+
+## 34. Market making on testnet, and what failed first (10 Nov 2026)
+
+- **Result.** `make market-making NET=testnet` on factory `accord-v2.testnet`, release 5, test USDC; observer in OutLayer's
+  enclave over its HTTPS API (payment key 1), reading Rhea DCL's USDC/wNEAR pool on NEAR mainnet with view calls only.
+  `a56.accord-v2.testnet`: period 1 `6 of 6` (spread `176 bps`, depth `36.56 / 55.00 USDC` within `300 bps`), `Eligible`,
+  the agent paid `6.00 tUSDC` to `halcyon-mm.testnet` (https://testnet.nearblocks.io/txns/42HuyHX2SPWNbnT7tKKni6WwyKKCK556vmKo3TydVPeD).
+  `a57.accord-v2.testnet`: period 1 `0 of 6`, `Withheld`, the agent's payment refused `ERR_PERIOD_WITHHELD`
+  (https://testnet.nearblocks.io/txns/4W1Ud2GVRPZnJL4uJdyEjAfdB5igT3S1DGTJxxLNcS1Y). Both `make verify`: `6 checks ok · 1
+  partial`. The run watched period 1 of each agreement only. Every transaction: `docs/runs.md` (repository root),
+  "Market making on testnet". Gate G-Atlas (6 Nov) stays failed by its date; the proof now exists.
+- **First failure: the vendor could not see the schedule.** `a50.accord-v2.testnet` (release 4) ended `NoDeal`,
+  `WALK_AWAY` in round 1: the vendor quoted one slot per period with a threshold of five, the structure check refused a
+  threshold above the slot count, the retry got the same quote, and the vendor walked away. Replayed against NEAR AI with
+  the same prompt, schema, model and sampling: 3 of 8 runs did this; with the buyer's `shared` naming the schedule, 0 of 8.
+  Fix (`90193d4`): the buyer's mandate names the schedule in `shared`, and both fixture pairs match the 10 Nov pool (its
+  partner `a49` had negotiated `150 bps` and `40 USDC` within `100 bps`, which the pool no longer met). The prompts
+  themselves are not changed (a new Sealed Table build); recorded as a known issue in `docs/build/BLOCKED.md`.
+- **Second failure: the observer had no seed.** `a54`, `a55.accord-v2.testnet` (release 5) negotiated, but every observer
+  call answered `PROTECTED_OBSERVER_SEED is not set`, so no slot was recorded and both periods closed `Review`. Over
+  OutLayer's HTTPS API the keeper sent only `{input}`, so OutLayer injected no secrets. Fix (`fa0c884`): the call sends
+  `secrets_ref` (the owner's `default` profile, as `request_execution` does on chain) and `version_key`, the agreement's
+  own `jobs.observer.wasm_hash`, so a project version change cannot swap the build. Deployed; the Railway keeper still
+  needs `OUTLAYER_PAYMENT_KEY` to observe on its own (`docs/build/BLOCKED.md` 3.7).
+
