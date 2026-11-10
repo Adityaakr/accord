@@ -170,7 +170,13 @@ export function world(): World {
       const acct = new Account(funder.account, testnetReader.chain.provider, new KeyPairSigner(KeyPair.fromString(funder.key as KeyPairString)));
       const near = name.endsWith("-buyer") ? 10n : 2n;
       await acct.createSubAccount({ accountOrPrefix: name, publicKey: kp.getPublicKey(), nearToTransfer: near * 10n ** 24n });
-      return { account: `${name}.${funder.account}`, key: kp.toString() };
+      const id = `${name}.${funder.account}`;
+      // An RPC node behind the one that took the transaction can still answer "does not exist": wait until it is seen.
+      for (let i = 0; i < 20; i++) {
+        if (await testnetReader.chain.account(id).then(() => true, () => false)) break;
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+      return { account: id, key: kp.toString() };
     },
   });
 }

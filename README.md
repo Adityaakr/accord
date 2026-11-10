@@ -72,6 +72,23 @@ Agreement [`a6.accord-v2.testnet`](https://testnet.nearblocks.io/address/a6.acco
 | 11 | Redirect to `halcyon-markets.testnet` refused: `ERR_PAYEE_MISMATCH`, nothing sent | [`AB9HLnWv…`](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs) |
 | 12 | Buyer revokes the agent; its next call fails with `AccessKeyDoesNotExist` | [`4ervNQdj…`](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P) |
 
+**Release 5, end to end in one command.** On 11 Nov 2026 `make demo` ran the whole loop on testnet from fresh accounts against the hosted app: agreement [`a63.accord-v2.testnet`](https://testnet.nearblocks.io/address/a63.accord-v2.testnet), release 5 (the security-review fixes and the reviewed enclave job builds), test USDC:
+
+```
+  00:09  accounts   demo-mwb4ek7m-buyer.northwind-demo.testnet · …-vendor · …-auth · …-pay
+  00:15  created    a63.accord-v2.testnet · demo timings
+  00:25  sealed     both mandates committed
+  01:36  recipient  proven on the demo domain · approved · accepted · active
+  01:36  attested   35.00 USDC · 3 items
+  02:00  executing  approved by both · funded 35.00 USDC
+  02:13  delivery   item 1 submitted · accepted
+  02:19  paid       item 1 · 13.00 USDC → demo-mwb4ek7m-pay.northwind-demo.testnet
+  02:23  refused    ERR_PAYEE_MISMATCH (one attack)
+demo: full loop in 2:23
+```
+
+(`USDC` in this output is the test token `tusdc.accord-v1.testnet`.) `make verify DEAL=a63.accord-v2.testnet` prints `code hash ECgsrZwy… = release 5`, `keys 1 key · FunctionCall · receiver self · methods [act] · no full access · ok`, the reviewed job builds `outlayer-verify proven`, and `verify: 6 checks ok · 1 partial`.
+
 ### Verify it yourself
 
 No account and no keys. In the browser: [/verify](https://accordweb-production.up.railway.app/verify) shows the seven-check verdict and five quick reads live from testnet; [/record](https://accordweb-production.up.railway.app/record) shows a6's 12 steps. In a terminal:
@@ -181,6 +198,18 @@ An account that is not an Accord agreement answers `404` with `{"error":"<accoun
 ## The problem
 
 Whose server do your agents meet on? When both companies bring an agent, each needs its limits to stay private while the outcome stays binding. The money step is where it breaks today: business email compromise alone cost `$3.05 billion` across `24,768` complaints in 2025 ([FBI IC3 2025 report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf)). Agents read their instructions from the same inbox an attacker can write to. Accord puts the negotiation in an enclave and the payment rules in a contract, so a fooled agent can ask but cannot pay outside the terms.
+
+## Who it is for, and what changes for them
+
+| Who | The problem today, in their words or numbers | What Accord changes | Shown on testnet by |
+| --- | --- | --- | --- |
+| Finance and treasury teams | Payment redirection: business email compromise cost `$3.05 billion` in 2025 ([FBI IC3](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf)) | A redirected or altered payment is refused by the contract and recorded; the team is told on Telegram, by webhook or in the app; finance exports match the record | a6 step 11 `ERR_PAYEE_MISMATCH`; the [Live attack room](https://accordweb-production.up.railway.app/app/try) |
+| Procurement teams | "Walmart, like most organizations with large procurement operations, can’t possibly conduct focused negotiations with all of its 100,000-plus suppliers" ([HBR, 2022](https://hbr.org/2022/11/how-walmart-automated-supplier-negotiations)) | Agents negotiate each supplier inside limits neither side sees, both companies approve, and payment follows only the approved terms | a6: `QUOTE → COUNTER → FINAL → ACCEPT`, `35.50 tUSDC · 3 items` |
+| Payment networks and merchants | "These agents will need to be trusted with payments, not only by users, but by banks and sellers as well" (Visa, [Apr 2025](https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21361.html)) | The agent holds a key that can only call `act` on one agreement; what it may pay is checked on chain, and anyone can verify an agreement with no account | `make verify`; `/app/api/verify/<agreement>` |
+| Token projects hiring market makers | "I call it information arbitrage" (Jelle Buth, market maker Enflux, [Cointelegraph, Apr 2025](https://cointelegraph.com/magazine/market-maker-deals-quietly-killing-crypto-projects)) | A market-making agreement pays only for periods an enclave observer measured as met | a56 paid (`Eligible`), a57 refused `ERR_PERIOD_WITHHELD` |
+| Agent developers | Agents read instructions from inputs an attacker can write to ([Simon Willison, Jun 2025](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/)) | A payment check before the call (`/app/check`), a read-only MCP server, the CLI and the SDK, so an agent can ask "would this pay?" and get the contract's answer | [Use from an agent](#use-from-an-agent) |
+
+None of these organisations uses or endorses Accord; the quotes describe the problem. Accord has no customers yet: it runs on NEAR testnet with test USDC and fictional companies (Northwind buying from Halcyon).
 
 ## How it works
 
@@ -362,7 +391,7 @@ The organisers' requirements per track ([`platform/GOAL.md`](platform/GOAL.md) "
 | `agents` | Payments in USDC; a receipt per task | tUSDC and Circle USDC on NEAR; `/record`, `/app/record.csv`, `accord receipts` |
 | `agents` | Agent Market: how jobs are posted and paid, or say there is no public way | Checked 31 Oct 2026: Agent Market is mainnet-only and holds payments in its own ledger, with no hook for an outside escrow, so Accord does not integrate it (`platform/DECISIONS.md` section 7) |
 | `business` | Humans set the constraints; a kill switch | Mandates, both approvals, exceptions; `revoke_agent` (`make revoke`, a13) |
-| `business` | Every sale and payout on a public ledger; a demo loop under two minutes | `/record`; `make demo NET=local` ran the loop in 14 s on a local node (3 Nov 2026). `make demo` has not run on testnet; there the flow ran as `make negotiate`, `finish`, `attack` and `revoke` |
+| `business` | Every sale and payout on a public ledger; a demo loop under two minutes | `/record`; `make demo` ran the loop on testnet in 2:23 from fresh accounts (a63, 11 Nov 2026, [above](#testnet-proof)): most of it is the enclave negotiation and the Payee proof; on a local node it ran in 14 s (3 Nov 2026). Under two minutes on testnet is not met |
 
 Not claimed: `realworld`, `social` and `swarms`. Their extra requirements (an invoice view paid through 1Click, a Sputnik DAO as the buyer, a sealed tender) are not built.
 
@@ -382,6 +411,16 @@ Not claimed: `realworld`, `social` and `swarms`. Their extra requirements (an in
 ## Business model (hypothesis)
 
 Free on testnet with test funds. Planned, still a hypothesis: buyers pay per agreement, and vendors pay per recipient authorisation. Building on Accord and verifying an agreement stay free. Never a percentage of payments. Production prices are published before launch.
+
+## After the hackathon
+
+What keeps working without us, and what is left before mainnet.
+
+- **Agreements do not depend on Accord's servers.** Each agreement is its own NEAR account with no full-access key and code pinned by hash; its rules, ledger and refusals are on chain. `make verify` and the MCP server read the chain directly, so an agreement can be checked even if the hosted app is down.
+- **The hosted demo stays up and funded through 18 Nov 2026**: the site, the app, the faucet (refilled twice a day when it falls under 15 NEAR) and the pre-funded `/try` room.
+- **Open source, MIT.** CI runs the website checks, the TypeScript typecheck and tests, and the Rust money-path tests on every push.
+- **Before mainnet, in order:** restrict the Sealed Table's seed to the agreement's own calls (S1, an OutLayer setting); remove release 3's job builds from the seeds' access; check the hardware quote in `make verify` (the `model` line is `partial` today); a third-party audit of the contracts (the review above is internal); then deploy the factory on mainnet with Circle USDC. Each step is tracked in [`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md) and [`platform/DECISIONS.md`](platform/DECISIONS.md).
+- **Next in the product:** an organisation-wide spend limit across all of its agreements, funding an agreement from other chains through NEAR Intents, and a DAO as the buyer.
 
 ## Repository map
 
