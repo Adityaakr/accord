@@ -20,6 +20,8 @@ export interface ReleaseProofDeps {
   run(bin: string, args: string[]): Promise<RunResult>;
   bin: string;
   api?: string;
+  /** Pause before the one retry of an unproven run (exit 2); 0 in tests. */
+  retryDelayMs?: number;
 }
 
 /** The release proof for one job; pure over `fetchRecord` and `run` so it is tested without the tool. */
@@ -29,7 +31,13 @@ export function releaseProof(d: ReleaseProofDeps): ReleaseProof {
     if (found.status !== "match") return found;
     const { record: rec, api } = found;
     if (!Number.isSafeInteger(rec.task_id) || rec.task_id < 0) return { status: "not_checked", detail: "attestation record has no task id" };
-    const r = await d.run(d.bin, ["job", String(rec.task_id), "--network", j.network, "--api", api, "--short", "--no-color"]);
+    const args = ["job", String(rec.task_id), "--network", j.network, "--api", api, "--short", "--no-color"];
+    let r = await d.run(d.bin, args);
+    // exit 2 is "unproven", often one fetch from OutLayer's API that came back incomplete: ask once more
+    if (r.code === 2 && !r.missing && !r.timedOut) {
+      if (d.retryDelayMs) await new Promise((ok) => setTimeout(ok, d.retryDelayMs));
+      r = await d.run(d.bin, args);
+    }
     const said = (r.stdout.trim() || r.stderr.trim()).split("\n").filter(Boolean).pop() ?? "";
     if (r.missing) return { status: "not_checked", detail: recordOnlyDetail(rec, j) };
     if (r.timedOut) return { status: "not_checked", detail: `= task ${rec.task_id} · wasm ${j.wasmHash.slice(0, 8)}… and caller match · outlayer-verify timed out` };
@@ -67,6 +75,7 @@ export function outlayerVerifyProof(env: Record<string, string | undefined>, o: 
     run: (bin, args) => runBinary(bin, args, timeoutMs),
     bin: env.OUTLAYER_VERIFY_BIN || "outlayer-verify",
     api: env.OUTLAYER_API_URL || undefined,
+    retryDelayMs: 2000,
   });
 }
 

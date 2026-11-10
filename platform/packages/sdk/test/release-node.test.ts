@@ -14,6 +14,17 @@ describe("release proof with outlayer-verify", () => {
     const p = releaseProof({ bin: "x", fetchRecord: async () => record, run: async () => ({ code: null, stdout: "", stderr: "", missing: false, timedOut: true }) });
     expect(await p(job)).toMatchObject({ status: "not_checked", detail: expect.stringContaining("timed out") });
   });
+  it("asks once more when the first run is unproven (exit 2), and stays not checked if it still is", async () => {
+    const codes = [2, 0];
+    let calls = 0;
+    const p = releaseProof({ bin: "x", fetchRecord: async () => record, run: async () => ({ code: codes[calls++] ?? 2, stdout: "INCOMPLETE task 28880", stderr: "", missing: false }) });
+    expect(await p(job)).toMatchObject({ status: "ok", detail: expect.stringContaining("outlayer-verify proven") });
+    expect(calls).toBe(2);
+    let again = 0;
+    const q = releaseProof({ bin: "x", fetchRecord: async () => record, run: async () => { again += 1; return { code: 2, stdout: "INCOMPLETE", stderr: "", missing: false }; } });
+    expect(await q(job)).toMatchObject({ status: "not_checked", detail: expect.stringContaining("unproven (exit 2)") });
+    expect(again).toBe(2);
+  });
   it("never passes a task id that is not a number to the tool", async () => {
     const calls: string[][] = [];
     const p = releaseProof({ bin: "x", fetchRecord: async () => ({ ...record, task_id: "--offline" as unknown as number }), run: async (_b, a) => { calls.push(a); return { code: 0, stdout: "", stderr: "", missing: false }; } });

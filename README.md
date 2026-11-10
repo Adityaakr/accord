@@ -72,7 +72,7 @@ Agreement [`a6.accord-v2.testnet`](https://testnet.nearblocks.io/address/a6.acco
 | 11 | Redirect to `halcyon-markets.testnet` refused: `ERR_PAYEE_MISMATCH`, nothing sent | [`AB9HLnWv…`](https://testnet.nearblocks.io/txns/AB9HLnWvkzNL418ygx8AVArinPnAK3jqxt4haAjsk8fs) |
 | 12 | Buyer revokes the agent; its next call fails with `AccessKeyDoesNotExist` | [`4ervNQdj…`](https://testnet.nearblocks.io/txns/4ervNQdjrd7MA1n7vWSY7cRUtCpwiQwSK7xDSK2Bmn9P) |
 
-**Release 5, end to end in one command.** On 11 Nov 2026 `make demo` ran the whole loop on testnet from fresh accounts against the hosted app: agreement [`a63.accord-v2.testnet`](https://testnet.nearblocks.io/address/a63.accord-v2.testnet), release 5 (the security-review fixes and the reviewed enclave job builds), test USDC:
+**Release 5, end to end in one command.** On 10 Nov 2026 (UTC) `make demo` ran the whole loop on testnet from fresh accounts against the hosted app: agreement [`a63.accord-v2.testnet`](https://testnet.nearblocks.io/address/a63.accord-v2.testnet), release 5 (the security-review fixes and the reviewed enclave job builds), test USDC:
 
 ```
   00:09  accounts   demo-mwb4ek7m-buyer.northwind-demo.testnet · …-vendor · …-auth · …-pay
@@ -132,8 +132,8 @@ Every transaction of these runs is linked in [`docs/runs.md`](docs/runs.md); the
 
 | Infrastructure | Account or link |
 | --- | --- |
-| Factory | [`accord-v2.testnet`](https://testnet.nearblocks.io/address/accord-v2.testnet), release `4` ([publish tx](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)); release `3` ([publish tx](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh)) for a6 |
-| Circle USDC factory | [`accord-usdc.testnet`](https://testnet.nearblocks.io/address/accord-usdc.testnet), release `4` ([publish tx](https://testnet.nearblocks.io/txns/GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai)); token `3e2210e1…afcb8af` (Circle USDC, 6 decimals) |
+| Factory | [`accord-v2.testnet`](https://testnet.nearblocks.io/address/accord-v2.testnet), release `5` current ([publish tx](https://testnet.nearblocks.io/txns/dFiMTwcYygycxQFSMpYqFfRaMaBU9uMrKtzpJQzRsmG), [made current](https://testnet.nearblocks.io/txns/8jSfWk6a3qzZRMrzqJj731njUGtRCYmWPLqLAqc3RAgF)); release `4` ([publish tx](https://testnet.nearblocks.io/txns/EB2Lz3WF1Pqt4o9y9NzUF5uc9qEhimPAPLKdwJFwvqnU)) for a10; release `3` ([publish tx](https://testnet.nearblocks.io/txns/7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh)) for a6 |
+| Circle USDC factory | [`accord-usdc.testnet`](https://testnet.nearblocks.io/address/accord-usdc.testnet), release `5` current ([publish tx](https://testnet.nearblocks.io/txns/9QVU3RU1u2TcAgmS6TV8hxxjF6hCF5UB1wtF817kGcwC), [made current](https://testnet.nearblocks.io/txns/3wK4mZVZtF8x6XNwSGbzDSyLR2nPwDqkjktsmpaoKAwi)); release `4` ([publish tx](https://testnet.nearblocks.io/txns/GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai)); token `3e2210e1…afcb8af` (Circle USDC, 6 decimals) |
 | Test USDC | [`tusdc.accord-v1.testnet`](https://testnet.nearblocks.io/address/tusdc.accord-v1.testnet) (NEP-141, 6 decimals) |
 | Relayer | `relay.accord-v2.testnet` ([a relayed tx](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC)) |
 | OutLayer jobs | Sealed Table, Payee and observer, as OutLayer projects `accord-v1.testnet/accord-{sealed-table,payee,observer}`; release 3 pubkey runs `13682`, `13672`, `13683` |
@@ -405,7 +405,7 @@ The organisers' requirements per track ([`platform/GOAL.md`](platform/GOAL.md) "
 | `agents` | Payments in USDC; a receipt per task | tUSDC and Circle USDC on NEAR; `/record`, `/app/record.csv`, `accord receipts` |
 | `agents` | Agent Market: how jobs are posted and paid, or say there is no public way | Checked 31 Oct 2026: Agent Market is mainnet-only and holds payments in its own ledger, with no hook for an outside escrow, so Accord does not integrate it (`platform/DECISIONS.md` section 7) |
 | `business` | Humans set the constraints; a kill switch | Mandates, both approvals, exceptions; `revoke_agent` (`make revoke`, a13) |
-| `business` | Every sale and payout on a public ledger; a demo loop under two minutes | `/record`; `make demo` ran the loop on testnet in 2:23 from fresh accounts (a63, 11 Nov 2026, [above](#testnet-proof)): most of it is the enclave negotiation and the Payee proof; on a local node it ran in 14 s (3 Nov 2026). Under two minutes on testnet is not met |
+| `business` | Every sale and payout on a public ledger; a demo loop under two minutes | `/record`; `make demo` ran the loop on testnet in 2:23 from fresh accounts (a63, 10 Nov 2026, [above](#testnet-proof)): most of it is the enclave negotiation and the Payee proof; on a local node it ran in 14 s (3 Nov 2026). Under two minutes on testnet is not met |
 
 Not claimed: `realworld`, `social` and `swarms`. Their extra requirements (an invoice view paid through 1Click, a Sputnik DAO as the buyer, a sealed tender) are not built.
 

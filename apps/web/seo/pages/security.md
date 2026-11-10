@@ -104,9 +104,9 @@ The agent cannot reorder, skip or argue with a gate. Humans change the inputs (a
 
 - 02 The High one: a deposit sent during `close` could make the refund to the buyer spend the vendor's reserve. The refund is now capped at the ledger while anything is owed to the vendor.
 
-- 03 Severities are self-assigned. Each fix landed together with a failing test that it makes pass, and the test stays in the suite. The contract and factory fixes are live as release 4 on both testnet factories since 9 Nov 2026, and the proofs ran again on new agreements (a10, a11, a13; see the [record](/record)). Agreements created before keep release 3.
+- 03 Severities are self-assigned. Each fix landed together with a failing test that it makes pass, and the test stays in the suite. The contract and factory fixes went live as release 4 on both testnet factories on 9 Nov 2026 and are carried into release 5 (current since 10 Nov 2026, which adds the reviewed enclave job builds), and the proofs ran again on new agreements (a10, a11, a13; see the [record](/record)). Agreements created before keep release 3.
 
-- 04 Agreements created before release 4 (a6, a8 and a1.accord-usdc.testnet) keep release 3's code by hash, so they keep the close-refund issue; new agreements get release 4.
+- 04 Agreements created before release 4 (a6, a8 and a1.accord-usdc.testnet) keep release 3's code by hash, so they keep the close-refund issue; new agreements get release 5 (for example a63.accord-v2.testnet, which ran the whole loop in one command).
 
 - 05 Scope: the review covered the contracts, the factory and the enclave jobs. The app server, the relayer and the demo endpoints were outside it; the relayer deposit issue (DECISIONS.md section 27) was found later by a live run on the public URL and fixed the same day.
 
