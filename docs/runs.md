@@ -15,8 +15,81 @@ Units: agreements of `accord-v2.testnet` settle in test USDC (`tusdc.accord-v1.t
 | `a21.accord-v2.testnet` | 9 Nov 2026 | Try without a wallet on the public URL | [below](#a21-try-without-a-wallet-on-the-public-url), DECISIONS 28 |
 | `a32.accord-v2.testnet` | 9 Nov 2026 | The run [/app/replay](https://accordweb-production.up.railway.app/app/replay) plays back, each step with its transaction; now `Settled` | the replay page |
 | `a48.accord-v2.testnet` | 10 Nov 2026 | Flow proofs: a dispute resolved by re-delivery, a dispute left open, an early mutual close that refunds the unspent escrow | [below](#flow-proofs) |
+| `a56`, `a57.accord-v2.testnet` | 10 Nov 2026 | Market making on testnet: a period observed on Rhea's mainnet pool and paid, a withheld period refused | [below](#market-making-on-testnet) |
 
-Market-making agreements have run end to end on a local node only (`make market-making NET=local`, recorded in [`platform/README.md`](../platform/README.md#the-whole-product-on-your-machine)); on testnet they wait on an OutLayer payment key ([`platform/docs/build/BLOCKED.md`](../platform/docs/build/BLOCKED.md) 3.7).
+Market-making agreements ran end to end on testnet on 10 Nov 2026 ([below](#market-making-on-testnet)); before that they had run on a local node only (`make market-making NET=local`, recorded in [`platform/README.md`](../platform/README.md#the-whole-product-on-your-machine)).
+
+## Market making on testnet
+
+10 Nov 2026, factory `accord-v2.testnet` (tUSDC), release 5 (agreement code `ECgsrZwy…`; Sealed Table `64a354a0…`, Payee `b5a0c473…`, observer `0dcc55e8…`). Run with `make market-making NET=testnet` from `platform/` ([`packages/live/src/targets/market-making.ts`](../platform/packages/live/src/targets/market-making.ts)); the observer ran in OutLayer's enclave over its HTTPS API, paid from OutLayer payment key 1, and read Rhea DCL's USDC/wNEAR pool (`17208628…|wrap.near|2000`) on NEAR mainnet with view calls only. Two agreements on demo timings (six-minute periods, six hidden slots each): [`a56`](https://testnet.nearblocks.io/address/a56.accord-v2.testnet), whose conditions the pool meets, and [`a57`](https://testnet.nearblocks.io/address/a57.accord-v2.testnet), whose conditions it cannot meet. The run's checks all passed (exit 0).
+
+Terms after the Sealed Table (glm-5.3-flash in OutLayer's enclave):
+
+| Agreement | Retainer | Periods | Spread at most | Depth at least, both sides | Within | Threshold |
+| --- | --- | --- | --- | --- | --- | --- |
+| `a56` | `6.00 tUSDC` | 4 × 360 s | `200 bps` | `25.00 USDC` | `300 bps` | 4 of 6 slots |
+| `a57` | `5.00 tUSDC` | 2 × 360 s | `25 bps` | `200.00 USDC` | `100 bps` | 5 of 6 slots |
+
+Output (agent key line left out):
+
+```
+accord market-making · a56.accord-v2.testnet · rhea-dcl 17208628…|wrap.near|2000
+  period 1  slot times held in the observer's enclave
+  slot 1    mainnet block 223872080 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  slot 2    mainnet block 223872216 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  slot 3    mainnet block 223872370 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  observer  a56.accord-v2.testnet · period 1 slot 4 · The operation was aborted due to timeout
+  slot 4    mainnet block 223872453 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  slot 5    mainnet block 223872525 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  slot 6    mainnet block 223872659 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  closed    6 of 6 passed · threshold 4 · uptime 100% · Eligible
+  paid      agent pays period 1 · payment_sent 6.00 USDC → halcyon-mm.testnet · tx 42HuyHX2SPWNbnT7tKKni6WwyKKCK556vmKo3TydVPeD
+  strict    a57.accord-v2.testnet · period 1 · 0 of 6 passed · threshold 5 · Withheld
+  withheld  agent asks to pay it anyway: ERR_PERIOD_WITHHELD · tx 4W1Ud2GVRPZnJL4uJdyEjAfdB5igT3S1DGTJxxLNcS1Y
+  scope     venue-level liquidity, not the market maker's own orders
+```
+
+The amount printed as `6.00 USDC` is `6.00 tUSDC`. The slot 4 timeout was one HTTPS call that took longer than 30 s; the next ask observed the slot. `a57`'s six slots read the same pool at mainnet blocks `223872330` to `223872861`: spread `176 bps`, depth `10.37 / 12.81 USDC` within `100 bps`, so every slot failed.
+
+### a56: observed, eligible, paid
+
+| Step | Account | Transaction | Result |
+| --- | --- | --- | --- |
+| Create | buyer `northwind-demo.testnet` | [`EHtYXxNE…`](https://testnet.nearblocks.io/txns/EHtYXxNEZRDkDpDgrJKRHBdsVwstNfT3FqzQGHEFjH9A) | `a56` on release 5 |
+| Seal buyer mandate | buyer | [`7NQHih4r…`](https://testnet.nearblocks.io/txns/7NQHih4rSx8phvo6xUe6ckkohhmM44kGTJirXWajBRtS) | `commit_mandate` |
+| Seal vendor mandate | vendor `halcyon-demo.testnet` | [`8VjKNQEW…`](https://testnet.nearblocks.io/txns/8VjKNQEWciiyMcY17tVeH6MeVLNAYAdRmpBzQqurC19F) | `commit_mandate` |
+| Negotiation started | keeper `accord-keeper.testnet` | [`6MEmrx2K…`](https://testnet.nearblocks.io/txns/6MEmrx2K9inuWfCovrYy3t9YvXMC6yykhumZDT49R5R3) | `Attested` about 40 s later |
+| Approve terms | buyer, vendor | [`f9wH2kWT…`](https://testnet.nearblocks.io/txns/f9wH2kWT2Z5b6wJLPMmaPgqnfUVMCLE5Zy3W944Jktm), [`EaoLasmW…`](https://testnet.nearblocks.io/txns/EaoLasmWn34wZN5efN63AWxJvPQx3K8mEBXoTQx3crHa) | |
+| Fund | buyer | [`92Hv55Hp…`](https://testnet.nearblocks.io/txns/92Hv55HpENP1MTMQFh1pUSDu2CJvtbfQUJ1uJ4L44E1J) | `24.00 tUSDC` escrowed |
+| Recipient | vendor, authority `halcyon-auth.testnet`, buyer | [`3qzbBdFp…`](https://testnet.nearblocks.io/txns/3qzbBdFpn9PzyPiSH5BTqeBjshcBW3FXYGF9oBpdXv8m), [`6VTx1jY9…`](https://testnet.nearblocks.io/txns/6VTx1jY95WnPJ94gZANT6G2aEPpoxhnAz12WarKQ66eg), [`4n4CD3DP…`](https://testnet.nearblocks.io/txns/4n4CD3DPXxovjYTBXh5tvrZVyHAoKTyfaGvtw6XYCbpw) | `halcyon-mm.testnet` proven by the Payee job, approved, accepted, active |
+| Agent key | buyer | [`6NeKGE12…`](https://testnet.nearblocks.io/txns/6NeKGE12DhBjY5ak9HUaumBUPRYNoC1SxP4HN7Kbk6UV) | `install_agent_key` |
+| Slots 1 to 6 | keeper | [`DWHLpSyE…`](https://testnet.nearblocks.io/txns/DWHLpSyEoATLfBVANmgHWLY8LKqJwQ4QLaTxWbfLphGv), [`8LRPEr78…`](https://testnet.nearblocks.io/txns/8LRPEr78vL51XMZkFMwSqvnh8aEHh6TTAofq6CWycBij), [`CyC4kYYw…`](https://testnet.nearblocks.io/txns/CyC4kYYweGeTxzE5ebbGNPWdPfuRAzbsZ59PGvf71mrt), [`2ekPpnWM…`](https://testnet.nearblocks.io/txns/2ekPpnWMdYASKb5z1xyCj1mcahQU9EqrcDJe6SCgvULx), [`EGzVre5M…`](https://testnet.nearblocks.io/txns/EGzVre5Mdyy7MaaiHDcsduHoKnZaGziNnxXqgg7Hj3v1), [`5gdkJi7w…`](https://testnet.nearblocks.io/txns/5gdkJi7wLBxMpqV7d497ETvC9VBQdpvkxfHnqSB6wUHT) | `record_observation`, each signed by the observer's key, all pass |
+| Close period 1 | keeper | [`5yDYDbSz…`](https://testnet.nearblocks.io/txns/5yDYDbSz4VVWX1Huy3k5bXu9RdJtmVMzvSYd6424Jz1c) | `6 of 6`, `Eligible` |
+| Agent pays period 1 | agent (key on `a56`) | [`42HuyHX2…`](https://testnet.nearblocks.io/txns/42HuyHX2SPWNbnT7tKKni6WwyKKCK556vmKo3TydVPeD) | sent, `6.00 tUSDC` to `halcyon-mm.testnet` |
+
+### a57: observed, withheld, refused
+
+| Step | Account | Transaction | Result |
+| --- | --- | --- | --- |
+| Create | buyer | [`9k7xj53b…`](https://testnet.nearblocks.io/txns/9k7xj53bNAbXybK6jyqg4Kdzr3Mx9RxWhXtGf7jhhr7D) | `a57` on release 5 |
+| Seal mandates | buyer, vendor | [`BVLtGegP…`](https://testnet.nearblocks.io/txns/BVLtGegPECzZi9RBsBSC6wKcd7SQxxnM4niXqbxrnBX3), [`B7X8b2R4…`](https://testnet.nearblocks.io/txns/B7X8b2R4CgN176bwRHKAHrpiFCJhLg37sRbAbaBg68iR) | |
+| Negotiation started | keeper | [`23UD1rhL…`](https://testnet.nearblocks.io/txns/23UD1rhLFxrgKDTMijAiJL4Ef6KAok42UeRJk85KmBD8) | `Attested` |
+| Approve terms | buyer, vendor | [`Ep3tZ2PW…`](https://testnet.nearblocks.io/txns/Ep3tZ2PWev2bsbfctLMU2aSkBf12e3vi4gPABgJEt5qF), [`9TAGNh22…`](https://testnet.nearblocks.io/txns/9TAGNh22S23hmsnJNcULQMJTwEUtnop7kjYDtzUPRicv) | |
+| Fund | buyer | [`JEEn7nxw…`](https://testnet.nearblocks.io/txns/JEEn7nxwXcEQJVqdwNnWjf17wswBRWcyArV5yi6SfMRQ) | `10.00 tUSDC` escrowed |
+| Recipient | vendor, authority, buyer | [`7riVqZsL…`](https://testnet.nearblocks.io/txns/7riVqZsLx5u6WAAYMf6NN3b8SQWRegpTKgx5j6rU68ox), [`7NKyRaBa…`](https://testnet.nearblocks.io/txns/7NKyRaBasLwCrJ3VKRB9EYw1r4PyZjwdCC17N5h5FLN7), [`EB6kDu3a…`](https://testnet.nearblocks.io/txns/EB6kDu3aQs3bi7d6scuopn714jDqnGypNkJ11HZTyZoD) | active |
+| Agent key | buyer | [`HhRoiZrJ…`](https://testnet.nearblocks.io/txns/HhRoiZrJLV4UQ2xhvjXC55EQNuYfd5VyDHJizHiVuy5k) | |
+| Slots 1 to 6 | keeper | [`FsKfn9ve…`](https://testnet.nearblocks.io/txns/FsKfn9veUL7PpvCpiYxQMA9pU1YuY8GxbWjKPTF62d33), [`AR8sF3jD…`](https://testnet.nearblocks.io/txns/AR8sF3jDrgTkNttzFYWYXUETKJcLS5D9xv2CQsDcKAxJ), [`CoEurFjd…`](https://testnet.nearblocks.io/txns/CoEurFjdsHcBsZhaXpkdGj1GsSyrGq94rxk2LRCQr9DJ), [`7cuop82W…`](https://testnet.nearblocks.io/txns/7cuop82WUyem5NmfGiLwKJC6hBunrwPvjh9nY52vzyx9), [`AUixeHcj…`](https://testnet.nearblocks.io/txns/AUixeHcjaZD4rrHhK3oJQxizgJJcjJGqaT3NKoriUhBU), [`7kUNVRTb…`](https://testnet.nearblocks.io/txns/7kUNVRTbNBFwHc5ajf94BdcFpfCphpVsuhXJx3J4pHkr) | all fail |
+| Close period 1 | keeper | [`5GmhVVJC…`](https://testnet.nearblocks.io/txns/5GmhVVJCVT826EmD9d6Be4SJZYefF3bNttLCyP2UcjVB) | `0 of 6`, `Withheld` (a second close call 2 s later, [`9AbJvDU8…`](https://testnet.nearblocks.io/txns/9AbJvDU8KqkDDGKeGhZgtsgZGHiHiVMo1eJUe4pV3Y6J), failed because the period was already closed) |
+| Agent pays period 1 anyway | agent (key on `a57`) | [`4W1Ud2GV…`](https://testnet.nearblocks.io/txns/4W1Ud2GVRPZnJL4uJdyEjAfdB5igT3S1DGTJxxLNcS1Y) | refused, `ERR_PERIOD_WITHHELD`; `0.00` moved |
+
+`make verify DEAL=a56.accord-v2.testnet`: `code hash ECgsrZwy… = release 5 (global by hash)` · `release   sealed-table run 15085 = task 30189 · wasm 64a354a0… · outlayer-verify proven · payee run 15086 = task 30191 · wasm b5a0c473… · outlayer-verify proven · observer run 15082 = task 30185 · wasm 0dcc55e8… · outlayer-verify proven · ok` · `record    1 payment · 0 refusals` · `verify: 6 checks ok · 1 partial`. `make verify DEAL=a57.accord-v2.testnet`: the same code and release lines, `record    0 payments · 1 refusal (1 in the log)`, `verify: 6 checks ok · 1 partial`. With `outlayer-verify` installed; `model` is partial (the hardware quote is not checked here).
+
+Periods 2 to 4 of `a56` and period 2 of `a57` were not observed by the run; after each agreement's end and grace, `close` settles it and refunds what was not paid to the buyer.
+
+### What failed first
+
+- `a50.accord-v2.testnet` (release 4), the strict room of the first attempt: `NoDeal`, `WALK_AWAY`, `rounds 1`, two model responses (start [`78biwb9z…`](https://testnet.nearblocks.io/txns/78biwb9zqkvQZ7cvmbPezsRAoaAyASj2PSrBDWsnhNXp)). The vendor cannot see the buyer's schedule, so it quoted one slot per period with a threshold of five; the structure check refuses a threshold above the slot count, the retry got the same quote, and the vendor walked away before the buyer spoke. Replayed with the same prompt, schema, model and sampling against NEAR AI, that happened in 3 of 8 runs; with the buyer's `shared` naming the schedule, in 0 of 8. Its partner `a49.accord-v2.testnet` had negotiated `150 bps` and `40 USDC` within `100 bps`, which the pool no longer met (10 Nov readings: `169` to `187 bps`; within `200 bps` the bid side was `0.00` at three of five samples). Both fixture pairs were changed (`platform/fixtures/companies/README.md`).
+- `a54`, `a55.accord-v2.testnet` (release 5), the second attempt: both negotiated, but every observer call answered `PROTECTED_OBSERVER_SEED is not set`, so no slot was recorded and both periods closed `Review`. Over OutLayer's HTTPS API the keeper's call sent only `{input}`; it now sends `secrets_ref` (the owner's `default` profile, as `request_execution` does on chain) and `version_key`, the agreement's own observer build.
 
 ## a8: try-it with a fresh account
 
