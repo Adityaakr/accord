@@ -118,13 +118,13 @@ const Milestones = () => (
   </svg>
 )
 
-/* status: what the read-only status line says when it is not "planned" or plain "demo" (market making runs on a local node, not testnet) */
+/* status: what the read-only status line says when it is not "planned" or plain "demo" (market making ran on testnet in a56 and a57, 10 Nov 2026) */
 type Card = { icon: PixelName; title: string; text: string; runs: Rail[]; art: ReactNode; planned?: boolean; status?: string }
 const CARDS: Card[] = [
   {
     icon: "chart", title: "Pay a market maker for liquidity that showed up",
     text: "A project renews an 18,500 USDC retainer. Each period pays only if four of six readings of the pool, taken at hidden times, meet the agreed spread and depth.",
-    runs: ["rhea", "outlayer", "near"], art: <Liquidity />, status: "demo (local node)",
+    runs: ["rhea", "outlayer", "near"], art: <Liquidity />, status: "demo (testnet: a56, a57)",
   },
   {
     icon: "bag", title: "Let an agent pay invoices it cannot redirect",

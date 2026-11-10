@@ -6,6 +6,7 @@ import { SectionHeading, appear } from "../components/SectionHeading"
 import { Button } from "../components/Button"
 import { useLive, type LiveValues } from "../lib/live"
 import { LINKS } from "../content/links"
+import { MARKET_MAKING as MM } from "../content/testnet"
 import { ProductShot, type ShotVariant } from "../components/ProductShot"
 import tl from "../styles/Timeline.module.css"
 import styles from "./MarketMaking.module.css"
@@ -108,15 +109,38 @@ function resultLine(result: string): string {
   return "Insufficient evidence to determine the result. Follow the agreement's review rule."
 }
 
-/* The observations under the evidence chain: one row per slot when the record carries them. Market-making
-   observations are not recorded on NEAR testnet yet, so the group says so instead of showing an unrelated snapshot. */
+/* The observations under the evidence chain: one row per slot when the live record carries them. The live record is
+   procurement agreement a6, which has none, so the group shows market-making agreement a56's period 1 as recorded on
+   NEAR testnet on 10 Nov 2026 (content/testnet.ts MARKET_MAKING, from docs/runs.md), each slot with its transaction. */
 function Observations({ v }: { v: LiveValues | null }) {
   const slots = v?.slots ?? []
   return (
     <div className={tl.group} aria-live="polite" aria-atomic="false">
-      <h3 className={tl.groupLabel}><span>Observations</span>{slots.length ? <span className={tl.groupMeta}>{slots.filter((s) => s.result === "PASS").length} of {slots.length} pass</span> : null}</h3>
+      <h3 className={tl.groupLabel}><span>Observations</span><span className={tl.groupMeta}>{slots.length ? `${slots.filter((s) => s.result === "PASS").length} of ${slots.length} pass` : `a56 · ${MM.slots.filter((s) => s.pass).length} of ${MM.slots.length} pass`}</span></h3>
       {slots.length === 0 ? (
-        <p className={tl.note}>No market-making observations are recorded on NEAR testnet yet.</p>
+        <>
+          <p className={tl.note}>
+            Recorded on NEAR testnet on {MM.date}: <a href={MM.agreementUrl} className="ls-link-inline mono" target="_blank" rel="noreferrer">{MM.agreement}</a>, period 1,
+            read from {MM.pool} on NEAR mainnet (each block links its recorded observation). Agreed: spread at most <span className="mono">{MM.terms.spreadBps} bps</span>, depth at least <span className="mono">{MM.terms.depth}</span> on
+            both sides within <span className="mono">{MM.terms.withinBps} bps</span>, {MM.terms.threshold} of {MM.terms.slots} slots.
+          </p>
+          <ol className={tl.rows}>
+            {MM.slots.map((s) => (
+              <li key={s.slot} className={`${tl.row} ${tl.rowWide}`}>
+                <span className={`mono ${tl.num}`}>{String(s.slot).padStart(2, "0")}</span>
+                <a href={s.tx} target="_blank" rel="noreferrer" className={`mono ${tl.name} ${tl.code} ls-link-inline`}>block {s.block}</a>
+                <span className={`mono ${tl.value}`}>spread {s.spreadBps} bps · depth {s.depthBid} / {s.depthAsk} USDC · both sides · pass</span>
+              </li>
+            ))}
+          </ol>
+          <p className={tl.note}>
+            <a href={MM.closed.tx} target="_blank" rel="noreferrer" className="ls-link-inline mono">{MM.closed.result}</a>; the agent
+            paid <a href={MM.paid.tx} target="_blank" rel="noreferrer" className="ls-link-inline mono">{MM.paid.amount}</a> to <span className="mono">{MM.paid.to}</span>. On the
+            stricter <a href={MM.strict.agreementUrl} target="_blank" rel="noreferrer" className="ls-link-inline mono">{MM.strict.agreement}</a>: <span className="mono">{MM.strict.result}</span>, and the
+            agent's payment was refused with <a href={MM.strict.refusalTx} target="_blank" rel="noreferrer" className="ls-link-inline mono">{MM.strict.refusal}</a>. The observations
+            measure the venue's liquidity, not the market maker's own orders.
+          </p>
+        </>
       ) : (
         <ol className={tl.rows}>
           {slots.map((s) => (

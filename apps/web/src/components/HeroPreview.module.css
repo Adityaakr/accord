@@ -168,8 +168,6 @@
 .termsFoot { margin-top: 0.2em; padding-top: 0.45em; border-top: 0.08em solid #f0f0f2; font-size: 0.64em; color: #16a34a; }
 .dashed { background: repeating-linear-gradient(90deg, #cfd1d6 0 0.35em, transparent 0.35em 0.6em); }
 
-/* a6's real record: a refused or revoked step, and a market-making room that has run on a local node only */
+/* a6's real record: a refused or revoked step */
 .nodeRefused .nodeState { color: #dc2626; }
 .nodeRefused .nodeSub { color: #b91c1c; }
-.stLocal { color: #8a5a00; }
-.stLocal .stDot { background: transparent; border: 0.12em dashed #b7791f; }

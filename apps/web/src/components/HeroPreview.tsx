@@ -6,8 +6,9 @@ import styles from "./HeroPreview.module.css"
    light app window with stacked windows behind it, an icon rail, a list panel, a canvas of numbered nodes, and an
    assistant-style side panel. The content is real: agreement a6.accord-v2.testnet as its record shows it on NEAR testnet
    (8 Nov 2026), and the room list names agreements that exist on testnet, each with the state and amounts get_agreement
-   returned on 9 Nov 2026. Market making is listed as a local-node run, because it has not run on testnet
-   (platform/docs/build/BLOCKED.md). Nothing is read live; the numbers are copied from chain.
+   returned on 9 Nov 2026. The market-making room is a56.accord-v2.testnet, which ran on testnet on 10 Nov 2026 (period 1
+   observed on Rhea's mainnet pool and paid; docs/runs.md), with the state get_agreement returned that day. Nothing is
+   read live; the numbers are copied from chain.
    Scales with its container: 1em = container width / 108. */
 
 /* ---------- icons (Lucide-style, 24 grid, 1.75 stroke) ---------- */
@@ -42,9 +43,9 @@ function I({ n, className = "" }: { n: keyof typeof P; className?: string }) {
 }
 
 /* ---------- content ---------- */
-type State = "Executing" | "Attested" | "Sealed" | "Settled" | "Local"
+type State = "Executing" | "Attested" | "Sealed" | "Settled"
 type Room = { icon: keyof typeof P; name: string; sub: string; state: State; active?: boolean }
-const STATE_LABEL: Record<State, string> = { Executing: "Executing", Attested: "Attested", Sealed: "Sealed", Settled: "Settled", Local: "Local node" }
+const STATE_LABEL: Record<State, string> = { Executing: "Executing", Attested: "Attested", Sealed: "Sealed", Settled: "Settled" }
 const GROUPS: { label: string; rooms: Room[] }[] = [
   { label: "On NEAR testnet", rooms: [
     { icon: "file", name: "a6 · Liquidity reporting", sub: "3 items · 35.50 tUSDC", state: "Executing", active: true },
@@ -52,8 +53,8 @@ const GROUPS: { label: string; rooms: Room[] }[] = [
     { icon: "file", name: "a1 · Circle USDC", sub: "3 items · 14.00 USDC", state: "Executing" },
     { icon: "file", name: "a32 · the replayed run", sub: "35.00 tUSDC · closed", state: "Settled" },
   ] },
-  { label: "Market making", rooms: [
-    { icon: "chart", name: "NEAR/USDC retainer", sub: "Rhea pool · local node only", state: "Local" },
+  { label: "Market making on testnet", rooms: [
+    { icon: "chart", name: "a56 · Rhea retainer", sub: "period 1 · 6.00 tUSDC paid", state: "Executing" },
   ] },
 ]
 const ROOM_COUNT = GROUPS.reduce((n, g) => n + g.rooms.length, 0)
@@ -119,7 +120,7 @@ function NodeCard({ node, style }: { node: Node; style: CSSProperties }) {
 
 export function HeroPreview() {
   return (
-    <div className={styles.stage} role="img" aria-label="Agreement a6.accord-v2.testnet as recorded on NEAR testnet on 8 Nov 2026: sealed mandates, terms of 35.50 test USDC in 3 items approved by both companies, recipient halcyon-mm.testnet proven and accepted, delivery accepted, the agent paid item 1 (16.50 tUSDC), a redirect to halcyon-markets.testnet refused with ERR_PAYEE_MISMATCH and nothing sent, then the agent revoked. The room list shows other testnet agreements and one market-making agreement that has run on a local node only.">
+    <div className={styles.stage} role="img" aria-label="Agreement a6.accord-v2.testnet as recorded on NEAR testnet on 8 Nov 2026: sealed mandates, terms of 35.50 test USDC in 3 items approved by both companies, recipient halcyon-mm.testnet proven and accepted, delivery accepted, the agent paid item 1 (16.50 tUSDC), a redirect to halcyon-markets.testnet refused with ERR_PAYEE_MISMATCH and nothing sent, then the agent revoked. The room list shows other testnet agreements and market-making agreement a56.accord-v2.testnet, whose period 1 was observed and paid on testnet.">
       <span className={styles.sheet2} aria-hidden="true" />
       <span className={styles.sheet1} aria-hidden="true" />
       <div className={styles.window}>

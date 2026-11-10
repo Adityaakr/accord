@@ -50,8 +50,22 @@ Review the observed spread, depth and availability for each measurement window, 
 
 - 05 Payment on NEAR USDC from the agreement's own account to the authorised recipient, or a refusal on the record.
 
-### Observations
+### Observations a56 · 6 of 6 pass
 
-No market-making observations are recorded on NEAR testnet yet.
+Recorded on NEAR testnet on 10 Nov 2026: [a56.accord-v2.testnet](https://testnet.nearblocks.io/address/a56.accord-v2.testnet), period 1, read from Rhea USDC/wNEAR on NEAR mainnet (each block links its recorded observation). Agreed: spread at most 200 bps, depth at least 25.00 USDC on both sides within 300 bps, 4 of 6 slots.
+
+- 01 [block 223872080](https://testnet.nearblocks.io/txns/DWHLpSyEoATLfBVANmgHWLY8LKqJwQ4QLaTxWbfLphGv) spread 176 bps · depth 36.56 / 55.00 USDC · both sides · pass
+
+- 02 [block 223872216](https://testnet.nearblocks.io/txns/8LRPEr78vL51XMZkFMwSqvnh8aEHh6TTAofq6CWycBij) spread 176 bps · depth 36.56 / 55.00 USDC · both sides · pass
+
+- 03 [block 223872370](https://testnet.nearblocks.io/txns/CyC4kYYweGeTxzE5ebbGNPWdPfuRAzbsZ59PGvf71mrt) spread 176 bps · depth 36.56 / 55.00 USDC · both sides · pass
+
+- 04 [block 223872453](https://testnet.nearblocks.io/txns/2ekPpnWMdYASKb5z1xyCj1mcahQU9EqrcDJe6SCgvULx) spread 176 bps · depth 36.56 / 55.00 USDC · both sides · pass
+
+- 05 [block 223872525](https://testnet.nearblocks.io/txns/EGzVre5Mdyy7MaaiHDcsduHoKnZaGziNnxXqgg7Hj3v1) spread 176 bps · depth 36.56 / 55.00 USDC · both sides · pass
+
+- 06 [block 223872659](https://testnet.nearblocks.io/txns/5gdkJi7wLBxMpqV7d497ETvC9VBQdpvkxfHnqSB6wUHT) spread 176 bps · depth 36.56 / 55.00 USDC · both sides · pass
+
+[6 of 6 passed · threshold 4 · Eligible](https://testnet.nearblocks.io/txns/5yDYDbSz4VVWX1Huy3k5bXu9RdJtmVMzvSYd6424Jz1c); the agent paid [6.00 tUSDC](https://testnet.nearblocks.io/txns/42HuyHX2SPWNbnT7tKKni6WwyKKCK556vmKo3TydVPeD) to halcyon-mm.testnet. On the stricter [a57.accord-v2.testnet](https://testnet.nearblocks.io/address/a57.accord-v2.testnet): 0 of 6 passed · threshold 5 · Withheld, and the agent's payment was refused with [ERR_PERIOD_WITHHELD](https://testnet.nearblocks.io/txns/4W1Ud2GVRPZnJL4uJdyEjAfdB5igT3S1DGTJxxLNcS1Y). The observations measure the venue's liquidity, not the market maker's own orders.
 
 [Inspect the testnet record](/record)

@@ -349,7 +349,7 @@ export function Compliance() {
           </p>
           <div className={styles.actions}>
             <Button variant="primary" href={LINKS.marketMaking}>Explore the agreement</Button>
-            <Link to="/docs/cli#market-making" className={`t-body-sm ls-link ${styles.join}`}>See a market-making period replayed (local node)<Arrow /></Link>
+            <Link to="/docs/cli#market-making" className={`t-body-sm ls-link ${styles.join}`}>See a market-making period on testnet<Arrow /></Link>
           </div>
         </Appear>
       </div>

@@ -270,7 +270,7 @@ export const DOC_PAGES: DocPage[] = [
             kind: "rows",
             rows: [
               { name: "Vendor contracts and renewals", value: "procurement · demo", href: TESTNET.agreementUrl, tone: "ok", detail: "Milestones released on accepted delivery; the reference type. Agreement `a6.accord-v2.testnet` ran it end to end on testnet: `35.50 tUSDC` in 3 items, item 1 paid, a redirect refused, the key revoked." },
-              { name: "Market-making agreements", value: "market-making · demo", href: "/use-cases/market-making", tone: "ok", detail: "A retainer period is payable only when enough observations of the venue's public liquidity, taken at hidden times, meet the agreed spread, depth and two-sided quoting. In the demonstration, 4 of 6 readings of Rhea's USDC/wNEAR pool must pass. Its recorded runs are on a local node reading real NEAR mainnet blocks; see [make market-making](/docs/cli#market-making)." },
+              { name: "Market-making agreements", value: "market-making · demo", href: "/use-cases/market-making", tone: "ok", detail: "A retainer period is payable only when enough observations of the venue's public liquidity, taken at hidden times, meet the agreed spread, depth and two-sided quoting. In the demonstration, 4 of 6 readings of Rhea's USDC/wNEAR pool must pass. On NEAR testnet (10 Nov 2026), `a56.accord-v2.testnet`'s period 1 passed `6 of 6` and was paid `6.00 tUSDC`, and `a57.accord-v2.testnet`'s stricter period passed `0 of 6` and its payment was refused `ERR_PERIOD_WITHHELD`; see [make market-making](/docs/cli#market-making)." },
             ],
           },
         ],
@@ -572,22 +572,23 @@ export const DOC_PAGES: DocPage[] = [
           },
           {
             kind: "code",
-            label: "make market-making NET=local · recorded on 3 Nov 2026 as make atlas, its earlier name, from the platform README",
+            label: "make market-making · recorded on NEAR testnet on 10 Nov 2026 (release 5, test USDC), agent key line left out",
             replay: "atlas",
-            code: `accord atlas · a14.accord.test.near · market-making · rhea-dcl 17208628…|wrap.near|2000 · local node
+            code: `accord market-making · a56.accord-v2.testnet · rhea-dcl 17208628…|wrap.near|2000
   period 1  slot times held in the observer's enclave
-  slot 1    mainnet block 222883053 · spread 147 bps · depth 32.78 / 75.62 USDC · pass
-  slot 2    mainnet block 222883166 · spread 147 bps · depth 32.78 / 75.62 USDC · pass
-  slot 3    mainnet block 222883341 · spread 147 bps · depth 32.78 / 75.62 USDC · pass
-  slot 4    mainnet block 222883437 · spread 147 bps · depth 32.78 / 75.62 USDC · pass
-  slot 5    mainnet block 222883536 · spread 147 bps · depth 32.78 / 75.62 USDC · pass
-  slot 6    mainnet block 222883588 · spread 147 bps · depth 32.78 / 75.62 USDC · pass
+  slot 1    mainnet block 223872080 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  slot 2    mainnet block 223872216 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  slot 3    mainnet block 223872370 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  observer  a56.accord-v2.testnet · period 1 slot 4 · The operation was aborted due to timeout
+  slot 4    mainnet block 223872453 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  slot 5    mainnet block 223872525 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
+  slot 6    mainnet block 223872659 · spread 176 bps · depth 36.56 / 55.00 USDC · pass
   closed    6 of 6 passed · threshold 4 · uptime 100% · Eligible
-  paid      agent pays period 1 · payment_sent 7.50 USDC → halcyon-mm.test.near · tx ANBNFhAnAQ8nJMSJmGZJjJQCQu49HQWirnA5GrApZMD2
-  strict    a15.accord.test.near · period 1 · 0 of 6 passed · threshold 4 · Withheld
-  withheld  agent asks to pay it anyway: ERR_PERIOD_WITHHELD · tx FYuYPokP7R9F6yWx11VRqCHFb7kdvEKXgh5WDBN6A241
+  paid      agent pays period 1 · payment_sent 6.00 USDC → halcyon-mm.testnet · tx 42HuyHX2SPWNbnT7tKKni6WwyKKCK556vmKo3TydVPeD
+  strict    a57.accord-v2.testnet · period 1 · 0 of 6 passed · threshold 5 · Withheld
+  withheld  agent asks to pay it anyway: ERR_PERIOD_WITHHELD · tx 4W1Ud2GVRPZnJL4uJdyEjAfdB5igT3S1DGTJxxLNcS1Y
   scope     venue-level liquidity, not the market maker's own orders`,
-            caption: "The slots are real mainnet blocks; the agreements and transactions are on the local node.",
+            caption: "The slots are real NEAR mainnet blocks of Rhea's pool, read by the observer in OutLayer's enclave; the agreements and transactions are on NEAR testnet, and 6.00 USDC is 6.00 tUSDC (test USDC). The slot 4 timeout was one slow HTTPS call; the next ask observed the slot. The run watched period 1 of each agreement. The same target runs on a local node with NET=local.",
           },
         ],
       },

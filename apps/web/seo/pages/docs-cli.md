@@ -96,43 +96,41 @@ accord attack · a9.accord.test.near · agent key ed25519:BPDWuq96f5k4XjZbGYkXHC
 
 - 01 One period One market-making period on Rhea's USDC/wNEAR pool, read-only on mainnet: the observations with their mainnet blocks, the pass count against the threshold, the agent's payment, then a stricter agreement's period `Withheld`, and the scope line. make market-making
 
-make market-making NET=local · recorded on 3 Nov 2026 as make atlas, its earlier name, from the platform README
+make market-making · recorded on NEAR testnet on 10 Nov 2026 (release 5, test USDC), agent key line left out
 
-a14.accord.test.near · market-making · rhea-dcl 17208628…|wrap.near|2000 · local node
+a56.accord-v2.testnet · market-making · rhea-dcl 17208628…|wrap.near|2000 · NEAR testnet
 
 period 1 6 of 6 passed
 
 slot times held in the observer's enclave
 
-- slot 1 pass mainnet block 222883053 spread 147 bps depth 32.78 / 75.62 USDC
+- slot 1 pass mainnet block 223872080 spread 176 bps depth 36.56 / 55.00 USDC
 
-- slot 2 pass mainnet block 222883166 spread 147 bps depth 32.78 / 75.62 USDC
+- slot 2 pass mainnet block 223872216 spread 176 bps depth 36.56 / 55.00 USDC
 
-- slot 3 pass mainnet block 222883341 spread 147 bps depth 32.78 / 75.62 USDC
+- slot 3 pass mainnet block 223872370 spread 176 bps depth 36.56 / 55.00 USDC
 
-- slot 4 pass mainnet block 222883437 spread 147 bps depth 32.78 / 75.62 USDC
+- slot 4 pass mainnet block 223872453 spread 176 bps depth 36.56 / 55.00 USDC
 
-- slot 5 pass mainnet block 222883536 spread 147 bps depth 32.78 / 75.62 USDC
+- slot 5 pass mainnet block 223872525 spread 176 bps depth 36.56 / 55.00 USDC
 
-- slot 6 pass mainnet block 222883588 spread 147 bps depth 32.78 / 75.62 USDC
+- slot 6 pass mainnet block 223872659 spread 176 bps depth 36.56 / 55.00 USDC
 
 closed · 6 of 6 passed · threshold 4 · uptime 100% Eligible
 
-agent pays period 1 · payment_sent 7.50 USDC → halcyon-mm.test.near ANBNFh…ZMD2
+agent pays period 1 · payment_sent 6.00 USDC → halcyon-mm.testnet 42HuyH…VPeD
 
-a15.accord.test.near · period 1
+a57.accord-v2.testnet · period 1
 
-0 of 6 passed · threshold 4 Withheld
+0 of 6 passed · threshold 5 Withheld
 
-agent asks to pay it anyway `ERR_PERIOD_WITHHELD` FYuYPo…A241
+agent asks to pay it anyway `ERR_PERIOD_WITHHELD` 4W1Ud2…cS1Y
 
 scope · venue-level liquidity, not the market maker's own orders
 
-The slots are real mainnet blocks; the agreements and transactions are on the local node.
+The slots are real NEAR mainnet blocks of Rhea's pool, read by the observer in OutLayer's enclave; the agreements and transactions are on NEAR testnet, and 6.00 USDC is 6.00 tUSDC (test USDC). The slot 4 timeout was one slow HTTPS call; the next ask observed the slot. The run watched period 1 of each agreement. The same target runs on a local node with NET=local.
 
-Recorded on 3 Nov 2026 when the command was named make atlas; it is now make market-making. The text below is the output as recorded.
-
-accord atlas · a14.accord.test.near · market-making · rhea-dcl 17208628…|wrap.near|2000 · local node period 1 slot times held in the observer's enclave slot 1 mainnet block 222883053 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 2 mainnet block 222883166 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 3 mainnet block 222883341 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 4 mainnet block 222883437 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 5 mainnet block 222883536 · spread 147 bps · depth 32.78 / 75.62 USDC · pass slot 6 mainnet block 222883588 · spread 147 bps · depth 32.78 / 75.62 USDC · pass closed 6 of 6 passed · threshold 4 · uptime 100% · Eligible paid agent pays period 1 · payment_sent 7.50 USDC → halcyon-mm.test.near · tx ANBNFhAnAQ8nJMSJmGZJjJQCQu49HQWirnA5GrApZMD2 strict a15.accord.test.near · period 1 · 0 of 6 passed · threshold 4 · Withheld withheld agent asks to pay it anyway: ERR_PERIOD_WITHHELD · tx FYuYPokP7R9F6yWx11VRqCHFb7kdvEKXgh5WDBN6A241 scope venue-level liquidity, not the market maker's own orders
+accord market-making · a56.accord-v2.testnet · rhea-dcl 17208628…|wrap.near|2000 period 1 slot times held in the observer's enclave slot 1 mainnet block 223872080 · spread 176 bps · depth 36.56 / 55.00 USDC · pass slot 2 mainnet block 223872216 · spread 176 bps · depth 36.56 / 55.00 USDC · pass slot 3 mainnet block 223872370 · spread 176 bps · depth 36.56 / 55.00 USDC · pass observer a56.accord-v2.testnet · period 1 slot 4 · The operation was aborted due to timeout slot 4 mainnet block 223872453 · spread 176 bps · depth 36.56 / 55.00 USDC · pass slot 5 mainnet block 223872525 · spread 176 bps · depth 36.56 / 55.00 USDC · pass slot 6 mainnet block 223872659 · spread 176 bps · depth 36.56 / 55.00 USDC · pass closed 6 of 6 passed · threshold 4 · uptime 100% · Eligible paid agent pays period 1 · payment_sent 6.00 USDC → halcyon-mm.testnet · tx 42HuyHX2SPWNbnT7tKKni6WwyKKCK556vmKo3TydVPeD strict a57.accord-v2.testnet · period 1 · 0 of 6 passed · threshold 5 · Withheld withheld agent asks to pay it anyway: ERR_PERIOD_WITHHELD · tx 4W1Ud2GVRPZnJL4uJdyEjAfdB5igT3S1DGTJxxLNcS1Y scope venue-level liquidity, not the market maker's own orders
 
 ## Verify, demo and the rest
 

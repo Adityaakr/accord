@@ -87,7 +87,10 @@ const passOf = (s: string) => s.match(/^(\d+) of (\d+) passed$/)
 
 export function parseAtlas(code: string): Atlas | null {
   const { head, body } = lines(code)
-  if (head.length < 5) return null
+  // Two first-line forms: the 3 Nov local-node record ("accord atlas · <account> · market-making · <venue> · local node")
+  // and today's testnet output ("accord market-making · <account> · <venue>", no suffix on testnet)
+  if (head.length !== 3 && head.length < 5) return null
+  const short = head.length === 3
   const slots: Slot[] = []
   let period: Atlas["period"] | null = null, closed: Atlas["closed"] | null = null, paid: Atlas["paid"] | null = null
   let strict: Atlas["strict"] | null = null, withheld: Atlas["withheld"] | null = null, scope = ""
@@ -118,6 +121,7 @@ export function parseAtlas(code: string): Atlas | null {
     } else if (tag === "scope") scope = rest
   }
   if (!period || !slots.length || !closed || !paid || !strict || !withheld) return null
+  if (short) return { title: head[0], account: head[1], type: "market-making", venue: head[2], where: head[1].endsWith(".testnet") ? "NEAR testnet" : "", period, slots, closed, paid, strict, withheld, scope }
   return { title: head[0], account: head[1], type: head[2], venue: head[3], where: head[head.length - 1], period, slots, closed, paid, strict, withheld, scope }
 }
 

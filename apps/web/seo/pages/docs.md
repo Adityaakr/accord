@@ -6,7 +6,7 @@ Accord is the private deal room and control plane for agent-to-agent commerce. A
 
 [Run your own deal in 5 minutes](/app/try-it) [Read the quickstart](/docs/quickstart)
 
-> Agreement a6.accord-v2.testnet as recorded on NEAR testnet on 8 Nov 2026: sealed mandates, terms of 35.50 test USDC in 3 items approved by both companies, recipient halcyon-mm.testnet proven and accepted, delivery accepted, the agent paid item 1 (16.50 tUSDC), a redirect to halcyon-markets.testnet refused with ERR_PAYEE_MISMATCH and nothing sent, then the agent revoked. The room list shows other testnet agreements and one market-making agreement that has run on a local node only.
+> Agreement a6.accord-v2.testnet as recorded on NEAR testnet on 8 Nov 2026: sealed mandates, terms of 35.50 test USDC in 3 items approved by both companies, recipient halcyon-mm.testnet proven and accepted, delivery accepted, the agent paid item 1 (16.50 tUSDC), a redirect to halcyon-markets.testnet refused with ERR_PAYEE_MISMATCH and nothing sent, then the agent revoked. The room list shows other testnet agreements and market-making agreement a56.accord-v2.testnet, whose period 1 was observed and paid on testnet.
 
 Illustrative mock-up. On testnet today: procurement agreement [a6](/record), every step on chain. Inside the mock-up: [deal rooms](/docs/quickstart) · [the agreement's steps](/docs/concepts#lifecycle) · [the activity and refusal log](/docs/concepts#refusals)
 

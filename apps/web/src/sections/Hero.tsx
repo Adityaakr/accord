@@ -204,7 +204,8 @@ export function Hero() {
           <p className={`t-body-sm ${styles.caption}`}>
             Agreement <Link to={LINKS.record} className="ls-link-inline">a6.accord-v2.testnet</Link> as recorded on NEAR testnet,
             every step with its transaction; <Link to={`${LINKS.verify}?agreement=a6.accord-v2.testnet`} className="ls-link-inline">verify it</Link> with
-            no account. Market-making agreements have run end to end on a local node, not yet on testnet.
+            no account. Market-making agreements have run on testnet too: in <Link to={`${LINKS.verify}?agreement=a56.accord-v2.testnet`} className="ls-link-inline">a56.accord-v2.testnet</Link> a
+            period observed on Rhea's mainnet pool passed and was paid in test USDC; a stricter agreement's withheld period was refused.
           </p>
         </Mount>
 

@@ -14,7 +14,7 @@ Status `demo` means built and shown in the demonstration. Status `planned` means
 
 - 01 Vendor contracts and renewals Milestones released on accepted delivery; the reference type. Agreement `a6.accord-v2.testnet` ran it end to end on testnet: `35.50 tUSDC` in 3 items, item 1 paid, a redirect refused, the key revoked. [procurement · demo](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
 
-- 02 Market-making agreements A retainer period is payable only when enough observations of the venue's public liquidity, taken at hidden times, meet the agreed spread, depth and two-sided quoting. In the demonstration, 4 of 6 readings of Rhea's USDC/wNEAR pool must pass. Its recorded runs are on a local node reading real NEAR mainnet blocks; see [make market-making](/docs/cli#market-making). [market-making · demo](/use-cases/market-making)
+- 02 Market-making agreements A retainer period is payable only when enough observations of the venue's public liquidity, taken at hidden times, meet the agreed spread, depth and two-sided quoting. In the demonstration, 4 of 6 readings of Rhea's USDC/wNEAR pool must pass. On NEAR testnet (10 Nov 2026), `a56.accord-v2.testnet`'s period 1 passed `6 of 6` and was paid `6.00 tUSDC`, and `a57.accord-v2.testnet`'s stricter period passed `0 of 6` and its payment was refused `ERR_PERIOD_WITHHELD`; see [make market-making](/docs/cli#market-making). [market-making · demo](/use-cases/market-making)
 
 ## How a market-making period pays
 

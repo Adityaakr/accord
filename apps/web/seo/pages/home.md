@@ -8,9 +8,9 @@ Accord turns private negotiations into enforceable payment rules. Agents negotia
 
 [Testnet record: procurement agreement a6, each step with its transaction](/record)
 
-> Agreement a6.accord-v2.testnet as recorded on NEAR testnet on 8 Nov 2026: sealed mandates, terms of 35.50 test USDC in 3 items approved by both companies, recipient halcyon-mm.testnet proven and accepted, delivery accepted, the agent paid item 1 (16.50 tUSDC), a redirect to halcyon-markets.testnet refused with ERR_PAYEE_MISMATCH and nothing sent, then the agent revoked. The room list shows other testnet agreements and one market-making agreement that has run on a local node only.
+> Agreement a6.accord-v2.testnet as recorded on NEAR testnet on 8 Nov 2026: sealed mandates, terms of 35.50 test USDC in 3 items approved by both companies, recipient halcyon-mm.testnet proven and accepted, delivery accepted, the agent paid item 1 (16.50 tUSDC), a redirect to halcyon-markets.testnet refused with ERR_PAYEE_MISMATCH and nothing sent, then the agent revoked. The room list shows other testnet agreements and market-making agreement a56.accord-v2.testnet, whose period 1 was observed and paid on testnet.
 
-Agreement [a6.accord-v2.testnet](/record) as recorded on NEAR testnet, every step with its transaction; [verify it](/verify?agreement=a6.accord-v2.testnet) with no account. Market-making agreements have run end to end on a local node, not yet on testnet.
+Agreement [a6.accord-v2.testnet](/record) as recorded on NEAR testnet, every step with its transaction; [verify it](/verify?agreement=a6.accord-v2.testnet) with no account. Market-making agreements have run on testnet too: in [a56.accord-v2.testnet](/verify?agreement=a56.accord-v2.testnet) a period observed on Rhea's mainnet pool passed and was paid in test USDC; a stricter agreement's withheld period was refused.
 
 ## Sealed Table
 
@@ -172,7 +172,7 @@ A market-making agreement connects the retainer to the liquidity conditions both
 
 When the required observations pass, payment becomes eligible for release under Accord's payment controls. Otherwise, it remains withheld for both parties to review. Each payment decision is linked to the terms and observations behind it.
 
-[Explore the agreement](/use-cases/market-making) [See a market-making period replayed (local node)](/docs/cli#market-making)
+[Explore the agreement](/use-cases/market-making) [See a market-making period on testnet](/docs/cli#market-making)
 
 Why it matters
 
@@ -380,7 +380,7 @@ Negotiate privately, approve the terms and define what must happen before money 
 
 A project renews an 18,500 USDC retainer. Each period pays only if four of six readings of the pool, taken at hidden times, meet the agreed spread and depth.
 
-Status: demo (local node). Runs on the Rhea pool, OutLayer and NEAR.
+Status: demo (testnet: a56, a57). Runs on the Rhea pool, OutLayer and NEAR.
 
 ### Let an agent pay invoices it cannot redirect
 

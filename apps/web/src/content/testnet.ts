@@ -145,3 +145,36 @@ export const CIRCLE = {
     { title: "Buyer revokes the agent", agreement: "a1.accord-usdc.testnet", mono: "AccessKeyDoesNotExist", refused: true, txs: [tx("FTigDebs1kZjLpTN8nC8SZWp4dMM1ChuUyR211JZnzuW")] },
   ] as Proof[],
 }
+
+/* Market making on testnet (docs/runs.md "Market making on testnet", 10 Nov 2026): factory accord-v2.testnet, release 5,
+   test USDC. a56's period 1 was observed by the observer in OutLayer's enclave, reading Rhea's USDC/wNEAR pool on NEAR
+   mainnet with view calls only, and paid; a57's stricter period 1 passed no slot and the agent's payment was refused.
+   The run watched period 1 of each agreement only. */
+export const MARKET_MAKING = {
+  date: "10 Nov 2026",
+  release: 5,
+  agreement: "a56.accord-v2.testnet",
+  agreementUrl: acct("a56.accord-v2.testnet"),
+  pool: "Rhea USDC/wNEAR",
+  terms: { spreadBps: 200, depth: "25.00 USDC", withinBps: 300, threshold: 4, slots: 6, retainer: "6.00 tUSDC" },
+  /* a56 period 1: each slot's mainnet block and reading, and the keeper's record_observation transaction */
+  slots: [
+    { slot: 1, block: 223872080, tx: tx("DWHLpSyEoATLfBVANmgHWLY8LKqJwQ4QLaTxWbfLphGv") },
+    { slot: 2, block: 223872216, tx: tx("8LRPEr78vL51XMZkFMwSqvnh8aEHh6TTAofq6CWycBij") },
+    { slot: 3, block: 223872370, tx: tx("CyC4kYYweGeTxzE5ebbGNPWdPfuRAzbsZ59PGvf71mrt") },
+    { slot: 4, block: 223872453, tx: tx("2ekPpnWMdYASKb5z1xyCj1mcahQU9EqrcDJe6SCgvULx") },
+    { slot: 5, block: 223872525, tx: tx("EGzVre5Mdyy7MaaiHDcsduHoKnZaGziNnxXqgg7Hj3v1") },
+    { slot: 6, block: 223872659, tx: tx("5gdkJi7wLBxMpqV7d497ETvC9VBQdpvkxfHnqSB6wUHT") },
+  ].map((s) => ({ ...s, spreadBps: 176, depthBid: "36.56", depthAsk: "55.00", pass: true })),
+  closed: { result: "6 of 6 passed · threshold 4 · Eligible", tx: tx("5yDYDbSz4VVWX1Huy3k5bXu9RdJtmVMzvSYd6424Jz1c") },
+  paid: { amount: "6.00 tUSDC", to: "halcyon-mm.testnet", tx: tx("42HuyHX2SPWNbnT7tKKni6WwyKKCK556vmKo3TydVPeD") },
+  strict: {
+    agreement: "a57.accord-v2.testnet",
+    agreementUrl: acct("a57.accord-v2.testnet"),
+    result: "0 of 6 passed · threshold 5 · Withheld",
+    closeTx: tx("5GmhVVJCVT826EmD9d6Be4SJZYefF3bNttLCyP2UcjVB"),
+    refusal: "ERR_PERIOD_WITHHELD",
+    refusalTx: tx("4W1Ud2GVRPZnJL4uJdyEjAfdB5igT3S1DGTJxxLNcS1Y"),
+  },
+  verify: "6 checks ok · 1 partial",
+}
