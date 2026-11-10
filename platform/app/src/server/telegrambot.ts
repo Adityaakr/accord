@@ -32,12 +32,21 @@ export async function botUsername(): Promise<string | null> {
   return s.username;
 }
 
-/** The connect links for an organisation: a private chat, and a group the bot is added to. */
-export async function connectLinks(orgId: string): Promise<{ chat: string; group: string; expires_in: number } | null> {
+/**
+ * The connect links for an organisation: a private chat, a group the bot is added to, the same two as tg:// links
+ * that open the Telegram app without a browser, and the /start command to send by hand. The web links use
+ * telegram.me, not t.me: some ISPs (several in India) intercept t.me and the browser shows ERR_SSL_PROTOCOL_ERROR,
+ * while telegram.me serves the same page.
+ */
+export async function connectLinks(orgId: string): Promise<{ chat: string; group: string; app: string; app_group: string; command: string; bot: string; expires_in: number } | null> {
   const u = await botUsername();
   if (!u) return null;
   const p = makeStart(orgId, linkKey(), Math.floor(Date.now() / 1000));
-  return { chat: `https://t.me/${u}?start=${p}`, group: `https://t.me/${u}?startgroup=${p}`, expires_in: 15 * 60 };
+  return {
+    chat: `https://telegram.me/${u}?start=${p}`, group: `https://telegram.me/${u}?startgroup=${p}`,
+    app: `tg://resolve?domain=${u}&start=${p}`, app_group: `tg://resolve?domain=${u}&startgroup=${p}`,
+    command: `/start ${p}`, bot: `@${u}`, expires_in: 15 * 60,
+  };
 }
 
 async function handle(u: Update) {

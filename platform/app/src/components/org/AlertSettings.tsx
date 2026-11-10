@@ -39,7 +39,7 @@ export function AlertSettings() {
   const [secret, setSecret] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [waiting, setWaiting] = useState<{ chat: string; before: string | null; until: number } | null>(null);
+  const [waiting, setWaiting] = useState<{ chat: string; app: string; command: string; bot: string; before: string | null; until: number } | null>(null);
 
   const load = useCallback(async () => {
     const r = await fetch("/api/org/channels", { cache: "no-store" });
@@ -96,10 +96,10 @@ export function AlertSettings() {
     setMsg(null); setBusy(true);
     const tab = window.open("", "_blank");
     try {
-      const b = (await call("POST", { action: "telegram-link" })) as { chat: string; group: string };
+      const b = (await call("POST", { action: "telegram-link" })) as { chat: string; group: string; app: string; app_group: string; command: string; bot: string };
       const href = group ? b.group : b.chat;
       if (tab) tab.location.href = href; else window.location.href = href;
-      setWaiting({ chat: href, before: c?.telegram_chat ?? null, until: Date.now() + 15 * 60_000 });
+      setWaiting({ chat: href, app: group ? b.app_group : b.app, command: b.command, bot: b.bot, before: c?.telegram_chat ?? null, until: Date.now() + 15 * 60_000 });
     } catch (e) { tab?.close(); setMsg({ ok: false, text: (e as Error).message }); } finally { setBusy(false); }
   };
   const disconnect = async () => {
@@ -154,7 +154,11 @@ export function AlertSettings() {
               {c.telegram_chat ? (
                 <p className={styles.note}>Alerts go to chat <span className="mono">{c.telegram_chat}</span>{c.updated_by === "telegram" ? ", connected from Telegram" : ""}.</p>
               ) : waiting ? (
-                <p className={styles.note}>Telegram opened in a new tab. Tap <b>Start</b> there; this page updates by itself. The link works for 15 minutes. <a className="link" href={waiting.chat} target="_blank" rel="noreferrer">Open it again</a></p>
+                <div className={styles.stack}>
+                  <p className={styles.note}>Telegram opened in a new tab. Tap <b>Start</b> there; this page updates by itself. The link works for 15 minutes.</p>
+                  <p className={styles.note}>Page did not open? <a className="link" href={waiting.app}>Open in the Telegram app</a> · <a className="link" href={waiting.chat} target="_blank" rel="noreferrer">open the link again</a> · or send this to <span className="mono">{waiting.bot}</span>:</p>
+                  <div className={styles.secret}><code>{waiting.command}</code><button type="button" className={`${styles.btn} ${styles.quiet}`} onClick={() => void navigator.clipboard?.writeText(waiting.command)}>Copy</button></div>
+                </div>
               ) : (
                 <p className={styles.note}>One tap: Telegram opens, you press Start, and this chat is connected. Nothing to copy.</p>
               )}
