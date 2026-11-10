@@ -20,3 +20,7 @@
 .restoringDot { width: 8px; height: 8px; border-radius: 2px; background: var(--text-weak); animation: restoring-pulse 1s var(--ease) infinite alternate; }
 @keyframes restoring-pulse { from { opacity: 0.25; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .restoringDot { animation: none; } }
+
+/* the page wrapper Chrome keeps hidden while the session restores; it adds no box of its own */
+.page { display: contents; }
+.page[hidden] { display: none; }

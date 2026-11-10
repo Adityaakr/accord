@@ -37,7 +37,7 @@ const ITEMS: Item[] = [
   { name: "USDC", mark: <span className={styles.coin}><Usdc /></span>,
     role: "Settlement on NEAR as a NEP-141 token, paid only by the contract from each agreement's own account." },
   { name: "NEAR Intents", mark: <img className={styles.tile} src="/assets/logos/near-intents.png" alt="" width={32} height={32} loading="lazy" />,
-    role: "Planned: funding an agreement from other chains through NEAR Intents' 1Click API." },
+    role: "Used, quote only: dry 1Click quotes price funding an agreement from USDC on Base, Ethereum, Arbitrum or Solana; nothing is signed or sent." },
   { name: "Rhea", mark: <span className={`${styles.tile} ${styles.tileDark}`}><img src="/assets/logos/rhea.svg" alt="" width={22} height={20} loading="lazy" /></span>,
     role: "The USDC/wNEAR pool the market-making observer reads at hidden times." },
   { name: "HOT Connect", mark: <img className={styles.tile} src="/assets/logos/hot-wallet.png" alt="" width={32} height={32} loading="lazy" />,

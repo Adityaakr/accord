@@ -60,8 +60,11 @@ export function Chrome({ network, factory, sandbox, children }: { network: strin
       <span className={styles.restoringDot} aria-hidden="true" />Restoring your session…
     </div>
   );
-  // a not-found page never waits for the session: it is the same for everyone
-  const body = waiting && !notFound ? restoringLine : children;
+  // a not-found page never waits for the session: it is the same for everyone. While waiting, the page is still
+  // rendered (hidden), so the server's HTML carries its text for readers without JavaScript (AI screeners, link
+  // previews) and nothing remounts when the session settles; people see the quiet line until then.
+  const hold = waiting && !notFound;
+  const body = <>{hold ? restoringLine : null}<div hidden={hold} className={styles.page}>{children}</div></>;
   if (full) return <NotFoundContext.Provider value={setNotFound}><main id="main">{body}</main></NotFoundContext.Provider>;
   return (
     <NotFoundContext.Provider value={setNotFound}>
@@ -83,7 +86,7 @@ export function Chrome({ network, factory, sandbox, children }: { network: strin
             <Link href="/docs">Docs</Link>
             <Link href="/check">Check a payment</Link>
             <Link href="/try-it">Try a deal</Link>
-            <Link href="/try">Recorded attack</Link>
+            <Link href="/try">Live attack room</Link>
             <a href="https://accordweb-production.up.railway.app" target="_blank" rel="noreferrer">accord site</a>
           </nav>
           <span className="small mono">{network} · factory {factory}</span>

@@ -38,7 +38,7 @@ A payment becomes eligible only when the agreed evidence or acceptance is record
 
 - USDC : Settlement on NEAR as a NEP-141 token, paid only by the contract from each agreement's own account.
 
-- NEAR Intents : Planned: funding an agreement from other chains through NEAR Intents' 1Click API.
+- NEAR Intents : Used, quote only: dry 1Click quotes price funding an agreement from USDC on Base, Ethereum, Arbitrum or Solana; nothing is signed or sent.
 
 - Rhea : The USDC/wNEAR pool the market-making observer reads at hidden times.
 
