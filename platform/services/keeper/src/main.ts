@@ -34,7 +34,7 @@ async function step(
       }
     }
     const atlas = (await deal.terms())?.atlas;
-    if (ask && atlas) for (const line of await observeAgreement(deal, atlas, now, ask)) log(line);
+    if (ask && atlas) for (const line of await observeAgreement(deal, atlas, now, ask, a.jobs.observer.wasm_hash)) log(line);
   }
   if (a.ends_at && now >= a.ends_at + a.params.grace_secs && !a.in_flight && !a.closing) {
     try {

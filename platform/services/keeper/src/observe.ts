@@ -34,7 +34,8 @@ export type ObserverOutput =
   | { mode: "observe"; status: "not_yet" }
   | { mode: string; status: "error"; error: string };
 
-export type AskObserver = (agreement: string, ask: SlotAsk) => Promise<ObserverOutput>;
+/** `wasmHash` is the observer build the agreement pins (`jobs.observer.wasm_hash`); OutLayer runs that version. */
+export type AskObserver = (agreement: string, ask: SlotAsk, wasmHash?: string) => Promise<ObserverOutput>;
 
 /** Where the observer runs: the local OutLayer on a local node, or OutLayer's HTTPS API on testnet. */
 export type ObserverConfig =
@@ -45,17 +46,24 @@ const OBSERVER_TIMEOUT_MS = 30_000;
 
 /**
  * The observer as a function. Local: `POST <url>` with the job input, the job output back. OutLayer
- * (app.outlayer.ai/docs/https-api): `POST <api>/call/<owner>/<project>` with `X-Payment-Key`, body `{input}`, reply
- * `{status, output}` where `output` is the job's stdout (a JSON string, or already parsed).
+ * (app.outlayer.ai/docs/https-api): `POST <api>/call/<owner>/<project>` with `X-Payment-Key`, body `{input, secrets_ref,
+ * version_key}`, reply `{status, output}` where `output` is the job's stdout (a JSON string, or already parsed).
+ * `secrets_ref` names the owner's `default` profile, as `request_execution` does on chain: without it OutLayer injects no
+ * secrets and the observer answers `PROTECTED_OBSERVER_SEED is not set` (a54.accord-v2.testnet, 10 Nov 2026).
+ * `version_key` pins the agreement's own observer build; without it OutLayer runs the project's active version.
  */
 export function observerFor(cfg: ObserverConfig): AskObserver {
-  return async (agreement, ask) => {
+  return async (agreement, ask, wasmHash) => {
     const input = { mode: "observe", agreement, period: ask.period, slot: ask.slot };
     const local = cfg.kind === "local";
     const res = await fetch(local ? cfg.url : `${cfg.api}/call/${cfg.owner}/${cfg.project}`, {
       method: "POST",
       headers: { "content-type": "application/json", ...(local ? {} : { "x-payment-key": cfg.paymentKey }) },
-      body: JSON.stringify(local ? input : { input }),
+      body: JSON.stringify(local ? input : {
+        input,
+        secrets_ref: { profile: "default", account_id: cfg.owner },
+        ...(wasmHash ? { version_key: wasmHash } : {}),
+      }),
       signal: AbortSignal.timeout(OBSERVER_TIMEOUT_MS),
     });
     const body = (await res.json()) as Record<string, unknown>;
@@ -81,6 +89,7 @@ export async function observeAgreement(
   atlas: AtlasTerms,
   now: number,
   ask: AskObserver,
+  wasmHash?: string,
 ): Promise<string[]> {
   const periods = await deal.periods();
   const recorded = new Map<number, Set<number>>();
@@ -94,7 +103,7 @@ export async function observeAgreement(
     // One slot's failure (an observer error, a timeout, a rejected record) never stops the others.
     let out: ObserverOutput;
     try {
-      out = await ask(deal.id, s);
+      out = await ask(deal.id, s, wasmHash);
     } catch (e) {
       lines.push(`observe ${deal.id} · period ${s.period + 1} slot ${s.slot + 1} · ${(e as Error).message.slice(0, 160)}`);
       continue;

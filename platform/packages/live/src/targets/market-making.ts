@@ -30,6 +30,7 @@ async function observePeriod(w: World, room: Room, ask: AskObserver, print: bool
   const deal = w.reader.agreement(room.id);
   const keeper = client(w, "keeper", room.id);
   const seen = new Set<number>();
+  const errors = new Set<string>();
   for (;;) {
     const a: AgreementView = await deal.get();
     const periods = await deal.periods();
@@ -38,7 +39,11 @@ async function observePeriod(w: World, room: Room, ask: AskObserver, print: bool
     const obs = await deal.observations(0);
     const recorded = new Map([[0, new Set(obs.map((o) => o.observation.slot))]]);
     for (const s of slotsToAsk(room.atlas, [p0], recorded, a.now)) {
-      const out = await ask(room.id, s).catch((e: Error) => ({ status: "error" as const, mode: "observe", error: e.message }));
+      const out = await ask(room.id, s, a.jobs.observer.wasm_hash).catch((e: Error) => ({ status: "error" as const, mode: "observe", error: e.message }));
+      if (out.status === "error" && !errors.has(out.error)) {
+        errors.add(out.error);
+        line(`observer`, `${room.id} · period 1 slot ${s.slot + 1} · ${out.error.slice(0, 160)}`);
+      }
       if (out.status !== "observed") continue;
       await keeper.recordObservation(observationOf(out), out.sig).catch(() => undefined);
     }
