@@ -14,9 +14,9 @@ import { useWorkspace } from "./workspace/Workspace";
 import styles from "./Chrome.module.css";
 
 const FULL = ["/signin", "/enter"];
-const PUBLIC = ["/verify", "/check", "/record", "/docs", "/status", "/replay", "/try", "/join", "/market-making", "/atlas", "/payee", "/invite"];
+const PUBLIC = ["/verify", "/check", "/record", "/docs", "/status", "/replay", "/controls", "/try", "/join", "/market-making", "/atlas", "/payee", "/invite"];
 // Read-only pages that never depend on who is signed in: they render at once, even while a session is being restored.
-const READ_ONLY = ["/verify", "/check", "/record", "/docs", "/status", "/replay"];
+const READ_ONLY = ["/controls", "/verify", "/check", "/record", "/docs", "/status", "/replay"];
 
 // A not-found page (app/not-found.tsx) marks itself here, so an unknown address shows "page not found" instead of
 // sending a signed-out visitor to sign-in.

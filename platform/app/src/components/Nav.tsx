@@ -33,6 +33,8 @@ const ICONS = {
   verify: <><path d="M8 2 13 4v4c0 3-2.2 5-5 6-2.8-1-5-3-5-6V4z" /><path d="m6 8 1.5 1.5L10.5 6.5" /></>,
   try: <path d="M5 3.5v9l7.5-4.5z" />,
   check: <><circle cx="8" cy="8" r="5.5" /><path d="m5.6 8.1 1.7 1.7 3.2-3.5" /></>,
+  sheet: <><rect x="2.5" y="3" width="11" height="10" rx="1.8" /><path d="M2.5 6.5h11M2.5 9.75h11M6.5 6.5V13" /></>,
+  grid: <><rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1" /><rect x="9" y="2.5" width="4.5" height="4.5" rx="1" /><rect x="2.5" y="9" width="4.5" height="4.5" rx="1" /><rect x="9" y="9" width="4.5" height="4.5" rx="1" /></>,
   deliveries: <><path d="M2.5 5.5 8 2.5l5.5 3v5L8 13.5l-5.5-3z" /><path d="M2.5 5.5 8 8.5l5.5-3M8 8.5v5" /></>,
   payout: <><rect x="2" y="4" width="12" height="8.5" rx="1.8" /><path d="M2 7h12M4.5 10h2.5" /></>,
   profile: <><circle cx="8" cy="6" r="2.6" /><path d="M3 13.5c.8-2.3 2.7-3.4 5-3.4s4.2 1.1 5 3.4" /></>,
@@ -77,8 +79,20 @@ const PUBLIC_NAV: NavItem[] = [
   { href: "/try-it", label: "Try a deal", icon: "try", match: (p) => p.startsWith("/try-it") },
   { href: "/verify", label: "Verify", icon: "verify", match: (p) => p.startsWith("/verify") },
   { href: "/record", label: "Public record", icon: "record", match: (p) => p.startsWith("/record") },
-  { href: "/check", label: "Check a payment", icon: "check", match: (p) => p.startsWith("/check") },
   { href: "/status", label: "Status", icon: "chart", match: (p) => p.startsWith("/status") },
+];
+
+/* Payment controls: their own section under the main items. Alerts and exports need an organisation session, so a
+   signed-out visitor sees only the public ones. */
+const CONTROLS_PUBLIC: NavItem[] = [
+  { href: "/check", label: "Check a payment", icon: "check", match: (p) => p.startsWith("/check") },
+  { href: "/controls", label: "All controls", icon: "grid", match: (p) => p.startsWith("/controls") },
+];
+const CONTROLS: NavItem[] = [
+  CONTROLS_PUBLIC[0]!,
+  { href: "/settings?tab=alerts", label: "Refusal alerts", icon: "bell", match: () => false },
+  { href: "/record?scope=org", label: "Finance exports", icon: "sheet", match: () => false },
+  CONTROLS_PUBLIC[1]!,
 ];
 
 export function Sidebar() {
@@ -118,6 +132,10 @@ export function Sidebar() {
     return (
       <nav className={`${styles.sidebar} ${styles.signedOut}`} aria-label="Main">
         <div className={styles.group}>{PUBLIC_NAV.map(link)}</div>
+        <div className={`${styles.group} ${styles.controls}`} aria-label="Payment controls">
+          <span className={styles.groupHead}>Payment controls<span className={styles.newTag}>New</span></span>
+          {CONTROLS_PUBLIC.map(link)}
+        </div>
         <div className={`${styles.group} ${styles.bottom}`}><span className={styles.sideTheme}><ThemeToggle /></span></div>
       </nav>
     );
@@ -145,6 +163,10 @@ export function Sidebar() {
         )}
       </div>
       <div className={styles.group}>{ws.nav.map(link)}</div>
+      <div className={`${styles.group} ${styles.controls}`} aria-label="Payment controls">
+        <span className={styles.groupHead}>Payment controls<span className={styles.newTag}>New</span></span>
+        {CONTROLS.map(link)}
+      </div>
       <div className={`${styles.group} ${styles.bottom}`}>
         {hasOrg ? (
           <Link href="/alerts" prefetch={false} className={`${styles.side} ${path.startsWith("/alerts") ? styles.on : ""}`} aria-current={path.startsWith("/alerts") ? "page" : undefined}>

@@ -106,7 +106,7 @@ function ToolGrid({ label, items }: { label: string; items: ToolCard[] }) {
 }
 
 /** The payment controls section: a "New" pill, a heading the size of the step's, live row then planned row. */
-function Tools() {
+export function Tools() {
   return (
     <section id="payment-controls" aria-labelledby="t-tools" className={`${styles.wide} ${styles.tools}`}>
       <div className={`${styles.head} ${styles.toolsHead}`}>
