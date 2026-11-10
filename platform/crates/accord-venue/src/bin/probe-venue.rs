@@ -34,7 +34,11 @@ fn main() {
         std::env::var("NEAR_MAINNET_ARCHIVAL_RPC_URL")
             .unwrap_or("https://archival-rpc.mainnet.fastnear.com".into()),
     );
-    let band: u32 = 200;
+    // `make probe-venue` measures within 200 bps; `probe-venue <unix time> <band bps>` sets both.
+    let band: u32 = std::env::args()
+        .nth(2)
+        .and_then(|a| a.parse().ok())
+        .unwrap_or(200);
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()

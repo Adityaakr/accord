@@ -8,7 +8,8 @@
       "contract": "dclv2.ref-labs.near",
       "pool_id": "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1|wrap.near|2000"
     },
-    "pair": "NEAR/USDC"
+    "pair": "NEAR/USDC",
+    "schedule": "2 periods of 360 seconds, 6 hidden observation slots per period; pass_threshold counts passing slots, so it is at most slots_per_period"
   },
   "limits": {
     "max_retainer_per_period": "8000000",

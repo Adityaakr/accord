@@ -8,17 +8,18 @@
       "contract": "dclv2.ref-labs.near",
       "pool_id": "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1|wrap.near|2000"
     },
-    "pair": "NEAR/USDC"
+    "pair": "NEAR/USDC",
+    "schedule": "4 periods of 360 seconds, 6 hidden observation slots per period; pass_threshold counts passing slots, so it is at most slots_per_period"
   },
   "limits": {
     "max_retainer_per_period": "8000000",
     "periods": 4,
     "period_secs": 360,
-    "max_spread_bps": 200,
+    "max_spread_bps": 220,
     "min_depth_quote": "20000000",
-    "depth_band_bps": 200,
+    "depth_band_bps": 300,
     "min_slots": 6,
     "min_threshold": 4
   },
-  "instructions": "Pay a retainer only for periods where the pool met the conditions. The conditions match what the pool showed on 3 Nov (a 146 bps spread, 32 USDC of bid depth within 2%), so most periods should pass."
+  "instructions": "Pay a retainer only for periods where the pool met the conditions. The conditions match what the pool showed on 10 Nov 2026 (spreads of 169 to 187 bps; 36 USDC of bid depth and 45 USDC of ask depth within 3%, while within 2% the bid side often thinned to zero), so most periods should pass."
 }
