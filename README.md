@@ -199,17 +199,31 @@ An account that is not an Accord agreement answers `404` with `{"error":"<accoun
 
 Whose server do your agents meet on? When both companies bring an agent, each needs its limits to stay private while the outcome stays binding. The money step is where it breaks today: business email compromise alone cost `$3.05 billion` across `24,768` complaints in 2025 ([FBI IC3 2025 report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf)). Agents read their instructions from the same inbox an attacker can write to. Accord puts the negotiation in an enclave and the payment rules in a contract, so a fooled agent can ask but cannot pay outside the terms.
 
-## Who it is for, and what changes for them
+## Impact
 
-| Who | The problem today, in their words or numbers | What Accord changes | Shown on testnet by |
-| --- | --- | --- | --- |
-| Finance and treasury teams | Payment redirection: business email compromise cost `$3.05 billion` in 2025 ([FBI IC3](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf)) | A redirected or altered payment is refused by the contract and recorded; the team is told on Telegram, by webhook or in the app; finance exports match the record | a6 step 11 `ERR_PAYEE_MISMATCH`; the [Live attack room](https://accordweb-production.up.railway.app/app/try) |
-| Procurement teams | "Walmart, like most organizations with large procurement operations, can’t possibly conduct focused negotiations with all of its 100,000-plus suppliers" ([HBR, 2022](https://hbr.org/2022/11/how-walmart-automated-supplier-negotiations)) | Agents negotiate each supplier inside limits neither side sees, both companies approve, and payment follows only the approved terms | a6: `QUOTE → COUNTER → FINAL → ACCEPT`, `35.50 tUSDC · 3 items` |
-| Payment networks and merchants | "These agents will need to be trusted with payments, not only by users, but by banks and sellers as well" (Visa, [Apr 2025](https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21361.html)) | The agent holds a key that can only call `act` on one agreement; what it may pay is checked on chain, and anyone can verify an agreement with no account | `make verify`; `/app/api/verify/<agreement>` |
-| Token projects hiring market makers | "I call it information arbitrage" (Jelle Buth, market maker Enflux, [Cointelegraph, Apr 2025](https://cointelegraph.com/magazine/market-maker-deals-quietly-killing-crypto-projects)) | A market-making agreement pays only for periods an enclave observer measured as met | a56 paid (`Eligible`), a57 refused `ERR_PERIOD_WITHHELD` |
-| Agent developers | Agents read instructions from inputs an attacker can write to ([Simon Willison, Jun 2025](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/)) | A payment check before the call (`/app/check`), a read-only MCP server, the CLI and the SDK, so an agent can ask "would this pay?" and get the contract's answer | [Use from an agent](#use-from-an-agent) |
+The same failure costs money in web2 and web3: an agent, or a person, is told to pay somewhere else, and nothing between the instruction and the money checks it against what both companies agreed.
 
-None of these organisations uses or endorses Accord; the quotes describe the problem. Accord has no customers yet: it runs on NEAR testnet with test USDC and fictional companies (Northwind buying from Halcyon).
+| | The number | Source |
+| --- | --- | --- |
+| Web2 · payment fraud | `76%` of US organisations had attempted or actual payments fraud in 2025; `74%` were hit by business email compromise | [AFP Payments Fraud and Control Survey, Apr 2026](https://www.financialprofessionals.org/about/learn-more/press-releases/Details/over-75-percent-of-us-firms-experienced-payments-fraud-in-2025-while-ai-adoption-for-fraud-mitigation-lags) |
+| Web2 · vendor impersonation | Vendor imposter fraud cited by `45%` of organisations, up `11` points in a year | [AFP survey, Apr 2025](https://www.financialprofessionals.org/about/learn-more/press-releases/Details/survey-79-percent-of-organizations-were-victims-of-attempted-or-actual-payments-fraud-activity-in-2024) |
+| Web2 · losses | Business email compromise: `$3.05 billion` across `24,768` complaints in 2025 | [FBI IC3 2025 report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf) |
+| Web2 · where agents are going | "AI agents will intermediate more than `$15 trillion` in B2B spending by 2028" (Gartner, as reported) | [Digital Commerce 360, Nov 2025](https://www.digitalcommerce360.com/2025/11/28/gartner-ai-agents-15-trillion-in-b2b-purchases-by-2028/) |
+| Agents · the open risk | "it is unclear if there are fool-proof methods of prevention for prompt injection" | [OWASP LLM01:2025](https://genai.owasp.org/llmrisk/llm01-prompt-injection/) |
+| Web3 · keys | Private key compromise was `43.8%` of stolen crypto in 2024; over `$3.4 billion` stolen in 2025 | [Chainalysis, Dec 2024](https://www.chainalysis.com/blog/crypto-hacking-stolen-funds-2025/), [Dec 2025](https://www.chainalysis.com/blog/crypto-hacking-stolen-funds-2026/) |
+| Web3 · market makers | Binance: "Not every market-making arrangement is aligned with long-term market integrity"; in Mar 2025 it offboarded the market maker in the MOVE case | [The Block, Mar 2026](https://www.theblock.co/post/395111/binance-points-market-maker-token-launch-red-flags-updated-trading-rules), [Mar 2025](https://www.theblock.co/post/347931/binance-move-market-maker-movement-38-million-usdt-buyback-program) |
+| Web3 · stablecoin B2B | B2B was half of `$6 billion` in real-world stablecoin payments in Feb 2025, up `288%` in a year (Artemis, as reported) | [Ledger Insights, Jun 2025](https://www.ledgerinsights.com/new-research-into-real-world-stablecoin-payments-shows-some-surprising-results/) |
+
+**The gap Accord fills.** The agent payment rails launched in 2025 let one party's agent pay: [Visa Intelligent Commerce](https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21366.html), [Mastercard Agent Pay](https://newsroom.mastercard.com/news/press/2025/april/mastercard-unveils-agent-pay-pioneering-agentic-payments-technology-to-power-commerce-in-the-age-of-ai) (agentic tokens), [Google AP2](https://cloud.google.com/blog/products/ai-machine-learning/announcing-agents-to-payments-ap2-protocol) (one user's mandate for a merchant's cart), [Stripe and OpenAI's ACP](https://stripe.com/blog/developing-an-open-standard-for-agentic-commerce) and [x402](https://www.x402.org/). None of them holds terms that two companies negotiated and both approved, or binds the recipient to a proof both accepted. Accord is that layer: the negotiation stays private in an enclave, and the contract refuses any payment outside the approved item, evidence, amount and recipient, whoever was fooled.
+
+| Who | What changes for them | Shown on testnet by |
+| --- | --- | --- |
+| Finance and treasury teams | A redirected or altered payment is refused by the contract and recorded; the team is told on Telegram, by webhook or in the app; exports match the record | a6 and a63 `ERR_PAYEE_MISMATCH`; the [Live attack room](https://accordweb-production.up.railway.app/app/try) |
+| Procurement teams | "Walmart, like most organizations with large procurement operations, can’t possibly conduct focused negotiations with all of its 100,000-plus suppliers" ([HBR, 2022](https://hbr.org/2022/11/how-walmart-automated-supplier-negotiations)): agents negotiate each supplier inside limits neither side sees, and payment follows only the approved terms | a6: `QUOTE → COUNTER → FINAL → ACCEPT`, `35.50 tUSDC · 3 items` |
+| Token projects hiring market makers | Payment only for periods an enclave observer measured as met, so a weak period is withheld on chain, not argued about | a56 paid (`Eligible`), a57 refused `ERR_PERIOD_WITHHELD` |
+| Agent developers | A payment check before the call (`/app/check`), a read-only MCP server, the CLI and the SDK: an agent asks "would this pay?" and gets the contract's answer | [Use from an agent](#use-from-an-agent) |
+
+None of the organisations named in this section uses or endorses Accord; their numbers and words describe the problem. Accord has no customers yet: it runs on NEAR testnet with test USDC and fictional companies (Northwind buying from Halcyon).
 
 ## How it works
 
@@ -412,15 +426,39 @@ Not claimed: `realworld`, `social` and `swarms`. Their extra requirements (an in
 
 Free on testnet with test funds. Planned, still a hypothesis: buyers pay per agreement, and vendors pay per recipient authorisation. Building on Accord and verifying an agreement stay free. Never a percentage of payments. Production prices are published before launch.
 
-## After the hackathon
+## Sustainability
 
-What keeps working without us, and what is left before mainnet.
+### The loop that pays for itself
 
-- **Agreements do not depend on Accord's servers.** Each agreement is its own NEAR account with no full-access key and code pinned by hash; its rules, ledger and refusals are on chain. `make verify` and the MCP server read the chain directly, so an agreement can be checked even if the hosted app is down.
+1. A buyer opens an agreement and pays for it (planned per-agreement fee, [above](#business-model-hypothesis)).
+2. Each vendor it buys from joins free, because joining is how it gets paid; its proven domain and recipient are reusable in every later agreement, with any buyer.
+3. Vendors that buy from their own suppliers open agreements too, and bring their vendors in free. Each paying buyer adds unpaid vendors who are one step from paying.
+4. Verifying stays free for anyone (`make verify`, the MCP server, `/app/api/verify`), so tools built on top send more agreements, not less trust.
+
+Revenue grows with the number of agreements, never with a cut of the money moving through them, and the costs it pays are per agreement too: a `2 NEAR` creation deposit on testnet (global code, by hash), the enclave runs and the model calls.
+
+### Partners whose products fit
+
+Candidates, not partners: no relationship with any of them is claimed.
+
+| Candidate | Their product | The fit |
+| --- | --- | --- |
+| [Circle](https://www.circle.com/multi-chain-usdc/near) | Native USDC on NEAR | `accord-usdc.testnet` already settles in Circle's testnet USDC; mainnet settles in native USDC |
+| [Pactum](https://pactum.com/) | AI supplier negotiation agents | The terms its agents reach could be the terms an Accord agreement enforces at payment time |
+| [Coupa](https://siliconangle.com/?p=754391) | Procurement suite with AI agents (and Pactum for negotiation) | Where the pre-payment check, refusal alerts and finance exports meet the buyer's existing approvals |
+| [Stripe and OpenAI ACP](https://stripe.com/blog/developing-an-open-standard-for-agentic-commerce), [Google AP2](https://ap2-protocol.org/), [Visa Intelligent Commerce](https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21366.html), [Mastercard Agent Pay](https://newsroom.mastercard.com/news/press/2025/april/mastercard-unveils-agent-pay-pioneering-agentic-payments-technology-to-power-commerce-in-the-age-of-ai) | Agent checkout and card rails for one party's agent | Accord adds the two-company terms and the recipient both approved; an agent's token or mandate could be scoped to an approved agreement |
+| [x402](https://www.x402.org/) | HTTP-native stablecoin payments, with NEAR among its launch collaborators | An x402 payment could be gated by the agreement's recipient and amount checks |
+| [Rhea Finance](https://www.rhea.finance/) | NEAR DEX | The market-making observer already measures a Rhea pool (a56, a57) |
+| Exchanges that police market-maker deals ([Binance](https://www.binance.com/en/blog/community/483141898861583811)) | Due diligence on token projects' market makers | A market-making agreement's on-chain record of measured periods is evidence a project can show a listing team |
+| [NEAR Intents / 1Click](https://docs.near-intents.org/), [OutLayer](https://app.outlayer.ai/), [NEAR AI Cloud](https://docs.near.ai/cloud/private-inference) | Cross-chain swaps; enclave compute; private inference | Funding an agreement from other chains (planned); OutLayer and NEAR AI Cloud already run Accord's enclave jobs and model calls |
+
+### What keeps working, and what is left
+
+- **Agreements do not depend on Accord's servers.** Each agreement is its own NEAR account with no full-access key and code pinned by hash; its rules, ledger and refusals are on chain, and `make verify` and the MCP server read the chain directly.
 - **The hosted demo stays up and funded through 18 Nov 2026**: the site, the app, the faucet (refilled twice a day when it falls under 15 NEAR) and the pre-funded `/try` room.
-- **Open source, MIT.** CI runs the website checks, the TypeScript typecheck and tests, and the Rust money-path tests on every push.
-- **Before mainnet, in order:** restrict the Sealed Table's seed to the agreement's own calls (S1, an OutLayer setting); remove release 3's job builds from the seeds' access; check the hardware quote in `make verify` (the `model` line is `partial` today); a third-party audit of the contracts (the review above is internal); then deploy the factory on mainnet with Circle USDC. Each step is tracked in [`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md) and [`platform/DECISIONS.md`](platform/DECISIONS.md).
-- **Next in the product:** an organisation-wide spend limit across all of its agreements, funding an agreement from other chains through NEAR Intents, and a DAO as the buyer.
+- **Open source, MIT**, with CI on every push (website checks, TypeScript typecheck and tests, the Rust money-path tests).
+- **Before mainnet, in order:** restrict the Sealed Table's seed to the agreement's own calls (S1, an OutLayer setting); remove release 3's job builds from the seeds' access; check the hardware quote in `make verify`; a third-party audit of the contracts; then the factory on mainnet with Circle USDC. Tracked in [`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md) and [`platform/DECISIONS.md`](platform/DECISIONS.md).
+- **Next in the product:** an organisation-wide spend limit across all its agreements, funding an agreement from other chains through NEAR Intents, and a DAO as the buyer.
 
 ## Repository map
 
