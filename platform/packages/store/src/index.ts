@@ -10,9 +10,11 @@ import { randomUUID } from "node:crypto";
 import pg from "pg";
 import { ORG_SCHEMA, orgs, type OrgTables } from "./orgs.js";
 import { AGENT_LOG_SCHEMA, agentLog, type AgentLogTables } from "./agentlog.js";
+import { ALERT_SCHEMA, alertStore, type AlertTables } from "./alerts.js";
 
 export * from "./orgs.js";
 export * from "./agentlog.js";
+export * from "./alerts.js";
 
 export interface InboxMessage {
   id: string;
@@ -48,7 +50,7 @@ create table if not exists faucet_grants (day date not null, kind text not null 
 create table if not exists faucet_days (day date primary key, open_yocto numeric not null, opened_at timestamptz not null default now());
 `;
 
-interface FileDb extends OrgTables, AgentLogTables {
+interface FileDb extends OrgTables, AgentLogTables, AlertTables {
   inbox: InboxMessage[];
   approvals: Approval[];
   demoVendors: DemoVendor[];
@@ -63,7 +65,7 @@ async function db(): Promise<pg.Pool | null> {
   if (!process.env.DATABASE_URL) return null;
   if (!pool) {
     pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 5 });
-    ready = pool.query(SCHEMA + ORG_SCHEMA + AGENT_LOG_SCHEMA).then(() => undefined);
+    ready = pool.query(SCHEMA + ORG_SCHEMA + AGENT_LOG_SCHEMA + ALERT_SCHEMA).then(() => undefined);
   }
   await ready;
   return pool;
@@ -414,3 +416,6 @@ export const org = orgs({ db, read: () => readFile(), mutate: (f) => mutate((d) 
 
 /** The demo agent's record of what it was asked and meant to do in each test room (./agentlog.ts). */
 export const agentActions = agentLog({ db, read: () => readFile(), mutate: (f) => mutate((d) => f(d)) });
+
+/** Finance references, refusal alert channels, alerts and their deliveries, per organisation (./alerts.ts). */
+export const alerts = alertStore({ db, read: () => readFile(), mutate: (f) => mutate((d) => f(d)) });

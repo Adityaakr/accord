@@ -157,6 +157,15 @@ export function orgs(b: Backend) {
     membership,
     members,
     lookupInvite,
+    /** Appends to the organisation's audit log. */
+    log,
+
+    /** Every organisation's id and name (the refusal alert scan walks them). */
+    async list(): Promise<{ id: string; name: string }[]> {
+      const p = await b.db();
+      if (p) return (await p.query("select id, name from orgs order by created_at")).rows.map((r: Record<string, unknown>) => ({ id: String(r.id), name: String(r.name) }));
+      return t(b.read()).orgs.map((o) => ({ id: o.id, name: o.name }));
+    },
 
     /** A new organisation with its creator as the first admin. One organisation per account. */
     async create(name: string, domain: string, creator: string): Promise<Org> {
