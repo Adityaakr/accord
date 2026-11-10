@@ -127,6 +127,8 @@ Every transaction of these runs is linked in [`docs/runs.md`](docs/runs.md); the
 
 Everything below reads NEAR testnet with no account and no keys. Run it from `platform/` after `corepack enable && pnpm install`.
 
+**Check a payment before signing.** [`/app/check`](https://accordweb-production.up.railway.app/app/check), or as JSON: `GET https://accordweb-production.up.railway.app/app/api/check?agreement=a48.accord-v2.testnet&item=3&amount=8.00&recipient=halcyon-mm.testnet`. It answers whether the agreement's contract would pay or refuse that payment, gate by gate (CORS any origin, GET only, 30 a minute per IP). It is a read-only simulation of `accord-core`'s `check_pay`, the function `act` calls, over chain state at one block: no transaction, and the contract decides at the time of the real call. Replayed against 24 recorded payments and refusals, it matches every one.
+
 **MCP server** (`@accord/mcp`, stdio by default). With no key in the environment it serves 7 read-only tools: `accord_list_agreements`, `accord_get_agreement`, `accord_due_items`, `accord_preflight`, `accord_refusals`, `accord_receipts` and `accord_verify`. The paying and principal tools appear only when their keys are set ([`platform/INTERFACES.md`](platform/INTERFACES.md) section 12).
 
 ```bash
