@@ -591,6 +591,25 @@ recordReleaseProof(): ReleaseProof   // browser-safe: the by-request record look
 outlayerVerifyProof(env, opts?: { timeoutMs?: number }): ReleaseProof   // record lookup, then `outlayer-verify job <task id>` (OUTLAYER_VERIFY_BIN, else PATH; OUTLAYER_VERIFY_TIMEOUT_MS); missing tool or timeout: not checked
 cachedReleaseProof(proof, opts?: { ttlMs?: number; retryMs?: number; max?: number }): ReleaseProof   // per job run; ok and fail kept 6 h, not checked retried after 60 s, concurrent calls share one run
 sealedCheck(accord, agreement, as: "buyer" | "vendor", key: DocKeySource): Promise<"ERR_SEALED" | "READABLE">   // a sanity check, not a proof
+
+// @accord/sdk/check (kept out of the main entry: it embeds a 270 KB wasm)
+checkPayment(accord, agreement, { item, amount?, recipient? }, opts?: { block?: number; archivalRpc?: string; factories?: string[] }): Promise<PaymentCheck & { defaulted }>
+  // would act(Pay) pay or refuse this, at which gate: get_agreement and get_items at one block, run through accord-core's
+  // gates::check_pay built to wasm (crates/accord-check; scripts/build-check-wasm.sh writes src/check-wasm.ts). Amount: digits
+  // only = base units, with a decimal point = whole tokens (at most the token's decimals); omitted = the item's approved amount.
+  // Recipient omitted = the active one. The act rules follow the code hash (8wMuMRre… releases 1 to 3: recipient as given;
+  // ECgsrZwy… releases 4 and 5: a malformed recipient panics ERR_BAD_RECIPIENT before the gates, canaries match in any case);
+  // another hash is UnsupportedCodeError, never guessed. Assumes the current agent key signs (none installed: ERR_REVOKED).
+simulatePayment({ agreement, view, items, codeHash, token, block, request }): Promise<PaymentCheck>   // the same over views already read
+checkForm(accord, agreement): Promise<CheckForm>   // items with approved amounts, the active recipient, the token
+type PaymentCheck = { verdict: "pay" | "refuse"; code: string | null; panics: boolean; summary: string;
+  gates: { gate: 1..6; name: "key_and_state" | "recipient" | "item" | "evidence" | "amount" | "lock"; label; pass: boolean | null; code; detail }[];
+  approved: { recipient; amount; token }; entered: { item; recipient; amount }; token: { id; symbol; decimals };
+  checked_at_block; checked_at; state; kind; release; rules: "release3" | "release4";
+  time_dependent: { at; detail } | null; not_checked: string[]; note; engine: { source; wasm_sha256 } }
+  // gates: each evaluated on its own (earlier gates made to pass, check_pay asked again); pass null = not evaluated.
+  // The first failing gate is always the contract's code (accord-check proptest; packages/sdk/test/check.test.ts replays
+  // 24 recorded payments and refusals of a48, a2.accord-usdc, a53, a6, a1.accord-usdc, a11 and a14 at their act blocks)
 ```
 
 Built on `near-api-js` (version pinned in `DECISIONS.md`; 7.x is a single package). Sealing uses `eciesjs` and `canonicalize`. The app wraps NEAR Connect as a `Signer`.
@@ -617,7 +636,7 @@ Run `npx @accord/mcp` (stdio) or `npx @accord/mcp --http 8787`; with no variable
 
 ## 14. App routes and HTTP API
 
-Pages: `/` (deal rooms), `/agreements/new`, `/agreements/[id]` (deal room: the four-state strip, terms, recipient, items, exceptions, the refusal log as a live region, receipts, the keys panel, agent approvals, the Verified panel), `/agreements/[id]/invoice` (`docs/build/WIN_PLAN.md` lever 4: the items as an invoice with amounts, due dates and the Fund button; the 1Click quote once lever 9 ships), `/market-making` (alias `/atlas`), `/payee` (file generator and checker), `/try` (the open inbox), `/verify` and `/verify/[id]`, `/record` (ledger), `/join`, `/docs`, `/status`.
+Pages: `/` (deal rooms), `/agreements/new`, `/agreements/[id]` (deal room: the four-state strip, terms, recipient, items, exceptions, the refusal log as a live region, receipts, the keys panel, agent approvals, the Verified panel), `/agreements/[id]/invoice` (`docs/build/WIN_PLAN.md` lever 4: the items as an invoice with amounts, due dates and the Fund button; the 1Click quote once lever 9 ships), `/market-making` (alias `/atlas`), `/payee` (file generator and checker), `/try` (the open inbox), `/verify` and `/verify/[id]`, `/check` (check a payment: public, no sign-in), `/record` (ledger), `/join`, `/docs`, `/status`.
 
 | Route | Method | Returns | Notes |
 | --- | --- | --- | --- |
@@ -625,6 +644,7 @@ Pages: `/` (deal rooms), `/agreements/new`, `/agreements/[id]` (deal room: the f
 | `/api/agreements/[id]` | GET | `AgreementView` and items | Same |
 | `/api/agreements/[id]/events` | GET | events after a cursor | Method per check 0.8 |
 | `/api/verify/[id]` | GET | `VerifyReport` | `?nonce=<64 hex>` from the client; relays NEAR AI's report when a key is needed; the client verifies. CORS: any origin, GET only, no credentials |
+| `/api/check` | GET | `PaymentCheck` (section 11) | `?agreement=&item=&amount=&recipient=[&block=]`: would the agreement's contract pay this payment or refuse it, and why; a read-only simulation of `act`'s gates from chain state at one block (the latest final, or `block`; a garbage-collected block is read from `NEAR_ARCHIVAL_RPC_URL`, else testnet's public archival RPC), no transaction. `amount`: digits only = token base units, with a decimal point = whole tokens (at most the token's decimals); `amount` and `recipient` default to the approved ones (`defaulted` names them). Without `item`: `CheckForm` (items, approved amounts, active recipient, token). 400 bad input (before any RPC call), 404 not an agreement of a known factory, 410 block unavailable, 422 code not known to the check, 429 past 30 a minute per IP (300 in all), 503 RPC busy. CORS: any origin, GET only, no credentials. The page is `/check` |
 | `/api/inbox` | POST | `{ id }` | `{ sender, subject, body }`; 10 an hour per visitor and `TRY_MAX_MESSAGES_PER_HOUR` in all; no key, no contract call |
 | `/api/inbox/stats` | GET | `{ attempts, last_refusal, paid_outside_terms, approved_payments }` | Computed from the contract's events; `paid_outside_terms` is `0` by construction and shown as counted |
 | `/api/record.csv` (also `/record.csv`) | GET | CSV | Columns: `date_utc, agreement, title, item, description_hash, amount, unit, token, recipient, via, status, block, transaction_url`; `unit` is the token's own symbol (`tUSDC`, `USDC`); `transaction_url` is the payment's own transaction (its `payment_sent` event), empty when the transactions API has not indexed it. No inference cost column: the Sealed Table's `usage` is not kept on chain. The public CSV is readable from any origin (no credentials); `?scope=org` is not |
