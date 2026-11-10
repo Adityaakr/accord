@@ -158,6 +158,22 @@ try { REDIRECTS = JSON.parse(readFileSync(join(DIST, "redirects.json"), "utf8"))
 
 const APP_ONLY = /^\/(record\.csv|signin|try-it|rooms|agreements|enter|profile|settings|onboarding|approvals|deliveries|invite|recipients|payout|agents|market-making)(\/|$)/
 
+async function demoDomainFile() {
+  const base = JSON.parse(readFileSync(join(DIST, ".well-known", "accord.json"), "utf8"))
+  try {
+    const r = await fetch(`${APP_ORIGIN}/app/.well-known/accord.json`, { signal: AbortSignal.timeout(3000) })
+    const app = r.ok ? await r.json() : null
+    const seen = new Set(base.entries.map((e) => e.recipient))
+    for (const e of Array.isArray(app?.entries) ? app.entries : []) {
+      if (typeof e?.recipient === "string" && typeof e?.settlement_authority === "string" && !seen.has(e.recipient)) {
+        base.entries.push({ recipient: e.recipient, settlement_authority: e.settlement_authority })
+        seen.add(e.recipient)
+      }
+    }
+  } catch { /* the static file alone */ }
+  return JSON.stringify(base, null, 2) + "\n"
+}
+
 const server = createServer((req, res) => {
   const path = (req.url || "/").split("?")[0]
   if (path === "/app" || path.startsWith("/app/")) return proxyToApp(req, res)
@@ -179,6 +195,17 @@ const server = createServer((req, res) => {
   }
   if (req.url === "/healthz") {
     res.writeHead(200, { "Content-Type": "text/plain", "Cache-Control": "no-store" }).end("ok")
+    return
+  }
+  /* This origin is the app's labelled demo domain (platform/DEPLOY.md): its accord.json is the static file's fixed
+     demo vendors plus the pairs make demo registered with the app in the last 24 hours (the app's
+     /app/.well-known/accord.json, each signed by its recipient). The Payee job reads it from the root. If the app
+     does not answer within 3 s, the static file alone is served. */
+  if (path === "/.well-known/accord.json" && APP_ORIGIN && (req.method === "GET" || req.method === "HEAD")) {
+    void demoDomainFile().then((body) => {
+      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*", ...HEADERS })
+      res.end(req.method === "HEAD" ? undefined : body)
+    })
     return
   }
   /* Agents that ask for Markdown (Accept: text/markdown) get the page's Markdown copy at the same URL */

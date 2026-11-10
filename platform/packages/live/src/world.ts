@@ -162,13 +162,13 @@ export function world(): World {
         throw new Error(`${account} holds less than ${near} NEAR: top it up from the testnet faucet (make setup prints the shortfall)`);
       }
     },
-    // A fresh account for `make demo`: a sub-account of the buyer's account with 22 NEAR for a buyer (the creation
+    // A fresh account for `make demo`: a sub-account of the buyer's account with 10 NEAR for a buyer (the 2 NEAR creation
     // deposit and gas) or 2 NEAR otherwise. Testnet has no keyless faucet API.
     newAccount: async (name) => {
       const funder = p("BUYER");
       const kp = KeyPair.fromRandom("ed25519");
       const acct = new Account(funder.account, testnetReader.chain.provider, new KeyPairSigner(KeyPair.fromString(funder.key as KeyPairString)));
-      const near = name.endsWith("-buyer") ? 22n : 2n;
+      const near = name.endsWith("-buyer") ? 10n : 2n;
       await acct.createSubAccount({ accountOrPrefix: name, publicKey: kp.getPublicKey(), nearToTransfer: near * 10n ** 24n });
       return { account: `${name}.${funder.account}`, key: kp.toString() };
     },
@@ -195,8 +195,9 @@ export function tryWorld(): World {
 function appOf(url: string | undefined): { url: string; demoDomain: string } {
   if (!url) return { url: "", demoDomain: "" };
   try {
+    // Keep the path: the hosted app is served under /app (basePath), so the origin alone would reach the website.
     const u = new URL(url);
-    return { url: u.origin, demoDomain: u.host };
+    return { url: `${u.origin}${u.pathname.replace(/\/+$/, "")}`, demoDomain: u.host };
   } catch {
     throw new Error(`APP_URL must be a full URL such as https://accord-app.example, got ${url}`);
   }
