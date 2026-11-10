@@ -48,9 +48,9 @@ const TYPES: TypeCard[] = [
   { id: "grants", kind: null, icon: "vault", title: "Grants", text: "Tranches released when two of three named reviewers accept the milestone." },
 ];
 
-/* Payment controls, shown under the agreement types so both live in one place: three live (links) on the first row,
-   three planned (muted, inert) on the second. They never change the type chosen above. */
-type ToolCard = { id: string; icon: PixelName; title: string; text: string; href: string | null };
+/* Payment controls, shown under the agreement types so both live in one place: the three live ones as links, then one
+   quiet line naming what is next (planned, no card). They never change the type chosen above. */
+type ToolCard = { id: string; icon: PixelName; title: string; text: string; href: string };
 const TOOLS: ToolCard[] = [
   { id: "check", icon: "check", title: "Check a payment", href: "/check",
     text: "Before signing, see whether a room's contract would pay or refuse a payment, gate by gate." },
@@ -58,12 +58,6 @@ const TOOLS: ToolCard[] = [
     text: "Webhook, Telegram or email the moment the contract refuses your agent, with an incident view and revoke." },
   { id: "exports", icon: "sheet", title: "Finance exports", href: "/record?scope=org",
     text: "Every payment matched to your PO or invoice, ready for QuickBooks or Xero." },
-  { id: "monitoring", icon: "pulse", title: "Continuous monitoring", href: null,
-    text: "Every agent payment across your rooms in one live view, with unusual patterns flagged and funds traced after an incident." },
-  { id: "guard", icon: "lock", title: "Accord Guard", href: null,
-    text: "The same payment rules as a firewall for any agent wallet, without a negotiated deal." },
-  { id: "inference", icon: "terminal", title: "Inference marketplace", href: null,
-    text: "Pay another company's model per request, each payment tied to a receipt naming the model that answered." },
 ];
 
 function Arrow() {
@@ -84,7 +78,7 @@ function ToolGrid({ label, items }: { label: string; items: ToolCard[] }) {
             <>
               <span className={styles.typeTop}>
                 <IconTile name={t.icon} size={40} />
-                {t.href ? <span className={styles.open} aria-hidden="true">Open<Arrow /></span> : <span className={styles.planned}>Planned</span>}
+                <span className={styles.open} aria-hidden="true">Open<Arrow /></span>
               </span>
               <span className={styles.typeTitle}>{t.title}</span>
               <span className={styles.typeText}>{t.text}</span>
@@ -92,11 +86,7 @@ function ToolGrid({ label, items }: { label: string; items: ToolCard[] }) {
           );
           return (
             <li key={t.id} className={styles.toolItem}>
-              {t.href ? (
-                <Link href={t.href} prefetch={false} className={`${styles.type} ${styles.tool}`}>{inner}</Link>
-              ) : (
-                <div className={`${styles.type} ${styles.toolPlanned}`} aria-label={`${t.title}, planned`}>{inner}</div>
-              )}
+              <Link href={t.href} prefetch={false} className={`${styles.type} ${styles.tool}`}>{inner}</Link>
             </li>
           );
         })}
@@ -105,17 +95,17 @@ function ToolGrid({ label, items }: { label: string; items: ToolCard[] }) {
   );
 }
 
-/** The payment controls section: a "New" pill, a heading the size of the step's, live row then planned row. */
+/** The payment controls section: a "New" pill, a heading the size of the step's, the live row, then one quiet "Next" line. */
 export function Tools() {
   return (
     <section id="payment-controls" aria-labelledby="t-tools" className={`${styles.wide} ${styles.tools}`}>
       <div className={`${styles.head} ${styles.toolsHead}`}>
         <span className={styles.pill}><span className={styles.indicator} aria-hidden="true" />New</span>
         <h2 id="t-tools" className={styles.h}>Payment controls for your agent</h2>
-        <p className={styles.lead}>Three are live today; three are planned. Use them with any room or on their own.</p>
+        <p className={styles.lead}>Live today. Use them with any room or on their own.</p>
       </div>
-      <ToolGrid label="Live" items={TOOLS.filter((t) => t.href)} />
-      <ToolGrid label="Planned" items={TOOLS.filter((t) => !t.href)} />
+      <ToolGrid label="Live" items={TOOLS} />
+      <p className={styles.toolNext}><span className={styles.toolNextTag}>Next</span>Continuous monitoring and Accord Guard.</p>
     </section>
   );
 }
@@ -600,15 +590,15 @@ export function NewRoomFlow({ network, deposit, demoAllowed, demoVendor }: {
             <span className={styles.stripLead}>Payment controls for your agent:</span>
           </span>
           <span className={styles.stripLinks}>
-            {TOOLS.filter((t) => t.href).map((t, i) => (
+            {TOOLS.map((t, i) => (
               <span key={t.id} className={styles.stripItem}>
                 {i > 0 ? <span className={styles.stripDot} aria-hidden="true">·</span> : null}
-                <Link href={t.href!} prefetch={false} className={styles.stripLink}>{t.title}</Link>
+                <Link href={t.href} prefetch={false} className={styles.stripLink}>{t.title}</Link>
               </span>
             ))}
             <button type="button" className={styles.stripMore}
               onClick={() => document.getElementById("payment-controls")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })}>
-              +3 planned ↓
+              Next ↓
             </button>
           </span>
         </nav>

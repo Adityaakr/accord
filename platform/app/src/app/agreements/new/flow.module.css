@@ -89,8 +89,8 @@
 .open svg { transition: transform 0.25s var(--ease); }
 .tool:hover .open, .tool:focus-visible .open { color: var(--teal); }
 .tool:hover .open svg, .tool:focus-visible .open svg { transform: translateX(2px); }
-.toolPlanned { opacity: 0.5; cursor: default; }
-.toolPlanned:hover { border-color: var(--hairline-strong); background: transparent; }
+.toolNext { display: flex; align-items: center; gap: 10px; margin: 16px 0 0; font-size: 13px; color: var(--text-weak); }
+.toolNextTag { font-family: var(--font-mono); font-size: 10.5px; padding: 2px 8px; border-radius: 999px; color: var(--text-medium); border: 1px dashed var(--hairline-strong); }
 
 /* groups: label row (padding to the name column), note, rows between hairlines */
 .group { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
