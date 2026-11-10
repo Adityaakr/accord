@@ -61,17 +61,6 @@
 
 /* The "New" strip: Type step only, between the hero and the stepper; a teal wash on a hairline, one line on a
    desktop, two on a phone (the label, then the links). */
-.strip { width: 100%; max-width: 720px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 14px; margin: -12px 0 32px; padding: 10px 16px; border: 1px solid var(--teal-line); border-radius: var(--radius-lg); background: var(--teal-wash); font-size: 13.5px; line-height: 150%; }
-.stripHead, .stripLinks { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 10px; }
-.stripTag { padding: 1px 8px; border: 1px solid var(--teal-line); border-radius: 999px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal); }
-.stripLead { color: var(--text-strong); }
-.stripItem { display: inline-flex; align-items: center; gap: 8px; }
-.stripDot { color: var(--text-faint); }
-.stripLink, .stripMore { padding: 0; color: var(--text-medium); text-decoration: underline; text-decoration-color: var(--teal-line); text-underline-offset: 3px; transition: color 0.2s var(--ease), text-decoration-color 0.2s var(--ease); }
-.stripLink:hover, .stripMore:hover { color: var(--text-strong); text-decoration-color: var(--teal); }
-.stripMore { color: var(--teal); text-decoration: none; }
-.stripMore:hover { color: var(--teal); text-decoration: underline; }
-.stripLink:focus-visible, .stripMore:focus-visible { outline: 2px solid rgba(var(--ink-rgb), 0.5); outline-offset: 3px; border-radius: 3px; }
 
 /* Payment controls: after the step's Continue, behind a hairline. A "New" pill, a heading the size of the step's,
    then a Live row (links with an "Open" arrow) and a Planned row (muted, inert). Same cards as the types. */
@@ -214,7 +203,6 @@
   .col { gap: 30px; }
   .types { grid-template-columns: minmax(0, 1fr); }
   .tools { margin-top: 36px; }
-  .strip { margin: -8px 0 24px; padding: 10px 12px; }
   .groupLabel, .note, .addRow { padding-left: 36px; }
   .advanced { padding-left: 36px; }
   .row { grid-template-columns: 24px minmax(0, 1fr); column-gap: 12px; row-gap: 2px; padding: 12px 0 8px; min-height: 0; align-items: baseline; }

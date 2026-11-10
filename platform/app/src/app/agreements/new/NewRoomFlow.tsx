@@ -582,27 +582,6 @@ export function NewRoomFlow({ network, deposit, demoAllowed, demoVendor }: {
 
   return (
     <div className={styles.flow}>
-      {/* Type step only: a quiet strip so the payment controls are seen before anyone presses Continue */}
-      {step === 0 && (
-        <nav className={styles.strip} aria-label="New: payment controls">
-          <span className={styles.stripHead}>
-            <span className={styles.stripTag}>New</span>
-            <span className={styles.stripLead}>Payment controls for your agent:</span>
-          </span>
-          <span className={styles.stripLinks}>
-            {TOOLS.map((t, i) => (
-              <span key={t.id} className={styles.stripItem}>
-                {i > 0 ? <span className={styles.stripDot} aria-hidden="true">·</span> : null}
-                <Link href={t.href} prefetch={false} className={styles.stripLink}>{t.title}</Link>
-              </span>
-            ))}
-            <button type="button" className={styles.stripMore}
-              onClick={() => document.getElementById("payment-controls")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })}>
-              Next ↓
-            </button>
-          </span>
-        </nav>
-      )}
       <div className={styles.stepper} ref={headRef}>
         <ol className={styles.steps} aria-label="Steps">
           {STEPS.map((s, i) => (
@@ -647,8 +626,6 @@ export function NewRoomFlow({ network, deposit, demoAllowed, demoVendor }: {
         </div>
       </div>
 
-      {/* step 1 only: the tools sit after Continue, so choosing a type and moving on stays one short reach */}
-      {step === 0 && <Tools />}
     </div>
   );
 }
