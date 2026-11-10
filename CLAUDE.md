@@ -42,7 +42,7 @@ Then, in more depth:
    Expected last line: `verify: 6 checks ok · 1 partial` with `outlayer-verify` installed (`cargo install --locked --git https://github.com/out-layer/outlayer-verify --rev 90c27d9d outlayer-verify`), else `verify: 5 checks ok · 1 partial · 1 not checked` (`model` is partial: the nonce is bound in the attestation report, the hardware quote is not checked here; the `release` check runs `outlayer-verify` on the three job runs).
 3. **Run the tests.** `cd platform && make test` (Rust toolchain from `platform/rust-toolchain.toml`; `make setup-check` lists what is missing). Without Rust: `pnpm -r typecheck` and `pnpm -r test` (`pnpm install` builds `@accord/sdk` and `@accord/store` first, through the `prepare` script in `platform/package.json`, because the other packages import their built output). The app alone: `pnpm --filter @accord/app typecheck` and `pnpm --filter @accord/app test`. The website: `npm ci && npm run check` at the repository root.
 4. **Run the whole flow locally, no network.** `cd platform && make sandbox` ends with `sandbox: all checks passed`; jobs are replaced by a mock signer and every mocked line says `[mock]`.
-5. **Try it in the browser.** `/app/try-it`: the steps and their literal output are in [`README.md`](README.md#try-it-in-about-5-minutes-on-testnet). It is live at https://accordweb-production.up.railway.app/app/try-it; the README also says how to run it locally.
+5. **Try it in the browser.** `/app/try-it`: the steps and their literal output are in [`README.md`](README.md#run-your-own-deal-step-by-step). It is live at https://accordweb-production.up.railway.app/app/try-it; the README also says how to run it locally.
 
 ## Use from an agent
 
