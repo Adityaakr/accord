@@ -7,6 +7,7 @@ import styles from "../pages.module.css";
 import rstyles from "./record.module.css";
 import { withBase } from "@/lib/basePath";
 import { RoomLink } from "@/components/RoomLink";
+import { ExportMenu } from "@/components/ExportMenu";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Record" };
@@ -49,6 +50,14 @@ export default async function Record({ searchParams }: { searchParams: Promise<{
         <Panel title="Refused"><span className="h2 num">{refused}</span><span className="small">requests the terms did not allow</span></Panel>
         <Panel title="Refunded"><Totals parts={refundedBy} /><span className="small">returned to buyers at settlement</span></Panel>
       </div>
+      {scope === "org" && (
+        <div style={{ marginBottom: 32 }}>
+          <Panel title="Export for finance" eyebrow="every payment in your organisation's rooms, signed from your side: money out as the buyer, money in as the vendor">
+            <ExportMenu api="/api/org/export" symbols={paidBy.map((p) => p.symbol)} disabled={payments.length === 0} />
+            <p className="small">QuickBooks Online (3 or 4 columns) and Xero files hold one token each, so tUSDC and USDC download separately. References come from each room&apos;s Funds tab.</p>
+          </Panel>
+        </div>
+      )}
       <Panel title="Payments" flush>
         <div className={styles.tableWrap}>
           <table className={styles.table}>
