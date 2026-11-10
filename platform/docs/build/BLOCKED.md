@@ -4,35 +4,39 @@ Each entry names the `PROGRESS.md` item it blocks. Remove an entry when it is do
 
 Release 4 (the security-review fixes) is no longer blocked: it is published and current on both factories since 9 Nov 2026
 (`DECISIONS.md` 26, set current on accord-v2.testnet `J9uADVqQSkY6f1uMYbMbWoPnB4oiwuS3CtLayKojtgeC` and on
-accord-usdc.testnet `5D9LxPuU4phUXTgRawd97TmhZPGiPjWzSPWCYXJteoLJ`).
+accord-usdc.testnet `5D9LxPuU4phUXTgRawd97TmhZPGiPjWzSPWCYXJteoLJ`). Release 5 (the reviewed job builds) is current on both
+since 10 Nov 2026 (`DECISIONS.md` 33, set current `8jSfWk6a3qzZRMrzqJj731njUGtRCYmWPLqLAqc3RAgF` and
+`3wK4mZVZtF8x6XNwSGbzDSyLR2nPwDqkjktsmpaoKAwi`).
 
-## 2.7 (S1) and security-review finding 5: new job builds, and the seed condition only the dashboard can set
+## 2.7 (S1) and security-review finding 5: the seed condition only the dashboard can set, then old-build access
 
-Added 9 Nov 2026 (DECISIONS.md 25). The job code on `main` (commit e12adb2 and 8d53aee) serves only agreements of
-`accord-v2.testnet` and `accord-usdc.testnet` (`a<n>.<factory>`, the agreement's own view, the factory's
-`is_agreement`) and turns an off-curve doc key into a final `BAD_INPUT`. The deployed builds (sealed table `7c832ce9…`,
-payee `24071443…`, observer `8240179a…`) do not have it until these steps run. The job cannot enforce S1 itself:
-OutLayer gives a job `NEAR_SENDER_ID` = the transaction's signer (https://app.outlayer.ai/docs/https-api, "Environment
-Variables in WASM"), never the contract that called `request_execution`, so only the secret's access condition can
-restrict who runs `negotiate`.
+Steps 1, 2, 3 and 5 of the 9 Nov list are done (10 Nov 2026, `DECISIONS.md` 33): the reviewed builds (Sealed Table
+`64a354a0cf02f1e23424a3173291abb5e951667f3f49b01524cfa9180d130fac`, Payee
+`b5a0c4731721657ab202d31c0b564f404baaa12137920edf35a62ea3308cb26b`, observer
+`0dcc55e828b3b828edf938734a4f797c2b40c4480cd438a4396dbea146733d72`) are deployed and active, and release 5 names them on
+both factories. Step 3 was done as "old build OR new build" on each secret row, not a move, so release 3 and 4 rooms
+(a6, a10, a14 for `/app/try`, every try-it room before a52) keep running on `7c832ce9…`, `24071443…`, `8240179a…`. What
+is left:
 
-1. Build the three jobs: `cd platform && cargo build --release --target wasm32-wasip2 -p accord-sealed-table -p accord-payee -p accord-observer`;
-   note each `sha256` of `target/wasm32-wasip2/release/accord-{sealed-table,payee,observer}.wasm`.
-2. Upload each to FastFS and deploy it as a new version of its project (`accord-v1.testnet/accord-sealed-table`,
-   `accord-v1.testnet/accord-payee`, `accord-v1.testnet/accord-observer`), the way builds `1099138a…` and `7c832ce9…`
-   went up (DECISIONS.md 19 and 21).
-3. Move every secret row to the new build with `outlayer secrets access --build <new sha256>` (the `PROTECTED_*_SEED`
-   values are kept, so the signing keys and the mandate key do not change).
-4. In the OutLayer dashboard (the CLI 0.2.2 has no Account Pattern), on the Sealed Table's `PROTECTED_SEALED_SEED` and
-   `NEARAI_API_KEY`, and on the Payee's `PROTECTED_PAYEE_SEED`, set the condition, with **Direct calls only** ticked:
-   `(Account Pattern ^a[0-9]+\.(accord-v2|accord-usdc)\.testnet$ OR Whitelist releases.accord-v2.testnet,
-   releases.accord-usdc.testnet) AND One build only <new sha256>`. If the panel offers only one pattern, use
-   `^(a[0-9]+|releases)\.(accord-v2|accord-usdc)\.testnet$`. Leave the observer's seed as it is (`allow-all` and the
-   build lock): the keeper asks it over HTTPS, and every caller gets the identical signed observation.
-5. Tell me the three new hashes. I publish release 5 on both factories with them (`RELEASE_MODE=global RELEASE_VERSION=5
-   make deploy-testnet`, then the same with `ACCORD_FACTORY=accord-usdc.testnet FACTORY_KEY=$FACTORY_USDC_KEY`), check
-   with a run requested directly (not by an agreement) that OutLayer refuses it before the code starts, run
-   `make negotiate`, and then drop the testnet sentence from claim 1's limit (GOAL.md and every copy of the table).
+1. **The seed condition (dashboard).** In the OutLayer dashboard (CLI 0.2.2 has no Account Pattern), on the Sealed
+   Table's row (`accord-v1.testnet/accord-sealed-table`, which holds `PROTECTED_SEALED_SEED` and `NEARAI_API_KEY`), set,
+   with **Direct calls only** ticked:
+   `(Account Pattern ^a[0-9]+\.(accord-v2|accord-usdc)\.testnet$ OR Whitelist releases.accord-v2.testnet, releases.accord-usdc.testnet) AND (One build only 64a354a0cf02f1e23424a3173291abb5e951667f3f49b01524cfa9180d130fac OR One build only 7c832ce9bbea56effda01e9ddf9c413f0d8d2c8baed837e1a524c77529f0a2e1)`
+   and on the Payee's row (`accord-v1.testnet/accord-payee`, `PROTECTED_PAYEE_SEED`):
+   `(Account Pattern ^a[0-9]+\.(accord-v2|accord-usdc)\.testnet$ OR Whitelist releases.accord-v2.testnet, releases.accord-usdc.testnet) AND (One build only b5a0c4731721657ab202d31c0b564f404baaa12137920edf35a62ea3308cb26b OR One build only 24071443f098c10bbc2ddc0eef79ab99ec696039cf6eb06c14aa813d73e7e876)`.
+   If the panel offers only one pattern, use `^(a[0-9]+|releases)\.(accord-v2|accord-usdc)\.testnet$`. Keep both builds
+   in the build part, or release 3 and 4 rooms stop. Leave the observer's row as it is (any caller, the two builds): the
+   keeper asks it over HTTPS, and every caller gets the identical signed observation. Then: a run requested directly
+   (not by an agreement) must be refused before the code starts; run `make negotiate`, the try-it e2e
+   (`app/e2e/try-without-wallet.mjs`) and `make verify DEAL=a10.accord-v2.testnet`; then drop the testnet sentence from
+   claim 1's limit (GOAL.md and every copy of the table).
+2. **Remove the old builds' access (later, after 18 Nov).** While each row also admits `7c832ce9…` / `24071443…` /
+   `8240179a…`, a caller can name an old build, which lacks the factory-only check (finding 5) and the off-curve refusal
+   (finding 4). Removing the old leaf stops every job run for release 3 and 4 rooms (negotiation retries, payee proofs,
+   observations), so do it only once those rooms no longer need runs: `outlayer secrets access --project
+   accord-v1.testnet/accord-<job> --build <new sha256>` for each of the three (with the dashboard condition from 1 in
+   place, set the build part to the new build only instead). Then say in the README that release 3 and 4 rooms can no
+   longer request job runs.
 
 ## 3.7: market making on testnet needs an OutLayer payment key
 

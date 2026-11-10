@@ -757,3 +757,61 @@ market-making room that has not run on testnet, and three "try" pages with near-
   image only. Locally (`next start`, binary on PATH), `/app/api/verify/a10.accord-v2.testnet` answered `release ok` in
   9.4 s on the first call and 3.7 s once cached; without the binary the same call answered `release not checked` in 3.4 to
   5.6 s. Until the app is redeployed from this image, the live endpoint says `not checked`.
+
+## 33. Release 5: the reviewed job builds, with the earlier builds kept readable (10 Nov 2026)
+
+- **Builds** (`cargo build --release --target wasm32-wasip2 -p accord-sealed-table -p accord-payee -p accord-observer` on
+  `main`, the code of findings 4, 5 and 10 in section 25): Sealed Table
+  `64a354a0cf02f1e23424a3173291abb5e951667f3f49b01524cfa9180d130fac` (1,495,687 bytes), Payee
+  `b5a0c4731721657ab202d31c0b564f404baaa12137920edf35a62ea3308cb26b`, observer
+  `0dcc55e828b3b828edf938734a4f797c2b40c4480cd438a4396dbea146733d72`. Uploaded to FastFS with `outlayer upload` (Sealed Table
+  chunks `BP5awXwK…`, `8TufRjFr…`; Payee `GkDve348…`; observer `FYdhiYcn…`) and added as new versions with `outlayer deploy
+  --no-activate` (`add_version` `5dsGAcUd…`, `ApE77GFb…`, `FyFvduW9…`), then activated once release 5 was current
+  (`set_active_version` `8xXxCivi…`, `B2LkJn7V…`, `8YWLhutt…`). The first Sealed Table and Payee uploads never landed
+  (the CLI printed a hash for a transaction the chain does not know; another process signed with `accord-v1.testnet`'s key
+  at the same time), so their first pubkey runs (requests `15080`, `15081`) failed with `wasm_url could not be fetched`
+  and were requested again after the re-upload. Check a FastFS URL answers `200` before requesting a run.
+- **Keeping live rooms working.** An agreement names its job builds by hash (`version_key` in `request_execution`), so
+  every release 3 and 4 room keeps asking for `7c832ce9…`, `24071443…`, `8240179a…`. Moving each secret row's lock to the
+  new build (`outlayer secrets access --build`, the old step 3) would have cut those builds off from their seeds and broken
+  every existing room, including the try-it rooms, `/app/try` (`a14`) and the payee proofs of release 4 rooms. OutLayer's
+  access condition is a tree (`Logic { operator: And | Or }` over leaves including `WasmHash`, https://app.outlayer.ai/docs/secrets,
+  source `github.com/out-layer/outlayer` `contract/src/types.rs`; the keystore judges an `Or` over two `WasmHash` leaves
+  against the measured build). CLI 0.2.2 sets only one build, so `update_access` was called on `outlayer.testnet` directly,
+  for each row, with `{"Logic":{"operator":"Or","conditions":[{"WasmHash":{"hash":<old>}},{"WasmHash":{"hash":<new>}}]}}`
+  (Sealed Table `7qJzyrN23mwpU29rWXwEt4dtHums36SsHTW2Crih6839`, Payee `DzbKsTCtHaV2pNE8y8sDCW1H2tc7tE5gKk7pd43gkESB`,
+  observer `59xrHMiLvZqhtY28fRhg71VjC3Jq7jbKWLz2yb6foskg`; two earlier attempts, `DS7KtmbX…` and `iuRw22dg…`, failed on too
+  small a deposit and changed nothing). `outlayer secrets list` now shows each row as `(build:<old> or build:<new>)`. The
+  ciphertext is not touched, so the seeds, the three signing keys and the mandate key are unchanged.
+- **Release 5** (global, agreement code `ECgsrZwy…` unchanged, so release 4's global contract is reused):
+  - accord-v2.testnet: pubkey runs `15085` = task `30189` (Sealed Table, https://testnet.nearblocks.io/txns/3TDs7RHcSN8hSHSuK4WMDNSSES46NtFoZBVuC6yQ4fQM),
+    `15086` = `30191` (Payee, https://testnet.nearblocks.io/txns/DWS5jZXQhELTf6W7vLehuhTut1NYbbdrNdf79Lw1JK7), `15082` = `30185`
+    (observer, https://testnet.nearblocks.io/txns/68e35UrWvmr5JTyHrSwQqhdaF8fKcPeVZBPiKdzfbfb7); publish
+    https://testnet.nearblocks.io/txns/dFiMTwcYygycxQFSMpYqFfRaMaBU9uMrKtzpJQzRsmG, current
+    https://testnet.nearblocks.io/txns/8jSfWk6a3qzZRMrzqJj731njUGtRCYmWPLqLAqc3RAgF.
+  - accord-usdc.testnet: `15300` = `31810` (https://testnet.nearblocks.io/txns/61XJJuxMHmAS8hbusSVTFZgcLcY1ED1aU46YDiWiCjPg),
+    `15301` = `31811` (https://testnet.nearblocks.io/txns/eZxtXBfT9QHFxZXKLV2nQXRWGmPvP1vjDzHJuyRthve), `15302` = `31812`
+    (https://testnet.nearblocks.io/txns/EaRgqtuiQZAjcAzEWQPDjkzq448vdnJdE38Rt3JdTjUY); publish
+    https://testnet.nearblocks.io/txns/9QVU3RU1u2TcAgmS6TV8hxxjF6hCF5UB1wtF817kGcwC, current
+    https://testnet.nearblocks.io/txns/3wK4mZVZtF8x6XNwSGbzDSyLR2nPwDqkjktsmpaoKAwi.
+  - The keys equal release 4's (Sealed Table `GgC8gEhK…`, Payee `FAbZHA2M…`, observer `CXZzXC5m…`); `outlayer-verify` proves
+    all six tasks (`PROVEN`, exit `0`).
+- **Proofs on release 5:** `make negotiate` → `a52.accord-v2.testnet`, `wasm 64a354a0…`, QUOTE → COUNTER → ACCEPT,
+  `33.00 USDC` (tUSDC) in 3 items, attestation ok, `ERR_SEALED` both ways, `Attested · 52 s`; `make negotiate-usdc` →
+  `a3.accord-usdc.testnet`, the same build, `14.00 USDC` in 3 items, `Attested · 53 s`. `make verify` on both: `code hash
+  ECgsrZwy… = release 5`, `release … outlayer-verify proven … · ok`, `5 checks ok · 1 partial · 1 not checked` (only
+  negotiated, so `payee` has no recipient yet). The live `/app/try-it` "Try without a wallet" run on the public URL
+  (`app/e2e/try-without-wallet.mjs`) reached Finish on `a53.accord-v2.testnet` (release 5): paid with no click, redirect
+  refused `ERR_PAYEE_MISMATCH`, revoked, closed, faucet `+2.192 NEAR`, `+68.00 tUSDC`, no request over 20 s; `make verify
+  DEAL=a53.accord-v2.testnet` and the live `/app/api/verify/a53.accord-v2.testnet` both say `release ok`, and `make verify`
+  prints `6 checks ok · 1 partial` (recipient proven by the release 5 Payee build on `useaccord.tech`).
+- **Old builds still work:** the same e2e run before release 5 was published, after the access change, reached Finish on
+  `a51.accord-v2.testnet` (release 4, builds `7c832ce9…` and `24071443…`), which verifies `6 checks ok · 1 partial`;
+  `a10` still prints `code hash ECgsrZwy… = release 4` and `6 checks ok · 1 partial`. The app reads the current release
+  from the factory, so no app or Railway variable changed.
+- **What this does not change:** S1 is still not set; the rows still admit any caller (only the build is restricted).
+  And while each row admits the old builds, anyone can request a run of `7c832ce9…` (or `24071443…`, `8240179a…`) by hash
+  and have it run with the seed, and those builds do not have finding 5's factory-only check or finding 4's off-curve
+  refusal. Every run a release 5 agreement requests has both, but an outside caller can still go around the factory-only
+  check by naming an old build, until the old-build leaf is removed; removing it stops job runs for release 3 and 4 rooms
+  (`docs/build/BLOCKED.md`). Claim 1's testnet sentence stays.
