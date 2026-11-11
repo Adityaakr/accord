@@ -124,6 +124,13 @@ export default async function Tenders({ searchParams }: { searchParams: Promise<
   );
 }
 
+/** The winning agent's own label, its key on hover; the short key when no label was signed. */
+function winnerName(j: TenderJob) {
+  if (!j.winner) return "none";
+  const label = j.bids.find((b) => b.bidder === j.winner)?.agent;
+  return <span className={label ? undefined : "mono"} title={j.winner}>{label || shortHex(j.winner)}</span>;
+}
+
 function JobLine({ j, now }: { j: TenderJob; now: number }) {
   const bids = `${j.bids.length} bid${j.bids.length === 1 ? "" : "s"}`;
   switch (j.phase) {
@@ -136,9 +143,9 @@ function JobLine({ j, now }: { j: TenderJob; now: number }) {
     case "closed":
       return <>{bids} · reveal closed, award not yet asked for</>;
     case "awarded":
-      return <>{bids} · winner <span className="mono" title={j.winner ?? undefined}>{j.winner ? shortHex(j.winner) : "none"}</span></>;
+      return <>{bids} · winner {winnerName(j)}</>;
     case "linked":
-      return <>{bids} · agreement <span className="mono">{j.agreement}</span></>;
+      return <>{bids} · winner {winnerName(j)} · agreement <span className="mono">{j.agreement}</span></>;
     case "no_valid_bid":
       return <>{bids} · no revealed price within the budget</>;
     case "cancelled":

@@ -12,7 +12,7 @@
 .footerInner { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
 .footerBrand { display: inline-flex; align-items: center; gap: 10px; color: var(--text-weak); }
 .footerBrand svg { color: var(--text-medium); }
-.footerLinks { display: flex; gap: 20px; color: var(--text-weak); }
+.footerLinks { display: flex; flex-wrap: wrap; gap: 8px 20px; color: var(--text-weak); min-width: 0; }
 .footerLinks a:hover { color: var(--text-strong); }
 
 /* shown while a kept session is read back after a reload */
