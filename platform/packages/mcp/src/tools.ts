@@ -5,7 +5,7 @@
 import { z } from "zod";
 import {
   NOT_AN_AGREEMENT, guardedPay, isAccountId, type ActResult, type AgreementClient, type AgreementRecord, type Mandate, type PreflightResult,
-  type TenderJob, type TxResult, type VerifyReport,
+  TENDER_TOKENS, type TenderJob, type TxResult, type VerifyReport,
 } from "@accord/sdk";
 
 export type Needs = "nothing" | "agent" | "principal" | "bidder";
@@ -140,16 +140,21 @@ const bidderOf = (d: McpDeps) => {
   return d.bidder;
 };
 const jobId = z.number().int().min(1);
+/** Each job with its token's symbol and decimals: prices and the budget are base units of THAT token. */
+const withToken = (j: TenderJob) => {
+  const t = TENDER_TOKENS.find((x) => x.id === j.token);
+  return { ...j, token_info: t ? { symbol: t.symbol, decimals: t.decimals } : { symbol: null, decimals: null } };
+};
 
 export const TOOLS: ToolDef[] = [
   {
     name: "accord_tender_jobs",
-    description: "Open tenders on the board, newest first: a buyer's job, its public budget (base units, 6 decimals), its phase (open, revealing, closed, awarded, no_valid_bid, linked, cancelled), the sealed bids (price null until revealed), the winner and the linked Accord agreement.",
+    description: "Open tenders on the board, newest first: a buyer's job, its public budget (base units of the job's token; token_info gives its symbol and decimals: 6 for tUSDC and USDC, 24 for NEAR), its phase (open, revealing, closed, awarded, no_valid_bid, linked, cancelled), the sealed bids (price null until revealed), the winner and the linked Accord agreement.",
     needs: "nothing",
     input: { limit: z.number().int().min(1).max(50).optional() },
     run: async (a, d) => {
       const t = tenderOf(d);
-      return { board: t.board, jobs: await t.jobs((a.limit as number | undefined) ?? 20) };
+      return { board: t.board, jobs: (await t.jobs((a.limit as number | undefined) ?? 20)).map(withToken) };
     },
   },
   {
@@ -161,12 +166,12 @@ export const TOOLS: ToolDef[] = [
       const t = tenderOf(d);
       const j = await t.job(a.job as number);
       if (!j) throw new Error(`no job ${a.job as number} on ${t.board}`);
-      return { board: t.board, job: j };
+      return { board: t.board, job: withToken(j) };
     },
   },
   {
     name: "accord_tender_bid",
-    description: "Submit a sealed bid on an open job, signed with this server's bidder key (ACCORD_BIDDER_SEED). `price` is base units of the job's token (6 decimals: \"34500000\" is 34.50). Only a hash of the price leaves this machine until the reveal; the relay pays the gas and cannot change the bid. Reveal with accord_tender_reveal after the bidding window closes.",
+    description: "Submit a sealed bid on an open job, signed with this server's bidder key (ACCORD_BIDDER_SEED). `price` is base units of the job's token: read token_info.decimals from accord_tender_job first (tUSDC and USDC: 6, so \"34500000\" is 34.50; NEAR: 24, so \"2500000000000000000000000\" is 2.5). A 6-decimal price on a NEAR job is a near-zero bid. Only a hash of the price leaves this machine until the reveal; the relay pays the gas and cannot change the bid. Reveal with accord_tender_reveal after the bidding window closes.",
     needs: "bidder",
     input: { job: jobId, price: baseUnits, agent: z.string().regex(/^[\x21-\x39\x3b-\x7e](?:[\x20-\x39\x3b-\x7e]{0,62}[\x21-\x39\x3b-\x7e])?$/, "1 to 64 printable ASCII characters, no ':', no leading or trailing space") },
     run: async (a, d) => bidderOf(d).bid(a.job as number, a.price as string, a.agent as string),

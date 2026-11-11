@@ -123,7 +123,7 @@ export interface SealedBid {
 export interface PrepareBidOptions {
   board: string;
   job: number;
-  /** Base units of the job's token (6 decimals). */
+  /** Base units of the job's token: use its decimals (tenderToken(job.token).decimals), never assume 6. */
   price: bigint | string;
   agent: string;
   key: BidderKey;
@@ -272,4 +272,44 @@ export function verifyLink(bidder: string, account: string, signature: string): 
   } catch {
     return false;
   }
+}
+
+/**
+ * The tokens a job's budget can be in. The board stores amounts as raw base units and never reads the token, so every
+ * client must use the job's own decimals: a 6-decimal price on a 24-decimal job would be a near-zero bid that wins.
+ * `links`: whether this board (whose factory is accord-v2.testnet) can link the winner's agreement for this token.
+ */
+export interface TenderToken { id: string; symbol: string; decimals: number; label: string; links: boolean }
+export const TENDER_TOKENS: TenderToken[] = [
+  { id: "tusdc.accord-v1.testnet", symbol: "tUSDC", decimals: 6, label: "tUSDC (test token)", links: true },
+  { id: "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af", symbol: "USDC", decimals: 6, label: "Circle USDC (testnet)", links: false },
+  { id: "wrap.testnet", symbol: "NEAR", decimals: 24, label: "NEAR (wrapped, wrap.testnet)", links: false },
+]
+
+/** The job token's entry; an unknown token is an error (never guess its decimals). */
+export function tenderToken(id: string): TenderToken {
+  const t = TENDER_TOKENS.find((x) => x.id === id)
+  if (!t) throw new Error(`unknown tender token ${id}: its decimals are not known here`)
+  return t
+}
+
+/** A human amount for a job's token: 2 places for 6-decimal tokens, up to 4 for NEAR, no float. */
+export function tenderAmount(base: string | bigint, token: string): string {
+  const t = tenderToken(token)
+  const v = BigInt(base)
+  const unit = 10n ** BigInt(t.decimals)
+  const places = t.decimals > 6 ? 4 : 2
+  const whole = v / unit
+  const frac = ((v % unit) * 10n ** BigInt(places)) / unit
+  let f = frac.toString().padStart(places, "0")
+  if (t.decimals > 6) f = f.replace(/0+$/, "").padEnd(2, "0")
+  return `${whole}.${f}`
+}
+
+/** Parses a human amount for a job's token into base units (at most 6 fractional digits typed). */
+export function parseTenderAmount(text: string, token: string): bigint {
+  const t = tenderToken(token)
+  const m = /^(\d{1,12})(?:\.(\d{1,6}))?$/.exec(text.trim())
+  if (!m) throw new Error("an amount like 34.50 (up to 6 decimals)")
+  return BigInt(m[1]!) * 10n ** BigInt(t.decimals) + BigInt((m[2] ?? "").padEnd(t.decimals, "0").slice(0, t.decimals) || "0")
 }

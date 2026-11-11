@@ -63,3 +63,12 @@ describe("accord tender", () => {
     expect(over.lines.join("\n")).toContain("above the budget");
   });
 });
+
+describe("accord tender on a NEAR job", () => {
+  it("parses the price with the job token's 24 decimals, never 6", async () => {
+    const s = setup(job({ token: "wrap.testnet", budget: "40000000000000000000000000" }));
+    await runTender(s.ctx(["tender", "bid", "3", "--price", "2.5", "--agent", "near-agent"]), s.d);
+    const kept = JSON.parse(s.files.get(`/h/.accord/tender-bids/${BOARD}/3.json`)!).entries[0];
+    expect(kept.price).toBe("2500000000000000000000000");
+  });
+});

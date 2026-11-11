@@ -5,18 +5,17 @@
 // cannot change a bid: the board checks the bidder's signature. Reads come straight from the board on chain.
 //
 //   accord tender list | show <job> | key
-//   accord tender bid <job> --price <USDC> --agent <label> [--wait]
+//   accord tender bid <job> --price <amount in the job token> --agent <label> [--wait]
 //   accord tender reveal <job> | award <job>
 
 import {
-  Chain, RPC, TENDER_BOARDS, TenderBoardClient, addBidSecret, bidderKey, formatUnits, isBoardId, newBidderKey, nextNonce,
-  prepareBid, secondsLeft, secretFor, signLink, type BidderKey, type TenderJob,
+  Chain, RPC, TENDER_BOARDS, TenderBoardClient, addBidSecret, bidderKey, isBoardId, newBidderKey, nextNonce,
+  parseTenderAmount, prepareBid, secondsLeft, secretFor, signLink, tenderAmount, tenderToken, type BidderKey, type TenderJob,
 } from "@accord/sdk";
 import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname } from "node:path";
 import { flagBool, flagString } from "./args.js";
-import { parseAmount } from "./amount.js";
 import { header, line } from "./format.js";
 import type { Ctx, Handler } from "./commands.js";
 
@@ -61,7 +60,11 @@ export function tenderDeps(ctx: Ctx): TenderDeps {
   };
 }
 
-const usdc = (base: string | null) => (base === null ? "sealed" : `${formatUnits(base)} USDC`);
+/** An amount in the job's own token (its decimals and symbol); a token this CLI does not know shows raw base units. */
+const amt = (base: string | null, token: string) => {
+  if (base === null) return "sealed";
+  try { return `${tenderAmount(base, token)} ${tenderToken(token).symbol}`; } catch { return `${base} base units of ${token}`; }
+};
 const shortId = (s: string) => `${s.slice(0, 12)}…`;
 const jobNo = (ctx: Ctx, i = 1) => {
   const v = ctx.rest[i];
@@ -93,10 +96,10 @@ function jobLines(j: TenderJob): string[] {
   const out = [
     header("tender", `job ${j.id}`, j.phase),
     line("title", j.title),
-    line("budget", `${usdc(j.budget)} · buyer ${j.buyer}`),
+    line("budget", `${amt(j.budget, j.token)} · buyer ${j.buyer}`),
     line("window", left ? `${left} s left to ${j.phase === "open" ? "bid" : "reveal"}` : j.phase),
   ];
-  for (const b of j.bids) out.push(line(b.bidder === j.winner ? "winner" : "bid", `${b.agent.padEnd(18)} ${shortId(b.bidder)} ${usdc(b.price)}`));
+  for (const b of j.bids) out.push(line(b.bidder === j.winner ? "winner" : "bid", `${b.agent.padEnd(18)} ${shortId(b.bidder)} ${amt(b.price, j.token)}`));
   if (j.agreement) out.push(line("agreement", j.agreement));
   return out;
 }
@@ -108,9 +111,10 @@ async function reveal(ctx: Ctx, d: TenderDeps, job: number): Promise<number> {
   const onChain = j?.bids.find((b) => b.bidder === key.id);
   if (!onChain) throw new Error(`job ${job} holds no bid from ${key.id}`);
   const kept = secretFor(await d.readText(bidFile(d, job)), onChain);
+  const token = j!.token;
   if (!kept) throw new Error(`no kept price and salt open the commitment on chain (${onChain.commitment.slice(0, 16)}…); see ${bidFile(d, job)}`);
   const r = await d.relay(`${job}/reveal`, { bidder: key.id, price: kept.price, salt: kept.salt });
-  ctx.out.block([header("tender reveal", `job ${job}`), line("price", usdc(kept.price)), line("tx", r.tx)], { job, ...r, price: kept.price });
+  ctx.out.block([header("tender reveal", `job ${job}`), line("price", amt(kept.price, token)), line("tx", r.tx)], { job, ...r, price: kept.price });
   return 0;
 }
 
@@ -134,7 +138,7 @@ export async function runTender(ctx: Ctx, d: TenderDeps): Promise<number> {
     case "list": {
       const jobs = await d.board.jobs(20);
       const lines = [header("tender list", d.board.board, `${jobs.length} jobs`)];
-      for (const j of jobs) lines.push(line(`job ${j.id}`, `${j.phase.padEnd(12)} ${usdc(j.budget).padEnd(13)} ${j.bids.length} bids · ${j.title}`));
+      for (const j of jobs) lines.push(line(`job ${j.id}`, `${j.phase.padEnd(12)} ${amt(j.budget, j.token).padEnd(14)} ${j.bids.length} bids · ${j.title}`));
       ctx.out.block(lines, { board: d.board.board, jobs });
       return 0;
     }
@@ -153,12 +157,14 @@ export async function runTender(ctx: Ctx, d: TenderDeps): Promise<number> {
       const job = jobNo(ctx);
       const priceText = flagString(ctx.args, "price");
       const agent = flagString(ctx.args, "agent");
-      if (!priceText || !agent) throw new Error("accord tender bid <job> --price <USDC> --agent <label>");
-      const price = parseAmount(priceText);
+      if (!priceText || !agent) throw new Error("accord tender bid <job> --price <amount in the job token> --agent <label>");
+      const job0 = await d.board.job(job);
+      if (!job0) throw new Error(`no job ${job} on ${d.board.board}`);
+      const price = parseTenderAmount(priceText, job0.token).toString();
       const j = await d.board.job(job);
       if (!j) throw new Error(`no job ${job} on ${d.board.board}`);
       if (j.phase !== "open") throw new Error(`job ${job} is ${j.phase}; bids are taken while it is open`);
-      if (BigInt(price) > BigInt(j.budget)) ctx.out.warn(`note: ${usdc(price)} is above the budget ${usdc(j.budget)}; it cannot win`);
+      if (BigInt(price) > BigInt(j.budget)) ctx.out.warn(`note: ${amt(price, j.token)} is above the budget ${amt(j.budget, j.token)}; it cannot win`);
       const key = await loadKey(d, true);
       const keptBefore = await d.readText(bidFile(d, job));
       const onChain = j.bids.find((b) => b.bidder === key.id);
@@ -202,6 +208,6 @@ export async function runTender(ctx: Ctx, d: TenderDeps): Promise<number> {
       return 0;
     }
     default:
-      throw new Error("accord tender list | show <job> | key | link <account> | bid <job> --price <USDC> --agent <label> [--wait] | reveal <job> | award <job>");
+      throw new Error("accord tender list | show <job> | key | link <account> | bid <job> --price <amount in the job token> --agent <label> [--wait] | reveal <job> | award <job>");
   }
 }

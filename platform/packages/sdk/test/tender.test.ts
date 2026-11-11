@@ -73,3 +73,16 @@ describe("linking an agent to an account", () => {
     expect(verifyLink(bidderKey("02".repeat(32)).id, "adi-accord.testnet", sig)).toBe(false);
   });
 });
+
+import { parseTenderAmount, tenderAmount, tenderToken } from "../src/tender.js";
+describe("tender tokens", () => {
+  it("parses and formats with each token's own decimals", () => {
+    expect(parseTenderAmount("34.50", "tusdc.accord-v1.testnet")).toBe(34_500_000n);
+    expect(parseTenderAmount("2.5", "wrap.testnet")).toBe(2_500_000_000_000_000_000_000_000n);
+    expect(tenderAmount(2_500_000_000_000_000_000_000_000n, "wrap.testnet")).toBe("2.50");
+    expect(tenderAmount(1_234_500_000_000_000_000_000_000n, "wrap.testnet")).toBe("1.2345");
+    expect(tenderAmount(34_500_000n, "tusdc.accord-v1.testnet")).toBe("34.50");
+    expect(() => tenderToken("mystery.testnet")).toThrow("unknown tender token");
+    expect(() => parseTenderAmount("1e3", "wrap.testnet")).toThrow();
+  });
+});

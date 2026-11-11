@@ -11,7 +11,7 @@ const cfg: TenderKeeperConfig = {
 };
 const NOW = 10_000_000_000;
 const job = (over: Partial<TenderJob>): TenderJob => ({
-  id: 5, buyer: "house.testnet", title: "t", spec: "", evidence_hash: "", budget: "40000000", token: "t", created_at: (NOW - 1000) * 1e6,
+  id: 5, buyer: "house.testnet", title: "t", spec: "", evidence_hash: "", budget: "40000000", token: "t.testnet", created_at: (NOW - 1000) * 1e6,
   commit_ends: 0, reveal_ends: 0, phase: "open", bids: [], winner: null, agreement: null, ...over,
 });
 const bidOf = (i: number, price: string | null) => {
@@ -49,5 +49,12 @@ describe("house tender keeper limits", () => {
     expect(nextActions(cfg, [job({ bids: full })], NOW)).toEqual([]);
     const { tenderKeeperConfig } = await import("../src/tender.js");
     expect(() => tenderKeeperConfig({ TENDER_KEEPER: "on", TENDER_BUYER_ACCOUNT: "a", TENDER_BUYER_KEY: "k", TENDER_COMMIT_SECS: "soon" })).toThrow("TENDER_COMMIT_SECS");
+  });
+});
+
+describe("house tender keeper tokens", () => {
+  it("never bids its 6-decimal prices on a job in another token", () => {
+    const near = { ...job({}), token: "wrap.testnet" };
+    expect(nextActions(cfg, [near], NOW).filter((a) => a.kind === "bid")).toEqual([]);
   });
 });

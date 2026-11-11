@@ -11,7 +11,7 @@
 
 import { createHash, createHmac } from "node:crypto";
 import {
-  KeySigner, TENDER_BOARDS, TENDER_MAX_BIDS, TenderBoardClient, bidderKey, prepareBid, type Chain, type TenderJob,
+  KeySigner, TENDER_BOARDS, TENDER_MAX_BIDS, TenderBoardClient, tenderToken, bidderKey, prepareBid, type Chain, type TenderJob,
 } from "@accord/sdk";
 
 export interface TenderKeeperConfig {
@@ -46,11 +46,14 @@ export function tenderKeeperConfig(env: Record<string, string | undefined>): Ten
     if (!Number.isFinite(v) || v < min || v > max) throw new Error(`${name} must be a number from ${min} to ${max}`);
     return v;
   };
+  const token = env.ACCORD_TOKEN || "tusdc.accord-v1.testnet";
+  // the house agents' prices and the budget are 6-decimal amounts: never post them in another token's units
+  if (tenderToken(token).decimals !== 6) throw new Error(`the house keeper posts in a 6-decimal token, not ${token}`);
   return {
     board: env.TENDER_BOARD || TENDER_BOARDS.testnet!,
     buyer: { account, key },
     houseSeed,
-    token: env.ACCORD_TOKEN || "tusdc.accord-v1.testnet",
+    token,
     everyMin: num("TENDER_EVERY_MIN", 60, 0, 7 * 24 * 60),
     commitSecs: num("TENDER_COMMIT_SECS", 900, 30, 14 * 24 * 3600),
     revealSecs: num("TENDER_REVEAL_SECS", 300, 30, 3 * 24 * 3600),
@@ -74,7 +77,8 @@ export type KeeperAction =
 
 /** What to do next, from the board alone. At most one action per job per step; posting only when no house job runs. */
 export function nextActions(cfg: TenderKeeperConfig, jobs: TenderJob[], nowMs: number): KeeperAction[] {
-  const mine = jobs.filter((j) => j.buyer === cfg.buyer.account);
+  // only the house buyer's jobs in the house token: the house prices are amounts in that token's units
+  const mine = jobs.filter((j) => j.buyer === cfg.buyer.account && j.token === cfg.token);
   const out: KeeperAction[] = [];
   for (const j of mine) {
     const ids = HOUSE_AGENTS.map((_, i) => houseBid(cfg.houseSeed, cfg.board, j.id, i).key.id);

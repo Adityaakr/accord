@@ -65,33 +65,48 @@ async function post(path, body) {
   if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
   return j;
 }
-const usdc = (base) => (base == null ? "sealed" : `${(Number(base) / 1e6).toFixed(2)} USDC`);
-const toBase = (text) => {
-  const m = /^(\d+)(?:\.(\d{1,6}))?$/.exec(String(text || "").trim());
-  if (!m) throw new Error("--price is USDC with up to 6 decimals, like 34.50");
-  return (BigInt(m[1]) * 1000000n + BigInt((m[2] || "").padEnd(6, "0"))).toString();
+// Each job's budget is in its own token; prices are in that token's base units (never assume 6 decimals).
+const TOKENS = {
+  "tusdc.accord-v1.testnet": { symbol: "tUSDC", decimals: 6 },
+  "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af": { symbol: "USDC", decimals: 6 },
+  "wrap.testnet": { symbol: "NEAR", decimals: 24 },
+};
+const tok = (id) => { const t = TOKENS[id]; if (!t) throw new Error(`unknown token ${id}: update tender-bid.mjs`); return t; };
+const amt = (base, token) => {
+  if (base == null) return "sealed";
+  const t = tok(token), v = BigInt(base), unit = 10n ** BigInt(t.decimals), places = t.decimals > 6 ? 4n : 2n;
+  let f = (((v % unit) * 10n ** places) / unit).toString().padStart(Number(places), "0");
+  if (t.decimals > 6) f = f.replace(/0+$/, "").padEnd(2, "0");
+  return `${v / unit}.${f} ${t.symbol}`;
+};
+const toBase = (text, token) => {
+  const t = tok(token);
+  const m = /^(\d{1,12})(?:\.(\d{1,6}))?$/.exec(String(text || "").trim());
+  if (!m) throw new Error(`--price is an amount in ${t.symbol} with up to 6 decimals, like 34.50`);
+  return (BigInt(m[1]) * 10n ** BigInt(t.decimals) + BigInt((m[2] || "").padEnd(t.decimals, "0") || "0")).toString();
 };
 const show = (j) => {
-  console.log(`job ${j.id} · ${j.phase} · budget ${usdc(j.budget)} · ${j.title}`);
-  for (const b of j.bids) console.log(`  ${b.bidder === j.winner ? "winner" : "bid   "} ${b.agent.padEnd(18)} ${b.bidder.slice(0, 12)}… ${usdc(b.price)}`);
+  console.log(`job ${j.id} · ${j.phase} · budget ${amt(j.budget, j.token)} · ${j.title}`);
+  for (const b of j.bids) console.log(`  ${b.bidder === j.winner ? "winner" : "bid   "} ${b.agent.padEnd(18)} ${b.bidder.slice(0, 12)}… ${amt(b.price, j.token)}`);
   if (j.agreement) console.log(`  agreement ${j.agreement}`);
 };
 
 async function reveal(board, job) {
   const k = await loadKey();
-  const onChain = (await get(`/${job}`)).job.bids.find((b) => b.bidder === k.id);
+  const cur = (await get(`/${job}`)).job;
+  const onChain = cur.bids.find((b) => b.bidder === k.id);
   if (!onChain) throw new Error(`job ${job} holds no bid from ${k.id}`);
   const kept = entriesOf(await readOrNull(`${HOME}/.accord/tender-bids/${checkBoard(board)}/${job}.json`)).find((e) => e.commitment === onChain.commitment);
   if (!kept) throw new Error("no kept price and salt open the commitment on chain");
   const r = await post(`${job}/reveal`, { bidder: k.id, price: kept.price, salt: kept.salt });
-  console.log(`revealed ${usdc(kept.price)} · tx ${r.tx}`);
+  console.log(`revealed ${amt(kept.price, cur.token)} · tx ${r.tx}`);
 }
 
 async function main() {
   if (cmd === "list") {
     const { board, jobs } = await get("");
     console.log(`board ${board}`);
-    for (const j of jobs) console.log(`  job ${String(j.id).padEnd(4)} ${j.phase.padEnd(12)} ${usdc(j.budget).padEnd(13)} ${j.bids.length} bids · ${j.title}`);
+    for (const j of jobs) console.log(`  job ${String(j.id).padEnd(4)} ${j.phase.padEnd(12)} ${amt(j.budget, j.token).padEnd(14)} ${j.bids.length} bids · ${j.title}`);
     return;
   }
   if (cmd === "key") { const k = await loadKey(); console.log(`bidder ${k.id} (stored in ${HOME}/.accord/bidder.json)`); return; }
@@ -119,8 +134,8 @@ async function main() {
   if (!/^[\x20-\x39\x3b-\x7e]{1,64}$/.test(agent) || agent.startsWith(" ") || agent.endsWith(" ")) {
     throw new Error("--agent is 1 to 64 printable ASCII characters, no ':', no leading or trailing space");
   }
-  const price = toBase(flag("price"));
-  if (BigInt(price) > BigInt(j.budget)) console.log(`note: ${usdc(price)} is above the budget ${usdc(j.budget)}; it cannot win`);
+  const price = toBase(flag("price"), j.token);
+  if (BigInt(price) > BigInt(j.budget)) console.log(`note: ${amt(price, j.token)} is above the budget ${amt(j.budget, j.token)}; it cannot win`);
   const k = await loadKey();
   const salt = randomBytes(32).toString("hex");
   const commitment = createHash("sha256").update(`accord-tender:v1:commit:${board}:${job}:${k.id}:${price}:${salt}`).digest("hex");
