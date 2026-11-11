@@ -13,3 +13,4 @@ export * from "./delivery.js";
 export * from "./accountid.js";
 export * from "./release.js";
 export * from "./funding.js";
+export * from "./tender.js";

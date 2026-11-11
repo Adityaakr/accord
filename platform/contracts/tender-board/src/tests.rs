@@ -349,3 +349,14 @@ fn list_jobs_is_newest_first_and_bounded() {
     assert_eq!(b.list_jobs(Some(99), None).len(), 4);
     assert_eq!(b.job_count(), 4);
 }
+
+/// Cross-language vector: packages/sdk/test/tender.test.ts asserts the same commitment and signature.
+#[test]
+fn sdk_vector() {
+    let x = Bidder::new(1);
+    let c = x.commitment(1, 40_000_000);
+    let s = x.sign(1, 1, &c, "agent");
+    assert_eq!(x.id(), "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c");
+    assert_eq!(c, "944d44b1b9123241be942c13fa74576b0e2bb77657104c64083b226dd918f556");
+    assert_eq!(s, "cb5bd0a83fbcc9298e427d656f0332a27d745b06a18bfd16a16c24adfb2c3368eb9312d905743628acb8653613efc81a7a54937936b9e519dd8f6279a4559e04");
+}
