@@ -82,7 +82,7 @@ const COLUMN_2: Item[] = [
     delay: 0.4,
     title: "What does it cost?",
     description:
-      "Testnet use is free and uses test funds. Planned pricing, still a hypothesis: buyers pay per agreement, and vendors pay per recipient authorisation. Building on Accord and verifying an agreement stay free. Never a percentage of payments. Production prices will be published before launch; network and third-party fees may apply.",
+      "Testnet use is free and uses test funds. Planned pricing, still a hypothesis: a market-making agreement $1,000 a month, a procurement agreement $25, and a vendor's recipient authorisation $10 after the first, which is free. Tenders, verifying an agreement and building on Accord stay free. Never a percentage of payments. Network and third-party fees may apply.",
   },
   {
     id: "e7MnSyaRM",

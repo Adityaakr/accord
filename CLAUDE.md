@@ -54,6 +54,10 @@ A keyless, read-only MCP server (9 tools, two of them for open tenders; stdio or
 
 Every public statement about Accord is one of seven claims, each with its limit, in [`platform/GOAL.md`](platform/GOAL.md) ("Claims and their limits"). The README and the site's `/security` carry the same table. The threat model is `platform/ARCHITECTURE.md` section 16.
 
+## Traction and business model
+
+`cd platform && make usage` counts what has run on the testnet contracts from chain state alone (no keys, about 30 s): agreements by factory, type and release, payments made and refused, tender jobs and bids. Most of that activity is ours, and the README's [Traction](README.md#traction) section says which parts. There are no customers, pilots or revenue yet. The business model is a priced hypothesis (never a percentage of payments; per agreement), with its first market, unit costs and next milestones in [`docs/business.md`](docs/business.md).
+
 ## Names
 
 "Accord Atlas" was the earlier name for market-making agreements; it was retired on 8 Nov 2026. You may still see it in code identifiers (the `atlas` field in the terms, the `accord-core::atlas` module), in routes kept as aliases (`/atlas`, `make atlas`) and in recorded output from before that date.

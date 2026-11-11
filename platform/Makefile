@@ -49,6 +49,7 @@ atlas: ; @$(LIVE) market-making
 verify: ; @pnpm --silent --filter @accord/cli dev -- verify --agreement $(DEAL)
 demo: ; @$(LIVE) demo
 tender: ; @$(LIVE) tender
+usage: ; @node scripts/usage.mjs
 tender-sim: ; @cargo test -q -p accord-tender-board simulation -- --nocapture 2>&1 | grep -v "EVENT_JSON\|^running\|^$$\|^\.$$"
 finish: ; @DEAL=$(DEAL) $(LIVE) finish
 # One new agreement through a dispute, a re-delivery and an early mutual close that refunds the unspent escrow.

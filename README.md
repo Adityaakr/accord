@@ -550,9 +550,32 @@ Not claimed: `realworld` and `social`. Their extra requirements (an invoice view
 | Sputnik DAO, Trezu | Not integrated. A DAO as the buyer (proposals to create, fund and approve) was designed and not built; Trezu is mainnet-only |
 | Chain Signatures | Not used: settlement is USDC on NEAR from the agreement's own account |
 
+## Traction
+
+Counted from chain by `cd platform && make usage` (view calls only, no keys, about 30 s), 11 Nov 2026:
+
+| What | Count |
+| --- | --- |
+| Agreements, each its own NEAR account | `79` on two factories (`73` procurement, `6` market-making), releases 1 to 5 |
+| Opened from a key made in the browser (`/app/try-it`, no wallet) | `48` |
+| Payments made by an agent's key under the contract | `56` |
+| Payments refused by the contract, on the record | `45`, in `34` agreements |
+| Tender jobs posted, sealed bids, distinct agent keys | `11`, `37`, `11` |
+
+Most of this activity is ours: building, `make demo`, `make tender` and our own runs of the public bid script. The try-it flow has no sign-up, so our runs, reviewers' agents and outside visitors cannot be told apart, and none are counted as users. No customers, letters of intent, pilots or revenue yet, and no outside developer has bid on a tender. The first pilots and what counts as success are in [`docs/business.md`](docs/business.md).
+
 ## Business model (hypothesis)
 
-Free on testnet with test funds. Planned, still a hypothesis: buyers pay per agreement, and vendors pay per recipient authorisation. Building on Accord and verifying an agreement stay free. Never a percentage of payments. Production prices are published before launch.
+Free on testnet with test funds. Never a percentage of payments: Accord charges per agreement, so it earns from the number of agreements, not from the money moving through them. Planned prices, still a hypothesis ([`docs/business.md`](docs/business.md) has the reasoning and the costs):
+
+| Who pays | For | Planned price |
+| --- | --- | --- |
+| A project hiring a market maker | A market-making agreement: measured periods, retainer paid only when eligible | `$1,000` per agreement per month, against retainers of `$50k` to `$300k+` a month |
+| A buyer company | A procurement agreement | `$25` per agreement, against an average business email compromise loss of about `$123,000` (FBI IC3 2025) |
+| A vendor | A recipient authorisation (the Payee proof) | First one free, then `$10` |
+| Nobody | Tenders (posting and bidding), verifying, the SDK, CLI and MCP server | Free |
+
+First market: token projects that pay a market maker every month and today trust its own report; the venue is public, so the measurement needs no one's word. Then companies whose agents pay vendors. Measured cost per agreement is mostly the `2 NEAR` storage deposit; enclave runs (about `0.007 NEAR` each) and model calls are cents. The fee is not collected on chain yet.
 
 ## Sustainability
 
@@ -583,7 +606,7 @@ Candidates, not partners: no relationship with any of them is claimed.
 ### What keeps working, and what is left
 
 - **Agreements do not depend on Accord's servers.** Each agreement is its own NEAR account with no full-access key and code pinned by hash; its rules, ledger and refusals are on chain, and `make verify` and the MCP server read the chain directly.
-- **The hosted demo stays up and funded through 25 Nov 2026**: the site, the app, the faucet (refilled twice a day when it falls under 15 NEAR) and the pre-funded `/try` room.
+- **The hosted demo stays up and funded through 25 Nov 2026**: the site, the app, the faucet (a scheduled job checks every 2 hours and tops it up when it falls under 30 NEAR) and the pre-funded `/try` room.
 - **Open source, MIT**, with CI on every push (website checks, TypeScript typecheck and tests, the Rust money-path tests).
 - **Before mainnet, in order:** restrict the Sealed Table's seed to the agreement's own calls (S1, an OutLayer setting); remove release 3's job builds from the seeds' access; check the hardware quote in `make verify`; a third-party audit of the contracts; then the factory on mainnet with Circle USDC. Tracked in [`platform/docs/build/BLOCKED.md`](platform/docs/build/BLOCKED.md) and [`platform/DECISIONS.md`](platform/DECISIONS.md).
 - **Next in the product:** an organisation-wide spend limit across all its agreements, funding an agreement from other chains through NEAR Intents (priced today with dry quotes; executing them waits for mainnet), and a DAO as the buyer.
