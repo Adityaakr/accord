@@ -1,0 +1,98 @@
+/* Home · Open tenders: the market-making section's heading row, then one stage with the board card on the left and the
+   rules and the bid command on the right, then the scope note. Teal marks the winner only; prices stay mono. */
+.section {
+  gap: 40px;
+  padding: 72px 0;
+  justify-content: center;
+  scroll-margin-top: 40px;
+}
+
+/* ---------- heading row (as Compliance.module.css) ---------- */
+.head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "tag ." "title copy"; column-gap: 64px; row-gap: 24px; align-items: baseline; width: 100%; }
+.headTag { grid-area: tag; }
+.headLeft { grid-area: title; }
+.headRight { grid-area: copy; display: flex; flex-direction: column; gap: 20px; position: relative; top: -16px; }
+.tag { display: inline-flex; align-items: center; gap: 8px; color: var(--text-medium); }
+.tagDot { width: 6px; height: 6px; border-radius: 999px; background: var(--teal); }
+.title { width: 100%; text-wrap: balance; }
+.description { color: var(--text-medium); text-wrap: pretty; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-top: 8px; }
+.join { color: var(--text-medium); text-decoration: none; }
+.join:hover { color: var(--text-strong); }
+
+/* ---------- stage ---------- */
+.stage {
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; width: 100%;
+  padding: 20px; border-radius: 20px;
+  background: linear-gradient(160deg, rgba(var(--ink-rgb), 0.04), rgba(var(--ink-rgb), 0.01) 60%), var(--elevation-weak, transparent);
+  border: 1px solid rgba(var(--ink-rgb), 0.08);
+}
+
+/* the board card */
+.board {
+  display: flex; flex-direction: column; gap: 14px; min-width: 0; align-self: start;
+  padding: 18px; border-radius: 14px;
+  background: var(--elevation-strong);
+  border: 1px solid rgba(var(--ink-rgb), 0.08);
+}
+.boardHead { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.boardLabel { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-weak); }
+.liveDot { width: 7px; height: 7px; border-radius: 999px; background: rgba(var(--ink-rgb), 0.25); }
+.liveOn { background: var(--teal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 18%, transparent); }
+.mono, .boardId, .key, .price, .ruleN { font-family: var(--mono); }
+.boardId { font-size: 11px; color: var(--text-weak); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jobRow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.jobTitle { color: var(--text-strong); }
+.phase { font-size: 12px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--hairline); color: var(--text-medium); white-space: nowrap; }
+
+.bids { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.bid {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  border: 1px solid rgba(var(--ink-rgb), 0.07);
+  background: rgba(var(--ink-rgb), 0.02);
+}
+.win { border-color: var(--teal); background: color-mix(in srgb, var(--teal) 7%, transparent); }
+.lock { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; color: var(--text-weak); background: rgba(var(--ink-rgb), 0.05); }
+.win .lock { color: var(--teal); }
+.agent { font-size: 14px; color: var(--text-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.key { font-size: 11px; color: var(--text-weak); }
+.price { font-size: 13px; color: var(--text-strong); text-align: right; }
+.badge { grid-column: 2 / -1; justify-self: start; font-size: 11px; padding: 2px 8px; border-radius: 999px; color: var(--teal); border: 1px solid var(--teal); }
+.boardFoot { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--text-weak); }
+
+/* rules and command */
+.side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.rules { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.rule { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; padding: 4px 4px 14px; border-bottom: 1px solid rgba(var(--ink-rgb), 0.07); }
+.rule:last-child { border-bottom: 0; padding-bottom: 4px; }
+.ruleN { font-size: 12px; color: var(--teal); padding-top: 3px; }
+.ruleTitle { margin: 0 0 4px; color: var(--text-strong); font-weight: 500; }
+.ruleText { margin: 0; color: var(--text-medium); text-wrap: pretty; }
+
+.cmd { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 12px; background: var(--elevation-strong); border: 1px solid rgba(var(--ink-rgb), 0.08); min-width: 0; }
+.cmdHead { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--text-medium); }
+.copy {
+  flex: none; font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  color: var(--text-medium); background: transparent; border: 1px solid var(--hairline);
+}
+.copy:hover { color: var(--text-strong); border-color: rgba(var(--ink-rgb), 0.3); }
+.code { margin: 0; overflow-x: auto; font-family: var(--mono); font-size: 12px; line-height: 1.7; color: var(--text-strong); white-space: pre; overflow-x: auto; }
+
+/* ---------- scope ---------- */
+.scope { max-width: 860px; color: var(--text-weak); text-wrap: pretty; }
+.scopeLabel { margin-right: 10px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-medium); }
+
+/* ---------- tablet and phone ---------- */
+@media (max-width: 1199.98px) {
+  .head { column-gap: 40px; }
+  .stage { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 809.98px) {
+  .section { gap: 28px; padding: 72px 16px; }
+  .head { grid-template-columns: minmax(0, 1fr); grid-template-areas: "tag" "title" "copy"; }
+  .headRight { top: 0; }
+  .stage { padding: 12px; border-radius: 16px; }
+  .bid { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .key { display: none; }
+}
