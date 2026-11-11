@@ -61,13 +61,17 @@
 
 /* ---------- activity timeline on the job page ---------- */
 .timeline { display: flex; flex-direction: column; gap: 6px; }
-.tlBands { position: relative; height: 22px; margin: 0 282px 0 166px; }
-.bandBid, .bandReveal { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
-.bandBid { background: var(--teal-wash); }
-.bandReveal { background: rgba(var(--ink-rgb, 0, 0, 0), 0.04); }
-.bandBid em, .bandReveal em, .now em { position: absolute; left: 8px; right: 6px; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 11px; color: var(--text-weak); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.now { position: absolute; top: -4px; bottom: -4px; width: 0; border-left: 1.5px solid var(--text-strong); }
-.now em { left: 6px; color: var(--text-strong); }
+.tlHead { position: relative; height: 18px; margin: 0 282px 0 166px; }
+.tlLabel { position: absolute; top: 0; font-size: 11.5px; color: var(--text-weak); white-space: nowrap; }
+.tlLabel b { font-weight: 400; font-family: var(--font-mono); font-size: 11px; color: var(--text-medium); }
+.tlLabelEnd { transform: translateX(-100%); }
+.nowLabel { position: absolute; top: 0; transform: translateX(-50%); padding: 0 6px; border-radius: 999px; font-family: var(--font-mono); font-size: 10.5px; color: var(--elevation-strong); background: var(--text-strong); white-space: nowrap; }
+.tlBands { position: relative; height: 6px; margin: 2px 282px 4px 166px; }
+.tlNow { position: relative; height: 16px; margin: 0 282px 2px 166px; }
+.bandBid, .bandReveal { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+.bandBid { background: color-mix(in srgb, var(--teal) 35%, transparent); }
+.bandReveal { background: var(--hairline-strong); margin-left: 2px; }
+.now { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 2px solid var(--text-strong); }
 .tlRows { display: flex; flex-direction: column; }
 .timeline .axis { grid-template-columns: 150px minmax(0, 1fr) 266px; }
 .tlRow { display: grid; grid-template-columns: 150px minmax(0, 1fr) 266px; align-items: center; column-gap: 16px; height: 28px; }
@@ -109,7 +113,7 @@
   .head > :last-child, .row > :last-child, .axis > :last-child { display: none; }
   .tlRow, .timeline .axis { grid-template-columns: 92px minmax(0, 1fr); column-gap: 10px; }
   .tlTimes { display: none; }
-  .tlBands { margin: 0 0 0 102px; }
+  .tlBands, .tlHead, .tlNow { margin-left: 102px; margin-right: 0; }
   .tickMid { display: none; }
   .board { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .stats { grid-template-columns: repeat(3, auto); }

@@ -146,11 +146,16 @@ export function ActivityTimeline({ job, now }: { job: TenderJob; now: number }) 
   const clock = (ns: number) => new Date(ns / 1e6).toISOString().slice(11, 16);
   return (
     <div className={styles.timeline}>
-      <div className={styles.tlBands} aria-hidden="true">
-        <span className={styles.bandBid} style={{ left: "0%", width: at(job.commit_ends) }}><em>bidding · until {clock(job.commit_ends)}</em></span>
-        <span className={styles.bandReveal} style={{ left: at(job.commit_ends), width: `calc(100% - ${at(job.commit_ends)})` }}><em>reveal · until {clock(t1)}</em></span>
-        {live ? <span className={styles.now} style={{ left: at(nowNs) }}><em>now</em></span> : null}
+      <div className={styles.tlHead} aria-hidden="true">
+        <span className={styles.tlLabel} style={{ left: "0%" }}>Bidding <b>until {clock(job.commit_ends)}</b></span>
+        <span className={`${styles.tlLabel} ${styles.tlLabelEnd}`} style={{ left: "100%" }}>Reveal <b>until {clock(t1)}</b></span>
       </div>
+      <div className={styles.tlBands} aria-hidden="true">
+        <span className={styles.bandBid} style={{ left: "0%", width: at(job.commit_ends) }} />
+        <span className={styles.bandReveal} style={{ left: at(job.commit_ends), width: `calc(100% - ${at(job.commit_ends)})` }} />
+        {live ? <span className={styles.now} style={{ left: at(nowNs) }} /> : null}
+      </div>
+      {live ? <div className={styles.tlNow} aria-hidden="true"><span className={styles.nowLabel} style={{ left: at(nowNs) }}>now {clock(nowNs)}</span></div> : null}
       <div className={styles.tlRows}>
         {job.bids.map((b) => (
           <div key={b.bidder} className={styles.tlRow}>
