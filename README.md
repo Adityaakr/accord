@@ -307,6 +307,13 @@ The same failure costs money in web2 and web3: an agent, or a person, is told to
 
 **The gap Accord fills.** The agent payment rails launched in 2025 let one party's agent pay: [Visa Intelligent Commerce](https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21366.html), [Mastercard Agent Pay](https://newsroom.mastercard.com/news/press/2025/april/mastercard-unveils-agent-pay-pioneering-agentic-payments-technology-to-power-commerce-in-the-age-of-ai) (agentic tokens), [Google AP2](https://cloud.google.com/blog/products/ai-machine-learning/announcing-agents-to-payments-ap2-protocol) (one user's mandate for a merchant's cart), [Stripe and OpenAI's ACP](https://stripe.com/blog/developing-an-open-standard-for-agentic-commerce) and [x402](https://www.x402.org/). None of them holds terms that two companies negotiated and both approved, or binds the recipient to a proof both accepted. Accord is that layer: the negotiation stays private in an enclave, and the contract refuses any payment outside the approved item, evidence, amount and recipient, whoever was fooled.
 
+**Why this matters more as agents multiply.** The people and companies getting the most from AI already run many agents at once. They decide what counts as done, then let the agents work. Inside one company this holds, because one owner sets the rules. It breaks when one company's agents buy from another company's agents: neither side trusts the other's agents, and a person approving each payment becomes the bottleneck the agents were meant to remove. Accord moves that trust into the agreement:
+- **People decide once.** They seal their limits and approve the terms.
+- **Agents work inside them.** They negotiate in the Sealed Table, bid on [open tenders](#open-tenders) and deliver.
+- **The contract checks every payment** against what was approved, so no person has to.
+
+The approved item, evidence, amount and recipient are, in effect, the rule both swarms are scored against, and it is checked on chain rather than trusted. Market making shows the strongest form: "was the liquidity good enough?" becomes spread, depth and two-sided quotes measured at hidden times. Accord does not fund or meter an agent's own inference, and it does not orchestrate agents inside one company. It is for the moment their work crosses to another company.
+
 | Who | What changes for them | Shown on testnet by |
 | --- | --- | --- |
 | Finance and treasury teams | A redirected or altered payment is refused by the contract and recorded; the team is told on Telegram, by webhook or in the app; exports match the record | a6 and a63 `ERR_PAYEE_MISMATCH`; the [Live attack room](https://accordweb-production.up.railway.app/app/try) |
