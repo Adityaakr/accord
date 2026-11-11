@@ -301,6 +301,7 @@ export function tenderAmount(base: string | bigint, token: string): string {
   const places = t.decimals > 6 ? 4 : 2
   const whole = v / unit
   const frac = ((v % unit) * 10n ** BigInt(places)) / unit
+  if (v > 0n && whole === 0n && frac === 0n) return t.decimals > 6 ? "<0.0001" : "<0.01"
   let f = frac.toString().padStart(places, "0")
   if (t.decimals > 6) f = f.replace(/0+$/, "").padEnd(2, "0")
   return `${whole}.${f}`

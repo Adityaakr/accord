@@ -1,0 +1,177 @@
+// Charts of a tender, drawn only from what the board stores (budget, each bid's commitment time, its revealed price
+// and reveal time, the winner). Colour carries state, never identity: teal is the winner, ink is any other revealed
+// bid, a hollow mark is a bid still sealed, yellow flags a price far below one unit of the token (on job 7 the house
+// agents priced a NEAR job in 6-decimal units). Every mark has a text tooltip, and the bids table under the chart is
+// its table view. Server components: plain HTML and SVG, no client JavaScript.
+import Link from "next/link";
+import { tenderAmount, tenderToken, type TenderBid, type TenderJob } from "@accord/sdk";
+import styles from "./charts.module.css";
+
+const amount = (base: string, token: string) => {
+  try { return `${tenderAmount(base, token)} ${tenderToken(token).symbol}`; } catch { return `${base} base units`; }
+};
+/** price / budget as a number, from bigints (no float on 24-decimal amounts). */
+const ratio = (price: string, budget: string) => {
+  const b = BigInt(budget);
+  return b > 0n ? Number((BigInt(price) * 100_000n) / b) / 100_000 : 0;
+};
+const isDust = (price: string, budget: string) => BigInt(price) > 0n && BigInt(price) * 10_000n < BigInt(budget);
+type Kind = "win" | "bid" | "dust" | "over";
+const kindOf = (b: TenderBid, j: TenderJob): Kind =>
+  b.bidder === j.winner ? "win" : b.price && BigInt(b.price) > BigInt(j.budget) ? "over" : b.price && isDust(b.price, j.budget) ? "dust" : "bid";
+
+/** One line in the jobs list: each revealed bid against the budget (the tick at the right), sealed bids hollow. */
+export function BidStrip({ job }: { job: TenderJob }) {
+  const W = 168, L = 6, R = 150, Y = 14;
+  const max = Math.max(1, ...job.bids.filter((b) => b.price).map((b) => ratio(b.price!, job.budget)));
+  const scale = Math.min(max, 1.12);
+  const x = (r: number) => L + (R - L) * Math.min(r, scale) / scale;
+  const budgetX = x(1);
+  const sealed = job.bids.filter((b) => b.price === null);
+  const label = job.bids.length === 0 ? "no bids yet" : `${job.bids.length} bids against a budget of ${amount(job.budget, job.token)}`;
+  return (
+    <svg className={styles.strip} viewBox={`0 0 ${W} 28`} role="img" aria-label={label}>
+      <line x1={L} x2={R} y1={Y} y2={Y} className={styles.stripTrack} />
+      <line x1={budgetX} x2={budgetX} y1={6} y2={22} className={styles.stripBudget} />
+      {sealed.map((b, i) => (
+        <circle key={b.bidder} cx={L + 4 + i * 9} cy={Y} r={3} className={styles.mSealed}><title>{`${b.agent}: sealed`}</title></circle>
+      ))}
+      {job.bids.filter((b) => b.price).map((b) => {
+        const k = kindOf(b, job);
+        return (
+          <circle key={b.bidder} cx={x(ratio(b.price!, job.budget))} cy={Y} r={k === "win" ? 4.5 : 3.2} className={styles[`m_${k}`]}>
+            <title>{`${b.agent}: ${amount(b.price!, job.token)}${k === "win" ? " (winner)" : k === "dust" ? " (far below one unit)" : ""}`}</title>
+          </circle>
+        );
+      })}
+    </svg>
+  );
+}
+
+/** The job page: every bid on one price axis from 0 to the budget (and past it if a bid went over). */
+export function PriceChart({ job }: { job: TenderJob }) {
+  const revealed = job.bids.filter((b) => b.price);
+  const maxR = Math.max(1, ...revealed.map((b) => ratio(b.price!, job.budget)));
+  const scale = maxR > 1 ? Math.min(maxR * 1.04, 2) : 1.04;
+  const pos = (r: number) => `${(Math.min(r, scale) / scale) * 100}%`;
+  const rows = [...job.bids].sort((a, b) => (a.price && b.price ? (BigInt(a.price) < BigInt(b.price) ? -1 : 1) : a.price ? -1 : b.price ? 1 : 0));
+  const ticks = [0, 0.25, 0.5, 0.75, 1];
+  let budgetNum = 0;
+  try { budgetNum = Number(tenderAmount(job.budget, job.token)); } catch { /* unknown token */ }
+  return (
+    <div className={styles.chart}>
+      <div className={styles.rows}>
+        {rows.map((b) => {
+          const k = b.price ? kindOf(b, job) : null;
+          return (
+            <div key={b.bidder} className={styles.row}>
+              <span className={`${styles.rowLabel} ${k === "win" ? styles.rowWin : ""}`}>{b.agent}</span>
+              <span className={styles.track}>
+                <span className={styles.budgetLine} style={{ left: pos(1) }} aria-hidden="true" />
+                {b.price && k ? (
+                  <>
+                    <span className={`${styles.stem} ${k === "win" ? styles.stemWin : ""}`} style={{ width: pos(ratio(b.price, job.budget)) }} aria-hidden="true" />
+                    <span className={`${styles.dot} ${styles[`d_${k}`]}`} style={{ left: pos(ratio(b.price, job.budget)) }} tabIndex={0}
+                      data-tip={`${b.agent} · ${amount(b.price, job.token)}${k === "win" ? " · lowest valid price" : k === "over" ? " · over the budget" : k === "dust" ? " · far below one unit: priced in the wrong decimals" : ""}`} />
+                    <span className={`${styles.value} ${k === "dust" ? styles.valueWarn : ""}`} style={{ left: pos(ratio(b.price, job.budget)) }}>
+                      {amount(b.price, job.token)}{k === "win" ? (isDust(b.price, job.budget) ? " · winner · wrong decimals?" : " · winner") : k === "dust" ? " · wrong decimals?" : ""}
+                    </span>
+                  </>
+                ) : (
+                  <span className={styles.sealedTag} data-tip={`${b.agent} · sealed: only a sha256 is on chain until it reveals`} tabIndex={0}>
+                    <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>
+                    sealed
+                  </span>
+                )}
+              </span>
+            </div>
+          );
+        })}
+        {rows.length === 0 ? <p className="small weak">No bids yet. The first sealed bid shows here as soon as it lands.</p> : null}
+      </div>
+      <div className={styles.axis} aria-hidden="true">
+        <span className={styles.rowLabel} />
+        <span className={styles.axisTrack}>
+          {ticks.map((t) => (
+            <span key={t} className={`${styles.tick} ${t === 1 ? styles.tickBudget : ""}`} style={{ left: pos(t) }}>
+              {t === 1 ? `budget ${budgetNum ? budgetNum.toFixed(2) : ""}` : budgetNum ? (budgetNum * t).toFixed(budgetNum * t < 10 ? 2 : 0) : `${t * 100}%`}
+            </span>
+          ))}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** The job page: when each bid was sealed and revealed, against the bidding and reveal windows. */
+export function ActivityTimeline({ job, now }: { job: TenderJob; now: number }) {
+  const t0 = job.created_at, t1 = job.reveal_ends;
+  const span = Math.max(1, t1 - t0);
+  const at = (t: number) => `${Math.max(0, Math.min(1, (t - t0) / span)) * 100}%`;
+  const nowNs = now * 1e6;
+  const live = nowNs < t1;
+  const clock = (ns: number) => new Date(ns / 1e6).toISOString().slice(11, 16);
+  return (
+    <div className={styles.timeline}>
+      <div className={styles.tlBands} aria-hidden="true">
+        <span className={styles.bandBid} style={{ left: "0%", width: at(job.commit_ends) }}><em>bidding</em></span>
+        <span className={styles.bandReveal} style={{ left: at(job.commit_ends), width: `calc(100% - ${at(job.commit_ends)})` }}><em>reveal</em></span>
+        {live ? <span className={styles.now} style={{ left: at(nowNs) }}><em>now</em></span> : null}
+      </div>
+      <div className={styles.tlRows}>
+        {job.bids.map((b) => (
+          <div key={b.bidder} className={styles.tlRow}>
+            <span className={styles.rowLabel}>{b.agent}</span>
+            <span className={styles.tlTrack}>
+              {b.revealed_at ? <span className={`${styles.tlSpan} ${b.bidder === job.winner ? styles.tlSpanWin : ""}`} style={{ left: at(b.committed_at), width: `calc(${at(b.revealed_at)} - ${at(b.committed_at)})` }} aria-hidden="true" /> : null}
+              <span className={styles.tlCommit} style={{ left: at(b.committed_at) }} tabIndex={0} data-tip={`${b.agent} · sealed at ${clock(b.committed_at)} UTC`} />
+              {b.revealed_at ? <span className={`${styles.tlReveal} ${b.bidder === job.winner ? styles.tlRevealWin : ""}`} style={{ left: at(b.revealed_at) }} tabIndex={0} data-tip={`${b.agent} · revealed at ${clock(b.revealed_at)} UTC`} /> : null}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className={styles.axis} aria-hidden="true">
+        <span className={styles.rowLabel} />
+        <span className={styles.axisTrack}>
+          <span className={styles.tick} style={{ left: "0%" }}>posted {clock(t0)}</span>
+          <span className={styles.tick} style={{ left: at(job.commit_ends) }}>bids close {clock(job.commit_ends)}</span>
+          <span className={`${styles.tick} ${styles.tickEnd}`} style={{ left: "100%" }}>reveals close {clock(t1)}</span>
+        </span>
+      </div>
+      <p className={styles.legend}>
+        <span><i className={styles.lgCommit} />sealed</span>
+        <span><i className={styles.lgReveal} />revealed</span>
+        <span><i className={styles.lgWin} />winner</span>
+      </p>
+    </div>
+  );
+}
+
+/** The jobs list: how busy the board is, one bar per job (bids), newest at the right. */
+export function BoardActivity({ jobs }: { jobs: TenderJob[] }) {
+  const recent = [...jobs].sort((a, b) => a.id - b.id).slice(-16);
+  const maxBids = Math.max(1, ...recent.map((j) => j.bids.length));
+  const bids = jobs.reduce((n, j) => n + j.bids.length, 0);
+  const agents = new Set(jobs.flatMap((j) => j.bids.map((b) => b.bidder))).size;
+  const open = jobs.filter((j) => j.phase === "open" || j.phase === "revealing").length;
+  const linked = jobs.filter((j) => j.agreement).length;
+  return (
+    <div className={styles.board}>
+      <dl className={styles.stats}>
+        <div><dt>Jobs</dt><dd>{jobs.length}</dd></div>
+        <div><dt>Sealed bids</dt><dd>{bids}</dd></div>
+        <div><dt>Agents</dt><dd>{agents}</dd></div>
+        <div><dt>Taking bids</dt><dd>{open}</dd></div>
+        <div><dt>Agreements</dt><dd>{linked}</dd></div>
+      </dl>
+      <div className={styles.bars} role="img" aria-label={`Bids per job for the last ${recent.length} jobs`}>
+        {recent.map((j) => (
+          <Link key={j.id} href={`/tenders/${j.id}`} className={styles.barCol} data-tip={`#${j.id} · ${j.bids.length} bids · ${j.phase.replace("_", " ")}`}>
+            <span className={`${styles.bar} ${j.phase === "open" || j.phase === "revealing" ? styles.barLive : j.agreement ? styles.barLinked : ""}`} style={{ height: `${Math.max(8, (j.bids.length / maxBids) * 100)}%` }} />
+            <span className={styles.barId}>{j.id}</span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}

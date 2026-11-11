@@ -1,0 +1,95 @@
+/* Tender charts: state colour only (teal winner, ink revealed, hollow sealed, yellow warning), hairline axes, thin
+   stems, 8px+ markers, one tooltip style (data-tip) for every mark. Light and dark come from the app's tokens. */
+
+/* a text tooltip on hover or focus, above the mark */
+.barCol { position: relative; }
+:is(.dot, .sealedTag, .tlCommit, .tlReveal, .barCol):is(:hover, :focus-visible)::after {
+  content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%);
+  padding: 5px 9px; border-radius: 6px; white-space: nowrap; z-index: 5; pointer-events: none;
+  font-family: var(--font-mono, ui-monospace); font-size: 11px; letter-spacing: 0;
+  color: var(--text-strong); background: var(--elevation-strong); border: 1px solid var(--hairline-strong);
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- the strip in each jobs-list row ---------- */
+.strip { width: 168px; height: 28px; display: block; overflow: visible; }
+.stripTrack { stroke: var(--hairline-strong); stroke-width: 1; }
+.stripBudget { stroke: var(--text-faint); stroke-width: 1; stroke-dasharray: 2 2; }
+.mSealed { fill: none; stroke: var(--text-faint); stroke-width: 1.2; }
+.m_bid { fill: var(--text-weak); stroke: var(--elevation-strong); stroke-width: 1.5; }
+.m_over { fill: none; stroke: var(--text-weak); stroke-width: 1.4; }
+.m_dust { fill: var(--yellow); stroke: var(--elevation-strong); stroke-width: 1.5; }
+.m_win { fill: var(--teal); stroke: var(--elevation-strong); stroke-width: 2; }
+
+/* ---------- price chart on the job page ---------- */
+.chart { display: flex; flex-direction: column; gap: 4px; }
+.rows { display: flex; flex-direction: column; }
+.row, .axis, .tlRow { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 14px; }
+.row { height: 34px; border-bottom: 1px solid var(--hairline); }
+.row:last-child { border-bottom: 0; }
+.rowLabel { font-size: 13px; color: var(--text-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rowWin { color: var(--text-strong); }
+.track, .axisTrack, .tlTrack { position: relative; height: 100%; margin-right: 90px; }
+.budgetLine { position: absolute; top: 4px; bottom: 4px; width: 0; border-left: 1px dashed var(--text-faint); }
+.stem { position: absolute; left: 0; top: 50%; height: 2px; margin-top: -1px; border-radius: 2px; background: var(--hairline-strong); }
+.stemWin { background: color-mix(in srgb, var(--teal) 55%, transparent); }
+.dot { position: absolute; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 999px; box-shadow: 0 0 0 2px var(--elevation-strong); cursor: default; }
+.d_bid { background: var(--text-weak); }
+.d_over { background: transparent; border: 1.5px solid var(--text-weak); }
+.d_dust { background: var(--yellow); }
+.d_win { width: 12px; height: 12px; margin: -6px 0 0 -6px; background: var(--teal); }
+.value { position: absolute; top: 50%; transform: translate(12px, -50%); font-family: var(--font-mono, ui-monospace); font-size: 11.5px; color: var(--text-medium); white-space: nowrap; pointer-events: none; }
+.valueWarn { color: var(--text-strong); }
+.sealedTag { position: absolute; left: 0; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; border: 1px dashed var(--hairline-strong); font-family: var(--font-mono, ui-monospace); font-size: 11px; color: var(--text-weak); }
+.axis { height: 22px; }
+.tick { position: absolute; top: 4px; transform: translateX(-50%); font-family: var(--font-mono, ui-monospace); font-size: 10.5px; color: var(--text-faint); white-space: nowrap; }
+.tick:first-child { transform: none; }
+.tickBudget { color: var(--text-weak); }
+.tickEnd { transform: translateX(-100%); }
+
+/* ---------- activity timeline on the job page ---------- */
+.timeline { display: flex; flex-direction: column; gap: 6px; }
+.tlBands { position: relative; height: 22px; margin: 0 90px 0 164px; }
+.bandBid, .bandReveal { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
+.bandBid { background: var(--teal-wash); }
+.bandReveal { background: rgba(var(--ink-rgb, 0, 0, 0), 0.04); }
+.bandBid em, .bandReveal em, .now em { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 11px; color: var(--text-weak); }
+.now { position: absolute; top: -4px; bottom: -4px; width: 0; border-left: 1.5px solid var(--text-strong); }
+.now em { left: 6px; color: var(--text-strong); }
+.tlRows { display: flex; flex-direction: column; }
+.tlRow { height: 28px; }
+.tlSpan { position: absolute; top: 50%; height: 2px; margin-top: -1px; border-radius: 2px; background: var(--hairline-strong); }
+.tlSpanWin { background: color-mix(in srgb, var(--teal) 55%, transparent); }
+.tlCommit, .tlReveal { position: absolute; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 999px; box-shadow: 0 0 0 2px var(--elevation-strong); }
+.tlCommit { background: var(--elevation-strong); border: 1.5px solid var(--text-weak); }
+.tlReveal { background: var(--text-weak); }
+.tlRevealWin { background: var(--teal); }
+.legend { margin: 6px 0 0; display: flex; gap: 16px; font-size: 11.5px; color: var(--text-weak); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 9px; height: 9px; border-radius: 999px; display: inline-block; }
+.lgCommit { border: 1.5px solid var(--text-weak); }
+.lgReveal { background: var(--text-weak); }
+.lgWin { background: var(--teal); }
+
+/* ---------- board activity on the jobs list ---------- */
+.board { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px; align-items: end; padding: 16px 20px; border-radius: var(--radius-lg, 12px); background: var(--elevation-strong); border: 1px solid var(--hairline); }
+.stats { margin: 0; display: grid; grid-template-columns: repeat(5, auto); gap: 4px 28px; }
+.stats div { display: flex; flex-direction: column; gap: 4px; }
+.stats dt { font-size: 12px; color: var(--text-weak); }
+.stats dd { margin: 0; font-family: var(--font-mono, ui-monospace); font-size: 22px; letter-spacing: -0.02em; color: var(--text-strong); font-variant-numeric: tabular-nums; }
+.bars { display: flex; align-items: flex-end; justify-content: flex-end; gap: 4px; height: 56px; }
+.barCol { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; width: 18px; text-decoration: none; }
+.bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--hairline-strong); transition: background 0.2s var(--ease); }
+.barCol:hover .bar { background: var(--text-weak); }
+.barLive { background: var(--teal); }
+.barLinked { background: color-mix(in srgb, var(--teal) 45%, transparent); }
+.barId { font-family: var(--font-mono, ui-monospace); font-size: 9.5px; color: var(--text-faint); }
+
+@media (max-width: 809.98px) {
+  .row, .axis, .tlRow { grid-template-columns: 96px minmax(0, 1fr); gap: 10px; }
+  .track, .axisTrack, .tlTrack { margin-right: 70px; }
+  .tlBands { margin: 0 70px 0 106px; }
+  .board { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .stats { grid-template-columns: repeat(3, auto); }
+  .bars { justify-content: flex-start; }
+}

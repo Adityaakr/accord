@@ -12,6 +12,7 @@ import { HeadActions } from "./HeadActions";
 import { HowToBid } from "./HowToBid";
 import { PHASE_LABEL, PHASE_TONE, shortHex } from "./lib";
 import { TokenAmount } from "./TokenAmount";
+import { BidStrip, BoardActivity } from "./charts";
 import styles from "./tenders.module.css";
 
 export const dynamic = "force-dynamic";
@@ -51,6 +52,8 @@ export default async function Tenders({ searchParams }: { searchParams: Promise<
         aside={<HeadActions />}
       />
 
+      {all && all.length ? <BoardActivity jobs={all} /> : null}
+
       <div className={styles.filters} role="toolbar" aria-label="Filter jobs">
         <div className={styles.group}>
           {FILTERS.map(([k, label]) => (
@@ -83,6 +86,7 @@ export default async function Tenders({ searchParams }: { searchParams: Promise<
                   </span>
                   <span className={`small ${styles.jobLine}`}><JobLine j={j} now={now} /></span>
                 </span>
+                <span className={styles.jobChart}><BidStrip job={j} /></span>
                 <span className={styles.jobMoney}><TokenAmount base={j.budget} token={j.token} /></span>
                 <span className={styles.jobState}><Pill tone={PHASE_TONE[j.phase]}>{PHASE_LABEL[j.phase]}</Pill></span>
               </Link>

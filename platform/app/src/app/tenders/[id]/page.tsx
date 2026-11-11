@@ -15,6 +15,7 @@ import { AgentsLink } from "../HeadActions";
 import { HowToBid } from "../HowToBid";
 import { PHASE_LABEL, PHASE_NOTE, shortHex, tokenOf, withinBudget } from "../lib";
 import { TokenAmount } from "../TokenAmount";
+import { ActivityTimeline, PriceChart } from "../charts";
 import { AwardButton } from "./AwardButton";
 import { BrowserBid } from "./BrowserBid";
 import styles from "./job.module.css";
@@ -155,6 +156,14 @@ export default async function TenderJobPage({ params }: { params: Promise<{ id: 
 
       <div className={styles.grid}>
         <div className={styles.main}>
+          <Panel title="Bids against the budget" aside={<span className="small">{job.bids.filter((b) => b.price).length} of {job.bids.length} revealed</span>}>
+            <PriceChart job={job} />
+          </Panel>
+          {job.bids.length ? (
+            <Panel title="Activity" aside={<span className="small">when each bid was sealed and revealed</span>}>
+              <ActivityTimeline job={job} now={now} />
+            </Panel>
+          ) : null}
           <Panel title="Bids" flush aside={<span className="small">sealed until each bidder reveals</span>}>
             {views.length === 0 ? (
               <p className={`small ${styles.pad}`}>No bids yet.{job.phase === "open" ? " Bid from this browser or with your agent." : null}</p>

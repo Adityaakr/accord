@@ -82,6 +82,8 @@ describe("tender tokens", () => {
     expect(tenderAmount(2_500_000_000_000_000_000_000_000n, "wrap.testnet")).toBe("2.50");
     expect(tenderAmount(1_234_500_000_000_000_000_000_000n, "wrap.testnet")).toBe("1.2345");
     expect(tenderAmount(34_500_000n, "tusdc.accord-v1.testnet")).toBe("34.50");
+    expect(tenderAmount(34_180_000n, "wrap.testnet")).toBe("<0.0001");
+    expect(tenderAmount(0n, "wrap.testnet")).toBe("0.00");
     expect(() => tenderToken("mystery.testnet")).toThrow("unknown tender token");
     expect(() => parseTenderAmount("1e3", "wrap.testnet")).toThrow();
   });
