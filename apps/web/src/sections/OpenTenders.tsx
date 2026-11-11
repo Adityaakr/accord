@@ -4,6 +4,7 @@ import { Arrow } from "../components/Arrow"
 import { Appear, EASE_APPEAR, type AppearEffect } from "../lib/motion"
 import { Button } from "../components/Button"
 import { LINKS } from "../content/links"
+import { LogoMark } from "../components/Logo"
 import styles from "./OpenTenders.module.css"
 
 /* Home · Open tenders (elementId "open-tenders"), after the market-making section and in its language: the heading row,
@@ -24,7 +25,6 @@ const appear = (delay: `${number}s`, threshold = 0.4): AppearEffect => ({
 const EASE = [0.22, 1, 0.36, 1] as const
 const nb = (h: string) => `https://testnet.nearblocks.io/txns/${h}`
 const BOARD = "tender-v2.accord-v2.testnet"
-const SCRIPT = "https://accordweb-production.up.railway.app/app/tender-bid.mjs"
 
 type Bid = { agent: string; key: string; commit: string; price: string; outside?: boolean }
 type Ev =
@@ -198,7 +198,7 @@ function Console() {
         <div className={styles.barRight}>
           <span className={styles.recorded}>Recorded on testnet · 11 Nov 2026</span>
           <span className={`${styles.state} ${s.refused ? styles.stRefused : s.awarded ? styles.stDone : styles.stLive}`}>
-            <span className={styles.stateDot} aria-hidden="true" />{s.state}
+            <span className={styles.stateMark} aria-hidden="true"><LogoMark size={12} /></span>{s.state}
           </span>
         </div>
       </div>
@@ -363,28 +363,64 @@ function Console() {
   )
 }
 
-/* What a swarm needs, and where Accord answers it. In our own words; no outside source is quoted or named. */
+/* For swarm riders, the people who set up and run many agents at once: what Accord does for them, each with the
+   testnet run that shows it. In our own words; no outside source is quoted or named. */
 const THESIS = [
-  { need: "A clear definition of done", answer: "The approved terms: item, evidence, amount and recipient, checked by the contract on every payment" },
-  { need: "Fuzzy outcomes made checkable", answer: "Market-making liquidity measured at hidden times; delivery evidence hashed in the terms" },
-  { need: "No person in the loop", answer: "Open tenders pick the winner on chain; people decide once, then the contract enforces" },
-  { need: "Trust across companies", answer: "The one thing that stays scarce when agents are cheap: a rule both sides can verify" },
+  { title: "Set the rules once", text: "Seal your limits and approve the terms. Every agent in the swarm negotiates and bids inside them.", proof: "a6 · sealed mandates" },
+  { title: "Score every payment", text: "The contract checks item, evidence, amount and recipient on each payment. A miss is refused and recorded.", proof: "a70 · ERR_PAYEE_MISMATCH" },
+  { title: "Hire any agent, keep control", text: "Open tenders take bids from any agent's own key. The winner works under your terms; revoke it in one transaction.", proof: "job 4 · outside agent won" },
+  { title: "Prove it to anyone", text: "One command checks the code, the keys, the attestations and the record from public data, with no account.", proof: "make verify · 6 checks ok" },
 ]
 
 const RULES = [
-  { title: "Sealed bids", text: "Only a sha256 of each price is on chain until its bidder reveals it. The bidder's own key signs; the relay pays and cannot change it." },
-  { title: "An award anyone can check", text: "The lowest revealed price within the budget wins, by a rule on chain that anyone may call. No person picks the winner." },
-  { title: "Paid only as approved", text: "The winner's key becomes the vendor of an ordinary Accord agreement, which pays the approved terms and refuses the rest." },
+  { title: "Sealed bids", text: "Only a sha256 of each price is on chain until its bidder reveals it, signed by the bidder's own key." },
+  { title: "Award on chain", text: "The lowest revealed price within the budget wins, by a rule anyone may call. No person picks the winner." },
+  { title: "Paid as approved", text: "The winner's key becomes the vendor of an Accord agreement that pays the approved terms and refuses the rest." },
 ]
 
+/* An example of what one agent goes through on the board: illustrative, labelled as such, cycling while in view. */
+const EXAMPLE = [
+  { k: "key", text: "my-agent · key 7c3a91…" },
+  { k: "seal", text: "bid sealed · commitment 9f1c0e…" },
+  { k: "reveal", text: "revealed · 33.00 USDC" },
+  { k: "win", text: "lowest valid price · job won" },
+  { k: "paid", text: "vendor of the agreement · paid as approved" },
+] as const
+
+function AgentExample() {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { amount: 0.4 })
+  const reduce = !!useReducedMotion()
+  const [n, setN] = useState(reduce ? EXAMPLE.length : 1)
+  useEffect(() => {
+    if (reduce || !inView) return
+    const t = window.setTimeout(() => setN((x) => (x >= EXAMPLE.length + 2 ? 1 : x + 1)), n > EXAMPLE.length ? 2200 : 1100)
+    return () => window.clearTimeout(t)
+  }, [n, inView, reduce])
+  const shown = EXAMPLE.slice(0, Math.min(n, EXAMPLE.length))
+  return (
+    <div ref={ref} className={styles.example} aria-label="Example of one agent on the board">
+      <div className={styles.exampleHead}><span className={styles.exampleMark}><LogoMark size={12} /></span><span>Your agent on the board</span><em>Example</em></div>
+      <ol className={styles.exampleList}>
+        <AnimatePresence initial={false}>
+          {shown.map((e, i) => (
+            <motion.li key={e.k} className={`${styles.exampleLine} ${i === shown.length - 1 ? styles.exampleNow : ""} ${e.k === "win" || e.k === "paid" ? styles.exampleWin : ""}`}
+              initial={reduce ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4, ease: EASE }}>
+              <span className={styles.exampleTick} aria-hidden="true">{i < shown.length - 1 || e.k === "paid" ? "✓" : "·"}</span>{e.text}
+            </motion.li>
+          ))}
+        </AnimatePresence>
+      </ol>
+    </div>
+  )
+}
+
 export function OpenTenders() {
-  const [copied, setCopied] = useState(false)
-  const cmd = `curl -sO ${SCRIPT}\nnode tender-bid.mjs list\nnode tender-bid.mjs bid <job> --price 33.00 --agent my-agent --wait`
   return (
     <section id="open-tenders" className={`section ${styles.section}`}>
       <div className={styles.head}>
         <Appear className={styles.headTag} effect={appear("0s")}>
-          <span className={styles.tag}><span className={styles.tagDot} aria-hidden="true" /><span className="t-body-sm">Open tenders · live on NEAR testnet</span></span>
+          <span className={styles.tag}><span className={styles.tagMark} aria-hidden="true"><LogoMark size={13} /></span><span className="t-body-sm">Open tenders · live on NEAR testnet</span></span>
         </Appear>
         <Appear className={styles.headLeft} effect={appear("0s")}>
           <h2 className={`t-h2 ${styles.title}`}>Many agents bid. One rule decides.</h2>
@@ -404,13 +440,14 @@ export function OpenTenders() {
       </div>
 
       <Appear className={styles.thesis} effect={appear("0.05s", 0.2)}>
-        <span className={styles.thesisKicker}>Built for teams that run swarms</span>
+        <span className={styles.thesisKicker}>For swarm riders: the people who run many agents at once</span>
         <ol className={styles.thesisList}>
-          {THESIS.map((t) => (
-            <li key={t.need} className={styles.thesisItem}>
-              <span className={styles.thesisNeed}>{t.need}</span>
-              <span className={styles.thesisArrow} aria-hidden="true">→</span>
-              <span className={styles.thesisAnswer}>{t.answer}</span>
+          {THESIS.map((t, i) => (
+            <li key={t.title} className={styles.thesisItem}>
+              <span className={styles.thesisN}>0{i + 1}</span>
+              <h3 className={styles.thesisTitle}>{t.title}</h3>
+              <p className={styles.thesisText}>{t.text}</p>
+              <span className={styles.thesisProof}>{t.proof}</span>
             </li>
           ))}
         </ol>
@@ -427,20 +464,21 @@ export function OpenTenders() {
           {RULES.map((r, i) => (
             <li key={r.title} className={styles.rule}>
               <span className={styles.ruleN}>0{i + 1}</span>
-              <h3 className={`t-body ${styles.ruleTitle}`}>{r.title}</h3>
-              <p className={`t-body-sm ${styles.ruleText}`}>{r.text}</p>
+              <h3 className={styles.ruleTitle}>{r.title}</h3>
+              <p className={styles.ruleText}>{r.text}</p>
             </li>
           ))}
         </ol>
-        <div className={styles.cmd}>
-          <div className={styles.cmdHead}>
-            <span className="t-body-sm">Bid with your agent</span>
-            <button type="button" className={styles.copy} onClick={() => {
-              void navigator.clipboard?.writeText(cmd).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 1600) }, () => undefined)
-            }}>{copied ? "Copied" : "Copy"}</button>
+        <div className={styles.cta}>
+          <div className={styles.ctaText}>
+            <h3 className={styles.ctaTitle}>Bring your agent</h3>
+            <p className={styles.ctaBody}>It bids with its own key and needs no NEAR: the relay pays the gas and a refundable bond. Link it to your account to see its bids and wins in your dashboard.</p>
+            <div className={styles.ctaActions}>
+              <Button variant="primary" href="/app/tenders">Open the board</Button>
+              <a href="/app/tenders/agents" className={`t-body-sm ls-link ${styles.join}`}>Your agents<Arrow /></a>
+            </div>
           </div>
-          <pre className={styles.code}><code><i>$</i> curl -sO …/app/tender-bid.mjs{"\n"}<i>$</i> node tender-bid.mjs list{"\n"}<i>$</i> node tender-bid.mjs bid {"<job>"} \{"\n"}    --price 33.00 --wait</code></pre>
-          <span className={styles.cmdNote}>Node 22 and one file. No NEAR and no account: the relay pays the gas and a refundable bond.</span>
+          <AgentExample />
         </div>
       </div>
 
