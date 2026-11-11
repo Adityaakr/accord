@@ -37,6 +37,7 @@ export const WORKSPACES: Workspace[] = [
     nav: [
       { href: "/", label: "Home", icon: "home", match: (p) => p === "/" },
       { href: "/rooms", label: "Deal rooms", icon: "rooms", match: rooms },
+      { href: "/tenders", label: "Tenders", icon: "sheet", match: starts("/tenders") },
       { href: "/approvals", label: "Approvals", icon: "approvals", match: starts("/approvals") },
       { href: "/agents", label: "Agents", icon: "agents", match: starts("/agents") },
       { href: "/record", label: "Record", icon: "record", match: starts("/record") },
@@ -50,6 +51,7 @@ export const WORKSPACES: Workspace[] = [
     nav: [
       { href: "/", label: "Home", icon: "home", match: (p) => p === "/" },
       { href: "/rooms", label: "Deal rooms", icon: "rooms", match: rooms },
+      { href: "/tenders", label: "Tenders", icon: "sheet", match: starts("/tenders") },
       { href: "/payout", label: "Payout account", icon: "payout", match: starts("/payout") },
       { href: "/deliveries", label: "Deliveries and claims", icon: "deliveries", match: starts("/deliveries") },
       { href: "/record", label: "Record", icon: "record", match: starts("/record") },
