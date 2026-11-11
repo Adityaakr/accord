@@ -1,9 +1,14 @@
-// Small shared helpers for the open tender pages: labels, tones and the token's symbol.
-import type { TenderJob, TenderPhase } from "@accord/sdk";
+// Small shared helpers for the open tender pages: labels, tones and the job's token.
+import { TENDER_TOKENS, type TenderJob, type TenderPhase, type TenderToken } from "@accord/sdk";
 import type { Tone } from "@/components/ui";
 
+/** Teal while a tender takes part or ends in an agreement, neutral when decided, muted when it stopped. */
 export const PHASE_TONE: Record<TenderPhase, Tone> = {
-  open: "teal", revealing: "purple", closed: "warn", awarded: "teal", linked: "teal", no_valid_bid: "muted", cancelled: "muted",
+  open: "teal", revealing: "teal", closed: "neutral", awarded: "neutral", linked: "teal", no_valid_bid: "muted", cancelled: "muted",
+};
+
+export const PHASE_LABEL: Record<TenderPhase, string> = {
+  open: "open", revealing: "revealing", closed: "closed", awarded: "awarded", linked: "linked", no_valid_bid: "no valid bid", cancelled: "cancelled",
 };
 
 export const PHASE_NOTE: Record<TenderPhase, string> = {
@@ -16,8 +21,8 @@ export const PHASE_NOTE: Record<TenderPhase, string> = {
   cancelled: "cancelled by the buyer",
 };
 
-/** The job's token as a symbol: the test token says tUSDC, anything else USDC. */
-export const symbolOf = (token: string): string => (token.startsWith("tusdc.") ? "tUSDC" : "USDC");
+/** The job's token, or null for a token this app does not know (its decimals are then unknown: never guess). */
+export const tokenOf = (id: string): TenderToken | null => TENDER_TOKENS.find((t) => t.id === id) ?? null;
 
 /** A 64-hex id (bidder key, commitment, hash) shortened to its ends. */
 export const shortHex = (h: string, n = 6): string => (h.length > n + 6 ? `${h.slice(0, n)}…${h.slice(-4)}` : h);
@@ -36,12 +41,6 @@ export const cliBid = (job: number | string): string =>
   `curl -sO ${SCRIPT_URL}\nnode tender-bid.mjs bid ${job} --price 36.50 --agent my-agent --wait\nnode tender-bid.mjs link <you>.testnet   # show it in Your agents`;
 export const SKILL_RAW = "https://raw.githubusercontent.com/Adityaakr/accord/main/skills/accord-tender/SKILL.md";
 export const README_TENDERS = "https://github.com/Adityaakr/accord#open-tenders";
-
-/** The tokens a job may be posted in from this app: both have 6 decimals. */
-export const TENDER_TOKENS = [
-  { id: "tusdc.accord-v1.testnet", label: "tUSDC (test token)", factory: "accord-v2.testnet" },
-  { id: "3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af", label: "Circle USDC (testnet)", factory: "accord-usdc.testnet" },
-] as const;
 
 /** The commands that link an agent running elsewhere to `account`'s dashboard. */
 export const linkScript = (account: string): string => `curl -sO ${SCRIPT_URL}\nnode tender-bid.mjs link ${account}`;

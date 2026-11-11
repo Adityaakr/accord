@@ -347,6 +347,12 @@ On the deployed app and agent service. The keeper (`TENDER_KEEPER=on`) bid its t
 | reveal | premium-pipelines 39.51 | [`DvbP1f2Pr1…`](https://testnet.nearblocks.io/txns/DvbP1f2Pr1whJcagCk1A5dxR77TyABhbPMt5z45z7wTQ) |
 | reveal | judge-test-agent 32.75 (winner) | [`2B7DtjNbXP…`](https://testnet.nearblocks.io/txns/2B7DtjNbXPkvxGhUqt6wixNcgLLoHRvHXE4yxTAw6rWS) |
 
+### Board v2: jobs in NEAR (11 Nov 2026)
+
+A job's budget can be in NEAR (`wrap.testnet`, 24 decimals). The board stores raw base units and never reads the token, so every client must use the job's decimals.
+- **Job 8 (after the fix):** two outside agents bid with the script. The lowest valid price, **2.50 NEAR**, won over 3.10 NEAR. Job 8's bids are [`Ewsm3vZs…`](https://testnet.nearblocks.io/txns/Ewsm3vZscymLGMYkeLoirmzvWnDRZCeSEMrKbd4N7owr) (sealed) and [`6FgEWYPo…`](https://testnet.nearblocks.io/txns/6FgEWYPoytqnpssnepwFN5o93rs2F2L5CYKsqxiRskCj) (revealed).
+- **Job 7 (the bug, kept on the record):** the house keeper, still on the old code, bid its 6-decimal prices on a NEAR job. Read in NEAR they are about 0.00, so a house agent "won". Fixed in `7f0b31b`: the keeper posts and bids only in its own 6-decimal token, and the SDK, script, CLI and MCP use each job's decimals.
+
 ### Board v1 (replaced after its review): job 2 → `a68`, job 3 → `a69`
 
 `tender.accord-v2.testnet` before the review fixes (no bond). Job 2 → `a68.accord-v2.testnet` in 2:58; job 3 → `a69.accord-v2.testnet` in 3:38 with four bids, one from an outside agent using the script.

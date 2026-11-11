@@ -13,13 +13,14 @@ import { useOrg } from "@/components/org/OrgProvider";
 import { RoomLink } from "@/components/RoomLink";
 import { SignInCard } from "@/components/SignInCard";
 import { Stage } from "@/components/Stage";
-import { PageHead, Panel, Pill, Quiet, Usdc, type Tone } from "@/components/ui";
+import { PageHead, Panel, Pill, Quiet, type Tone } from "@/components/ui";
 import { onVisibleInterval } from "@/components/visible";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import type { AgentView } from "@/server/tenderagents";
 import { browserKey, ensureBrowserKey, linkBrowserKey } from "../browserKey";
 import { Command } from "../Command";
-import { PHASE_TONE, linkCli, linkScript, shortHex, symbolOf } from "../lib";
+import { linkCli, linkScript, shortHex } from "../lib";
+import { TokenAmount } from "../TokenAmount";
 import styles from "../act.module.css";
 
 export interface LinkParams { bidder: string; sig: string; label: string; source: string }
@@ -93,7 +94,6 @@ function Signed({ account, link, head }: { account: string; link: LinkParams | n
   }, [tick, reloadOrg]);
 
   const agents = data?.agents ?? [];
-  const sym = (job: number) => (tokens[job] ? symbolOf(tokens[job]!) : "USDC");
 
   return (
     <div className="container">
@@ -113,7 +113,7 @@ function Signed({ account, link, head }: { account: string; link: LinkParams | n
                 </div>
               ) : (
                 <ul className={styles.agents}>
-                  {agents.map((a) => <AgentCard key={a.bidder} a={a} sym={sym} onUnlinked={reload} />)}
+                  {agents.map((a) => <AgentCard key={a.bidder} a={a} tokens={tokens} onUnlinked={reload} />)}
                 </ul>
               )}
             </Panel>
@@ -170,7 +170,7 @@ function LinkCard({ account, link, onDone }: { account: string; link: LinkParams
   );
 }
 
-function AgentCard({ a, sym, onUnlinked }: { a: AgentView; sym: (job: number) => string; onUnlinked: () => void }) {
+function AgentCard({ a, tokens, onUnlinked }: { a: AgentView; tokens: Record<number, string>; onUnlinked: () => void }) {
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -192,55 +192,56 @@ function AgentCard({ a, sym, onUnlinked }: { a: AgentView; sym: (job: number) =>
   return (
     <li className={styles.agent}>
       <div className={styles.agentTop}>
-        <div className={styles.agentName}>
-          <span className={styles.agentLabel}>{a.label}<Pill tone={SOURCE_TONE[a.source] ?? "neutral"}>{a.source}</Pill></span>
-          <span className={styles.agentMeta}>
-            <button type="button" className={styles.bidderId} title={`${a.bidder} (click to copy)`} aria-label={`Copy bidder id ${a.bidder}`}
-              onClick={() => { void navigator.clipboard?.writeText(a.bidder).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1400); }).catch(() => undefined); }}>
-              {copied ? "copied" : shortHex(a.bidder, 8)}
-            </button>
-            <span>linked <span className="mono">{Number.isNaN(linked.getTime()) ? a.linked_at : linked.toISOString().slice(0, 10)}</span></span>
-          </span>
-        </div>
-        <div className={styles.stats}>
-          <span className={styles.stat}><span className={styles.statValue}>{a.bids.length}</span><span className={styles.statLabel}>bids</span></span>
-          <span className={styles.stat}><span className={styles.statValue}>{a.open}</span><span className={styles.statLabel}>open</span></span>
-          <span className={styles.stat}><span className={`${styles.statValue} ${a.wins ? styles.won : ""}`}>{a.wins}</span><span className={styles.statLabel}>wins</span></span>
-        </div>
+        <span className={styles.agentLabel}>{a.label}</span>
+        <Pill tone={SOURCE_TONE[a.source] ?? "neutral"}>{a.source}</Pill>
+        <button type="button" className={styles.bidderId} title={`${a.bidder} (click to copy)`} aria-label={`Copy bidder id ${a.bidder}`}
+          onClick={() => { void navigator.clipboard?.writeText(a.bidder).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1400); }).catch(() => undefined); }}>
+          {copied ? "copied" : shortHex(a.bidder, 8)}
+        </button>
+        <span className={styles.agentMeta}>linked <span className="mono">{Number.isNaN(linked.getTime()) ? a.linked_at : linked.toISOString().slice(0, 10)}</span></span>
+        <span className={styles.stats}>
+          <span><span className="num strong">{a.bids.length}</span> bid{a.bids.length === 1 ? "" : "s"}</span>
+          <span><span className="num strong">{a.open}</span> open</span>
+          <span><span className={`num ${a.wins ? styles.won : "strong"}`}>{a.wins}</span> win{a.wins === 1 ? "" : "s"}</span>
+        </span>
+        <span className={styles.unlink}>
+          {!asking ? (
+            <button type="button" className={styles.textBtn} onClick={() => setAsking(true)}>Unlink</button>
+          ) : (
+            <>
+              <span>Unlink? Its bids stay on the board.</span>
+              <button type="button" className={`${styles.textBtn} ${styles.bad}`} onClick={() => void unlink()} disabled={busy} aria-busy={busy}>{busy ? "Unlinking…" : "Unlink"}</button>
+              <button type="button" className={styles.textBtn} onClick={() => setAsking(false)} disabled={busy}>Cancel</button>
+            </>
+          )}
+        </span>
       </div>
+      {err ? <p className={`${styles.msg} ${styles.bad}`} role="status">{err}</p> : null}
 
       {a.bids.length ? (
-        <table className={styles.bids}>
-          <thead><tr><th>Job</th><th>Title</th><th>Phase</th><th>Price</th><th>Outcome</th><th>Agreement</th></tr></thead>
-          <tbody>
-            {a.bids.map((b) => (
-              <tr key={b.job}>
-                <td><Link className="mono link" href={`/tenders/${b.job}`}>#{b.job}</Link></td>
-                <td className={styles.bidTitle} title={b.title}>{b.title}</td>
-                <td><Pill tone={PHASE_TONE[b.phase]}>{b.phase}</Pill></td>
-                <td>{b.price !== null ? <Usdc amount={b.price} symbol={sym(b.job)} /> : <span className="mono faint">sealed</span>}</td>
-                <td className="mono">{b.won ? <span className={styles.won}>won</span> : b.lost ? <span className={styles.lost}>lost</span> : <span className="faint">pending</span>}</td>
-                <td className={b.agreement ? undefined : styles.hideNarrow}>{b.agreement ? <RoomLink className="mono link" id={b.agreement} /> : <span className="faint">none</span>}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className={styles.tableWrap}>
+          <table className={styles.bids}>
+            <thead><tr><th scope="col">Job</th><th scope="col">Title</th><th scope="col" className={styles.right}>Price</th><th scope="col">Outcome</th><th scope="col" className={styles.hideNarrow}>Agreement</th></tr></thead>
+            <tbody>
+              {a.bids.map((b) => (
+                <tr key={b.job}>
+                  <td><Link className="mono link" href={`/tenders/${b.job}`}>#{b.job}</Link></td>
+                  <td className={styles.bidTitle} title={b.title}>{b.title}</td>
+                  <td className={styles.right}>
+                    {b.price === null ? <span className="mono faint">sealed</span>
+                      : tokens[b.job] ? <TokenAmount base={b.price} token={tokens[b.job]!} />
+                      : <span className="mono faint">…</span>}
+                  </td>
+                  <td>{b.won ? <Pill tone="teal">won</Pill> : b.lost ? <Pill tone="muted">lost</Pill> : <Pill tone="neutral">{b.phase === "open" || b.phase === "revealing" ? b.phase : "pending"}</Pill>}</td>
+                  <td className={styles.hideNarrow}>{b.agreement ? <RoomLink className="mono link" id={b.agreement} /> : <span className="faint">none</span>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
-        <p className="small">No bids on the board&apos;s recent jobs yet. <Link className="link" href="/tenders">Open tenders</Link></p>
+        <p className={`small ${styles.agentEmpty}`}>No bids on the board&apos;s recent jobs yet. <Link className="link" href="/tenders?phase=open">Jobs taking bids</Link></p>
       )}
-
-      <div className={styles.unlink}>
-        {!asking ? (
-          <button type="button" className={`${styles.btn} ${styles.quiet}`} onClick={() => setAsking(true)}>Unlink</button>
-        ) : (
-          <>
-            <span>Unlink <span className="mono">{a.label}</span>? Its bids stay on the board.</span>
-            <button type="button" className={`${styles.btn} ${styles.danger}`} onClick={() => void unlink()} disabled={busy} aria-busy={busy}>{busy ? "Unlinking…" : "Unlink"}</button>
-            <button type="button" className={`${styles.btn} ${styles.quiet}`} onClick={() => setAsking(false)} disabled={busy}>Cancel</button>
-          </>
-        )}
-        {err ? <span className={`${styles.msg} ${styles.bad}`} role="status">{err}</span> : null}
-      </div>
     </li>
   );
 }

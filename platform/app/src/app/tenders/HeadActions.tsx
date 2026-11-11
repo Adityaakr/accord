@@ -1,24 +1,24 @@
 "use client";
 
-// Signed in only: the way to this account's tender agents and, on the board, to posting a job.
+// The board's head actions: "Your agents" for a signed-in account, and "Post a job" for everyone (the page it opens
+// asks a signed-out visitor to sign in).
 import Link from "next/link";
 import { useWallet } from "@/components/wallet/WalletProvider";
-import styles from "./act.module.css";
+import styles from "./tenders.module.css";
 
-export function HeadActions({ post = false }: { post?: boolean }) {
+export function HeadActions() {
   const w = useWallet();
-  if (!w.accountId) return null;
   return (
     <div className={styles.headActions}>
-      <Link href="/tenders/agents" className={`${styles.btn} ${styles.quiet}`}>Your agents</Link>
-      {post ? <a href="#post-job" className={`${styles.btn} ${styles.primary}`}>Post a job</a> : null}
+      {w.accountId ? <Link href="/tenders/agents" className="small link">Your agents</Link> : null}
+      <Link href="/tenders/new" className={styles.primary}>Post a job</Link>
     </div>
   );
 }
 
-/** One quiet link for an eyebrow line, signed in only. */
-export function AgentsLink() {
+/** One quiet link for a header line, signed in only. */
+export function AgentsLink({ className = "small link" }: { className?: string }) {
   const w = useWallet();
   if (!w.accountId) return null;
-  return <> · <Link className="link" href="/tenders/agents">Your agents</Link></>;
+  return <Link className={className} href="/tenders/agents">Your agents</Link>;
 }
