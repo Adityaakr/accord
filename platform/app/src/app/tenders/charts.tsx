@@ -48,56 +48,88 @@ export function BidStrip({ job }: { job: TenderJob }) {
   );
 }
 
-/** The job page: every bid on one price axis from 0 to the budget (and past it if a bid went over). */
+/** Base units as a decimal number for differences and percentages (display only; ranking stays in bigint). */
+const asNumber = (base: string, token: string) => {
+  try { return Number(tenderAmount(base, token).replace("<", "")); } catch { return 0; }
+};
+
+/**
+ * The job page: every bid on one price axis from 0 to the budget, each with its price and its distance from the
+ * winning price in fixed columns at the right (never on the plot, so nothing collides with the budget line).
+ */
 export function PriceChart({ job }: { job: TenderJob }) {
   const revealed = job.bids.filter((b) => b.price);
   const maxR = Math.max(1, ...revealed.map((b) => ratio(b.price!, job.budget)));
-  const scale = maxR > 1 ? Math.min(maxR * 1.04, 2) : 1.04;
+  const scale = maxR > 1 ? Math.min(maxR * 1.03, 2) : 1;
   const pos = (r: number) => `${(Math.min(r, scale) / scale) * 100}%`;
   const rows = [...job.bids].sort((a, b) => (a.price && b.price ? (BigInt(a.price) < BigInt(b.price) ? -1 : 1) : a.price ? -1 : b.price ? 1 : 0));
-  const ticks = [0, 0.25, 0.5, 0.75, 1];
-  let budgetNum = 0;
-  try { budgetNum = Number(tenderAmount(job.budget, job.token)); } catch { /* unknown token */ }
+  const win = job.bids.find((b) => b.bidder === job.winner && b.price) ?? null;
+  const ref = win ?? rows.find((b) => b.price && kindOf(b, job) !== "over") ?? null;
+  const sym = (() => { try { return tenderToken(job.token).symbol; } catch { return ""; } })();
+  const budgetN = asNumber(job.budget, job.token);
+  const refN = ref?.price ? asNumber(ref.price, job.token) : 0;
+  const valid = revealed.filter((b) => BigInt(b.price!) <= BigInt(job.budget));
+  const spread = valid.length > 1 ? Math.max(...valid.map((b) => asNumber(b.price!, job.token))) - Math.min(...valid.map((b) => asNumber(b.price!, job.token))) : 0;
+  const fmt = (n: number) => (n >= 1 || n === 0 ? n.toFixed(2) : n.toPrecision(2));
+  const ticks = [0, 0.5, 1];
   return (
     <div className={styles.chart}>
+      {ref?.price ? (
+        <p className={styles.summary}>
+          <span>{win ? "Winning price" : "Lowest valid price so far"} <b>{amount(ref.price, job.token)}</b></span>
+          {budgetN > 0 && refN <= budgetN ? <span><b>{fmt(budgetN - refN)} {sym}</b> ({(((budgetN - refN) / budgetN) * 100).toFixed(1)}%) under the budget</span> : null}
+          {valid.length > 1 ? <span>spread <b>{fmt(spread)} {sym}</b></span> : null}
+          <span>{revealed.length} of {job.bids.length} revealed</span>
+        </p>
+      ) : (
+        <p className={styles.summary}><span>{job.bids.length ? `${job.bids.length} sealed bid${job.bids.length === 1 ? "" : "s"}: prices show as each bidder reveals` : "No bids yet"}</span></p>
+      )}
+      <div className={styles.head} aria-hidden="true">
+        <span>Agent</span><span>Price against the budget</span><span className={styles.num}>Price</span><span className={styles.num}>vs {win ? "winner" : "lowest"}</span>
+      </div>
       <div className={styles.rows}>
         {rows.map((b) => {
           const k = b.price ? kindOf(b, job) : null;
+          const r = b.price ? ratio(b.price, job.budget) : 0;
+          const diff = b.price && ref?.price ? asNumber(b.price, job.token) - refN : null;
+          const note = !b.price ? "sealed" : k === "win" ? (isDust(b.price, job.budget) ? "lowest · wrong decimals?" : "lowest") : k === "over" ? "over budget"
+            : k === "dust" ? "wrong decimals?" : b.bidder === ref?.bidder ? "lowest" : diff !== null ? `+${fmt(diff)}` : "";
           return (
-            <div key={b.bidder} className={styles.row}>
+            <div key={b.bidder} className={`${styles.row} ${k === "win" ? styles.rowIsWin : ""}`}>
               <span className={`${styles.rowLabel} ${k === "win" ? styles.rowWin : ""}`}>{b.agent}</span>
               <span className={styles.track}>
                 <span className={styles.budgetLine} style={{ left: pos(1) }} aria-hidden="true" />
                 {b.price && k ? (
                   <>
-                    <span className={`${styles.stem} ${k === "win" ? styles.stemWin : ""}`} style={{ width: pos(ratio(b.price, job.budget)) }} aria-hidden="true" />
-                    <span className={`${styles.dot} ${styles[`d_${k}`]}`} style={{ left: pos(ratio(b.price, job.budget)) }} tabIndex={0}
-                      data-tip={`${b.agent} · ${amount(b.price, job.token)}${k === "win" ? " · lowest valid price" : k === "over" ? " · over the budget" : k === "dust" ? " · far below one unit: priced in the wrong decimals" : ""}`} />
-                    <span className={`${styles.value} ${k === "dust" ? styles.valueWarn : ""}`} style={{ left: pos(ratio(b.price, job.budget)) }}>
-                      {amount(b.price, job.token)}{k === "win" ? (isDust(b.price, job.budget) ? " · winner · wrong decimals?" : " · winner") : k === "dust" ? " · wrong decimals?" : ""}
-                    </span>
+                    <span className={`${styles.stem} ${k === "win" ? styles.stemWin : ""}`} style={{ width: pos(r) }} aria-hidden="true" />
+                    <span className={`${styles.dot} ${styles[`d_${k}`]}`} style={{ left: pos(r) }} tabIndex={0}
+                      data-tip={`${b.agent} · ${amount(b.price, job.token)} · ${(r * 100).toFixed(1)}% of the budget`} />
                   </>
                 ) : (
-                  <span className={styles.sealedTag} data-tip={`${b.agent} · sealed: only a sha256 is on chain until it reveals`} tabIndex={0}>
-                    <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>
-                    sealed
-                  </span>
+                  <span className={styles.sealedBar} aria-hidden="true" />
                 )}
               </span>
+              <span className={`${styles.num} ${styles.price}`}>{b.price ? amount(b.price, job.token) : (
+                <span className={styles.sealedTag} data-tip={`${b.agent} · only a sha256 is on chain until it reveals`} tabIndex={0}>
+                  <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>sealed
+                </span>
+              )}</span>
+              <span className={`${styles.num} ${styles.delta} ${k === "win" || note === "lowest" ? styles.deltaWin : ""} ${note.includes("wrong") ? styles.deltaWarn : ""}`}>{b.price ? note : ""}</span>
             </div>
           );
         })}
-        {rows.length === 0 ? <p className="small weak">No bids yet. The first sealed bid shows here as soon as it lands.</p> : null}
+        {rows.length === 0 ? <p className="small weak">The first sealed bid shows here as soon as it lands.</p> : null}
       </div>
       <div className={styles.axis} aria-hidden="true">
-        <span className={styles.rowLabel} />
+        <span />
         <span className={styles.axisTrack}>
           {ticks.map((t) => (
-            <span key={t} className={`${styles.tick} ${t === 1 ? styles.tickBudget : ""}`} style={{ left: pos(t) }}>
-              {t === 1 ? `budget ${budgetNum ? budgetNum.toFixed(2) : ""}` : budgetNum ? (budgetNum * t).toFixed(budgetNum * t < 10 ? 2 : 0) : `${t * 100}%`}
+            <span key={t} className={`${styles.tick} ${t === 1 ? styles.tickBudget : t === 0.5 ? styles.tickMid : ""}`} style={{ left: pos(t) }}>
+              {t === 1 ? `budget ${fmt(budgetN)}` : fmt(budgetN * t)}
             </span>
           ))}
         </span>
+        <span /><span />
       </div>
     </div>
   );
@@ -114,8 +146,8 @@ export function ActivityTimeline({ job, now }: { job: TenderJob; now: number }) 
   return (
     <div className={styles.timeline}>
       <div className={styles.tlBands} aria-hidden="true">
-        <span className={styles.bandBid} style={{ left: "0%", width: at(job.commit_ends) }}><em>bidding</em></span>
-        <span className={styles.bandReveal} style={{ left: at(job.commit_ends), width: `calc(100% - ${at(job.commit_ends)})` }}><em>reveal</em></span>
+        <span className={styles.bandBid} style={{ left: "0%", width: at(job.commit_ends) }}><em>bidding · until {clock(job.commit_ends)}</em></span>
+        <span className={styles.bandReveal} style={{ left: at(job.commit_ends), width: `calc(100% - ${at(job.commit_ends)})` }}><em>reveal · until {clock(t1)}</em></span>
         {live ? <span className={styles.now} style={{ left: at(nowNs) }}><em>now</em></span> : null}
       </div>
       <div className={styles.tlRows}>
@@ -127,15 +159,15 @@ export function ActivityTimeline({ job, now }: { job: TenderJob; now: number }) 
               <span className={styles.tlCommit} style={{ left: at(b.committed_at) }} tabIndex={0} data-tip={`${b.agent} · sealed at ${clock(b.committed_at)} UTC`} />
               {b.revealed_at ? <span className={`${styles.tlReveal} ${b.bidder === job.winner ? styles.tlRevealWin : ""}`} style={{ left: at(b.revealed_at) }} tabIndex={0} data-tip={`${b.agent} · revealed at ${clock(b.revealed_at)} UTC`} /> : null}
             </span>
+            <span className={styles.tlTimes}>sealed {clock(b.committed_at)}{b.revealed_at ? <> → revealed {clock(b.revealed_at)}</> : " · not revealed"}</span>
           </div>
         ))}
       </div>
       <div className={styles.axis} aria-hidden="true">
         <span className={styles.rowLabel} />
         <span className={styles.axisTrack}>
-          <span className={styles.tick} style={{ left: "0%" }}>posted {clock(t0)}</span>
-          <span className={styles.tick} style={{ left: at(job.commit_ends) }}>bids close {clock(job.commit_ends)}</span>
-          <span className={`${styles.tick} ${styles.tickEnd}`} style={{ left: "100%" }}>reveals close {clock(t1)}</span>
+          <span className={styles.tick} style={{ left: "0%" }}>posted {clock(t0)} UTC</span>
+          <span className={`${styles.tick} ${styles.tickEnd}`} style={{ left: "100%" }}>closed {clock(t1)}</span>
         </span>
       </div>
       <p className={styles.legend}>
@@ -164,13 +196,17 @@ export function BoardActivity({ jobs }: { jobs: TenderJob[] }) {
         <div><dt>Taking bids</dt><dd>{open}</dd></div>
         <div><dt>Agreements</dt><dd>{linked}</dd></div>
       </dl>
+      <div className={styles.barsWrap}>
+      <span className={styles.barsCaption}>Bids per job <i className={styles.lgLive} /> taking bids <i className={styles.lgLinked} /> agreement</span>
       <div className={styles.bars} role="img" aria-label={`Bids per job for the last ${recent.length} jobs`}>
         {recent.map((j) => (
           <Link key={j.id} href={`/tenders/${j.id}`} className={styles.barCol} data-tip={`#${j.id} · ${j.bids.length} bids · ${j.phase.replace("_", " ")}`}>
-            <span className={`${styles.bar} ${j.phase === "open" || j.phase === "revealing" ? styles.barLive : j.agreement ? styles.barLinked : ""}`} style={{ height: `${Math.max(8, (j.bids.length / maxBids) * 100)}%` }} />
+            <span className={styles.barCount}>{j.bids.length}</span>
+            <span className={`${styles.bar} ${j.phase === "open" || j.phase === "revealing" ? styles.barLive : j.agreement ? styles.barLinked : ""}`} style={{ height: `${Math.round(6 + 30 * (j.bids.length / maxBids))}px` }} />
             <span className={styles.barId}>{j.id}</span>
           </Link>
         ))}
+      </div>
       </div>
     </div>
   );

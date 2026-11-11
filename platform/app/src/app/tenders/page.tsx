@@ -13,6 +13,9 @@ import { HowToBid } from "./HowToBid";
 import { PHASE_LABEL, PHASE_TONE, shortHex } from "./lib";
 import { TokenAmount } from "./TokenAmount";
 import { BidStrip, BoardActivity } from "./charts";
+import { tenderAmount } from "@accord/sdk";
+
+const tenderAmountSafe = (base: string, token: string) => { try { return tenderAmount(base, token); } catch { return base; } };
 import styles from "./tenders.module.css";
 
 export const dynamic = "force-dynamic";
@@ -87,7 +90,9 @@ export default async function Tenders({ searchParams }: { searchParams: Promise<
                   <span className={`small ${styles.jobLine}`}><JobLine j={j} now={now} /></span>
                 </span>
                 <span className={styles.jobChart}><BidStrip job={j} /></span>
-                <span className={styles.jobMoney}><TokenAmount base={j.budget} token={j.token} /></span>
+                <span className={styles.jobMoney}>
+                  {(() => { const w = j.bids.find((b) => b.bidder === j.winner && b.price); return w ? <><TokenAmount base={w.price!} token={j.token} /><span className={styles.jobOf}> of {tenderAmountSafe(j.budget, j.token)}</span></> : <TokenAmount base={j.budget} token={j.token} />; })()}
+                </span>
                 <span className={styles.jobState}><Pill tone={PHASE_TONE[j.phase]}>{PHASE_LABEL[j.phase]}</Pill></span>
               </Link>
             </li>
