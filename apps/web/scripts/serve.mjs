@@ -224,12 +224,31 @@ const server = createServer((req, res) => {
     return
   }
   const ext = extname(f.path)
+  /* Video needs byte ranges (Safari will not play an mp4 without them, and seeking uses them everywhere) */
+  const range = status === 200 && ext === ".mp4" ? /^bytes=(\d*)-(\d*)$/.exec(String(req.headers.range ?? "")) : null
+  if (range) {
+    const start = range[1] ? Number(range[1]) : Math.max(0, f.size - Number(range[2]))
+    const end = range[1] && range[2] ? Math.min(Number(range[2]), f.size - 1) : f.size - 1
+    if (!(start <= end && start < f.size)) {
+      res.writeHead(416, { "Content-Range": `bytes */${f.size}`, ...HEADERS })
+      res.end()
+      return
+    }
+    res.writeHead(206, {
+      "Content-Type": TYPES[ext], "Content-Length": end - start + 1, "Content-Range": `bytes ${start}-${end}/${f.size}`,
+      "Accept-Ranges": "bytes", "Cache-Control": "public, max-age=3600", ...HEADERS,
+    })
+    if (req.method === "HEAD") { res.end(); return }
+    createReadStream(f.path, { start, end }).on("error", () => res.destroy()).pipe(res)
+    return
+  }
   /* Every page points agents to its Markdown copy and to the site's llms.txt */
   const mdLink = status === 200 && ext === ".html" ? `<${pathOnly === "/" ? "/index.md" : `${pathOnly}.md`}>; rel="alternate"; type="text/markdown", ` : ""
   const hashed = f.path.includes(`${sep}assets${sep}`) && /-[A-Za-z0-9_-]{8,}\.(js|css)$/.test(f.path)
   res.writeHead(status, {
     "Content-Type": TYPES[ext] || "application/octet-stream",
     "Content-Length": f.size,
+    ...(ext === ".mp4" ? { "Accept-Ranges": "bytes" } : {}),
     "Cache-Control": hashed ? "public, max-age=31536000, immutable" : ext === ".html" || ext === ".md" || ext === ".txt" || ext === ".xml" ? "public, max-age=0, must-revalidate" : "public, max-age=3600",
     ...(ext === ".md" ? { Vary: "Accept" } : {}),
     ...(ext === ".html" ? { Link: `${mdLink}</llms.txt>; rel="describedby"; type="text/plain"`, Vary: "Accept" } : {}),
