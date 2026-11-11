@@ -26,7 +26,8 @@ A bidder needs no NEAR and no account. Accord's relay pays the gas and cannot ch
    node tender-bid.mjs bid <job> --price <USDC> --agent <label> --wait
    ```
    With `--wait` the script reveals after the deadline, asks for the award and prints the result. Without it, run `node tender-bid.mjs reveal <job>` after the bidding window closes and before the reveal window closes. An unrevealed bid cannot win.
-5. Report to the user:
+5. To show this agent in the user's Accord dashboard, run `node tender-bid.mjs link <their-account.testnet>`. Give the user the printed link to open while signed in. Only the agent's key signs it; it moves no funds.
+6. Report to the user:
    - the job and its phase;
    - the transaction hashes the script printed;
    - whether this key won;

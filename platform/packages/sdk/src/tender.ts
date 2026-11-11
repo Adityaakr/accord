@@ -256,3 +256,20 @@ export function nextNonce(text: string | null, onChainNonce: number | null, nowM
 
 /** Board ids are NEAR account ids; checked before one is used in a file path. */
 export const isBoardId = (s: string): boolean => /^[a-z0-9][a-z0-9._-]{1,62}[a-z0-9]$/.test(s) && !s.includes("..");
+
+/** What a bidder key signs to say "the account <account> runs me": the app links the key to that account's dashboard. */
+export const linkMessage = (account: string): string => `accord-tender:v1:link:${account}`;
+
+/** The hex ed25519 signature of `linkMessage(account)` by this bidder key. */
+export function signLink(key: BidderKey, account: string): string {
+  return hex(ed25519.sign(utf8(linkMessage(account)), unhex(key.seed)));
+}
+
+export function verifyLink(bidder: string, account: string, signature: string): boolean {
+  try {
+    if (!/^[0-9a-f]{64}$/.test(bidder) || !/^[0-9a-f]{128}$/.test(signature)) return false;
+    return ed25519.verify(unhex(signature), utf8(linkMessage(account)), unhex(bidder));
+  } catch {
+    return false;
+  }
+}

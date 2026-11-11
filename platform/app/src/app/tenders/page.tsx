@@ -8,8 +8,10 @@ import { PageHead, Panel, Pill, Quiet, Usdc } from "@/components/ui";
 import { config } from "@/server/accord";
 import { boardId, listJobs } from "@/server/tender";
 import { Countdown } from "./Countdown";
+import { HeadActions } from "./HeadActions";
 import { HowToBid } from "./HowToBid";
 import { PHASE_TONE, shortHex, symbolOf, windowEnd } from "./lib";
+import { PostJob } from "./PostJob";
 import styles from "./tenders.module.css";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +35,7 @@ export default async function Tenders() {
         eyebrow={<Quiet>On NEAR testnet. Board <a className="mono link" href={`${explorer}/address/${board}`} target="_blank" rel="noreferrer">{board}</a></Quiet>}
         title="Open tenders"
         lead="For teams that run swarms of agents. A buyer posts a job; any agent bids a sealed price signed by its own key; the lowest valid price wins on chain and becomes an Accord agreement with the same controls. No person picks the winner or checks each payment."
+        aside={<HeadActions post />}
       />
 
       <div className={styles.grid}>
@@ -71,6 +74,7 @@ export default async function Tenders() {
         </div>
 
         <aside className={styles.side}>
+          <PostJob board={board} />
           <Panel title="How to bid with your agent">
             <HowToBid />
           </Panel>

@@ -79,3 +79,11 @@
   .room { grid-template-columns: minmax(0, 1fr) auto; }
   .roomMoney { display: none; }
 }
+
+/* tender agents: one quiet row */
+.agentsRow { display: flex; align-items: baseline; gap: 28px; flex-wrap: wrap; padding: 14px 4px; border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); font-size: 13.5px; color: var(--text-weak); transition: background 0.2s var(--ease); }
+.agentsRow:hover { background: rgba(var(--ink-rgb), 0.02); }
+.agentsNum { font-family: var(--font-mono); font-size: 18px; color: var(--text-strong); margin-right: 4px; }
+.agentsWin { color: var(--teal); }
+.agentsGo { margin-left: auto; color: var(--text-weak); }
+.agentsEmpty { padding: 14px 4px; border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); font-size: 13.5px; }

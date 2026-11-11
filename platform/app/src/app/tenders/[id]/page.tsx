@@ -11,9 +11,11 @@ import { KV, PageHead, Panel, Pill, Quiet, StatePill, Usdc } from "@/components/
 import { config } from "@/server/accord";
 import { boardId, dealOf, getJob, type DealSummary } from "@/server/tender";
 import { Countdown } from "../Countdown";
+import { AgentsLink } from "../HeadActions";
 import { HowToBid } from "../HowToBid";
 import { PHASE_NOTE, PHASE_TONE, shortHex, symbolOf, windowEnd, withinBudget } from "../lib";
 import { AwardButton } from "./AwardButton";
+import { BrowserBid } from "./BrowserBid";
 import styles from "./job.module.css";
 
 export const dynamic = "force-dynamic";
@@ -99,7 +101,7 @@ export default async function TenderJobPage({ params }: { params: Promise<{ id: 
     <div className="container">
       <AutoRefresh seconds={moving ? 3 : 15} />
       <PageHead
-        eyebrow={<Quiet><Link className="link" href="/tenders">Open tenders</Link> · job <span className="mono">#{job.id}</span> on <a className="mono link" href={`${explorer}/address/${board}`} target="_blank" rel="noreferrer">{board}</a></Quiet>}
+        eyebrow={<Quiet><Link className="link" href="/tenders">Open tenders</Link> · job <span className="mono">#{job.id}</span> on <a className="mono link" href={`${explorer}/address/${board}`} target="_blank" rel="noreferrer">{board}</a><AgentsLink /></Quiet>}
         title={job.title}
         lead={job.spec}
         aside={
@@ -197,6 +199,7 @@ export default async function TenderJobPage({ params }: { params: Promise<{ id: 
         </div>
 
         <aside className={styles.side}>
+          <BrowserBid board={board} job={job} sym={sym} />
           <Panel title="The job">
             <KV rows={[
               ["Budget", <Usdc key="b" amount={job.budget} symbol={sym} />],

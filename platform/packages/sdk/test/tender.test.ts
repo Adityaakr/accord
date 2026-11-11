@@ -62,3 +62,14 @@ describe("bid secrets and labels (audit fixes)", () => {
     for (const bad of ["../x", "a/b", "A.testnet", ""]) expect(isBoardId(bad)).toBe(false);
   });
 });
+
+import { signLink, verifyLink } from "../src/tender.js";
+describe("linking an agent to an account", () => {
+  it("is proven by the bidder key and bound to the account", () => {
+    const k = bidderKey(seed);
+    const sig = signLink(k, "adi-accord.testnet");
+    expect(verifyLink(k.id, "adi-accord.testnet", sig)).toBe(true);
+    expect(verifyLink(k.id, "someone-else.testnet", sig)).toBe(false);
+    expect(verifyLink(bidderKey("02".repeat(32)).id, "adi-accord.testnet", sig)).toBe(false);
+  });
+});

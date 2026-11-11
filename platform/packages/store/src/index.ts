@@ -11,10 +11,12 @@ import pg from "pg";
 import { ORG_SCHEMA, orgs, type OrgTables } from "./orgs.js";
 import { AGENT_LOG_SCHEMA, agentLog, type AgentLogTables } from "./agentlog.js";
 import { ALERT_SCHEMA, alertStore, type AlertTables } from "./alerts.js";
+import { TENDER_AGENT_SCHEMA, tenderAgentStore, type TenderAgentTables } from "./tenderagents.js";
 
 export * from "./orgs.js";
 export * from "./agentlog.js";
 export * from "./alerts.js";
+export * from "./tenderagents.js";
 
 export interface InboxMessage {
   id: string;
@@ -50,7 +52,7 @@ create table if not exists faucet_grants (day date not null, kind text not null 
 create table if not exists faucet_days (day date primary key, open_yocto numeric not null, opened_at timestamptz not null default now());
 `;
 
-interface FileDb extends OrgTables, AgentLogTables, AlertTables {
+interface FileDb extends OrgTables, AgentLogTables, AlertTables, TenderAgentTables {
   inbox: InboxMessage[];
   approvals: Approval[];
   demoVendors: DemoVendor[];
@@ -65,7 +67,7 @@ async function db(): Promise<pg.Pool | null> {
   if (!process.env.DATABASE_URL) return null;
   if (!pool) {
     pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 5 });
-    ready = pool.query(SCHEMA + ORG_SCHEMA + AGENT_LOG_SCHEMA + ALERT_SCHEMA).then(() => undefined);
+    ready = pool.query(SCHEMA + ORG_SCHEMA + AGENT_LOG_SCHEMA + ALERT_SCHEMA + TENDER_AGENT_SCHEMA).then(() => undefined);
   }
   await ready;
   return pool;
@@ -419,3 +421,6 @@ export const agentActions = agentLog({ db, read: () => readFile(), mutate: (f) =
 
 /** Finance references, refusal alert channels, alerts and their deliveries, per organisation (./alerts.ts). */
 export const alerts = alertStore({ db, read: () => readFile(), mutate: (f) => mutate((d) => f(d)) });
+
+/** Tender agents linked to an account, each proven by its bidder key (./tenderagents.ts). */
+export const tenderAgents = tenderAgentStore({ db, read: () => readFile(), mutate: (f) => mutate((d) => f(d)) });

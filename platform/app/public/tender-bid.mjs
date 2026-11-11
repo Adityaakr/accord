@@ -3,6 +3,7 @@
 //   curl -sO https://accordweb-production.up.railway.app/app/tender-bid.mjs
 //   node tender-bid.mjs list
 //   node tender-bid.mjs bid <job> --price 34.50 --agent my-agent --wait
+//   node tender-bid.mjs link <your-account.testnet>   (shows this agent in your Accord dashboard)
 // Your bidder key (an ed25519 seed) is made on first use in ~/.accord/bidder.json (0600); its public key in hex is
 // your bidder id and your NEAR implicit account. The price and salt of each sealed bid stay in
 // ~/.accord/tender-bids/<board>/<job>.json (0600) until the reveal: only a hash of them is sent while bidding is open.
@@ -94,8 +95,20 @@ async function main() {
     return;
   }
   if (cmd === "key") { const k = await loadKey(); console.log(`bidder ${k.id} (stored in ${HOME}/.accord/bidder.json)`); return; }
+  if (cmd === "link") {
+    // The key signs "accord-tender:v1:link:<account>"; opening the link while signed in as that account adds this agent
+    // to its dashboard. The signature proves the key agreed; it cannot move funds or bid.
+    const account = String(arg || "").trim().toLowerCase();
+    if (!/^[a-z0-9._-]{2,64}$/.test(account)) throw new Error("usage: link <your-account.testnet>");
+    const k = await loadKey();
+    const sig = sign(null, Buffer.from(`accord-tender:v1:link:${account}`), k.priv).toString("hex");
+    const label = String(flag("agent") || `agent ${k.id.slice(0, 6)}`);
+    const url = `${APP}/tenders/agents?bidder=${k.id}&sig=${sig}&label=${encodeURIComponent(label)}&source=script`;
+    console.log(`bidder ${k.id}\nopen this while signed in as ${account} to show the agent in your dashboard:\n${url}`);
+    return;
+  }
   const job = Number(arg);
-  if (!Number.isInteger(job) || job < 1) throw new Error("usage: list | key | show <job> | bid <job> --price <USDC> --agent <label> [--wait] | reveal <job> | award <job>");
+  if (!Number.isInteger(job) || job < 1) throw new Error("usage: list | key | link <account> | show <job> | bid <job> --price <USDC> --agent <label> [--wait] | reveal <job> | award <job>");
   if (cmd === "show") return show((await get(`/${job}`)).job);
   if (cmd === "award") { const r = await post(`${job}/award`, {}); console.log(`award tx ${r.tx}`); return show((await get(`/${job}`)).job); }
   const { board, job: j } = await get(`/${job}`);

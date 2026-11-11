@@ -10,7 +10,7 @@
 
 import {
   Chain, RPC, TENDER_BOARDS, TenderBoardClient, addBidSecret, bidderKey, formatUnits, isBoardId, newBidderKey, nextNonce,
-  prepareBid, secondsLeft, secretFor, type BidderKey, type TenderJob,
+  prepareBid, secondsLeft, secretFor, signLink, type BidderKey, type TenderJob,
 } from "@accord/sdk";
 import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -182,6 +182,16 @@ export async function runTender(ctx: Ctx, d: TenderDeps): Promise<number> {
       ctx.out.block([...jobLines(final), line("result", final.winner === key.id ? "you won: the buyer opens an Accord agreement with your key as vendor" : "another bid won")], final);
       return 0;
     }
+    case "link": {
+      const account = String(ctx.rest[1] ?? "").trim().toLowerCase();
+      if (!/^[a-z0-9._-]{2,64}$/.test(account)) throw new Error("accord tender link <your-account.testnet> [--agent <label>]");
+      const k = await loadKey(d, true);
+      const sig = signLink(k, account);
+      const label = flagString(ctx.args, "agent") ?? `agent ${k.id.slice(0, 6)}`;
+      const url = `${DEFAULT_RELAY}/tenders/agents?bidder=${k.id}&sig=${sig}&label=${encodeURIComponent(label)}&source=cli`;
+      ctx.out.block([header("tender link", account), line("bidder", k.id), line("open", url), line("then", `signed in as ${account}, the agent shows in your dashboard`)], { account, bidder: k.id, signature: sig, url });
+      return 0;
+    }
     case "reveal":
       return reveal(ctx, d, jobNo(ctx));
     case "award": {
@@ -192,6 +202,6 @@ export async function runTender(ctx: Ctx, d: TenderDeps): Promise<number> {
       return 0;
     }
     default:
-      throw new Error("accord tender list | show <job> | key | bid <job> --price <USDC> --agent <label> [--wait] | reveal <job> | award <job>");
+      throw new Error("accord tender list | show <job> | key | link <account> | bid <job> --price <USDC> --agent <label> [--wait] | reveal <job> | award <job>");
   }
 }

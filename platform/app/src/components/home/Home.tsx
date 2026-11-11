@@ -14,6 +14,7 @@ import { useWorkspace } from "../workspace/Workspace";
 import { KindLabel } from "../rooms/KindLabel";
 import { StatePill, Usdc } from "../ui";
 import { onVisibleInterval } from "../visible";
+import { TenderAgents } from "./TenderAgents";
 import styles from "./Home.module.css";
 
 type Module = "next" | "numbers" | "rooms";
@@ -110,7 +111,12 @@ export function Home() {
 
       {error && <div className={styles.error} role="alert"><p className="h5">The chain could not be read</p><p className="small mono">{error}</p></div>}
       {!data && !error && <div className={styles.loading} aria-busy="true"><span /><span /><span /></div>}
-      {data && <div className={styles.stack}>{layout.filter((m) => m.on).map((m) => blocks[m.id])}</div>}
+      {data && (
+        <div className={styles.stack}>
+          {layout.filter((m) => m.on).map((m) => blocks[m.id])}
+          {ws.id === "buyer" || ws.id === "vendor" ? <TenderAgents account={w.accountId} /> : null}
+        </div>
+      )}
     </div>
   );
 }

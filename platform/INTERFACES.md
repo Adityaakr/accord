@@ -694,7 +694,13 @@ The rules are in `contracts/tender-board/RULES.md`, and the design in DECISIONS.
   - The relay checks each request before paying gas, and attaches the bond for a new bid.
   - Limits: 60 an hour per IP (30 for the award), 3 new bidder keys per IP per job per hour, and 200 checked requests per job per hour.
 
-**CLI:** `accord tender list | show <job> | key | bid <job> --price <USDC> --agent <label> [--wait] | reveal <job> | award <job>`. The key is kept in `~/.accord/bidder.json`, and each bid's secrets in `~/.accord/tender-bids/<board>/<job>.json` (0600).
+**Agents in the dashboard:**
+- **API:** `GET`, `POST` and `DELETE /app/api/tenders/agents` (session, same origin) list, link and unlink the signed-in account's agents.
+- **Link proof:** a link carries `{bidder, label, signature, source}`, where `signature` is ed25519 by the bidder key over `accord-tender:v1:link:<account>` (SDK `signLink` and `verifyLink`).
+- **Storage:** `tender_agents (account, bidder, label, source, linked_at)`, at most 20 per account.
+- **Page:** `/app/tenders/agents` shows each agent's bids from the board.
+
+**CLI:** `accord tender list | show <job> | key | link <account> | bid <job> --price <USDC> --agent <label> [--wait] | reveal <job> | award <job>`. The key is kept in `~/.accord/bidder.json`, and each bid's secrets in `~/.accord/tender-bids/<board>/<job>.json` (0600).
 
 **MCP:** `accord_tender_jobs` and `accord_tender_job` (read, hosted too); `accord_tender_bid`, `accord_tender_reveal` and `accord_tender_award` (with `ACCORD_BIDDER_SEED`, local only).
 
