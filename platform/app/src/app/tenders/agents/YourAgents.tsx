@@ -19,6 +19,8 @@ import { useWallet } from "@/components/wallet/WalletProvider";
 import type { AgentView } from "@/server/tenderagents";
 import { browserKey, ensureBrowserKey, linkBrowserKey } from "../browserKey";
 import { Command } from "../Command";
+import { KeyChip } from "../KeyChip";
+import { LogoMark } from "@/components/LogoMark";
 import { linkCli, linkScript, shortHex } from "../lib";
 import { TokenAmount } from "../TokenAmount";
 import styles from "../act.module.css";
@@ -27,7 +29,7 @@ export interface LinkParams { bidder: string; sig: string; label: string; source
 type Data = { account: string; agents: AgentView[] };
 
 const SOURCE_TONE: Record<string, Tone> = { browser: "teal", script: "neutral", cli: "neutral", mcp: "purple" };
-const LEAD = "The agents that bid on open tenders for you. Each one is a key that signed to say you run it; the board decides every bid and award, and this page shows what it decided.";
+const LEAD = "Every agent that bids on open tenders for you: its ID, its bids, what it won and the agreement a win led to, read from the board on NEAR. Each one is a key that signed to say you run it.";
 
 export function YourAgents({ link }: { link: LinkParams | null }) {
   const w = useWallet();
@@ -35,7 +37,7 @@ export function YourAgents({ link }: { link: LinkParams | null }) {
   const head = (
     <PageHead
       eyebrow={<Quiet><Link className="link" href="/tenders">Open tenders</Link>{w.accountId ? <> · signed in as <span className="mono">{w.accountId}</span></> : null}</Quiet>}
-      title="Your agents"
+      title={<span className={styles.titleMark}><span className={styles.titleLogo} aria-hidden="true"><LogoMark size={24} /></span>Agents on Accord</span>}
       lead={LEAD}
     />
   );
@@ -101,6 +103,14 @@ function Signed({ account, link, head }: { account: string; link: LinkParams | n
       <div className={styles.page}>
         {link ? <LinkCard account={account} link={link} onDone={() => { router.replace("/tenders/agents"); reload(); }} /> : null}
         {error ? <p className={`${styles.msg} ${styles.bad}`} role="alert">Could not read your agents: {error}</p> : null}
+        {data && agents.length ? (
+          <dl className={styles.summary}>
+            <div><dt>Agents</dt><dd>{agents.length}</dd></div>
+            <div><dt>Bids</dt><dd>{agents.reduce((n, a) => n + a.bids.length, 0)}</dd></div>
+            <div><dt>Taking bids now</dt><dd>{agents.reduce((n, a) => n + a.open, 0)}</dd></div>
+            <div><dt>Wins</dt><dd>{agents.reduce((n, a) => n + a.wins, 0)}<small>{(() => { const d = agents.reduce((n, a) => n + a.bids.filter((b) => b.won || b.lost).length, 0); const w = agents.reduce((n, a) => n + a.wins, 0); return d ? `${Math.round((w / d) * 100)}% of decided` : ""; })()}</small></dd></div>
+          </dl>
+        ) : null}
         <div className={styles.grid}>
           <div className={styles.main}>
             <Panel title="Linked agents" eyebrow={data ? `${agents.length} linked` : undefined} flush>
@@ -118,9 +128,7 @@ function Signed({ account, link, head }: { account: string; link: LinkParams | n
               )}
             </Panel>
           </div>
-          <aside className={styles.side}>
-            <AddAgent account={account} linked={agents.map((a) => a.bidder)} onLinked={reload} />
-          </aside>
+          <AddAgent account={account} linked={agents.map((a) => a.bidder)} onLinked={reload} />
         </div>
       </div>
     </div>
@@ -174,7 +182,6 @@ function AgentCard({ a, tokens, onUnlinked }: { a: AgentView; tokens: Record<num
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   async function unlink() {
     setBusy(true);
     setErr(null);
@@ -194,10 +201,7 @@ function AgentCard({ a, tokens, onUnlinked }: { a: AgentView; tokens: Record<num
       <div className={styles.agentTop}>
         <span className={styles.agentLabel}>{a.label}</span>
         <Pill tone={SOURCE_TONE[a.source] ?? "neutral"}>{a.source}</Pill>
-        <button type="button" className={styles.bidderId} title={`${a.bidder} (click to copy)`} aria-label={`Copy bidder id ${a.bidder}`}
-          onClick={() => { void navigator.clipboard?.writeText(a.bidder).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1400); }).catch(() => undefined); }}>
-          {copied ? "copied" : shortHex(a.bidder, 8)}
-        </button>
+        <KeyChip id={a.bidder} />
         <span className={styles.agentMeta}>linked <span className="mono">{Number.isNaN(linked.getTime()) ? a.linked_at : linked.toISOString().slice(0, 10)}</span></span>
         <span className={styles.stats}>
           <span><span className="num strong">{a.bids.length}</span> bid{a.bids.length === 1 ? "" : "s"}</span>
@@ -287,9 +291,9 @@ function AddAgent({ account, linked, onLinked }: { account: string; linked: stri
         <div className={styles.way}>
           <span className={styles.wayTitle}>An agent that runs elsewhere</span>
           <p className="small">Run this where the agent keeps its key (Node 22 or later). It prints a link; open it here while signed in as <span className="mono">{account}</span>.</p>
-          <Command text={linkScript(account)} />
+          <Command caption="Any machine with Node 22" text={linkScript(account)} />
           <p className="small">From a clone of the repository, the CLI does the same:</p>
-          <Command text={linkCli(account)} />
+          <Command caption="From a clone" text={linkCli(account)} />
         </div>
       </div>
     </Panel>

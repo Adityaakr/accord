@@ -44,21 +44,28 @@
 .boxTop { align-items: flex-start; }
 .boxTop > :last-child { padding-top: 11px; }
 
-/* commands with a copy button */
-.cmd { position: relative; min-width: 0; }
-.code {
-  margin: 0; padding: 12px 64px 12px 14px; border-radius: var(--radius); background: var(--elevation-medium); border: 1px solid var(--hairline);
-  font-family: var(--font-mono); font-size: 12px; line-height: 160%; color: var(--text-strong); white-space: pre; overflow-x: auto;
-}
-.copy {
-  position: absolute; top: 8px; right: 8px; padding: 3px 9px; border-radius: 6px; border: 1px solid var(--hairline-strong);
-  background: var(--elevation-strong); font-family: var(--font-mono); font-size: 11.5px; color: var(--text-weak);
-}
+/* commands: a caption bar with Copy, then the code */
+.cmd { min-width: 0; border-radius: var(--radius); border: 1px solid var(--hairline); background: var(--elevation-medium); overflow: hidden; }
+.cmdBar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 8px 6px 12px; border-bottom: 1px solid var(--hairline); font-size: 11.5px; color: var(--text-faint); }
+.code { margin: 0; padding: 10px 12px; font-family: var(--font-mono); font-size: 12px; line-height: 160%; color: var(--text-strong); white-space: pre; overflow-x: auto; }
+.copy { padding: 2px 9px; border-radius: 6px; border: 1px solid var(--hairline-strong); background: var(--elevation-strong); font-family: var(--font-mono); font-size: 11px; color: var(--text-weak); cursor: pointer; }
 .copy:hover { color: var(--text-strong); }
+
+/* an agent ID, masked with Reveal and Copy */
+.keyChip { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; padding: 3px 4px 3px 10px; border-radius: 8px; border: 1px solid var(--hairline-strong); background: var(--elevation-medium); }
+.keyLabel { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text-weak); white-space: nowrap; }
+.keyInfo { position: relative; display: inline-grid; place-items: center; width: 14px; height: 14px; border-radius: 999px; border: 1px solid var(--hairline-strong); font-size: 9.5px; line-height: 1; color: var(--text-weak); cursor: help; }
+.keyInfo:is(:hover, :focus-visible)::after {
+  content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); width: 260px; white-space: normal; z-index: 5;
+  padding: 8px 10px; border-radius: 8px; font-size: 11.5px; line-height: 1.45; color: var(--text-strong); background: var(--elevation-strong); border: 1px solid var(--hairline-strong); box-shadow: 0 8px 24px -12px rgba(0,0,0,0.4);
+}
+.keyValue { font-family: var(--font-mono); font-size: 12px; color: var(--text-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; letter-spacing: 0.02em; }
+.keyBtn { flex: none; padding: 2px 8px; border-radius: 6px; border: 1px solid transparent; background: transparent; font-size: 11.5px; color: var(--text-weak); cursor: pointer; }
+.keyBtn:hover { color: var(--text-strong); border-color: var(--hairline-strong); background: var(--elevation-strong); }
 
 /* /tenders/agents */
 .page { display: flex; flex-direction: column; gap: 20px; }
-.grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+.grid { display: flex; flex-direction: column; gap: 20px; }
 .main, .side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .note { font-size: 13px; color: var(--text-weak); }
 .gap { margin-bottom: 16px; }
@@ -87,9 +94,10 @@
 .bids .right { text-align: right; }
 .bidTitle { max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
 .empty { padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; color: var(--text-weak); }
-.ways { display: flex; flex-direction: column; gap: 16px; }
+.ways { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 24px; }
 .way { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.way + .way { padding-top: 16px; border-top: 1px solid var(--hairline); }
+.way + .way { padding-left: 24px; border-left: 1px solid var(--hairline); }
+@media (max-width: 899.98px) { .ways { grid-template-columns: minmax(0, 1fr); } .way + .way { padding: 16px 0 0; border-left: 0; border-top: 1px solid var(--hairline); } }
 .wayTitle { font-size: 14px; font-weight: 500; color: var(--text-strong); }
 .loading { height: 96px; border-radius: var(--radius); background: linear-gradient(90deg, rgba(var(--ink-rgb), 0.03), rgba(var(--ink-rgb), 0.06), rgba(var(--ink-rgb), 0.03)); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
 @keyframes shimmer { to { background-position: -200% 0; } }
@@ -101,3 +109,14 @@
   .bidTitle { max-width: 140px; }
   .unlink { margin-left: 0; }
 }
+
+/* the Your agents header */
+.titleMark { display: inline-flex; align-items: center; gap: 14px; }
+.titleLogo { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: var(--text-strong); background: var(--elevation-strong); border: 1px solid var(--hairline-strong); }
+.summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-radius: var(--radius-lg); border: 1px solid var(--hairline); background: var(--elevation-strong); }
+.summary div { display: flex; flex-direction: column; gap: 4px; padding: 14px 18px; }
+.summary div + div { border-left: 1px solid var(--hairline); }
+.summary dt { font-size: 12px; color: var(--text-weak); }
+.summary dd { margin: 0; font-family: var(--font-mono); font-size: 22px; letter-spacing: -0.02em; color: var(--text-strong); }
+.summary dd small { margin-left: 6px; font-family: var(--font-text); font-size: 12px; letter-spacing: 0; color: var(--text-weak); }
+@media (max-width: 809.98px) { .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } .summary div:nth-child(3) { border-left: 0; } .summary div:nth-child(n+3) { border-top: 1px solid var(--hairline); } }

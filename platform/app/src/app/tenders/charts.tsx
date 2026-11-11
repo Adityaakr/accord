@@ -77,7 +77,8 @@ export function PriceChart({ job }: { job: TenderJob }) {
       {ref?.price ? (
         <p className={styles.summary}>
           <span>{win ? "Winning price" : "Lowest valid price so far"} <b>{amount(ref.price, job.token)}</b></span>
-          {budgetN > 0 && refN <= budgetN ? <span><b>{fmt(budgetN - refN)} {sym}</b> ({(((budgetN - refN) / budgetN) * 100).toFixed(1)}%) under the budget</span> : null}
+          {isDust(ref.price, job.budget) ? <span className={styles.summaryWarn}>far below one unit: priced in the wrong decimals</span> : null}
+          {budgetN > 0 && refN <= budgetN && !isDust(ref.price, job.budget) ? <span><b>{fmt(budgetN - refN)} {sym}</b> ({(((budgetN - refN) / budgetN) * 100).toFixed(1)}%) under the budget</span> : null}
           {valid.length > 1 ? <span>spread <b>{fmt(spread)} {sym}</b></span> : null}
           <span>{revealed.length} of {job.bids.length} revealed</span>
         </p>
@@ -92,8 +93,8 @@ export function PriceChart({ job }: { job: TenderJob }) {
           const k = b.price ? kindOf(b, job) : null;
           const r = b.price ? ratio(b.price, job.budget) : 0;
           const diff = b.price && ref?.price ? asNumber(b.price, job.token) - refN : null;
-          const note = !b.price ? "sealed" : k === "win" ? (isDust(b.price, job.budget) ? "lowest · wrong decimals?" : "lowest") : k === "over" ? "over budget"
-            : k === "dust" ? "wrong decimals?" : b.bidder === ref?.bidder ? "lowest" : diff !== null ? `+${fmt(diff)}` : "";
+          const note = !b.price ? "sealed" : k === "win" ? (isDust(b.price, job.budget) ? "lowest · too small" : "lowest") : k === "over" ? "over budget"
+            : k === "dust" ? "too small" : b.bidder === ref?.bidder ? "lowest" : diff !== null ? `+${fmt(diff)}` : "";
           return (
             <div key={b.bidder} className={`${styles.row} ${k === "win" ? styles.rowIsWin : ""}`}>
               <span className={`${styles.rowLabel} ${k === "win" ? styles.rowWin : ""}`}>{b.agent}</span>
@@ -103,7 +104,7 @@ export function PriceChart({ job }: { job: TenderJob }) {
                   <>
                     <span className={`${styles.stem} ${k === "win" ? styles.stemWin : ""}`} style={{ width: pos(r) }} aria-hidden="true" />
                     <span className={`${styles.dot} ${styles[`d_${k}`]}`} style={{ left: pos(r) }} tabIndex={0}
-                      data-tip={`${b.agent} · ${amount(b.price, job.token)} · ${(r * 100).toFixed(1)}% of the budget`} />
+                      data-tip={`${b.agent} · ${amount(b.price, job.token)} · ${(r * 100).toFixed(1)}% of the budget${k === "dust" || isDust(b.price, job.budget) ? " · far below one unit: priced in the wrong decimals" : ""}`} />
                   </>
                 ) : (
                   <span className={styles.sealedBar} aria-hidden="true" />
@@ -114,7 +115,7 @@ export function PriceChart({ job }: { job: TenderJob }) {
                   <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>sealed
                 </span>
               )}</span>
-              <span className={`${styles.num} ${styles.delta} ${k === "win" || note === "lowest" ? styles.deltaWin : ""} ${note.includes("wrong") ? styles.deltaWarn : ""}`}>{b.price ? note : ""}</span>
+              <span className={`${styles.num} ${styles.delta} ${k === "win" || note === "lowest" ? styles.deltaWin : ""} ${note.includes("small") ? styles.deltaWarn : ""}`}>{b.price ? note : ""}</span>
             </div>
           );
         })}
