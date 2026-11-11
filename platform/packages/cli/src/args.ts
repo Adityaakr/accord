@@ -7,7 +7,7 @@ export interface ParsedArgs {
 
 /** Flags that never take a value. Every other `--flag` takes the next word. */
 export const BOOLEAN_FLAGS = new Set([
-  "json", "raw", "help", "pay", "close", "waive-evidence", "acknowledge-warnings", "mutual",
+  "json", "raw", "help", "pay", "close", "waive-evidence", "acknowledge-warnings", "mutual", "wait",
 ]);
 
 export function parseArgv(argv: readonly string[]): ParsedArgs {

@@ -68,7 +68,7 @@ export async function run(argv: readonly string[], env: Env, io: Io, makeDeps: D
     if (g.network === "mainnet" && !READ_ONLY.has(command)) {
       throw new Error("the CLI signs on testnet only; mainnet is read-only here");
     }
-    if (!g.factory && command !== "recycle") {
+    if (!g.factory && command !== "recycle" && command !== "tender") {
       const id = flagString(args, "agreement");
       const named = id?.match(/^a\d+\.(.+)$/);
       if (id && !named) {

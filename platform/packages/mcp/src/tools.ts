@@ -5,10 +5,10 @@
 import { z } from "zod";
 import {
   NOT_AN_AGREEMENT, guardedPay, isAccountId, type ActResult, type AgreementClient, type AgreementRecord, type Mandate, type PreflightResult,
-  type TxResult, type VerifyReport,
+  type TenderJob, type TxResult, type VerifyReport,
 } from "@accord/sdk";
 
-export type Needs = "nothing" | "agent" | "principal";
+export type Needs = "nothing" | "agent" | "principal" | "bidder";
 
 /** Read access to one agreement; the SDK's `AgreementClient` satisfies it. */
 export type AgreementReader = Pick<AgreementClient, "get" | "terms" | "items" | "dueItems" | "refusals" | "receipts">;
@@ -26,6 +26,18 @@ export interface McpDeps {
     publicKey: string;
     pay(p: { item: number; amount: string; recipient: string; memo?: string }): Promise<ActResult>;
     requestException(e: { item: number; amount: string; waiveEvidence: boolean; reason: string }): Promise<ActResult>;
+  };
+  /** The open tender board (contracts/tender-board): read only. */
+  tender?: { board: string; jobs(limit?: number): Promise<TenderJob[]>; job(id: number): Promise<TenderJob | null> };
+  /**
+   * Present only when ACCORD_BIDDER_SEED is set: bids with that ed25519 key through the app's relay (no NEAR needed).
+   * The price and salt of each sealed bid are kept in a 0600 file until the reveal; only the commitment is sent.
+   */
+  bidder?: {
+    id: string;
+    bid(job: number, price: string, agent: string): Promise<{ bidder: string; commitment: string; tx: string; kept: string }>;
+    reveal(job: number): Promise<{ tx: string; price: string }>;
+    award(job: number): Promise<{ tx: string }>;
   };
   /** Present only when ACCORD_PRINCIPAL_KEY and ACCORD_PRINCIPAL_ACCOUNT are set. */
   principal?: {
@@ -119,7 +131,60 @@ const mandateShape = z.object({
   instructions: z.string(),
 });
 
+const tenderOf = (d: McpDeps) => {
+  if (!d.tender) throw new Error("the tender board is not configured on this server");
+  return d.tender;
+};
+const bidderOf = (d: McpDeps) => {
+  if (!d.bidder) throw new Error("bidding needs ACCORD_BIDDER_SEED (64 hex) in this server's environment");
+  return d.bidder;
+};
+const jobId = z.number().int().min(1);
+
 export const TOOLS: ToolDef[] = [
+  {
+    name: "accord_tender_jobs",
+    description: "Open tenders on the board, newest first: a buyer's job, its public budget (base units, 6 decimals), its phase (open, revealing, closed, awarded, no_valid_bid, linked, cancelled), the sealed bids (price null until revealed), the winner and the linked Accord agreement.",
+    needs: "nothing",
+    input: { limit: z.number().int().min(1).max(50).optional() },
+    run: async (a, d) => {
+      const t = tenderOf(d);
+      return { board: t.board, jobs: await t.jobs((a.limit as number | undefined) ?? 20) };
+    },
+  },
+  {
+    name: "accord_tender_job",
+    description: "One tender job with its bids. While the job is open every price is hidden; the winner's key becomes the vendor of an ordinary Accord agreement, linked here once the buyer opens it.",
+    needs: "nothing",
+    input: { job: jobId },
+    run: async (a, d) => {
+      const t = tenderOf(d);
+      const j = await t.job(a.job as number);
+      if (!j) throw new Error(`no job ${a.job as number} on ${t.board}`);
+      return { board: t.board, job: j };
+    },
+  },
+  {
+    name: "accord_tender_bid",
+    description: "Submit a sealed bid on an open job, signed with this server's bidder key (ACCORD_BIDDER_SEED). `price` is base units of the job's token (6 decimals: \"34500000\" is 34.50). Only a hash of the price leaves this machine until the reveal; the relay pays the gas and cannot change the bid. Reveal with accord_tender_reveal after the bidding window closes.",
+    needs: "bidder",
+    input: { job: jobId, price: baseUnits, agent: z.string().min(1).max(64).regex(/^[^:]+$/, "no ':'") },
+    run: async (a, d) => bidderOf(d).bid(a.job as number, a.price as string, a.agent as string),
+  },
+  {
+    name: "accord_tender_reveal",
+    description: "Reveal this bidder's sealed price on a job once its bidding window has closed (the board refuses a reveal before then and after the reveal window).",
+    needs: "bidder",
+    input: { job: jobId },
+    run: async (a, d) => bidderOf(d).reveal(a.job as number),
+  },
+  {
+    name: "accord_tender_award",
+    description: "Ask the board to choose the winner (the lowest revealed price within the budget, the earliest on a tie). Open to anyone once every bid is revealed or the reveal window has closed.",
+    needs: "bidder",
+    input: { job: jobId },
+    run: async (a, d) => bidderOf(d).award(a.job as number),
+  },
   {
     name: "accord_list_agreements",
     description: `List agreements on the factory, or those where \`party\` is the buyer, vendor or authority. Paginated: \`limit\` (default ${LIST_DEFAULT}, at most 100) and \`offset\` (default 0); the result gives \`total\` and \`next_offset\` (null on the last page).`,
@@ -267,16 +332,18 @@ export const TOOLS: ToolDef[] = [
 export interface EnvFlags {
   agent: boolean;
   principal: boolean;
+  bidder?: boolean;
 }
 
 export function envFlags(env: Record<string, string | undefined>): EnvFlags {
   return {
     agent: Boolean(env.ACCORD_AGENT_KEY && env.AGENT_AGREEMENT),
     principal: Boolean(env.ACCORD_PRINCIPAL_KEY && env.ACCORD_PRINCIPAL_ACCOUNT),
+    bidder: Boolean(env.ACCORD_BIDDER_SEED),
   };
 }
 
 /** The tools this environment offers: payment tools with the agent key, principal tools with both principal vars. */
 export function toolsFor(flags: EnvFlags): ToolDef[] {
-  return TOOLS.filter((t) => t.needs === "nothing" || (t.needs === "agent" && flags.agent) || (t.needs === "principal" && flags.principal));
+  return TOOLS.filter((t) => t.needs === "nothing" || (t.needs === "agent" && flags.agent) || (t.needs === "principal" && flags.principal) || (t.needs === "bidder" && flags.bidder === true));
 }

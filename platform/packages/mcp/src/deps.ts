@@ -1,6 +1,9 @@
 // The real dependencies: the SDK over RPC; the agent and principal signers only when their variables are set.
 
-import { Accord, KeySigner, preflight, recordReleaseProof, verify, type Network, type ReleaseProof } from "@accord/sdk";
+import { Accord, KeySigner, TENDER_BOARDS, TenderBoardClient, bidderKey, preflight, prepareBid, recordReleaseProof, verify, type Network, type ReleaseProof } from "@accord/sdk";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
+import { dirname } from "node:path";
 import { cachedReleaseProof, outlayerVerifyProof } from "@accord/sdk/node";
 import type { McpDeps } from "./tools.js";
 import type { Env } from "./env.js";
@@ -25,6 +28,8 @@ export interface ReadOptions {
   approvalsUrl?: string;
   /** The release check; by default the by-request record lookup only (the quote stays not checked). */
   releaseProof?: ReleaseProof;
+  /** The tender board to read; by default the network's deployed board. */
+  tenderBoard?: string;
 }
 
 /**
@@ -40,7 +45,10 @@ export function readDeps(accord: Accord, o: ReadOptions = {}): McpDeps {
   const second = o.second && o.second !== accord.factory ? o.second : "";
   const symbols = new Map<string, Promise<string>>();
   const releaseProof = o.releaseProof ?? recordReleaseProof();
+  const boardId = o.tenderBoard ?? TENDER_BOARDS[accord.network];
+  const board = boardId ? new TenderBoardClient(accord.chain, boardId) : null;
   return {
+    tender: board ? { board: board.board, jobs: (limit) => board.jobs(limit ?? 20), job: (id) => board.job(id) } : undefined,
     listAgreements: async (party) => [
       ...(await accord.listAgreements({ party })),
       ...(second ? await accord.onFactory(second).listAgreements({ party }) : []),
@@ -89,6 +97,10 @@ export function realDeps(env: Env): McpDeps {
       requestException: (e) => deal.agentRequestException(e),
     };
   }
+  if (env.ACCORD_BIDDER_SEED) {
+    if (network === "mainnet") throw new Error("bidding signs on testnet only");
+    deps.bidder = bidderDeps(env, deps.tender?.board ?? TENDER_BOARDS.testnet!);
+  }
   if (env.ACCORD_PRINCIPAL_KEY && env.ACCORD_PRINCIPAL_ACCOUNT) {
     if (network === "mainnet") throw new Error("principal tools sign on testnet only");
     const s = signer(env.ACCORD_PRINCIPAL_ACCOUNT, env.ACCORD_PRINCIPAL_KEY, accord, "ACCORD_PRINCIPAL_KEY");
@@ -102,4 +114,33 @@ export function realDeps(env: Env): McpDeps {
     };
   }
   return deps;
+}
+
+/** The bidder tools: the key from ACCORD_BIDDER_SEED, the app's relay (ACCORD_APP_URL), the secrets in ~/.accord. */
+function bidderDeps(env: Env, board: string): NonNullable<McpDeps["bidder"]> {
+  const key = bidderKey(env.ACCORD_BIDDER_SEED!.trim());
+  const app = (env.ACCORD_APP_URL || "https://accordweb-production.up.railway.app/app").replace(/\/+$/, "");
+  const file = (job: number) => `${env.HOME || homedir()}/.accord/tender-bids/${board}/${job}.json`;
+  const relay = async (path: string, body: object): Promise<{ tx: string }> => {
+    const r = await fetch(`${app}/api/tenders/${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    const j = (await r.json().catch(() => ({}))) as { tx?: string; error?: string };
+    if (!r.ok || !j.tx) throw new Error(`relay: ${j.error ?? `HTTP ${r.status}`}`);
+    return { tx: j.tx };
+  };
+  return {
+    id: key.id,
+    bid: async (job, price, agent) => {
+      const b = prepareBid({ board, job, price, agent, key });
+      await mkdir(dirname(file(job)), { recursive: true, mode: 0o700 });
+      await writeFile(file(job), JSON.stringify({ bidder: key.id, price: b.secret.price, salt: b.secret.salt, commitment: b.commitment, nonce: b.nonce }, null, 2), { mode: 0o600 });
+      const r = await relay(`${job}/bids`, { bidder: b.bidder, agent: b.agent, commitment: b.commitment, nonce: b.nonce, signature: b.signature });
+      return { bidder: key.id, commitment: b.commitment, tx: r.tx, kept: file(job) };
+    },
+    reveal: async (job) => {
+      const k = JSON.parse(await readFile(file(job), "utf8")) as { price: string; salt: string };
+      const r = await relay(`${job}/reveal`, { bidder: key.id, price: k.price, salt: k.salt });
+      return { tx: r.tx, price: k.price };
+    },
+    award: (job) => relay(`${job}/award`, {}),
+  };
 }

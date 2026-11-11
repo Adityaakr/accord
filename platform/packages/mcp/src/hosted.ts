@@ -6,7 +6,7 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import { buildServer } from "./server.js";
 import { toolsFor, type McpDeps } from "./tools.js";
 
-/** The read-only tool names the hosted endpoint offers (the same seven as a keyless `accord-mcp`). */
+/** The read-only tool names the hosted endpoint offers (the same as a keyless `accord-mcp`). */
 export const HOSTED_TOOLS = toolsFor({ agent: false, principal: false }).map((t) => t.name);
 
 /** CORS for a keyless, read-only endpoint: any origin, no credentials, the MCP headers only. */
@@ -47,7 +47,7 @@ export async function handleMcpRequest(req: Request, deps: McpDeps): Promise<Res
   }
   const readOnly: McpDeps = {
     listAgreements: deps.listAgreements, agreement: deps.agreement, preflight: deps.preflight, verify: deps.verify,
-    tokenSymbol: deps.tokenSymbol,
+    tokenSymbol: deps.tokenSymbol, tender: deps.tender,
   };
   const server = buildServer(readOnly, { agent: false, principal: false });
   const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });

@@ -3,6 +3,7 @@
 
 import { FUNDING_SOURCES, NotAnAgreementError, fundingQuotes, guardedPay, isFundingSource, type FundingQuote, type FundingSource, pluralCount, sha256Hex, type AgreementClient, type CreateArgs, type Kind, type Mandate, type Params,
   type PreflightResult, type TxResult, type VerifyReport } from "@accord/sdk";
+import { tender } from "./tender.js";
 import { flagBool, flagInt, flagString, requireFlag, toInt, type ParsedArgs } from "./args.js";
 import { DEFAULT_ALLOWANCE, parseAmount, parseNear } from "./amount.js";
 import type { Env, Role } from "./env.js";
@@ -537,7 +538,7 @@ const recycle: Handler = async (ctx) => {
 
 export const COMMANDS: Record<string, Handler> = {
   create, seal, negotiate, approve, fund, recipient, deliver, accept, dispute, agent, pay, exception, period, claim,
-  close, withdraw, show, refusals, receipts, check, "fund-quote": fundQuote, verify: verifyCmd, "sealed-check": sealedCheck, watch, recycle,
+  close, withdraw, show, refusals, receipts, check, "fund-quote": fundQuote, verify: verifyCmd, "sealed-check": sealedCheck, watch, recycle, tender,
 };
 
 /** Commands that read only; they run without `--as`. */
@@ -563,5 +564,7 @@ export const USAGE = `accord <command> [--network testnet] [--factory <id>] [--a
   sealed-check --agreement <a>                                (--as buyer|vendor)
   watch --agreement <a> [--interval <s>] [--count <n>]
   recycle [--token <id>] [--to <account>] [--amount <x>]      (signs as RECIPIENT_ACCOUNT)
+  tender list | show <job> | key | bid <job> --price <USDC> --agent <label> [--wait] | reveal <job> | award <job>
+                                                              (open tenders: your own bidder key, no NEAR; the relay pays the gas)
 
 Amounts are in the agreement's token (\`12.5\`: tUSDC on the test-token factory, USDC on Circle's); --raw takes base units. Keys come from .env; only public keys are printed.`;

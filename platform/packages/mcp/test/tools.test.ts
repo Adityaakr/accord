@@ -8,10 +8,11 @@ import { LIST_DEFAULT, TOOLS, envFlags, toolsFor, type McpDeps } from "../src/to
 
 const AGREEMENT = "a7.accord-v1.testnet";
 const READ = [
-  "accord_list_agreements", "accord_get_agreement", "accord_due_items", "accord_preflight", "accord_refusals",
+  "accord_tender_jobs", "accord_tender_job", "accord_list_agreements", "accord_get_agreement", "accord_due_items", "accord_preflight", "accord_refusals",
   "accord_receipts", "accord_verify",
 ];
 const PAY = ["accord_pay", "accord_request_exception"];
+const BID = ["accord_tender_bid", "accord_tender_reveal", "accord_tender_award"];
 const PRINCIPAL = ["accord_seal_mandate", "accord_approve_terms", "accord_submit_delivery", "accord_propose_recipient"];
 
 function preflightResult(rating: Rating, approvedByBuyer = false): PreflightResult {
@@ -184,5 +185,12 @@ describe("accord_list_agreements is paginated", () => {
     expect(r.next_offset).toBeNull();
     expect(z.object(list.input).safeParse({ limit: 101 }).success).toBe(false);
     expect(z.object(list.input).safeParse({ offset: -1 }).success).toBe(false);
+  });
+});
+
+describe("tender tools", () => {
+  it("bid, reveal and award appear only with ACCORD_BIDDER_SEED", () => {
+    expect(toolsFor(envFlags({})).map((t) => t.name)).not.toContain("accord_tender_bid");
+    expect(toolsFor(envFlags({ ACCORD_BIDDER_SEED: "01".repeat(32) })).map((t) => t.name).sort()).toEqual([...READ, ...BID].sort());
   });
 });

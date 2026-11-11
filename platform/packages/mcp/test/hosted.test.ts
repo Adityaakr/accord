@@ -30,9 +30,9 @@ function post(body: unknown): Request {
 const init = { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "t", version: "0" } } };
 
 describe("hosted MCP endpoint", () => {
-  it("offers the seven read tools and nothing that signs", () => {
+  it("offers the nine read tools and nothing that signs", () => {
     expect(HOSTED_TOOLS).toEqual([
-      "accord_list_agreements", "accord_get_agreement", "accord_due_items", "accord_preflight", "accord_refusals",
+      "accord_tender_jobs", "accord_tender_job", "accord_list_agreements", "accord_get_agreement", "accord_due_items", "accord_preflight", "accord_refusals",
       "accord_receipts", "accord_verify",
     ]);
   });

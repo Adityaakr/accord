@@ -236,7 +236,7 @@ describe("other commands", () => {
     const { COMMANDS } = await import("../src/commands.js");
     expect(Object.keys(COMMANDS).sort()).toEqual([
       "accept", "agent", "approve", "check", "claim", "close", "create", "deliver", "dispute", "exception", "fund", "fund-quote",
-      "negotiate", "pay", "period", "receipts", "recipient", "recycle", "refusals", "seal", "sealed-check", "show",
+      "negotiate", "pay", "period", "receipts", "recipient", "recycle", "refusals", "seal", "sealed-check", "show", "tender",
       "verify", "watch", "withdraw",
     ]);
   });
