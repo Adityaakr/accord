@@ -90,8 +90,6 @@
   font-size: 14px;
 }
 .skip:focus { top: 12px; }
-.iconLink { display: inline-flex; align-items: center; gap: 6px; }
-.github { margin-right: 16px; }
 
 /* Theme toggle: beside the CTA on desktop, beside the hamburger on phone */
 .themePhone { display: none; }

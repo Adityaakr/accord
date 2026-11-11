@@ -11,10 +11,10 @@ import styles from "./Nav.module.css"
 
 /* Navigation (template component xfh9lOiA3) per copy brief ACCORD_LANDING_PAGE_SPEC.md §2.1, regrouped 8 Nov 2026 around one
    product: centre: Use cases · Product (menu: Overview, Sealed Table, Agreement controls, Payee, Payment controls) · How it works · Security ·
-   Verify · Research · Docs; right: GitHub (icon + label, only when configured) and the primary button.
+   Verify · Research · Docs; right: the theme toggle and the primary button (GitHub is linked from the footer).
    Phone menu: the same links in the same order, the Product group set out under its label, plus Join and Record. */
 
-type NavItem = { label: string; href: string; external?: boolean; icon?: boolean; note?: string }
+type NavItem = { label: string; href: string; external?: boolean; note?: string }
 const PRODUCT: NavItem[] = [
   { label: "Overview", href: LINKS.product, note: "Negotiation, approval and payment in one deal room" },
   { label: "Sealed Table", href: LINKS.sealedTable, note: "Confidential negotiation between agents" },
@@ -30,7 +30,6 @@ const AFTER: NavItem[] = [
   { label: "Research", href: LINKS.research },
   { label: "Docs", href: LINKS.docs },
 ]
-const GITHUB: NavItem | null = LINKS.repo ? { label: "GitHub", href: LINKS.repo, external: true, icon: true } : null
 const PHONE_EXTRA: NavItem[] = [
   { label: "Start", href: LINKS.join },
   { label: "Record", href: LINKS.record },
@@ -75,19 +74,10 @@ function ProductMenu() {
   )
 }
 
-function GitHubIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" />
-    </svg>
-  )
-}
-
 function NavLink({ item, className, onClick }: { item: NavItem; className: string; onClick?: () => void }) {
   if (item.external) {
     return (
-      <a href={item.href} target="_blank" rel="noopener noreferrer" className={`${className} ${item.icon ? styles.iconLink : ""}`} onClick={onClick}>
-        {item.icon ? <GitHubIcon /> : null}
+      <a href={item.href} target="_blank" rel="noopener noreferrer" className={className} onClick={onClick}>
         {item.label}
       </a>
     )
@@ -137,7 +127,7 @@ export function Nav() {
                 <span className={`t-body-sm ${styles.mobileGroupLabel}`}>Product</span>
                 {PRODUCT.map((l) => <NavLink key={l.label} item={l} className={`t-h6 ls-link ${styles.linkMobile}`} onClick={() => setOpen(false)} />)}
               </div>
-              {[...AFTER, ...PHONE_EXTRA, ...(GITHUB ? [GITHUB] : [])].map((l) => (
+              {[...AFTER, ...PHONE_EXTRA].map((l) => (
                 <NavLink key={l.label} item={l} className={`t-h5 ls-link ${styles.linkMobile}`} onClick={() => setOpen(false)} />
               ))}
             </motion.div>
@@ -145,7 +135,6 @@ export function Nav() {
         </AnimatePresence>
 
         <div className={`${styles.cta} ${open ? styles.ctaOpen : ""}`}>
-          {GITHUB ? <NavLink item={GITHUB} className={`t-body-sm ls-link ${styles.link} ${styles.github}`} /> : null}
           <ThemeToggle className={styles.themeDesktop} />
           <Button href={LINKS.openDealRoom} fullWidth={open}>{PRIMARY_CTA}</Button>
         </div>
