@@ -162,14 +162,14 @@ export function Hero() {
           <div className={styles.actions}>
             {/* jtobshkjO: Button Primary, appear onMount y24 1.4s delay 0.4s */}
             <Mount y={24} delay="0.4s">
-              <Button variant="primary" href={LINKS.tryDeal}>
-                {TRY_CTA}
+              <Button variant="primary" href={LINKS.openDealRoom}>
+                {PRIMARY_CTA}
               </Button>
             </Mount>
             {/* Kt0jRKddM: Button Secondary (T_m9VlS9B), appear onMount y24 1.4s delay 0.6s */}
             <Mount y={24} delay="0.6s">
-              <Button variant="secondary" href={LINKS.openDealRoom}>
-                {PRIMARY_CTA}
+              <Button variant="secondary" href={LINKS.tryDeal}>
+                {TRY_CTA}
               </Button>
             </Mount>
           </div>
