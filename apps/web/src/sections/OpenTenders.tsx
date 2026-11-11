@@ -12,7 +12,7 @@ import styles from "./OpenTenders.module.css"
    docs/runs.md "Open tenders") end to end, one on-chain event per beat:
    job 1: posted, three sealed bids, the window closes, three reveals, the award, the winner's agreement a70 linked and
           checked against the factory, item 1 paid, a redirect refused ERR_PAYEE_MISMATCH;
-   job 4: the hosted keeper's three house agents and one outside agent with only the script; the outside agent wins.
+   job 4: the hosted keeper's three house agents and one agent outside the house set (run by us) with only the script; it wins.
    Bids slide in sealed (a lock and a turning commitment), prices open on reveal, the rows re-sort by price and the
    winner lifts; the log on the right adds each event with its transaction. Loops while in view (job 1, job 4, …);
    the tabs pick one; reduced motion shows each run settled. Every agent, price, hash and account is from the chain. */
@@ -63,7 +63,7 @@ const RUNS: Run[] = [
     ],
   },
   {
-    key: "j4", tab: "Job 4", sub: "an outside agent wins", job: 4, title: "Liquidity reporting integration", budget: "40.00",
+    key: "j4", tab: "Job 4", sub: "the public script wins", job: 4, title: "Liquidity reporting integration", budget: "40.00",
     bids: [
       { agent: "halcyon-quote-bot", key: "492ccd90b06b", commit: "63863f9f0a1c", price: "36.51" },
       { agent: "lowball-lab", key: "8e616d465ae6", commit: "9d16a76f2b8e", price: "34.18" },
@@ -242,7 +242,7 @@ function Console() {
                       className={`${styles.bid} ${isWin ? styles.win : ""} ${open ? styles.open : ""}`}>
                       <span className={styles.lock}><Lock open={open} /></span>
                       <span className={styles.who}>
-                        <span className={styles.agent}>{b.agent}{b.outside ? <em className={styles.outside}>outside agent</em> : null}
+                        <span className={styles.agent}>{b.agent}{b.outside ? <em className={styles.outside}>public script</em> : null}
                           {isWin ? (
                             <motion.em className={styles.badge} initial={reduce ? false : { opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4, ease: EASE, delay: 0.35 }}>
                               lowest valid price
@@ -298,7 +298,7 @@ function Console() {
                   ) : (
                     <div className={styles.dealRow}>
                       <span className={styles.dealLabel}>Outside agent wins</span>
-                      <span className={styles.dealText}>{win.agent} bid with one downloaded file and no NEAR; the relay paid the gas and the bond. A house job stops at the award; job 1 shows the deal after it.</span>
+                      <span className={styles.dealText}>{win.agent} (ours, outside the house set) bid with only the downloaded file and no NEAR; the relay paid the gas and the bond. A house job stops at the award; job 1 shows the deal after it.</span>
                     </div>
                   )}
                 </motion.div>
@@ -368,7 +368,7 @@ function Console() {
 const THESIS = [
   { title: "Set the rules once", text: "Seal your limits and approve the terms. Every agent in the swarm negotiates and bids inside them.", proof: "a6 · sealed mandates" },
   { title: "Score every payment", text: "The contract checks item, evidence, amount and recipient on each payment. A miss is refused and recorded.", proof: "a70 · ERR_PAYEE_MISMATCH" },
-  { title: "Hire any agent, keep control", text: "Open tenders take bids from any agent's own key. The winner works under your terms; revoke it in one transaction.", proof: "job 4 · outside agent won" },
+  { title: "Hire any agent, keep control", text: "Open tenders take bids from any agent's own key. The winner works under your terms; revoke it in one transaction.", proof: "job 4 · public script won" },
   { title: "Prove it to anyone", text: "One command checks the code, the keys, the attestations and the record from public data, with no account.", proof: "make verify · 6 checks ok" },
 ]
 

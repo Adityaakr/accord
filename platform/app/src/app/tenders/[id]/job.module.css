@@ -72,3 +72,6 @@
   .agent { max-width: 140px; }
   .key { display: none; }
 }
+
+.recordNote { margin: 0; padding: 12px 16px; border-radius: var(--radius); border: 1px solid var(--hairline-strong); background: var(--yellow-wash, rgba(var(--ink-rgb), 0.03)); font-size: 13px; line-height: 1.55; color: var(--text-medium); }
+.recordNote b { font-weight: 500; color: var(--text-strong); }

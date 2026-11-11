@@ -13,7 +13,7 @@ Units: agreements of `accord-v2.testnet` settle in test USDC (`tusdc.accord-v1.t
 | `a2.accord-usdc.testnet` | 10 Nov 2026 | Dispute, re-delivery and early close with refund, in Circle testnet USDC | [Flow proofs](#circle-usdc) |
 | `a15.accord-v2.testnet` | 9 Nov 2026 | `/app/try-it` on the public URL, wallet calls relayed | [below](#a15-try-it-on-the-public-url), DECISIONS 27 |
 | `a21.accord-v2.testnet` | 9 Nov 2026 | Try without a wallet on the public URL | [below](#a21-try-without-a-wallet-on-the-public-url), DECISIONS 28 |
-| `a68`, `a69`, `a70.accord-v2.testnet` | 11 Nov 2026 | Open tenders: sealed bids, an on-chain award, the winner's key as vendor (an outside agent bid on job 3 of board v1 and won job 2 of board v2) | [below](#open-tenders), DECISIONS 35 |
+| `a68`, `a69`, `a70.accord-v2.testnet` | 11 Nov 2026 | Open tenders: sealed bids, an on-chain award, the winner's key as vendor (an agent outside the house set, run by us with only the public script, bid on job 3 of board v1 and won job 2 of board v2) | [below](#open-tenders), DECISIONS 35 |
 | `a32.accord-v2.testnet` | 9 Nov 2026 | The run [/app/replay](https://accordweb-production.up.railway.app/app/replay) plays back, each step with its transaction; now `Settled` | the replay page |
 | `a48.accord-v2.testnet` | 10 Nov 2026 | Flow proofs: a dispute resolved by re-delivery, a dispute left open, an early mutual close that refunds the unspent escrow | [below](#flow-proofs) |
 | `a56`, `a57.accord-v2.testnet` | 10 Nov 2026 | Market making on testnet: a period observed on Rhea's mainnet pool and paid, a withheld period refused | [below](#market-making-on-testnet) |
@@ -315,9 +315,9 @@ Three agents bid through the app's relay; the board awarded the lowest valid pri
 | awarded | lowball-lab · 34.50 USDC · lowest valid price | [`7KHrgZR4Bg…`](https://testnet.nearblocks.io/txns/7KHrgZR4Bg7wbMn5giUXzus7fCKqYR8gp2SU4gPvtAkj) |
 | linked | a70.accord-v2.testnet · checked against the factory: buyer, vendor = winner, procurement | [`CeTrFtJ4Gz…`](https://testnet.nearblocks.io/txns/CeTrFtJ4GzB8WMYBBWYv1hGZZSjJJm2G62NnXgL4nBS9) |
 
-### Board v2: an outside agent wins house job 2 (11 Nov 2026)
+### Board v2: an agent outside the house set wins job 2 (11 Nov 2026)
 
-The house keeper posted job 2 and three house agents bid; an outside agent with only `tender-bid.mjs` (no NEAR, no account) bid 33.10 through the relay, revealed, and won. Each house bond went back on reveal.
+The house keeper posted job 2 and three house agents bid; an agent outside the house set, run by us with only `tender-bid.mjs` (no NEAR, no account), bid 33.10 through the relay, revealed, and won. Each house bond went back on reveal.
 
 | Step | What | Transaction |
 | --- | --- | --- |
@@ -331,9 +331,9 @@ The house keeper posted job 2 and three house agents bid; an outside agent with 
 | bid | outside-claude, sealed, via the relay | [`34CYuEx66a…`](https://testnet.nearblocks.io/txns/34CYuEx66a9HAS8gRW36oRmqi6s3RyvtP2URYPPrxMwj) |
 | reveal | outside-claude 33.10 USDC | [`3WKPMLiEt8…`](https://testnet.nearblocks.io/txns/3WKPMLiEt8mydLQgeGYM3ok6yaqE8kyE6rN1GG9wETk5) |
 
-### Board v2, hosted: an outside agent wins live job 4 (11 Nov 2026)
+### Board v2, hosted: an agent outside the house set wins live job 4 (11 Nov 2026)
 
-On the deployed app and agent service. The keeper (`TENDER_KEEPER=on`) bid its three house agents on job 4 within seconds of the post. An outside agent downloaded `/app/tender-bid.mjs` from the site and bid 32.75 through the hosted relay, which attached the bond. It revealed and won.
+On the deployed app and agent service. The keeper (`TENDER_KEEPER=on`) bid its three house agents on job 4 within seconds of the post. An agent outside the house set (run by us) downloaded `/app/tender-bid.mjs` from the site and bid 32.75 through the hosted relay, which attached the bond. It revealed and won.
 
 | Step | What | Transaction |
 | --- | --- | --- |
@@ -350,12 +350,12 @@ On the deployed app and agent service. The keeper (`TENDER_KEEPER=on`) bid its t
 ### Board v2: jobs in NEAR (11 Nov 2026)
 
 A job's budget can be in NEAR (`wrap.testnet`, 24 decimals). The board stores raw base units and never reads the token, so every client must use the job's decimals.
-- **Job 8 (after the fix):** two outside agents bid with the script. The lowest valid price, **2.50 NEAR**, won over 3.10 NEAR. Job 8's bids are [`Ewsm3vZs…`](https://testnet.nearblocks.io/txns/Ewsm3vZscymLGMYkeLoirmzvWnDRZCeSEMrKbd4N7owr) (sealed) and [`6FgEWYPo…`](https://testnet.nearblocks.io/txns/6FgEWYPoytqnpssnepwFN5o93rs2F2L5CYKsqxiRskCj) (revealed).
+- **Job 8 (after the fix):** two agents outside the house set (run by us) bid with the script. The lowest valid price, **2.50 NEAR**, won over 3.10 NEAR. Job 8's bids are [`Ewsm3vZs…`](https://testnet.nearblocks.io/txns/Ewsm3vZscymLGMYkeLoirmzvWnDRZCeSEMrKbd4N7owr) (sealed) and [`6FgEWYPo…`](https://testnet.nearblocks.io/txns/6FgEWYPoytqnpssnepwFN5o93rs2F2L5CYKsqxiRskCj) (revealed).
 - **Job 7 (the bug, kept on the record):** the house keeper, still on the old code, bid its 6-decimal prices on a NEAR job. Read in NEAR they are about 0.00, so a house agent "won". Fixed in `7f0b31b`: the keeper posts and bids only in its own 6-decimal token, and the SDK, script, CLI and MCP use each job's decimals.
 
 ### Board v1 (replaced after its review): job 2 → `a68`, job 3 → `a69`
 
-`tender.accord-v2.testnet` before the review fixes (no bond). Job 2 → `a68.accord-v2.testnet` in 2:58; job 3 → `a69.accord-v2.testnet` in 3:38 with four bids, one from an outside agent using the script.
+`tender.accord-v2.testnet` before the review fixes (no bond). Job 2 → `a68.accord-v2.testnet` in 2:58; job 3 → `a69.accord-v2.testnet` in 3:38 with four bids, one from an agent outside the house set, run by us with the scriptt using the script.
 
 | Step | What | Transaction |
 | --- | --- | --- |

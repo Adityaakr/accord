@@ -324,7 +324,7 @@ export const DOC_PAGES: DocPage[] = [
             kind: "rows",
             rows: [
               { name: "Factory", value: "accord-v2.testnet", href: TESTNET.factoryUrl, detail: "Publishes releases and creates agreements. It cannot call, upgrade or drain an existing agreement." },
-              { name: "Release", value: "release 4", href: RELEASE4.publish, detail: "One agreement code hash per release, published as a NEP-591 global contract and referenced by hash, so it cannot change. Every agreement on the release uses it; an agreement keeps its release for life. Release 4 (`ECgsrZwy…`, the security-review fixes) is current on both factories since 9 Nov 2026; a6 and the agreements before it keep release 3 (`8wMuMRre…`)." },
+              { name: "Release", value: "release 5", href: RELEASE4.publish, detail: "One agreement code hash per release, published as a NEP-591 global contract and referenced by hash, so it cannot change. Every agreement on the release uses it; an agreement keeps its release for life. Release 5 (release 4's agreement code `ECgsrZwy…`, the security-review fixes, on the reviewed enclave job builds) is current on both factories since 10 Nov 2026; a10 keeps release 4, and a6 and the agreements before it keep release 3 (`8wMuMRre…`)." },
               { name: "Agreement account", value: "a<id>.accord-v2.testnet", href: TESTNET.agreementUrl, detail: "Created in one batch (`CreateAccount`, `Transfer`, `UseGlobalContract`, `FunctionCall new`) with no `AddKey`, so it starts with no keys. It has no method that deploys code and never holds a full-access key." },
               { name: "Creation deposit", value: "2 NEAR", detail: "Paid by the buyer; covers state storage, mandate storage, the agent's gas and the on-chain OutLayer runs." },
             ],
@@ -739,7 +739,7 @@ export const DOC_PAGES: DocPage[] = [
               },
               {
                 claim: "The approved terms are the agent's only authority",
-                limit: "The agent's judgement is bounded, not protected: it can still be fooled into asking. Attestation proves which code produced the terms, not that the deal was good; people decide that when they approve",
+                limit: "The agent's judgement is bounded, not protected: it can still be fooled into asking. Attestation proves which code produced the terms, not that the deal was good; people decide that when they approve. The buyer can also approve an exception its agent requests, including a lower amount for an item; the vendor is not asked",
               },
               {
                 claim: "Payments go only to the authorised recipient",
@@ -747,7 +747,7 @@ export const DOC_PAGES: DocPage[] = [
               },
               {
                 claim: "Revoking ends the agent's authority in one transaction",
-                limit: "A payment already made stays made, and it went to the authorised recipient at the approved amount. A call that reached the chain before the revoke still runs, with every check. Revoking never cancels what the vendor has earned: an eligible payment stays claimable by the vendor",
+                limit: "A payment already made stays made, and it went to the authorised recipient at the approved amount. A call that reached the chain before the revoke still runs, with every check. Revoking never cancels what the vendor has earned: an eligible payment stays claimable by the vendor, unless the buyer approves an exception that lowers it",
               },
               {
                 claim: "Negotiation is private; settlement is public",
@@ -759,7 +759,7 @@ export const DOC_PAGES: DocPage[] = [
               },
               {
                 claim: "On an open tender, each price stays sealed until its bidder reveals it, the lowest valid price wins, and the winner's key becomes the vendor of an ordinary Accord agreement",
-                limit: "One party can bid under several keys and reveal only the price that wins after seeing the others; each unrevealed bid forfeits its 0.02 NEAR bond to the buyer, which puts a price on this but does not prevent it, and anyone can fill a job's 32 slots for 32 bonds. The board (`tender-v2.accord-v2.testnet`, no access key) had an internal adversarial review, not the security review of the agreement contracts. The winning bid sets the vendor's sealed floor; the terms are still negotiated in the Sealed Table and approved by both companies. Testnet only",
+                limit: "One party can bid under several keys and reveal only the price that wins after seeing the others; each unrevealed bid forfeits its 0.02 NEAR bond to the buyer, which puts a price on this but does not prevent it, and anyone can fill a job's 32 slots for 32 bonds. The board (`tender-v2.accord-v2.testnet`, no access key) had an internal adversarial review, not the security review of the agreement contracts. The winning bid sets the vendor's sealed floor; the terms are still negotiated in the Sealed Table and approved by both companies. The link checks buyer, vendor and kind, not that the agreement's total or token match the winning bid. Testnet only",
               },
             ],
           },
@@ -790,7 +790,7 @@ export const DOC_PAGES: DocPage[] = [
               { name: "Job secret condition", detail: "The planned condition (only runs an agreement requests can read the seeds) is not expressible with outlayer-cli `0.2.2`. The seeds are locked to the exact build hash and open to any caller: anyone can get a signed output, but every output names the agreement and is checked by that agreement against state it reads itself, so a run requested by someone else cannot change an outcome." },
               { name: "Factory key", detail: "The factory keeps its full-access key during the hackathon so fixes can ship. It cannot touch an existing agreement." },
               { name: "Test token", value: "tusdc.accord-v1.testnet", href: acct(TESTNET.token), detail: "The default factory and the full flow on a6 settle in the repository's test token. Circle's testnet USDC settles on the second factory, `accord-usdc.testnet`, where `a1.accord-usdc.testnet` ran a funded deal." },
-              { name: "Job builds", value: "release 3's", href: "/docs/verify#a6-result", detail: "`make verify` proves the three job runs with the outlayer-verify tool when it is installed (`6 ok · 1 partial` on a6), so the job keys came from the release's wasm in an enclave. Release 4 still runs release 3's job builds; the reviewed builds are not deployed." },
+              { name: "Job builds", value: "release 3's", href: "/docs/verify#a6-result", detail: "`make verify` proves the three job runs with the outlayer-verify tool when it is installed (`6 ok · 1 partial` on a6), so the job keys came from the release's wasm in an enclave. Release 4 ran release 3's job builds; release 5 (current since 10 Nov 2026) runs the reviewed builds." },
             ],
           },
         ],

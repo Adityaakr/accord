@@ -100,7 +100,7 @@ const CLAIMS: Row[] = [
   [
     "The approved terms are the agent's only authority",
     <>The agent's only key is a function-call key on the agreement's own account that can call <Mono>act</Mono> and nothing else; <Mono>act</Mono> refuses any payment whose item, evidence, amount or recipient differs from the terms both companies approved</>,
-    "The agent's judgement is bounded, not protected: it can still be fooled into asking. Attestation proves which code produced the terms, not that the deal was good; people decide that when they approve",
+    "The agent's judgement is bounded, not protected: it can still be fooled into asking. Attestation proves which code produced the terms, not that the deal was good; people decide that when they approve. The buyer can also approve an exception its agent requests, including a lower amount for an item; the vendor is not asked",
   ],
   [
     "Payments go only to the authorised recipient",
@@ -110,7 +110,7 @@ const CLAIMS: Row[] = [
   [
     "Revoking ends the agent's authority in one transaction",
     <><Mono>revoke_agent</Mono> marks the agent's key revoked, so the contract refuses it from that receipt on, and deletes it from the agreement account in the same transaction; the account has no other key, so after the deletion lands (about one block) anything the agent signs is rejected by the network before it reaches the contract</>,
-    "A payment already made stays made, and it went to the authorised recipient at the approved amount. A call that reached the chain before the revoke still runs, with every check. Revoking never cancels what the vendor has earned: an eligible payment stays claimable by the vendor",
+    "A payment already made stays made, and it went to the authorised recipient at the approved amount. A call that reached the chain before the revoke still runs, with every check. Revoking never cancels what the vendor has earned: an eligible payment stays claimable by the vendor, unless the buyer approves an exception that lowers it",
   ],
   [
     "Negotiation is private; settlement is public",
@@ -125,7 +125,7 @@ const CLAIMS: Row[] = [
   [
     "On an open tender, each price stays sealed until its bidder reveals it, the lowest valid price wins, and the winner's key becomes the vendor of an ordinary Accord agreement",
     "The tender board stores only a sha256 commitment of each price, and accepts a bid only with the bidder's own ed25519 signature, checked on chain; a reveal must open that commitment; the award is computed on chain by a rule anyone can call; the buyer's link to the agreement is stored only if the factory confirms a procurement agreement with that buyer and the winner's key as vendor",
-    <>One party can bid under several keys and reveal only the price that wins after seeing the others; each unrevealed bid forfeits its 0.02 NEAR bond to the buyer, which puts a price on this but does not prevent it, and anyone can fill a job&apos;s 32 slots for 32 bonds. The board (<Mono>tender-v2.accord-v2.testnet</Mono>, no access key) had an internal adversarial review, not the security review of the agreement contracts. The winning bid sets the vendor&apos;s sealed floor; the terms are still negotiated in the Sealed Table and approved by both companies. Testnet only</>,
+    <>One party can bid under several keys and reveal only the price that wins after seeing the others; each unrevealed bid forfeits its 0.02 NEAR bond to the buyer, which puts a price on this but does not prevent it, and anyone can fill a job&apos;s 32 slots for 32 bonds. The board (<Mono>tender-v2.accord-v2.testnet</Mono>, no access key) had an internal adversarial review, not the security review of the agreement contracts. The winning bid sets the vendor&apos;s sealed floor; the terms are still negotiated in the Sealed Table and approved by both companies. The link checks buyer, vendor and kind, not that the agreement&apos;s total or token match the winning bid. Testnet only</>,
   ],
 ]
 

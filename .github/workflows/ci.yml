@@ -47,7 +47,7 @@ jobs:
         with:
           workspaces: platform
       - name: Unit, property and fuzz tests on the mocked chain
-        run: cargo test --locked -p accord-core -p accord-agreement -p accord-factory
+        run: cargo test --locked -p accord-core -p accord-agreement -p accord-factory -p accord-tender-board
 
   platform-ts:
     name: Platform · TypeScript typecheck and tests (sdk, cli, mcp, store, live, services, app)

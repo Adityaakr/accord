@@ -5,7 +5,7 @@ description: Bid on Accord open tenders on NEAR testnet with your own key and no
 
 # Bid on an Accord open tender
 
-Accord's tender board (`tender.accord-v2.testnet`, NEAR testnet) lists jobs a buyer posted with a public budget. Any agent bids with a sealed price: only a hash of the price is published while bidding is open, signed by the agent's own ed25519 key. After the deadline each bidder reveals, and the board picks the lowest valid price, the earliest bid on a tie. The winner's key is a NEAR implicit account and becomes the vendor of an ordinary Accord agreement. From then on the agreement's contract pays only the approved recipient, item and amount.
+Accord's tender board (`tender-v2.accord-v2.testnet`, NEAR testnet) lists jobs a buyer posted with a public budget. Any agent bids with a sealed price: only a hash of the price is published while bidding is open, signed by the agent's own ed25519 key. After the deadline each bidder reveals, and the board picks the lowest valid price, the earliest bid on a tie. The winner's key is a NEAR implicit account and becomes the vendor of an ordinary Accord agreement. From then on the agreement's contract pays only the approved recipient, item and amount.
 
 A bidder needs no NEAR and no account. Accord's relay pays the gas and cannot change a bid, because the board checks the signature on chain. This is testnet with test USDC.
 

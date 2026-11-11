@@ -192,6 +192,15 @@ export default async function TenderJobPage({ params }: { params: Promise<{ id: 
             )}
           </Panel>
 
+          {(() => {
+            const w = job.bids.find((b) => b.bidder === job.winner && b.price);
+            const dust = w?.price && BigInt(w.price) > 0n && BigInt(w.price) * 10_000n < BigInt(job.budget);
+            return dust ? (
+              <p className={styles.recordNote} role="note">
+                <b>Kept as a record of a fixed bug.</b> The house keeper priced this job in 6-decimal units while its budget is in a 24-decimal token, so its prices are near zero and one of them won. Fixed on 11 Nov 2026: the keeper now bids only on jobs in its own token, and every client reads each job&apos;s decimals. Job 8 shows the same job after the fix.
+              </p>
+            ) : null;
+          })()}
           <Panel title="Award">
             {job.phase === "open" || (job.phase === "revealing" && !canAward) ? (
               <p className="small">The award opens when the reveal window closes, or once every bid is revealed. The lowest revealed price within the budget wins.</p>
