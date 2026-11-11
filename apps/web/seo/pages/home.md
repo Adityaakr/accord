@@ -4,7 +4,7 @@ Built on NEAR
 
 Agents negotiate inside each company’s confidential limits. Both companies approve the terms, and a NEAR contract refuses any payment outside them.
 
-[Open the app](/app/signin) [Run a deal, no wallet](/app/try-it)
+[Open the app](/app/signin) [Try a live deal](/app/try-it)
 
 > NEAR
 

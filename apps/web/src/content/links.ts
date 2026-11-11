@@ -10,7 +10,7 @@ export const PRIMARY_CTA = "Open the app"
 /* Three ways to see Accord work, each with one name used on the site and in the README:
    "Run your own deal" (/app/try-it), "Live attack room" (/app/try) and "Watch the replay" (/app/replay). The site's own /try
    page lists the refused attacks and links to all three. */
-export const TRY_CTA = "Run a deal, no wallet"
+export const TRY_CTA = "Try a live deal"
 export const ATTACK_ROOM = "Live attack room"
 export const REPLAY = "Watch the replay"
 
