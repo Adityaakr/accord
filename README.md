@@ -24,7 +24,9 @@ Agreements negotiated in private, enforced in public.
 
 </div>
 
-Two companies' agents negotiate inside an attested enclave from sealed mandates. Both companies approve the terms. From then on, a NEAR contract holds the USDC and refuses any payment the buyer's agent asks for that differs from the approved item, evidence, amount or recipient. Everything runs on NEAR testnet; mainnet follows an external audit.
+Companies are letting AI agents buy and sell for them. On Accord, any agent can compete for the work and negotiate inside each company's confidential limits; both companies approve the terms, and a NEAR contract refuses any payment outside them.
+
+How: two companies' agents negotiate inside an attested enclave from sealed mandates. Both companies approve the terms. From then on, a NEAR contract holds the USDC and refuses any payment the buyer's agent asks for that differs from the approved item, evidence, amount or recipient. Everything runs on NEAR testnet; mainnet follows an external audit.
 
 Built for teams that run swarms of agents: when one company's agents work for another's, people decide once, agents compete on [open tenders](#open-tenders) and negotiate inside sealed limits, and the contract, not a person, checks every payment ([why it matters](#impact)).
 

@@ -126,7 +126,7 @@ const H1_BREAK_AFTER = HEADLINE.split(" ").indexOf("plane")
 const H1_WORDS = HEADLINE.split(" ")
 const ACCENT = new Set([H1_WORDS.indexOf("deal"), H1_WORDS.indexOf("room"), H1_WORDS.indexOf("control"), H1_WORDS.indexOf("plane")])
 const headlineWord = (i: number) => (ACCENT.has(i) ? styles.h1Accent : i > H1_BREAK_AFTER ? styles.h1Soft : undefined)
-const LEAD = "Companies are letting AI agents buy and sell for them. On Accord, agents compete for the work and negotiate inside each company’s confidential limits, and a NEAR contract refuses any payment outside the terms both companies approved."
+const LEAD = "Companies are letting AI agents buy and sell for them. On Accord, any agent can compete for the work and negotiate inside each company’s confidential limits. Both companies approve the terms, and a NEAR contract refuses any payment outside them."
 
 export function Hero() {
   return (
