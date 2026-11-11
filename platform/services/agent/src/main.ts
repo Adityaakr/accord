@@ -9,6 +9,7 @@ import { plan } from "./planner.js";
 import { serviceConfig } from "./config.js";
 import { TESTNET_REARM, type RearmConfig } from "./rearm.js";
 import { TryRoomKeeper } from "./room.js";
+import { TenderKeeper, tenderKeeperConfig } from "./tender.js";
 import { tryWorld } from "../../../packages/live/src/world.js";
 
 const POLL_MS = 3_000;
@@ -67,9 +68,11 @@ async function main() {
   const local = cfg.network === "sandbox";
   const rearmOn = process.env.AGENT_REARM === "on" || (local && process.env.AGENT_REARM !== "off");
   const room = rearmOn ? new TryRoomKeeper(tryWorld(), rearmConfig(local), (s) => console.log(`  rearm     ${s}`)) : null;
-  if (!fixed && !room) throw new Error("set AGENT_AGREEMENT and ACCORD_AGENT_KEY, or AGENT_REARM=on with the TRY_* accounts");
+  const tenderCfg = tenderKeeperConfig(process.env);
+  const tenders = tenderCfg ? new TenderKeeper(tenderCfg, reader.chain, (s) => console.log(`  tender    ${s}`)) : null;
+  if (!fixed && !room && !tenders) throw new Error("set AGENT_AGREEMENT and ACCORD_AGENT_KEY, or AGENT_REARM=on with the TRY_* accounts, or TENDER_KEEPER=on");
   const preflightOn = process.env.AGENT_PREFLIGHT === "on";
-  console.log(`accord agent · ${cfg.network} · planner literal · preflight ${preflightOn ? "on" : "off"}${fixed ? ` · ${fixed.id}` : ""}${room ? " · /try re-arm on" : ""}`);
+  console.log(`accord agent · ${cfg.network} · planner literal · preflight ${preflightOn ? "on" : "off"}${fixed ? ` · ${fixed.id}` : ""}${room ? " · /try re-arm on" : ""}${tenders ? ` · tenders on ${tenderCfg!.board}` : ""}`);
 
   // The re-arm runs in its own loop: opening a room can take minutes (negotiation, payee proof), and the inbox of
   // the current room keeps being answered meanwhile. One step at a time; a failed step is retried on the next.
@@ -78,6 +81,16 @@ async function main() {
       for (;;) {
         await room.step().catch((e: Error) => console.error(`  rearm     ${e.message}`));
         await new Promise((r) => setTimeout(r, REARM_MS));
+      }
+    })();
+  }
+
+  // The house tender keeper: its own loop, one step every 15 s (a step is a few board reads and at most a few calls).
+  if (tenders) {
+    void (async () => {
+      for (;;) {
+        await tenders.step().catch((e: Error) => console.error(`  tender    ${e.message}`));
+        await new Promise((r) => setTimeout(r, 15_000));
       }
     })();
   }

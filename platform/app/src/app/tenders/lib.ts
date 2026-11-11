@@ -30,5 +30,9 @@ export function windowEnd(j: TenderJob): number | null {
 /** Whether a price (base units) is within the job's budget. */
 export const withinBudget = (price: string, budget: string): boolean => BigInt(price) <= BigInt(budget);
 
-export const cliBid = (job: number | string): string => `npx @accord/cli tender bid ${job} --price 36.50 --agent my-agent`;
+/** The no-install path: one dependency-free script served by this app (public/tender-bid.mjs), Node 22 or later. */
+export const SCRIPT_URL = "https://accordweb-production.up.railway.app/app/tender-bid.mjs";
+export const cliBid = (job: number | string): string =>
+  `curl -sO ${SCRIPT_URL}\nnode tender-bid.mjs bid ${job} --price 36.50 --agent my-agent --wait`;
+export const SKILL_RAW = "https://raw.githubusercontent.com/Adityaakr/accord/main/skills/accord-tender/SKILL.md";
 export const README_TENDERS = "https://github.com/Adityaakr/accord#open-tenders";

@@ -1,15 +1,16 @@
 "use client";
 
-// Three ways an agent bids on an open tender: the CLI, the MCP server or plain HTTP. Tabs, keyboard reachable.
+// Four ways an agent bids on an open tender: a one-file script, an agent skill, the MCP server or plain HTTP. Tabs,
+// keyboard reachable.
 import { useState } from "react";
-import { README_TENDERS, cliBid } from "./lib";
+import { README_TENDERS, SKILL_RAW, cliBid } from "./lib";
 import styles from "./tenders.module.css";
 
-const TABS = ["CLI", "MCP", "HTTP"] as const;
+const TABS = ["Script", "Skill", "MCP", "HTTP"] as const;
 type Tab = (typeof TABS)[number];
 
 export function HowToBid({ job = "<job>" }: { job?: number | string }) {
-  const [tab, setTab] = useState<Tab>("CLI");
+  const [tab, setTab] = useState<Tab>("Script");
   const move = (dir: 1 | -1) => setTab(TABS[(TABS.indexOf(tab) + dir + TABS.length) % TABS.length]!);
   return (
     <div className={styles.howto}>
@@ -23,20 +24,30 @@ export function HowToBid({ job = "<job>" }: { job?: number | string }) {
         ))}
       </div>
       <div role="tabpanel" id={`bid-panel-${tab}`} aria-labelledby={`bid-tab-${tab}`} className={styles.tabPanel}>
-        {tab === "CLI" && (
+        {tab === "Script" && (
           <>
             <pre className={styles.code}><code>{cliBid(job)}</code></pre>
-            <p className="small">Seals the price with a random salt, signs the bid with your agent&apos;s own key and sends it through this app&apos;s relay. Keep the price, the salt and the key until the reveal window opens: without them the bid cannot be revealed and cannot win.</p>
+            <p className="small">No install and no NEAR: Node 22 or later and one file. It makes your bidder key on first use, seals the price with a random salt, signs the bid and sends it through this app&apos;s relay; with <span className="mono">--wait</span> it reveals after the deadline and prints the result. The key, price and salt stay in <span className="mono">~/.accord</span> (mode 0600). From a clone, <span className="mono">accord tender</span> does the same.</p>
+          </>
+        )}
+        {tab === "Skill" && (
+          <>
+            <pre className={styles.code}><code>{`mkdir -p ~/.claude/skills/accord-tender
+curl -so ~/.claude/skills/accord-tender/SKILL.md \\
+  ${SKILL_RAW}`}</code></pre>
+            <p className="small">Then ask your agent: &ldquo;bid 36.50 on Accord tender {String(job)}&rdquo;. The skill uses the same script and asks you to confirm the price first.</p>
           </>
         )}
         {tab === "MCP" && (
           <>
             <ul className={styles.toolList}>
-              <li><span className="mono">accord_tender_jobs</span><span className="small">lists the open jobs and their windows</span></li>
-              <li><span className="mono">accord_prepare_bid</span><span className="small">seals a price and signs it with your agent&apos;s key, locally</span></li>
-              <li><span className="mono">accord_submit_bid</span><span className="small">sends the signed bid to the relay</span></li>
+              <li><span className="mono">accord_tender_jobs</span><span className="small">the jobs, newest first, with their phase and bids</span></li>
+              <li><span className="mono">accord_tender_job</span><span className="small">one job; both read tools are also on the hosted <span className="mono">/app/mcp</span></span></li>
+              <li><span className="mono">accord_tender_bid</span><span className="small">seals and signs a price with <span className="mono">ACCORD_BIDDER_SEED</span>, locally, and sends it to the relay</span></li>
+              <li><span className="mono">accord_tender_reveal</span><span className="small">reveals after the deadline</span></li>
+              <li><span className="mono">accord_tender_award</span><span className="small">asks the board to pick the winner</span></li>
             </ul>
-            <p className="small">The same keyless MCP server as the rest of Accord (stdio or HTTP). The key and the salt never leave your agent.</p>
+            <p className="small">The bid tools run in your own <span className="mono">@accord/mcp</span> (stdio), never on the hosted server. The key and the salt never leave your machine before the reveal.</p>
           </>
         )}
         {tab === "HTTP" && (

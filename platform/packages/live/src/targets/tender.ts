@@ -7,6 +7,7 @@
 // is its bid), terms negotiated in the Sealed Table, both approve, the recipient proven, funded, a delivery, a payment,
 // and one attack refused.
 //
+// TENDER_RELAY_URL sends bids, reveals and the award through another app (a local one) than APP_URL.
 // TENDER_COMMIT_SECS (default 40) and TENDER_REVEAL_SECS (default 60) set the windows; a longer commit window leaves
 // time for an outside agent to bid on the printed job (`accord tender bid <job> ...`).
 
@@ -114,7 +115,7 @@ export async function run(base: World): Promise<void> {
   const tag = Date.now().toString(36);
   const [buyer, recipient] = await Promise.all([base.newAccount(`tender-${tag}-buyer`), base.newAccount(`tender-${tag}-pay`)]);
   const w0 = base.with({ buyer: buyer! });
-  const relay = (await appRelay(base.app.url)) ?? signerRelay(board, new KeySigner(buyer!.account, buyer!.key, base.reader.chain));
+  const relay = (await appRelay(process.env.TENDER_RELAY_URL || base.app.url)) ?? signerRelay(board, new KeySigner(buyer!.account, buyer!.key, base.reader.chain));
   at("accounts", `buyer ${buyer!.account} · recipient ${recipient!.account}`);
 
   // 1. The buyer posts the job: public budget, evidence the buyer will require, two windows.
@@ -146,12 +147,22 @@ export async function run(base: World): Promise<void> {
     at("waiting", `${j.bids.filter((b) => b.price === null).length} bid(s) not revealed; waiting for the reveal window to close`);
     await waitFor("the reveal window to close", revealSecs + 30, async () => (await board.job(job))?.phase === "closed");
   }
-  const awardTx = await relay.award(job);
+  // Anyone may ask for the award (a bidder's script often does); a second ask is refused, which is fine.
+  const awardTx = await relay.award(job).catch(async (e: Error) => {
+    if ((await board.job(job))?.phase === "awarded") return "(already awarded by another caller)";
+    throw e;
+  });
   j = (await board.job(job))!;
   const win = j.bids.find((b) => b.bidder === j.winner);
   if (!win) throw new Error(`job ${job}: ${j.phase}, no winner`);
   at("awarded", `${win.agent} · ${usdc(win.price!)} · lowest valid price · tx ${awardTx}`);
-  const key = bidderKey(keys[bids.findIndex((b) => b.bidder === win.bidder)]?.seed ?? "");
+  const mine = bids.findIndex((b) => b.bidder === win.bidder);
+  if (mine < 0) {
+    // An outside agent won with its own key: only it can sign as the vendor, so the run stops at the award.
+    say(`tender: job ${job} won by an outside agent (${win.agent}, ${win.bidder.slice(0, 12)}…); the agreement waits for its key`);
+    return;
+  }
+  const key = bidderKey(keys[mine]!.seed);
 
   // 4. The winner's key is its implicit account: funded, it signs as the vendor. Its approver is a second key of its own.
   const authKey = newBidderKey();
