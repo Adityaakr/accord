@@ -840,3 +840,48 @@ market-making room that has not run on testnet, and three "try" pages with near-
   own `jobs.observer.wasm_hash`, so a project version change cannot swap the build. Deployed; the Railway keeper still
   needs `OUTLAYER_PAYMENT_KEY` to observe on its own (`docs/build/BLOCKED.md` 3.7).
 
+
+## 35. Open tenders: the tender board, and its review (11 Nov 2026)
+
+**What and why.** An open tender in front of an Accord agreement:
+- A buyer posts a job with a public budget. Any agent bids with a sealed price, signed by its own ed25519 key.
+- The lowest valid revealed price wins.
+- The winner's key, a NEAR implicit account, becomes the vendor of an ordinary `procurement` agreement.
+
+It answers "who can sell to this buyer?" without the buyer choosing the vendor in advance, and an outside agent can take part with nothing but a key. The contract is `platform/contracts/tender-board`; its rules are in `RULES.md` there.
+
+**Decisions.**
+- **A separate contract, not a new agreement kind.** The factory fixes the vendor at creation (`contracts/agreement/src/lib.rs`: nothing reassigns `vendor`), and a new kind would change the agreement code hash. So the board sits outside the release. A tender-won agreement is an ordinary release 5 agreement, and all seven `make verify` checks apply unchanged (a68, a69 and a70 print `6 checks ok · 1 partial`).
+- **Commit and reveal, not one Sealed Table run per bidder.**
+  - The Sealed Table is one buyer against one vendor on one agreement account.
+  - N negotiations would mean N agreements at 2 NEAR each, with every bidder funding a vendor account and an approver account.
+  - Instead, bidding costs a bidder only a signature. Only the winner goes through the Sealed Table, and its bid becomes the floor of its sealed mandate.
+- **Signatures checked by the board** (`env::ed25519_verify`), so a relay can pay the gas without being able to forge or change a bid. Implicit accounts stand in for sub-accounts, so nobody has to create an account for an outside agent.
+- **Deployed with no access key.** A fix ships as a new account: v1 at `tender.accord-v2.testnet` (tx `7LwjtgaZ9HJTyTttbkLHdYa1sAPAdsWh2WUBQ5GeWgXL`), v2 at `tender-v2.accord-v2.testnet` (tx `GBa1KS427FSF9sArcGCFctr2UkfcNiFgEmhZW7EJvr5H`).
+- **The link to the agreement is checked against the factory.** `link_agreement` calls `factory.agreement(id)` and stores the link only for a procurement agreement with the job's buyer and the winner's key as vendor.
+
+**Review (two adversarial reviewers, 11 Nov 2026).** Every confirmed finding came with a failing test, and the tests stay as regressions:
+- `contracts/tender-board/src/audit_tests.rs`;
+- `app/tests/tender-audit.test.ts`;
+- `packages/cli/test/tender-audit.test.ts`.
+
+| Finding | Severity | Fix |
+| --- | --- | --- |
+| 32 throwaway keys fill a job's slots for the gas of 32 calls | medium | A 0.02 NEAR bond per new bid, returned on reveal or cancel and forfeited to the buyer when unrevealed. The relay allows 3 new keys per caller per job per hour. Filling a job still costs only 32 bonds: stated as a limit |
+| One party with several keys reveals only the price that wins after seeing others, at no cost | medium | The same bond, forfeited per unrevealed bid. This prices the attack but does not prevent it: stated as a limit in GOAL.md claim 7 |
+| Small-order public keys accept a signature nobody made (`ed25519_verify` is non-strict) | low | The 14 small-order encodings are refused as bidder keys |
+| Rust and JS trim agent labels differently, so the relay paid for bids the board refused | low | Labels are printable ASCII, never trimmed, and checked the same way in the contract, SDK, MCP and script |
+| A placeholder in an early slot wins ties | info | Ties go to the earliest last commitment, then the index |
+| 200 junk POSTs used up a job's shared relay allowance for an hour | high (relay) | The job allowance is counted only after a request passes its signature, window and commitment checks |
+| A re-bid that failed overwrote the salt of the bid still on chain | high (clients) | Secrets kept by commitment; nonces always rise; a reveal uses the kept entry that opens the commitment on chain |
+| A damaged `bidder.json` was replaced by a new key (possibly a won vendor key) | high (clients) | A key is created only when the file is missing, with `wx`; a damaged file is an error |
+| The keeper paid gas for bids into a full job, and left a new job's first seconds open | medium | It never bids into a full job, and bids in the same step as the post |
+| Unbounded body reads and cache and limiter maps; `--wait` award spam | medium | Bodies capped while reading; caches and the limiter pruned; one award request per wait |
+
+Not fixed and stated: the relayer and the agent service each keep their own nonce counter for a shared key (collisions recover through near-api-js's retry), and the house agents' prices are public in the source (an outside agent can beat them, which is the point of a house job).
+
+**Runs.**
+- v1: jobs 2 and 3 led to a68 and a69 (job 3 with an outside agent bidding through the script).
+- v2: job 1 led to a70 in 4:01, and an outside agent with only the script won house job 2.
+
+`make tender-sim` runs 20 scripted agents over 5 jobs on the contract's code. Transactions are in `docs/runs.md` ("Open tenders").

@@ -49,6 +49,7 @@ atlas: ; @$(LIVE) market-making
 verify: ; @pnpm --silent --filter @accord/cli dev -- verify --agreement $(DEAL)
 demo: ; @$(LIVE) demo
 tender: ; @$(LIVE) tender
+tender-sim: ; @cargo test -q -p accord-tender-board simulation -- --nocapture 2>&1 | grep -v "EVENT_JSON\|^running\|^$$\|^\.$$"
 finish: ; @DEAL=$(DEAL) $(LIVE) finish
 # One new agreement through a dispute, a re-delivery and an early mutual close that refunds the unspent escrow.
 dispute-close: ; @$(LIVE) dispute-close
@@ -72,4 +73,4 @@ inbox: ; @$(LIVE) inbox
 release-check: ; $(call todo,7.4 make release-check)
 submission-check: ; $(call todo,8.2 make submission-check)
 
-.PHONY: help setup-check ci test wasm check-wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate negotiate-usdc finish-usdc dispute-close dispute-close-usdc close close-usdc cancel verify-usdc approve fund payee pay attack revoke claim exception payee-change market-making atlas verify demo tender deploy-tender measure demo-reset inbox release-check submission-check
+.PHONY: help setup-check ci test wasm check-wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate negotiate-usdc finish-usdc dispute-close dispute-close-usdc close close-usdc cancel verify-usdc approve fund payee pay attack revoke claim exception payee-change market-making atlas verify demo tender tender-sim deploy-tender measure demo-reset inbox release-check submission-check

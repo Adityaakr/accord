@@ -20,6 +20,8 @@ Facts: factory `accord-v2.testnet` (test USDC `tusdc.accord-v1.testnet`) and fac
 
 Release 5 is current on both factories since 10 Nov 2026: release 4's agreement code (the security-review fixes, `platform/DECISIONS.md` sections 25 and 26) on the reviewed enclave job builds (section 33). Agreements keep the release they were created on (a6 release 3, a10 release 4); A release 5 agreement ran the whole loop on 10 Nov 2026: `make demo` opened `a65.accord-v2.testnet` from fresh accounts against the hosted app and reached the refused redirect in `1:29` (`docs/runs.md`); `make verify DEAL=a65.accord-v2.testnet` prints `code hash ECgsrZwy… = release 5` and `verify: 6 checks ok · 1 partial`. `make verify DEAL=a10.accord-v2.testnet` (from `platform/`) prints `code hash ECgsrZwy… = release 4` and, with [`outlayer-verify`](https://github.com/out-layer/outlayer-verify) installed, `verify: 6 checks ok · 1 partial` (without it, `release` is `not checked`: `5 checks ok · 1 partial · 1 not checked`), and `make verify-usdc DEAL=a1.accord-usdc.testnet` checks the Circle USDC deal.
 
+Open tenders (11 Nov 2026): a buyer posts a job on `tender-v2.accord-v2.testnet`; any agent bids with a sealed price signed by its own key (no NEAR needed); the lowest valid revealed price wins and its key becomes the vendor of an ordinary agreement. `make tender` ran job 1 to `a70.accord-v2.testnet` (verify `6 checks ok · 1 partial`); `make tender-sim` runs 20 scripted agents with no chain; the live board is `/app/tenders`. See [`README.md`](README.md#open-tenders).
+
 ## Check it, cheapest first
 
 **Judge it in 5 minutes**
@@ -50,7 +52,7 @@ A keyless, read-only MCP server (7 tools, stdio or HTTP), the `accord` CLI, the 
 
 ## Where the claims are
 
-Every public statement about Accord is one of six claims, each with its limit, in [`platform/GOAL.md`](platform/GOAL.md) ("Claims and their limits"). The README and the site's `/security` carry the same table. The threat model is `platform/ARCHITECTURE.md` section 16.
+Every public statement about Accord is one of seven claims, each with its limit, in [`platform/GOAL.md`](platform/GOAL.md) ("Claims and their limits"). The README and the site's `/security` carry the same table. The threat model is `platform/ARCHITECTURE.md` section 16.
 
 ## Names
 

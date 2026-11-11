@@ -1,5 +1,5 @@
-// /app/mcp: the hosted, keyless Accord MCP server (streamable HTTP, stateless, JSON responses). The same seven read
-// tools as a keyless `accord-mcp` (packages/mcp), over this app's chain client: list, get, due items, preflight,
+// /app/mcp: the hosted, keyless Accord MCP server (streamable HTTP, stateless, JSON responses). The same nine read
+// tools as a keyless `accord-mcp` (packages/mcp), over this app's chain client: tender jobs, list, get, due items, preflight,
 // refusals, receipts, verify. No key is read and no tool signs. Any origin may call it (no credentials); each client
 // IP gets 60 requests a minute, and the whole endpoint 600, because every tool call is RPC reads.
 import { handleMcpRequest, MCP_CORS } from "@accord/mcp/hosted";

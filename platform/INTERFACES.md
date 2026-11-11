@@ -660,6 +660,48 @@ Pages: `/` (deal rooms), `/agreements/new`, `/agreements/[id]` (deal room: the f
 
 No route accepts a field named or shaped like a mandate; `app/tests/no-mandate-routes.test.ts` fails if one does.
 
+## 14a. Open tender board (`contracts/tender-board`, `tender-v2.accord-v2.testnet`)
+
+The rules are in `contracts/tender-board/RULES.md`, and the design in DECISIONS.md section 35. Amounts are in base units of the job's token (6 decimals).
+
+| Method | Caller | Deposit | Effect / errors |
+| --- | --- | --- | --- |
+| `new(factory)` | deploy | | The factory checked by `link_agreement` |
+| `post_job(title, spec, evidence_hash, budget, token, commit_secs, reveal_secs) -> u64` | anyone (the buyer) | `POST_DEPOSIT` 0.3 NEAR | `ERR_DEPOSIT`, `ERR_TITLE`, `ERR_SPEC`, `ERR_EVIDENCE_HASH`, `ERR_BUDGET`, `ERR_COMMIT_WINDOW` (30 s to 14 d), `ERR_REVEAL_WINDOW` (30 s to 3 d) |
+| `submit_bid(job, bidder, commitment, agent, nonce, signature) -> u32` | anyone (the bidder's signature counts) | `BID_BOND` 0.02 NEAR for a new bid, 0 for a replacement | `ERR_NO_JOB`, `ERR_BIDDING_CLOSED`, `ERR_BIDDER` (not 64 hex, or a small-order key), `ERR_COMMITMENT`, `ERR_AGENT`, `ERR_SIGNATURE`, `ERR_NONCE`, `ERR_JOB_FULL` (32), `ERR_BOND` |
+| `reveal_bid(job, bidder, price, salt)` | anyone | | Refunds the bond to its payer. `ERR_DECIDED`, `ERR_TOO_EARLY`, `ERR_REVEAL_CLOSED`, `ERR_SALT`, `ERR_NO_BID`, `ERR_REVEALED`, `ERR_COMMITMENT_MISMATCH` |
+| `award(job) -> Outcome` | anyone | | Lowest revealed price at or under the budget; ties go to the earliest last commitment, then the index. Unrevealed bonds go to the buyer. `ERR_DECIDED`, `ERR_TOO_EARLY`, `ERR_REVEAL_OPEN` |
+| `cancel_job(job)` | buyer | | Refunds every held bond. `ERR_NOT_BUYER`, `ERR_DECIDED` |
+| `link_agreement(job, agreement_id) -> Promise` | buyer | | Calls `factory.agreement(id)`, then `on_agreement`. The link is stored only for a procurement agreement with this buyer and the winner as vendor (else the event `link_refused`). `ERR_NOT_BUYER`, `ERR_NO_WINNER`, `ERR_LINKED` |
+| `get_job(id)`, `list_jobs(from?, limit?)` (newest first, at most 20), `job_count()`, `get_factory()` | view | | `JobView`: `phase` is one of `open`, `revealing`, `closed`, `awarded`, `no_valid_bid`, `linked`, `cancelled`. Each bid has `bidder`, `agent`, `commitment`, `nonce`, `committed_at`, `price` (null until revealed), `bond_payer` and `bond_held` |
+
+**Messages** (byte for byte in Rust, `@accord/sdk` `tender.ts` and `app/public/tender-bid.mjs`):
+- commitment: `sha256("accord-tender:v1:commit:<board>:<job>:<bidder>:<price>:<salt>")`;
+- signed message: `"accord-tender:v1:bid:<board>:<job>:<nonce>:<commitment>:<agent>"`.
+
+**Events** (`EVENT_JSON`, standard `accord-tender` 1.0.0): `job_posted`, `bid_committed`, `bid_revealed`, `awarded` (with `bonds_forfeited`), `cancelled` (with `bonds_refunded`), `linked`, `link_refused`.
+
+**SDK:**
+- `TENDER_BOARDS`, `TENDER_BID_BOND`, `TENDER_POST_DEPOSIT`;
+- keys: `newBidderKey`, `bidderKey`, `bidderNearKey`;
+- bids: `prepareBid`, `verifyBidSignature`, `commitment`, `validAgentLabel`;
+- the board: `TenderBoardClient` (`job`, `jobs`, `postJob`, `submitBid`, `reveal`, `award`, `cancel`, `link`);
+- kept secrets: `addBidSecret`, `secretFor`, `nextNonce`.
+
+**HTTP:**
+- `GET /app/api/tenders` and `GET /app/api/tenders/<job>`: read, CORS any origin, 240 a minute per IP.
+- `POST /app/api/tenders/<job>/bids` `{bidder, agent, commitment, nonce, signature}`, `/reveal` `{bidder, price, salt}` and `/award`. These take signed data from any origin with no credentials.
+  - The relay checks each request before paying gas, and attaches the bond for a new bid.
+  - Limits: 60 an hour per IP (30 for the award), 3 new bidder keys per IP per job per hour, and 200 checked requests per job per hour.
+
+**CLI:** `accord tender list | show <job> | key | bid <job> --price <USDC> --agent <label> [--wait] | reveal <job> | award <job>`. The key is kept in `~/.accord/bidder.json`, and each bid's secrets in `~/.accord/tender-bids/<board>/<job>.json` (0600).
+
+**MCP:** `accord_tender_jobs` and `accord_tender_job` (read, hosted too); `accord_tender_bid`, `accord_tender_reveal` and `accord_tender_award` (with `ACCORD_BIDDER_SEED`, local only).
+
+**Make:** `make deploy-tender` (a new keyless board), `make tender` (posting to a refused redirect), `make tender-sim` (20 scripted agents, 5 jobs, no chain).
+
+**Agent service:** `TENDER_KEEPER=on` with `TENDER_BUYER_ACCOUNT`/`TENDER_BUYER_KEY` (else the `TRY_BUYER_*` pair), and optionally `TENDER_HOUSE_SEED`, `TENDER_EVERY_MIN` (60), `TENDER_COMMIT_SECS` (900) and `TENDER_REVEAL_SECS` (300).
+
 ## 15. Environment variables (`.env.example` lists names only)
 
 | Variable | Used by | Meaning |

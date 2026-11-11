@@ -122,6 +122,11 @@ const CLAIMS: Row[] = [
     "Each slot's time is drawn inside the observer's enclave from a seed generated there; the observation is taken at the first NEAR mainnet block after that time, signed by the observer's key, and checked by the contract against the agreed spread, depth and two-sided quoting; anyone can recompute it from an archival node",
     "A market-making agreement's observer measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment",
   ],
+  [
+    "On an open tender, each price stays sealed until its bidder reveals it, the lowest valid price wins, and the winner's key becomes the vendor of an ordinary Accord agreement",
+    "The tender board stores only a sha256 commitment of each price, and accepts a bid only with the bidder's own ed25519 signature, checked on chain; a reveal must open that commitment; the award is computed on chain by a rule anyone can call; the buyer's link to the agreement is stored only if the factory confirms a procurement agreement with that buyer and the winner's key as vendor",
+    <>One party can bid under several keys and reveal only the price that wins after seeing the others; each unrevealed bid forfeits its 0.02 NEAR bond to the buyer, which puts a price on this but does not prevent it, and anyone can fill a job&apos;s 32 slots for 32 bonds. The board (<Mono>tender-v2.accord-v2.testnet</Mono>, no access key) had an internal adversarial review, not the security review of the agreement contracts. The winning bid sets the vendor&apos;s sealed floor; the terms are still negotiated in the Sealed Table and approved by both companies. Testnet only</>,
+  ],
 ]
 
 /* The keeper (kit v7 ARCHITECTURE.md: actors table and section 10). Liveness only; nothing here goes beyond claims 5 and 6. */

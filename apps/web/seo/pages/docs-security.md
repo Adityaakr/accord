@@ -2,7 +2,7 @@ Security and limits
 
 # Security and limits
 
-The six claims Accord makes, each with its limit, what NEAR does not do here yet, the limits of this testnet deployment, and the threat model.
+The seven claims Accord makes, each with its limit, what NEAR does not do here yet, the limits of this testnet deployment, and the threat model.
 
 ## Claims and their limits
 
@@ -19,6 +19,8 @@ Claim its limit
 - 05 Negotiation is private; settlement is public The enforced schedule (amounts, dates, recipient) and every payment are public on NEAR, as with any stablecoin payment
 
 - 06 A market-making agreement's payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception A market-making agreement's observer measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment
+
+- 07 On an open tender, each price stays sealed until its bidder reveals it, the lowest valid price wins, and the winner's key becomes the vendor of an ordinary Accord agreement One party can bid under several keys and reveal only the price that wins after seeing the others; each unrevealed bid forfeits its 0.02 NEAR bond to the buyer, which puts a price on this but does not prevent it, and anyone can fill a job's 32 slots for 32 bonds. The board (`tender-v2.accord-v2.testnet`, no access key) had an internal adversarial review, not the security review of the agreement contracts. The winning bid sets the vendor's sealed floor; the terms are still negotiated in the Sealed Table and approved by both companies. Testnet only
 
 The reason behind each claim is on [/security](/security).
 

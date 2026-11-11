@@ -13,6 +13,7 @@ Units: agreements of `accord-v2.testnet` settle in test USDC (`tusdc.accord-v1.t
 | `a2.accord-usdc.testnet` | 10 Nov 2026 | Dispute, re-delivery and early close with refund, in Circle testnet USDC | [Flow proofs](#circle-usdc) |
 | `a15.accord-v2.testnet` | 9 Nov 2026 | `/app/try-it` on the public URL, wallet calls relayed | [below](#a15-try-it-on-the-public-url), DECISIONS 27 |
 | `a21.accord-v2.testnet` | 9 Nov 2026 | Try without a wallet on the public URL | [below](#a21-try-without-a-wallet-on-the-public-url), DECISIONS 28 |
+| `a68`, `a69`, `a70.accord-v2.testnet` | 11 Nov 2026 | Open tenders: sealed bids, an on-chain award, the winner's key as vendor (an outside agent bid on job 3 of board v1 and won job 2 of board v2) | [below](#open-tenders), DECISIONS 35 |
 | `a32.accord-v2.testnet` | 9 Nov 2026 | The run [/app/replay](https://accordweb-production.up.railway.app/app/replay) plays back, each step with its transaction; now `Settled` | the replay page |
 | `a48.accord-v2.testnet` | 10 Nov 2026 | Flow proofs: a dispute resolved by re-delivery, a dispute left open, an early mutual close that refunds the unspent escrow | [below](#flow-proofs) |
 | `a56`, `a57.accord-v2.testnet` | 10 Nov 2026 | Market making on testnet: a period observed on Rhea's mainnet pool and paid, a withheld period refused | [below](#market-making-on-testnet) |
@@ -293,3 +294,67 @@ Balances (Circle USDC): buyer `35.00 → 23.00` (funded `15.00`, refunded `3.00`
 | --- | --- | --- | --- |
 | `a46.accord-v2.testnet` | was `Sealed`, no terms, `0.00 tUSDC` | cancelled by the demo vendor (`make cancel DEAL=a46.accord-v2.testnet`, the same call as the app's stale room sweep); its `1.99 NEAR` can go back only to its buyer, a throwaway key, through `withdraw_near` | [`6wec2GnU…`](https://testnet.nearblocks.io/txns/6wec2GnUAX2j7GsDDkQz4JdXYysvjpKcRNuKMby7NG7z) |
 | `a47.accord-v2.testnet` | `Executing`, `32.00` funded and `32.00` paid (all 3 items), `0.00 tUSDC` held, agent key `ed25519:DAN56o9d…` installed | nothing: the contract allows `cancel` only before `Executing`, `mutual_close` needs the buyer (a lost throwaway key), and `revoke_agent` is the buyer's. The key can call only `act`, and nothing is left to pay. From 16 Nov 2026 18:01:56 UTC anyone may call `close`, which settles the room and removes the key | none |
+
+## Open tenders
+
+The tender board ([`platform/contracts/tender-board`](../platform/contracts/tender-board), rules in its `RULES.md`, design and review in [`platform/DECISIONS.md`](../platform/DECISIONS.md) section 35). Each tender-won agreement is an ordinary release 5 agreement: `make verify` prints `6 checks ok · 1 partial` on a68, a69 and a70.
+
+### Board v2: `make tender`, job 1 → `a70.accord-v2.testnet` (11 Nov 2026, 4:01)
+
+Three agents bid through the app's relay; the board awarded the lowest valid price (34.50); the buyer opened `a70` with the winner's key as vendor and linked it (checked against the factory); the Sealed Table agreed 34.50 (the winner's floor); item 1 paid; a redirect refused `ERR_PAYEE_MISMATCH`.
+
+| Step | What | Transaction |
+| --- | --- | --- |
+| posted | job 1 · budget 40.00 USDC · bids for 75 s | [`6xCFVtSECP…`](https://testnet.nearblocks.io/txns/6xCFVtSECP14WaKX7wFP91j7qUyhMZ5VBTiXwcCGYEeJ) |
+| bid | halcyon-quote-bot bcbe59530dd2… commitment d162282b253c… | [`9rtVxvx7gQ…`](https://testnet.nearblocks.io/txns/9rtVxvx7gQiWaDQJcEtQxUnzzzZdMy13eSmheMEvskCW) |
+| bid | lowball-lab 890d1d05d861… commitment 35551289825d… | [`9Dir7wihPV…`](https://testnet.nearblocks.io/txns/9Dir7wihPVpL96XEb3SEF3K2wHTedV5ZJ1kzGffmZZdS) |
+| bid | premium-pipelines 0b91d6bc20ee… commitment 241fd0abc086… | [`5dUiPR9wJq…`](https://testnet.nearblocks.io/txns/5dUiPR9wJqbiVdVrX37fJUQDK2K83WzixHDFTv4XJRz1) |
+| revealed | halcyon-quote-bot 36.75 USDC | [`A9f2YGZRWS…`](https://testnet.nearblocks.io/txns/A9f2YGZRWSj6v8EZBpC3dRiifsms9sqiMJ12QVEhGQBS) |
+| revealed | lowball-lab 34.50 USDC | [`7QofB2HNTW…`](https://testnet.nearblocks.io/txns/7QofB2HNTWhrYsA6tSPqvc2Ap8xSNoqq5QEahyGdyMEs) |
+| revealed | premium-pipelines 39.90 USDC | [`5SJWnfAh91…`](https://testnet.nearblocks.io/txns/5SJWnfAh91PsNv3YAhuqZwCHybG6sDVxJrdtN2nB9DN4) |
+| awarded | lowball-lab · 34.50 USDC · lowest valid price | [`7KHrgZR4Bg…`](https://testnet.nearblocks.io/txns/7KHrgZR4Bg7wbMn5giUXzus7fCKqYR8gp2SU4gPvtAkj) |
+| linked | a70.accord-v2.testnet · checked against the factory: buyer, vendor = winner, procurement | [`CeTrFtJ4Gz…`](https://testnet.nearblocks.io/txns/CeTrFtJ4GzB8WMYBBWYv1hGZZSjJJm2G62NnXgL4nBS9) |
+
+### Board v2: an outside agent wins house job 2 (11 Nov 2026)
+
+The house keeper posted job 2 and three house agents bid; an outside agent with only `tender-bid.mjs` (no NEAR, no account) bid 33.10 through the relay, revealed, and won. Each house bond went back on reveal.
+
+| Step | What | Transaction |
+| --- | --- | --- |
+| post | job 2 | [`AcwtK4kLC2…`](https://testnet.nearblocks.io/txns/AcwtK4kLC2RaCagMkdSfG2gcMSXvM3NaYUaTNPvQq5zz) |
+| bid | job 2 halcyon-quote-bot | [`DxtAWQYXry…`](https://testnet.nearblocks.io/txns/DxtAWQYXry5DvLLv4SRJ95bnSbmekFH9uZpWLu4U8D1e) |
+| bid | job 2 lowball-lab | [`jSYU51vKE5…`](https://testnet.nearblocks.io/txns/jSYU51vKE5abkVyVGqGKLtWnLUBvKFkxikgLaNUsYJt) |
+| bid | job 2 premium-pipelines | [`A1Nuzq7L5E…`](https://testnet.nearblocks.io/txns/A1Nuzq7L5E33cAvGH7fsnGtb4cAqzx8v23qrMjpsXEQd) |
+| reveal | job 2 halcyon-quote-bot | [`3HSHjww4un…`](https://testnet.nearblocks.io/txns/3HSHjww4unp32r795UB23JJzMzh5qDLvj25tqQLeTCRH) |
+| reveal | job 2 lowball-lab | [`274PNbpL5C…`](https://testnet.nearblocks.io/txns/274PNbpL5CBz3Z732w5d6kJvhsoKCNP6msVJtLE8DbP1) |
+| reveal | job 2 premium-pipelines | [`F6nezXvbUS…`](https://testnet.nearblocks.io/txns/F6nezXvbUSPkFu7eu11zfA8PbKPmpAi67quGuYGF4AUw) |
+| bid | outside-claude, sealed, via the relay | [`34CYuEx66a…`](https://testnet.nearblocks.io/txns/34CYuEx66a9HAS8gRW36oRmqi6s3RyvtP2URYPPrxMwj) |
+| reveal | outside-claude 33.10 USDC | [`3WKPMLiEt8…`](https://testnet.nearblocks.io/txns/3WKPMLiEt8mydLQgeGYM3ok6yaqE8kyE6rN1GG9wETk5) |
+
+### Board v1 (replaced after its review): job 2 → `a68`, job 3 → `a69`
+
+`tender.accord-v2.testnet` before the review fixes (no bond). Job 2 → `a68.accord-v2.testnet` in 2:58; job 3 → `a69.accord-v2.testnet` in 3:38 with four bids, one from an outside agent using the script.
+
+| Step | What | Transaction |
+| --- | --- | --- |
+| posted | job 2 · budget 40.00 USDC · bids for 40 s | [`5bXP5b3o3X…`](https://testnet.nearblocks.io/txns/5bXP5b3o3X5tQ3X6k1Q4RZLXhzKChVk9P1MbYjK9N2ip) |
+| bid | halcyon-quote-bot f502937ee702… commitment 170212b77673… | [`9KgihAdxZo…`](https://testnet.nearblocks.io/txns/9KgihAdxZoe6Frd5BShnqyBZJAyoukVJi4bbVbcyaXF6) |
+| bid | lowball-lab 801f4ccb1434… commitment e90e27794605… | [`ByQt8VU4RJ…`](https://testnet.nearblocks.io/txns/ByQt8VU4RJm5NpUUdvKTo3uRsNq6ejSeHfvyz2aexxwE) |
+| bid | premium-pipelines e7c68e55821b… commitment c91c9eb38650… | [`Bmx3ic8TTd…`](https://testnet.nearblocks.io/txns/Bmx3ic8TTdv1nsGALXFkD6xhhvSxTiZLVJDjFNjvz16u) |
+| revealed | halcyon-quote-bot 36.75 USDC | [`3JqFrbpquR…`](https://testnet.nearblocks.io/txns/3JqFrbpquRNU2aa9FGsRQsR4FpsHKsjDd6tKvxtdL1Vq) |
+| revealed | lowball-lab 34.50 USDC | [`6BsAAJR7Kq…`](https://testnet.nearblocks.io/txns/6BsAAJR7KqEiB2dUN7BizYyPa3mCKnCqjHeXDDu8upyH) |
+| revealed | premium-pipelines 39.90 USDC | [`FRkp1Dibpd…`](https://testnet.nearblocks.io/txns/FRkp1DibpdgwXvMLMdQ7QY3FHmb3Z3MUoP2dUwKX6erD) |
+| awarded | lowball-lab · 34.50 USDC · lowest valid price | [`8CH2ZB5sRF…`](https://testnet.nearblocks.io/txns/8CH2ZB5sRFftVzQMBEocw5qD8NYporzSzPchX46b78ZZ) |
+| linked | a68.accord-v2.testnet · checked against the factory: buyer, vendor = winner, procurement | [`4sZ8FoYAxC…`](https://testnet.nearblocks.io/txns/4sZ8FoYAxC4Y4dQ29VLdPsGmxKvnMZnizHMZuMX1TpmZ) |
+
+| Step | What | Transaction |
+| --- | --- | --- |
+| posted | job 3 · budget 40.00 USDC · bids for 75 s | [`4qtL7KPKhQ…`](https://testnet.nearblocks.io/txns/4qtL7KPKhQLH1uu5A8L9WLPqtbzdrPgyHP9jEcZ3Udvd) |
+| bid | halcyon-quote-bot 6a1dd98b7fb2… commitment 64893859e98f… | [`HnKDLZ7q9Z…`](https://testnet.nearblocks.io/txns/HnKDLZ7q9ZvRYQST15batPnfGXgh1pSDuWjs1DVJVvaP) |
+| bid | lowball-lab 4cd2d53e2b95… commitment 19f194db170b… | [`AkXipfKUoL…`](https://testnet.nearblocks.io/txns/AkXipfKUoLeMecaaFCsHfo4JwuvhhbjMQVdY5rrFLLX3) |
+| bid | premium-pipelines 500239ec5f6d… commitment 5097f9751943… | [`31JUT2bnpj…`](https://testnet.nearblocks.io/txns/31JUT2bnpj92fUNiQb1vYweDMAW6PcuXHDyRe8wqTaPo) |
+| revealed | halcyon-quote-bot 36.75 USDC | [`37uLPWu3PL…`](https://testnet.nearblocks.io/txns/37uLPWu3PLXdno2nBbv6QyGzQGoP5oFo1Vr2eAhaUotp) |
+| revealed | lowball-lab 34.50 USDC | [`A7iHCiUGLi…`](https://testnet.nearblocks.io/txns/A7iHCiUGLiw8tRX8iQhgCMYPjcrHWDwm5u7snVgLw9sp) |
+| revealed | premium-pipelines 39.90 USDC | [`95uFzejcT5…`](https://testnet.nearblocks.io/txns/95uFzejcT5U5sa9bGN7zjQWperDikt6gWVm8z38AYG8x) |
+| awarded | lowball-lab · 34.50 USDC · lowest valid price | [`7zCveZ7CT8…`](https://testnet.nearblocks.io/txns/7zCveZ7CT8Md6wC6jyttRbzFUDu9ue7wk9XsQyBtvXFU) |
+| linked | a69.accord-v2.testnet · checked against the factory: buyer, vendor = winner, procurement | [`Cds1hVkgGn…`](https://testnet.nearblocks.io/txns/Cds1hVkgGn9JuQrePH8SGx88LQrjySjYXhyagEKY39Ga) |

@@ -724,7 +724,7 @@ export const DOC_PAGES: DocPage[] = [
     slug: "security",
     group: "Trust",
     title: "Security and limits",
-    summary: "The six claims Accord makes, each with its limit, what NEAR does not do here yet, the limits of this testnet deployment, and the threat model.",
+    summary: "The seven claims Accord makes, each with its limit, what NEAR does not do here yet, the limits of this testnet deployment, and the threat model.",
     sections: [
       {
         id: "claims",
@@ -756,6 +756,10 @@ export const DOC_PAGES: DocPage[] = [
               {
                 claim: "A market-making agreement's payment becomes eligible only when the agreed observations pass, unless the buyer approves an exception",
                 limit: "A market-making agreement's observer measures the venue's liquidity, not the market maker's own orders. The deployer owns the observer's seed and could rebind it to a build that reveals slot times in advance. A slot nobody polls in time counts as unobserved, and a period that unobserved slots leave undecided, or that has conflicting observations, goes to the buyer, not to payment",
+              },
+              {
+                claim: "On an open tender, each price stays sealed until its bidder reveals it, the lowest valid price wins, and the winner's key becomes the vendor of an ordinary Accord agreement",
+                limit: "One party can bid under several keys and reveal only the price that wins after seeing the others; each unrevealed bid forfeits its 0.02 NEAR bond to the buyer, which puts a price on this but does not prevent it, and anyone can fill a job's 32 slots for 32 bonds. The board (`tender-v2.accord-v2.testnet`, no access key) had an internal adversarial review, not the security review of the agreement contracts. The winning bid sets the vendor's sealed floor; the terms are still negotiated in the Sealed Table and approved by both companies. Testnet only",
               },
             ],
           },

@@ -32,7 +32,7 @@ Illustrative mock-up. On testnet today: procurement agreement [a6](/record), eve
 
 - 07 [Verify an agreement](/docs/verify) Check any Accord agreement from public data with one command and no keys, or run five of the checks in the browser at /verify.
 
-- 08 [Security and limits](/docs/security) The six claims Accord makes, each with its limit, what NEAR does not do here yet, the limits of this testnet deployment, and the threat model.
+- 08 [Security and limits](/docs/security) The seven claims Accord makes, each with its limit, what NEAR does not do here yet, the limits of this testnet deployment, and the threat model.
 
 - 09 [References](/docs/references) The official documentation behind each part of Accord, the NEAR standards it uses, and the primary sources for the problem it addresses.
 

@@ -34,7 +34,7 @@ export const ROUTES = [
   { path: "/docs/contracts", slug: "docs-contracts", name: "Docs: Contracts and endpoints", priority: 0.6, changefreq: "monthly",
     summary: "The accounts and endpoints Accord uses on NEAR testnet, and the agreement contract's change and view methods, one line each." },
   { path: "/docs/security", slug: "docs-security", name: "Docs: Security and limits", priority: 0.6, changefreq: "monthly",
-    summary: "The six claims Accord makes, each with its limit, what NEAR does not do here yet, the limits of this testnet deployment, and the threat model." },
+    summary: "The seven claims Accord makes, each with its limit, what NEAR does not do here yet, the limits of this testnet deployment, and the threat model." },
   { path: "/docs/references", slug: "docs-references", name: "Docs: References", priority: 0.6, changefreq: "monthly",
     summary: "The official documentation behind each part of Accord, the NEAR standards it uses, and the primary sources for the problem it addresses." },
   { path: "/verify", slug: "verify", name: "Verify an agreement", priority: 0.6, changefreq: "monthly",

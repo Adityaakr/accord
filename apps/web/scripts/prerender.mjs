@@ -284,7 +284,7 @@ ${FOR_AGENTS.map((f) => `- **${f.name}**: ${f.text}`).join("\n")}
 
 ## Claims and their limits
 
-Every public statement about Accord is one of these six, each with its limit. The full table is at ${SITE_URL}/security
+Every public statement about Accord is one of these seven, each with its limit. The full table is at ${SITE_URL}/security
 
 ${CLAIMS.map((c, i) => `${i + 1}. **${c.claim}** Limit: ${c.limit}`).join("\n")}
 

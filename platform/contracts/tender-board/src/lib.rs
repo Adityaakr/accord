@@ -569,3 +569,5 @@ mod tests;
 
 #[cfg(test)]
 mod audit_tests;
+#[cfg(test)]
+mod sim;

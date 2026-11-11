@@ -41,7 +41,7 @@ Every track the project fits, decided by what passed, not by what was planned. T
 | `business` | Always | Humans set the constraints (mandates, approvals, revoke as the kill switch), procurement and treasury flows, the public ledger, `make demo NET=local` (14 s on a local node; not yet run on testnet) |
 | `realworld` | the build plan (an internal note, removed from the repository on 10 Nov 2026) passes (gasless vendor through a relayer limited to Accord contracts, the invoice view, CSV export, the bookkeeper section) | Vendor never holds NEAR; the invoice view with amount, due date, line items and the fund button; paid, pending and refunded with transaction links; the CSV. The README says plainly that the prompt's "payment goes through the 1Click API" is met only as a labelled `dry: true` quote (lever 9), because NEAR Intents has no testnet (Q-007) and Accord signs nothing on mainnet |
 | `social` | the build plan (an internal note, removed from the repository on 10 Nov 2026) passes (a Sputnik DAO is the buyer) | Terms approved and revoke exercised through DAO proposals on testnet |
-| `swarms` | the build plan (an internal note, removed from the repository on 10 Nov 2026) passes (sealed tender, sub-account per agent, 20 by 5 simulation) | `RULES.md`, `make swarm`, the `/tender` page |
+| `swarms` | Included (11 Nov 2026): the tender board is the coordinator (sealed bids, reveal, on-chain award); bidders are implicit accounts by key, not sub-accounts of one parent; settlement is an Accord agreement in USDC on NEAR, not NEAR Intents | `contracts/tender-board/RULES.md`, `make tender-sim`, `make tender`, `/app/tenders` |
 
 Never include a track only to get another draw. A track the README cannot back with a do-X-see-Y step is left out.
 
