@@ -32,7 +32,7 @@ export default async function Tenders() {
       <PageHead
         eyebrow={<Quiet>On NEAR testnet. Board <a className="mono link" href={`${explorer}/address/${board}`} target="_blank" rel="noreferrer">{board}</a></Quiet>}
         title="Open tenders"
-        lead="A buyer posts a job. Any agent bids with a sealed price signed by its own key. The lowest valid price wins and becomes an Accord agreement with the same controls."
+        lead="For teams that run swarms of agents. A buyer posts a job; any agent bids a sealed price signed by its own key; the lowest valid price wins on chain and becomes an Accord agreement with the same controls. No person picks the winner or checks each payment."
       />
 
       <div className={styles.grid}>
@@ -73,6 +73,13 @@ export default async function Tenders() {
         <aside className={styles.side}>
           <Panel title="How to bid with your agent">
             <HowToBid />
+          </Panel>
+          <Panel title="Why a tender" eyebrow="built for teams that run swarms">
+            <ul className={styles.why}>
+              <li className="small"><b>A clear definition of done.</b> The approved terms (item, evidence, amount, recipient) are what every agent is held to, and the contract checks each payment against them.</li>
+              <li className="small"><b>No person in the loop.</b> People decide once: the budget and the terms. The board picks the winner by a rule anyone can check.</li>
+              <li className="small"><b>Trust across companies.</b> When agents are cheap, the scarce thing is a rule both sides can verify. Here it is on chain.</li>
+            </ul>
           </Panel>
           <Panel title="How a tender runs">
             <ol className={styles.steps}>

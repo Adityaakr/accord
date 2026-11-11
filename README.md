@@ -26,6 +26,8 @@ Agreements negotiated in private, enforced in public.
 
 Two companies' agents negotiate inside an attested enclave from sealed mandates. Both companies approve the terms. From then on, a NEAR contract holds the USDC and refuses any payment the buyer's agent asks for that differs from the approved item, evidence, amount or recipient. Everything runs on NEAR testnet; mainnet follows an external audit.
 
+Built for teams that run swarms of agents: when one company's agents work for another's, people decide once, agents compete on [open tenders](#open-tenders) and negotiate inside sealed limits, and the contract, not a person, checks every payment ([why it matters](#impact)).
+
 ## Judge it in 5 minutes
 
 1. **Run your own deal.** Open [/app/try-it](https://accordweb-production.up.railway.app/app/try-it) and choose "Try without a wallet". It runs one deal on testnet, including a refused redirect ([walkthrough](#run-your-own-deal-step-by-step)).
@@ -307,12 +309,16 @@ The same failure costs money in web2 and web3: an agent, or a person, is told to
 
 **The gap Accord fills.** The agent payment rails launched in 2025 let one party's agent pay: [Visa Intelligent Commerce](https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21366.html), [Mastercard Agent Pay](https://newsroom.mastercard.com/news/press/2025/april/mastercard-unveils-agent-pay-pioneering-agentic-payments-technology-to-power-commerce-in-the-age-of-ai) (agentic tokens), [Google AP2](https://cloud.google.com/blog/products/ai-machine-learning/announcing-agents-to-payments-ap2-protocol) (one user's mandate for a merchant's cart), [Stripe and OpenAI's ACP](https://stripe.com/blog/developing-an-open-standard-for-agentic-commerce) and [x402](https://www.x402.org/). None of them holds terms that two companies negotiated and both approved, or binds the recipient to a proof both accepted. Accord is that layer: the negotiation stays private in an enclave, and the contract refuses any payment outside the approved item, evidence, amount and recipient, whoever was fooled.
 
-**Why this matters more as agents multiply.** The people and companies getting the most from AI already run many agents at once. They decide what counts as done, then let the agents work. Inside one company this holds, because one owner sets the rules. It breaks when one company's agents buy from another company's agents: neither side trusts the other's agents, and a person approving each payment becomes the bottleneck the agents were meant to remove. Accord moves that trust into the agreement:
-- **People decide once.** They seal their limits and approve the terms.
-- **Agents work inside them.** They negotiate in the Sealed Table, bid on [open tenders](#open-tenders) and deliver.
-- **The contract checks every payment** against what was approved, so no person has to.
+**Built for teams that run swarms of agents.** The teams getting the most from AI already run swarms: they decide what counts as done, check results against it, and let the agents work without a person in every loop. Inside one company that holds, because one owner sets the rules. It breaks when one company's swarm works for another's: neither side trusts the other's agents, and a person approving each payment is the bottleneck the swarm was meant to remove. Accord sits between them:
 
-The approved item, evidence, amount and recipient are, in effect, the rule both swarms are scored against, and it is checked on chain rather than trusted. Market making shows the strongest form: "was the liquidity good enough?" becomes spread, depth and two-sided quotes measured at hidden times. Accord does not fund or meter an agent's own inference, and it does not orchestrate agents inside one company. It is for the moment their work crosses to another company.
+| What a swarm needs | What Accord gives it | Shown on testnet by |
+| --- | --- | --- |
+| A clear definition of done | The approved terms (item, evidence, amount, recipient) are what every agent is held to; the contract checks each payment against them | a6, a63, a70 `ERR_PAYEE_MISMATCH` |
+| Fuzzy outcomes made checkable | Market making: "was the liquidity good enough?" becomes spread, depth and two-sided quotes measured at hidden times. Procurement: delivery evidence fixed by hash in the terms | a56 paid, a57 refused `ERR_PERIOD_WITHHELD` |
+| No person in the loop | People decide once (sealed limits, approved terms); agents negotiate in the Sealed Table, compete on [open tenders](#open-tenders) and are paid by the contract | `make tender`, job 1 → a70; outside agents won jobs 2 and 4 |
+| Trust across companies | The scarce thing when agents are cheap is a rule both sides can verify; here it is on NEAR, checkable with `make verify` | `verify: 6 checks ok · 1 partial` |
+
+What Accord does not do: fund or meter an agent's own inference, or orchestrate agents inside one company. It is for the moment a swarm's work crosses to another company.
 
 | Who | What changes for them | Shown on testnet by |
 | --- | --- | --- |

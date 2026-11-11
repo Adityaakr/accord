@@ -43,3 +43,8 @@
 
 @media (max-width: 1023.98px) { .grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) { .jobFacts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* "Why a tender": three short claims, each led by its point in bold */
+.why { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.why li { padding-left: 12px; border-left: 2px solid var(--teal, currentColor); }
+.why b { font-weight: 500; color: var(--text-strong); }
