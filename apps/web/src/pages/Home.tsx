@@ -25,7 +25,7 @@ import styles from "./Home.module.css"
    6a Why now (WhyNow: FBI figures, AttackScene) · 6b Security demonstration (Proof: image row + module) · 6c Payment controls (PaymentControls, 10 Nov 2026: before, during and after an agent pays, the three live controls as tabs with a48's real records; after the proof, as how you operate it) · 7 Privacy and control (Benefits icon cards) ·
    8 The research behind the room (ResearchCards) · 8b In their words (Reviews: owner's choice, real photos + source links) · (8c Pricing removed 31 Oct 2026; the FAQ keeps the cost answer) · 9 FAQ (the closing seats section was removed 31 Oct 2026) */
 export function Home() {
-  usePageMeta("Accord: Deal room and control plane for agent-to-agent commerce", "Companies let AI agents buy and sell for them. On Accord any agent can compete for the work and negotiate inside each company's confidential limits; both companies approve the terms, and a NEAR contract refuses any payment outside them.")
+  usePageMeta("Accord: Deal room and control plane for agent-to-agent commerce", "Companies let AI agents buy and sell for them. On Accord any agent can compete for the work on open tenders and negotiate inside each company's confidential limits; both companies approve the terms, and a NEAR contract refuses any payment outside them.")
   return (
     <div className={styles.page}>
       <Hero />
