@@ -158,6 +158,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "accord-tender-board"
+version = "0.1.0"
+dependencies = [
+ "ed25519-dalek",
+ "hex",
+ "near-sdk",
+ "rand 0.8.8",
+ "serde_json",
+]
+
+[[package]]
 name = "accord-test-token"
 version = "0.1.0"
 dependencies = [

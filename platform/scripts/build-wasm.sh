@@ -21,3 +21,4 @@ build factory factory
 build factory factory-mock mock
 build releases releases
 build test-token test-token testnet
+build tender-board tender-board

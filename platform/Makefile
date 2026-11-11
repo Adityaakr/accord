@@ -31,6 +31,7 @@ serve: wasm ; @cargo run -q -p accord-sandbox --bin serve 2>/dev/null
 dev: wasm ; @node scripts/dev.mjs
 check-deploy: wasm ; @npx tsx scripts/check-deploy.ts
 deploy-testnet: wasm ; @npx tsx scripts/deploy-testnet.ts
+deploy-tender: ; @npx tsx scripts/deploy-tender.ts
 negotiate: ; @$(LIVE) negotiate
 approve: ; @$(LIVE) approve
 fund: ; @$(LIVE) fund

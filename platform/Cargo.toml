@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/accord-core", "crates/accord-check", "crates/accord-venue", "crates/accord-jobkit", "contracts/probe-keys", "contracts/agreement", "contracts/factory", "contracts/releases", "contracts/test-token", "tests", "jobs/observer", "jobs/payee", "jobs/sealed-table"]
+members = ["crates/accord-core", "crates/accord-check", "crates/accord-venue", "crates/accord-jobkit", "contracts/probe-keys", "contracts/agreement", "contracts/factory", "contracts/releases", "contracts/test-token", "contracts/tender-board", "tests", "jobs/observer", "jobs/payee", "jobs/sealed-table"]
 
 [workspace.package]
 version = "0.1.0"
