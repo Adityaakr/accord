@@ -11,7 +11,7 @@
 
 import { createHash, createHmac } from "node:crypto";
 import {
-  KeySigner, TENDER_BOARDS, TenderBoardClient, bidderKey, prepareBid, type Chain, type TenderJob,
+  KeySigner, TENDER_BOARDS, TENDER_MAX_BIDS, TenderBoardClient, bidderKey, prepareBid, type Chain, type TenderJob,
 } from "@accord/sdk";
 
 export interface TenderKeeperConfig {
@@ -41,14 +41,19 @@ export function tenderKeeperConfig(env: Record<string, string | undefined>): Ten
   const key = env.TENDER_BUYER_KEY || env.TRY_BUYER_KEY || "";
   if (!account || !key) throw new Error("TENDER_KEEPER=on needs TENDER_BUYER_ACCOUNT and TENDER_BUYER_KEY (or the TRY_BUYER_* pair)");
   const houseSeed = env.TENDER_HOUSE_SEED || createHash("sha256").update(`accord-tender-house:${key}`).digest("hex");
+  const num = (name: string, fallback: number, min: number, max: number) => {
+    const v = Number(env[name] ?? fallback);
+    if (!Number.isFinite(v) || v < min || v > max) throw new Error(`${name} must be a number from ${min} to ${max}`);
+    return v;
+  };
   return {
     board: env.TENDER_BOARD || TENDER_BOARDS.testnet!,
     buyer: { account, key },
     houseSeed,
     token: env.ACCORD_TOKEN || "tusdc.accord-v1.testnet",
-    everyMin: Number(env.TENDER_EVERY_MIN ?? 60),
-    commitSecs: Number(env.TENDER_COMMIT_SECS ?? 900),
-    revealSecs: Number(env.TENDER_REVEAL_SECS ?? 300),
+    everyMin: num("TENDER_EVERY_MIN", 60, 0, 7 * 24 * 60),
+    commitSecs: num("TENDER_COMMIT_SECS", 900, 30, 14 * 24 * 3600),
+    revealSecs: num("TENDER_REVEAL_SECS", 300, 30, 3 * 24 * 3600),
   };
 }
 
@@ -74,7 +79,9 @@ export function nextActions(cfg: TenderKeeperConfig, jobs: TenderJob[], nowMs: n
   for (const j of mine) {
     const ids = HOUSE_AGENTS.map((_, i) => houseBid(cfg.houseSeed, cfg.board, j.id, i).key.id);
     if (j.phase === "open") {
-      ids.forEach((id, i) => { if (!j.bids.some((b) => b.bidder === id)) out.push({ kind: "bid", job: j.id, agent: i }); });
+      // a full job takes no more bids: never pay gas for a refusal
+      let room = TENDER_MAX_BIDS - j.bids.length;
+      ids.forEach((id, i) => { if (room > 0 && !j.bids.some((b) => b.bidder === id)) { out.push({ kind: "bid", job: j.id, agent: i }); room--; } });
     } else if (j.phase === "revealing") {
       ids.forEach((id, i) => { if (j.bids.some((b) => b.bidder === id && b.price === null)) out.push({ kind: "reveal", job: j.id, agent: i }); });
       if (j.bids.length > 0 && j.bids.every((b) => b.price !== null)) out.push({ kind: "award", job: j.id });
@@ -97,11 +104,15 @@ export class TenderKeeper {
   }
 
   async step(): Promise<void> {
+    let posted = false;
     const jobs = await this.board.jobs(20);
     for (const a of nextActions(this.cfg, jobs, Date.now())) {
       const r = await this.run(a, jobs);
+      posted ||= a.kind === "post" && r.ok;
       this.log(`${a.kind}${"job" in a ? ` job ${a.job}` : ""}${"agent" in a ? ` ${HOUSE_AGENTS[a.agent]}` : ""} → ${r.ok ? r.txHash : r.failure}`);
     }
+    // bid on a new job in the same step, so its first seconds are not left to anyone filling it with junk
+    if (posted) await this.step();
   }
 
   private run(a: KeeperAction, jobs: TenderJob[]) {

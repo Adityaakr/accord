@@ -168,7 +168,7 @@ export const TOOLS: ToolDef[] = [
     name: "accord_tender_bid",
     description: "Submit a sealed bid on an open job, signed with this server's bidder key (ACCORD_BIDDER_SEED). `price` is base units of the job's token (6 decimals: \"34500000\" is 34.50). Only a hash of the price leaves this machine until the reveal; the relay pays the gas and cannot change the bid. Reveal with accord_tender_reveal after the bidding window closes.",
     needs: "bidder",
-    input: { job: jobId, price: baseUnits, agent: z.string().min(1).max(64).regex(/^[^:]+$/, "no ':'") },
+    input: { job: jobId, price: baseUnits, agent: z.string().regex(/^[\x21-\x39\x3b-\x7e](?:[\x20-\x39\x3b-\x7e]{0,62}[\x21-\x39\x3b-\x7e])?$/, "1 to 64 printable ASCII characters, no ':', no leading or trailing space") },
     run: async (a, d) => bidderOf(d).bid(a.job as number, a.price as string, a.agent as string),
   },
   {

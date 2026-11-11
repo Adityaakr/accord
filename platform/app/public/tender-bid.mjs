@@ -9,7 +9,7 @@
 // The relay pays the gas and cannot change your bid: the board contract checks your signature on chain.
 // Same messages as @accord/sdk (packages/sdk/src/tender.ts) and the contract (contracts/tender-board).
 import { createHash, createPrivateKey, createPublicKey, randomBytes, sign } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname } from "node:path";
 
@@ -25,18 +25,33 @@ const keyOf = (seedHex) => {
   const id = Buffer.from(createPublicKey(priv).export({ format: "jwk" }).x, "base64url").toString("hex");
   return { seed: seedHex, id, priv };
 };
-async function secret(path, content) {
+async function secret(path, content, create = false) {
   await mkdir(dirname(path), { recursive: true, mode: 0o700 });
-  await writeFile(path, content, { mode: 0o600 });
+  await writeFile(path, content, { mode: 0o600, flag: create ? "wx" : "w" });
+  await chmod(path, 0o600);
 }
+const readOrNull = (path) => readFile(path, "utf8").catch((e) => { if (e.code === "ENOENT") return null; throw e; });
+// The key is made only when there is none; a damaged file is an error and is left alone (it may be a won vendor key).
 async function loadKey() {
   const file = `${HOME}/.accord/bidder.json`;
-  try { return keyOf(JSON.parse(await readFile(file, "utf8")).seed); } catch {
-    const k = keyOf(randomBytes(32).toString("hex"));
-    await secret(file, JSON.stringify({ seed: k.seed, id: k.id }, null, 2));
-    return k;
+  const text = await readOrNull(file);
+  if (text !== null) {
+    try { return keyOf(JSON.parse(text).seed); } catch (e) { throw new Error(`${file} is not a readable bidder key (${e.message}); left as it is`); }
   }
+  const k = keyOf(randomBytes(32).toString("hex"));
+  await secret(file, JSON.stringify({ seed: k.seed, id: k.id }, null, 2), true);
+  return k;
 }
+// Each bid's price and salt, kept by commitment: a re-bid adds an entry, so the bid on chain can always be revealed.
+const entriesOf = (text) => {
+  if (!text) return [];
+  const v = JSON.parse(text);
+  return Array.isArray(v.entries) ? v.entries : v.commitment ? [{ commitment: v.commitment, price: v.price, salt: v.salt, nonce: v.nonce ?? 0 }] : [];
+};
+const checkBoard = (board) => {
+  if (!/^[a-z0-9][a-z0-9._-]{1,62}[a-z0-9]$/.test(board) || board.includes("..")) throw new Error(`the app named an odd board: ${board}`);
+  return board;
+};
 async function get(path) {
   const r = await fetch(`${APP}/api/tenders${path}`);
   const j = await r.json();
@@ -62,8 +77,12 @@ const show = (j) => {
 };
 
 async function reveal(board, job) {
-  const kept = JSON.parse(await readFile(`${HOME}/.accord/tender-bids/${board}/${job}.json`, "utf8"));
-  const r = await post(`${job}/reveal`, { bidder: kept.bidder, price: kept.price, salt: kept.salt });
+  const k = await loadKey();
+  const onChain = (await get(`/${job}`)).job.bids.find((b) => b.bidder === k.id);
+  if (!onChain) throw new Error(`job ${job} holds no bid from ${k.id}`);
+  const kept = entriesOf(await readOrNull(`${HOME}/.accord/tender-bids/${checkBoard(board)}/${job}.json`)).find((e) => e.commitment === onChain.commitment);
+  if (!kept) throw new Error("no kept price and salt open the commitment on chain");
+  const r = await post(`${job}/reveal`, { bidder: k.id, price: kept.price, salt: kept.salt });
   console.log(`revealed ${usdc(kept.price)} · tx ${r.tx}`);
 }
 
@@ -83,27 +102,37 @@ async function main() {
   if (cmd === "reveal") return reveal(board, job);
   if (cmd !== "bid") throw new Error(`unknown command ${cmd}`);
   if (j.phase !== "open") throw new Error(`job ${job} is ${j.phase}; bids are taken while it is open`);
-  const agent = String(flag("agent") || "").trim();
-  if (!agent || agent.length > 64 || agent.includes(":")) throw new Error("--agent is a label of 1 to 64 characters without ':'");
+  const agent = String(flag("agent") || "");
+  if (!/^[\x20-\x39\x3b-\x7e]{1,64}$/.test(agent) || agent.startsWith(" ") || agent.endsWith(" ")) {
+    throw new Error("--agent is 1 to 64 printable ASCII characters, no ':', no leading or trailing space");
+  }
   const price = toBase(flag("price"));
   if (BigInt(price) > BigInt(j.budget)) console.log(`note: ${usdc(price)} is above the budget ${usdc(j.budget)}; it cannot win`);
   const k = await loadKey();
   const salt = randomBytes(32).toString("hex");
   const commitment = createHash("sha256").update(`accord-tender:v1:commit:${board}:${job}:${k.id}:${price}:${salt}`).digest("hex");
-  const nonce = Math.floor((Date.now() - Date.UTC(2026, 0, 1)) / 1000);
+  const file = `${HOME}/.accord/tender-bids/${checkBoard(board)}/${job}.json`;
+  const before = await readOrNull(file);
+  const mine = j.bids.find((b) => b.bidder === k.id);
+  const nonce = Math.max(Math.floor((Date.now() - Date.UTC(2026, 0, 1)) / 1000), ...entriesOf(before).map((e) => e.nonce + 1), mine ? mine.nonce + 1 : 0);
   const signature = sign(null, Buffer.from(`accord-tender:v1:bid:${board}:${job}:${nonce}:${commitment}:${agent}`), k.priv).toString("hex");
-  await secret(`${HOME}/.accord/tender-bids/${board}/${job}.json`, JSON.stringify({ bidder: k.id, price, salt, commitment, nonce }, null, 2));
+  const entries = entriesOf(before).filter((e) => e.commitment !== commitment).concat([{ commitment, price, salt, nonce }]);
+  await secret(file, JSON.stringify({ bidder: k.id, entries }, null, 2));
   const r = await post(`${job}/bids`, { bidder: k.id, agent, commitment, nonce, signature });
   console.log(`sealed bid on job ${job} · bidder ${k.id.slice(0, 12)}… · commitment ${commitment.slice(0, 16)}… · tx ${r.tx}`);
   if (!rest.includes("--wait")) return console.log(`reveal after the deadline: node tender-bid.mjs reveal ${job}`);
   let cur = j;
   while (cur.phase === "open") { await sleep(3000); cur = (await get(`/${job}`)).job; }
   if (cur.phase === "revealing") await reveal(board, job);
+  let asked = false;
   for (let i = 0; i < 200; i++) {
     cur = (await get(`/${job}`)).job;
-    const all = cur.bids.every((b) => b.price !== null);
-    if (cur.phase === "closed" || (cur.phase === "revealing" && all)) { await post(`${job}/award`, {}).catch(() => undefined); continue; }
     if (!["open", "revealing", "closed"].includes(cur.phase)) break;
+    const all = cur.bids.every((b) => b.price !== null);
+    if (!asked && (cur.phase === "closed" || (cur.phase === "revealing" && all))) {
+      asked = true; // one ask; anyone else may ask too
+      await post(`${job}/award`, {}).catch((e) => console.log(`award: ${e.message}`));
+    }
     await sleep(3000);
   }
   show(cur);

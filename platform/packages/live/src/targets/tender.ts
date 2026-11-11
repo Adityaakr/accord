@@ -11,6 +11,8 @@
 // TENDER_COMMIT_SECS (default 40) and TENDER_REVEAL_SECS (default 60) set the windows; a longer commit window leaves
 // time for an outside agent to bid on the printed job (`accord tender bid <job> ...`).
 
+import { mkdir, writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
 import { sha256 } from "@noble/hashes/sha2";
 import { utf8ToBytes } from "@noble/hashes/utils";
 import { Account, KeyPair, KeyPairSigner, actions, type KeyPairString } from "near-api-js";
@@ -76,6 +78,12 @@ function signerRelay(board: TenderBoardClient, s: KeySigner): Relay {
   };
 }
 
+async function keepKeys(name: string, seeds: Record<string, string>): Promise<void> {
+  const dir = `${homedir()}/.accord/runs`;
+  await mkdir(dir, { recursive: true, mode: 0o700 });
+  await writeFile(`${dir}/${name}.json`, JSON.stringify(seeds, null, 2), { mode: 0o600, flag: "wx" });
+}
+
 /** NEAR to an implicit account (which creates it), from the demo's funder. */
 async function fundImplicit(w: World, funder: Principal, account: string, near: bigint): Promise<void> {
   const acct = new Account(funder.account, w.reader.chain.provider, new KeyPairSigner(KeyPair.fromString(funder.key as KeyPairString)));
@@ -113,14 +121,19 @@ export async function run(base: World): Promise<void> {
   say(`accord tender · board ${boardId} · factory ${base.reader.factory} · token ${base.token}`);
 
   const tag = Date.now().toString(36);
-  const [buyer, recipient] = await Promise.all([base.newAccount(`tender-${tag}-buyer`), base.newAccount(`tender-${tag}-pay`)]);
-  const w0 = base.with({ buyer: buyer! });
-  const relay = (await appRelay(process.env.TENDER_RELAY_URL || base.app.url)) ?? signerRelay(board, new KeySigner(buyer!.account, buyer!.key, base.reader.chain));
-  at("accounts", `buyer ${buyer!.account} · recipient ${recipient!.account}`);
+  // The demo's own buyer posts and pays (no throwaway buyer account to strand NEAR in); the recipient is a fresh implicit
+  // account, funded just enough to exist.
+  const buyer = base.principals.buyer;
+  const payKey = newBidderKey();
+  await fundImplicit(base, buyer, payKey.id, NEAR / 10n);
+  const recipient: Principal = { account: payKey.id, key: bidderNearKey(payKey) };
+  const w0 = base;
+  const relay = (await appRelay(process.env.TENDER_RELAY_URL || base.app.url)) ?? signerRelay(board, new KeySigner(buyer.account, buyer.key, base.reader.chain));
+  at("accounts", `buyer ${buyer.account} · recipient ${recipient.account.slice(0, 12)}… (implicit)`);
 
   // 1. The buyer posts the job: public budget, evidence the buyer will require, two windows.
   const evidence = Array.from(sha256(utf8ToBytes(`tender ${tag}: liquidity reporting integration, 3 milestones`)), (b) => b.toString(16).padStart(2, "0")).join("");
-  const posted = await board.postJob(new KeySigner(buyer!.account, buyer!.key, base.reader.chain), {
+  const posted = await board.postJob(new KeySigner(buyer.account, buyer.key, base.reader.chain), {
     title: "Liquidity reporting integration", spec: "Three milestones: data pipeline, daily report, dashboard. Evidence: the delivery file named in the agreement.",
     evidenceHash: evidence, budget: BUDGET, token: base.token, commitSecs, revealSecs,
   });
@@ -166,21 +179,23 @@ export async function run(base: World): Promise<void> {
 
   // 4. The winner's key is its implicit account: funded, it signs as the vendor. Its approver is a second key of its own.
   const authKey = newBidderKey();
-  await Promise.all([fundImplicit(base, base.principals.buyer, key.id, 2n * NEAR), fundImplicit(base, base.principals.buyer, authKey.id, NEAR / 2n)]);
+  await Promise.all([fundImplicit(base, buyer, key.id, NEAR / 2n), fundImplicit(base, buyer, authKey.id, NEAR / 5n)]);
+  // kept so the NEAR left on these accounts after the run can be recovered (0600, outside the repository)
+  await keepKeys(`tender-${boardId}-${job}`, { vendor: key.seed, approver: authKey.seed, recipient: payKey.seed });
   const vendor: Principal = { account: key.id, key: bidderNearKey(key) };
   const authority: Principal = { account: authKey.id, key: bidderNearKey(authKey) };
-  const w = w0.with({ vendor, authority, recipient: recipient! });
+  const w = w0.with({ vendor, authority, recipient: recipient });
   at("winner", `vendor ${vendor.account.slice(0, 12)}… (the bid key) · approver ${authority.account.slice(0, 12)}…`);
 
   const deposit = BigInt((await w.reader.config()).create_deposit);
-  await w.gas(buyer!.account, Number(deposit / NEAR) + 6);
+  await w.gas(buyer.account, Number(deposit / NEAR) + 6);
   const created = await w.as("buyer").createAgreement({
     kind: "procurement", title: `Tender ${job}: liquidity reporting integration`, vendor: vendor.account, vendor_authority: authority.account,
     canaries: w.canaries, params: DEMO_PARAMS,
   });
   const id = created.agreement;
   const agreementNo = Number(id.slice(1, id.indexOf(".")));
-  const linked = await board.link(new KeySigner(buyer!.account, buyer!.key, base.reader.chain), job, agreementNo);
+  const linked = await board.link(new KeySigner(buyer.account, buyer.key, base.reader.chain), job, agreementNo);
   if (!linked.ok) throw new Error(`link_agreement: ${linked.failure}`);
   j = (await board.job(job))!;
   if (j.agreement !== id) throw new Error(`the board did not link ${id} (factory check refused it?)`);
@@ -188,8 +203,8 @@ export async function run(base: World): Promise<void> {
 
   // 5. The deal, as in make demo.
   const preset = procurementPreset(w);
-  const registered = registerDemoVendor(w, recipient!, authority.account);
-  const prefund = w.fund(buyer!.account, PREFUND);
+  const registered = registerDemoVendor(w, recipient, authority.account);
+  const prefund = w.fund(buyer.account, PREFUND);
   await Promise.all([
     client(w, "vendor", id).sealMandate(winnerMandate(preset.vendor, BigInt(win.price!)), { role: "vendor" }),
     client(w, "buyer", id).sealMandate(companyMandate(preset.buyer), { role: "buyer" }),
@@ -198,7 +213,7 @@ export async function run(base: World): Promise<void> {
   const negotiation = negotiate(w, id);
   const recipientReady = (async () => {
     await registered;
-    const version = Number((await client(w, "vendor", id).proposeRecipient(recipient!.account, w.app.demoDomain)).value);
+    const version = Number((await client(w, "vendor", id).proposeRecipient(recipient.account, w.app.demoDomain)).value);
     const proven = await waitFor("the Payee job's proof", 150, async () => {
       const v = (await w.reader.agreement(id).recipients())[version - 1];
       if (v?.status === "ProofFailed") throw new Error(`the payee proof failed: ${v.failure}`);
@@ -226,8 +241,8 @@ export async function run(base: World): Promise<void> {
   await client(w, "buyer", id).acceptDelivery(1);
   at("delivery", "item 1 submitted by the winner · accepted");
   const item = terms.items[0]!;
-  const paid = await agent.deal.pay({ item: 1, amount: item.amount, recipient: recipient!.account });
-  at("paid", `item 1 · ${usdc(item.amount)} → ${recipient!.account}`);
+  const paid = await agent.deal.pay({ item: 1, amount: item.amount, recipient: recipient.account });
+  at("paid", `item 1 · ${usdc(item.amount)} → ${recipient.account}`);
   const attack = await agent.deal.pay({ item: 2, amount: terms.items[1]!.amount, recipient: w.attacker });
   at("refused", `${attack.code ?? attack.status} (a redirect to ${w.attacker})`);
   const s = Math.floor((Date.now() - started) / 1000);

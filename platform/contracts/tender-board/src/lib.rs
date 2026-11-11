@@ -6,6 +6,12 @@
 //! the implicit account of its key, so the buyer opens a normal Accord `procurement` agreement with that account as
 //! vendor, and `link_agreement` asks the factory that the agreement exists with this buyer and that vendor.
 //!
+//! A new bid carries a bond (BID_BOND), attached by whoever submits it: the relay, for a bidder with no NEAR. It
+//! goes back to its payer when the bid is revealed or the buyer cancels; a bid left unrevealed forfeits it to the buyer
+//! at the award. That puts a price on two things the board cannot rule out: filling a job's 32 slots with throwaway
+//! keys, and one party committing several prices under several keys and revealing only the one that wins after seeing
+//! the others. Each unrevealed bid costs its bond; neither is impossible.
+//!
 //! This contract is not part of an Accord release and changes nothing in the factory or the agreement code; an
 //! agreement created after a tender is an ordinary agreement on the factory's current release.
 
@@ -18,11 +24,13 @@ pub const MAX_BIDS: u32 = 32;
 pub const MAX_TITLE: usize = 120;
 pub const MAX_SPEC: usize = 1000;
 pub const MAX_AGENT: usize = 64;
+/// Attached to each new bid by its submitter; refunded on reveal or cancel, forfeited to the buyer if unrevealed.
+pub const BID_BOND: NearToken = NearToken::from_millinear(20);
 const MIN_WINDOW_SECS: u64 = 30;
 const MAX_COMMIT_SECS: u64 = 14 * 24 * 3600;
 const MAX_REVEAL_SECS: u64 = 3 * 24 * 3600;
 /// Covers the job record and up to MAX_BIDS bids; the buyer pays it once when posting.
-pub const POST_DEPOSIT: NearToken = NearToken::from_millinear(250);
+pub const POST_DEPOSIT: NearToken = NearToken::from_millinear(300);
 const GAS_VIEW: Gas = Gas::from_tgas(10);
 const GAS_CALLBACK: Gas = Gas::from_tgas(15);
 
@@ -58,6 +66,9 @@ pub struct Bid {
     pub committed_at: u64,
     pub price: Option<U128>,
     pub revealed_at: Option<u64>,
+    /// Who attached the bond, and whether the board still holds it.
+    pub bond_payer: AccountId,
+    pub bond_held: bool,
 }
 
 #[near(serializers = [borsh])]
@@ -140,6 +151,38 @@ fn is_lower_hex(s: &str, len: usize) -> bool {
     s.len() == len
         && s.bytes()
             .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+}
+
+/// The small-order ed25519 public keys, canonical and not ("Taming the many EdDSAs", Chalkias et al., 2020). NEAR's
+/// `ed25519_verify` accepts the all-zero signature on every message for some of them, so a bid "signed" by one would
+/// be anyone's. No real key is one of these.
+const WEAK_KEYS: [&str; 14] = [
+    "0100000000000000000000000000000000000000000000000000000000000000",
+    "0100000000000000000000000000000000000000000000000000000000000080",
+    "0000000000000000000000000000000000000000000000000000000000000000",
+    "0000000000000000000000000000000000000000000000000000000000000080",
+    "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+    "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "eeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+    "eeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+    "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc05",
+    "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc85",
+    "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a",
+    "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa",
+];
+
+/// An agent label: 1 to 64 printable ASCII characters or spaces, no ':', no leading or trailing space. Checked as
+/// given and never trimmed, so the label the bidder signed is the label stored (JS and Rust trim different sets).
+pub fn valid_agent(agent: &str) -> bool {
+    !agent.is_empty()
+        && agent.len() <= MAX_AGENT
+        && agent
+            .bytes()
+            .all(|b| (0x20..=0x7e).contains(&b) && b != b':')
+        && !agent.starts_with(' ')
+        && !agent.ends_with(' ')
 }
 
 fn emit(event: &str, data: Value) {
@@ -228,7 +271,9 @@ impl TenderBoard {
     }
 
     /// Commits (or, with a higher nonce, replaces) a sealed bid. Anyone may submit it; only the bidder's signature
-    /// counts. `bidder` is the hex public key, `signature` the hex ed25519 signature over `bid_message`.
+    /// counts. `bidder` is the hex public key, `signature` the hex ed25519 signature over `bid_message`. A new bid
+    /// attaches exactly BID_BOND; a replacement attaches nothing (the first bond stays with the bid).
+    #[payable]
     pub fn submit_bid(
         &mut self,
         job: u64,
@@ -248,13 +293,12 @@ impl TenderBoard {
             j.outcome == Outcome::Pending && now < j.commit_ends,
             "ERR_BIDDING_CLOSED"
         );
-        assert!(is_lower_hex(&bidder, 64), "ERR_BIDDER");
-        assert!(is_lower_hex(&commitment, 64), "ERR_COMMITMENT");
-        let agent = agent.trim().to_string();
         assert!(
-            !agent.is_empty() && agent.chars().count() <= MAX_AGENT && !agent.contains(':'),
-            "ERR_AGENT"
+            is_lower_hex(&bidder, 64) && !WEAK_KEYS.contains(&bidder.as_str()),
+            "ERR_BIDDER"
         );
+        assert!(is_lower_hex(&commitment, 64), "ERR_COMMITMENT");
+        assert!(valid_agent(&agent), "ERR_AGENT");
         let pk: [u8; 32] = decode(&bidder, "ERR_BIDDER");
         let sig: [u8; 64] = decode(&signature, "ERR_SIGNATURE");
         let msg = bid_message(board.as_str(), job, nonce, &commitment, &agent);
@@ -266,6 +310,7 @@ impl TenderBoard {
         let existing = (0..j.bids.len()).find(|&i| j.bids[i].bidder == bidder);
         let index = match existing {
             Some(i) => {
+                assert!(env::attached_deposit().is_zero(), "ERR_BOND");
                 let b = &mut j.bids[i];
                 assert!(nonce > b.nonce, "ERR_NONCE");
                 b.commitment = commitment.clone();
@@ -276,6 +321,7 @@ impl TenderBoard {
             }
             None => {
                 assert!(j.bids.len() < MAX_BIDS, "ERR_JOB_FULL");
+                assert!(env::attached_deposit() == BID_BOND, "ERR_BOND");
                 j.bids.push(Bid {
                     bidder: bidder.clone(),
                     agent: agent.clone(),
@@ -284,6 +330,8 @@ impl TenderBoard {
                     committed_at: now,
                     price: None,
                     revealed_at: None,
+                    bond_payer: env::predecessor_account_id(),
+                    bond_held: true,
                 });
                 j.bids.len() - 1
             }
@@ -295,8 +343,8 @@ impl TenderBoard {
         index
     }
 
-    /// Reveals a bid's price after the commit deadline. Anyone holding the price and salt may call it: the
-    /// commitment binds both to this job and bidder.
+    /// Reveals a bid's price after the commit deadline and returns its bond to whoever attached it. Anyone holding
+    /// the price and salt may call it: the commitment binds both to this job and bidder.
     pub fn reveal_bid(&mut self, job: u64, bidder: String, price: U128, salt: String) {
         let board = env::current_account_id();
         let now = env::block_timestamp();
@@ -311,6 +359,7 @@ impl TenderBoard {
         let i = (0..j.bids.len())
             .find(|&i| j.bids[i].bidder == bidder)
             .unwrap_or_else(|| env::panic_str("ERR_NO_BID"));
+        let budget = j.budget;
         let b = &mut j.bids[i];
         assert!(b.price.is_none(), "ERR_REVEALED");
         let want = hex::encode(env::sha256_array(commitment_message(
@@ -323,14 +372,20 @@ impl TenderBoard {
         assert!(want == b.commitment, "ERR_COMMITMENT_MISMATCH");
         b.price = Some(price);
         b.revealed_at = Some(now);
+        let refund = b.bond_held.then(|| b.bond_payer.clone());
+        b.bond_held = false;
         emit(
             "bid_revealed",
-            json!({"job": job, "index": i, "bidder": bidder, "price": price, "within_budget": price.0 <= j.budget.0}),
+            json!({"job": job, "index": i, "bidder": bidder, "price": price, "within_budget": price.0 <= budget.0}),
         );
+        if let Some(payer) = refund {
+            Promise::new(payer).transfer(BID_BOND).detach();
+        }
     }
 
-    /// Chooses the winner: the lowest revealed price within the budget, the earliest bid on a tie. Open to anyone
-    /// once the reveal window has closed, or earlier once every bid has been revealed.
+    /// Chooses the winner: the lowest revealed price within the budget; on a tie, the bid whose last commitment came
+    /// first (a replaced bid counts from its replacement), then the lower index. Open to anyone once the reveal
+    /// window has closed, or earlier once every bid has been revealed. Bonds of unrevealed bids go to the buyer.
     pub fn award(&mut self, job: u64) -> Outcome {
         let now = env::block_timestamp();
         let j = self
@@ -341,27 +396,41 @@ impl TenderBoard {
         assert!(now >= j.commit_ends, "ERR_TOO_EARLY");
         let all_revealed = !j.bids.is_empty() && j.bids.iter().all(|b| b.price.is_some());
         assert!(now >= j.reveal_ends || all_revealed, "ERR_REVEAL_OPEN");
-        let mut best: Option<(u32, u128)> = None;
+        let mut best: Option<(u32, u128, u64)> = None;
         for (i, b) in j.bids.iter().enumerate() {
             if let Some(p) = b.price {
-                if p.0 <= j.budget.0 && best.is_none_or(|(_, bp)| p.0 < bp) {
-                    best = Some((i as u32, p.0));
+                let better =
+                    best.is_none_or(|(_, bp, bt)| p.0 < bp || (p.0 == bp && b.committed_at < bt));
+                if p.0 <= j.budget.0 && better {
+                    best = Some((i as u32, p.0, b.committed_at));
                 }
             }
         }
+        let mut forfeited: u128 = 0;
+        for b in j.bids.iter_mut() {
+            if b.bond_held {
+                b.bond_held = false;
+                forfeited += 1;
+            }
+        }
         j.outcome = match best {
-            Some((index, _)) => Outcome::Winner { index },
+            Some((index, _, _)) => Outcome::Winner { index },
             None => Outcome::NoValidBid,
         };
-        let winner = best.map(|(i, _)| j.bids[i].bidder.clone());
+        let winner = best.map(|(i, _, _)| j.bids[i].bidder.clone());
         emit(
             "awarded",
-            json!({"job": job, "winner": winner, "price": best.map(|(_, p)| U128(p))}),
+            json!({"job": job, "winner": winner, "price": best.map(|(_, p, _)| U128(p)), "bonds_forfeited": forfeited as u64}),
         );
+        if forfeited > 0 {
+            Promise::new(j.buyer.clone())
+                .transfer(BID_BOND.saturating_mul(forfeited))
+                .detach();
+        }
         j.outcome.clone()
     }
 
-    /// The buyer cancels a job that has no winner yet.
+    /// The buyer cancels a job that has no winner yet; every bond still held goes back to its payer.
     pub fn cancel_job(&mut self, job: u64) {
         let j = self
             .jobs
@@ -370,7 +439,20 @@ impl TenderBoard {
         assert!(env::predecessor_account_id() == j.buyer, "ERR_NOT_BUYER");
         assert!(j.outcome == Outcome::Pending, "ERR_DECIDED");
         j.outcome = Outcome::Cancelled;
-        emit("cancelled", json!({"job": job}));
+        let mut refunds: Vec<AccountId> = Vec::new();
+        for b in j.bids.iter_mut() {
+            if b.bond_held {
+                b.bond_held = false;
+                refunds.push(b.bond_payer.clone());
+            }
+        }
+        emit(
+            "cancelled",
+            json!({"job": job, "bonds_refunded": refunds.len()}),
+        );
+        for payer in refunds {
+            Promise::new(payer).transfer(BID_BOND).detach();
+        }
     }
 
     /// The buyer names the Accord agreement it opened with the winner. The factory is asked for agreement `id`; the
@@ -444,7 +526,7 @@ impl TenderBoard {
     /// Newest first.
     pub fn list_jobs(&self, from: Option<u64>, limit: Option<u8>) -> Vec<JobView> {
         let now = env::block_timestamp();
-        let limit = limit.unwrap_or(20).min(50) as usize;
+        let limit = limit.unwrap_or(10).min(20) as usize;
         let top = from
             .unwrap_or(self.next_id.saturating_sub(1))
             .min(self.next_id.saturating_sub(1));
@@ -484,3 +566,6 @@ fn view(id: u64, j: &Job, now: u64) -> JobView {
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod audit_tests;

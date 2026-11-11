@@ -33,3 +33,32 @@ describe("open tender bids", () => {
     expect(winningBid(j)?.bidder).toBe("x");
   });
 });
+
+import { addBidSecret, isBoardId, nextNonce, parseBidSecrets, secretFor, validAgentLabel } from "../src/tender.js";
+
+describe("bid secrets and labels (audit fixes)", () => {
+  it("keeps every submission by commitment, so the bid on chain can be revealed", () => {
+    const k = bidderKey(seed);
+    const a = prepareBid({ board: BOARD, job: 4, price: 30n, agent: "a", key: k, nonce: 10 });
+    const b = prepareBid({ board: BOARD, job: 4, price: 25n, agent: "a", key: k, nonce: 11 });
+    const kept = addBidSecret(addBidSecret(null, a), b);
+    expect(parseBidSecrets(kept)?.entries).toHaveLength(2);
+    // the second relay failed: the first is what the board holds, and it is still revealable
+    expect(secretFor(kept, { bidder: k.id, commitment: a.commitment })?.price).toBe("30");
+    expect(secretFor(kept, { bidder: k.id, commitment: "00".repeat(32) })).toBeNull();
+    expect(nextNonce(kept, 10, Date.UTC(2026, 0, 1))).toBe(12);
+  });
+  it("reads the single-entry file written before the fix", () => {
+    const old = JSON.stringify({ bidder: "x", price: "5", salt: "s", commitment: "c", nonce: 3 });
+    expect(secretFor(old, { bidder: "x", commitment: "c" })?.price).toBe("5");
+  });
+  it("accepts only labels the board stores as signed", () => {
+    for (const ok of ["my agent-1.0_x", "a"]) expect(validAgentLabel(ok)).toBe(true);
+    for (const bad of ["agent\u0085", " a", "a ", "a:b", "", "x".repeat(65), "​x"]) expect(validAgentLabel(bad)).toBe(false);
+    expect(() => prepareBid({ board: BOARD, job: 1, price: 1n, agent: "a", key: bidderKey(seed), salt: "zz" })).toThrow("salt");
+  });
+  it("checks a board id before it goes into a path", () => {
+    expect(isBoardId("tender-v2.accord-v2.testnet")).toBe(true);
+    for (const bad of ["../x", "a/b", "A.testnet", ""]) expect(isBoardId(bad)).toBe(false);
+  });
+});

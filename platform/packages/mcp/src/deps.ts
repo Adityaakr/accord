@@ -1,7 +1,7 @@
 // The real dependencies: the SDK over RPC; the agent and principal signers only when their variables are set.
 
-import { Accord, KeySigner, TENDER_BOARDS, TenderBoardClient, bidderKey, preflight, prepareBid, recordReleaseProof, verify, type Network, type ReleaseProof } from "@accord/sdk";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { Accord, KeySigner, TENDER_BOARDS, TenderBoardClient, addBidSecret, bidderKey, isBoardId, nextNonce, preflight, prepareBid, secretFor, recordReleaseProof, verify, type Network, type ReleaseProof } from "@accord/sdk";
+import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname } from "node:path";
 import { cachedReleaseProof, outlayerVerifyProof } from "@accord/sdk/node";
@@ -99,7 +99,7 @@ export function realDeps(env: Env): McpDeps {
   }
   if (env.ACCORD_BIDDER_SEED) {
     if (network === "mainnet") throw new Error("bidding signs on testnet only");
-    deps.bidder = bidderDeps(env, deps.tender?.board ?? TENDER_BOARDS.testnet!);
+    deps.bidder = bidderDeps(env, new TenderBoardClient(accord.chain, deps.tender?.board ?? TENDER_BOARDS.testnet!));
   }
   if (env.ACCORD_PRINCIPAL_KEY && env.ACCORD_PRINCIPAL_ACCOUNT) {
     if (network === "mainnet") throw new Error("principal tools sign on testnet only");
@@ -117,10 +117,15 @@ export function realDeps(env: Env): McpDeps {
 }
 
 /** The bidder tools: the key from ACCORD_BIDDER_SEED, the app's relay (ACCORD_APP_URL), the secrets in ~/.accord. */
-function bidderDeps(env: Env, board: string): NonNullable<McpDeps["bidder"]> {
+function bidderDeps(env: Env, board: TenderBoardClient): NonNullable<McpDeps["bidder"]> {
   const key = bidderKey(env.ACCORD_BIDDER_SEED!.trim());
   const app = (env.ACCORD_APP_URL || "https://accordweb-production.up.railway.app/app").replace(/\/+$/, "");
-  const file = (job: number) => `${env.HOME || homedir()}/.accord/tender-bids/${board}/${job}.json`;
+  if (!isBoardId(board.board)) throw new Error(`not a board account id: ${board.board}`);
+  const file = (job: number) => `${env.HOME || homedir()}/.accord/tender-bids/${board.board}/${job}.json`;
+  const read = (job: number) => readFile(file(job), "utf8").catch((e: NodeJS.ErrnoException) => {
+    if (e.code === "ENOENT") return null;
+    throw e;
+  });
   const relay = async (path: string, body: object): Promise<{ tx: string }> => {
     const r = await fetch(`${app}/api/tenders/${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
     const j = (await r.json().catch(() => ({}))) as { tx?: string; error?: string };
@@ -130,14 +135,23 @@ function bidderDeps(env: Env, board: string): NonNullable<McpDeps["bidder"]> {
   return {
     id: key.id,
     bid: async (job, price, agent) => {
-      const b = prepareBid({ board, job, price, agent, key });
+      const j = await board.job(job);
+      if (!j) throw new Error(`no job ${job} on ${board.board}`);
+      if (j.phase !== "open") throw new Error(`job ${job} is ${j.phase}; bids are taken while it is open`);
+      const before = await read(job);
+      const b = prepareBid({ board: board.board, job, price, agent, key, nonce: nextNonce(before, j.bids.find((x) => x.bidder === key.id)?.nonce ?? null) });
+      // kept before sending and added, never overwritten: whichever submission lands can be revealed
       await mkdir(dirname(file(job)), { recursive: true, mode: 0o700 });
-      await writeFile(file(job), JSON.stringify({ bidder: key.id, price: b.secret.price, salt: b.secret.salt, commitment: b.commitment, nonce: b.nonce }, null, 2), { mode: 0o600 });
+      await writeFile(file(job), addBidSecret(before, b), { mode: 0o600 });
+      await chmod(file(job), 0o600);
       const r = await relay(`${job}/bids`, { bidder: b.bidder, agent: b.agent, commitment: b.commitment, nonce: b.nonce, signature: b.signature });
       return { bidder: key.id, commitment: b.commitment, tx: r.tx, kept: file(job) };
     },
     reveal: async (job) => {
-      const k = JSON.parse(await readFile(file(job), "utf8")) as { price: string; salt: string };
+      const onChain = (await board.job(job))?.bids.find((x) => x.bidder === key.id);
+      if (!onChain) throw new Error(`job ${job} holds no bid from ${key.id}`);
+      const k = secretFor(await read(job), onChain);
+      if (!k) throw new Error(`no kept price and salt open the commitment on chain; see ${file(job)}`);
       const r = await relay(`${job}/reveal`, { bidder: key.id, price: k.price, salt: k.salt });
       return { tx: r.tx, price: k.price };
     },

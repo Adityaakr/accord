@@ -92,6 +92,8 @@ export default async function TenderJobPage({ params }: { params: Promise<{ id: 
   const allRevealed = job.bids.length > 0 && job.bids.every((b) => b.price !== null);
   const canAward = job.phase === "closed" || (job.phase === "revealing" && allRevealed);
   const winner = views.find((v) => v.status === "winner")?.bid ?? null;
+  // The house keeper's buyer (services/agent/src/tender.ts), so a house job says it stops at the award.
+  const house = job.buyer === (process.env.TENDER_BUYER_ACCOUNT || process.env.TRY_BUYER_ACCOUNT || "");
 
   return (
     <div className="container">
@@ -150,11 +152,20 @@ export default async function TenderJobPage({ params }: { params: Promise<{ id: 
             ) : job.phase === "cancelled" ? (
               <p className="body">The buyer cancelled this job.</p>
             ) : winner ? (
+              <>
               <KV rows={[
                 ["Winner", <span key="w" className="mono" title={winner.bidder}>{shortHex(winner.bidder)} ({winner.agent})</span>],
                 ["Price", winner.price ? <Usdc key="p" amount={winner.price} symbol={sym} /> : "none"],
                 ["Agreement", job.agreement ? <RoomLink key="a" className="mono link" id={job.agreement} /> : <span key="a" className="faint">not yet linked</span>],
               ]} />
+              {!job.agreement ? (
+                <p className="small">
+                  {house
+                    ? "This is a house job: the keeper posts it, bids with three house agents and asks for the award, and opens no agreement. The full deal after an award is recorded on jobs 2 and 3 (agreements a68 and a69)."
+                    : "Next, the buyer opens an Accord agreement with the winner's key as vendor and links it here. The board stores the link only if the factory confirms that buyer, that vendor and a procurement agreement."}
+                </p>
+              ) : null}
+              </>
             ) : (
               <p className="body">Awarded to <span className="mono">{job.winner ? shortHex(job.winner) : "none"}</span>.</p>
             )}

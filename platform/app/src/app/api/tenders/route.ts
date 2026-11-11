@@ -1,10 +1,12 @@
 // The open tenders on the board, newest first. Keyless and readable from any origin.
 import { readPreflight, withReadCors } from "@/server/cors";
 import { boardId, listJobs } from "@/server/tender";
+import { readAllowed } from "@/server/tenderroute";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
+  if (!readAllowed(req)) return withReadCors(Response.json({ error: "too many requests" }, { status: 429 }));
   try {
     return withReadCors(Response.json({ board: boardId(), now: Date.now(), jobs: await listJobs() }, { headers: { "cache-control": "no-store" } }));
   } catch (e) {

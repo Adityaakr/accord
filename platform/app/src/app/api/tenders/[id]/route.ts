@@ -1,10 +1,12 @@
 // One job with its bids (prices stay null until revealed) and, once linked, the Accord agreement's state.
 import { readPreflight, withReadCors } from "@/server/cors";
 import { RelayError, boardId, dealOf, getJob, parseJobId } from "@/server/tender";
+import { readAllowed } from "@/server/tenderroute";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  if (!readAllowed(req)) return withReadCors(Response.json({ error: "too many requests" }, { status: 429 }));
   try {
     const id = parseJobId((await ctx.params).id);
     const job = await getJob(id);

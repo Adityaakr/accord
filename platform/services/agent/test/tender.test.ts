@@ -16,7 +16,7 @@ const job = (over: Partial<TenderJob>): TenderJob => ({
 });
 const bidOf = (i: number, price: string | null) => {
   const h = houseBid(cfg.houseSeed, cfg.board, 5, i);
-  return { bidder: h.key.id, agent: h.agent, commitment: commitment(cfg.board, 5, h.key.id, h.price, h.salt), nonce: 1, committed_at: 0, price, revealed_at: null };
+  return { bidder: h.key.id, agent: h.agent, commitment: commitment(cfg.board, 5, h.key.id, h.price, h.salt), nonce: 1, committed_at: 0, price, revealed_at: null, bond_payer: "relay.testnet", bond_held: price === null };
 };
 
 describe("house tender keeper", () => {
@@ -40,5 +40,14 @@ describe("house tender keeper", () => {
       expect(a.price <= 40_000_000n && a.price > 30_000_000n).toBe(true);
     }
     expect(houseBid(cfg.houseSeed, cfg.board, 9, 0).salt).not.toBe(houseBid(cfg.houseSeed, cfg.board, 10, 0).salt);
+  });
+});
+
+describe("house tender keeper limits", () => {
+  it("never bids into a full job and refuses nonsense settings", async () => {
+    const full = Array.from({ length: 32 }, (_, i) => ({ ...bidOf(0, null), bidder: String(i).padStart(64, "0") }));
+    expect(nextActions(cfg, [job({ bids: full })], NOW)).toEqual([]);
+    const { tenderKeeperConfig } = await import("../src/tender.js");
+    expect(() => tenderKeeperConfig({ TENDER_KEEPER: "on", TENDER_BUYER_ACCOUNT: "a", TENDER_BUYER_KEY: "k", TENDER_COMMIT_SECS: "soon" })).toThrow("TENDER_COMMIT_SECS");
   });
 });

@@ -39,6 +39,24 @@ fn ctx(pred: &str, at: u64) {
     ctx_full(pred, NearToken::from_yoctonear(0), at, vec![]);
 }
 
+/// Re-enters the current context with the bond a submission needs: BID_BOND for a new bidder, nothing for a replacement.
+fn bond_for(b: &TenderBoard, job: u64, bidder: &str) {
+    let exists = b
+        .get_job(job)
+        .is_some_and(|j| j.bids.iter().any(|x| x.bidder == bidder));
+    let d = if exists {
+        NearToken::from_yoctonear(0)
+    } else {
+        BID_BOND
+    };
+    ctx_full(
+        env::predecessor_account_id().as_str(),
+        d,
+        env::block_timestamp(),
+        vec![],
+    );
+}
+
 struct Bidder {
     key: SigningKey,
     salt: String,
@@ -72,6 +90,7 @@ impl Bidder {
     fn bid(&self, b: &mut TenderBoard, job: u64, price: u128, nonce: u32) -> u32 {
         let c = self.commitment(job, price);
         let sig = self.sign(job, nonce, &c, "agent");
+        bond_for(b, job, &self.id());
         b.submit_bid(job, self.id(), c, "agent".into(), nonce, sig)
     }
     fn reveal(&self, b: &mut TenderBoard, job: u64, price: u128) {
@@ -183,6 +202,7 @@ fn a_newer_bid_replaces_an_older_one_and_the_old_one_cannot_be_replayed() {
     ctx("relay.testnet", T0 + SEC);
     let c1 = x.commitment(job, 40_000_000);
     let s1 = x.sign(job, 1, &c1, "agent");
+    bond_for(&b, job, &x.id());
     b.submit_bid(job, x.id(), c1.clone(), "agent".into(), 1, s1.clone());
     x.bid(&mut b, job, 35_000_000, 2);
     assert_eq!(b.get_job(job).unwrap().bids.len(), 1);
@@ -356,7 +376,45 @@ fn sdk_vector() {
     let x = Bidder::new(1);
     let c = x.commitment(1, 40_000_000);
     let s = x.sign(1, 1, &c, "agent");
-    assert_eq!(x.id(), "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c");
-    assert_eq!(c, "944d44b1b9123241be942c13fa74576b0e2bb77657104c64083b226dd918f556");
+    assert_eq!(
+        x.id(),
+        "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c"
+    );
+    assert_eq!(
+        c,
+        "944d44b1b9123241be942c13fa74576b0e2bb77657104c64083b226dd918f556"
+    );
     assert_eq!(s, "cb5bd0a83fbcc9298e427d656f0332a27d745b06a18bfd16a16c24adfb2c3368eb9312d905743628acb8653613efc81a7a54937936b9e519dd8f6279a4559e04");
+}
+
+#[test]
+fn a_reveal_or_a_cancel_releases_the_bond_and_a_replaced_bid_loses_ties() {
+    let (mut b, job) = board_with_job(50_000_000);
+    let (x, y) = (Bidder::new(1), Bidder::new(2));
+    ctx("relay.testnet", T0 + SEC);
+    x.bid(&mut b, job, 30_000_000, 1);
+    ctx("relay.testnet", T0 + 2 * SEC);
+    y.bid(&mut b, job, 30_000_000, 1);
+    // x holds the earlier slot but replaces its bid after y: on a tie, y's commitment came first
+    ctx("relay.testnet", T0 + 3 * SEC);
+    x.bid(&mut b, job, 30_000_000, 2);
+    ctx("anyone.testnet", T0 + 61 * SEC);
+    x.reveal(&mut b, job, 30_000_000);
+    assert!(
+        !b.get_job(job).unwrap().bids[0].bond_held,
+        "a reveal releases the bond"
+    );
+    assert!(b.get_job(job).unwrap().bids[1].bond_held);
+    y.reveal(&mut b, job, 30_000_000);
+    assert_eq!(b.award(job), Outcome::Winner { index: 1 });
+
+    let (mut b, job) = board_with_job(50_000_000);
+    ctx("relay.testnet", T0 + SEC);
+    x.bid(&mut b, job, 1, 1);
+    ctx(BUYER, T0 + 2 * SEC);
+    b.cancel_job(job);
+    assert!(
+        !b.get_job(job).unwrap().bids[0].bond_held,
+        "a cancel refunds the bond"
+    );
 }

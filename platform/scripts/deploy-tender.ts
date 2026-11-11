@@ -13,7 +13,7 @@ if ((env.NEAR_NETWORK ?? "testnet") !== "testnet") throw new Error("deploy-tende
 
 const RPC = env.NEAR_RPC_URL || "https://test.rpc.fastnear.com";
 const FACTORY = need("ACCORD_FACTORY");
-const BOARD = env.TENDER_BOARD || `tender.${FACTORY}`;
+const BOARD = env.TENDER_BOARD || `tender-v2.${FACTORY}`;
 if (!BOARD.endsWith(`.${FACTORY}`)) throw new Error(`TENDER_BOARD must be a sub-account of ${FACTORY}`);
 const provider = new JsonRpcProvider({ url: RPC });
 const factory = new Account(FACTORY, provider, new KeyPairSigner(KeyPair.fromString(need("FACTORY_KEY") as KeyPairString)));

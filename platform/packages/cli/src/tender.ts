@@ -9,9 +9,12 @@
 //   accord tender reveal <job> | award <job>
 
 import {
-  Chain, RPC, TENDER_BOARDS, TenderBoardClient, bidderKey, formatUnits, newBidderKey, prepareBid, secondsLeft,
-  type BidderKey, type TenderJob,
+  Chain, RPC, TENDER_BOARDS, TenderBoardClient, addBidSecret, bidderKey, formatUnits, isBoardId, newBidderKey, nextNonce,
+  prepareBid, secondsLeft, secretFor, type BidderKey, type TenderJob,
 } from "@accord/sdk";
+import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
+import { dirname } from "node:path";
 import { flagBool, flagString } from "./args.js";
 import { parseAmount } from "./amount.js";
 import { header, line } from "./format.js";
@@ -24,13 +27,16 @@ export interface TenderDeps {
   board: Pick<TenderBoardClient, "board" | "job" | "jobs">;
   relay(path: string, body: object): Promise<{ tx: string }>;
   home: string;
-  readText(path: string): Promise<string>;
-  writeSecret(path: string, content: string): Promise<void>;
+  /** null when the file does not exist; any other read error throws. */
+  readText(path: string): Promise<string | null>;
+  /** Writes with mode 0600 (and 0600 again after, for a file that existed); `create` fails if the file exists. */
+  writeSecret(path: string, content: string, create?: boolean): Promise<void>;
   sleep(ms: number): Promise<void>;
 }
 
 export function tenderDeps(ctx: Ctx): TenderDeps {
   const boardId = flagString(ctx.args, "board") ?? ctx.env.TENDER_BOARD ?? TENDER_BOARDS.testnet!;
+  if (!isBoardId(boardId)) throw new Error(`not a board account id: ${boardId}`);
   const rpc = ctx.env.NEAR_RPC_URL || RPC.testnet!.rpc;
   const relayUrl = (flagString(ctx.args, "relay") ?? ctx.env.ACCORD_APP_URL ?? DEFAULT_RELAY).replace(/\/+$/, "");
   return {
@@ -41,13 +47,15 @@ export function tenderDeps(ctx: Ctx): TenderDeps {
       if (!r.ok || !j.tx) throw new Error(`relay: ${j.error ?? `HTTP ${r.status}`}`);
       return { tx: j.tx };
     },
-    home: ctx.env.HOME ?? ".",
-    readText: async (p) => (await import("node:fs/promises")).readFile(p, "utf8"),
-    writeSecret: async (p, content) => {
-      const fs = await import("node:fs/promises");
-      const path = await import("node:path");
-      await fs.mkdir(path.dirname(p), { recursive: true, mode: 0o700 });
-      await fs.writeFile(p, content, { mode: 0o600 });
+    home: ctx.env.HOME || homedir(),
+    readText: async (p) => readFile(p, "utf8").catch((e: NodeJS.ErrnoException) => {
+      if (e.code === "ENOENT") return null;
+      throw e;
+    }),
+    writeSecret: async (p, content, create) => {
+      await mkdir(dirname(p), { recursive: true, mode: 0o700 });
+      await writeFile(p, content, { mode: 0o600, flag: create ? "wx" : "w" });
+      await chmod(p, 0o600);
     },
     sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
   };
@@ -61,17 +69,21 @@ const jobNo = (ctx: Ctx, i = 1) => {
   return Number(v);
 };
 
+/** The bidder key: read if the file exists (a damaged file is an error, never replaced), made only if it does not. */
 async function loadKey(d: TenderDeps, create: boolean): Promise<BidderKey> {
   const file = `${d.home}/.accord/bidder.json`;
-  try {
-    const k = JSON.parse(await d.readText(file)) as { seed?: string };
-    return bidderKey(String(k.seed));
-  } catch (e) {
-    if (!create) throw new Error(`no bidder key at ${file}: run accord tender key (${(e as Error).message})`);
-    const k = newBidderKey();
-    await d.writeSecret(file, JSON.stringify({ seed: k.seed, id: k.id }, null, 2));
-    return k;
+  const text = await d.readText(file);
+  if (text !== null) {
+    try {
+      return bidderKey(String((JSON.parse(text) as { seed?: string }).seed));
+    } catch (e) {
+      throw new Error(`${file} is not a readable bidder key (${(e as Error).message}); it may be the vendor key of a won agreement, so it is left as it is`);
+    }
   }
+  if (!create) throw new Error(`no bidder key at ${file}: run accord tender key`);
+  const k = newBidderKey();
+  await d.writeSecret(file, JSON.stringify({ seed: k.seed, id: k.id }, null, 2), true);
+  return k;
 }
 
 const bidFile = (d: TenderDeps, job: number) => `${d.home}/.accord/tender-bids/${d.board.board}/${job}.json`;
@@ -89,10 +101,16 @@ function jobLines(j: TenderJob): string[] {
   return out;
 }
 
+/** Reveals the bid the board holds for this key, with the kept entry whose commitment matches it. */
 async function reveal(ctx: Ctx, d: TenderDeps, job: number): Promise<number> {
-  const saved = JSON.parse(await d.readText(bidFile(d, job))) as { bidder: string; price: string; salt: string };
-  const r = await d.relay(`${job}/reveal`, { bidder: saved.bidder, price: saved.price, salt: saved.salt });
-  ctx.out.block([header("tender reveal", `job ${job}`), line("price", usdc(saved.price)), line("tx", r.tx)], { job, ...r, price: saved.price });
+  const key = await loadKey(d, false);
+  const j = await d.board.job(job);
+  const onChain = j?.bids.find((b) => b.bidder === key.id);
+  if (!onChain) throw new Error(`job ${job} holds no bid from ${key.id}`);
+  const kept = secretFor(await d.readText(bidFile(d, job)), onChain);
+  if (!kept) throw new Error(`no kept price and salt open the commitment on chain (${onChain.commitment.slice(0, 16)}…); see ${bidFile(d, job)}`);
+  const r = await d.relay(`${job}/reveal`, { bidder: key.id, price: kept.price, salt: kept.salt });
+  ctx.out.block([header("tender reveal", `job ${job}`), line("price", usdc(kept.price)), line("tx", r.tx)], { job, ...r, price: kept.price });
   return 0;
 }
 
@@ -142,8 +160,11 @@ export async function runTender(ctx: Ctx, d: TenderDeps): Promise<number> {
       if (j.phase !== "open") throw new Error(`job ${job} is ${j.phase}; bids are taken while it is open`);
       if (BigInt(price) > BigInt(j.budget)) ctx.out.warn(`note: ${usdc(price)} is above the budget ${usdc(j.budget)}; it cannot win`);
       const key = await loadKey(d, true);
-      const sealed = prepareBid({ board: d.board.board, job, price, agent, key });
-      await d.writeSecret(bidFile(d, job), JSON.stringify({ bidder: key.id, price: sealed.secret.price, salt: sealed.secret.salt, commitment: sealed.commitment, nonce: sealed.nonce }, null, 2));
+      const keptBefore = await d.readText(bidFile(d, job));
+      const onChain = j.bids.find((b) => b.bidder === key.id);
+      const sealed = prepareBid({ board: d.board.board, job, price, agent, key, nonce: nextNonce(keptBefore, onChain?.nonce ?? null) });
+      // kept before sending and added, never overwritten: whichever submission lands can be revealed
+      await d.writeSecret(bidFile(d, job), addBidSecret(keptBefore, sealed));
       const r = await d.relay(`${job}/bids`, { bidder: sealed.bidder, agent: sealed.agent, commitment: sealed.commitment, nonce: sealed.nonce, signature: sealed.signature });
       ctx.out.block([
         header("tender bid", `job ${job}`),
@@ -156,7 +177,7 @@ export async function runTender(ctx: Ctx, d: TenderDeps): Promise<number> {
       const after = await waitPhase(d, job, (x) => x.phase !== "open", secondsLeft(j) + 60);
       if (after.phase === "revealing") await reveal(ctx, d, job);
       const decided = await waitPhase(d, job, (x) => !["open", "revealing", "closed"].includes(x.phase) || (x.phase === "revealing" && x.bids.every((b) => b.price !== null)), 600);
-      if (decided.phase === "revealing" || decided.phase === "closed") await d.relay(`${job}/award`, {}).catch(() => undefined);
+      if (decided.phase === "revealing" || decided.phase === "closed") await d.relay(`${job}/award`, {}).catch((e: Error) => ctx.out.warn(`award: ${e.message}`));
       const final = (await d.board.job(job))!;
       ctx.out.block([...jobLines(final), line("result", final.winner === key.id ? "you won: the buyer opens an Accord agreement with your key as vendor" : "another bid won")], final);
       return 0;

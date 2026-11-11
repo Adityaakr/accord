@@ -20,7 +20,7 @@ function setup(j: TenderJob) {
     board: { board: BOARD, job: async () => j, jobs: async () => [j] },
     relay: async (path, body) => { sent.push({ path, body: body as Record<string, unknown> }); return { tx: "TX" }; },
     home: "/h",
-    readText: async (p) => { const v = files.get(p); if (v === undefined) throw new Error("ENOENT"); return v; },
+    readText: async (p) => files.get(p) ?? null,
     writeSecret: async (p, c) => { files.set(p, c); },
     sleep: async () => undefined,
   };
@@ -36,7 +36,7 @@ describe("accord tender", () => {
     const s = setup(job());
     expect(await runTender(s.ctx(["tender", "bid", "3", "--price", "34.5", "--agent", "my-agent"]), s.d)).toBe(0);
     const key = JSON.parse(s.files.get("/h/.accord/bidder.json")!);
-    const kept = JSON.parse(s.files.get(`/h/.accord/tender-bids/${BOARD}/3.json`)!);
+    const kept = JSON.parse(s.files.get(`/h/.accord/tender-bids/${BOARD}/3.json`)!).entries[0];
     expect(kept.price).toBe("34500000");
     const body = s.sent[0]!.body;
     expect(s.sent[0]!.path).toBe("3/bids");
@@ -45,12 +45,15 @@ describe("accord tender", () => {
     expect(body.commitment).toBe(commitment(BOARD, 3, key.id, 34_500_000n, kept.salt));
     expect(verifyBidSignature({ board: BOARD, job: 3, ...(body as { bidder: string; agent: string; commitment: string; nonce: number; signature: string }) })).toBe(true);
   });
-  it("reveals exactly what it kept", async () => {
-    const s = setup(job());
+  it("reveals the kept entry that opens the bid on chain", async () => {
+    const j = job();
+    const s = setup(j);
     await runTender(s.ctx(["tender", "bid", "3", "--price", "1", "--agent", "a"]), s.d);
-    const kept = JSON.parse(s.files.get(`/h/.accord/tender-bids/${BOARD}/3.json`)!);
+    const file = JSON.parse(s.files.get(`/h/.accord/tender-bids/${BOARD}/3.json`)!);
+    const kept = file.entries[0];
+    j.bids = [{ bidder: file.bidder, agent: "a", commitment: kept.commitment, nonce: kept.nonce, committed_at: 0, price: null, revealed_at: null, bond_payer: "r.testnet", bond_held: true }];
     await runTender(s.ctx(["tender", "reveal", "3"]), s.d);
-    expect(s.sent[1]).toEqual({ path: "3/reveal", body: { bidder: kept.bidder, price: "1000000", salt: kept.salt } });
+    expect(s.sent[1]).toEqual({ path: "3/reveal", body: { bidder: file.bidder, price: "1000000", salt: kept.salt } });
   });
   it("refuses to bid on a job that is not open, and warns above the budget", async () => {
     const closed = setup(job({ phase: "revealing" }));

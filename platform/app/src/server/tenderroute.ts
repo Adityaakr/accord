@@ -14,30 +14,50 @@ export const RELAY_CORS: Record<string, string> = {
 
 export const relayPreflight = () => new Response(null, { status: 204, headers: RELAY_CORS });
 
+/** The body as text, refusing more than `max` bytes without reading the rest. */
+async function cappedText(req: Request, max: number): Promise<string | null> {
+  if (Number(req.headers.get("content-length") ?? "0") > max) return null;
+  const reader = req.body?.getReader();
+  if (!reader) return "";
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > max) { void reader.cancel(); return null; }
+    chunks.push(value);
+  }
+  return new TextDecoder().decode(Buffer.concat(chunks));
+}
+
 export async function relayRoute(
   req: Request,
   raw: Promise<{ id: string }>,
   what: string,
   perIpPerHour: number,
-  run: (id: number, body: unknown) => Promise<{ ok: boolean; tx: string }>,
+  run: (id: number, body: unknown, ip: string) => Promise<{ ok: boolean; tx: string }>,
 ): Promise<Response> {
   const json = (v: unknown, status = 200) => Response.json(v, { status, headers: RELAY_CORS });
   try {
     const id = parseJobId((await raw).id);
-    const full = takeAll([
-      { key: `tender:${what}:ip:${clientIp(req)}`, max: perIpPerHour, windowMs: 3_600_000 },
-      { key: `tender:${what}:job:${id}`, max: 200, windowMs: 3_600_000 },
-    ]);
-    if (full) return json({ error: "too many requests; try again later" }, 429);
-    const text = await req.text();
-    if (text.length > 4096) return json({ error: "request too large" }, 413);
+    const ip = clientIp(req);
+    // Per caller first; the job's shared allowance is spent only by requests that pass their checks (server/tender.ts).
+    if (takeAll([{ key: `tender:${what}:ip:${ip}`, max: perIpPerHour, windowMs: 3_600_000 }])) return json({ error: "too many requests; try again later" }, 429);
+    const text = await cappedText(req, 4096);
+    if (text === null) return json({ error: "request too large" }, 413);
     let body: unknown = {};
     if (text) {
       try { body = JSON.parse(text); } catch { return json({ error: "the body is not JSON" }, 400); }
     }
-    return json(await run(id, body));
+    return json(await run(id, body, ip));
   } catch (e) {
     if (e instanceof RelayError) return json({ error: e.message }, e.status);
     return json({ error: `the relay failed: ${(e as Error).message}` }, 502);
   }
+}
+
+/** A per-IP allowance for the public GET routes (each uncached read is an RPC call). */
+export function readAllowed(req: Request): boolean {
+  return takeAll([{ key: `tender:read:ip:${clientIp(req)}`, max: 240, windowMs: 60_000 }]) === null;
 }

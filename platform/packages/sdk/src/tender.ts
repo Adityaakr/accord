@@ -14,9 +14,17 @@ import { TGAS } from "./chain.js";
 const utf8 = (s: string) => new TextEncoder().encode(s);
 
 /** The deployed boards, per network. */
-export const TENDER_BOARDS: Record<string, string> = { testnet: "tender.accord-v2.testnet" };
+export const TENDER_BOARDS: Record<string, string> = { testnet: "tender-v2.accord-v2.testnet" };
+/** The first board (tender.accord-v2.testnet, 11 Nov 2026), replaced after its audit; its jobs 1 to 4 stay readable. */
+export const TENDER_BOARD_V1 = "tender.accord-v2.testnet";
 /** NEAR the buyer attaches to `post_job` for the job's storage (the contract's POST_DEPOSIT). */
-export const TENDER_POST_DEPOSIT = 250_000_000_000_000_000_000_000n;
+export const TENDER_POST_DEPOSIT = 300_000_000_000_000_000_000_000n;
+/**
+ * NEAR attached to each new bid by whoever submits it (the contract's BID_BOND): back to that payer when the bid is
+ * revealed or the job is cancelled, forfeited to the buyer when the bid is left unrevealed. A bidder with no NEAR has
+ * the relay attach it.
+ */
+export const TENDER_BID_BOND = 20_000_000_000_000_000_000_000n;
 export const TENDER_MAX_BIDS = 32;
 
 export type TenderPhase = "open" | "revealing" | "closed" | "awarded" | "no_valid_bid" | "linked" | "cancelled";
@@ -29,6 +37,8 @@ export interface TenderBid {
   committed_at: number;
   price: string | null;
   revealed_at: number | null;
+  bond_payer: string;
+  bond_held: boolean;
 }
 
 export interface TenderJob {
@@ -117,22 +127,26 @@ export interface PrepareBidOptions {
   price: bigint | string;
   agent: string;
   key: BidderKey;
-  /** Higher than any earlier bid by this key on this job; default: milliseconds since 2026-01-01, so a later call is higher. */
+  /** Higher than any earlier bid by this key on this job; default: seconds since 2026-01-01 (use `nextNonce` to re-bid). */
   nonce?: number;
   salt?: string;
 }
 
+/**
+ * An agent label as the board accepts it: 1 to 64 printable ASCII characters or spaces, no ':', no leading or
+ * trailing space. Never trimmed, so the label signed is the label stored.
+ */
 export function validAgentLabel(agent: string): boolean {
-  const a = agent.trim();
-  return a.length > 0 && [...a].length <= 64 && !a.includes(":");
+  return /^[\x20-\x39\x3b-\x7e]{1,64}$/.test(agent) && !agent.startsWith(" ") && !agent.endsWith(" ");
 }
 
 export function prepareBid(o: PrepareBidOptions): SealedBid {
   const price = BigInt(o.price);
   if (price <= 0n) throw new Error("the price must be more than 0");
-  const agent = o.agent.trim();
-  if (!validAgentLabel(agent)) throw new Error("agent label: 1 to 64 characters, no ':'");
+  const agent = o.agent;
+  if (!validAgentLabel(agent)) throw new Error("agent label: 1 to 64 printable ASCII characters, no ':', no leading or trailing space");
   const salt = o.salt ?? hex(random32());
+  if (!/^[0-9a-f]{64}$/.test(salt)) throw new Error("the salt is 32 bytes of lowercase hex");
   const nonce = o.nonce ?? Math.floor((Date.now() - Date.UTC(2026, 0, 1)) / 1000);
   if (!Number.isInteger(nonce) || nonce < 0 || nonce > 0xffffffff) throw new Error("nonce must fit in u32");
   const c = commitment(o.board, o.job, o.key.id, price, salt);
@@ -144,7 +158,7 @@ export function prepareBid(o: PrepareBidOptions): SealedBid {
 export function verifyBidSignature(b: Pick<SealedBid, "board" | "job" | "bidder" | "agent" | "commitment" | "nonce" | "signature">): boolean {
   try {
     if (!/^[0-9a-f]{64}$/.test(b.bidder) || !/^[0-9a-f]{64}$/.test(b.commitment) || !/^[0-9a-f]{128}$/.test(b.signature)) return false;
-    if (!validAgentLabel(b.agent) || b.agent !== b.agent.trim()) return false;
+    if (!validAgentLabel(b.agent)) return false;
     return ed25519.verify(unhex(b.signature), utf8(bidMessage(b.board, b.job, b.nonce, b.commitment, b.agent)), unhex(b.bidder));
   } catch {
     return false;
@@ -171,8 +185,10 @@ export class TenderBoardClient {
       commit_secs: j.commitSecs, reveal_secs: j.revealSecs,
     }, { deposit: TENDER_POST_DEPOSIT, gas: 50n * TGAS });
   }
-  submitBid(s: Signer, b: SealedBid | Omit<SealedBid, "secret">): Promise<TxResult> {
-    return s.call(this.board, "submit_bid", { job: b.job, bidder: b.bidder, commitment: b.commitment, agent: b.agent, nonce: b.nonce, signature: b.signature }, { gas: 50n * TGAS });
+  /** `replacing`: true when this key already has a bid on the job (a replacement attaches no bond). */
+  submitBid(s: Signer, b: SealedBid | Omit<SealedBid, "secret">, replacing = false): Promise<TxResult> {
+    return s.call(this.board, "submit_bid", { job: b.job, bidder: b.bidder, commitment: b.commitment, agent: b.agent, nonce: b.nonce, signature: b.signature },
+      { gas: 50n * TGAS, deposit: replacing ? 0n : TENDER_BID_BOND });
   }
   reveal(s: Signer, job: number, bidder: string, price: bigint | string, salt: string): Promise<TxResult> {
     return s.call(this.board, "reveal_bid", { job, bidder, price: BigInt(price).toString(), salt }, { gas: 50n * TGAS });
@@ -198,3 +214,45 @@ export function secondsLeft(j: TenderJob, nowMs = Date.now()): number {
   const end = j.phase === "open" ? j.commit_ends : j.phase === "revealing" ? j.reveal_ends : 0;
   return end ? Math.max(0, Math.ceil((end / 1e6 - nowMs) / 1000)) : 0;
 }
+
+/**
+ * The secrets a bidder keeps per job, keyed by commitment: a re-bid adds an entry instead of overwriting, so the
+ * bid that is actually on chain can always be revealed, whichever submission landed.
+ */
+export interface BidSecrets {
+  bidder: string;
+  entries: { commitment: string; price: string; salt: string; nonce: number }[];
+}
+
+export function parseBidSecrets(text: string | null): BidSecrets | null {
+  if (!text) return null;
+  const v = JSON.parse(text) as Partial<BidSecrets> & { price?: string; salt?: string; commitment?: string; nonce?: number };
+  if (Array.isArray(v.entries)) return { bidder: String(v.bidder), entries: v.entries };
+  // the single-entry shape written before 11 Nov 2026
+  if (v.price && v.salt && v.commitment) return { bidder: String(v.bidder), entries: [{ commitment: v.commitment, price: v.price, salt: v.salt, nonce: v.nonce ?? 0 }] };
+  return null;
+}
+
+export function addBidSecret(prev: string | null, b: SealedBid): string {
+  const cur = parseBidSecrets(prev);
+  const entries = (cur && cur.bidder === b.bidder ? cur.entries : []).filter((e) => e.commitment !== b.commitment);
+  entries.push({ commitment: b.commitment, price: b.secret.price, salt: b.secret.salt, nonce: b.nonce });
+  return JSON.stringify({ bidder: b.bidder, entries } satisfies BidSecrets, null, 2);
+}
+
+/** The kept entry that opens the bid the board holds for this bidder, or null. */
+export function secretFor(text: string | null, onChain: Pick<TenderBid, "bidder" | "commitment">): BidSecrets["entries"][number] | null {
+  const cur = parseBidSecrets(text);
+  if (!cur || cur.bidder !== onChain.bidder) return null;
+  return cur.entries.find((e) => e.commitment === onChain.commitment) ?? null;
+}
+
+/** A nonce above every one this bidder used on the job, here or on chain, and not below the clock default. */
+export function nextNonce(text: string | null, onChainNonce: number | null, nowMs = Date.now()): number {
+  const kept = parseBidSecrets(text)?.entries.map((e) => e.nonce) ?? [];
+  const clock = Math.floor((nowMs - Date.UTC(2026, 0, 1)) / 1000);
+  return Math.max(clock, ...kept.map((n) => n + 1), (onChainNonce ?? -1) + 1);
+}
+
+/** Board ids are NEAR account ids; checked before one is used in a file path. */
+export const isBoardId = (s: string): boolean => /^[a-z0-9][a-z0-9._-]{1,62}[a-z0-9]$/.test(s) && !s.includes("..");
