@@ -113,7 +113,7 @@ The organisers' prompts say to keep the requirements and the checkpoint. Each on
 | `agents` | Negotiation: counter once with reasoning, then accept or walk away | The Sealed Table protocol (quote, counter with reasons, final, accept or walk away) | `make negotiate`; the terms show `rounds: 4` or fewer |
 | `agents` | Payments in USDC or NEAR | USDC (NEP-141) | `make pay` |
 | `agents` | A receipt for every task: what, from whom, price, whether the work passed | Every payment is a receipt: item, deliverable hash, acceptance, amount, recipient, transaction | `/record`, `/record.csv`, `accord receipts <deal>` |
-| `agents` | Agent Market: how jobs are posted and paid programmatically; say so if there is no public way | Checked in PROGRESS 0.9; `docs/build/WIN_PLAN.md` lever 7 | `DECISIONS.md` |
+| `agents` | Agent Market: how jobs are posted and paid programmatically; say so if there is no public way | Checked in PROGRESS 0.9; the build plan (an internal note, removed from the repository on 10 Nov 2026) | `DECISIONS.md` |
 | `agents` | Checkpoint: how the agent holds its keys and what it cannot do without the human | README section "What the agent's key can and cannot do" | README |
 | `business` | Humans only set the constraints; a kill switch they can flip at any time | Mandates, approvals, exceptions; `revoke_agent` | `make revoke` |
 | `business` | The agent's own NEAR account; never a full-access key in plain text; OutLayer custody or a scoped function-call key | Each agreement account is the agent's working account for that agreement, holding no full-access key; the agent's only credential is a scoped function-call key on it, stored only in the agent's environment | README; `make verify` |
@@ -151,4 +151,4 @@ Written for Claude Code and Codex first (Q-017), and for a person second. No mar
 
 ## Non-goals for v1
 
-Mainnet, any mainnet signing, a token, a marketplace, legal KYB, confidential settlement, a second settlement rail in the core, cross-chain payments beyond the dry quotes in `docs/build/WIN_PLAN.md`, multi-venue market-making agreements, loan-plus-option market-making structures, agent-to-agent free-form chat outside the Sealed Table.
+Mainnet, any mainnet signing, a token, a marketplace, legal KYB, confidential settlement, a second settlement rail in the core, cross-chain payments beyond the dry quotes in the build plan (an internal note, removed from the repository on 10 Nov 2026), multi-venue market-making agreements, loan-plus-option market-making structures, agent-to-agent free-form chat outside the Sealed Table.

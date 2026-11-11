@@ -259,7 +259,7 @@ The mainnet block height, hash and time are recorded with the metrics. Anyone ca
 
 ### 9.4 What market-making agreements do not claim
 
-It measures the venue's liquidity, not which market maker provided it; DCL positions are per account, which could make attribution possible later (`docs/build/WIN_PLAN.md` lever 6), and until a separate claim ships nothing says the observer attributes liquidity. It is a pool with concentrated liquidity and limit orders, not a central limit order book, and the copy says "liquidity" rather than "order book". Retainer-only. It does not claim the slot times are hidden from the deployer: the deployer owns `PROTECTED_OBSERVER_SEED` and could rebind it to a build that prints future slot times (claim 6's limit).
+It measures the venue's liquidity, not which market maker provided it; DCL positions are per account, which could make attribution possible later (the build plan (an internal note, removed from the repository on 10 Nov 2026)), and until a separate claim ships nothing says the observer attributes liquidity. It is a pool with concentrated liquidity and limit orders, not a central limit order book, and the copy says "liquidity" rather than "order book". Retainer-only. It does not claim the slot times are hidden from the deployer: the deployer owns `PROTECTED_OBSERVER_SEED` and could rebind it to a build that prints future slot times (claim 6's limit).
 
 ## 10. Keeper
 

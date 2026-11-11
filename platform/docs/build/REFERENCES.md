@@ -129,7 +129,7 @@ Every row was opened on 29 Oct 2026. Quote the paraphrase, link the source, neve
 | Source | Date | What it says | The gap it leaves |
 | --- | --- | --- | --- |
 | Binance updated market-maker guidance: https://www.unlock-bc.com/en/binance-tightens-rules-for-token-market-makers (also https://finance.yahoo.com/markets/crypto/articles/binance-requests-market-maker-transparency-191855624.html) | 25 Mar 2026 | Projects must disclose the market maker's identity, legal entity and agreement terms; profit-sharing and guaranteed-return arrangements banned; token loans must state how borrowed tokens may be used; blacklisting for misconduct. | Disclosure of terms, not proof the terms were kept. A market-making agreement's mandate is the stated permitted use, with the proof. |
-| Forgd market-maker leaderboard on DefiLlama: https://cointelegraph.com/news/forgd-market-maker-leaderboard-defillama | 5 Aug 2026 | Spread, depth, volume and uptime ratings across 35 market-making firms and more than 500 projects. | Ratings depend on data market makers choose to share, and nothing is enforced. A market-making agreement measures the venue's liquidity at hidden times inside an enclave and releases the fee by contract; attribution to the market maker's own orders is planned (`WIN_PLAN.md` lever 6). |
+| Forgd market-maker leaderboard on DefiLlama: https://cointelegraph.com/news/forgd-market-maker-leaderboard-defillama | 5 Aug 2026 | Spread, depth, volume and uptime ratings across 35 market-making firms and more than 500 projects. | Ratings depend on data market makers choose to share, and nothing is enforced. A market-making agreement measures the venue's liquidity at hidden times inside an enclave and releases the fee by contract; attribution to the market maker's own orders is planned (the build plan (an internal note, removed from the repository on 10 Nov 2026)). |
 | Haseeb Qureshi, Dragonfly roundtable, via ChainCatcher: https://www.chaincatcher.com/en/article/2182079 | 19 May 2025 | Three channels to normalise disclosure: exchanges require it, VCs require it, market makers refuse non-disclosing counterparties. | All three are norms. A market-making agreement is the contract. |
 
 ### 6. Judges on the record
@@ -147,7 +147,7 @@ Market-maker deals are the least transparent contract in crypto: fewer than 1% o
 
 ### 7. The fixes tried so far, and where each one stops
 
-Every fix on the market moves one piece of the problem and leaves the others. A market-making agreement moves them together: the project keeps custody, the strategy stays sealed, the venue's liquidity is measured at hidden times (the market maker's own orders are a later step, `WIN_PLAN.md` lever 6), and the measurement is what pays. Use this in the README's prior-art section.
+Every fix on the market moves one piece of the problem and leaves the others. A market-making agreement moves them together: the project keeps custody, the strategy stays sealed, the venue's liquidity is measured at hidden times (the market maker's own orders are a later step, the build plan (an internal note, removed from the repository on 10 Nov 2026)), and the measurement is what pays. Use this in the README's prior-art section.
 
 | Fix | Who | What it does | Custody stays with project | Strategy sealed | Own orders measured | Payment follows measurement | Where it stops |
 | --- | --- | --- | --- | --- | --- | --- | --- |

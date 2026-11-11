@@ -31,7 +31,6 @@ If two files disagree, the order of authority is: `HACKATHON.md` (the organisers
 | `REFERENCES.md` | Evidence for the README's problem section | When writing the README |
 | `DEMO.md` | The video shot by shot, the short cut, the X post drafts (lowercase, tags), the hosted demo | Phase 7 |
 | `SUBMISSION.md` | The one submission: values, tracks rule, the idea text, payload build and checks, sending, the release check | Phases 7 and 8 |
-| `WIN_PLAN.md` | How judging works, the five criteria, positioning against what the organisers link, nine levers after gate G2 | After gate G2 |
 | `LOOP_PROMPT.md` | The prompts Adi pastes into Claude Code | Adi |
 | `SETUP_FROM_YOU.md` | Everything only Adi can do, in the order the build will need it | Adi, before the kickoff |
 | `starter/` | Files the build copies in at scaffold time: the fictional companies' mandates and domain file, the attack messages, the two negotiator prompts and their output schema, the literal planner's rules, `.env.example` | `PROGRESS.md` 0.11 |
