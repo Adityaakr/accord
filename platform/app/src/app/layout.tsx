@@ -19,6 +19,14 @@ const mono = localFont({ src: "./fonts/JetBrainsMono-latin.woff2", weight: "400 
 export const metadata: Metadata = {
   title: { default: "Accord app", template: "%s · Accord" },
   description: "The private deal room and control plane for agent-to-agent commerce. Agreements negotiated in private, enforced in public.",
+  // the Accord mark in the tab (the site's own favicons, public/brand); metadata URLs are not prefixed with the base path
+  icons: {
+    icon: [
+      { url: `${process.env.NEXT_PUBLIC_BASE_PATH ?? "/app"}/brand/favicon.png`, type: "image/png", media: "(prefers-color-scheme: light)" },
+      { url: `${process.env.NEXT_PUBLIC_BASE_PATH ?? "/app"}/brand/favicon-dark.png`, type: "image/png", media: "(prefers-color-scheme: dark)" },
+    ],
+    apple: `${process.env.NEXT_PUBLIC_BASE_PATH ?? "/app"}/brand/favicon.png`,
+  },
 };
 
 export const dynamic = "force-dynamic";
