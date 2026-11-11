@@ -9,7 +9,7 @@
 Agreements negotiated in private, enforced in public.
 
 [Site](https://accordweb-production.up.railway.app) ·
-[Watch the film (2:41)](https://accordweb-production.up.railway.app/media/accord-film.mp4) ·
+[Watch the film (2:58)](https://accordweb-production.up.railway.app/media/accord-film.mp4) ·
 [Run your own deal](https://accordweb-production.up.railway.app/app/try-it) ·
 [Live attack room](https://accordweb-production.up.railway.app/app/try) ·
 [Open tenders](https://accordweb-production.up.railway.app/app/tenders) ·
@@ -24,7 +24,7 @@ Agreements negotiated in private, enforced in public.
 <a href="LICENSE"><img alt="License: MIT" src="docs/badges/license.svg" /></a>
 
 <p align="center">
-  <a href="https://accordweb-production.up.railway.app/media/accord-film.mp4"><img src="docs/media/film-poster.jpg" width="820" alt="Watch the Accord film, 2 minutes 41: the deal room, the agreement steps, market making on testnet and verification from public data." /></a>
+  <a href="https://accordweb-production.up.railway.app/media/accord-film.mp4"><img src="docs/media/film-poster.jpg" width="820" alt="Watch the Accord film, 2 minutes 58: the payment fraud it stops, the six steps of a deal room, the attack refused on chain and verification from public data." /></a>
 </p>
 
 </div>
