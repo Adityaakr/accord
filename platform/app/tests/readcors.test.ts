@@ -19,7 +19,10 @@ describe("read-only CORS", () => {
   });
 
   it("only read routes answer a CORS preflight; no write route does", () => {
-    const allowed = new Set(["api/verify/[id]/route.ts", "api/check/route.ts", "api/fund-quote/[id]/route.ts", "api/record.csv/route.ts", "record.csv/route.ts", "mcp/route.ts"]);
+    const allowed = new Set(["api/verify/[id]/route.ts", "api/check/route.ts", "api/fund-quote/[id]/route.ts", "api/record.csv/route.ts", "record.csv/route.ts", "mcp/route.ts", "api/tenders/route.ts", "api/tenders/[id]/route.ts"]);
+    // Tender relay routes take POST from any origin on purpose: the body is data signed by the bidder's own key, the
+    // board checks that signature on chain, and no session or cookie is read. They must never touch a session.
+    const signedRelays = new Set(["api/tenders/[id]/bids/route.ts", "api/tenders/[id]/reveal/route.ts", "api/tenders/[id]/award/route.ts"]);
     const root = join(__dirname, "../src/app");
     const found: string[] = [];
     const walk = (dir: string) => {
@@ -35,8 +38,11 @@ describe("read-only CORS", () => {
       }
     };
     walk(root);
-    expect(found.every((f) => allowed.has(f))).toBe(true);
-    expect(found.length).toBe(allowed.size);
+    expect(found.filter((f) => !allowed.has(f) && !signedRelays.has(f))).toEqual([]);
+    expect(found.length).toBe(allowed.size + signedRelays.size);
+    for (const f of [...signedRelays, "../server/tenderroute.ts", "../server/tender.ts"]) {
+      expect(readFileSync(join(root, f), "utf8")).not.toMatch(/session|cookies\(|withSession|x-accord-site-host/);
+    }
   });
 });
 

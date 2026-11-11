@@ -14,9 +14,9 @@ import { useWorkspace } from "./workspace/Workspace";
 import styles from "./Chrome.module.css";
 
 const FULL = ["/signin", "/enter"];
-const PUBLIC = ["/verify", "/check", "/record", "/docs", "/status", "/replay", "/controls", "/try", "/join", "/market-making", "/atlas", "/payee", "/invite"];
+const PUBLIC = ["/verify", "/check", "/record", "/docs", "/status", "/replay", "/controls", "/try", "/join", "/market-making", "/atlas", "/payee", "/invite", "/tenders"];
 // Read-only pages that never depend on who is signed in: they render at once, even while a session is being restored.
-const READ_ONLY = ["/controls", "/verify", "/check", "/record", "/docs", "/status", "/replay"];
+const READ_ONLY = ["/controls", "/verify", "/check", "/record", "/docs", "/status", "/replay", "/tenders"];
 
 // A not-found page (app/not-found.tsx) marks itself here, so an unknown address shows "page not found" instead of
 // sending a signed-out visitor to sign-in.
@@ -87,6 +87,7 @@ export function Chrome({ network, factory, sandbox, children }: { network: strin
             <Link href="/check">Check a payment</Link>
             <Link href="/try-it">Try a deal</Link>
             <Link href="/try">Live attack room</Link>
+            <Link href="/tenders">Tenders</Link>
             <a href="https://accordweb-production.up.railway.app" target="_blank" rel="noreferrer">accord site</a>
           </nav>
           <span className="small mono">{network} · factory {factory}</span>

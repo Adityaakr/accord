@@ -1,0 +1,21 @@
+// One job with its bids (prices stay null until revealed) and, once linked, the Accord agreement's state.
+import { readPreflight, withReadCors } from "@/server/cors";
+import { RelayError, boardId, dealOf, getJob, parseJobId } from "@/server/tender";
+
+export const dynamic = "force-dynamic";
+
+export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  try {
+    const id = parseJobId((await ctx.params).id);
+    const job = await getJob(id);
+    if (!job) return withReadCors(Response.json({ error: `no job ${id}` }, { status: 404 }));
+    const deal = job.agreement ? await dealOf(job.agreement) : null;
+    return withReadCors(Response.json({ board: boardId(), now: Date.now(), job, deal }, { headers: { "cache-control": "no-store" } }));
+  } catch (e) {
+    const status = e instanceof RelayError ? e.status : 502;
+    return withReadCors(Response.json({ error: (e as Error).message }, { status }));
+  }
+}
+export function OPTIONS() {
+  return readPreflight();
+}

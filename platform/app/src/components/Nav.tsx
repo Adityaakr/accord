@@ -77,6 +77,7 @@ export function Nav({ network }: { network: string }) {
 /* The open pages, for a visitor who has not signed in */
 const PUBLIC_NAV: NavItem[] = [
   { href: "/try-it", label: "Try a deal", icon: "try", match: (p) => p.startsWith("/try-it") },
+  { href: "/tenders", label: "Tenders", icon: "sheet", match: (p) => p.startsWith("/tenders") },
   { href: "/verify", label: "Verify", icon: "verify", match: (p) => p.startsWith("/verify") },
   { href: "/record", label: "Public record", icon: "record", match: (p) => p.startsWith("/record") },
   { href: "/status", label: "Status", icon: "chart", match: (p) => p.startsWith("/status") },
