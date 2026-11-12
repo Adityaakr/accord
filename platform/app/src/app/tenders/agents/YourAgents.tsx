@@ -17,6 +17,7 @@ import { PageHead, Panel, Pill, Quiet, type Tone } from "@/components/ui";
 import { onVisibleInterval } from "@/components/visible";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import type { AgentView } from "@/server/tenderagents";
+import type { TenderClaim } from "@accord/store";
 import { browserKey, ensureBrowserKey, linkBrowserKey } from "../browserKey";
 import { Command } from "../Command";
 import { KeyChip } from "../KeyChip";
@@ -26,7 +27,7 @@ import { TokenAmount } from "../TokenAmount";
 import styles from "../act.module.css";
 
 export interface LinkParams { bidder: string; sig: string; label: string; source: string }
-type Data = { account: string; agents: AgentView[] };
+type Data = { account: string; agents: AgentView[]; claims?: TenderClaim[] };
 
 const SOURCE_TONE: Record<string, Tone> = { browser: "teal", script: "neutral", cli: "neutral", mcp: "purple" };
 const LEAD = "Every agent that bids on open tenders for you: its ID, its bids, what it won and the agreement a win led to, read from the board on NEAR. Each one is a key that signed to say you run it.";
@@ -102,6 +103,7 @@ function Signed({ account, link, head }: { account: string; link: LinkParams | n
       {head}
       <div className={styles.page}>
         {link ? <LinkCard account={account} link={link} onDone={() => { router.replace("/tenders/agents"); reload(); }} /> : null}
+        {(data?.claims ?? []).map((c) => <ClaimCard key={c.bidder} account={account} claim={c} onDone={reload} />)}
         {error ? <p className={`${styles.msg} ${styles.bad}`} role="alert">Could not read your agents: {error}</p> : null}
         {data && agents.length ? (
           <dl className={styles.summary}>
@@ -178,6 +180,41 @@ function LinkCard({ account, link, onDone }: { account: string; link: LinkParams
   );
 }
 
+/** An agent that said it runs for this account (`accord tender bid --account`): one click links it, or dismiss it. */
+function ClaimCard({ account, claim, onDone }: { account: string; claim: TenderClaim; onDone: () => void }) {
+  const [busy, setBusy] = useState<"approve" | "dismiss" | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  async function send(kind: "approve" | "dismiss") {
+    setBusy(kind);
+    setErr(null);
+    try {
+      const r = kind === "approve"
+        ? await fetch("/api/tenders/agents", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ bidder: claim.bidder, label: claim.label, signature: claim.signature, source: claim.source }) })
+        : await fetch(`/api/tenders/agents?claim=${claim.bidder}`, { method: "DELETE", headers: { "content-type": "application/json" }, body: "{}" });
+      const b = (await r.json().catch(() => ({}))) as { error?: string };
+      if (!r.ok) throw new Error(b.error ?? `HTTP ${r.status}`);
+      onDone();
+    } catch (e) {
+      setErr((e as Error).message);
+      setBusy(null);
+    }
+  }
+  return (
+    <div className={styles.confirmCard} role="dialog" aria-label={`Agent ${claim.label} asks to join`}>
+      <div className={styles.confirmText}>
+        <span className="eyebrow">asked from the {claim.source} · {new Date(claim.claimed_at).toISOString().slice(0, 16).replace("T", " ")} UTC</span>
+        <p className={styles.confirmTitle}>Agent <span className="mono">{claim.label}</span> (<span className="mono" title={claim.bidder}>{shortHex(claim.bidder)}</span>) says it runs for <span className="mono">{account}</span></p>
+        <p className="small">Its key signed this. Approve it if you ran it: its bids, wins and deals then show here. Linking cannot move funds.</p>
+        {err ? <p className={`${styles.msg} ${styles.bad}`} role="status">{err}</p> : null}
+      </div>
+      <div className={styles.actions}>
+        <button type="button" className={`${styles.btn} ${styles.primary}`} onClick={() => void send("approve")} disabled={!!busy} aria-busy={busy === "approve"}>{busy === "approve" ? "Approving…" : "Approve"}</button>
+        <button type="button" className={`${styles.btn} ${styles.quiet}`} onClick={() => void send("dismiss")} disabled={!!busy}>{busy === "dismiss" ? "Dismissing…" : "Not mine"}</button>
+      </div>
+    </div>
+  );
+}
+
 function AgentCard({ a, tokens, onUnlinked }: { a: AgentView; tokens: Record<number, string>; onUnlinked: () => void }) {
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -237,7 +274,9 @@ function AgentCard({ a, tokens, onUnlinked }: { a: AgentView; tokens: Record<num
                       : <span className="mono faint">…</span>}
                   </td>
                   <td>{b.won ? <Pill tone="teal">won</Pill> : b.lost ? <Pill tone="muted">lost</Pill> : <Pill tone="neutral">{b.phase === "open" || b.phase === "revealing" ? b.phase : "pending"}</Pill>}</td>
-                  <td className={styles.hideNarrow}>{b.agreement ? <RoomLink className="mono link" id={b.agreement} /> : <span className="faint">none</span>}</td>
+                  <td className={styles.hideNarrow}>{b.agreement ? <RoomLink className="mono link" id={b.agreement} />
+                    : b.won ? <Link className="link small" href={`/tenders/${b.job}`} title={`accord tender work ${b.job} finishes the job`}>next step</Link>
+                    : <span className="faint">none</span>}</td>
                 </tr>
               ))}
             </tbody>
@@ -290,10 +329,11 @@ function AddAgent({ account, linked, onLinked }: { account: string; linked: stri
         </div>
         <div className={styles.way}>
           <span className={styles.wayTitle}>An agent that runs elsewhere</span>
-          <p className="small">Run this where the agent keeps its key (Node 22 or later). It prints a link; open it here while signed in as <span className="mono">{account}</span>.</p>
+          <p className="small">Give your account when the agent bids, and it asks to join this list: it shows above with an Approve button. Nothing to copy back.</p>
+          <Command caption="From a clone of the repository" text={`accord tender bid <job> --price <amount> --agent my-agent --account ${account} --wait --deliver "./do-the-job.sh"`} />
+          <p className="small">With <span className="mono">--wait</span> it follows the job to the end: if it wins it does the job (<span className="mono">--deliver</span> prints the work) and is paid. The script needs only Node 22:</p>
           <Command caption="Any machine with Node 22" text={linkScript(account)} />
-          <p className="small">From a clone of the repository, the CLI does the same:</p>
-          <Command caption="From a clone" text={linkCli(account)} />
+          <Command caption="Or link an agent that already runs" text={linkCli(account)} />
         </div>
       </div>
     </Panel>

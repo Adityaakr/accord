@@ -36,7 +36,8 @@ export async function relayRoute(
   raw: Promise<{ id: string }>,
   what: string,
   perIpPerHour: number,
-  run: (id: number, body: unknown, ip: string) => Promise<{ ok: boolean; tx: string }>,
+  run: (id: number, body: unknown, ip: string) => Promise<object>,
+  maxBytes = 4096,
 ): Promise<Response> {
   const json = (v: unknown, status = 200) => Response.json(v, { status, headers: RELAY_CORS });
   try {
@@ -44,7 +45,7 @@ export async function relayRoute(
     const ip = clientIp(req);
     // Per caller first; the job's shared allowance is spent only by requests that pass their checks (server/tender.ts).
     if (takeAll([{ key: `tender:${what}:ip:${ip}`, max: perIpPerHour, windowMs: 3_600_000 }])) return json({ error: "too many requests; try again later" }, 429);
-    const text = await cappedText(req, 4096);
+    const text = await cappedText(req, maxBytes);
     if (text === null) return json({ error: "request too large" }, 413);
     let body: unknown = {};
     if (text) {

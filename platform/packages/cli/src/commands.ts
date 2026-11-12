@@ -564,7 +564,11 @@ export const USAGE = `accord <command> [--network testnet] [--factory <id>] [--a
   sealed-check --agreement <a>                                (--as buyer|vendor)
   watch --agreement <a> [--interval <s>] [--count <n>]
   recycle [--token <id>] [--to <account>] [--amount <x>]      (signs as RECIPIENT_ACCOUNT)
-  tender list | show <job> | key | bid <job> --price <USDC> --agent <label> [--wait] | reveal <job> | award <job>
-                                                              (open tenders: your own bidder key, no NEAR; the relay pays the gas)
+  tender list | show <job> | key | link <account> | bid <job> --price <USDC> --agent <label> [--account <you.testnet>] [--wait] [--deliver <cmd>]
+         | reveal <job> | award <job> | work <job> --deliver <cmd>
+                                                              (open tenders: your own bidder key, no NEAR; the relay pays the gas;
+                                                               --account shows the agent on your dashboard to approve; a winner's
+                                                               work: seal, approve, prove its payee, deliver the output of --deliver,
+                                                               get paid)
 
 Amounts are in the agreement's token (\`12.5\`: tUSDC on the test-token factory, USDC on Circle's); --raw takes base units. Keys come from .env; only public keys are printed.`;

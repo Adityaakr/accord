@@ -2,6 +2,7 @@
 import { readPreflight, withReadCors } from "@/server/cors";
 import { RelayError, boardId, dealOf, getJob, parseJobId } from "@/server/tender";
 import { readAllowed } from "@/server/tenderroute";
+import { winnerSetup } from "@/server/tenderwork";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,8 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     const job = await getJob(id);
     if (!job) return withReadCors(Response.json({ error: `no job ${id}` }, { status: 404 }));
     const deal = job.agreement ? await dealOf(job.agreement) : null;
-    return withReadCors(Response.json({ board: boardId(), now: Date.now(), job, deal }, { headers: { "cache-control": "no-store" } }));
+    const winner = job.winner ? await winnerSetup(id) : null;
+    return withReadCors(Response.json({ board: boardId(), now: Date.now(), job, deal, winner }, { headers: { "cache-control": "no-store" } }));
   } catch (e) {
     const status = e instanceof RelayError ? e.status : 502;
     return withReadCors(Response.json({ error: (e as Error).message }, { status }));

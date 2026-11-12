@@ -23,6 +23,11 @@ function setup(j: TenderJob) {
     readText: async (p) => files.get(p) ?? null,
     writeSecret: async (p, c) => { files.set(p, c); },
     sleep: async () => undefined,
+    post: async (path: string, body: object) => { sent.push({ path, body: body as Record<string, unknown> }); return {}; },
+    appUrl: "https://app.test/app",
+    ops: () => { throw new Error("no agreement in this test"); },
+    runDeliver: async () => "",
+    now: () => 0,
   };
   const ctx = (argv: string[]): Ctx => {
     const args = parseArgv(argv);
@@ -70,5 +75,23 @@ describe("accord tender on a NEAR job", () => {
     await runTender(s.ctx(["tender", "bid", "3", "--price", "2.5", "--agent", "near-agent"]), s.d);
     const kept = JSON.parse(s.files.get(`/h/.accord/tender-bids/${BOARD}/3.json`)!).entries[0];
     expect(kept.price).toBe("2500000000000000000000000");
+  });
+});
+
+describe("accord tender: joining a dashboard without a pasted link", () => {
+  it("bid --account asks to join that account's agents, signed by the bidder key", async () => {
+    const { verifyLink } = await import("@accord/sdk");
+    const s = setup(job());
+    await runTender(s.ctx(["tender", "bid", "3", "--price", "1", "--agent", "my-agent", "--account", "Adi.testnet"]), s.d);
+    const claim = s.sent.find((x) => x.path === "agents/claims")!.body as { account: string; bidder: string; label: string; signature: string };
+    expect(claim).toMatchObject({ account: "adi.testnet", label: "my-agent", source: "cli" });
+    expect(verifyLink(claim.bidder, "adi.testnet", claim.signature)).toBe(true);
+    expect(s.lines.join("\n")).toContain("approve it at https://app.test/app/tenders/agents");
+  });
+  it("link sends the claim instead of printing a link to paste", async () => {
+    const s = setup(job());
+    await runTender(s.ctx(["tender", "link", "adi.testnet"]), s.d);
+    expect(s.sent.map((x) => x.path)).toEqual(["agents/claims"]);
+    expect(s.lines.join("\n")).not.toContain("sig=");
   });
 });

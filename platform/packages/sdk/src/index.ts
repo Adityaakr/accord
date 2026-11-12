@@ -14,4 +14,5 @@ export * from "./accountid.js";
 export * from "./release.js";
 export * from "./funding.js";
 export * from "./tender.js";
+export * from "./tenderwork.js";
 export * from "./timelock.js";

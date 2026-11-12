@@ -1,8 +1,9 @@
 // The signed-in account's tender agents. GET lists them with their bids; POST links one (with a signature by the
-// agent's own bidder key over "accord-tender:v1:link:<account>"); DELETE ?bidder= unlinks one. Same-origin, session.
+// agent's own bidder key over "accord-tender:v1:link:<account>"); DELETE ?bidder= unlinks one, DELETE ?claim= dismisses
+// an agent that asked to join (./claims). Same-origin, session.
 import { NextResponse } from "next/server";
 import { body, withSession } from "@/server/orgapi";
-import { LinkError, agentsFor, linkAgent, unlinkAgent } from "@/server/tenderagents";
+import { LinkError, agentsFor, claimsFor, dismissClaim, linkAgent, unlinkAgent } from "@/server/tenderagents";
 
 export const dynamic = "force-dynamic";
 
@@ -16,11 +17,13 @@ const out = async (f: () => Promise<unknown>) => {
 };
 
 export function GET(req: Request) {
-  return withSession(req, (account) => out(async () => ({ account, agents: await agentsFor(account) })));
+  return withSession(req, (account) => out(async () => ({ account, agents: await agentsFor(account), claims: await claimsFor(account) })));
 }
 export function POST(req: Request) {
   return withSession(req, async (account) => out(async () => linkAgent(account, await body(req))));
 }
 export function DELETE(req: Request) {
-  return withSession(req, (account) => out(async () => unlinkAgent(account, new URL(req.url).searchParams.get("bidder") ?? "")));
+  const q = new URL(req.url).searchParams;
+  const claim = q.get("claim");
+  return withSession(req, (account) => out(async () => claim !== null ? dismissClaim(account, claim) : unlinkAgent(account, q.get("bidder") ?? "")));
 }

@@ -16,6 +16,7 @@ function setup(j: TenderJob, relay: TenderDeps["relay"]) {
     board: { board: BOARD, job: async () => j, jobs: async () => [j] }, relay, home: "/h",
     readText: async (p) => files.get(p) ?? null,
     writeSecret: async (p, c) => { files.set(p, c); }, sleep: async () => undefined,
+    post: async () => ({}), appUrl: "https://app.test/app", ops: () => { throw new Error("no agreement in this test"); }, runDeliver: async () => "", now: () => 0,
   };
   const ctx = (argv: string[]): Ctx => {
     const args = parseArgv(argv);

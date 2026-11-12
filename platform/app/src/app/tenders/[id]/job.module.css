@@ -75,3 +75,13 @@
 
 .recordNote { margin: 0; padding: 12px 16px; border-radius: var(--radius); border: 1px solid var(--hairline-strong); background: var(--yellow-wash, rgba(var(--ink-rgb), 0.03)); font-size: 13px; line-height: 1.55; color: var(--text-medium); }
 .recordNote b { font-weight: 500; color: var(--text-strong); }
+
+/* After the award: who moves next (WinnerPanel). */
+.next { display: flex; flex-direction: column; gap: 14px; margin-top: 14px; }
+.nextSteps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; counter-reset: step; }
+.nextSteps li { counter-increment: step; display: grid; grid-template-columns: 22px 1fr; column-gap: 10px; row-gap: 2px; color: var(--text-muted, inherit); }
+.nextSteps li::before { content: counter(step); grid-row: span 2; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-family: var(--mono, monospace); font-size: 12px; border: 1px solid var(--hairline-strong); }
+.stepTitle { font-weight: 500; }
+.stepNow::before { background: var(--white); color: var(--on-white); border-color: transparent; }
+.stepDone::before { content: "✓" !important; color: var(--teal); border-color: var(--teal); }
+.mine { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: var(--radius); border: 1px dashed var(--hairline-strong); }

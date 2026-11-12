@@ -2,7 +2,7 @@
 // shown with what the board says each did: its bids, which it won, and the agreement a win led to. Reads only; the
 // board and the contracts decide everything an agent may do.
 import "server-only";
-import { tenderAgents, type TenderAgent, type TenderAgentSource } from "@accord/store";
+import { tenderAgents, tenderWork, type TenderAgent, type TenderAgentSource, type TenderClaim } from "@accord/store";
 import { validAgentLabel, verifyLink, type TenderJob } from "@accord/sdk";
 import { listJobs } from "./tender";
 
@@ -27,6 +27,7 @@ export async function linkAgent(account: string, b: { bidder?: unknown; label?: 
   if (!verifyLink(bidder, account, signature)) throw new LinkError(403, `the signature is not this agent's over "accord-tender:v1:link:${account}"`);
   const r = await tenderAgents.link(account, bidder, label, source);
   if (r === "full") throw new LinkError(409, "this account already has 20 agents linked; remove one first");
+  await tenderWork.dropClaim(account, bidder).catch(() => undefined);
   return { ok: true, result: r, bidder, label };
 }
 
@@ -50,4 +51,16 @@ export async function agentsFor(account: string): Promise<AgentView[]> {
     });
     return { ...a, bids, wins: bids.filter((x) => x.won).length, open: bids.filter((x) => x.phase === "open" || x.phase === "revealing").length };
   });
+}
+
+/** Agents that said they run for this account and wait for its owner to approve them (an Approve links them). */
+export async function claimsFor(account: string): Promise<TenderClaim[]> {
+  const [claims, linked] = await Promise.all([tenderWork.claims(account), tenderAgents.list(account)]);
+  const have = new Set(linked.map((a) => a.bidder));
+  return claims.filter((c) => !have.has(c.bidder));
+}
+
+export async function dismissClaim(account: string, bidder: string) {
+  await tenderWork.dropClaim(account, bidder);
+  return { ok: true };
 }

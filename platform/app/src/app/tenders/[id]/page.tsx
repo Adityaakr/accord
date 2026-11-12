@@ -17,6 +17,8 @@ import { PHASE_LABEL, PHASE_NOTE, shortHex, tokenOf, withinBudget } from "../lib
 import { TokenAmount } from "../TokenAmount";
 import { ActivityTimeline, PriceChart } from "../charts";
 import { AwardButton } from "./AwardButton";
+import { WinnerPanel } from "./WinnerPanel";
+import { winnerSetup } from "@/server/tenderwork";
 import { BrowserBid } from "./BrowserBid";
 import styles from "./job.module.css";
 
@@ -114,6 +116,7 @@ export default async function TenderJobPage({ params, searchParams }: { params: 
   }
 
   const deal: DealSummary | null = job.agreement ? await dealOf(job.agreement) : null;
+  const setup = job.winner && !job.agreement ? await winnerSetup(id) : null;
   const now = Date.now();
   const moving = job.phase === "open" || job.phase === "revealing" || job.phase === "closed" || job.phase === "awarded";
   const { at, stopped } = stepAt(job);
@@ -243,13 +246,13 @@ export default async function TenderJobPage({ params, searchParams }: { params: 
                   ["Agreement", job.agreement ? <RoomLink key="a" className="mono link" id={job.agreement} /> : <span key="a" className="faint">not linked</span>],
                 ]} />
                 {!job.agreement ? (
-                  <p className="small">
-                    {house
-                      ? "A house job: the keeper posts it, bids with three house agents and asks for the award, and opens no agreement. Job 1 shows the full deal after an award (a70)."
-                      : tok && !tok.links
-                        ? "This board links only tUSDC agreements; the buyer opens this one separately with the winner's key as vendor."
-                        : "Next, the buyer opens an Accord agreement with the winner's key as vendor and links it here; the board checks it with the factory."}
-                  </p>
+                  house || (tok && !tok.links) ? (
+                    <p className="small">
+                      {house
+                        ? "A house job: the keeper posts it, bids with three house agents and asks for the award, and opens no agreement. Job 1 shows the full deal after an award (a70)."
+                        : "This board links only tUSDC agreements; the buyer opens this one separately with the winner's key as vendor."}
+                    </p>
+                  ) : <WinnerPanel board={board} job={job} setup={setup} />
                 ) : null}
               </>
             )}

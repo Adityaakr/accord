@@ -4,11 +4,17 @@
 // the reveal. Bids, reveals and the award go through the app's relay (POST /api/tenders/...), which pays the gas and
 // cannot change a bid: the board checks the bidder's signature. Reads come straight from the board on chain.
 //
-//   accord tender list | show <job> | key
-//   accord tender bid <job> --price <amount in the job token> --agent <label> [--wait]
+//   accord tender list | show <job> | key | link <account>
+//   accord tender bid <job> --price <amount in the job token> --agent <label> [--account <you.testnet>] [--wait] [--deliver "<cmd>"]
 //   accord tender reveal <job> | award <job>
+//   accord tender work <job> --deliver "<cmd>"      (the winner finishes the job: ./tenderwork.ts)
+//
+// With --account (or ACCORD_ACCOUNT) the agent asks to join that account's dashboard: it shows there with an Approve
+// button, no link to paste. With --wait a bid follows the job to the end: reveal, award, and if it won, the work.
 
+import { exec } from "node:child_process";
 import {
+  Accord, KeySigner, bidderNearKey, signLink as signLinkFor,
   Chain, RPC, TENDER_BOARDS, TenderBoardClient, addBidSecret, bidderKey, isBoardId, newBidderKey, nextNonce,
   parseTenderAmount, prepareBid, secondsLeft, secretFor, signLink, tenderAmount, tenderToken, type BidderKey, type TenderJob,
 } from "@accord/sdk";
@@ -18,11 +24,12 @@ import { dirname } from "node:path";
 import { flagBool, flagString } from "./args.js";
 import { header, line } from "./format.js";
 import type { Ctx, Handler } from "./commands.js";
+import { work, type WinnerKeys, type WorkDeps, type WorkOps } from "./tenderwork.js";
 
 export const DEFAULT_RELAY = "https://accordweb-production.up.railway.app/app";
 
 /** What `accord tender` touches, injected so tests run with fakes. */
-export interface TenderDeps {
+export interface TenderDeps extends Omit<WorkDeps, "board"> {
   board: Pick<TenderBoardClient, "board" | "job" | "jobs">;
   relay(path: string, body: object): Promise<{ tx: string }>;
   home: string;
@@ -38,8 +45,26 @@ export function tenderDeps(ctx: Ctx): TenderDeps {
   if (!isBoardId(boardId)) throw new Error(`not a board account id: ${boardId}`);
   const rpc = ctx.env.NEAR_RPC_URL || RPC.testnet!.rpc;
   const relayUrl = (flagString(ctx.args, "relay") ?? ctx.env.ACCORD_APP_URL ?? DEFAULT_RELAY).replace(/\/+$/, "");
+  const chain = new Chain(rpc, "testnet");
+  const factory = ctx.env.ACCORD_FACTORY || "accord-v2.testnet";
+  const post = async (path: string, body: object) => {
+    const r = await fetch(`${relayUrl}/api/tenders/${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    const j = (await r.json().catch(() => ({}))) as Record<string, unknown>;
+    if (!r.ok) throw new Error(`app: ${String(j.error ?? `HTTP ${r.status}`)}`);
+    return j;
+  };
   return {
-    board: new TenderBoardClient(new Chain(rpc, "testnet"), boardId),
+    board: new TenderBoardClient(chain, boardId),
+    post,
+    appUrl: relayUrl,
+    ops: (agreement, keys) => realOps(new Accord({ network: "testnet", factory, rpc }), agreement, keys),
+    runDeliver: (command, env) => new Promise((resolve, reject) => {
+      exec(command, { env: { ...process.env, ...env }, maxBuffer: 1 << 20, timeout: 10 * 60_000 }, (err, stdout, stderr) => {
+        if (err) reject(new Error(`--deliver failed: ${err.message}${stderr ? ` (${stderr.trim().slice(0, 300)})` : ""}`));
+        else resolve(stdout);
+      });
+    }),
+    now: () => Date.now(),
     relay: async (path, body) => {
       const r = await fetch(`${relayUrl}/api/tenders/${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
       const j = (await r.json().catch(() => ({}))) as { tx?: string; error?: string };
@@ -60,6 +85,36 @@ export function tenderDeps(ctx: Ctx): TenderDeps {
   };
 }
 
+/** The winner's real moves: the vendor key signs as the vendor, the approver key as the vendor's authority. */
+function realOps(base: Accord, agreement: string, k: WinnerKeys): WorkOps {
+  const as = (key: BidderKey) => base.withSigner(new KeySigner(key.id, bidderNearKey(key), base.chain)).agreement(agreement);
+  const vendor = as(k.vendor), authority = as(k.authority), read = base.agreement(agreement);
+  return {
+    view: async () => {
+      const [a, c, recipients, items] = await Promise.all([read.get(), read.commitments(), read.recipients(), read.items()]);
+      return { agreement: a, sealed: { buyer: !!c.buyer, vendor: !!c.vendor }, recipients, items, now: a.now };
+    },
+    seal: async (m) => (await vendor.sealMandate(m, { role: "vendor" })).txHash,
+    negotiate: async () => (await vendor.startNegotiation()).txHash,
+    approve: async (terms) => (await vendor.approveTerms(terms)).txHash,
+    propose: async (r, domain) => (await vendor.proposeRecipient(r, domain)).txHash,
+    authorityApprove: async (v) => (await authority.approveRecipient(v)).txHash,
+    activate: async (v) => (await vendor.activateRecipient(v)).txHash,
+    deliver: async (item, sha, uri) => (await vendor.submitDelivery(item, sha, uri)).txHash,
+    claim: async (item) => { const r = await vendor.claim(item); return { tx: r.txHash ?? "(no tx)", status: r.status, code: r.code ?? null }; },
+  };
+}
+
+/** Asks to join an account's dashboard: signed by the agent's key; the owner approves it there. */
+async function claimAccount(d: TenderDeps, key: BidderKey, account: string, label: string): Promise<void> {
+  await d.post("agents/claims", { account, bidder: key.id, label, source: "cli", signature: signLinkFor(key, account) });
+}
+const ownerOf = (ctx: Ctx): string | undefined => {
+  const a = (flagString(ctx.args, "account") ?? ctx.env.ACCORD_ACCOUNT)?.trim().toLowerCase();
+  if (a && !/^[a-z0-9._-]{2,64}$/.test(a)) throw new Error(`--account ${a} is not a NEAR account id`);
+  return a || undefined;
+};
+
 /** An amount in the job's own token (its decimals and symbol); a token this CLI does not know shows raw base units. */
 const amt = (base: string | null, token: string) => {
   if (base === null) return "sealed";
@@ -73,8 +128,8 @@ const jobNo = (ctx: Ctx, i = 1) => {
 };
 
 /** The bidder key: read if the file exists (a damaged file is an error, never replaced), made only if it does not. */
-async function loadKey(d: TenderDeps, create: boolean): Promise<BidderKey> {
-  const file = `${d.home}/.accord/bidder.json`;
+async function loadKey(d: TenderDeps, create: boolean, path?: string): Promise<BidderKey> {
+  const file = path ?? `${d.home}/.accord/bidder.json`;
   const text = await d.readText(file);
   if (text !== null) {
     try {
@@ -83,7 +138,7 @@ async function loadKey(d: TenderDeps, create: boolean): Promise<BidderKey> {
       throw new Error(`${file} is not a readable bidder key (${(e as Error).message}); it may be the vendor key of a won agreement, so it is left as it is`);
     }
   }
-  if (!create) throw new Error(`no bidder key at ${file}: run accord tender key`);
+  if (!create || path) throw new Error(`no bidder key at ${file}${path ? "" : ": run accord tender key"}`);
   const k = newBidderKey();
   await d.writeSecret(file, JSON.stringify({ seed: k.seed, id: k.id }, null, 2), true);
   return k;
@@ -105,8 +160,8 @@ function jobLines(j: TenderJob): string[] {
 }
 
 /** Reveals the bid the board holds for this key, with the kept entry whose commitment matches it. */
-async function reveal(ctx: Ctx, d: TenderDeps, job: number): Promise<number> {
-  const key = await loadKey(d, false);
+async function reveal(ctx: Ctx, d: TenderDeps, job: number, keyPath?: string): Promise<number> {
+  const key = await loadKey(d, false, keyPath);
   const j = await d.board.job(job);
   const onChain = j?.bids.find((b) => b.bidder === key.id);
   if (!onChain) throw new Error(`job ${job} holds no bid from ${key.id}`);
@@ -134,6 +189,8 @@ export const tender: Handler = async (ctx) => {
 
 export async function runTender(ctx: Ctx, d: TenderDeps): Promise<number> {
   const sub = ctx.rest[0];
+  // --key <file>: another bidder key file, such as one downloaded from the browser that bid with it
+  const keyPath = flagString(ctx.args, "key");
   switch (sub) {
     case "list": {
       const jobs = await d.board.jobs(20);
@@ -149,7 +206,7 @@ export async function runTender(ctx: Ctx, d: TenderDeps): Promise<number> {
       return 0;
     }
     case "key": {
-      const k = await loadKey(d, true);
+      const k = await loadKey(d, true, keyPath);
       ctx.out.block([header("tender key"), line("bidder", k.id), line("account", `${k.id} (NEAR implicit; funded only if you win)`), line("stored", `${d.home}/.accord/bidder.json (0600)`)], { bidder: k.id });
       return 0;
     }
@@ -165,41 +222,48 @@ export async function runTender(ctx: Ctx, d: TenderDeps): Promise<number> {
       if (!j) throw new Error(`no job ${job} on ${d.board.board}`);
       if (j.phase !== "open") throw new Error(`job ${job} is ${j.phase}; bids are taken while it is open`);
       if (BigInt(price) > BigInt(j.budget)) ctx.out.warn(`note: ${amt(price, j.token)} is above the budget ${amt(j.budget, j.token)}; it cannot win`);
-      const key = await loadKey(d, true);
+      const key = await loadKey(d, true, keyPath);
       const keptBefore = await d.readText(bidFile(d, job));
       const onChain = j.bids.find((b) => b.bidder === key.id);
       const sealed = prepareBid({ board: d.board.board, job, price, agent, key, nonce: nextNonce(keptBefore, onChain?.nonce ?? null) });
       // kept before sending and added, never overwritten: whichever submission lands can be revealed
       await d.writeSecret(bidFile(d, job), addBidSecret(keptBefore, sealed));
       const r = await d.relay(`${job}/bids`, { bidder: sealed.bidder, agent: sealed.agent, commitment: sealed.commitment, nonce: sealed.nonce, signature: sealed.signature });
+      const owner = ownerOf(ctx);
+      const claimed = owner ? await claimAccount(d, key, owner, agent).then(() => true, (e: Error) => { ctx.out.warn(`could not ask to join ${owner}'s dashboard: ${e.message}`); return false; }) : false;
       ctx.out.block([
         header("tender bid", `job ${job}`),
         line("bidder", key.id),
         line("sealed", `commitment ${sealed.commitment.slice(0, 16)}… · price hidden until the reveal`),
         line("tx", r.tx),
         line("kept", `${bidFile(d, job)} (price and salt; needed to reveal)`),
-      ], { job, bidder: key.id, commitment: sealed.commitment, tx: r.tx });
+        ...(claimed ? [line("dashboard", `asked to join ${owner}'s agents: approve it at ${d.appUrl}/tenders/agents`)] : []),
+      ], { job, bidder: key.id, commitment: sealed.commitment, tx: r.tx, claimed: owner ?? null });
       if (!flagBool(ctx.args, "wait")) return 0;
       const after = await waitPhase(d, job, (x) => x.phase !== "open", secondsLeft(j) + 60);
-      if (after.phase === "revealing") await reveal(ctx, d, job);
+      if (after.phase === "revealing") await reveal(ctx, d, job, keyPath);
       const decided = await waitPhase(d, job, (x) => !["open", "revealing", "closed"].includes(x.phase) || (x.phase === "revealing" && x.bids.every((b) => b.price !== null)), 600);
       if (decided.phase === "revealing" || decided.phase === "closed") await d.relay(`${job}/award`, {}).catch((e: Error) => ctx.out.warn(`award: ${e.message}`));
       const final = (await d.board.job(job))!;
-      ctx.out.block([...jobLines(final), line("result", final.winner === key.id ? "you won: the buyer opens an Accord agreement with your key as vendor" : "another bid won")], final);
-      return 0;
+      const won = final.winner === key.id;
+      ctx.out.block([...jobLines(final), line("result", won ? "you won: now doing the job (accord tender work)" : "another bid won")], final);
+      return won ? work(ctx, d, job, key) : 0;
     }
     case "link": {
       const account = String(ctx.rest[1] ?? "").trim().toLowerCase();
       if (!/^[a-z0-9._-]{2,64}$/.test(account)) throw new Error("accord tender link <your-account.testnet> [--agent <label>]");
-      const k = await loadKey(d, true);
+      const k = await loadKey(d, true, keyPath);
       const sig = signLink(k, account);
       const label = flagString(ctx.args, "agent") ?? `agent ${k.id.slice(0, 6)}`;
-      const url = `${DEFAULT_RELAY}/tenders/agents?bidder=${k.id}&sig=${sig}&label=${encodeURIComponent(label)}&source=cli`;
-      ctx.out.block([header("tender link", account), line("bidder", k.id), line("open", url), line("then", `signed in as ${account}, the agent shows in your dashboard`)], { account, bidder: k.id, signature: sig, url });
+      await d.post("agents/claims", { account, bidder: k.id, label, source: "cli", signature: sig });
+      const url = `${d.appUrl}/tenders/agents`;
+      ctx.out.block([header("tender link", account), line("bidder", k.id), line("asked", `to join ${account}'s agents`), line("approve", `${url} (signed in as ${account})`)], { account, bidder: k.id, signature: sig, url });
       return 0;
     }
+    case "work":
+      return work(ctx, d, jobNo(ctx), await loadKey(d, false, keyPath));
     case "reveal":
-      return reveal(ctx, d, jobNo(ctx));
+      return reveal(ctx, d, jobNo(ctx), keyPath);
     case "award": {
       const job = jobNo(ctx);
       const r = await d.relay(`${job}/award`, {});
@@ -208,6 +272,6 @@ export async function runTender(ctx: Ctx, d: TenderDeps): Promise<number> {
       return 0;
     }
     default:
-      throw new Error("accord tender list | show <job> | key | link <account> | bid <job> --price <amount in the job token> --agent <label> [--wait] | reveal <job> | award <job>");
+      throw new Error("accord tender list | show <job> | key | link <account> | bid <job> --price <amount in the job token> --agent <label> [--account <you.testnet>] [--wait] [--deliver <cmd>] | reveal <job> | award <job> | work <job> --deliver <cmd>");
   }
 }

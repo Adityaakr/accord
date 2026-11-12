@@ -3,7 +3,10 @@
 //   curl -sO https://accordweb-production.up.railway.app/app/tender-bid.mjs
 //   node tender-bid.mjs list
 //   node tender-bid.mjs bid <job> --price 34.50 --agent my-agent --wait
-//   node tender-bid.mjs link <your-account.testnet>   (shows this agent in your Accord dashboard)
+//   node tender-bid.mjs bid <job> --price 34.50 --agent my-agent --account you.testnet --wait
+//   node tender-bid.mjs link <your-account.testnet>   (asks to join your Accord dashboard; approve it there)
+// --account (or ACCORD_ACCOUNT) asks to join that account's agents: it shows there with an Approve button. A winner
+// finishes the job with the CLI, which reads the same key: accord tender work <job> --deliver "<command>".
 // Your bidder key (an ed25519 seed) is made on first use in ~/.accord/bidder.json (0600); its public key in hex is
 // your bidder id and your NEAR implicit account. The price and salt of each sealed bid stay in
 // ~/.accord/tender-bids/<board>/<job>.json (0600) until the reveal: only a hash of them is sent while bidding is open.
@@ -118,12 +121,12 @@ async function main() {
     const k = await loadKey();
     const sig = sign(null, Buffer.from(`accord-tender:v1:link:${account}`), k.priv).toString("hex");
     const label = String(flag("agent") || `agent ${k.id.slice(0, 6)}`);
-    const url = `${APP}/tenders/agents?bidder=${k.id}&sig=${sig}&label=${encodeURIComponent(label)}&source=script`;
-    console.log(`bidder ${k.id}\nopen this while signed in as ${account} to show the agent in your dashboard:\n${url}`);
+    await post("agents/claims", { account, bidder: k.id, label, source: "script", signature: sig });
+    console.log(`bidder ${k.id}\nasked to join ${account}'s agents: approve it at ${APP}/tenders/agents (signed in as ${account})`);
     return;
   }
   const job = Number(arg);
-  if (!Number.isInteger(job) || job < 1) throw new Error("usage: list | key | link <account> | show <job> | bid <job> --price <USDC> --agent <label> [--wait] | reveal <job> | award <job>");
+  if (!Number.isInteger(job) || job < 1) throw new Error("usage: list | key | link <account> | show <job> | bid <job> --price <USDC> --agent <label> [--account <you.testnet>] [--wait] | reveal <job> | award <job>");
   if (cmd === "show") return show((await get(`/${job}`)).job);
   if (cmd === "award") { const r = await post(`${job}/award`, {}); console.log(`award tx ${r.tx}`); return show((await get(`/${job}`)).job); }
   const { board, job: j } = await get(`/${job}`);
@@ -148,6 +151,12 @@ async function main() {
   await secret(file, JSON.stringify({ bidder: k.id, entries }, null, 2));
   const r = await post(`${job}/bids`, { bidder: k.id, agent, commitment, nonce, signature });
   console.log(`sealed bid on job ${job} · bidder ${k.id.slice(0, 12)}… · commitment ${commitment.slice(0, 16)}… · tx ${r.tx}`);
+  const owner = String(flag("account") || process.env.ACCORD_ACCOUNT || "").trim().toLowerCase();
+  if (owner) {
+    const sig = sign(null, Buffer.from(`accord-tender:v1:link:${owner}`), k.priv).toString("hex");
+    await post("agents/claims", { account: owner, bidder: k.id, label: agent, source: "script", signature: sig })
+      .then(() => console.log(`asked to join ${owner}'s agents: approve it at ${APP}/tenders/agents`), (e) => console.log(`could not ask to join ${owner}'s agents: ${e.message}`));
+  }
   if (!rest.includes("--wait")) return console.log(`reveal after the deadline: node tender-bid.mjs reveal ${job}`);
   let cur = j;
   while (cur.phase === "open") { await sleep(3000); cur = (await get(`/${job}`)).job; }
@@ -164,6 +173,8 @@ async function main() {
     await sleep(3000);
   }
   show(cur);
-  console.log(cur.winner === k.id ? "you won: the buyer opens an Accord agreement with your key as vendor" : "another bid won");
+  console.log(cur.winner === k.id
+    ? `you won. Do the job with the CLI (it reads this key): accord tender work ${job} --deliver "<command that prints the work>"\nit accepts, waits for the buyer to open the agreement (${APP}/tenders/${job}), delivers and is paid`
+    : "another bid won");
 }
 main().catch((e) => { console.error(`error: ${e.message}`); process.exit(1); });
