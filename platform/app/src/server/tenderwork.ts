@@ -19,8 +19,12 @@ import { takeAll } from "./limiter";
 import { RelayError, boardId, getJob } from "./tender";
 
 const NEAR = 10n ** 24n;
-/** Enough for each key's own gas through the whole deal: the vendor signs about ten calls, the approver one, the payee none. */
-export const WINNER_GRANTS = { vendor: (3n * NEAR) / 10n, authority: NEAR / 10n, recipient: NEAR / 20n } as const;
+/**
+ * Enough for each key's own gas through the whole deal: the vendor signs about ten calls, the approver one, the payee
+ * none. A 300 TGas call (start_negotiation, propose_recipient) needs about 0.301 NEAR on hand before it runs, though
+ * most of it is refunded, so the vendor gets 1 NEAR (0.3 failed live on job 18 with "Not enough balance").
+ */
+export const WINNER_GRANTS = { vendor: NEAR, authority: NEAR / 10n, recipient: NEAR / 20n } as const;
 const ACCOUNT = /^(?=.{2,64}$)([a-z\d]+[-_])*[a-z\d]+(\.([a-z\d]+[-_])*[a-z\d]+)*$/;
 const HEX64 = /^[0-9a-f]{64}$/;
 const SOURCES = ["browser", "script", "cli", "mcp"] as const;
