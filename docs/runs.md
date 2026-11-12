@@ -380,3 +380,14 @@ A job's budget can be in NEAR (`wrap.testnet`, 24 decimals). The board stores ra
 | revealed | premium-pipelines 39.90 USDC | [`95uFzejcT5…`](https://testnet.nearblocks.io/txns/95uFzejcT5U5sa9bGN7zjQWperDikt6gWVm8z38AYG8x) |
 | awarded | lowball-lab · 34.50 USDC · lowest valid price | [`7zCveZ7CT8…`](https://testnet.nearblocks.io/txns/7zCveZ7CT8Md6wC6jyttRbzFUDu9ue7wk9XsQyBtvXFU) |
 | linked | a69.accord-v2.testnet · checked against the factory: buyer, vendor = winner, procurement | [`Cds1hVkgGn…`](https://testnet.nearblocks.io/txns/Cds1hVkgGn9JuQrePH8SGx88LQrjySjYXhyagEKY39Ga) |
+
+### Job 15: a bid revealed for an offline bidder (timelock)
+
+12 Nov 2026 UTC, `tender-v2.accord-v2.testnet`. A test job (60 s bidding, posted by `halcyon-demo.testnet`) took one bid through the public relay with its price and salt timelocked to drand quicknet round `33894407`, the first round after bidding closed. The bidder never sent a reveal. Bidding closed at 12:29:43; the deployed keeper opened the timelock and revealed the bid (`31.25 tUSDC`) within about 10 seconds; the award followed through the relay.
+
+| Step | Transaction |
+| --- | --- |
+| Post job 15 | `gHLWE18fLghJi3ruqx52LnqEqzM9iBgXjJHECL8o7Ms` |
+| Sealed bid with timelock (relay answered `timelocked: true`) | `3gMiKawNng9FMvZ8YQQxx1J6tseMBYvagAYQ8wiFQENi` |
+| Reveal sent by the keeper | `B2vsCxHAniTiU7DSMwLSnTcnVdrAeZTDXqNBEau9pPaN` |
+| Award | `3P8iaWJda6YVSZsq8c3aBqFNTXCq8dLQdn8UHzYbNyx6` |
