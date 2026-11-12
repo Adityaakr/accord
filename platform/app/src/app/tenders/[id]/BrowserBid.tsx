@@ -2,13 +2,15 @@
 
 // Bid from this browser: the signed-in person seals a price with a bidder key kept in this browser's storage, and
 // the app's relay submits it (it pays the gas and the bond; the board checks the key's signature). The price and
-// the salt stay here until the reveal window, when this page reveals the bid once on its own. The key is linked to
+// the salt stay here until the reveal window, when this page reveals the bid once on its own. The bid also carries
+// its price and salt timelocked to the drand round after bidding closes (sdk/timelock.ts), so the house keeper reveals
+// it for a bidder who never comes back; nobody can open it before that round. The key is linked to
 // the signed-in account, so the bid shows on /tenders/agents.
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
-  addBidSecret, nextNonce, parseTenderAmount, prepareBid, secretFor, validAgentLabel, type BidderKey, type TenderJob,
+  addBidSecret, nextNonce, parseTenderAmount, prepareBid, secretFor, timelockBidSecret, validAgentLabel, type BidderKey, type TenderJob,
 } from "@accord/sdk";
 import { TxLink } from "@/components/TxLink";
 import { Panel, Pill } from "@/components/ui";
@@ -94,10 +96,14 @@ export function BrowserBid({ board, job }: { board: string; job: TenderJob }) {
       const next = addBidSecret(prev, sealed);
       if (!write(bidsKey(board, job.id), next)) { setMsg({ ok: false, text: "Could not keep the sealed price in this browser, so nothing was sent." }); return; }
       setKept(next);
+      // drand unreachable: the bid still goes, and this page (or the bidder) reveals it as before
+      const timelock = await timelockBidSecret(sealed.secret, job.commit_ends).catch(() => undefined);
       const r = await relay(`/api/tenders/${job.id}/bids`, {
-        bidder: sealed.bidder, agent: sealed.agent, commitment: sealed.commitment, nonce: sealed.nonce, signature: sealed.signature,
+        bidder: sealed.bidder, agent: sealed.agent, commitment: sealed.commitment, nonce: sealed.nonce, signature: sealed.signature, timelock,
       });
-      setMsg(r.ok ? { ok: true, text: onChain ? "Bid replaced. Sealed on chain." : "Bid sealed on chain.", tx: r.tx } : { ok: false, text: r.error });
+      const sealedText = onChain ? "Bid replaced. Sealed on chain." : "Bid sealed on chain.";
+      const after = timelock ? " It is revealed for you when bidding closes; you can close this page." : " Come back after bidding closes to reveal it.";
+      setMsg(r.ok ? { ok: true, text: sealedText + after, tx: r.tx } : { ok: false, text: r.error });
       if (r.ok) setPrice("");
       router.refresh();
     } catch (err) {
@@ -159,7 +165,7 @@ export function BrowserBid({ board, job }: { board: string; job: TenderJob }) {
             {busy ? "Sealing and sending…" : mine ? "Replace my bid" : "Seal and bid"}
           </button>
           {result}
-          <p className={styles.hint}>This browser keeps the key and the sealed price. Come back after bidding closes: this page reveals the bid, or it cannot win.</p>
+          <p className={styles.hint}>Your price is sealed, and also locked in time with drand so nobody can read it before bidding closes. Then Accord reveals it for you; you do not need to come back.</p>
           {linkNote === "no_session"
             ? <p className={styles.hint}>To see this agent on <Link className="link" href="/tenders/agents">Your agents</Link>, confirm it is you there; the bid itself does not need it.</p>
             : linkNote ? <p className={styles.hint}>{linkNote}</p> : null}
@@ -178,7 +184,7 @@ export function BrowserBid({ board, job }: { board: string; job: TenderJob }) {
             <p className="small">Revealed at {amount(mine.price)}. The award opens when the reveal window closes, or once every bid is revealed.</p>
           ) : secret ? (
             <>
-              <p className="small">Bidding is closed. Reveal your price of {keptPrice} so the board counts it.</p>
+              <p className="small">Bidding is closed. Reveal your price of {keptPrice} so the board counts it; a timelocked bid is also revealed for you.</p>
               <button type="button" className={`${styles.btn} ${styles.primary} ${styles.full}`} onClick={() => void reveal()} disabled={busy} aria-busy={busy}>
                 {busy ? "Revealing…" : "Reveal my bid"}
               </button>

@@ -6,12 +6,17 @@
 // reveals and the award, which the board allows from anyone). Each house agent's key and salt are derived from
 // TENDER_HOUSE_SEED, so a restart can still reveal its bids.
 //
+// It also reveals for bidders who are offline: a bid sent with a timelocked price and salt (sdk/timelock.ts, kept by
+// the app's relay) opens once drand publishes the round after the bidding deadline, and the keeper sends that reveal
+// on any job on the board. The board checks the reveal against the bid's commitment, so the keeper cannot alter it.
+//
 // The full deal after an award (agreement, Sealed Table, payment, refused redirect) is what `make tender` runs; the
 // keeper does not open agreements, so it spends only the job deposit (0.25 NEAR) and gas per job.
 
 import { createHash, createHmac } from "node:crypto";
+import { tenderTimelocks, type TenderTimelock } from "@accord/store";
 import {
-  KeySigner, TENDER_BOARDS, TENDER_MAX_BIDS, TenderBoardClient, tenderToken, bidderKey, prepareBid, type Chain, type TenderJob,
+  KeySigner, TENDER_BOARDS, openTimelockedBid, TENDER_MAX_BIDS, TenderBoardClient, tenderToken, bidderKey, prepareBid, type Chain, type TenderJob,
 } from "@accord/sdk";
 
 export interface TenderKeeperConfig {
@@ -99,10 +104,35 @@ export function nextActions(cfg: TenderKeeperConfig, jobs: TenderJob[], nowMs: n
   return out;
 }
 
+export type TimelockStep =
+  | { kind: "reveal"; lock: TenderTimelock }
+  | { kind: "drop"; lock: TenderTimelock; why: string };
+
+/** What to do with stored timelocks, from the board alone: reveal while the job is revealing, drop when it never can be. */
+export function timelockSteps(jobs: TenderJob[], locks: TenderTimelock[]): TimelockStep[] {
+  const out: TimelockStep[] = [];
+  for (const lock of locks) {
+    const j = jobs.find((x) => x.id === lock.job);
+    if (!j) continue; // not in the window read this step; it is read again next step
+    const bid = j.bids.find((b) => b.bidder === lock.bidder);
+    if (!bid) { if (j.phase !== "open") out.push({ kind: "drop", lock, why: "no such bid on the board" }); continue; }
+    if (bid.commitment !== lock.commitment) { if (j.phase !== "open") out.push({ kind: "drop", lock, why: "the bid was replaced" }); continue; }
+    if (bid.price !== null) out.push({ kind: "drop", lock, why: "already revealed" });
+    else if (j.phase === "revealing") out.push({ kind: "reveal", lock });
+    else if (j.phase !== "open") out.push({ kind: "drop", lock, why: `job is ${j.phase}` });
+  }
+  return out;
+}
+
+type TimelockStore = Pick<typeof tenderTimelocks, "pending" | "finish">;
+
 export class TenderKeeper {
   private readonly board: TenderBoardClient;
   private readonly buyer: KeySigner;
-  constructor(private readonly cfg: TenderKeeperConfig, chain: Chain, private readonly log: (s: string) => void) {
+  constructor(
+    private readonly cfg: TenderKeeperConfig, chain: Chain, private readonly log: (s: string) => void,
+    private readonly locks: TimelockStore = tenderTimelocks,
+  ) {
     this.board = new TenderBoardClient(chain, cfg.board);
     this.buyer = new KeySigner(cfg.buyer.account, cfg.buyer.key, chain);
   }
@@ -115,8 +145,31 @@ export class TenderKeeper {
       posted ||= a.kind === "post" && r.ok;
       this.log(`${a.kind}${"job" in a ? ` job ${a.job}` : ""}${"agent" in a ? ` ${HOUSE_AGENTS[a.agent]}` : ""} → ${r.ok ? r.txHash : r.failure}`);
     }
+    await this.revealTimelocked(jobs);
     // bid on a new job in the same step, so its first seconds are not left to anyone filling it with junk
     if (posted) await this.step();
+  }
+
+  /** Reveals bids whose timelocked price and salt are now open; a failure is logged and retried next step. */
+  private async revealTimelocked(jobs: TenderJob[]): Promise<void> {
+    const pending = await this.locks.pending(this.cfg.board).catch((e: Error) => { this.log(`timelocks: ${e.message}`); return []; });
+    for (const s of timelockSteps(jobs, pending)) {
+      const { lock } = s;
+      const who = `job ${lock.job} ${lock.bidder.slice(0, 8)}`;
+      if (s.kind === "drop") { await this.locks.finish(lock.board, lock.job, lock.bidder, s.why); continue; }
+      try {
+        const open = await openTimelockedBid(lock.ciphertext, { board: this.cfg.board, job: lock.job, bidder: lock.bidder, commitment: lock.commitment });
+        if (!open) continue; // drand has not published the round yet
+        const r = await this.board.reveal(this.buyer, lock.job, lock.bidder, open.price, open.salt);
+        this.log(`timelock reveal ${who} → ${r.ok ? r.txHash : r.failure}`);
+        if (r.ok) await this.locks.finish(lock.board, lock.job, lock.bidder, r.txHash ?? "revealed");
+      } catch (e) {
+        const msg = (e as Error).message;
+        this.log(`timelock reveal ${who}: ${msg}`);
+        // a ciphertext that does not open the commitment never will: stop paying for it
+        if (/does not open|is not \{price/.test(msg)) await this.locks.finish(lock.board, lock.job, lock.bidder, msg);
+      }
+    }
   }
 
   private run(a: KeeperAction, jobs: TenderJob[]) {

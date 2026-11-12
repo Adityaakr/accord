@@ -3,7 +3,7 @@
 // are reproducible from the seed, so a restart reveals the same price and salt.
 import { describe, expect, it } from "vitest";
 import { commitment, type TenderJob } from "@accord/sdk";
-import { HOUSE_AGENTS, houseBid, nextActions, type TenderKeeperConfig } from "../src/tender.js";
+import { HOUSE_AGENTS, houseBid, nextActions, timelockSteps, type TenderKeeperConfig } from "../src/tender.js";
 
 const cfg: TenderKeeperConfig = {
   board: "tender.accord-v2.testnet", buyer: { account: "house.testnet", key: "ed25519:x" }, houseSeed: "07".repeat(32),
@@ -56,5 +56,25 @@ describe("house tender keeper tokens", () => {
   it("never bids its 6-decimal prices on a job in another token", () => {
     const near = { ...job({}), token: "wrap.testnet" };
     expect(nextActions(cfg, [near], NOW).filter((a) => a.kind === "bid")).toEqual([]);
+  });
+});
+
+describe("timelocked reveals", () => {
+  const lock = (over: Partial<{ job: number; bidder: string; commitment: string }> = {}) => {
+    const b = bidOf(0, null);
+    return { board: cfg.board, job: 5, bidder: b.bidder, commitment: b.commitment, ciphertext: "x", round: 1, created_at: "", done_at: null, outcome: null, ...over };
+  };
+  it("reveals only while the job is revealing and the bid on chain is the one locked", () => {
+    expect(timelockSteps([job({ phase: "open", bids: [bidOf(0, null)] })], [lock()])).toEqual([]);
+    expect(timelockSteps([job({ phase: "revealing", bids: [bidOf(0, null)] })], [lock()]).map((s) => s.kind)).toEqual(["reveal"]);
+  });
+  it("drops what can never be revealed, and waits on what it cannot see yet", () => {
+    const kinds = (jobs: TenderJob[], l = lock()) => timelockSteps(jobs, [l]).map((s) => s.kind);
+    expect(kinds([job({ phase: "revealing", bids: [bidOf(0, "1")] })])).toEqual(["drop"]);
+    expect(kinds([job({ phase: "awarded", bids: [bidOf(0, null)] })])).toEqual(["drop"]);
+    expect(kinds([job({ phase: "revealing", bids: [bidOf(0, null)] })], lock({ commitment: "00".repeat(32) }))).toEqual(["drop"]);
+    expect(kinds([job({ phase: "revealing", bids: [] })])).toEqual(["drop"]);
+    expect(kinds([job({ phase: "open", bids: [] })])).toEqual([]);
+    expect(kinds([])).toEqual([]);
   });
 });

@@ -5,11 +5,14 @@
 // board would refuse; only a request that passes counts against the job's shared allowance, so junk cannot use it up.
 // A new bid carries the board's bond (TENDER_BID_BOND), attached by the relayer and returned to it on reveal; each IP
 // may bring at most NEW_KEYS_PER_IP fresh bidder keys to a job per hour. Reads are cached for 2 s so many open tabs
-// make one RPC call; the cache keeps at most a few hundred entries.
+// make one RPC call; the cache keeps at most a few hundred entries. A bid may carry its price and salt timelocked to
+// the drand round after the bidding deadline (`timelock`, sdk/timelock.ts): kept so the house keeper can reveal it
+// for a bidder who is offline; nobody, this server included, can open it before that round.
 import "server-only";
 import {
-  KeySigner, TENDER_BOARDS, TenderBoardClient, commitment, verifyBidSignature, type TenderJob, type TxResult,
+  KeySigner, TENDER_BOARDS, TenderBoardClient, commitment, timelockRoundFor, timelockRoundOf, verifyBidSignature, type TenderJob, type TxResult,
 } from "@accord/sdk";
+import { tenderTimelocks } from "@accord/store";
 import { accord, config } from "./accord";
 import { takeAll } from "./limiter";
 
@@ -116,8 +119,24 @@ export async function relayBid(id: number, body: unknown, ip = "") {
   if (!mine && takeAll([{ key: `tender:newkey:${id}:${ip}`, max: NEW_KEYS_PER_IP, windowMs: 3_600_000 }])) {
     throw new RelayError(429, `at most ${NEW_KEYS_PER_IP} new bidder keys per caller per job each hour`);
   }
+  const lock = await checkTimelock(b.timelock, j);
   spendJobAllowance(id, "bids");
-  return once(`bid:${id}:${checked.bidder}`, async () => result(id, await board().submitBid(relaySigner(), checked, !!mine)));
+  const out = await once(`bid:${id}:${checked.bidder}`, async () => result(id, await board().submitBid(relaySigner(), checked, !!mine)));
+  if (lock) {
+    await tenderTimelocks.save({ board: boardId(), job: id, bidder: checked.bidder, commitment: checked.commitment, ciphertext: lock.ciphertext, round: lock.round })
+      .catch((e: Error) => console.error(`[tender] timelock not kept for job ${id}: ${e.message}`));
+  }
+  return { ...out, timelocked: !!lock };
+}
+
+/** An optional timelocked reveal: an age/tlock text locked no earlier than the first drand round after bidding closes. */
+async function checkTimelock(raw: unknown, j: TenderJob): Promise<{ ciphertext: string; round: number } | null> {
+  if (raw === undefined || raw === null) return null;
+  if (typeof raw !== "string" || raw.length > 4096) throw new RelayError(400, "timelock is an armored tlock ciphertext of at most 4096 characters");
+  const round = timelockRoundOf(raw);
+  if (round === null) throw new RelayError(400, "timelock is not a tlock ciphertext");
+  if (round < (await timelockRoundFor(j.commit_ends))) throw new RelayError(400, "timelock opens before bidding closes, so it would expose the price early");
+  return { ciphertext: raw, round };
 }
 
 /** Relays a reveal; checks the price and salt open the stored commitment before paying for it. */

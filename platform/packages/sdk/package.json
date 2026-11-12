@@ -7,22 +7,37 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./node": { "types": "./dist/release-node.d.ts", "default": "./dist/release-node.js" },
-    "./check": { "types": "./dist/check.d.ts", "default": "./dist/check.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/release-node.d.ts",
+      "default": "./dist/release-node.js"
+    },
+    "./check": {
+      "types": "./dist/check.d.ts",
+      "default": "./dist/check.js"
+    }
   },
-  "files": ["dist", "!dist/**/*.map"],
-  "publishConfig": { "access": "public" },
+  "files": [
+    "dist",
+    "!dist/**/*.map"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
-    "near-api-js": "7.3.1",
-    "eciesjs": "0.4.18",
-    "canonicalize": "2.1.0",
+    "@noble/curves": "1.9.7",
     "@noble/hashes": "1.8.0",
-    "@noble/curves": "1.9.7"
+    "canonicalize": "2.1.0",
+    "eciesjs": "0.4.18",
+    "near-api-js": "7.3.1",
+    "tlock-js": "0.9.0"
   }
 }
