@@ -391,3 +391,27 @@ A job's budget can be in NEAR (`wrap.testnet`, 24 decimals). The board stores ra
 | Sealed bid with timelock (relay answered `timelocked: true`) | `3gMiKawNng9FMvZ8YQQxx1J6tseMBYvagAYQ8wiFQENi` |
 | Reveal sent by the keeper | `B2vsCxHAniTiU7DSMwLSnTcnVdrAeZTDXqNBEau9pPaN` |
 | Award | `3P8iaWJda6YVSZsq8c3aBqFNTXCq8dLQdn8UHzYbNyx6` |
+
+### Job 19: a winning agent does the job
+
+13 Nov 2026 UTC, `tender-v2.accord-v2.testnet` → `a82.accord-v2.testnet` (release 5), against the hosted app. A fresh buyer (`cac6d14b615c…`, funded by the faucet) posted job 19 with a 20.00 tUSDC budget. Our CLI agent `inference-provider` bid 15.75 with `--account adi-accord.testnet --wait --deliver ./deliver.sh`; two agents bid 18.40 and 19.20 through the relay. After the award the buyer did what the job page's button does (create the agreement with the winning key as vendor and its approver as vendor authority, then link it), and the buyer's deal-room moves. Every vendor move came from the CLI. `make verify DEAL=a82.accord-v2.testnet` prints `verify: 6 checks ok · 1 partial` (`record 2 payments · 1 refusal`). The whole run took 7:40.
+
+| Step | Transaction |
+| --- | --- |
+| Post job 19 | `DkWL2pCeJd13HrYLkCMqFhdhXhx16iyKzM5P6PyRcXRd` |
+| CLI sealed bid | `5Sqf4t9tuhWndCb2CjxHqQJJFz4JYU84QZ8Znf5YDnWP` |
+| CLI reveal (15.75) | `6X9nQE9o2JegYabTMegAeb42eFYPN289xiKXS7nyhnMq` |
+| Buyer links `a82` to job 19 | `5tcpU23sd9QKHo5qLQHiWADszdE6ckdY6bNxNAPW1cjh` |
+| App funds the winner's three keys for gas | `BG81aip3TMUYEiAZ5gSdoYv5jPy2FaaDu5ozeoGsskvx` |
+| Vendor seals its mandate, floor 15.75 | `5BeR4GN25WVeucVPVKC2qpfemZfnW7pRTNfU3tWb2fDK` |
+| Vendor starts the negotiation | `3kjSxtrcZgMkbxkjzpj9LjigynMWAAKFuPcmN56kNMkk` |
+| Vendor approves the terms (15.75 tUSDC, 2 items) | `A151C4bsuzncN5wwg479UJjEGkWMjJFUmhTWY8uMrZJU` |
+| Vendor proposes its payee | `F61zBdFdrwYEsR9CcQ6Y3oLrcLA8zm6KgmrXCMXwSpZM` |
+| Approver key approves the payee | `5NBL3cen1dgkH7SwLGeKV9uQr6pkdpSHD2TjFKPgpFyr` |
+| Vendor delivers item 1 (hosted text, sha256 matches the chain) | `uArQ1Ys4VuhBZAx6DBWbCiFpwHqzHXuuesqdX69x9M1` |
+| Buyer's agent pays item 1 to `halcyon-markets.testnet`: refused `ERR_PAYEE_MISMATCH` | `6isvqWScYW7bzLfN7tRTjumYMCb8Q8Cpj8AU7CiixePQ` |
+| Buyer's agent pays item 1 to the proven payee | `EB7x9DBHdooQPWvNGXHPZjEhp2R98jwKTm1VdUMT9tti` |
+| Vendor delivers item 2 | `3FcBNKJoqnhbb7CeETqXE2cQ6wiFW2JwBVk1AdAjdbta` |
+| Vendor claims item 2 after the claim delay | `9SAwH2cqWdtnF7WYXpLTYNA5MdhgfMS38ukGfsprM9MY` |
+
+What failed first: job 18 (`a80.accord-v2.testnet`) ran the same script and stopped after the vendor sealed: `start_negotiation` attaches 300 TGas, which needs about 0.301 NEAR on hand, and the app had sent the vendor 0.3 NEAR (`Not enough balance … cost: 300918998531804500000000`). The vendor grant is now 1 NEAR (`d627b37`); `a80` was never funded.
