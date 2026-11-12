@@ -63,6 +63,8 @@ export interface RelayPolicy {
   pairs?: FactoryPair[];
   /** The chain's current block height. */
   height: bigint;
+  /** The tender board: its buyer's link_agreement (no deposit) is carried, nothing else on it. */
+  board?: string;
 }
 
 /** Every pair the policy allows, the default first. */
@@ -104,6 +106,11 @@ export function rejectDelegate(d: DecodedDelegate, p: RelayPolicy): string | nul
     // never relay act: the contract identifies the agent by the signing key, and a relayer's key would stand in for it
     if (call.methodName === "act") return "the relayer never carries act; the agent signs it with its own key";
     if (call.deposit > 1n) return "the relayer attaches at most 1 yoctoNEAR; sign a call that attaches NEAR in your wallet";
+    return null;
+  }
+  if (p.board && da.receiverId === p.board) {
+    if (call.methodName !== "link_agreement") return "the relayer carries link_agreement only on the tender board";
+    if (call.deposit !== 0n) return "link_agreement attaches no NEAR";
     return null;
   }
   const own = pairs.filter((x) => x.token === da.receiverId);

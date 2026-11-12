@@ -106,6 +106,9 @@ describe("accord tender work", () => {
     expect(w.bidder).toBe(vendor.id);
     expect(verifyWinner(vendor.id, BOARD, 9, w.authority, w.recipient, w.signature)).toBe(true);
     expect(verifyWinner(w.recipient, BOARD, 9, w.authority, w.recipient, w.recipient_signature)).toBe(true);
+    expect(verifyWinner(w.authority, BOARD, 9, w.authority, w.recipient, (w as unknown as { authority_signature: string }).authority_signature)).toBe(true);
+    // asked once on the award and again once the agreement is linked (when the app funds the accounts)
+    expect(posts.filter((p) => p.path === "9/winner")).toHaveLength(2);
     expect(JSON.parse(files.get(`/h/.accord/tender-work/${BOARD}/9.json`)!)).toMatchObject({ vendor: vendor.id });
     expect(sim.recipients[0]).toMatchObject({ account: w.recipient, domain: "demo.example" });
 

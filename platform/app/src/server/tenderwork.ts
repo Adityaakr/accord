@@ -11,7 +11,7 @@
 // - delivery: the work the winner delivered for an item, hosted for the buyer to read; the agreement holds its sha256.
 import "server-only";
 import { createHash } from "node:crypto";
-import { registerDemoVendor, tenderWork, TENDER_DELIVERY_MAX, type TenderClaim, type TenderWinner } from "@accord/store";
+import { registerDemoVendor, tenderWork, TENDER_DELIVERY_MAX, type TenderClaim, type TenderDelivery, type TenderWinner } from "@accord/store";
 import { tenderToken, validAgentLabel, verifyDelivery, verifyLink, verifyWinner, type TenderJob } from "@accord/sdk";
 import { accord } from "./accord";
 import { demoConfig, faucetGrants } from "./demo";
@@ -35,6 +35,8 @@ export async function claimAccount(b: Record<string, unknown>): Promise<{ ok: tr
   if (!HEX64.test(bidder)) throw new RelayError(400, "bidder is the agent's public key, 64 hex characters");
   if (!validAgentLabel(label)) throw new RelayError(400, "a label is 1 to 64 printable ASCII characters, no ':'");
   if (!verifyLink(bidder, account, signature)) throw new RelayError(403, `the signature is not this agent's over "accord-tender:v1:link:${account}"`);
+  // anyone's key can ask: a cap per account keeps a stranger from flooding an owner's dashboard
+  if (takeAll([{ key: `tender:claims:account:${account}`, max: 10, windowMs: 3_600_000 }])) throw new RelayError(429, `${account} has had enough agents ask to join this hour`);
   await tenderWork.claim({ account, bidder, label, source, signature });
   return { ok: true, account, bidder };
 }
@@ -46,7 +48,8 @@ export interface WinnerSetup { authority: string; recipient: string; funded: boo
 
 export async function winnerSetup(job: number): Promise<WinnerSetup | null> {
   const w = await tenderWork.winner(boardId(), job).catch(() => null);
-  return w ? { authority: w.authority, recipient: w.recipient, funded: w.funded_tx !== null, domain: demoConfig().domain } : null;
+  // "sending" (a send in progress, or one that never finished) is not funded
+  return w ? { authority: w.authority, recipient: w.recipient, funded: !!w.funded_tx && w.funded_tx !== "sending", domain: demoConfig().domain } : null;
 }
 
 /** Checks a winner's request against the board: this key won this job, and the job can still become an agreement. */
@@ -55,14 +58,21 @@ function checkWinner(j: TenderJob, bidder: string) {
   if (j.winner !== bidder) throw new RelayError(403, `this key did not win job ${j.id}`);
 }
 
+/**
+ * The winner names its approver and payee (kept so the buyer can open the agreement). Nothing is funded or registered
+ * until the buyer has opened and linked that agreement (paying its creation deposit): only then does the faucet fund
+ * the three accounts for gas, at most a few jobs per buyer a day, and the payee go on the demo domain. The agent calls
+ * this again once the job is linked (`accord tender work` does).
+ */
 export async function registerWinner(id: number, b: Record<string, unknown>): Promise<{ ok: true; setup: WinnerSetup; txs: string[] }> {
   const bidder = String(b.bidder ?? ""), authority = String(b.authority ?? ""), recipient = String(b.recipient ?? "");
   if (![bidder, authority, recipient].every((x) => HEX64.test(x))) {
     throw new RelayError(400, "bidder, authority and recipient are 64-hex implicit accounts: the winning key and two more keys the agent holds");
   }
   if (new Set([bidder, authority, recipient]).size !== 3) throw new RelayError(400, "the vendor, its approver and its payee are three different keys");
-  // The winning key names the pair; the payee's own key agrees to be paid there (it is registered on the demo domain).
+  // The winning key names the pair; the approver and the payee each agree with their own key.
   if (!verifyWinner(bidder, boardId(), id, authority, recipient, String(b.signature ?? ""))) throw new RelayError(403, "the signature is not the winning key's over this approver and payee");
+  if (!verifyWinner(authority, boardId(), id, authority, recipient, String(b.authority_signature ?? ""))) throw new RelayError(403, "the approver key did not sign this approver and payee");
   if (!verifyWinner(recipient, boardId(), id, authority, recipient, String(b.recipient_signature ?? ""))) throw new RelayError(403, "the payee key did not sign this approver and payee");
   const j = await getJob(id);
   if (!j) throw new RelayError(404, `no job ${id} on ${boardId()}`);
@@ -74,19 +84,27 @@ export async function registerWinner(id: number, b: Record<string, unknown>): Pr
   if (kept.authority !== authority || kept.recipient !== recipient) {
     throw new RelayError(409, "this job's winner already named another approver and payee; keep using those keys");
   }
-  await registerDemoVendor(recipient, authority);
   let txs: string[] = [];
-  if (kept.funded_tx === null) {
-    if (takeAll([{ key: "tender:winner-grants", max: 12, windowMs: 3_600_000 }])) throw new RelayError(429, "the faucet has funded enough winners this hour; try again later");
+  if (j.agreement && kept.funded_tx === null) {
+    // the agreement the buyer opened must be this winner's, with this approver
+    const a = await accord().agreement(j.agreement).get();
+    if (a.vendor !== bidder || a.vendor_authority !== authority) throw new RelayError(409, `${j.agreement} does not name this winner and approver`);
+    if (takeAll([{ key: `tender:winner-grants:buyer:${j.buyer}`, max: 3, windowMs: 86_400_000 }, { key: "tender:winner-grants", max: 12, windowMs: 3_600_000 }])) {
+      throw new RelayError(429, "the faucet has funded enough tender winners for now; fund the three accounts yourself or try later");
+    }
     // claimed before sending, so two racing requests cannot both fund the same job
     if (await tenderWork.markFunded(boardId(), id, "sending")) {
-      txs = await faucetGrants([
-        { account: bidder, yocto: WINNER_GRANTS.vendor }, { account: authority, yocto: WINNER_GRANTS.authority }, { account: recipient, yocto: WINNER_GRANTS.recipient },
-      ]).catch(async (e: Error) => {
+      await registerDemoVendor(recipient, authority);
+      try {
+        txs = await faucetGrants([
+          { account: bidder, yocto: WINNER_GRANTS.vendor }, { account: authority, yocto: WINNER_GRANTS.authority }, { account: recipient, yocto: WINNER_GRANTS.recipient },
+        ]);
+      } catch (e) {
+        // a retry tops up only what is still missing (faucetGrants skips an account that already holds its grant)
         await tenderWork.unmarkFunded(boardId(), id);
-        throw new RelayError(503, `the faucet could not fund the winner's accounts: ${e.message}`);
-      });
-      await tenderWork.recordFunded(boardId(), id, txs[0]!);
+        throw new RelayError(503, `the faucet could not fund the winner's accounts: ${(e as Error).message}`);
+      }
+      await tenderWork.recordFunded(boardId(), id, txs[0] ?? "already funded");
     }
   }
   return { ok: true, setup: (await winnerSetup(id))!, txs };
@@ -103,10 +121,23 @@ export async function publishDelivery(id: number, b: Record<string, unknown>): P
   const j = await getJob(id);
   if (!j?.winner || j.agreement !== agreement) throw new RelayError(409, `job ${id} is not linked to ${agreement}`);
   if (!verifyDelivery(j.winner, agreement, item, sha, String(b.signature ?? ""))) throw new RelayError(403, "the signature is not the vendor key's over this delivery");
-  const a = await accord().agreement(agreement).get();
+  const deal = accord().agreement(agreement);
+  const [a, items] = await Promise.all([deal.get(), deal.items()]);
   if (a.vendor !== j.winner) throw new RelayError(409, "the agreement's vendor is not this job's winner");
+  // once an item is delivered on chain, its hosted copy is fixed: only the text whose sha256 the chain holds
+  const onChain = items.find((x) => x.id === item)?.delivery?.evidence_hash ?? null;
+  if (onChain !== null && onChain !== sha) throw new RelayError(409, `item ${item} is delivered on chain with another sha256; the hosted copy cannot change`);
   await tenderWork.deliver({ agreement, item, bidder: j.winner, sha256: sha, content_type: contentType, body });
   return { ok: true, sha256: sha, path: `/api/tenders/deliveries/${agreement}/${item}` };
 }
 
-export const deliveryOf = (agreement: string, item: number) => tenderWork.delivery(agreement, item);
+/**
+ * A hosted delivery with whether it is the one the chain holds: `matches` is false when the vendor recorded another
+ * sha256 for the item, null when the item is not delivered on chain yet (or the chain could not be read).
+ */
+export async function deliveryOf(agreement: string, item: number): Promise<(TenderDelivery & { matches: boolean | null }) | null> {
+  const d = await tenderWork.delivery(agreement, item);
+  if (!d) return null;
+  const onChain = await accord().agreement(agreement).items().then((xs) => xs.find((x) => x.id === item)?.delivery?.evidence_hash ?? null, () => null);
+  return { ...d, matches: onChain === null ? null : onChain === d.sha256 };
+}

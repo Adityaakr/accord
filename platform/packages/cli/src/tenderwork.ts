@@ -1,9 +1,10 @@
 // `accord tender work <job> --deliver "<command>"`: a winning agent finishes the job on its own.
 //
-// 1. It names its approver and payee to the app, signed by its winning key (the payee signs too). Both are keys it makes
-//    here and keeps in ~/.accord/tender-work/<board>/<job>.json (0600). The app funds the three accounts once so each
-//    can pay its own gas, and registers the payee on its labelled demo domain so the Payee job can prove it.
-// 2. It waits for the buyer to open the agreement from the job's page (vendor = this key) and link it on the board.
+// 1. It names its approver and payee to the app, signed by its winning key (each of the two signs too). Both are keys
+//    it makes here and keeps in ~/.accord/tender-work/<board>/<job>.json (0600).
+// 2. It waits for the buyer to open the agreement from the job's page (vendor = this key) and link it on the board,
+//    then asks again: only for a linked agreement does the app fund the three accounts for gas (once) and register the
+//    payee on its labelled demo domain so the Payee job can prove it.
 // 3. It plays the vendor, one move at a time (vendorMove in @accord/sdk): seals its mandate with its winning price as
 //    the floor, starts the negotiation, approves the terms, proposes and approves its payee, delivers each item with the
 //    output of --deliver (published to the app, its sha256 recorded in the agreement), and claims each accepted item
@@ -69,7 +70,7 @@ export async function registerWinner(d: WorkDeps, job: number, k: WinnerKeys): P
   const args = [d.board.board, job, k.authority.id, k.recipient.id] as const;
   const r = await d.post(`${job}/winner`, {
     bidder: k.vendor.id, authority: k.authority.id, recipient: k.recipient.id,
-    signature: signWinner(k.vendor.seed, ...args), recipient_signature: signWinner(k.recipient.seed, ...args),
+    signature: signWinner(k.vendor.seed, ...args), authority_signature: signWinner(k.authority.seed, ...args), recipient_signature: signWinner(k.recipient.seed, ...args),
   });
   const setup = r.setup as { domain?: string } | undefined;
   if (!setup?.domain) throw new Error("the app did not return the payee's domain");
@@ -116,9 +117,8 @@ export async function work(ctx: Ctx, d: WorkDeps, jobId: number, vendor: BidderK
   }
   const win = j.bids.find((b) => b.bidder === vendor.id)!;
   const keys = await winnerKeys(d, jobId, vendor);
-  const { domain, funded } = await registerWinner(d, jobId, keys);
+  const { domain } = await registerWinner(d, jobId, keys);
   say("won", `job ${jobId} at your price ${win.price}; vendor ${vendor.id.slice(0, 12)}… · approver ${keys.authority.id.slice(0, 12)}… · payee ${keys.recipient.id.slice(0, 12)}…`);
-  if (funded.length) say("funded", `the app sent NEAR for gas to your three accounts (tx ${funded[0]})`);
   say("payee", `${keys.recipient.id} on ${domain}; its key is in ${workFile(d, jobId)}`);
 
   // The buyer opens the agreement from the job's page; the board checks it names this key as the vendor.
@@ -131,6 +131,8 @@ export async function work(ctx: Ctx, d: WorkDeps, jobId: number, vendor: BidderK
   }
   const agreement = j.agreement;
   say("agreement", `${agreement} · deal room ${d.appUrl}/agreements/${agreement}`, { agreement });
+  const { funded } = await registerWinner(d, jobId, keys);
+  if (funded.length) say("funded", `the app sent NEAR for gas to your accounts (tx ${funded[0]})`);
   const ops = d.ops(agreement, keys);
   const mandate = tenderVendorMandate(BigInt(win.price!), { job: jobId, title: j.title });
 
@@ -158,7 +160,10 @@ export async function work(ctx: Ctx, d: WorkDeps, jobId: number, vendor: BidderK
         case "propose": return ops.propose(move.recipient, move.domain);
         case "authority-approve": return ops.authorityApprove(move.version);
         case "activate": return ops.activate(move.version);
-        case "deliver": return deliver(d, ops, j, agreement, move.item, keys, deliverCmd!);
+        case "deliver": return deliver(d, ops, j, agreement, move.item, keys, deliverCmd!).catch((e: Error) => {
+          if (/ERR_DELIVERY_CLOSED/.test(e.message)) return null;
+          throw e;
+        });
         case "claim": {
           const r = await ops.claim(move.item);
           if (r.status !== "sent") { say("refused", `claim ${move.item}: ${r.code ?? r.status}`); await d.sleep(10_000); }
@@ -166,6 +171,7 @@ export async function work(ctx: Ctx, d: WorkDeps, jobId: number, vendor: BidderK
         }
       }
     })();
+    if (tx === null) { say("done", "deliveries are closed for this agreement"); return 0; }
     const what = move.kind === "deliver" || move.kind === "claim" ? `item ${move.item}` : move.kind === "seal" ? `mandate, floor ${win.price}` : "";
     say(DESCRIBE[move.kind], `${what ? `${what} · ` : ""}tx ${tx}`, { tx });
   }

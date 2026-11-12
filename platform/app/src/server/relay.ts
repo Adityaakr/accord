@@ -11,7 +11,7 @@ import "server-only";
 import { Account, KeyPair, KeyPairSigner, SignedTransaction, actions, baseEncode, type KeyPairString } from "near-api-js";
 import { InvalidNonceError } from "near-api-js/rpc-errors";
 import { sha256 } from "@noble/hashes/sha2";
-import { RotatingRpcProvider, isRpcBusy, rpcEndpoints, rpcRequest } from "@accord/sdk";
+import { RotatingRpcProvider, TENDER_BOARDS, isRpcBusy, rpcEndpoints, rpcRequest } from "@accord/sdk";
 import { readWithin, settleWithin } from "./deadline";
 import { accord, config } from "./accord";
 import type { FactoryPair } from "./delegate";
@@ -109,7 +109,7 @@ export async function relaySubmit(signedDelegate: string): Promise<{ hash: strin
   if (c.network !== "testnet") throw new Error("the relayer runs on testnet only");
   const d: DecodedDelegate = decodeSignedDelegate(signedDelegate);
   const [{ token }, pairs, h] = await readWithin(Promise.all([accord().config(), extraPairs(), height()]), VALIDATE_MS, "checking the relayed call");
-  const why = rejectDelegate(d, { factory: c.factory, token, pairs, height: h });
+  const why = rejectDelegate(d, { factory: c.factory, token, pairs, height: h, board: process.env.TENDER_BOARD || TENDER_BOARDS.testnet });
   if (why) throw Object.assign(new Error(why), { status: 400 });
   const left = () => Math.max(1_000, SUBMIT_DEADLINE_MS - (Date.now() - started));
   // nothing is broadcast unless the signed transaction (and so its hash) is ready inside the deadline

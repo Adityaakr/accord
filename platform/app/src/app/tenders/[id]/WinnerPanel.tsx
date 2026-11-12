@@ -32,20 +32,35 @@ export function WinnerPanel({ board, job, setup }: { board: string; job: TenderJ
   useEffect(() => { setMine(!!job.winner && browserKey()?.id === job.winner); }, [job.winner]);
   const isBuyer = !!w.accountId && w.accountId === job.buyer;
 
+  // The agreement made by an earlier click whose link did not go through: retried by linking only, never created twice.
+  const madeKey = `accord.tender.made.${board}.${job.id}`;
+  const [made, setMade] = useState<string | null>(null);
+  useEffect(() => { try { setMade(localStorage.getItem(madeKey)); } catch { /* storage blocked */ } }, [madeKey]);
+
   async function open() {
     if (!w.signer || !setup || !job.winner) return;
     setError(null);
     try {
-      setBusy("Creating the agreement: sign in your wallet");
-      const accord = browserAccord(cfg, { signer: w.signer });
-      const { agreement } = await accord.createAgreement({
-        kind: "procurement", title: `Tender ${job.id}: ${job.title}`.slice(0, 120), vendor: job.winner, vendor_authority: setup.authority,
-        canaries: [], params: DEMO_PARAMS,
-      });
-      setBusy("Linking it to the job: sign once more");
+      const reader = browserAccord(cfg);
+      // the agreement must come from the factory the board checks links against
+      const factory = await reader.chain.view<string>(board, "get_factory", {});
+      const accord = browserAccord(cfg, { factory, signer: w.signer });
+      let agreement = made;
+      if (!agreement) {
+        setBusy("Creating the agreement: sign in your wallet");
+        agreement = (await accord.createAgreement({
+          kind: "procurement", title: `Tender ${job.id}: ${job.title}`.slice(0, 120), vendor: job.winner, vendor_authority: setup.authority,
+          canaries: [], params: DEMO_PARAMS,
+        })).agreement;
+        setMade(agreement);
+        try { localStorage.setItem(madeKey, agreement); } catch { /* storage blocked: a retry would create again */ }
+      }
+      setBusy(`Linking ${agreement} to the job: sign once more`);
       const n = Number(agreement.slice(1, agreement.indexOf(".")));
       const r = await new TenderBoardClient(accord.chain, board).link(w.signer, job.id, n);
-      if (!r.ok) throw new Error(`the board did not link ${agreement}: ${r.failure ?? "refused"}. Link it again from this page.`);
+      // the board answers with the linked account, or nothing when its factory check refused the agreement
+      if (!r.ok || typeof r.value !== "string" || !r.value) throw new Error(`the board did not link ${agreement}${r.failure ? `: ${r.failure}` : ""}. Try linking again.`);
+      try { localStorage.removeItem(madeKey); } catch { /* */ }
       router.push(`/agreements/${agreement}`);
     } catch (e) {
       setError((e as Error).message);
@@ -86,7 +101,7 @@ export function WinnerPanel({ board, job, setup }: { board: string; job: TenderJ
       {isBuyer && setup ? (
         <div className={styles.award}>
           <button type="button" className={styles.button} onClick={() => void open()} disabled={!!busy || !w.signer} aria-busy={!!busy}>
-            {busy ?? "Open the agreement with the winner"}
+            {busy ?? (made ? `Link ${made} to this job` : "Open the agreement with the winner")}
           </button>
           <p className="small">Two wallet signatures. The creation deposit is the factory&apos;s; nothing is funded yet.</p>
         </div>

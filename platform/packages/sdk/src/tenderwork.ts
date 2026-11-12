@@ -103,9 +103,15 @@ export function vendorMove(v: VendorView, payee: { recipient: string; domain: st
     return wait("the buyer reads and approves the terms", true);
   }
 
-  // Executing (or Closing): the recipient first, then funding, then the items one at a time.
+  // Executing: the recipient first, then funding, then the items one at a time, until the term ends.
+  if (a.ends_at !== null && v.now >= a.ends_at) return { kind: "done", why: "the agreement's term has ended; deliveries are closed" };
   const current = v.recipients.filter(liveVersion).at(-1) ?? null;
-  if (!a.recipient && !current) return { kind: "propose", recipient: payee.recipient, domain: payee.domain };
+  if (!a.recipient && !current) {
+    // a payee the Payee job could not prove is proposed once more at most: each proposal costs the agreement a deposit
+    const failed = v.recipients.filter((x) => x.status === "ProofFailed");
+    if (failed.length >= 2) return { kind: "done", why: `the payee could not be proven: ${failed.at(-1)!.failure ?? failed.at(-1)!.reasons.join("; ")}` };
+    return { kind: "propose", recipient: payee.recipient, domain: payee.domain };
+  }
   if (current && current.status !== "Active") {
     if (current.status === "Proposed") return wait("the Payee job is checking the recipient on the domain (about a minute)");
     if (current.status === "Proven") return { kind: "authority-approve", version: current.version };
@@ -125,7 +131,8 @@ export function vendorMove(v: VendorView, payee: { recipient: string; domain: st
     const ready = eligible.eligible_at !== null && v.now >= eligible.eligible_at + a.params.claim_delay_secs;
     return ready ? { kind: "claim", item: eligible.id } : wait(`item ${eligible.id} is eligible: the buyer's agent pays it, or the vendor claims it after the claim delay`);
   }
-  const next = items.find((it) => it.status === "Open" && !it.delivery && it.evidence === "DeliveryAccepted");
+  // a disputed item is delivered again (the contract takes a new delivery for it)
+  const next = items.find((it) => it.evidence === "DeliveryAccepted" && ((it.status === "Open" && !it.delivery) || it.status === "Disputed"));
   if (next) return { kind: "deliver", item: next.id };
   if (items.every((it) => it.status === "Paid" || it.status === "AssumedPaid")) return { kind: "done", why: "every item is paid" };
   return wait("nothing for the vendor to do until the buyer moves", true);

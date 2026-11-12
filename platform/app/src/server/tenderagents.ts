@@ -61,6 +61,6 @@ export async function claimsFor(account: string): Promise<TenderClaim[]> {
 }
 
 export async function dismissClaim(account: string, bidder: string) {
-  await tenderWork.dropClaim(account, bidder);
+  await tenderWork.dismissClaim(account, bidder);
   return { ok: true };
 }

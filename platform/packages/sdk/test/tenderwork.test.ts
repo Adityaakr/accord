@@ -18,7 +18,7 @@ const version = (over: Partial<RecipientVersion>): RecipientVersion => ({
 const view = (a: Partial<AgreementView>, rest: Partial<VendorView> = {}): VendorView => ({
   agreement: {
     state: "Executing", negotiation: "Done", approvals: { buyer: true, vendor: true }, terms_hash: "h", recipient: { version: 1, account: "r.testnet", domain: "demo.example" },
-    funded: "20", total: "20", params: { claim_delay_secs: 120 }, ...a,
+    funded: "20", total: "20", params: { claim_delay_secs: 120 }, ends_at: null, ...a,
   } as AgreementView,
   sealed: { buyer: true, vendor: true }, recipients: [version({ status: "Active" })], items: [item({})], now: 1000, ...rest,
 });
@@ -51,6 +51,13 @@ describe("a winning agent's next move", () => {
     expect(vendorMove(view({}, { items: [item({ status: "Paid" }), item({ id: 2, status: "Open" })] }), PAYEE)).toEqual({ kind: "deliver", item: 2 });
     expect(vendorMove(view({}, { items: [item({ status: "Paid" }), item({ id: 2, status: "Paid" })] }), PAYEE)).toMatchObject({ kind: "done" });
     expect(vendorMove(view({ state: "NoDeal" }), PAYEE)).toMatchObject({ kind: "done" });
+  });
+  it("delivers a disputed item again, stops after two failed payee proofs, and stops when the term ends", () => {
+    expect(vendorMove(view({}, { items: [item({ status: "Disputed", delivery: { evidence_hash: "x", uri: "u", at: 0, window_end: 0 } })] }), PAYEE)).toEqual({ kind: "deliver", item: 1 });
+    const failed = version({ status: "ProofFailed", failure: "no such recipient on the domain" });
+    expect(vendorMove(view({ recipient: null }, { recipients: [failed] }), PAYEE)).toMatchObject({ kind: "propose" });
+    expect(vendorMove(view({ recipient: null }, { recipients: [failed, { ...failed, version: 2 }] }), PAYEE)).toMatchObject({ kind: "done", why: expect.stringContaining("no such recipient") });
+    expect(vendorMove(view({ ends_at: 1000 }), PAYEE)).toMatchObject({ kind: "done", why: expect.stringContaining("term") });
   });
 });
 

@@ -141,7 +141,8 @@ export async function faucetStatus(): Promise<{ account: string; near: bigint } 
 }
 
 /**
- * Sends `yocto` NEAR from the faucet to each account in order (a transfer to a fresh implicit account creates it).
+ * Sends `yocto` NEAR from the faucet to each account in order that does not already hold it (a transfer to a fresh
+ * implicit account creates it).
  * Used to give a tender winner's three keys just enough NEAR for their own gas. Returns the transaction hashes.
  */
 export async function faucetGrants(grants: { account: string; yocto: bigint }[]): Promise<string[]> {
@@ -151,6 +152,9 @@ export async function faucetGrants(grants: { account: string; yocto: bigint }[])
   if (BigInt(String(own.amount ?? "0")) < need + DRIP_GAS_RESERVE * BigInt(grants.length)) throw faucetEmpty();
   const hashes: string[] = [];
   for (const g of grants) {
+    // an account that already holds its grant (an earlier, interrupted send) is not funded twice
+    const have = await accord().chain.account(g.account).then((a) => BigInt(String(a.amount ?? "0")), () => 0n);
+    if (have >= g.yocto) continue;
     const r = await f.signAndSendTransaction({ receiverId: g.account, actions: [actions.transfer(g.yocto)], waitUntil: "FINAL" });
     hashes.push((r as { transaction: { hash: string } }).transaction.hash);
   }

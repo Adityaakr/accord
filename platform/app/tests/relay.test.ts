@@ -175,3 +175,14 @@ describe("two factories, each with its own token", () => {
     expect(await check(fund(TOKEN, `a1.${USDC_FACTORY}`))).toMatch(/into an Accord agreement/);
   });
 });
+
+describe("the tender board's link_agreement", () => {
+  const BOARD = "tender-v2.accord-v2.testnet";
+  const withBoard = async (o: Parameters<typeof delegate>[0]) => rejectDelegate(decodeSignedDelegate(await delegate(o)), { ...policy, board: BOARD });
+  it("is carried with no deposit, and nothing else on the board is", async () => {
+    expect(await withBoard({ receiverId: BOARD, method: "link_agreement", args: { job: 3, agreement_id: 71 }, gas: 80n * TGAS })).toBeNull();
+    expect(await withBoard({ receiverId: BOARD, method: "post_job", gas: 50n * TGAS })).toMatch("link_agreement only");
+    expect(await withBoard({ receiverId: BOARD, method: "link_agreement", gas: 80n * TGAS, deposit: 1n })).toMatch("no NEAR");
+    expect(await check({ receiverId: BOARD, method: "link_agreement", gas: 80n * TGAS })).toMatch("only carries calls into Accord");
+  });
+});

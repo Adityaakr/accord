@@ -14,7 +14,7 @@
 import type pg from "pg";
 import type { TenderAgentSource } from "./tenderagents.js";
 
-export interface TenderClaim { account: string; bidder: string; label: string; source: TenderAgentSource; signature: string; claimed_at: string }
+export interface TenderClaim { account: string; bidder: string; label: string; source: TenderAgentSource; signature: string; claimed_at: string; dismissed?: boolean }
 export interface TenderWinner {
   board: string; job: number; bidder: string; authority: string; recipient: string; funded_tx: string | null; created_at: string;
 }
@@ -29,7 +29,7 @@ export const TENDER_DELIVERY_MAX = 65_536;
 export const TENDER_WORK_SCHEMA = `
 create table if not exists tender_claims (account text not null check (length(account) <= 64), bidder text not null check (bidder ~ '^[0-9a-f]{64}$'),
   label text not null check (length(label) <= 64), source text not null, signature text not null check (signature ~ '^[0-9a-f]{128}$'),
-  claimed_at timestamptz not null default now(), primary key (account, bidder));
+  claimed_at timestamptz not null default now(), dismissed boolean not null default false, primary key (account, bidder));
 create table if not exists tender_winners (board text not null, job integer not null, bidder text not null check (bidder ~ '^[0-9a-f]{64}$'),
   authority text not null check (length(authority) <= 64), recipient text not null check (length(recipient) <= 64), funded_tx text,
   created_at timestamptz not null default now(), primary key (board, job));
@@ -55,19 +55,21 @@ export function tenderWorkStore(b: Backend) {
       if (p) {
         await p.query(
           `insert into tender_claims (account, bidder, label, source, signature) values ($1, $2, $3, $4, $5)
-           on conflict (account, bidder) do update set label = excluded.label, source = excluded.source, signature = excluded.signature, claimed_at = now()`,
+           on conflict (account, bidder) do update set label = excluded.label, source = excluded.source, signature = excluded.signature, claimed_at = now()
+           where not tender_claims.dismissed`,
           [c.account, c.bidder, c.label, c.source, c.signature],
         );
         await p.query(
-          `delete from tender_claims where account = $1 and bidder not in (select bidder from tender_claims where account = $1 order by claimed_at desc limit $2)`,
+          `delete from tender_claims where account = $1 and not dismissed and bidder not in (select bidder from tender_claims where account = $1 and not dismissed order by claimed_at desc limit $2)`,
           [c.account, TENDER_CLAIMS_MAX],
         );
         return;
       }
       b.mutate((d) => {
+        if (claims(d).some((x) => x.account === c.account && x.bidder === c.bidder && x.dismissed)) return;
         const rest = claims(d).filter((x) => !(x.account === c.account && x.bidder === c.bidder));
         rest.push({ ...c, claimed_at: new Date().toISOString() });
-        const mine = rest.filter((x) => x.account === c.account);
+        const mine = rest.filter((x) => x.account === c.account && !x.dismissed);
         const drop = new Set(mine.slice(0, Math.max(0, mine.length - TENDER_CLAIMS_MAX)));
         d.tenderClaims = rest.filter((x) => !drop.has(x));
       });
@@ -75,15 +77,22 @@ export function tenderWorkStore(b: Backend) {
     async claims(account: string): Promise<TenderClaim[]> {
       const p = await b.db();
       if (p) {
-        const r = await p.query("select account, bidder, label, source, signature, claimed_at::text as claimed_at from tender_claims where account = $1 order by claimed_at desc", [account]);
+        const r = await p.query("select account, bidder, label, source, signature, claimed_at::text as claimed_at from tender_claims where account = $1 and not dismissed order by claimed_at desc", [account]);
         return r.rows as TenderClaim[];
       }
-      return claims(b.read()).filter((x) => x.account === account).reverse();
+      return claims(b.read()).filter((x) => x.account === account && !x.dismissed).reverse();
     },
+    /** Removes a claim once its agent is linked. */
     async dropClaim(account: string, bidder: string): Promise<void> {
       const p = await b.db();
       if (p) { await p.query("delete from tender_claims where account = $1 and bidder = $2", [account, bidder]); return; }
       b.mutate((d) => { d.tenderClaims = claims(d).filter((x) => !(x.account === account && x.bidder === bidder)); });
+    },
+    /** "Not mine": the claim is hidden and the same key cannot ask this account again. */
+    async dismissClaim(account: string, bidder: string): Promise<void> {
+      const p = await b.db();
+      if (p) { await p.query("update tender_claims set dismissed = true where account = $1 and bidder = $2", [account, bidder]); return; }
+      b.mutate((d) => { const c = claims(d).find((x) => x.account === account && x.bidder === bidder); if (c) c.dismissed = true; });
     },
 
     /** The winner's setup for a job; the first one written stands (a winner cannot swap its approver later here). */
