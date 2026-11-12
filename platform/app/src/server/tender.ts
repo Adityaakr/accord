@@ -51,6 +51,7 @@ const forget = (id: number) => { cache.delete(`job:${id}`); cache.delete("jobs")
 
 export const listJobs = () => cached("jobs", 2000, () => board().jobs(30));
 export const getJob = (id: number) => cached(`job:${id}`, 2000, () => board().job(id));
+export const jobCount = () => cached("count", 2000, () => board().count());
 
 export interface DealSummary { agreement: string; state: string; paid: number; refused: number; codes: string[] }
 

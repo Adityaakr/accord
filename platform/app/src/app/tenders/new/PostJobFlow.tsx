@@ -143,7 +143,7 @@ export function PostJobFlow({ board }: { board: string }) {
         const list = (await fetch("/api/tenders", { cache: "no-store" }).then((x) => x.json()).catch(() => null)) as { jobs?: TenderJob[] } | null;
         id = (list?.jobs ?? []).filter((j) => j.buyer === w.accountId).sort((a, b) => b.id - a.id)[0]?.id ?? null;
       }
-      router.push(id ? `/tenders/${id}` : "/tenders");
+      router.push(id ? `/tenders/${id}?posted=1` : "/tenders");
       router.refresh();
     } catch (err) {
       setError((err as Error).message);

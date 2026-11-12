@@ -8,7 +8,7 @@ import { Account, KV, Panel, Pill, StatePill } from "@/components/ui";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { RoomLink } from "@/components/RoomLink";
 import { config } from "@/server/accord";
-import { boardId, dealOf, getJob, type DealSummary } from "@/server/tender";
+import { boardId, dealOf, getJob, jobCount, type DealSummary } from "@/server/tender";
 import { Countdown } from "../Countdown";
 import { Disclosure } from "../Disclosure";
 import { AgentsLink } from "../HeadActions";
@@ -66,8 +66,9 @@ function bidViews(j: TenderJob): BidView[] {
 
 const iso = (ns: number) => `${new Date(ns / 1e6).toISOString().slice(0, 16).replace("T", " ")} UTC`;
 
-export default async function TenderJobPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function TenderJobPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ posted?: string }> }) {
   const { id: raw } = await params;
+  const { posted } = await searchParams;
   if (!/^[1-9][0-9]{0,8}$/.test(raw)) notFound();
   const id = Number(raw);
   const board = boardId();
@@ -91,7 +92,26 @@ export default async function TenderJobPage({ params }: { params: Promise<{ id: 
       </div>
     );
   }
-  if (!job) notFound();
+  if (!job) {
+    // The board is read at final finality, a few seconds behind the wallet that just posted: a job one or two past the
+    // count is most likely on its way, so wait for it rather than call it missing.
+    const count = await jobCount().catch(() => null);
+    const arriving = count === null ? posted === "1" : id > count && id <= count + 2;
+    if (!arriving) notFound();
+    return (
+      <div className="container">
+        <AutoRefresh seconds={2} />
+        <header className={styles.head}>
+          <Link href="/tenders" className="small link">Open tenders</Link>
+          <div className={styles.titleRow}><h1 className="h2">Tender {id}</h1><Pill>confirming</Pill></div>
+        </header>
+        <div className={styles.error} role="status">
+          <p className="h5">Your job is on its way to the board</p>
+          <p className="small">The transaction went through; the board&apos;s final state is a few seconds behind it. This page reads <span className="mono">{board}</span> again every 2 s and shows the job as soon as it is final.</p>
+        </div>
+      </div>
+    );
+  }
 
   const deal: DealSummary | null = job.agreement ? await dealOf(job.agreement) : null;
   const now = Date.now();
