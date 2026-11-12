@@ -9,6 +9,7 @@
 import { Account, KeyPair, KeyPairSigner, actions, buildDelegateAction, encodeSignedDelegate, type KeyPairString } from "near-api-js";
 import { RotatingRpcProvider, isRpcBusy, rpcEndpoints, toTxResult, type Signer, type TxResult } from "@accord/sdk";
 import { relayAndWait, type RelayClientOptions } from "./relayClient";
+import { BALANCES_CHANGED } from "./events";
 
 export const THROWAWAY_STORAGE_KEY = "accord-throwaway-key";
 /** Blocks a relayed request stays valid for; the relayer accepts up to 7200. */
@@ -125,6 +126,7 @@ export function throwawaySigner(kp: KeyPair, opts: { rpc: string; deps?: Throwaw
         } else {
           outcome = await deps.direct(contractId, action);
         }
+        if (typeof window !== "undefined") window.dispatchEvent(new Event(BALANCES_CHANGED));
         return toTxResult(outcome);
       });
     },

@@ -12,6 +12,7 @@ import { friendlyWalletError, isWalletNetworkError, rawWalletError, walletErrorM
 import { useAppConfig } from "@/components/AppConfig";
 import { relayAndWait } from "./relayClient";
 import { clearThrowawayKey, implicitAccountId, loadThrowawayKey, newThrowawayKey, saveThrowawayKey, throwawaySigner } from "./throwaway";
+import { BALANCES_CHANGED } from "./events";
 
 export type WalletKind = "near-connect" | "sandbox";
 /** How the person signed in: their own NEAR wallet, a local sandbox key, or a throwaway testnet key in this tab. */
@@ -109,6 +110,7 @@ function connectorSigner(wallet: ConnectorWallet, accountId: string, chain: stri
         if ((e as { relay?: boolean }).relay) throw new Error(`Accord's relayer could not send this transaction: ${(e as Error).message}.`);
         throw new Error(walletErrorMessage(e, name, chain));
       }
+      window.dispatchEvent(new Event(BALANCES_CHANGED));
       try {
         return toTxResult(outcome);
       } catch {

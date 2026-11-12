@@ -1,11 +1,13 @@
 "use client";
 
 // The signed-in account's NEAR, test USDC and (when the server offers it) Circle USDC, read through the app's own
-// cached /api/chain/balances, never from public RPC in the browser. Refreshes every 20 s while the tab is visible and
-// keeps the last values on a busy answer, so the header never flickers to zero.
+// cached /api/chain/balances, never from public RPC in the browser. Refreshes every 20 s while the tab is visible, and
+// again just after this tab's wallet sends a transaction (BALANCES_CHANGED; reads are final, a few seconds behind the
+// wallet, so it reads at 2, 5 and 10 s). Keeps the last values on a busy answer, so the header never flickers to zero.
 
 import { useEffect, useState } from "react";
 import { useAppConfig } from "@/components/AppConfig";
+import { BALANCES_CHANGED } from "./events";
 
 export interface Balances { near: string | null; tusdc: string | null; usdc: string | null }
 
@@ -42,7 +44,13 @@ export function useBalances(account: string | null): Balances {
     const t = window.setInterval(() => void tick(), 20_000);
     const vis = () => { if (document.visibilityState === "visible") void tick(); };
     document.addEventListener("visibilitychange", vis);
-    return () => { live = false; window.clearInterval(t); document.removeEventListener("visibilitychange", vis); };
+    const soon: number[] = [];
+    const changed = () => { for (const ms of [2_000, 5_000, 10_000]) soon.push(window.setTimeout(() => void tick(), ms)); };
+    window.addEventListener(BALANCES_CHANGED, changed);
+    return () => {
+      live = false; window.clearInterval(t); soon.forEach((x) => window.clearTimeout(x));
+      document.removeEventListener("visibilitychange", vis); window.removeEventListener(BALANCES_CHANGED, changed);
+    };
   }, [account, hasUsdc]);
   return b;
 }
