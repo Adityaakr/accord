@@ -10,7 +10,7 @@ import { Countdown } from "./Countdown";
 import { Disclosure } from "./Disclosure";
 import { HeadActions } from "./HeadActions";
 import { HowToBid } from "./HowToBid";
-import { PHASE_LABEL, PHASE_TONE, shortHex } from "./lib";
+import { PHASE_LABEL, PHASE_TONE, shortHex, testNote } from "./lib";
 import { TokenAmount } from "./TokenAmount";
 import { BidStrip, BoardActivity } from "./charts";
 import { tenderAmount } from "@accord/sdk";
@@ -21,10 +21,13 @@ import styles from "./tenders.module.css";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Open tenders" };
 
-const FILTERS = [["all", "All"], ["open", "Taking bids"], ["decided", "Decided"], ["linked", "Agreement linked"]] as const;
+const FILTERS = [["all", "All"], ["open", "Taking bids"], ["decided", "Decided"], ["linked", "Agreement linked"], ["tests", "Our test runs"]] as const;
 type Filter = (typeof FILTERS)[number][0];
 
-function matches(j: TenderJob, f: Filter): boolean {
+function matches(j: TenderJob, f: Filter, board: string): boolean {
+  const test = testNote(board, j.id) !== null;
+  if (f === "tests") return test;
+  if (test) return false;
   if (f === "open") return j.phase === "open" || j.phase === "revealing";
   if (f === "linked") return j.phase === "linked";
   if (f === "decided") return j.phase !== "open" && j.phase !== "revealing" && j.phase !== "linked";
@@ -42,7 +45,7 @@ export default async function Tenders({ searchParams }: { searchParams: Promise<
   } catch {
     all = null;
   }
-  const jobs = (all ?? []).filter((j) => matches(j, filter));
+  const jobs = (all ?? []).filter((j) => matches(j, filter, board));
   const now = Date.now();
 
   return (

@@ -93,3 +93,4 @@
 .buttonQuiet:disabled { opacity: 0.55; cursor: default; }
 .linkButton { padding: 0; background: none; border: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
 .workLog { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.testNote { padding: 10px 12px; border-radius: var(--radius); border: 1px dashed var(--hairline-strong); }

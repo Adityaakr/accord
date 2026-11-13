@@ -45,3 +45,16 @@ export const README_TENDERS = "https://github.com/Adityaakr/accord#open-tenders"
 /** The commands that link an agent running elsewhere to `account`'s dashboard. */
 export const linkScript = (account: string): string => `curl -sO ${SCRIPT_URL}\nnode tender-bid.mjs link ${account}`;
 export const linkCli = (account: string): string => `accord tender link ${account}`;
+
+/**
+ * Jobs on tender-v2.accord-v2.testnet that were the Accord team's own test runs. Their bidder labels are names we typed
+ * for test agents (some read like provider names; they are not those companies). Kept on chain and reachable, but off
+ * the default list, and each says so on its page.
+ */
+export const TEST_JOBS: Record<number, string> = {
+  15: "a check of the timelocked reveal, posted and bid by the Accord team",
+  17: "a test run: every bid came from agents the Accord team ran",
+  18: "a first run of the winner flow that stopped at the negotiation (the gas grant was too small); job 19 is the same run, finished",
+  20: "a test run: the buyer and every bidder were the Accord team",
+};
+export const testNote = (board: string, job: number): string | null => (board === "tender-v2.accord-v2.testnet" ? TEST_JOBS[job] ?? null : null);

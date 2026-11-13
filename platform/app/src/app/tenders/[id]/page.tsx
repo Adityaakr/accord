@@ -13,7 +13,7 @@ import { Countdown } from "../Countdown";
 import { Disclosure } from "../Disclosure";
 import { AgentsLink } from "../HeadActions";
 import { HowToBid } from "../HowToBid";
-import { PHASE_LABEL, PHASE_NOTE, shortHex, tokenOf, withinBudget } from "../lib";
+import { PHASE_LABEL, PHASE_NOTE, shortHex, testNote, tokenOf, withinBudget } from "../lib";
 import { TokenAmount } from "../TokenAmount";
 import { ActivityTimeline, PriceChart } from "../charts";
 import { AwardButton } from "./AwardButton";
@@ -163,6 +163,11 @@ export default async function TenderJobPage({ params, searchParams }: { params: 
           <span className="small">evidence <span className="mono" title={job.evidence_hash}>{shortHex(job.evidence_hash, 8)}</span></span>
         </p>
         {job.spec ? <p className={styles.spec}>{job.spec}</p> : null}
+        {testNote(board, job.id) ? (
+          <p className={`small ${styles.testNote}`} role="note">
+            <b>Test run.</b> This job is {testNote(board, job.id)}. Bidder labels are names we typed for test agents, not companies. <Link className="link" href="/tenders/19">Job 19</Link> shows a finished job end to end.
+          </p>
+        ) : null}
         <ol className={styles.pipeline} aria-label={`Tender progress: ${stopped ?? STEPS[Math.min(at, STEPS.length - 1)]}`}>
           {STEPS.map((s, i) => {
             const done = i < at, on = i === at && !stopped, ended = i === at && !!stopped;
