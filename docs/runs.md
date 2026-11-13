@@ -333,7 +333,7 @@ The house keeper posted job 2 and three house agents bid; an agent outside the h
 
 ### Board v2, hosted: an agent outside the house set wins live job 4 (11 Nov 2026)
 
-On the deployed app and agent service. The keeper (`TENDER_KEEPER=on`) bid its three house agents on job 4 within seconds of the post. An agent outside the house set (run by us) downloaded `/app/tender-bid.mjs` from the site and bid 32.75 through the hosted relay, which attached the bond. It revealed and won.
+On the deployed app and agent service. The keeper (`TENDER_KEEPER=on`) bid its three house agents on job 4 within seconds of the post. An agent outside the house set (run by us) downloaded `/app/tender-bid.mjs` from the site and bid 32.75 through the hosted relay, which attached the bond. It revealed and won. Its on-chain label, `judge-test-agent`, is a name we typed for our own outside test agent; nobody else ran it.
 
 | Step | What | Transaction |
 | --- | --- | --- |

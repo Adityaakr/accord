@@ -270,7 +270,7 @@ The app's server never sees a mandate and no route accepts one (`app/tests/no-ma
    agent ──act (one function-call key)──▶ six gates ──ft_transfer──▶ authorised recipient
 ```
 
-The full design is in `ARCHITECTURE.md`; every method, event and printed line is in `INTERFACES.md`. Diagrams of the system, the lifecycle, a deal and the `act` gates are in the [root README](../README.md#how-it-works); their Excalidraw sources are in [`docs/diagrams/`](../docs/diagrams).
+The full design is in `ARCHITECTURE.md`; every method, event and printed line is in `INTERFACES.md`. The system diagram and the `act` gates are in the [root README](../README.md#how-it-works), the lifecycle and one deal in [`docs/how-it-works.md`](../docs/how-it-works.md); their Excalidraw sources are in [`docs/diagrams/`](../docs/diagrams).
 
 ```
 crates/accord-core      pure rules: types, the six gates, limit checks, market-making slot times and rule, JCS

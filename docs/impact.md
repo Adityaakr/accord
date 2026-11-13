@@ -1,0 +1,37 @@
+# Impact
+
+The same failure costs money in web2 and web3: an agent, or a person, is told to pay somewhere else, and nothing between the instruction and the money checks it against what both companies agreed.
+
+| | The number | Source |
+| --- | --- | --- |
+| Web2 · payment fraud | `76%` of US organisations had attempted or actual payments fraud in 2025; `74%` were hit by business email compromise | [AFP Payments Fraud and Control Survey, Apr 2026](https://www.financialprofessionals.org/about/learn-more/press-releases/Details/over-75-percent-of-us-firms-experienced-payments-fraud-in-2025-while-ai-adoption-for-fraud-mitigation-lags) |
+| Web2 · vendor impersonation | Vendor imposter fraud cited by `45%` of organisations, up `11` points in a year | [AFP survey, Apr 2025](https://www.financialprofessionals.org/about/learn-more/press-releases/Details/survey-79-percent-of-organizations-were-victims-of-attempted-or-actual-payments-fraud-activity-in-2024) |
+| Web2 · losses | Business email compromise: `$3.05 billion` across `24,768` complaints in 2025 | [FBI IC3 2025 report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf) |
+| Web2 · where agents are going | "AI agents will intermediate more than `$15 trillion` in B2B spending by 2028" (Gartner, as reported) | [Digital Commerce 360, Nov 2025](https://www.digitalcommerce360.com/2025/11/28/gartner-ai-agents-15-trillion-in-b2b-purchases-by-2028/) |
+| Agents · the open risk | "it is unclear if there are fool-proof methods of prevention for prompt injection" | [OWASP LLM01:2025](https://genai.owasp.org/llmrisk/llm01-prompt-injection/) |
+| Web3 · keys | Private key compromise was `43.8%` of stolen crypto in 2024; over `$3.4 billion` stolen in 2025 | [Chainalysis, Dec 2024](https://www.chainalysis.com/blog/crypto-hacking-stolen-funds-2025/), [Dec 2025](https://www.chainalysis.com/blog/crypto-hacking-stolen-funds-2026/) |
+| Web3 · market makers | Binance: "Not every market-making arrangement is aligned with long-term market integrity"; in Mar 2025 it offboarded the market maker in the MOVE case | [The Block, Mar 2026](https://www.theblock.co/post/395111/binance-points-market-maker-token-launch-red-flags-updated-trading-rules), [Mar 2025](https://www.theblock.co/post/347931/binance-move-market-maker-movement-38-million-usdt-buyback-program) |
+| Web3 · stablecoin B2B | B2B was about half of `$6 billion` in real-world stablecoin payments in one month (Feb 2025), up `288%` in a year (Artemis, as reported) | [Ledger Insights, Jun 2025](https://www.ledgerinsights.com/new-research-into-real-world-stablecoin-payments-shows-some-surprising-results/) |
+
+**The gap Accord fills.** The agent payment rails launched in 2025 let one party's agent pay: [Visa Intelligent Commerce](https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21366.html), [Mastercard Agent Pay](https://newsroom.mastercard.com/news/press/2025/april/mastercard-unveils-agent-pay-pioneering-agentic-payments-technology-to-power-commerce-in-the-age-of-ai) (agentic tokens), [Google AP2](https://cloud.google.com/blog/products/ai-machine-learning/announcing-agents-to-payments-ap2-protocol) (one user's mandate for a merchant's cart), [Stripe and OpenAI's ACP](https://stripe.com/blog/developing-an-open-standard-for-agentic-commerce) and [x402](https://www.x402.org/). None of them holds terms that two companies negotiated and both approved, or binds the recipient to a proof both accepted. Accord is that layer: the negotiation stays private in an enclave, and the contract refuses any payment outside the approved item, evidence, amount and recipient, whoever was fooled.
+
+**Built for teams that run swarms of agents.** The teams getting the most from AI already run swarms: they decide what counts as done, check results against it, and let the agents work without a person in every loop. Inside one company that holds, because one owner sets the rules. It breaks when one company's swarm works for another's: neither side trusts the other's agents, and a person approving each payment is the bottleneck the swarm was meant to remove. Accord sits between them:
+
+| What a swarm needs | What Accord gives it | Shown on testnet by |
+| --- | --- | --- |
+| A clear definition of done | The approved terms (item, evidence, amount, recipient) are what every agent is held to; the contract checks each payment against them | a6, a63, a70 `ERR_PAYEE_MISMATCH` |
+| Fuzzy outcomes made checkable | Market making: "was the liquidity good enough?" becomes spread, depth and two-sided quotes measured at hidden times. Procurement: delivery evidence fixed by hash in the terms | a56 paid, a57 refused `ERR_PERIOD_WITHHELD` |
+| No person in the loop | People decide once (sealed limits, approved terms); agents negotiate in the Sealed Table, compete on [open tenders](tenders.md) and are paid by the contract | `make tender`, job 1 → a70; agents outside the house set (run by us with the public script) won jobs 2 and 4 |
+| Trust across companies | The scarce thing when agents are cheap is a rule both sides can verify; here it is on NEAR, checkable with `make verify` | `verify: 6 checks ok · 1 partial` |
+
+What Accord does not do: fund or meter an agent's own inference, or orchestrate agents inside one company. It is for the moment a swarm's work crosses to another company.
+
+| Who | What changes for them | Shown on testnet by |
+| --- | --- | --- |
+| Finance and treasury teams | A redirected or altered payment is refused by the contract and recorded; the team is told on Telegram, by webhook or in the app; exports match the record | a6 and a63 `ERR_PAYEE_MISMATCH`; the [Live attack room](https://accordweb-production.up.railway.app/app/try) |
+| Procurement teams | "Walmart, like most organizations with large procurement operations, can’t possibly conduct focused negotiations with all of its 100,000-plus suppliers" ([HBR, 2022](https://hbr.org/2022/11/how-walmart-automated-supplier-negotiations)): agents negotiate each supplier inside limits neither side sees, and payment follows only the approved terms | a6: `QUOTE → COUNTER → FINAL → ACCEPT`, `35.50 tUSDC · 3 items` |
+| Token projects hiring market makers | Payment only for periods an enclave observer measured as met, so a weak period is withheld on chain, not argued about | a56 paid (`Eligible`), a57 refused `ERR_PERIOD_WITHHELD` |
+| Agents hired for jobs, one or a swarm | An open tender: any agent bids with a sealed price and its own key, needing no NEAR, and the lowest valid price wins. The winner then works under the same guardrails: the job, the evidence of delivery, the amount and the account to pay are approved on chain before work starts; the agent's key can only ask that one contract to pay; the hirer can revoke it. Paying for an agent's inference from the job is not built | `make tender`: job 1 → a70 `ERR_PAYEE_MISMATCH`; an agent outside the house set, run by us with only the public script, won job 2 ([Open tenders](tenders.md)); `make tender-sim` |
+| Agent developers | A payment check before the call (`/app/check`), a read-only MCP server, the CLI and the SDK: an agent asks "would this pay?" and gets the contract's answer | [Use from an agent](use-from-an-agent.md) |
+
+None of the organisations named in this section uses or endorses Accord; their numbers and words describe the problem. Accord has no customers yet: it runs on NEAR testnet with test USDC and fictional companies (Northwind buying from Halcyon).

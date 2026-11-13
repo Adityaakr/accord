@@ -29,7 +29,7 @@ Open tenders (11 Nov 2026): a buyer posts a job on `tender-v2.accord-v2.testnet`
 1. Open [/app/try-it](https://accordweb-production.up.railway.app/app/try-it) and choose "Try without a wallet". It runs one deal on testnet, including a refused redirect.
 2. Open [/verify](https://accordweb-production.up.railway.app/verify) and enter the agreement id it gives you.
    No funds, no wallet, or the faucet refuses your network: [/app/replay](https://accordweb-production.up.railway.app/app/replay) replays a recorded run (`a32.accord-v2.testnet`) in about 60 seconds, each step with its transaction, and [/app/try](https://accordweb-production.up.railway.app/app/try) is a pre-funded live room where a scam you send is refused on chain.
-3. Clone the repo and run `cd platform && corepack enable && pnpm install && make verify DEAL=a10.accord-v2.testnet`.
+3. Clone the repo and run `cd platform && corepack enable && pnpm install && make verify DEAL=a82.accord-v2.testnet` (release 5, won on an open tender, about 13 s). Last line: `verify: 6 checks ok · 1 partial` with `outlayer-verify` installed, `verify: 5 checks ok · 1 partial · 1 not checked` without it.
 
 Then, in more depth:
 
