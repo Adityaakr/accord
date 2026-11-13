@@ -39,7 +39,7 @@ const readOrNull = (path) => readFile(path, "utf8").catch((e) => { if (e.code ==
 // The bid's price and salt locked to the drand round after bidding closes, so Accord's keeper reveals it even if this
 // script is not running then. drand's tlock is bundled at ${APP}/tender-tlock.mjs; it is fetched once into ~/.accord
 // and used only if its sha256 is the one pinned here. null when it cannot be had: the bid still goes, revealed by hand.
-const TLOCK_SHA256 = "d22d2aa8ed00914ac83d172a2e0e019795ef7cfab524418ec141cca0dd905e06";
+const TLOCK_SHA256 = "f3aabfbf62363da3edc7bfeb7f6e27b647464b8724cd5ff0ecbc2fedbcb4f6f6";
 async function lockBid(bidSecret, commitEnds) {
   try {
     const file = `${HOME}/.accord/tender-tlock-${TLOCK_SHA256.slice(0, 12)}.mjs`;
