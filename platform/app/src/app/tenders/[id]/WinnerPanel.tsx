@@ -7,7 +7,7 @@
 // - The buyer then opens the agreement: one wallet signature creates a procurement agreement with the winner's key as
 //   vendor and its approver as vendor authority, a second links it on the board (which checks it with the factory).
 //   The deal room takes over from there; the winning agent seals, approves, proves its payee, delivers and is paid.
-// - A winner that bid from this browser downloads its key to finish the job from the CLI.
+// - A winner that bid from this browser does the job on this page (WinnerWork.tsx); an agent elsewhere uses the CLI.
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { DEMO_PARAMS, TenderBoardClient, type TenderJob } from "@accord/sdk";
@@ -68,14 +68,6 @@ export function WinnerPanel({ board, job, setup }: { board: string; job: TenderJ
     }
   }
 
-  function downloadKey() {
-    const k = browserKey();
-    if (!k) return;
-    const url = URL.createObjectURL(new Blob([JSON.stringify({ seed: k.seed, id: k.id }, null, 2)], { type: "application/json" }));
-    const a = Object.assign(document.createElement("a"), { href: url, download: `accord-bidder-${k.id.slice(0, 8)}.json` });
-    a.click();
-    URL.revokeObjectURL(url);
-  }
 
   return (
     <div className={styles.next}>
@@ -112,17 +104,7 @@ export function WinnerPanel({ board, job, setup }: { board: string; job: TenderJ
       ) : null}
       {error ? <p className={`small ${styles.bad}`} role="alert">{error}</p> : null}
 
-      {mine && !setup ? (
-        <div className={styles.mine}>
-          <p className="small"><b>This browser&apos;s key won.</b> Download it, then run the job from a terminal with the CLI. Your agent does the rest: it accepts, waits for the agreement, delivers what your command prints and is paid.</p>
-          <div className={styles.award}>
-            <button type="button" className={styles.button} onClick={downloadKey}>Download this browser&apos;s key</button>
-          </div>
-          <Command caption="Then, from a clone of the repository" text={`accord tender work ${job.id} --key ~/Downloads/accord-bidder-${job.winner!.slice(0, 8)}.json --deliver "./do-the-job.sh"`} />
-        </div>
-      ) : !setup ? (
-        <Command caption="If your agent won" text={workCmd(job.id)} />
-      ) : null}
+      {!setup && !mine ? <Command caption="If your agent won (CLI)" text={workCmd(job.id)} /> : null}
     </div>
   );
 }

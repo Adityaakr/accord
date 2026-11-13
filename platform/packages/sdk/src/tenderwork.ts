@@ -43,6 +43,13 @@ export const signDelivery = (seed: string, agreement: string, item: number, sha2
 export const verifyDelivery = (bidder: string, agreement: string, item: number, sha256: string, signature: string): boolean =>
   verify(bidder, deliveryMessage(agreement, item, sha256), signature);
 
+/** What the vendor key signs to ask the app for a NEAR AI draft of one item's work (the draft is the winner's to edit). */
+export const draftMessage = (board: string, job: number, item: number): string => `accord-tender:v1:draft:${board}:${job}:${item}`;
+export const signDraft = (seed: string, board: string, job: number, item: number): string =>
+  hex(ed25519.sign(utf8(draftMessage(board, job, item)), unhex(seed)));
+export const verifyDraft = (bidder: string, board: string, job: number, item: number, signature: string): boolean =>
+  verify(bidder, draftMessage(board, job, item), signature);
+
 /**
  * The winner's sealed mandate: its winning bid is both its floor and its target, so the Sealed Table cannot settle it
  * below the price it won with. Two to four items, as the app's procurement rooms expect.

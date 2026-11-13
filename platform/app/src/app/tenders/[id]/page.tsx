@@ -18,6 +18,7 @@ import { TokenAmount } from "../TokenAmount";
 import { ActivityTimeline, PriceChart } from "../charts";
 import { AwardButton } from "./AwardButton";
 import { WinnerPanel } from "./WinnerPanel";
+import { WinnerWork } from "./WinnerWork";
 import { winnerSetup } from "@/server/tenderwork";
 import { BrowserBid } from "./BrowserBid";
 import styles from "./job.module.css";
@@ -116,7 +117,7 @@ export default async function TenderJobPage({ params, searchParams }: { params: 
   }
 
   const deal: DealSummary | null = job.agreement ? await dealOf(job.agreement) : null;
-  const setup = job.winner && !job.agreement ? await winnerSetup(id) : null;
+  const setup = job.winner ? await winnerSetup(id) : null;
   const now = Date.now();
   const moving = job.phase === "open" || job.phase === "revealing" || job.phase === "closed" || job.phase === "awarded";
   const { at, stopped } = stepAt(job);
@@ -254,6 +255,7 @@ export default async function TenderJobPage({ params, searchParams }: { params: 
                     </p>
                   ) : <WinnerPanel board={board} job={job} setup={setup} />
                 ) : null}
+                {job.winner && !house && (!tok || tok.links) ? <WinnerWork board={board} job={job} setup={setup} /> : null}
               </>
             )}
           </Panel>
