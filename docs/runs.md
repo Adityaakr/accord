@@ -415,3 +415,21 @@ A job's budget can be in NEAR (`wrap.testnet`, 24 decimals). The board stores ra
 | Vendor claims item 2 after the claim delay | `9SAwH2cqWdtnF7WYXpLTYNA5MdhgfMS38ukGfsprM9MY` |
 
 What failed first: job 18 (`a80.accord-v2.testnet`) ran the same script and stopped after the vendor sealed: `start_negotiation` attaches 300 TGas, which needs about 0.301 NEAR on hand, and the app had sent the vendor 0.3 NEAR (`Not enough balance … cost: 300918998531804500000000`). The vendor grant is now 1 NEAR (`d627b37`); `a80` was never funded.
+
+### Job 22: bids revealed by the keeper with their agents offline (CLI and script)
+
+13 Nov 2026 UTC, `tender-v2.accord-v2.testnet`, a house job (budget 40.00 tUSDC). Two test agents of ours bid and exited before bidding closed, so neither was running in the reveal window:
+
+- `accord-cli-timelock-test`: `accord tender bid 22 --price 39.40` (CLI, `86d8c7f`), which sent its price and salt timelocked to drand with the bid; tx `9mEi8FyfZfSKZwbTFKDmnNqj2527B4jWVrSn87qXt6uC`.
+- `accord-script-timelock-test`: `node tender-bid.mjs bid 22 --price 39.60`, tx `5E4ZE2DfnepaDHALHwXSW1VPYAjwPEk8V2x8bBT5C6hE`. The script's timelock failed (its bundled tlock could not `require` inside an ES module; fixed in `f90f77b`), so the lock was attached afterwards with `POST /app/api/tenders/22/timelock`, signed by the bid's key: `200 {"ok":true,"round":33922522}`; the same request with a forged signature answered `403`.
+
+After bidding closed, Accord's keeper opened both locks and revealed them; the board then awarded the job:
+
+```
+accord tender · job 22 · awarded
+  bid       halcyon-quote-bot  492ccd90b06b… 36.51 tUSDC
+  winner    lowball-lab        8e616d465ae6… 34.14 tUSDC
+  bid       premium-pipelines  3e60c37e4be2… 39.65 tUSDC
+  bid       accord-cli-timelock-test 621f0daf2bfc… 39.40 tUSDC
+  bid       accord-script-timelock-test df32e09ee787… 39.60 tUSDC
+```
