@@ -10,8 +10,9 @@
 // for a bidder who is offline; nobody, this server included, can open it before that round.
 import "server-only";
 import {
-  KeySigner, TENDER_BOARDS, TenderBoardClient, commitment, timelockRoundFor, timelockRoundOf, verifyBidSignature, type TenderJob, type TxResult,
+  KeySigner, TENDER_BOARDS, TenderBoardClient, commitment, timelockRoundFor, timelockRoundOf, verifyBidSignature, verifyTimelock, type TenderJob, type TxResult,
 } from "@accord/sdk";
+import { createHash } from "node:crypto";
 import { tenderTimelocks } from "@accord/store";
 import { accord, config } from "./accord";
 import { takeAll } from "./limiter";
@@ -128,6 +129,29 @@ export async function relayBid(id: number, body: unknown, ip = "") {
       .catch((e: Error) => console.error(`[tender] timelock not kept for job ${id}: ${e.message}`));
   }
   return { ...out, timelocked: !!lock };
+}
+
+/**
+ * Keeps a timelocked reveal for a bid already on the board (sent on chain directly, or without one): signed by the
+ * bid's own key over the board, job, the on-chain commitment and the ciphertext's sha256, so nobody can replace another
+ * bidder's lock. The keeper reveals it after the drand round like any other; the board still checks the commitment.
+ */
+export async function relayTimelock(id: number, body: unknown) {
+  const b = (body ?? {}) as Record<string, unknown>;
+  if (!isHex(b.bidder, 64) || !isHex(b.signature, 128) || typeof b.timelock !== "string") {
+    throw new RelayError(400, "a timelock is {bidder, timelock, signature}: hex key, tlock ciphertext, hex signature");
+  }
+  const j = await freshJob(id);
+  if (j.phase !== "open") throw new RelayError(409, `job ${id} is ${j.phase}; a timelock is attached while bids are open`);
+  const mine = j.bids.find((x) => x.bidder === b.bidder);
+  if (!mine) throw new RelayError(404, `no bid from ${String(b.bidder).slice(0, 12)}… on job ${id}`);
+  const sha = createHash("sha256").update(b.timelock, "utf8").digest("hex");
+  if (!verifyTimelock(mine.bidder, boardId(), id, mine.commitment, sha, b.signature as string)) {
+    throw new RelayError(403, "the signature is not this bidder's over this job, its commitment and this ciphertext");
+  }
+  const lock = (await checkTimelock(b.timelock, j))!;
+  await tenderTimelocks.save({ board: boardId(), job: id, bidder: mine.bidder, commitment: mine.commitment, ciphertext: lock.ciphertext, round: lock.round });
+  return { ok: true, round: lock.round };
 }
 
 /** An optional timelocked reveal: an age/tlock text locked no earlier than the first drand round after bidding closes. */

@@ -23,7 +23,7 @@ describe("read-only CORS", () => {
     // Tender relay routes take POST from any origin on purpose: the body is data signed by the bidder's own key, the
     // board checks that signature on chain, and no session or cookie is read. They must never touch a session.
     const signedRelays = new Set([
-      "api/tenders/[id]/bids/route.ts", "api/tenders/[id]/reveal/route.ts", "api/tenders/[id]/award/route.ts",
+      "api/tenders/[id]/bids/route.ts", "api/tenders/[id]/reveal/route.ts", "api/tenders/[id]/award/route.ts", "api/tenders/[id]/timelock/route.ts",
       // a winner's approver and payee, its deliveries, and an agent's claim on an account: each signed by the agent's key
       "api/tenders/[id]/winner/route.ts", "api/tenders/[id]/deliveries/route.ts", "api/tenders/agents/claims/route.ts",
     ]);

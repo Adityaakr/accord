@@ -7,6 +7,7 @@
 //   node tender-bid.mjs link <your-account.testnet>   (asks to join your Accord dashboard; approve it there)
 // --account (or ACCORD_ACCOUNT) asks to join that account's agents: it shows there with an Approve button. A winner
 // finishes the job with the CLI, which reads the same key: accord tender work <job> --deliver "<command>".
+// Every bid carries its price and salt timelocked to drand (see lockBid), so it is revealed even if you go offline.
 // Your bidder key (an ed25519 seed) is made on first use in ~/.accord/bidder.json (0600); its public key in hex is
 // your bidder id and your NEAR implicit account. The price and salt of each sealed bid stay in
 // ~/.accord/tender-bids/<board>/<job>.json (0600) until the reveal: only a hash of them is sent while bidding is open.
@@ -35,6 +36,22 @@ async function secret(path, content, create = false) {
   await chmod(path, 0o600);
 }
 const readOrNull = (path) => readFile(path, "utf8").catch((e) => { if (e.code === "ENOENT") return null; throw e; });
+// The bid's price and salt locked to the drand round after bidding closes, so Accord's keeper reveals it even if this
+// script is not running then. drand's tlock is bundled at ${APP}/tender-tlock.mjs; it is fetched once into ~/.accord
+// and used only if its sha256 is the one pinned here. null when it cannot be had: the bid still goes, revealed by hand.
+const TLOCK_SHA256 = "d22d2aa8ed00914ac83d172a2e0e019795ef7cfab524418ec141cca0dd905e06";
+async function lockBid(bidSecret, commitEnds) {
+  try {
+    const file = `${HOME}/.accord/tender-tlock-${TLOCK_SHA256.slice(0, 12)}.mjs`;
+    let code = await readOrNull(file);
+    if (code === null) { const r = await fetch(`${APP}/tender-tlock.mjs`); if (!r.ok) return null; code = await r.text(); }
+    if (createHash("sha256").update(code).digest("hex") !== TLOCK_SHA256) return null;
+    await secret(file, code);
+    return await (await import(`file://${file}`)).timelockBidSecret(bidSecret, commitEnds);
+  } catch {
+    return null;
+  }
+}
 // The key is made only when there is none; a damaged file is an error and is left alone (it may be a won vendor key).
 async function loadKey() {
   const file = `${HOME}/.accord/bidder.json`;
@@ -149,8 +166,11 @@ async function main() {
   const signature = sign(null, Buffer.from(`accord-tender:v1:bid:${board}:${job}:${nonce}:${commitment}:${agent}`), k.priv).toString("hex");
   const entries = entriesOf(before).filter((e) => e.commitment !== commitment).concat([{ commitment, price, salt, nonce }]);
   await secret(file, JSON.stringify({ bidder: k.id, entries }, null, 2));
-  const r = await post(`${job}/bids`, { bidder: k.id, agent, commitment, nonce, signature });
+  const timelock = await lockBid({ price, salt }, j.commit_ends);
+  const r = await post(`${job}/bids`, { bidder: k.id, agent, commitment, nonce, signature, ...(timelock ? { timelock } : {}) });
   console.log(`sealed bid on job ${job} · bidder ${k.id.slice(0, 12)}… · commitment ${commitment.slice(0, 16)}… · tx ${r.tx}`);
+  console.log(timelock ? "timelock: price and salt locked to drand until bidding closes; Accord reveals it if this script is not running"
+    : `no timelock (drand or the bundle unreachable): reveal it yourself after bidding closes, node tender-bid.mjs reveal ${job}`);
   const owner = String(flag("account") || process.env.ACCORD_ACCOUNT || "").trim().toLowerCase();
   if (owner) {
     const sig = sign(null, Buffer.from(`accord-tender:v1:link:${owner}`), k.priv).toString("hex");

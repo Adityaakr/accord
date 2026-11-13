@@ -203,7 +203,7 @@ export default async function TenderJobPage({ params, searchParams }: { params: 
                         <td className={styles.key}><span className="mono weak" title={`key ${bid.bidder}\ncommitment ${bid.commitment}`}>{shortHex(bid.bidder)}</span></td>
                         <td className={styles.right}>
                           {bid.price === null
-                            ? <span className={styles.sealed}><Lock />sealed</span>
+                            ? status === "sealed" ? <span className={styles.sealed}><Lock />sealed</span> : <span className="faint">hidden</span>
                             : amount(bid.price)}
                         </td>
                         <td className={styles.right}><BidStatus status={status} /></td>

@@ -72,6 +72,8 @@ export function PriceChart({ job }: { job: TenderJob }) {
   const spread = valid.length > 1 ? Math.max(...valid.map((b) => asNumber(b.price!, job.token))) - Math.min(...valid.map((b) => asNumber(b.price!, job.token))) : 0;
   const fmt = (n: number) => (n >= 1 || n === 0 ? n.toFixed(2) : n.toPrecision(2));
   const ticks = [0, 0.5, 1];
+  // after the reveal window an unrevealed bid is out of the running, not still "sealed"
+  const live = job.phase === "open" || job.phase === "revealing";
   return (
     <div className={styles.chart}>
       {ref?.price ? (
@@ -80,7 +82,7 @@ export function PriceChart({ job }: { job: TenderJob }) {
           {isDust(ref.price, job.budget) ? <span className={styles.summaryWarn}>far below one unit: priced in the wrong decimals</span> : null}
           {budgetN > 0 && refN <= budgetN && !isDust(ref.price, job.budget) ? <span><b>{fmt(budgetN - refN)} {sym}</b> ({(((budgetN - refN) / budgetN) * 100).toFixed(1)}%) under the budget</span> : null}
           {valid.length > 1 ? <span>spread <b>{fmt(spread)} {sym}</b></span> : null}
-          <span>{revealed.length} of {job.bids.length} revealed</span>
+          <span>{revealed.length} of {job.bids.length} revealed{!live && revealed.length < job.bids.length ? ` · ${job.bids.length - revealed.length} never revealed` : ""}</span>
         </p>
       ) : (
         <p className={styles.summary}><span>{job.bids.length ? `${job.bids.length} sealed bid${job.bids.length === 1 ? "" : "s"}: prices show as each bidder reveals` : "No bids yet"}</span></p>
@@ -110,7 +112,9 @@ export function PriceChart({ job }: { job: TenderJob }) {
                   <span className={styles.sealedBar} aria-hidden="true" />
                 )}
               </span>
-              <span className={`${styles.num} ${styles.price}`}>{b.price ? amount(b.price, job.token) : (
+              <span className={`${styles.num} ${styles.price}`}>{b.price ? amount(b.price, job.token) : !live ? (
+                <span className={styles.sealedTag} data-tip={`${b.agent} did not reveal before the window closed: its price stays hidden, it cannot win, and its bid bond is forfeit`} tabIndex={0}>not revealed</span>
+              ) : (
                 <span className={styles.sealedTag} data-tip={`${b.agent} · only a sha256 is on chain until it reveals`} tabIndex={0}>
                   <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>sealed
                 </span>

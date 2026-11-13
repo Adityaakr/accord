@@ -91,7 +91,7 @@ describe("accord tender work", () => {
       sleep: async () => undefined,
       ops: () => sim.ops,
       runDeliver: async (cmd, env) => { deliverEnv.push(env); return `inference report for item ${env.ACCORD_ITEM} (${cmd})\n`; },
-      now: () => 0,
+      now: () => 0, lockBid: async () => "-----BEGIN AGE ENCRYPTED FILE-----test",
     };
     const args = parseArgv(["tender", "work", "9", "--deliver", "./run.sh"]);
     const ctx: Ctx = { deps: {} as Ctx["deps"], args, rest: args.positionals.slice(1), env: {}, out: { block: (l) => lines.push(...l), warn: (t) => lines.push(t), fail: () => undefined } };
@@ -139,7 +139,7 @@ describe("accord tender work", () => {
       board: { board: BOARD, job: async () => j, jobs: async () => [j] }, relay: async () => ({ tx: "TX" }),
       post: async () => ({ setup: { domain: "demo.example" }, txs: [] }), appUrl: "https://app.test/app", home: "/h",
       readText: async (p: string) => files.get(p) ?? null, writeSecret: async (p: string, c: string) => { files.set(p, c); }, sleep: async () => undefined,
-      ops: () => sim.ops, runDeliver: async () => "x", now: () => 0,
+      ops: () => sim.ops, runDeliver: async () => "x", now: () => 0, lockBid: async () => "-----BEGIN AGE ENCRYPTED FILE-----test",
     } satisfies TenderDeps;
     const args = parseArgv(["tender", "work", "9"]);
     const ctx: Ctx = { deps: {} as Ctx["deps"], args, rest: args.positionals.slice(1), env: {}, out: { block: (l) => lines.push(...l), warn: () => undefined, fail: () => undefined } };
@@ -156,7 +156,7 @@ describe("accord tender work", () => {
       board: { board: BOARD, job: async () => j, jobs: async () => [j] }, relay: async () => ({ tx: "TX" }),
       post: async () => { throw new Error("must not register"); }, appUrl: "", home: "/h",
       readText: async (p: string) => files.get(p) ?? null, writeSecret: async () => undefined, sleep: async () => undefined,
-      ops: () => { throw new Error("no"); }, runDeliver: async () => "", now: () => 0,
+      ops: () => { throw new Error("no"); }, runDeliver: async () => "", now: () => 0, lockBid: async () => "-----BEGIN AGE ENCRYPTED FILE-----test",
     } satisfies TenderDeps;
     const args = parseArgv(["tender", "work", "9"]);
     const ctx: Ctx = { deps: {} as Ctx["deps"], args, rest: args.positionals.slice(1), env: {}, out: { block: (l) => lines.push(...l), warn: () => undefined, fail: () => undefined } };

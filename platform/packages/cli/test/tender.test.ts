@@ -27,7 +27,7 @@ function setup(j: TenderJob) {
     appUrl: "https://app.test/app",
     ops: () => { throw new Error("no agreement in this test"); },
     runDeliver: async () => "",
-    now: () => 0,
+    now: () => 0, lockBid: async () => "-----BEGIN AGE ENCRYPTED FILE-----test",
   };
   const ctx = (argv: string[]): Ctx => {
     const args = parseArgv(argv);
@@ -46,6 +46,7 @@ describe("accord tender", () => {
     const body = s.sent[0]!.body;
     expect(s.sent[0]!.path).toBe("3/bids");
     expect(JSON.stringify(body)).not.toContain("34500000"); // the price never leaves before the reveal
+    expect(body.timelock).toContain("AGE ENCRYPTED FILE"); // Accord can reveal it if this agent goes offline
     expect(body.bidder).toBe(key.id);
     expect(body.commitment).toBe(commitment(BOARD, 3, key.id, 34_500_000n, kept.salt));
     expect(verifyBidSignature({ board: BOARD, job: 3, ...(body as { bidder: string; agent: string; commitment: string; nonce: number; signature: string }) })).toBe(true);

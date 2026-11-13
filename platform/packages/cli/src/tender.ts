@@ -16,7 +16,7 @@ import { exec } from "node:child_process";
 import {
   Accord, KeySigner, bidderNearKey, signLink as signLinkFor,
   Chain, RPC, TENDER_BOARDS, TenderBoardClient, addBidSecret, bidderKey, isBoardId, newBidderKey, nextNonce,
-  parseTenderAmount, prepareBid, secondsLeft, secretFor, signLink, tenderAmount, tenderToken, type BidderKey, type TenderJob,
+  parseTenderAmount, prepareBid, secondsLeft, secretFor, signLink, tenderAmount, tenderToken, timelockBidSecret, type BidderKey, type TenderJob,
 } from "@accord/sdk";
 import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -38,6 +38,11 @@ export interface TenderDeps extends Omit<WorkDeps, "board"> {
   /** Writes with mode 0600 (and 0600 again after, for a file that existed); `create` fails if the file exists. */
   writeSecret(path: string, content: string, create?: boolean): Promise<void>;
   sleep(ms: number): Promise<void>;
+  /**
+   * The bid's price and salt locked to the drand round after bidding closes, so Accord's keeper reveals it if this
+   * agent is offline in the reveal window; null when drand cannot be reached (the bid still goes, revealed by hand).
+   */
+  lockBid(secret: { price: string; salt: string }, commitEndsNs: number): Promise<string | null>;
 }
 
 export function tenderDeps(ctx: Ctx): TenderDeps {
@@ -65,6 +70,7 @@ export function tenderDeps(ctx: Ctx): TenderDeps {
       });
     }),
     now: () => Date.now(),
+    lockBid: (secret, commitEndsNs) => timelockBidSecret(secret, commitEndsNs).catch(() => null),
     relay: async (path, body) => {
       const r = await fetch(`${relayUrl}/api/tenders/${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
       const j = (await r.json().catch(() => ({}))) as { tx?: string; error?: string };
@@ -228,7 +234,9 @@ export async function runTender(ctx: Ctx, d: TenderDeps): Promise<number> {
       const sealed = prepareBid({ board: d.board.board, job, price, agent, key, nonce: nextNonce(keptBefore, onChain?.nonce ?? null) });
       // kept before sending and added, never overwritten: whichever submission lands can be revealed
       await d.writeSecret(bidFile(d, job), addBidSecret(keptBefore, sealed));
-      const r = await d.relay(`${job}/bids`, { bidder: sealed.bidder, agent: sealed.agent, commitment: sealed.commitment, nonce: sealed.nonce, signature: sealed.signature });
+      const timelock = flagBool(ctx.args, "no-timelock") ? null : await d.lockBid(sealed.secret, j.commit_ends);
+      if (!timelock && !flagBool(ctx.args, "no-timelock")) ctx.out.warn("note: drand could not be reached, so this bid has no timelock; reveal it yourself (accord tender reveal) after bidding closes");
+      const r = await d.relay(`${job}/bids`, { bidder: sealed.bidder, agent: sealed.agent, commitment: sealed.commitment, nonce: sealed.nonce, signature: sealed.signature, ...(timelock ? { timelock } : {}) });
       const owner = ownerOf(ctx);
       const claimed = owner ? await claimAccount(d, key, owner, agent).then(() => true, (e: Error) => { ctx.out.warn(`could not ask to join ${owner}'s dashboard: ${e.message}`); return false; }) : false;
       ctx.out.block([
@@ -237,6 +245,7 @@ export async function runTender(ctx: Ctx, d: TenderDeps): Promise<number> {
         line("sealed", `commitment ${sealed.commitment.slice(0, 16)}… · price hidden until the reveal`),
         line("tx", r.tx),
         line("kept", `${bidFile(d, job)} (price and salt; needed to reveal)`),
+        ...(timelock ? [line("timelock", "price and salt locked to drand until bidding closes; Accord reveals it if this agent is offline")] : []),
         ...(claimed ? [line("dashboard", `asked to join ${owner}'s agents: approve it at ${d.appUrl}/tenders/agents`)] : []),
       ], { job, bidder: key.id, commitment: sealed.commitment, tx: r.tx, claimed: owner ?? null });
       if (!flagBool(ctx.args, "wait")) return 0;

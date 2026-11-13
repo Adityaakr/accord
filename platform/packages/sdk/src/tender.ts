@@ -314,3 +314,24 @@ export function parseTenderAmount(text: string, token: string): bigint {
   if (!m) throw new Error("an amount like 34.50 (up to 6 decimals)")
   return BigInt(m[1]!) * 10n ** BigInt(t.decimals) + BigInt((m[2] ?? "").padEnd(t.decimals, "0").slice(0, t.decimals) || "0")
 }
+
+/**
+ * What a bidder key signs to hand the relay its timelocked reveal for a bid already on the board (one sent on chain
+ * directly, or before it carried a timelock): the board, job, commitment and the ciphertext's sha256. The keeper opens
+ * it after the drand round and reveals, so the bid is revealed even if its agent is offline.
+ */
+export const timelockMessage = (board: string, job: number, commitment: string, ciphertextSha256: string): string =>
+  `accord-tender:v1:timelock:${board}:${job}:${commitment}:${ciphertextSha256}`;
+
+export function signTimelock(key: BidderKey, board: string, job: number, commitment: string, ciphertextSha256: string): string {
+  return hex(ed25519.sign(utf8(timelockMessage(board, job, commitment, ciphertextSha256)), unhex(key.seed)));
+}
+
+export function verifyTimelock(bidder: string, board: string, job: number, commitment: string, ciphertextSha256: string, signature: string): boolean {
+  try {
+    if (!/^[0-9a-f]{64}$/.test(bidder) || !/^[0-9a-f]{128}$/.test(signature)) return false;
+    return ed25519.verify(unhex(signature), utf8(timelockMessage(board, job, commitment, ciphertextSha256)), unhex(bidder));
+  } catch {
+    return false;
+  }
+}
