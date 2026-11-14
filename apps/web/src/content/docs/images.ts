@@ -12,4 +12,5 @@ export const DOC_IMAGES: Record<ImageId, { w: number; h: number; theme: "dark" |
   "agent-refused": { w: 360, h: 715, theme: "light" },
   verify: { w: 1600, h: 1944, theme: "dark" },
   record: { w: 1600, h: 1156, theme: "dark" },
+  "outlayer-slow": { w: 1600, h: 692, theme: "dark" },
 }

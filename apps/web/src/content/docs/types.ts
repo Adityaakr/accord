@@ -15,6 +15,7 @@ export type ImageId =
   | "agent-refused"      // the demo agent panel after a redirected payment: ERR_PAYEE_MISMATCH
   | "verify"             // the site's /verify page checking a6.accord-v2.testnet
   | "record"             // the site's /record page for a6
+  | "outlayer-slow"      // /app/try-it on 14 Nov 2026, 21:05 UTC: the red notice while OutLayer's queue read slow
 
 export type DocImage = { id: ImageId; alt: string; caption?: string }
 
