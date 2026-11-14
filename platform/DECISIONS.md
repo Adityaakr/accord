@@ -964,4 +964,15 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
   then `held over: starting the negotiation`, and the room reached `Attested` on its first attempt, `212 s` after both
   sides sealed (hold included). The four rooms before the guard that met the same queue (a85 to a88) ended `NoDeal`.
   One held run is one observation, not a rate.
+- **A release 6 agreement through the whole flow.** `a91.accord-v2.testnet` (14 Nov 2026, `make finish`): `Attested`,
+  both approvals, `32.00` test USDC funded
+  (https://testnet.nearblocks.io/txns/7QgyfvEHeXEtNrmWkAXGy8xkyvKPoVW4Mn7bRYBwPkvC), recipient `halcyon-mm.testnet`
+  proven by the Payee job, item 1 paid `10.66`
+  (https://testnet.nearblocks.io/txns/3Z9WGtx1byMgRJt7nVuED8Qngr3axjJB4qEe2N6FvUvw), a redirected payment refused
+  `ERR_PAYEE_MISMATCH` (https://testnet.nearblocks.io/txns/9xerfHvh2MJwWqsSKgPGtUK9C4h3oWZCmZEXgt7iuUHb), the agent's
+  key revoked. `make verify DEAL=a91.accord-v2.testnet` prints `verify: 6 checks ok · 1 partial`.
+- **The payee proof has no hold.** On `a91` the first Payee job run got no signed output while OutLayer's queue was
+  slow (the version ended `ProofFailed`); the vendor proposed the recipient again once the queue cleared and it was
+  proven. The guard covers only the negotiation; a recipient proposed during a slow spell can fail and must be
+  proposed again. Nothing is lost when it does: the escrow and the agreement are unchanged.
 
