@@ -3,7 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { newBidderKey } from "../src/tender.js";
 import {
-  signDelivery, signWinner, tenderVendorMandate, vendorMove, verifyDelivery, verifyWinner, type VendorView,
+  nextMoveUsesOutLayer, signDelivery, signWinner, tenderVendorMandate, vendorMove, verifyDelivery, verifyWinner, type VendorView,
 } from "../src/tenderwork.js";
 import type { AgreementView, ItemView, RecipientVersion } from "../src/types.js";
 
@@ -60,6 +60,22 @@ describe("a winning agent's next move", () => {
     expect(vendorMove(view({ recipient: null }, { recipients: [failed] }), PAYEE)).toMatchObject({ kind: "propose" });
     expect(vendorMove(view({ recipient: null }, { recipients: [failed, { ...failed, version: 2 }] }), PAYEE)).toMatchObject({ kind: "done", why: expect.stringContaining("no such recipient") });
     expect(vendorMove(view({ ends_at: 1000 }), PAYEE)).toMatchObject({ kind: "done", why: expect.stringContaining("term") });
+  });
+  it("holds the payee proposal while OutLayer answers late, and does not count unanswered proofs against the payee", () => {
+    // slow: the proposal waits, so the Payee job's proof is not lost
+    expect(vendorMove({ ...view({ recipient: null }, { recipients: [] }), tableSlow: true }, PAYEE)).toMatchObject({ kind: "wait", buyer: false });
+    // a run OutLayer never answered is proposed again, even twice
+    const unanswered = version({ status: "ProofFailed", failure: "no signed output" });
+    expect(vendorMove(view({ recipient: null }, { recipients: [unanswered, { ...unanswered, version: 2 }] }), PAYEE)).toMatchObject({ kind: "propose" });
+    // but not for ever: four failed proposals of any kind stop it
+    const four = [1, 2, 3, 4].map((n) => ({ ...unanswered, version: n }));
+    expect(vendorMove(view({ recipient: null }, { recipients: four }), PAYEE)).toMatchObject({ kind: "done", why: expect.stringContaining("OutLayer") });
+    // the queue is read only when the next move sends OutLayer a job
+    expect(nextMoveUsesOutLayer(view({ recipient: null }).agreement, [])).toBe(true);
+    expect(nextMoveUsesOutLayer(view({ recipient: null }).agreement, [unanswered])).toBe(true);
+    expect(nextMoveUsesOutLayer(view({ recipient: null }).agreement, [version({ status: "Proposed" })])).toBe(false);
+    expect(nextMoveUsesOutLayer(view({ state: "Sealed", negotiation: { Ready: { attempts: 0 } } }).agreement, [])).toBe(true);
+    expect(nextMoveUsesOutLayer(view({ state: "Attested" }).agreement, [])).toBe(false);
   });
 });
 

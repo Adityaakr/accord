@@ -75,7 +75,7 @@ export async function sealBoth(w: World, id: string, preset: { buyer: string; ve
 
 /** Waits, at most `HOLD_SECS`, while OutLayer's queue is slow or until someone else has started the negotiation. */
 const HOLD_SECS = 900;
-async function holdWhileSlow(deal: ReturnType<typeof client>, outlayer: string): Promise<void> {
+async function holdWhileSlow(deal: ReturnType<typeof client>, outlayer: string, what: "negotiation" | "payee" = "negotiation"): Promise<void> {
   const until = Date.now() + HOLD_SECS * 1000;
   let said = false;
   while (Date.now() < until) {
@@ -84,10 +84,11 @@ async function holdWhileSlow(deal: ReturnType<typeof client>, outlayer: string):
     if (!said) console.log(`  held      OutLayer's worker is behind: none of its newest ${q.unanswered} requests is answered, the oldest made ${q.sinceSecs} s ago; starting when its queue clears, within ${HOLD_SECS / 60} min at most`);
     said = true;
     await new Promise((r) => setTimeout(r, 20_000));
+    if (what === "payee") continue;
     const a = await deal.get();
     if (!(a.state === "Sealed" && typeof a.negotiation === "object" && "Ready" in a.negotiation)) return; // started elsewhere
   }
-  if (said) console.log("  held      over: starting the negotiation");
+  if (said) console.log(what === "payee" ? "  held      over: proposing the recipient" : "  held      over: starting the negotiation");
 }
 
 /** Starts the negotiation as the keeper would and waits for the Sealed Table's answer. */
@@ -123,6 +124,8 @@ export async function fundTotal(w: World, id: string): Promise<{ total: bigint; 
 
 /** Proposed by the vendor, proven by the Payee job, approved by the authority, accepted by the buyer, active. */
 export async function authorise(w: World, id: string, account: string): Promise<{ version: number; rating: string }> {
+  // The Payee job runs on OutLayer too: hold while its worker is behind, so the proof is not lost to a late answer.
+  if (w.network !== "sandbox") await holdWhileSlow(client(w, "vendor", id), (await w.reader.agreement(id).get()).outlayer, "payee");
   const tx = await client(w, "vendor", id).proposeRecipient(account, w.domain);
   const version = Number(tx.value);
   const proven = await waitFor("the Payee job's proof", w.network === "sandbox" ? 60 : 300, async () => {

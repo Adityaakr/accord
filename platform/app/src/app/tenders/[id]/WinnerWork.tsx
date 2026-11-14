@@ -9,7 +9,7 @@
 // is the contract's to accept or refuse.
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Accord, KeySigner, bidderKey, bidderNearKey, newBidderKey, signDelivery, signDraft, signWinner, tenderVendorMandate, vendorMove,
+  Accord, KeySigner, bidderKey, bidderNearKey, newBidderKey, signDelivery, signDraft, signWinner, tenderVendorMandate, vendorMove, nextMoveUsesOutLayer,
   type BidderKey, type TenderJob, type VendorMove, type VendorView,
 } from "@accord/sdk";
 import { useAppConfig } from "@/components/AppConfig";
@@ -106,8 +106,8 @@ export function WinnerWork({ board, job, setup, house = false }: { board: string
     if (!job.agreement || !keys || !setup) return null;
     const d = accord().agreement(job.agreement);
     const [a, c, recipients, items] = await Promise.all([d.get(), d.commitments(), d.recipients(), d.items()]);
-    // read OutLayer's queue only when the next move would be to start the negotiation
-    const ready = a.state === "Sealed" && typeof a.negotiation === "object" && "Ready" in a.negotiation;
+    // read OutLayer's queue only when the next move would send it a job (the negotiation, the payee proof)
+    const ready = nextMoveUsesOutLayer(a, recipients);
     const tableSlow = ready ? await d.tableQueue(a.outlayer, a.now * 1000).then((q) => q.slow, () => false) : false;
     const v: VendorView = { agreement: a, sealed: { buyer: !!c.buyer, vendor: !!c.vendor }, recipients, items, now: a.now, tableSlow };
     const m = vendorMove(v, { recipient: keys.recipient.id, domain: setup.domain });

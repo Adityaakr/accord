@@ -87,12 +87,25 @@ export interface VendorView {
   items: ItemView[];
   /** Seconds, the chain's clock (agreement.now when the view has it). */
   now: number;
-  /** OutLayer is answering late (`tableQueue(...).slow`): the negotiation is held so an attempt is not wasted. */
+  /** OutLayer is answering late (`tableQueue(...).slow`): the negotiation and the payee proposal are held, so a
+   *  negotiation attempt or a proposal's deposit is not spent on an answer that would arrive too late. */
   tableSlow?: boolean;
 }
 
 const liveVersion = (v: RecipientVersion) => !["ProofFailed", "Superseded", "Cancelled"].includes(v.status);
 const wait = (why: string, buyer = false): VendorMove => ({ kind: "wait", why, buyer });
+
+/** What the agreement records when a job's run returned nothing signed inside NEAR's wait: OutLayer, not the payee. */
+const UNANSWERED = "no signed output";
+/** Proposals that failed for any reason before the vendor stops: each one costs the agreement a deposit. */
+const MAX_PROPOSALS = 4;
+
+/** true when the vendor's next move would send a job to OutLayer (start the negotiation, or propose its payee):
+ *  the caller reads OutLayer's queue only then, and passes the result as `tableSlow`. */
+export function nextMoveUsesOutLayer(a: AgreementView, recipients: RecipientVersion[]): boolean {
+  if (a.state === "Sealed") return typeof a.negotiation === "object" && "Ready" in a.negotiation;
+  return a.state === "Executing" && !a.recipient && !recipients.some(liveVersion);
+}
 
 /** The vendor's next valid move in a procurement agreement, given who it is paid to and on which domain. */
 export function vendorMove(v: VendorView, payee: { recipient: string; domain: string }): VendorMove {
@@ -120,9 +133,13 @@ export function vendorMove(v: VendorView, payee: { recipient: string; domain: st
   if (a.ends_at !== null && v.now >= a.ends_at) return { kind: "done", why: "the agreement's term has ended; deliveries are closed" };
   const current = v.recipients.filter(liveVersion).at(-1) ?? null;
   if (!a.recipient && !current) {
-    // a payee the Payee job could not prove is proposed once more at most: each proposal costs the agreement a deposit
+    // a payee the Payee job could not prove is proposed once more at most: each proposal costs the agreement a deposit.
+    // A run OutLayer never answered says nothing about the payee, so it does not count towards that, up to a cap.
     const failed = v.recipients.filter((x) => x.status === "ProofFailed");
-    if (failed.length >= 2) return { kind: "done", why: `the payee could not be proven: ${failed.at(-1)!.failure ?? failed.at(-1)!.reasons.join("; ")}` };
+    const refused = failed.filter((x) => x.failure !== UNANSWERED);
+    if (refused.length >= 2) return { kind: "done", why: `the payee could not be proven: ${refused.at(-1)!.failure ?? refused.at(-1)!.reasons.join("; ")}` };
+    if (failed.length >= MAX_PROPOSALS) return { kind: "done", why: `the Payee job got no answer from OutLayer on ${failed.length - refused.length} of ${failed.length} proposals; propose the recipient again from the deal room when OutLayer is answering` };
+    if (v.tableSlow) return wait("OutLayer's enclave worker is answering late; the recipient is proposed when its queue clears, so the Payee job's proof is not lost to a late answer");
     return { kind: "propose", recipient: payee.recipient, domain: payee.domain };
   }
   if (current && current.status !== "Active") {

@@ -272,6 +272,9 @@ export async function counterpartyStep(id: string): Promise<Step> {
   const versions = await reader.recipients();
   const current = versions.filter(live).at(-1) ?? null;
   if (!a.recipient && !current) {
+    // The Payee job runs on OutLayer too: a proposal made while its worker is behind would end `ProofFailed`.
+    const q = (await queueReading(a.outlayer))?.queue ?? null;
+    if (q?.slow) return wait(`OutLayer's enclave worker is answering late (none of its newest ${q.unanswered} requests is answered, the oldest made ${q.sinceSecs} s ago), so the vendor proposes its recipient when the queue clears: the Payee job's proof would otherwise be lost to a late answer.`);
     const tx = await as("vendor", id).proposeRecipient(d.recipient, d.domain);
     return done(`Proposed ${d.recipient} as the recipient on ${d.domain}`, tx.txHash, "The Payee job is checking the domain. It takes about a minute.");
   }

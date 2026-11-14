@@ -568,7 +568,7 @@ a.events(opts?: { fromBlock?: number }): AsyncIterable<AccordEvent>
 a.sealMandate(mandate: Mandate, opts: { role: "buyer" | "vendor"; docKey: DocKeySource }): Promise<{ commitment: string; txHash: string }>
   // checks the release's mandate key against its pubkey run's attestation record before encrypting
 a.startNegotiation(); a.approveTerms(termsHash); a.cancel();
-a.tableQueue();          // { pending, waiting, oldestSecs, slow }: OutLayer's newest requests, by view calls; the keeper, the
+a.tableQueue();          // { pending, unanswered, sinceSecs, slow }: OutLayer's newest requests, by view calls; the keeper, the
                          // demo vendor and the tender winner hold startNegotiation() while `slow` (three attempts, one yield each)
 a.fund(amount: string)                                                   // ft_transfer_call(…, "fund")
 a.proposeRecipient(account, domain); a.approveRecipient(v); a.acceptRecipient(v, { acknowledgeWarnings }); a.activateRecipient(v); a.cancelRecipientChange(v);

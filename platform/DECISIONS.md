@@ -971,8 +971,12 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
   (https://testnet.nearblocks.io/txns/3Z9WGtx1byMgRJt7nVuED8Qngr3axjJB4qEe2N6FvUvw), a redirected payment refused
   `ERR_PAYEE_MISMATCH` (https://testnet.nearblocks.io/txns/9xerfHvh2MJwWqsSKgPGtUK9C4h3oWZCmZEXgt7iuUHb), the agent's
   key revoked. `make verify DEAL=a91.accord-v2.testnet` prints `verify: 6 checks ok · 1 partial`.
-- **The payee proof has no hold.** On `a91` the first Payee job run got no signed output while OutLayer's queue was
-  slow (the version ended `ProofFailed`); the vendor proposed the recipient again once the queue cleared and it was
-  proven. The guard covers only the negotiation; a recipient proposed during a slow spell can fail and must be
-  proposed again. Nothing is lost when it does: the escrow and the agreement are unchanged.
+- **The payee proposal is held too.** On `a91` the first Payee job run got no signed output while OutLayer's queue was
+  slow (the version ended `ProofFailed`, failure `no signed output`); the vendor proposed the recipient again once the
+  queue cleared and it was proven. Since then nothing of ours proposes a recipient while `tableQueue` reads slow: a
+  tender winner's moves (`vendorMove`, in the CLI and the browser), the demo vendor and `make finish` wait for the
+  queue to clear. A winner used to stop after two failed proofs; a proof OutLayer never answered now does not count
+  towards those two, up to four failed proposals in all (each costs the agreement a deposit). A vendor who proposes
+  by hand in the deal room is not held. Nothing is lost when a proof fails this way: the escrow and the agreement are
+  unchanged. The held proposal has not yet been seen live; the unit tests cover the rule.
 
