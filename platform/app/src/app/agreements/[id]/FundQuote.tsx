@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { Panel } from "@/components/ui";
+import { ChainMark } from "@/components/ChainMark";
 import styles from "./verified.module.css";
 
 type Quote = { source: string; label: string; amountInFormatted?: string; seconds?: number | null; error?: string };
@@ -37,7 +38,7 @@ export function FundQuote({ agreement }: { agreement: string }) {
         <div className={styles.checks}>
           {a.quotes.map((q) => (
             <div key={q.source} className={styles.checkHead} style={{ justifyContent: "space-between" }}>
-              <span className="small">{q.label}</span>
+              <span className="small"><ChainMark source={q.source} />{q.label}</span>
               {q.error
                 ? <span className="small faint">{q.error}</span>
                 : <span className="mono small">{q.amountInFormatted} in{q.seconds ? ` · ~${q.seconds} s` : ""}</span>}
