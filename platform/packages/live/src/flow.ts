@@ -73,11 +73,34 @@ export async function sealBoth(w: World, id: string, preset: { buyer: string; ve
   return { buyer, vendor };
 }
 
+/** Waits, at most `HOLD_SECS`, while OutLayer's queue is slow or until someone else has started the negotiation. */
+const HOLD_SECS = 900;
+async function holdWhileSlow(deal: ReturnType<typeof client>, outlayer: string): Promise<void> {
+  const until = Date.now() + HOLD_SECS * 1000;
+  let said = false;
+  while (Date.now() < until) {
+    const q = await deal.tableQueue(outlayer).catch(() => null);
+    if (!q?.slow) break;
+    if (!said) console.log(`  held      OutLayer's worker is behind: none of its newest ${q.unanswered} requests is answered, the oldest made ${q.sinceSecs} s ago; starting when its queue clears, within ${HOLD_SECS / 60} min at most`);
+    said = true;
+    await new Promise((r) => setTimeout(r, 20_000));
+    const a = await deal.get();
+    if (!(a.state === "Sealed" && typeof a.negotiation === "object" && "Ready" in a.negotiation)) return; // started elsewhere
+  }
+  if (said) console.log("  held      over: starting the negotiation");
+}
+
 /** Starts the negotiation as the keeper would and waits for the Sealed Table's answer. */
 export async function negotiate(w: World, id: string): Promise<AgreementView> {
   const deal = client(w, "keeper", id);
   const a = await deal.get();
-  if (a.state === "Sealed" && typeof a.negotiation === "object" && "Ready" in a.negotiation) await deal.startNegotiation();
+  if (a.state === "Sealed" && typeof a.negotiation === "object" && "Ready" in a.negotiation) {
+    // As the keeper does: hold while OutLayer's worker is behind, so the attempt is not spent on a late answer.
+    // The deployed keeper may start it first once the queue clears; either way the wait below sees the answer.
+    if (w.network !== "sandbox") await holdWhileSlow(deal, a.outlayer);
+    const now = await deal.get();
+    if (now.state === "Sealed" && typeof now.negotiation === "object" && "Ready" in now.negotiation) await deal.startNegotiation();
+  }
   return waitFor("the Sealed Table's answer", w.network === "sandbox" ? 90 : 300, async () => {
     const v = await deal.get();
     return v.state !== "Sealed" ? v : undefined;

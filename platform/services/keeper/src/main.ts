@@ -1,7 +1,7 @@
 // The keeper (ARCHITECTURE.md section 10): liveness, not authority. Every method it calls is open to anyone, so if it
 // is down a party can call them from the app. It holds no secret that affects an outcome.
 
-import { Accord, KeySigner, type AgreementView, type AgreementClient, type TableQueue, SLOW_AFTER_SECS } from "@accord/sdk";
+import { Accord, KeySigner, type AgreementView, type AgreementClient, type TableQueue } from "@accord/sdk";
 import { beat } from "@accord/store";
 import { serviceConfig } from "../../agent/src/config.js";
 import { observeAgreement, observerFor, type AskObserver } from "./observe.js";
@@ -36,7 +36,7 @@ async function step(
     const q = await queue(deal, a.outlayer);
     const since = heldSince.get(a.account) ?? Date.now();
     if (q?.slow && Date.now() - since < MAX_HOLD_MS) {
-      if (!heldSince.has(a.account)) log(`negotiate ${a.account} · held: ${q.waiting} OutLayer requests have waited over ${SLOW_AFTER_SECS} s (oldest ${q.oldestSecs} s)`);
+      if (!heldSince.has(a.account)) log(`negotiate ${a.account} · held: OutLayer has answered none of its newest ${q.unanswered} requests, the oldest made ${q.sinceSecs} s ago`);
       heldSince.set(a.account, since);
       return;
     }

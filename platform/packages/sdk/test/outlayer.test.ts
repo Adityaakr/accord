@@ -1,15 +1,24 @@
 import { describe, expect, it } from "vitest";
 import { judgeQueue, tableQueue } from "../src/outlayer.js";
 
+const reqs = (from: number, ages: (number | null)[]) => ages.flatMap((age, i) => (age === null ? [] : [{ id: from + i, age }]));
+
 describe("judgeQueue", () => {
   it("is not slow with nothing pending", () => {
-    expect(judgeQueue([])).toEqual({ pending: 0, waiting: 0, oldestSecs: null, slow: false });
+    expect(judgeQueue([])).toEqual({ pending: 0, unanswered: 0, sinceSecs: null, slow: false });
   });
-  it("is not slow with fresh requests and one long job", () => {
-    expect(judgeQueue([4, 9, 85]).slow).toBe(false);
+  it("is slow when the newest requests in a row are all unanswered and the oldest has waited 45 s", () => {
+    expect(judgeQueue(reqs(46033, [69, 67, 57, 44, 43, 12]))).toEqual({ pending: 6, unanswered: 6, sinceSecs: 69, slow: true });
   });
-  it("is slow when two or more requests have waited over 45 s", () => {
-    expect(judgeQueue([12, 43, 44, 57, 67, 69])).toEqual({ pending: 6, waiting: 3, oldestSecs: 69, slow: true });
+  it("is not slow when a newer request was answered: old ones below it are stuck jobs, not a queue", () => {
+    // ids 100 and 101 hang; 102 was answered; 103 and 104 are fresh
+    expect(judgeQueue(reqs(100, [110, 95, null, 9, 4]))).toEqual({ pending: 4, unanswered: 2, sinceSecs: 9, slow: false });
+  });
+  it("is not slow with a short run, however old", () => {
+    expect(judgeQueue(reqs(7, [100, 90])).slow).toBe(false);
+  });
+  it("is not slow while the run is young", () => {
+    expect(judgeQueue(reqs(7, [30, 20, 10, 5])).slow).toBe(false);
   });
 });
 
@@ -33,7 +42,7 @@ describe("tableQueue", () => {
   const now = 1_794_670_000_000;
   it("finds the requests at and above the finished count", async () => {
     const o = outlayer(46033, { 46033: 69, 46034: 67, 46035: 57, 46036: 44, 46037: 43, 46038: 12 }, now);
-    expect(await tableQueue(o, "outlayer.testnet", now)).toEqual({ pending: 6, waiting: 3, oldestSecs: 69, slow: true });
+    expect(await tableQueue(o, "outlayer.testnet", now)).toEqual({ pending: 6, unanswered: 6, sinceSecs: 69, slow: true });
     expect(Math.min(...o.asked)).toBe(46028);
   });
   it("reads on while the queue is longer than one round", async () => {

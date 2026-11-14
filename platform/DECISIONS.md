@@ -943,9 +943,12 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
   (`get_request(id)`, with the `timestamp` it was made at) and removes it when it is answered or its yield ends.
   `get_stats` counts finished requests, so the unanswered ones sit at ids from that count upwards (read at 14:55 UTC:
   finished `46033`, ids `46033` to `46038` pending, aged `69`, `67`, `57`, `44`, `43`, `12 s`). Testnet blocks are
-  about `0.6 s`, so the yield is about `120 s`; the Sealed Table runs for about `55 s` (52 to 64 s from request to
-  answer on a quiet queue), which leaves about a minute for the worker to pick a request up. `tableQueue` therefore
-  calls the worker slow when `2` or more requests have waited over `45 s` (one alone can be a long job). Everything of
+  about `0.58 s`, so the yield is about `116 s`; the Sealed Table runs for about `55 s` (41 to 64 s from request to
+  answer on a quiet queue), which leaves about a minute for the worker to pick a request up. Old unanswered requests
+  alone prove little: watching `16` ids for `180 s`, `6` sat until their yield ended while `4` newer ones were answered
+  within `10 s`, so some projects' jobs simply hang. `tableQueue` therefore looks at the newest requests: the worker is
+  slow when the newest `3` or more in a row are all unanswered and the oldest of that run was made `45 s` ago or more,
+  which says nothing asked since then has been answered. An answered request in between ends the run. Everything of
   ours that calls `start_negotiation` on its own (the keeper, the try-it demo vendor, the tender winner's browser and
   CLI) reads it first and waits while it is slow; the room and `/try-it` say so with the live numbers. The keeper
   starts a held agreement anyway after `15` minutes, because a worker that stays a little behind would otherwise hold
@@ -953,4 +956,6 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
   `a89.accord-v2.testnet`, `Attested · 253 s`; readings half an hour later still showed requests waiting `60` to `110 s`. This is liveness only:
   `start_negotiation` is still open to anyone, an unreadable queue never holds a start, and nothing about what the
   contract accepts changed. The thresholds come from one afternoon's readings, not from many runs. A first version read
-  ids below the finished count and so always read fast; an independent review before deploy caught it.
+  ids below the finished count and so always read fast; an independent review before deploy caught it, and a second
+  review replaced a count of old requests (deployed for under an hour) with the run of newest unanswered ones. It
+  cannot see lag that begins after a negotiation starts, or how far past the yield the worker is.

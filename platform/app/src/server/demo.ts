@@ -16,7 +16,6 @@ import { accord, config } from "./accord";
 
 const YOCTO = 10n ** 24n;
 import { FAUCET_NEAR_TARGET, faucetEmpty, isFaucetEmptyError } from "./faucetgrant";
-import { SLOW_AFTER_SECS } from "@accord/sdk";
 import { queueReading } from "./tablequeue";
 import { closeMove } from "@/lib/finish";
 export { FAUCET_NEAR_TARGET };
@@ -254,7 +253,7 @@ export async function counterpartyStep(id: string): Promise<Step> {
     if (typeof a.negotiation === "object" && "Ready" in a.negotiation) {
       // three attempts, each answered inside one yield: hold while OutLayer's worker is behind
       const q = (await queueReading(a.outlayer))?.queue ?? null;
-      if (q?.slow) return wait(`Both mandates are sealed. OutLayer's enclave worker is answering late (${q.waiting} requests have waited over ${SLOW_AFTER_SECS} s), so the negotiation is held: the keeper starts it when the queue clears, within 15 minutes at most, so an attempt is not wasted.`);
+      if (q?.slow) return wait(`Both mandates are sealed. OutLayer's enclave worker is answering late (none of its newest ${q.unanswered} requests is answered, the oldest made ${q.sinceSecs} s ago), so the negotiation is held: the keeper starts it when the queue clears, within 15 minutes at most, so an attempt is not wasted.`);
       const tx = await as("vendor", id).startNegotiation();
       return done("Started the negotiation in the Sealed Table", tx.txHash, "The Sealed Table is negotiating. It usually takes about a minute.");
     }

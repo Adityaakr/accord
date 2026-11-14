@@ -1,11 +1,11 @@
 "use client";
 
 // One line on Try it, before the visitor starts: how OutLayer's enclave queue looks right now, read live from its
-// contract. It says what was measured (requests unanswered for longer than the Sealed Table can spare), never an
+// contract. It says what was measured (whether the newest requests are being answered), never an
 // estimate it cannot back, and "could not be read" when the read failed.
 
 import { useEffect, useState } from "react";
-import { SLOW_AFTER_SECS, type TableQueue } from "@accord/sdk";
+import { YIELD_SECS, type TableQueue } from "@accord/sdk";
 import { onVisibleInterval } from "./visible";
 import styles from "./TableNotice.module.css";
 
@@ -28,24 +28,23 @@ export function TableQueueLine({ initial }: { initial: QueueReading | null }) {
   }
   const q = reading.queue;
   const age = <span className="mono" suppressHydrationWarning>{Math.max(0, Math.round((now - reading.at) / 1000))} s</span>;
-  const over = <span className="mono">{SLOW_AFTER_SECS} s</span>;
   if (q.slow) {
     return (
       <aside className={styles.notice} role="status">
         <p>
           <strong>OutLayer&apos;s enclave worker is behind right now.</strong>{" "}
-          <span className="mono">{q.waiting}</span> of its <span className="mono">{q.pending}</span> unanswered requests have waited over {over}
-          {q.oldestSecs !== null ? <> (oldest <span className="mono">{q.oldestSecs} s</span>)</> : null}. You can still open a room and seal your limits. The
-          negotiation is then held, not started, until the queue clears, for <span className="mono">15</span> minutes at most, so an attempt is not
-          wasted; while the worker stays behind it can still end as <span className="mono">No deal</span>. Read {age} ago.
+          None of its newest <span className="mono">{q.unanswered}</span> requests is answered, and the oldest of them was made{" "}
+          <span className="mono">{q.sinceSecs} s</span> ago; a negotiation has about <span className="mono">{YIELD_SECS} s</span> in all. You can still open a
+          room and seal your limits. The negotiation is then held, not started, until the queue clears, for <span className="mono">15</span> minutes at
+          most, so an attempt is not wasted; while the worker stays behind it can still end as <span className="mono">No deal</span>. Read {age} ago.
         </p>
       </aside>
     );
   }
   return (
     <p className="small" role="status">
-      Sealed Table queue on OutLayer now: <span className="mono">{q.pending}</span> unanswered {q.pending === 1 ? "request" : "requests"},{" "}
-      <span className="mono">{q.waiting}</span> waiting over {over}. A negotiation should start straight away and usually takes about a minute. Read {age} ago.
+      Sealed Table queue on OutLayer now: {q.unanswered === 0 ? "nothing is waiting" : <>its newest <span className="mono">{q.unanswered}</span> {q.unanswered === 1 ? "request has" : "requests have"} waited at most <span className="mono">{q.sinceSecs} s</span></>}.
+      A negotiation should start straight away and usually takes about a minute. Read {age} ago.
     </p>
   );
 }

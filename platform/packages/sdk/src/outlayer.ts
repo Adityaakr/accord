@@ -7,41 +7,51 @@
 //
 // OutLayer keeps each unanswered request readable (`get_request(id)`, with the `timestamp` it was made at) and
 // removes it when it is answered or its yield ends. `get_stats` counts the requests that have finished, so the
-// unanswered ones sit at ids from about that count upwards. Their ages say how far behind the worker is: with the
-// worker keeping up, nothing waits long; with it behind, several requests sit unanswered for most of a yield.
+// unanswered ones sit at ids from about that count upwards, in the order they were made.
+//
+// Old unanswered requests alone prove little: some projects' jobs hang until their yield ends while newer requests
+// are answered in seconds. What shows a worker that is behind is the newest requests: when the newest several are
+// all still unanswered and the oldest of that unbroken run has waited longer than our run can spare, nothing asked
+// recently has been answered, and a negotiation started now would wait at least that long. An answered request
+// anywhere in between (a missing id with unanswered ones below it) means the worker is answering, and ends the run.
 // Whoever is about to call `start_negotiation` reads this first and holds the attempt while the queue is slow.
 
 import type { Chain } from "./chain.js";
 
 export interface TableQueue {
-  /** Requests still unanswered */
+  /** Requests still unanswered, whatever their age */
   pending: number;
-  /** Of those, how many have waited longer than `SLOW_AFTER_SECS` */
-  waiting: number;
-  /** Age of the oldest one, in seconds; null when nothing is pending */
-  oldestSecs: number | null;
+  /** The newest requests in a row that are all unanswered (the run that ends at the newest id) */
+  unanswered: number;
+  /** Age of the oldest request in that run, in seconds: nothing asked since then has been answered. null when the run is empty */
+  sinceSecs: number | null;
   /** true when starting a negotiation now would probably waste an attempt */
   slow: boolean;
 }
 
-/** NEAR's yield on testnet: 200 blocks at about 0.6 s (measured 14 Nov 2026). */
-export const YIELD_SECS = 120;
-/** How long the Sealed Table runs once a worker has picked it up (52 to 64 s from request to answer on a quiet queue). */
+/** NEAR's yield on testnet: 200 blocks at about 0.58 s (measured 14 Nov 2026). */
+export const YIELD_SECS = 116;
+/** How long the Sealed Table runs once a worker has picked it up (41 to 64 s from request to answer on a quiet queue). */
 export const RUN_SECS = 55;
-/** A request unanswered for longer than this has waited on the worker for most of what our run can spare. */
+/** The newest run counts as a queue once its oldest request has waited this long: about what our run can spare. */
 export const SLOW_AFTER_SECS = 45;
-/** This many requests waiting that long means a queue; one alone can be a single long job. */
-export const SLOW_WAITING = 2;
+/** ...and it is at least this many requests long, so one or two slow jobs are not read as a queue. */
+export const SLOW_RUN = 3;
 
 /** Ids read per round, how far below the finished count to start, and the most ids read in one call. */
 const ROUND = 30, BELOW = 5, MAX_IDS = 90;
 /** More failed reads than this and the reading is not trusted: a missing answer must not read as "nothing pending". */
 const MAX_FAILED_READS = 3;
 
-/** The verdict from the ages (seconds) of the pending requests. */
-export function judgeQueue(ages: number[]): TableQueue {
-  const waiting = ages.filter((a) => a > SLOW_AFTER_SECS).length;
-  return { pending: ages.length, waiting, oldestSecs: ages.length ? Math.max(...ages) : null, slow: waiting >= SLOW_WAITING };
+/** The verdict from the unanswered requests (id and age in seconds), in any order. */
+export function judgeQueue(requests: { id: number; age: number }[]): TableQueue {
+  const newestFirst = [...requests].sort((a, b) => b.id - a.id);
+  const run = newestFirst.filter((r, i) => r.id === newestFirst[0]!.id - i); // unbroken from the newest id down
+  const sinceSecs = run.length ? Math.max(...run.map((r) => r.age)) : null;
+  return {
+    pending: requests.length, unanswered: run.length, sinceSecs,
+    slow: run.length >= SLOW_RUN && sinceSecs !== null && sinceSecs >= SLOW_AFTER_SECS,
+  };
 }
 
 type View = <T>(contractId: string, method: string, args?: object) => Promise<T>;
@@ -54,22 +64,22 @@ type View = <T>(contractId: string, method: string, args?: object) => Promise<T>
 export async function tableQueue(chain: { view: View } | Chain, outlayer: string, nowMs: number = Date.now()): Promise<TableQueue> {
   const view = (chain as { view: View }).view.bind(chain);
   const [finished] = await view<[number, string]>(outlayer, "get_stats", {});
-  const ages: number[] = [];
+  const pending: { id: number; age: number }[] = [];
   let failed = 0;
   for (let from = Math.max(1, finished - BELOW), read = 0; read < MAX_IDS; from += ROUND, read += ROUND) {
     const ids = Array.from({ length: ROUND }, (_, i) => from + i);
     const requests = await Promise.all(ids.map((request_id) =>
       view<{ timestamp?: number | string } | null>(outlayer, "get_request", { request_id }).catch(() => { failed += 1; return null; })));
     if (failed > MAX_FAILED_READS) throw new Error(`OutLayer queue: ${failed} reads failed`);
-    for (const r of requests) {
-      if (!r || r.timestamp === undefined) continue;
+    requests.forEach((r, i) => {
+      if (!r || r.timestamp === undefined) return;
       const at = Number(BigInt(r.timestamp) / 1_000_000n); // nanoseconds to milliseconds
-      ages.push(Math.max(0, Math.round((nowMs - at) / 1000)));
-    }
+      pending.push({ id: ids[i]!, age: Math.max(0, Math.round((nowMs - at) / 1000)) });
+    });
     // the queue ends where ids stop existing: go on only while the top of this round still had requests
     if (!requests.slice(-BELOW).some((r) => r)) break;
   }
-  return judgeQueue(ages);
+  return judgeQueue(pending);
 }
 
 /** The same read for callers that must not fail: unknown counts as not slow, so a negotiation is never held on a read error. */
