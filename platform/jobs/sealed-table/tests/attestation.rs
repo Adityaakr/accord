@@ -206,6 +206,16 @@ fn a_signed_response_is_accepted_only_from_a_verified_signer_over_the_exact_byte
     assert_eq!(ok.record.signer, addr);
     assert_eq!(ok.content, "{\"ok\":true}");
     assert_eq!((ok.prompt_tokens, ok.completion_tokens), (9, 3));
+    // Several verified instances share the signing key: the report lists the address once per instance.
+    let shared = nearai::complete(
+        &signing_host(key.clone(), "provider_tee", false),
+        "k",
+        "z-ai/glm-5.3-flash",
+        body.clone(),
+        &[addr.clone(), addr.clone(), addr.clone()],
+    )
+    .unwrap();
+    assert_eq!(shared.record.signer, addr);
     // Not a verified candidate.
     let e = nearai::complete(
         &signing_host(key.clone(), "provider_tee", false),
@@ -233,4 +243,46 @@ fn a_signed_response_is_accepted_only_from_a_verified_signer_over_the_exact_byte
         &[addr],
     );
     assert!(e.unwrap_err().contains("exact bytes"));
+}
+
+/// One signing key on several instances counts once when all of them verified, and not at all when an instance
+/// that did not verify reports it too.
+#[test]
+fn a_signing_key_shared_by_instances_counts_only_when_all_of_them_verified() {
+    let part = |addr: &str, ok: bool| attest::PartResult {
+        signing_address: addr.into(),
+        tdx_ok: ok,
+        gpu_ok: Some(true),
+        compose_hash: String::new(),
+        signing_public_key: None,
+        failures: Vec::new(),
+    };
+    let report = |candidates: Vec<attest::PartResult>| attest::Attestation {
+        nonce: String::new(),
+        report_sha256: String::new(),
+        gateway: part("0xgateway", true),
+        candidates,
+        local: false,
+    };
+    let all = report(vec![
+        part("0xAA", true),
+        part("0xaa", true),
+        part("0xaa", true),
+    ]);
+    assert_eq!(all.verified_signers(), vec!["0xaa".to_string()]);
+    let two_keys = report(vec![
+        part("0xaa", true),
+        part("0xbb", true),
+        part("0xaa", true),
+    ]);
+    assert_eq!(
+        two_keys.verified_signers(),
+        vec!["0xaa".to_string(), "0xbb".to_string()]
+    );
+    let one_unverified = report(vec![
+        part("0xaa", true),
+        part("0xaa", false),
+        part("0xbb", true),
+    ]);
+    assert_eq!(one_unverified.verified_signers(), vec!["0xbb".to_string()]);
 }

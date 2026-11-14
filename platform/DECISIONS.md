@@ -885,3 +885,40 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
 - v2: job 1 led to a70 in 4:01, and an outside agent with only the script won house job 2.
 
 `make tender-sim` runs 20 scripted agents over 5 jobs on the contract's code. Transactions are in `docs/runs.md` ("Open tenders").
+
+## 36. Release 6: one signing key on several model instances (14 Nov 2026)
+
+- **What broke.** `a83.accord-v2.testnet` (opened by the house buyer for tender job 24) ended `NoDeal` after three
+  attempts, each `negotiation_failed … infrastructure`. The job's output (read from the worker's `resolve_execution`,
+  requests `44265`, `44278`) said `signer is not exactly one verified model key`. NEAR AI's report
+  (`GET https://cloud-api.near.ai/v1/attestation/report?model=z-ai/glm-5.3-flash&provider=near&signing_algo=ecdsa&nonce=…`,
+  five reads on 14 Nov 2026) lists `3` `model_attestations`, all with signing address
+  `0x3b753b4406613c5e70ae640508632b600424fa0c`; on 10 Nov it listed `1` (section 33). Release 5's build counted
+  instances, not keys, so a match was `3`, not `1`, and every response was refused. Every new negotiation on release 5
+  fails this way while the report has more than one instance per key.
+- **The change** (`jobs/sealed-table/src/attest.rs` `verified_signers`, `nearai.rs`). A signing key counts once when
+  every candidate that reports it verified (TDX, GPU, no failure). A key that any candidate which did not verify also
+  reports is left out: it would also sit outside a verified environment. That second rule is stricter than release 5.
+  Tests: `tests/attestation.rs` `a_signing_key_shared_by_instances_counts_only_when_all_of_them_verified` and the
+  shared-key case in the signature test. Live (`tests/live.rs live_negotiation`, 14 Nov): `terms` in `41 s`, four
+  responses signed by `0x3b75…fa0c`.
+- **Build and OutLayer.** Sealed Table `4312ad08218c404a42a414078b66c4783f54235f34b540fcb15592a81373c9ed`
+  (1,495,812 bytes); Payee `b5a0c473…` and observer `0dcc55e8…` rebuilt to the same hashes as release 5. Uploaded
+  (chunks `A7TPSjm8kxPPhdJEH9P8n4pNXtjqKn8vUio5ymBunLFa`, `EyvAwh3JiVB73TTqSzaFAmZQhAtTcPP6dbtrcd1oScrV`; the FastFS
+  URL answered `200` with the same sha256), added with `outlayer deploy --no-activate`, the secret row widened with
+  `update_access` to `build:7c832ce9… or build:64a354a0… or build:4312ad08…` (so release 3, 4 and 5 rooms keep their
+  seeds), and made the active version (`set_active_version` `GUL38mJWAEe3hBsfFP1Hnze5duiotnjGBjdLJLv6Kv6G`).
+- **Release 6 on accord-v2.testnet** (global, agreement code `ECgsrZwy…` reused). The first pubkey requests
+  (`44331`, `44339`, `44353`) reached the callback with a null output (the yield ended before OutLayer answered) and
+  stored nothing. The second round stored all three: `44370` (Sealed Table, `EFDg2FGDohTSRDgCviYrqYG99gJdqowBA6KUJWpxv6Hz`),
+  `44376` (Payee, `GhkBfxRgxgXxSqsm3CkP4C2eTZHbF35pgfypqeWZMpcw`), `44383` (observer,
+  `9sJmgTFvpGEvByuwzqivsD2nDMKXscyh1F6DmeLCBDvv`). Keys equal release 5's (Sealed Table `GgC8gEhK…`). Publish
+  `6rhVAKtxV4EuFfgkeAX5ZSczwBGLTdXhemy9nBmRNhG`, current `4oXRgmbSFUGDgkcAPyzXvZfQ8MpgfRbCr8BNN5TbmwvL`.
+- **Proof.** `make negotiate` → `a84.accord-v2.testnet`: `wasm 4312ad08…`, QUOTE → COUNTER → ACCEPT, signer
+  `0x3b75…fa0c`, `Attested` in `57 s`. `make verify DEAL=a84.accord-v2.testnet`: `code hash ECgsrZwy… = release 6`,
+  `release sealed-table run 44370 = task 106160 … outlayer-verify proven … · ok`, `5 checks ok · 1 partial · 1 not
+  checked` (no recipient yet).
+- **Not done.** `accord-usdc.testnet` is still on release 5 (its key was not on the machine that made this release),
+  so a new Circle USDC agreement cannot negotiate until release 6 is published there with `RELEASE_FROM=accord-v2.testnet`.
+  A release 5 agreement that had not negotiated yet cannot either: an agreement keeps its release.
+

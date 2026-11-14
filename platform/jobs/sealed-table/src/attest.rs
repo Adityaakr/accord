@@ -10,7 +10,8 @@
 //!   ECDSA public key (for end-to-end encryption) hashing to the attested address.
 //!
 //! The gateway part must verify; every model candidate that verifies is kept, and a response is accepted only if
-//! its signer is exactly one of them. TLS binding is not checked from inside the job (the worker terminates TLS).
+//! its signer is one of their signing keys (several instances may share one key; a key that an unverified candidate
+//! also reports is not accepted). TLS binding is not checked from inside the job (the worker terminates TLS).
 
 use crate::host::{get, post, Host, HttpResponse};
 use accord_core::hash::sha256;
@@ -59,13 +60,26 @@ pub struct Attestation {
 }
 
 impl Attestation {
-    /// Lowercased addresses of the model candidates that verified.
+    /// Lowercased signing addresses of the verified model candidates, each once. NEAR AI may serve one model from
+    /// several instances that hold the same signing key; the report then lists that address once per instance, and
+    /// it counts when every instance reporting it verified. An address that a candidate which did not verify also
+    /// reports is left out: that key would also sit outside a verified environment. (Kept in release 6's layout.)
+    #[rustfmt::skip]
     pub fn verified_signers(&self) -> Vec<String> {
-        self.candidates
+        let addr = |c: &PartResult| c.signing_address.to_ascii_lowercase();
+        let unverified: Vec<String> = self
+            .candidates
             .iter()
-            .filter(|c| c.verified_model())
-            .map(|c| c.signing_address.to_ascii_lowercase())
-            .collect()
+            .filter(|c| !c.verified_model())
+            .map(addr)
+            .collect();
+        let mut out: Vec<String> = Vec::new();
+        for a in self.candidates.iter().filter(|c| c.verified_model()).map(addr) {
+            if !unverified.contains(&a) && !out.contains(&a) {
+                out.push(a);
+            }
+        }
+        out
     }
 }
 

@@ -1,7 +1,7 @@
 //! Steps 4 and 5 of the run: one non-streamed completion per message, its exact request and response bytes kept,
 //! then `GET /v1/signature/{id}?signing_algo=ecdsa`: the signed text must be `"<model>:<sha256(request
 //! body)>:<sha256(response body)>"` over those exact bytes, the kind `provider_tee`, and the recovered EIP-191
-//! signer exactly one verified model candidate (docs.near.ai/cloud/verification/cloud-api/response-signatures).
+//! signer the signing key of a verified model candidate (docs.near.ai/cloud/verification/cloud-api/response-signatures).
 //! Anything else makes the response unverifiable, which ends the run as an infrastructure failure.
 
 use crate::attest::NEARAI;
@@ -76,7 +76,8 @@ fn error_kind(body: &[u8]) -> String {
         .unwrap_or_default()
 }
 
-/// Sends one completion and verifies its signature; `verified` holds the lowercased verified model signers.
+/// Sends one completion, verifies its signature; `verified`: `Attestation::verified_signers` (release 6's layout).
+#[allow(clippy::manual_contains)]
 pub fn complete(
     host: &dyn Host,
     api_key: &str,
@@ -170,8 +171,8 @@ pub fn complete(
     if signer != field("signing_address").to_ascii_lowercase() {
         return Err("recovered signer differs from signing_address".into());
     }
-    if verified.iter().filter(|a| **a == signer).count() != 1 {
-        return Err("signer is not exactly one verified model key".into());
+    if !verified.iter().any(|a| *a == signer) {
+        return Err("signer is not a verified model key".into());
     }
     Ok(Completion {
         content,
