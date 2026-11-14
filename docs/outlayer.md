@@ -42,7 +42,10 @@ can check them: they were waiting on the same worker, they are not its cause.
   `OutLayer is slow and having problems right now`, the measured numbers, and the accounts waiting on the same worker,
   each read live from `outlayer.testnet` and linked to the explorer. The notice goes when the queue clears.
 
-<!-- screenshot -->
+<img src="media/outlayer-slow-try-it.png" width="820" alt="The hosted /app/try-it page on 14 Nov 2026 at 21:05 UTC. A red notice reads: OutLayer is slow and having problems right now. None of its newest 7 requests is answered, and the oldest of them was made 45 s ago; a negotiation has about 116 s in all. Below it: waiting on the same shared worker right now, read from outlayer.testnet: pwnbounty-d1c276.testnet, nixo.testnet, enclave.parry.testnet, drizzle-replay.testnet, veil-clouds.testnet. None of these accounts is Accord's: their requests are unanswered too.">
+
+The hosted `/app/try-it` on 14 Nov 2026 at 21:05 UTC, captured as served: `7` requests unanswered in a row, the oldest
+`45 s` old, and the five accounts they belonged to at that moment.
 
 ## Check the queue yourself
 
