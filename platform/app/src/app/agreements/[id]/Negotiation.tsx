@@ -28,7 +28,12 @@ export interface NegotiationProps {
   vendorCommit: string | null;
   terms: { total: string; items: number; hash: string | null; label: string; unit?: string } | null;
   verifyHref: string;
+  /** ended with no deal because no signed answer reached the contract on any attempt */
+  unanswered?: boolean;
 }
+
+/** NEAR lets a contract wait about 200 blocks for the enclave's answer; past this an attempt is very likely lost. */
+const LATE_AFTER_SECS = 150;
 
 const short = (h: string) => `${h.slice(0, 8)}…${h.slice(-4)}`;
 
@@ -100,8 +105,12 @@ export function Negotiation(p: NegotiationProps) {
     ready: `Both sealed · starts next${p.attempt ? ` (attempt ${p.attempt})` : ""}`,
     requested: `Negotiating in the enclave${p.attempt ? ` · attempt ${p.attempt}` : ""}`,
     done: "Checked against both limits",
-    ended: "No deal · nothing was funded",
+    ended: p.unanswered ? "No deal · the enclave did not answer in time" : "No deal · nothing was funded",
   }[p.phase];
+  // why this room is waiting or ended, when the cause is the enclave's answer arriving late or not at all
+  const late = p.phase === "requested" && elapsed !== null && elapsed >= LATE_AFTER_SECS;
+  const retried = (p.phase === "ready" || p.phase === "requested") && (p.attempt ?? 1) > 1;
+  const noAnswer = p.phase === "ended" && !!p.unanswered;
 
   return (
     <Stage compact>
@@ -138,6 +147,24 @@ export function Negotiation(p: NegotiationProps) {
               <Link className={styles.verify} href={p.verifyHref}>Check the attestation →</Link>
             </div>
           </div>
+        ) : noAnswer ? (
+          <div className={styles.note}>
+            <p><strong>This room ended because the Sealed Table&apos;s answer never arrived, not because the two sides could not agree.</strong>{" "}
+              The negotiation runs in an enclave on OutLayer&apos;s testnet worker, and a NEAR contract can wait about <span className="mono">200</span> blocks
+              (2 to 3 minutes) for it. All <span className="mono">3</span> attempts passed that wait with no signed answer, so the contract closed the room
+              as <span className="mono">No deal</span>. Nothing was funded, both sets of limits stayed sealed, and the creation deposit can be withdrawn.</p>
+            <p>A room cannot be negotiated again, so <Link className="link" href="/try-it" prefetch={false}>open a new one</Link> when the worker has caught up.
+              These need no new negotiation: <Link className="link" href="/try" prefetch={false}>the live room</Link> (already past negotiation; a redirect is
+              refused on chain), <Link className="link" href="/replay" prefetch={false}>the replay</Link> of a recorded run, and{" "}
+              <Link className="link" href="/verify" prefetch={false}>verify</Link> for any earlier agreement.</p>
+          </div>
+        ) : late || retried ? (
+          <p className={styles.note}>
+            {late
+              ? <>This attempt has waited longer than usual. A NEAR contract can wait about <span className="mono">200</span> blocks (2 to 3 minutes) for the enclave, which runs on OutLayer&apos;s testnet worker; if the answer comes after that, the contract counts the attempt as failed. </>
+              : <>Attempt <span className="mono">{(p.attempt ?? 2) - 1}</span> returned no signed answer the contract accepts, usually because OutLayer&apos;s testnet worker answered after NEAR&apos;s wait of about <span className="mono">200</span> blocks. </>}
+            The contract allows <span className="mono">3</span> attempts, then closes the room as <span className="mono">No deal</span> with nothing funded. Your limits stay sealed throughout.
+          </p>
         ) : (
           <p className={styles.note}>Proposals never leave the enclave. Only the agreed terms and an attestation come out.</p>
         )}

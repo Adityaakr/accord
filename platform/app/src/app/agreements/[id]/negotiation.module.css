@@ -144,3 +144,6 @@
   .status { flex-basis: 100%; }
   .terms { padding: 14px 16px; }
 }
+.note p { margin: 0; }
+.note p + p { margin-top: 8px; }
+.note strong { color: var(--text-medium); font-weight: 600; }

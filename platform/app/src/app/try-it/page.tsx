@@ -3,6 +3,8 @@ import { accord, config } from "@/server/accord";
 import { demoConfig, demoReady } from "@/server/demo";
 import { perIpPerDay } from "@/server/faucetgrant";
 import { maybeSweep } from "@/server/sweep";
+import { tableHealth } from "@/server/tablehealth";
+import { TableNotice } from "@/components/TableNotice";
 import { TryIt } from "./TryIt";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +16,7 @@ export default async function TryItPage() {
   const c = config();
   // rooms visitors left before execution are ended by the demo vendor, at most one pass every few minutes
   maybeSweep();
-  const factory = await accord().config().catch(() => null);
+  const [factory, health] = await Promise.all([accord().config().catch(() => null), tableHealth()]);
   return (
     <div className="container">
       <PageHead
@@ -22,6 +24,7 @@ export default async function TryItPage() {
         title="Try a deal in about 5 minutes"
         lead="Open a real deal room against Accord's demo vendor, seal your limits, and watch the agents negotiate, the contract pay the right account, and refuse the wrong one."
       />
+      <TableNotice health={health} context="deal" />
       <TryIt
         network={c.network}
         explorer={c.explorer}

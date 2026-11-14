@@ -930,4 +930,13 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
   The build and the fix are not involved (a84 above answered in `57 s`); an attempt has one yield (about 200 blocks) to
   be answered, and three late answers end the agreement. The tender path after negotiation (terms approved, payee,
   funding, delivery, claim) with the house buyer has therefore not run on testnet yet.
+- **What the app says while this lasts, and what we did not build.** `a87.accord-v2.testnet` (13:16 UTC) ended the
+  same way. The app now reads the newest agreements on the factory and, while the newest ended negotiation is a
+  `NoDeal` with no stored signed output, shows a notice on `/try-it`, `/tenders` and each tender page: the cause
+  (OutLayer's testnet worker answering after NEAR's wait of about 200 blocks), the agreement it is read from, and the
+  paths that need no new negotiation (`/try`, `/replay`, verify). The notice disappears by itself when a newer
+  negotiation is answered. We did not add a negotiation path that skips the enclave: `check_sealed` accepts terms only
+  under the release's Sealed Table key, `submit_sealed_result` (F1) stays compiled out for the reason in its comment,
+  and open terms agreed without the enclave would be new agreement code (a release 7) that drops the private
+  negotiation, which is claim 1. Not a change to make on the closing day.
 

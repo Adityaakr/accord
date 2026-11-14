@@ -21,6 +21,8 @@ import { WinnerPanel } from "./WinnerPanel";
 import { WinnerWork } from "./WinnerWork";
 import { winnerSetup } from "@/server/tenderwork";
 import { BrowserBid } from "./BrowserBid";
+import { tableHealth } from "@/server/tablehealth";
+import { TableNotice } from "@/components/TableNotice";
 import styles from "./job.module.css";
 
 export const dynamic = "force-dynamic";
@@ -187,6 +189,7 @@ export default async function TenderJobPage({ params, searchParams }: { params: 
           })}
         </ol>
       </header>
+      <TableNotice health={await tableHealth()} context="tender" />
 
       <div className={styles.grid}>
         <div className={styles.main}>

@@ -91,7 +91,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
 
   const step = currentStep(a, r.items, r.periods);
   const terminal = a.state === "NoDeal" || a.state === "Cancelled" ? a.state : null;
-  const fallback: Tab = a.state === "Sealed" ? "negotiation" : a.state === "Attested" ? "terms" : a.state === "Executing" ? "activity" : "funds";
+  const fallback: Tab = a.state === "Sealed" || r.unanswered ? "negotiation" : a.state === "Attested" ? "terms" : a.state === "Executing" ? "activity" : "funds";
   const tab: Tab = (TABS.find(([k]) => k === tabParam)?.[0] ?? fallback) as Tab;
 
   const neg = a.negotiation;
@@ -104,6 +104,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
     buyerCommit: r.commitments.buyer?.commitment ?? null, vendorCommit: r.commitments.vendor?.commitment ?? null,
     terms: terms ? { total: usd(terms.total), items: terms.items.length, hash: a.terms_hash, label: isAtlas ? "periods" : "items", unit: sym } : null,
     verifyHref: `/verify/${a.account}`,
+    unanswered: r.unanswered,
   };
 
   // changes whenever the chain state the page shows changes: the timeline and the transcript read again at once

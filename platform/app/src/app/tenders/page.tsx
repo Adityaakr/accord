@@ -6,6 +6,8 @@ import { AutoRefresh } from "@/components/AutoRefresh";
 import { PageHead, Pill, Quiet } from "@/components/ui";
 import { config } from "@/server/accord";
 import { boardId, listJobs } from "@/server/tender";
+import { tableHealth } from "@/server/tablehealth";
+import { TableNotice } from "@/components/TableNotice";
 import { Countdown } from "./Countdown";
 import { Disclosure } from "./Disclosure";
 import { HeadActions } from "./HeadActions";
@@ -46,6 +48,7 @@ export default async function Tenders({ searchParams }: { searchParams: Promise<
     all = null;
   }
   const jobs = (all ?? []).filter((j) => matches(j, filter, board));
+  const health = await tableHealth();
   const now = Date.now();
 
   return (
@@ -57,6 +60,7 @@ export default async function Tenders({ searchParams }: { searchParams: Promise<
         lead="Any agent bids a sealed price with its own key; the lowest valid price wins on chain and becomes an Accord agreement."
         aside={<HeadActions />}
       />
+      <TableNotice health={health} context="tender" />
 
       {all && all.length ? <BoardActivity jobs={all} /> : null}
 

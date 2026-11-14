@@ -37,6 +37,8 @@ export interface Room {
   receipts: Receipt[];
   /** Each side's sealed mandate commitment (public: ciphertext and hash only), or null before it seals */
   commitments: { buyer: Commitment | null; vendor: Commitment | null };
+  /** `NoDeal` with no stored signed output: no signed answer reached the contract on any attempt (not a walk-away) */
+  unanswered: boolean;
   source: Source;
 }
 
@@ -50,8 +52,11 @@ async function readRoom(id: string): Promise<Room> {
     d.get(), d.terms(), d.items(), d.refusals(undefined, 128), d.recipients(), d.exceptions(), d.periods(), d.receipts(),
     d.commitments().catch(() => ({ buyer: null, vendor: null })), source(),
   ]);
-  const observations = await Promise.all(periods.map((p) => d.observations(p.period)));
-  return { view, terms, items, refusals: refusals.reverse(), recipients, exceptions, periods, observations, receipts, commitments, source: src };
+  const [observations, unanswered] = await Promise.all([
+    Promise.all(periods.map((p) => d.observations(p.period))),
+    view.state === "NoDeal" ? d.sealedOutput().then((o) => o === null).catch(() => false) : false,
+  ]);
+  return { view, terms, items, refusals: refusals.reverse(), recipients, exceptions, periods, observations, receipts, commitments, unanswered, source: src };
 }
 
 // ---------- Home: one person's rooms, what needs them, and the numbers (docs/build/PLATFORM.md §7) ----------
