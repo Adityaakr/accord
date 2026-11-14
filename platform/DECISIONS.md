@@ -940,12 +940,17 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
   and open terms agreed without the enclave would be new agreement code (a release 7) that drops the private
   negotiation, which is claim 1. Not a change to make on the closing day.
 - **Holding the attempt instead of losing it.** `outlayer.testnet` keeps each unanswered request readable
-  (`get_request(id)`, with the `timestamp` it was made at) and removes it when it is answered or its yield ends;
-  `get_stats` gives the newest id. So the queue can be read with view calls: `tableQueue` looks at the newest `30` ids
-  and calls the worker slow when `3` or more requests have waited over `60 s` (one long job is not a queue). Everything
-  of ours that calls `start_negotiation` on its own (the keeper, the try-it demo vendor, the tender winner's browser
-  and CLI) reads it first and waits while it is slow; the attempts stay at three and the room says it is held. This
-  is liveness only: `start_negotiation` is still open to anyone, a read error never holds a start, and nothing about
-  what the contract accepts changed. At 14:21 UTC the queue read `2` pending, none waiting, and `make negotiate` ran
-  to `a89.accord-v2.testnet`, `Attested · 253 s`.
-
+  (`get_request(id)`, with the `timestamp` it was made at) and removes it when it is answered or its yield ends.
+  `get_stats` counts finished requests, so the unanswered ones sit at ids from that count upwards (read at 14:55 UTC:
+  finished `46033`, ids `46033` to `46038` pending, aged `69`, `67`, `57`, `44`, `43`, `12 s`). Testnet blocks are
+  about `0.6 s`, so the yield is about `120 s`; the Sealed Table runs for about `55 s` (52 to 64 s from request to
+  answer on a quiet queue), which leaves about a minute for the worker to pick a request up. `tableQueue` therefore
+  calls the worker slow when `2` or more requests have waited over `45 s` (one alone can be a long job). Everything of
+  ours that calls `start_negotiation` on its own (the keeper, the try-it demo vendor, the tender winner's browser and
+  CLI) reads it first and waits while it is slow; the room and `/try-it` say so with the live numbers. The keeper
+  starts a held agreement anyway after `15` minutes, because a worker that stays a little behind would otherwise hold
+  a room for ever and a late attempt still succeeds some of the time: `make negotiate` at 14:26 UTC reached
+  `a89.accord-v2.testnet`, `Attested · 253 s`; readings half an hour later still showed requests waiting `60` to `110 s`. This is liveness only:
+  `start_negotiation` is still open to anyone, an unreadable queue never holds a start, and nothing about what the
+  contract accepts changed. The thresholds come from one afternoon's readings, not from many runs. A first version read
+  ids below the finished count and so always read fast; an independent review before deploy caught it.

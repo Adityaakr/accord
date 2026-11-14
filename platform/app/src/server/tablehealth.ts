@@ -25,14 +25,7 @@ const ANSWERED = new Set(["Attested", "Executing", "Settled"]);
 let cached: { at: number; value: TableHealth } | null = null;
 
 async function newest(n: number): Promise<AgreementRecord[]> {
-  const a = accord();
-  const all: AgreementRecord[] = [];
-  for (let from = 1; ; from += 100) {
-    const page = await a.listAgreements({ from, limit: 100 });
-    all.push(...page);
-    if (page.length < 100) break;
-  }
-  return all.slice(-n).reverse();
+  return (await accord().listAgreements()).slice(-n).reverse();
 }
 
 /** null when the chain could not be read: the pages then say nothing rather than guess. */

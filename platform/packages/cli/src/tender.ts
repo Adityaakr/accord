@@ -100,7 +100,7 @@ function realOps(base: Accord, agreement: string, k: WinnerKeys): WorkOps {
       const [a, c, recipients, items] = await Promise.all([read.get(), read.commitments(), read.recipients(), read.items()]);
       // read OutLayer's queue only when the next move would be to start the negotiation
       const ready = a.state === "Sealed" && typeof a.negotiation === "object" && "Ready" in a.negotiation;
-      const tableSlow = ready ? await read.tableQueue(a.outlayer).then((q) => q.slow, () => false) : false;
+      const tableSlow = ready ? await read.tableQueue(a.outlayer, a.now * 1000).then((q) => q.slow, () => false) : false;
       return { agreement: a, sealed: { buyer: !!c.buyer, vendor: !!c.vendor }, recipients, items, now: a.now, tableSlow };
     },
     seal: async (m) => (await vendor.sealMandate(m, { role: "vendor" })).txHash,

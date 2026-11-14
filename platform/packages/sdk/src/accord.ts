@@ -69,7 +69,8 @@ export class Accord {
   async listAgreements(opts: { party?: string; from?: number; limit?: number } = {}): Promise<AgreementRecord[]> {
     if (opts.party) return this.chain.view(this.factory, "agreements_for", { account: opts.party });
     if (opts.from !== undefined) return this.chain.view(this.factory, "agreements", { from: opts.from, limit: opts.limit ?? null });
-    // No starting id: every agreement, read a page at a time (the factory returns at most 100 per call, from id 1).
+    // No starting id: every agreement, read a page at a time (the factory returns at most 100 per call, from id 1);
+    // `limit` only applies with `from`.
     const all: AgreementRecord[] = [];
     for (let from = 1; ; ) {
       const page = await this.chain.view<AgreementRecord[]>(this.factory, "agreements", { from, limit: 100 });
@@ -182,8 +183,8 @@ export class AgreementClient {
   startNegotiation() { return this.call("start_negotiation", {}, 300n); }
 
   /** How long OutLayer is taking to answer right now, read from its contract; see `tableQueue`. */
-  async tableQueue(outlayer?: string): Promise<TableQueue> {
-    return tableQueue(this.accord.chain, outlayer ?? (await this.get()).outlayer);
+  async tableQueue(outlayer?: string, nowMs?: number): Promise<TableQueue> {
+    return tableQueue(this.accord.chain, outlayer ?? (await this.get()).outlayer, nowMs);
   }
   approveTerms(termsHash: string) { return this.call("approve_terms", { terms_hash: termsHash }, 30n, ONE_YOCTO); }
   cancel() { return this.call("cancel", {}, 30n); }

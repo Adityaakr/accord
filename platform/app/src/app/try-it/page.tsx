@@ -5,6 +5,8 @@ import { perIpPerDay } from "@/server/faucetgrant";
 import { maybeSweep } from "@/server/sweep";
 import { tableHealth } from "@/server/tablehealth";
 import { TableNotice } from "@/components/TableNotice";
+import { TableQueueLine } from "@/components/TableQueueLine";
+import { queueReading } from "@/server/tablequeue";
 import { TryIt } from "./TryIt";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +19,7 @@ export default async function TryItPage() {
   // rooms visitors left before execution are ended by the demo vendor, at most one pass every few minutes
   maybeSweep();
   const [factory, health] = await Promise.all([accord().config().catch(() => null), tableHealth()]);
+  const queue = await queueReading(factory?.outlayer);
   return (
     <div className="container">
       <PageHead
@@ -25,6 +28,7 @@ export default async function TryItPage() {
         lead="Open a real deal room against Accord's demo vendor, seal your limits, and watch the agents negotiate, the contract pay the right account, and refuse the wrong one."
       />
       <TableNotice health={health} context="deal" />
+      <TableQueueLine initial={queue} />
       <TryIt
         network={c.network}
         explorer={c.explorer}

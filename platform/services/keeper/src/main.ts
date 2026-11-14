@@ -1,7 +1,7 @@
 // The keeper (ARCHITECTURE.md section 10): liveness, not authority. Every method it calls is open to anyone, so if it
 // is down a party can call them from the app. It holds no secret that affects an outcome.
 
-import { Accord, KeySigner, type AgreementView, type AgreementClient, type TableQueue } from "@accord/sdk";
+import { Accord, KeySigner, type AgreementView, type AgreementClient, type TableQueue, SLOW_AFTER_SECS } from "@accord/sdk";
 import { beat } from "@accord/store";
 import { serviceConfig } from "../../agent/src/config.js";
 import { observeAgreement, observerFor, type AskObserver } from "./observe.js";
@@ -12,6 +12,10 @@ const LOOP_MS = 15_000;
 // OutLayer's queue, read at most once every 20 s whatever the number of agreements waiting. null: could not be read,
 // which never holds a negotiation.
 const QUEUE_TTL_MS = 20_000;
+/** The longest one attempt is held for a slow queue before it is started anyway. */
+const MAX_HOLD_MS = 15 * 60_000;
+/** When each held agreement was first held (this process only: a restart starts the hold again). */
+const heldSince = new Map<string, number>();
 let lastQueue: { at: number; value: TableQueue | null } | null = null;
 async function queue(deal: AgreementClient, outlayer: string): Promise<TableQueue | null> {
   if (lastQueue && Date.now() - lastQueue.at < QUEUE_TTL_MS) return lastQueue.value;
@@ -27,13 +31,19 @@ async function step(
   if (a.state === "Sealed" && typeof a.negotiation === "object" && "Ready" in a.negotiation) {
     // An agreement has three attempts and each must be answered inside one yield: while OutLayer's worker is behind,
     // starting one only burns it (DECISIONS.md section 36), so the agreement waits here with its attempts intact.
+    // The hold is capped: a worker that stays a little behind would otherwise hold a room for ever, and a late
+    // attempt still succeeds some of the time.
     const q = await queue(deal, a.outlayer);
-    if (q?.slow) {
-      log(`negotiate ${a.account} · held: ${q.waiting} OutLayer requests have waited over a minute (oldest ${q.oldestSecs} s)`);
+    const since = heldSince.get(a.account) ?? Date.now();
+    if (q?.slow && Date.now() - since < MAX_HOLD_MS) {
+      if (!heldSince.has(a.account)) log(`negotiate ${a.account} · held: ${q.waiting} OutLayer requests have waited over ${SLOW_AFTER_SECS} s (oldest ${q.oldestSecs} s)`);
+      heldSince.set(a.account, since);
       return;
     }
+    const held = heldSince.has(a.account) ? ` · after a ${Math.round((Date.now() - since) / 1000)} s hold${q?.slow ? ", queue still slow" : ""}` : "";
+    heldSince.delete(a.account);
     const tx = await deal.startNegotiation();
-    log(`negotiate ${a.account} · tx ${tx.txHash}`);
+    log(`negotiate ${a.account} · tx ${tx.txHash}${held}`);
     return;
   }
   for (const v of await deal.recipients()) {

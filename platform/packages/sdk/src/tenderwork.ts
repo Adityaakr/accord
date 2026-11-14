@@ -106,7 +106,7 @@ export function vendorMove(v: VendorView, payee: { recipient: string; domain: st
     if (!v.sealed.buyer) return wait("the buyer seals its mandate in the deal room", true);
     if (typeof a.negotiation === "object" && "Ready" in a.negotiation) {
       return v.tableSlow
-        ? wait("OutLayer's enclave worker is answering late; the negotiation starts when its queue clears, so none of the three attempts is wasted")
+        ? wait("OutLayer's enclave worker is answering late; the keeper starts the negotiation when its queue clears (within 15 minutes at most), so an attempt is not wasted")
         : { kind: "negotiate" };
     }
     return wait("the Sealed Table is negotiating (about a minute)");

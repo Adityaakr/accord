@@ -8,7 +8,8 @@ import { notFound } from "next/navigation";
 import { isRpcBusy } from "@accord/sdk";
 import { formatUnits, type ItemView, type Refusal } from "@accord/sdk";
 import { room, type Room } from "@/server/data";
-import { accord, config, symbolFor } from "@/server/accord";
+import { config, symbolFor } from "@/server/accord";
+import { queueReading } from "@/server/tablequeue";
 import { Account, Empty, EvidenceHash, Hash, KV, Meter, Near, Panel, Pill, Usdc, type Tone } from "@/components/ui";
 import { SourceLine } from "@/components/SourceLine";
 import { AutoRefresh } from "@/components/AutoRefresh";
@@ -97,7 +98,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
   const neg = a.negotiation;
   // both sealed and not yet requested: is OutLayer's queue slow, so the keeper is holding the attempt?
   const held = a.state === "Sealed" && typeof neg === "object" && "Ready" in neg
-    ? await accord().agreement(a.account).tableQueue(a.outlayer).then((q) => (q.slow ? q.waiting : null), () => null) : null;
+    ? await queueReading(a.outlayer).then((r) => (r?.queue.slow ? r.queue.waiting : null)) : null;
   const negotiation: NegotiationProps = {
     phase: terminal === "NoDeal" ? "ended" : a.state !== "Sealed" || neg === "Done" ? "done"
       : neg === "AwaitingMandates" ? "awaiting" : typeof neg === "object" && "Requested" in neg ? "requested" : "ready",
