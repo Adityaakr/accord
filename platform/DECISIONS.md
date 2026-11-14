@@ -921,4 +921,13 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
 - **Not done.** `accord-usdc.testnet` is still on release 5 (its key was not on the machine that made this release),
   so a new Circle USDC agreement cannot negotiate until release 6 is published there with `RELEASE_FROM=accord-v2.testnet`.
   A release 5 agreement that had not negotiated yet cannot either: an agreement keeps its release.
+- **Later the same day: OutLayer answered too late.** Around 12:10 UTC the tender run for job 26 reached negotiation
+  on release 6 (`a85.accord-v2.testnet`, opened and sealed by the house buyer for an outside test agent of ours) and
+  ended `NoDeal`: all three attempts were `negotiation_failed … no signed output`, because the yield ended before the
+  worker ran the job (request `44952` came back afterwards with `state read: a different negotiation request is in
+  state`). `make negotiate` right after (`a86.accord-v2.testnet`) failed the same way: request `45013` was made at
+  `1794658130` and resolved at `1794658489`, `359 s` later, with about 40 requests from other projects queued ahead.
+  The build and the fix are not involved (a84 above answered in `57 s`); an attempt has one yield (about 200 blocks) to
+  be answered, and three late answers end the agreement. The tender path after negotiation (terms approved, payee,
+  funding, delivery, claim) with the house buyer has therefore not run on testnet yet.
 
