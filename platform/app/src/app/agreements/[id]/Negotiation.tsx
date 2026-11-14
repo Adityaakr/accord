@@ -31,7 +31,11 @@ export interface NegotiationProps {
   verifyHref: string;
   /** ended with no deal because no signed answer reached the contract on any attempt */
   unanswered?: boolean;
-  /** both sealed, and the start is held: OutLayer has answered none of its newest `unanswered` requests, the oldest made `sinceSecs` ago */
+  /**
+   * OutLayer's queue reads slow right now (null when it does not): it has answered none of its newest `unanswered`
+   * requests, the oldest made `sinceSecs` ago, sent by `senders`. Before the request the start is held; during an
+   * attempt the answer may come too late.
+   */
   held?: { unanswered: number; sinceSecs: number; senders?: string[]; outlayer?: string } | null;
 }
 
@@ -168,6 +172,15 @@ export function Negotiation(p: NegotiationProps) {
               (none of its newest <span className="mono">{p.held.unanswered}</span> requests is answered, the oldest made <span className="mono">{p.held.sinceSecs} s</span> ago). A room has <span className="mono">3</span> attempts and each must be
               answered inside NEAR&apos;s wait of about <span className="mono">200</span> blocks, so the keeper holds the start until the queue clears, for <span className="mono">15</span> minutes
               at most, instead of spending an attempt now. It starts by itself and this page updates. Starting it yourself spends an attempt.</p>
+            {p.held.senders?.length ? <p><QueueSenders senders={p.held.senders} outlayer={p.held.outlayer} /></p> : null}
+          </div>
+        ) : p.phase === "requested" && p.held ? (
+          <div className={`${styles.note} ${styles.down}`}>
+            <p><strong>OutLayer is slow and having problems right now.</strong>{" "}
+              This attempt is waiting on OutLayer&apos;s testnet enclave worker, which has answered none of its newest{" "}
+              <span className="mono">{p.held.unanswered}</span> requests (the oldest made <span className="mono">{p.held.sinceSecs} s</span> ago). A NEAR contract can wait about{" "}
+              <span className="mono">200</span> blocks (about <span className="mono">2</span> minutes) for the answer; if it comes later, the contract counts the attempt as failed.
+              It allows <span className="mono">3</span> attempts, then closes the room as <span className="mono">No deal</span> with nothing funded. Your limits stay sealed throughout.</p>
             {p.held.senders?.length ? <p><QueueSenders senders={p.held.senders} outlayer={p.held.outlayer} /></p> : null}
           </div>
         ) : late || retried ? (
