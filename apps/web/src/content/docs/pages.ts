@@ -25,6 +25,12 @@ const A6 = {
 const ATTESTATION = "https://testnet-api.outlayer.ai/attestations/by-request/13596"
 const OUTLAYER_VERIFY = "https://app.outlayer.ai/docs/trust-verification"
 const NEAR_AI_VERIFY = "https://docs.near.ai/cloud/verification"
+const OUTLAYER = "https://outlayer.ai"
+/* NEP-519, Yield Execution: how long a contract can wait for an outside answer */
+const NEP_YIELD = "https://github.com/near/NEPs/blob/master/neps/nep-0519.md"
+const SOURCE = "https://github.com/Adityaakr/accord/blob/main/"
+/** An account as a link to its explorer page; `label` when the full id would be long in a list */
+const room = (account: string, label: string = account) => "[" + label + "](" + acct(account) + ")"
 
 export const DOC_PAGES: DocPage[] = [
   /* ------------------------------------------------------------------ 1. Quickstart */
@@ -353,29 +359,30 @@ export const DOC_PAGES: DocPage[] = [
         id: "outlayer-dependency",
         title: "The OutLayer dependency",
         blocks: [
-          { kind: "p", text: "The negotiation and the recipient proof each run as a job on OutLayer's testnet enclave worker, which other projects share. A NEAR contract waits for the answer inside one yield, about `200` blocks (about `116 s` on testnet), and the Sealed Table runs for about `55 s`, so the worker has about a minute to pick a request up. An agreement has `3` negotiation attempts; an answer that arrives after the yield counts as a failed attempt, and three of them end the room as `No deal` with nothing funded." },
+          { kind: "p", text: "The negotiation and the recipient proof each run as a job on the testnet enclave worker of [OutLayer](" + OUTLAYER + ") (the contract " + room("outlayer.testnet") + "), which other projects share. A NEAR contract waits for the answer inside one [yield](" + NEP_YIELD + "), about `200` blocks (about `116 s` on testnet), and [the Sealed Table](/docs/near#outlayer) runs for about `55 s`, so the worker has about a minute to pick a request up. An agreement has `3` negotiation attempts; an answer that arrives after the yield counts as a failed attempt, and three of them end the room as `No deal` with nothing funded." },
           {
             kind: "rows",
             label: "What we saw on 14 Nov 2026",
             rows: [
-              { name: "From 12:10 UTC", value: "a85 to a88", detail: "All four ended `No deal`: every attempt came back after the yield. One request (`45013`) was answered `359 s` after it was made." },
-              { name: "14:59 UTC", value: "a90", detail: "Held until the queue cleared, then `Attested` on its first attempt, `212 s` after both sides sealed." },
-              { name: "19:35 UTC", value: "a96", detail: "Queue empty: `Attested` in `69 s`, first attempt." },
-              { name: "19:41 UTC", value: "a97", href: "/verify?agreement=a97.accord-v2.testnet", detail: "The wallet-free flow on the hosted app: held for about `16` minutes, then negotiated and ran to `Settled`." },
+              { name: "From 12:10 UTC", value: "a85 to a88", href: acct("a85.accord-v2.testnet"), detail: "All four ended `No deal`: every attempt came back after the yield (" + ["a85", "a86", "a87", "a88"].map((n) => room(n + ".accord-v2.testnet", n)).join(", ") + "). One request (`45013`) was answered `359 s` after it was made." },
+              { name: "14:59 UTC", value: "a90", href: "/verify?agreement=a90.accord-v2.testnet", detail: "Held until the queue cleared, then `Attested` on its first attempt, `212 s` after both sides sealed (" + room("a90.accord-v2.testnet", "a90") + ")." },
+              { name: "19:35 UTC", value: "a96", href: "/verify?agreement=a96.accord-v2.testnet", detail: "Queue empty: `Attested` in `69 s`, first attempt (" + room("a96.accord-v2.testnet", "a96") + ")." },
+              { name: "19:41 UTC", value: "a97", href: "/verify?agreement=a97.accord-v2.testnet", detail: "The wallet-free flow on the hosted app: held for about `16` minutes, then negotiated and ran to `Settled` (" + room("a97.accord-v2.testnet", "a97") + ")." },
             ],
           },
-          { kind: "p", text: "The app reads OutLayer's unanswered requests with view calls before it starts anything, with no key. The worker counts as slow when its newest `3` or more requests in a row are all unanswered and the oldest of them was made `45 s` ago or more. While it is slow, the keeper, the demo vendor and a tender winner hold the negotiation and the recipient proposal, for `15` minutes at most, instead of spending an attempt. [/app/try-it](/app/try-it) and a room's Negotiation tab then say so in red, with the measured numbers and the accounts whose requests are waiting on the same worker, each read live from `outlayer.testnet` and linked to the explorer. The notice goes when the queue clears." },
-          { kind: "image", image: { id: "outlayer-slow", alt: "The hosted /app/try-it page on 14 Nov 2026 at 21:05 UTC. A red notice reads: OutLayer is slow and having problems right now. None of its newest 7 requests is answered, and the oldest of them was made 45 s ago; a negotiation has about 116 s in all. Below it: waiting on the same shared worker right now, read from outlayer.testnet: pwnbounty-d1c276.testnet, nixo.testnet, enclave.parry.testnet, drizzle-replay.testnet, veil-clouds.testnet. None of these accounts is Accord's: their requests are unanswered too.", caption: "/app/try-it on 14 Nov 2026 at 21:05 UTC, as served: 7 requests unanswered in a row, the oldest 45 s old, and the five accounts they belonged to at that moment. None is Accord's." } },
+          { kind: "p", text: "The app reads the unanswered requests of " + room("outlayer.testnet") + " with view calls before it starts anything, with no key ([tableQueue](" + SOURCE + "platform/packages/sdk/src/outlayer.ts) in the SDK). The worker counts as slow when its newest `3` or more requests in a row are all unanswered and the oldest of them was made `45 s` ago or more. While it is slow, the keeper, the demo vendor and a tender winner hold the negotiation and the recipient proposal, for `15` minutes at most, instead of spending an attempt. [/app/try-it](/app/try-it) and a room's Negotiation tab then say so in red, with the measured numbers and the accounts whose requests are waiting on the same worker, each read live from the contract and linked to the explorer. The notice goes when the queue clears. The same reading as JSON: [/app/api/table-queue](/app/api/table-queue)." },
+          { kind: "image", image: { id: "outlayer-slow", alt: "The hosted /app/try-it page on 14 Nov 2026 at 21:05 UTC. A red notice reads: OutLayer is slow and having problems right now. None of its newest 7 requests is answered, and the oldest of them was made 45 s ago; a negotiation has about 116 s in all. Below it: waiting on the same shared worker right now, read from outlayer.testnet: pwnbounty-d1c276.testnet, nixo.testnet, enclave.parry.testnet, drizzle-replay.testnet, veil-clouds.testnet. None of these accounts is Accord's: their requests are unanswered too.", caption: "[/app/try-it](/app/try-it) on 14 Nov 2026 at 21:05 UTC, as served: 7 requests unanswered in a row, the oldest 45 s old, sent by " + ["pwnbounty-d1c276.testnet", "nixo.testnet", "enclave.parry.testnet", "drizzle-replay.testnet", "veil-clouds.testnet"].map((a) => room(a)).join(", ") + ". None is Accord's." } },
+          { kind: "p", text: "Other accounts whose requests were waiting on the same worker between 19:43 and 20:14 UTC that day: " + ["maskbid.testnet", "tredio-oracle.testnet", "lowball-house-ck.testnet", "sentinel.v1.lien-13569.testnet"].map((a) => room(a)).join(", ") + ". None is Accord's. They are named because anyone can check them on the explorer: they were waiting too, they are not the cause." },
           {
             kind: "rows",
             label: "Why this is structural, not a bug",
             rows: [
-              { name: "NEAR fixes the wait", value: "about 200 blocks", detail: "A contract cannot lengthen the yield." },
-              { name: "A late answer is not accepted", value: "submit_sealed_result", detail: "The enclave signs its result, so a late answer could be accepted in a separate transaction. That path exists in the agreement contract and is deliberately compiled out of every release: with OutLayer's seed restriction (S1) not set, a keeper could request its own run and submit whichever signed outcome it prefers. Enabling it safely needs that OutLayer setting and a new agreement release." },
-              { name: "One enclave provider", value: "no second path", detail: "A long OutLayer outage still ends a room as `No deal`." },
+              { name: "NEAR fixes the wait", value: "about 200 blocks", href: NEP_YIELD, detail: "A contract cannot lengthen the [yield](" + NEP_YIELD + ") (NEP-519)." },
+              { name: "A late answer is not accepted", value: "submit_sealed_result", href: SOURCE + "platform/contracts/agreement/src/negotiation.rs", detail: "The enclave signs its result, so a late answer could be accepted in a separate transaction. That path exists in [the agreement contract](" + SOURCE + "platform/contracts/agreement/src/negotiation.rs) and is deliberately compiled out of every release: with OutLayer's seed restriction (S1, under [Security and limits](/docs/security)) not set, a keeper could request its own run and submit whichever signed outcome it prefers. Enabling it safely needs that OutLayer setting and a new agreement release." },
+              { name: "One enclave provider", value: "OutLayer", href: OUTLAYER, detail: "There is no second path, so a long OutLayer outage still ends a room as `No deal`." },
             ],
           },
-          { kind: "note", text: "These need no new negotiation, so they work whatever OutLayer's queue looks like: [the replay](/app/replay), [the live attack room](/app/try), [/verify](/verify) and `make verify`. The queue reading as JSON: `GET /app/api/table-queue`. The full account: [docs/outlayer.md](https://github.com/Adityaakr/accord/blob/main/docs/outlayer.md)." },
+          { kind: "note", text: "These need no new negotiation, so they work whatever OutLayer's queue looks like: [the replay](/app/replay), [the live attack room](/app/try), [/verify](/verify) and [make verify](/docs/verify). The full account, with how to read the queue yourself: [docs/outlayer.md](" + SOURCE + "docs/outlayer.md) and [DECISIONS.md, section 36](" + SOURCE + "platform/DECISIONS.md)." },
         ],
       },
       {
