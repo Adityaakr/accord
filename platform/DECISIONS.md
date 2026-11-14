@@ -959,3 +959,9 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
   ids below the finished count and so always read fast; an independent review before deploy caught it, and a second
   review replaced a count of old requests (deployed for under an hour) with the run of newest unanswered ones. It
   cannot see lag that begins after a negotiation starts, or how far past the yield the worker is.
+- **Seen live.** With the guard deployed, `make negotiate` at 14:59 UTC opened `a90.accord-v2.testnet`; the keeper
+  logged `negotiate a90.accord-v2.testnet · held` and the make target printed `held … starting when its queue clears`,
+  then `held over: starting the negotiation`, and the room reached `Attested` on its first attempt, `212 s` after both
+  sides sealed (hold included). The four rooms before the guard that met the same queue (a85 to a88) ended `NoDeal`.
+  One held run is one observation, not a rate.
+
