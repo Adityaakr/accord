@@ -39,9 +39,11 @@ export async function tableHealth(): Promise<TableHealth | null> {
       const view = await d.get().catch(() => null);
       if (!view) return null;
       if (ANSWERED.has(view.state)) return true;
-      if (view.state !== "NoDeal") return null; // still sealing or negotiating, or cancelled: no outcome to count
-      // a no-deal the Sealed Table decided stores its signed output; one with none was never answered
-      return (await d.sealedOutput()) !== null ? true : false;
+      if (view.state === "Sealed") return null; // still sealing or negotiating: no outcome to count
+      // NoDeal or Cancelled: the Sealed Table's signed output is stored whenever it answered. A no-deal with none was
+      // never answered; a room cancelled before any answer says nothing either way.
+      const answered = (await d.sealedOutput()) !== null;
+      return answered ? true : view.state === "NoDeal" ? false : null;
     }));
     let unanswered = 0;
     let newestUnanswered: TableHealth["newestUnanswered"] = null;
