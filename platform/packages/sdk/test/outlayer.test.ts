@@ -5,20 +5,28 @@ const reqs = (from: number, ages: (number | null)[]) => ages.flatMap((age, i) =>
 
 describe("judgeQueue", () => {
   it("is not slow with nothing pending", () => {
-    expect(judgeQueue([])).toEqual({ pending: 0, unanswered: 0, sinceSecs: null, slow: false });
+    expect(judgeQueue([])).toEqual({ pending: 0, unanswered: 0, sinceSecs: null, slow: false, senders: [] });
   });
   it("is slow when the newest requests in a row are all unanswered and the oldest has waited 45 s", () => {
-    expect(judgeQueue(reqs(46033, [69, 67, 57, 44, 43, 12]))).toEqual({ pending: 6, unanswered: 6, sinceSecs: 69, slow: true });
+    expect(judgeQueue(reqs(46033, [69, 67, 57, 44, 43, 12]))).toEqual({ pending: 6, unanswered: 6, sinceSecs: 69, slow: true, senders: [] });
   });
   it("is not slow when a newer request was answered: old ones below it are stuck jobs, not a queue", () => {
     // ids 100 and 101 hang; 102 was answered; 103 and 104 are fresh
-    expect(judgeQueue(reqs(100, [110, 95, null, 9, 4]))).toEqual({ pending: 4, unanswered: 2, sinceSecs: 9, slow: false });
+    expect(judgeQueue(reqs(100, [110, 95, null, 9, 4]))).toEqual({ pending: 4, unanswered: 2, sinceSecs: 9, slow: false, senders: [] });
   });
   it("is not slow with a short run, however old", () => {
     expect(judgeQueue(reqs(7, [100, 90])).slow).toBe(false);
   });
   it("is not slow while the run is young", () => {
     expect(judgeQueue(reqs(7, [30, 20, 10, 5])).slow).toBe(false);
+  });
+  it("names each sender in the newest run once, the longest waiting first, and none from below an answered request", () => {
+    const q = judgeQueue([
+      { id: 9, age: 200, sender: "stuck.testnet" }, // 10 was answered: not part of the run
+      { id: 11, age: 90, sender: "a.testnet" }, { id: 12, age: 60, sender: "b.testnet" }, { id: 13, age: 20, sender: "a.testnet" }, { id: 14, age: 5 },
+    ]);
+    expect(q.unanswered).toBe(4);
+    expect(q.senders).toEqual(["a.testnet", "b.testnet"]);
   });
 });
 
@@ -33,7 +41,7 @@ function outlayer(finished: number, pending: Record<number, number>, nowMs: numb
       asked.push(id);
       if (failing.includes(id)) throw new Error("rpc");
       const age = pending[id];
-      return (age === undefined ? null : { request_id: id, timestamp: String(BigInt(nowMs - age * 1000) * 1_000_000n) }) as T;
+      return (age === undefined ? null : { request_id: id, sender_id: `p${id % 2}.testnet`, timestamp: String(BigInt(nowMs - age * 1000) * 1_000_000n) }) as T;
     },
   };
 }
@@ -42,7 +50,7 @@ describe("tableQueue", () => {
   const now = 1_794_670_000_000;
   it("finds the requests at and above the finished count", async () => {
     const o = outlayer(46033, { 46033: 69, 46034: 67, 46035: 57, 46036: 44, 46037: 43, 46038: 12 }, now);
-    expect(await tableQueue(o, "outlayer.testnet", now)).toEqual({ pending: 6, unanswered: 6, sinceSecs: 69, slow: true });
+    expect(await tableQueue(o, "outlayer.testnet", now)).toEqual({ pending: 6, unanswered: 6, sinceSecs: 69, slow: true, senders: ["p1.testnet", "p0.testnet"] });
     expect(Math.min(...o.asked)).toBe(46028);
   });
   it("reads on while the queue is longer than one round", async () => {

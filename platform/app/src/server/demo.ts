@@ -216,6 +216,9 @@ export interface Step {
 }
 
 const wait = (next: string, yourMove = false): Step => ({ did: null, next, tx: null, yourMove });
+/** The accounts OutLayer's contract lists as waiting on the same worker, for a held step's line: the delay is checkable. */
+const waitingToo = (senders: string[]): string =>
+  senders.length ? ` Waiting on the same shared worker right now: ${senders.slice(0, 8).join(", ")}${senders.length > 8 ? ` and ${senders.length - 8} more` : ""}.` : "";
 const done = (did: string, tx: string, next: string): Step => ({ did, next, tx, yourMove: false });
 
 const live = (v: RecipientVersion) => !["ProofFailed", "Superseded", "Cancelled"].includes(v.status);
@@ -253,7 +256,7 @@ export async function counterpartyStep(id: string): Promise<Step> {
     if (typeof a.negotiation === "object" && "Ready" in a.negotiation) {
       // three attempts, each answered inside one yield: hold while OutLayer's worker is behind
       const q = (await queueReading(a.outlayer))?.queue ?? null;
-      if (q?.slow) return wait(`Both mandates are sealed. OutLayer's enclave worker is answering late (none of its newest ${q.unanswered} requests is answered, the oldest made ${q.sinceSecs} s ago), so the negotiation is held: the keeper starts it when the queue clears, within 15 minutes at most, so an attempt is not wasted.`);
+      if (q?.slow) return wait(`Both mandates are sealed. OutLayer's enclave worker is answering late (none of its newest ${q.unanswered} requests is answered, the oldest made ${q.sinceSecs} s ago), so the negotiation is held: the keeper starts it when the queue clears, within 15 minutes at most, so an attempt is not wasted.${waitingToo(q.senders)}`);
       const tx = await as("vendor", id).startNegotiation();
       return done("Started the negotiation in the Sealed Table", tx.txHash, "The Sealed Table is negotiating. It usually takes about a minute.");
     }
@@ -274,7 +277,7 @@ export async function counterpartyStep(id: string): Promise<Step> {
   if (!a.recipient && !current) {
     // The Payee job runs on OutLayer too: a proposal made while its worker is behind would end `ProofFailed`.
     const q = (await queueReading(a.outlayer))?.queue ?? null;
-    if (q?.slow) return wait(`OutLayer's enclave worker is answering late (none of its newest ${q.unanswered} requests is answered, the oldest made ${q.sinceSecs} s ago), so the vendor proposes its recipient when the queue clears: the Payee job's proof would otherwise be lost to a late answer.`);
+    if (q?.slow) return wait(`OutLayer's enclave worker is answering late (none of its newest ${q.unanswered} requests is answered, the oldest made ${q.sinceSecs} s ago), so the vendor proposes its recipient when the queue clears: the Payee job's proof would otherwise be lost to a late answer.${waitingToo(q.senders)}`);
     const tx = await as("vendor", id).proposeRecipient(d.recipient, d.domain);
     return done(`Proposed ${d.recipient} as the recipient on ${d.domain}`, tx.txHash, "The Payee job is checking the domain. It takes about a minute.");
   }

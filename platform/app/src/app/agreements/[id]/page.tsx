@@ -98,7 +98,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
   const neg = a.negotiation;
   // both sealed and not yet requested: is OutLayer's queue slow, so the keeper is holding the attempt?
   const held = a.state === "Sealed" && typeof neg === "object" && "Ready" in neg
-    ? await queueReading(a.outlayer).then((r) => (r?.queue.slow ? { unanswered: r.queue.unanswered, sinceSecs: r.queue.sinceSecs ?? 0 } : null)) : null;
+    ? await queueReading(a.outlayer).then((r) => (r?.queue.slow ? { unanswered: r.queue.unanswered, sinceSecs: r.queue.sinceSecs ?? 0, senders: r.queue.senders, outlayer: a.outlayer } : null)) : null;
   const negotiation: NegotiationProps = {
     phase: terminal === "NoDeal" ? "ended" : a.state !== "Sealed" || neg === "Done" ? "done"
       : neg === "AwaitingMandates" ? "awaiting" : typeof neg === "object" && "Requested" in neg ? "requested" : "ready",

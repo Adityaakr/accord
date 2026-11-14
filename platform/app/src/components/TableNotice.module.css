@@ -5,3 +5,6 @@
 .notice ul { padding-left: 18px; }
 .notice a { color: var(--text-strong); text-decoration: underline; text-underline-offset: 2px; }
 .notice code { font-size: 12.5px; }
+/* OutLayer measured slow right now: the one notice in red, because it stops a new negotiation */
+.down { border-left-color: var(--refusal); border-color: var(--refusal-line); background: var(--refusal-bg); }
+.down strong { color: var(--refusal); }

@@ -147,3 +147,7 @@
 .note p { margin: 0; }
 .note p + p { margin-top: 8px; }
 .note strong { color: var(--text-medium); font-weight: 600; }
+/* OutLayer measured slow right now, so the start is held: the one note in red */
+.down { padding: 10px 12px; border: 1px solid var(--refusal-line); border-left: 3px solid var(--refusal); border-radius: var(--radius); background: var(--refusal-bg); color: var(--text-medium); }
+.down strong { color: var(--refusal); }
+.down a { color: var(--text-strong); text-decoration: underline; text-underline-offset: 2px; }

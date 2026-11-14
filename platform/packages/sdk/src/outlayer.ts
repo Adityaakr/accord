@@ -27,6 +27,11 @@ export interface TableQueue {
   sinceSecs: number | null;
   /** true when starting a negotiation now would probably waste an attempt */
   slow: boolean;
+  /**
+   * The accounts whose requests make up that run (`sender_id` on each request, as OutLayer's contract reports it),
+   * each once, the longest waiting first. These are whoever is waiting on the same worker, not a cause.
+   */
+  senders: string[];
 }
 
 /** NEAR's yield on testnet: 200 blocks at about 0.58 s (measured 14 Nov 2026). */
@@ -44,12 +49,13 @@ const ROUND = 30, BELOW = 5, MAX_IDS = 90;
 const MAX_FAILED_READS = 3;
 
 /** The verdict from the unanswered requests (id and age in seconds), in any order. */
-export function judgeQueue(requests: { id: number; age: number }[]): TableQueue {
+export function judgeQueue(requests: { id: number; age: number; sender?: string }[]): TableQueue {
   const newestFirst = [...requests].sort((a, b) => b.id - a.id);
   const run = newestFirst.filter((r, i) => r.id === newestFirst[0]!.id - i); // unbroken from the newest id down
   const sinceSecs = run.length ? Math.max(...run.map((r) => r.age)) : null;
+  const senders = [...new Set([...run].sort((a, b) => b.age - a.age || a.id - b.id).flatMap((r) => (r.sender ? [r.sender] : [])))];
   return {
-    pending: requests.length, unanswered: run.length, sinceSecs,
+    pending: requests.length, unanswered: run.length, sinceSecs, senders,
     slow: run.length >= SLOW_RUN && sinceSecs !== null && sinceSecs >= SLOW_AFTER_SECS,
   };
 }
@@ -64,17 +70,17 @@ type View = <T>(contractId: string, method: string, args?: object) => Promise<T>
 export async function tableQueue(chain: { view: View } | Chain, outlayer: string, nowMs: number = Date.now()): Promise<TableQueue> {
   const view = (chain as { view: View }).view.bind(chain);
   const [finished] = await view<[number, string]>(outlayer, "get_stats", {});
-  const pending: { id: number; age: number }[] = [];
+  const pending: { id: number; age: number; sender?: string }[] = [];
   let failed = 0;
   for (let from = Math.max(1, finished - BELOW), read = 0; read < MAX_IDS; from += ROUND, read += ROUND) {
     const ids = Array.from({ length: ROUND }, (_, i) => from + i);
     const requests = await Promise.all(ids.map((request_id) =>
-      view<{ timestamp?: number | string } | null>(outlayer, "get_request", { request_id }).catch(() => { failed += 1; return null; })));
+      view<{ timestamp?: number | string; sender_id?: string } | null>(outlayer, "get_request", { request_id }).catch(() => { failed += 1; return null; })));
     if (failed > MAX_FAILED_READS) throw new Error(`OutLayer queue: ${failed} reads failed`);
     requests.forEach((r, i) => {
       if (!r || r.timestamp === undefined) return;
       const at = Number(BigInt(r.timestamp) / 1_000_000n); // nanoseconds to milliseconds
-      pending.push({ id: ids[i]!, age: Math.max(0, Math.round((nowMs - at) / 1000)) });
+      pending.push({ id: ids[i]!, age: Math.max(0, Math.round((nowMs - at) / 1000)), sender: typeof r.sender_id === "string" ? r.sender_id : undefined });
     });
     // the queue ends where ids stop existing: go on only while the top of this round still had requests
     if (!requests.slice(-BELOW).some((r) => r)) break;

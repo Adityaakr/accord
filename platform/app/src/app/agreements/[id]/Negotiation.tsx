@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { Stage } from "@/components/Stage";
 import { IconTile } from "@/components/IconTile";
 import { shortAccount } from "@/components/account/short";
+import { QueueSenders } from "@/components/QueueSenders";
 import styles from "./negotiation.module.css";
 
 export interface NegotiationProps {
@@ -31,7 +32,7 @@ export interface NegotiationProps {
   /** ended with no deal because no signed answer reached the contract on any attempt */
   unanswered?: boolean;
   /** both sealed, and the start is held: OutLayer has answered none of its newest `unanswered` requests, the oldest made `sinceSecs` ago */
-  held?: { unanswered: number; sinceSecs: number } | null;
+  held?: { unanswered: number; sinceSecs: number; senders?: string[]; outlayer?: string } | null;
 }
 
 /** NEAR lets a contract wait about 200 blocks for the enclave's answer; past this an attempt is very likely lost. */
@@ -161,12 +162,14 @@ export function Negotiation(p: NegotiationProps) {
               <Link className="link" href="/verify" prefetch={false}>verify</Link> for any earlier agreement.</p>
           </div>
         ) : p.phase === "ready" && p.held ? (
-          <p className={styles.note}>
-            Both sets of limits are sealed. The negotiation runs on OutLayer&apos;s testnet enclave worker, which is answering late right now
-            (none of its newest <span className="mono">{p.held.unanswered}</span> requests is answered, the oldest made <span className="mono">{p.held.sinceSecs} s</span> ago). A room has <span className="mono">3</span> attempts and each must be
-            answered inside NEAR&apos;s wait of about <span className="mono">200</span> blocks, so the keeper holds the start until the queue clears, for <span className="mono">15</span> minutes
-            at most, instead of spending an attempt now. It starts by itself and this page updates. Starting it yourself spends an attempt.
-          </p>
+          <div className={`${styles.note} ${styles.down}`}>
+            <p><strong>OutLayer is slow and having problems right now.</strong>{" "}
+              Both sets of limits are sealed. The negotiation runs on OutLayer&apos;s testnet enclave worker, which is answering late
+              (none of its newest <span className="mono">{p.held.unanswered}</span> requests is answered, the oldest made <span className="mono">{p.held.sinceSecs} s</span> ago). A room has <span className="mono">3</span> attempts and each must be
+              answered inside NEAR&apos;s wait of about <span className="mono">200</span> blocks, so the keeper holds the start until the queue clears, for <span className="mono">15</span> minutes
+              at most, instead of spending an attempt now. It starts by itself and this page updates. Starting it yourself spends an attempt.</p>
+            {p.held.senders?.length ? <p><QueueSenders senders={p.held.senders} outlayer={p.held.outlayer} /></p> : null}
+          </div>
         ) : late || retried ? (
           <p className={styles.note}>
             {late

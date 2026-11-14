@@ -7,6 +7,7 @@
 import { useEffect, useState } from "react";
 import { YIELD_SECS, type TableQueue } from "@accord/sdk";
 import { onVisibleInterval } from "./visible";
+import { QueueSenders } from "./QueueSenders";
 import styles from "./TableNotice.module.css";
 
 export interface QueueReading { queue: TableQueue; at: number }
@@ -30,14 +31,15 @@ export function TableQueueLine({ initial }: { initial: QueueReading | null }) {
   const age = <span className="mono" suppressHydrationWarning>{Math.max(0, Math.round((now - reading.at) / 1000))} s</span>;
   if (q.slow) {
     return (
-      <aside className={styles.notice} role="status">
+      <aside className={`${styles.notice} ${styles.down}`} role="status">
         <p>
-          <strong>OutLayer&apos;s enclave worker is behind right now.</strong>{" "}
+          <strong>OutLayer is slow and having problems right now.</strong>{" "}
           None of its newest <span className="mono">{q.unanswered}</span> requests is answered, and the oldest of them was made{" "}
           <span className="mono">{q.sinceSecs} s</span> ago; a negotiation has about <span className="mono">{YIELD_SECS} s</span> in all. You can still open a
           room and seal your limits. The negotiation is then held, not started, until the queue clears, for <span className="mono">15</span> minutes at
           most, so an attempt is not wasted; while the worker stays behind it can still end as <span className="mono">No deal</span>. Read {age} ago.
         </p>
+        {q.senders.length > 0 ? <p><QueueSenders senders={q.senders} /></p> : null}
       </aside>
     );
   }
