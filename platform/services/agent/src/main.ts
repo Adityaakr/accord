@@ -69,7 +69,7 @@ async function main() {
   const rearmOn = process.env.AGENT_REARM === "on" || (local && process.env.AGENT_REARM !== "off");
   const room = rearmOn ? new TryRoomKeeper(tryWorld(), rearmConfig(local), (s) => console.log(`  rearm     ${s}`)) : null;
   const tenderCfg = tenderKeeperConfig(process.env);
-  const tenders = tenderCfg ? new TenderKeeper(tenderCfg, reader.chain, (s) => console.log(`  tender    ${s}`)) : null;
+  const tenders = tenderCfg ? new TenderKeeper(tenderCfg, reader, (s) => console.log(`  tender    ${s}`)) : null;
   if (!fixed && !room && !tenders) throw new Error("set AGENT_AGREEMENT and ACCORD_AGENT_KEY, or AGENT_REARM=on with the TRY_* accounts, or TENDER_KEEPER=on");
   const preflightOn = process.env.AGENT_PREFLIGHT === "on";
   console.log(`accord agent · ${cfg.network} · planner literal · preflight ${preflightOn ? "on" : "off"}${fixed ? ` · ${fixed.id}` : ""}${room ? " · /try re-arm on" : ""}${tenders ? ` · tenders on ${tenderCfg!.board}` : ""}`);

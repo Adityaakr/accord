@@ -47,7 +47,7 @@ const MOVE_TEXT: Record<VendorMove["kind"], string> = {
   activate: "Activate your payee", deliver: "Deliver", claim: "Claim payment", wait: "Waiting", done: "Done",
 };
 
-export function WinnerWork({ board, job, setup }: { board: string; job: TenderJob; setup: WinnerSetup | null }) {
+export function WinnerWork({ board, job, setup, house = false }: { board: string; job: TenderJob; setup: WinnerSetup | null; house?: boolean }) {
   const cfg = useAppConfig();
   const [vendor, setVendor] = useState<BidderKey | null>(null);
   const [keys, setKeys] = useState<Keys | null>(null);
@@ -190,7 +190,7 @@ export function WinnerWork({ board, job, setup }: { board: string; job: TenderJo
           <p className="small">Makes your approver and payee keys in this browser and tells the buyer you accept. No funds move.</p>
         </div>
       ) : !job.agreement ? (
-        <p className="small">Accepted. Waiting for the buyer to open the agreement; this page carries on when they do.</p>
+        <p className="small" role="status">{house ? "Accepted. The house buyer opens the agreement by itself, usually within a minute; this page carries on when it does." : "Accepted. Waiting for the buyer to open the agreement; this page carries on when they do."}</p>
       ) : (
         <>
           <p className="small">

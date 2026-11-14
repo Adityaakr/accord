@@ -10,14 +10,17 @@
 // the app's relay) opens once drand publishes the round after the bidding deadline, and the keeper sends that reveal
 // on any job on the board. The board checks the reveal against the bid's commitment, so the keeper cannot alter it.
 //
-// The full deal after an award (agreement, Sealed Table, payment, refused redirect) is what `make tender` runs; the
-// keeper does not open agreements, so it spends only the job deposit (0.25 NEAR) and gas per job.
+// After the award: when an agent outside the house set wins and accepts the job, the keeper opens the agreement and
+// plays the buyer (./tenderdeal.ts), so the winner can deliver and be paid. That costs the factory's creation deposit
+// per such job (returned when the agreement ends) and the winning price in test USDC. A house agent that wins has
+// nobody to do the work, so its job stops at the award: the job deposit (0.25 NEAR) and gas.
 
 import { createHash, createHmac } from "node:crypto";
 import { tenderTimelocks, type TenderTimelock } from "@accord/store";
 import {
-  KeySigner, TENDER_BOARDS, openTimelockedBid, TENDER_MAX_BIDS, TenderBoardClient, tenderToken, bidderKey, prepareBid, type Chain, type TenderJob,
+  KeySigner, TENDER_BOARDS, openTimelockedBid, TENDER_MAX_BIDS, TenderBoardClient, tenderToken, bidderKey, prepareBid, type Accord, type TenderJob,
 } from "@accord/sdk";
+import { HouseBuyer } from "./tenderdeal.js";
 
 export interface TenderKeeperConfig {
   board: string;
@@ -129,12 +132,14 @@ type TimelockStore = Pick<typeof tenderTimelocks, "pending" | "finish">;
 export class TenderKeeper {
   private readonly board: TenderBoardClient;
   private readonly buyer: KeySigner;
+  private readonly deals: HouseBuyer;
   constructor(
-    private readonly cfg: TenderKeeperConfig, chain: Chain, private readonly log: (s: string) => void,
+    private readonly cfg: TenderKeeperConfig, reader: Accord, private readonly log: (s: string) => void,
     private readonly locks: TimelockStore = tenderTimelocks,
   ) {
-    this.board = new TenderBoardClient(chain, cfg.board);
-    this.buyer = new KeySigner(cfg.buyer.account, cfg.buyer.key, chain);
+    this.board = new TenderBoardClient(reader.chain, cfg.board);
+    this.buyer = new KeySigner(cfg.buyer.account, cfg.buyer.key, reader.chain);
+    this.deals = new HouseBuyer(cfg.board, reader, this.buyer, log);
   }
 
   async step(): Promise<void> {
@@ -146,6 +151,9 @@ export class TenderKeeper {
       this.log(`${a.kind}${"job" in a ? ` job ${a.job}` : ""}${"agent" in a ? ` ${HOUSE_AGENTS[a.agent]}` : ""} → ${r.ok ? r.txHash : r.failure}`);
     }
     await this.revealTimelocked(jobs);
+    // the deal after an award an outside agent won: one buyer move per job per step
+    const isHouseKey = (job: number, bidder: string) => HOUSE_AGENTS.some((_, i) => houseBid(this.cfg.houseSeed, this.cfg.board, job, i).key.id === bidder);
+    await this.deals.step(jobs.filter((j) => j.buyer === this.cfg.buyer.account && j.token === this.cfg.token), isHouseKey);
     // bid on a new job in the same step, so its first seconds are not left to anyone filling it with junk
     if (posted) await this.step();
   }

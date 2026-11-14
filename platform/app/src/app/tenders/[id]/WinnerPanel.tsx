@@ -7,6 +7,7 @@
 // - The buyer then opens the agreement: one wallet signature creates a procurement agreement with the winner's key as
 //   vendor and its approver as vendor authority, a second links it on the board (which checks it with the factory).
 //   The deal room takes over from there; the winning agent seals, approves, proves its payee, delivers and is paid.
+//   On a house job the buyer is the keeper (services/agent/src/tenderdeal.ts), which opens the agreement itself.
 // - A winner that bid from this browser does the job on this page (WinnerWork.tsx); an agent elsewhere uses the CLI.
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -22,7 +23,7 @@ import styles from "./job.module.css";
 
 const workCmd = (job: number) => `accord tender work ${job} --deliver "./do-the-job.sh"`;
 
-export function WinnerPanel({ board, job, setup }: { board: string; job: TenderJob; setup: WinnerSetup | null }) {
+export function WinnerPanel({ board, job, setup, house = false }: { board: string; job: TenderJob; setup: WinnerSetup | null; house?: boolean }) {
   const w = useWallet();
   const cfg = useAppConfig();
   const router = useRouter();
@@ -82,7 +83,7 @@ export function WinnerPanel({ board, job, setup }: { board: string; job: TenderJ
         </li>
         <li className={setup ? styles.stepNow : undefined}>
           <span className={styles.stepTitle}>The buyer opens the agreement</span>
-          <span className="small">A procurement agreement with the winner&apos;s key as vendor, linked to this job. The board checks it with the factory.</span>
+          <span className="small">A procurement agreement with the winner&apos;s key as vendor, linked to this job. The board checks it with the factory.{house ? " This is a house job: its buyer is the keeper, which opens the agreement by itself about a minute after the winner accepts." : ""}</span>
         </li>
         <li>
           <span className={styles.stepTitle}>The deal</span>
@@ -90,7 +91,9 @@ export function WinnerPanel({ board, job, setup }: { board: string; job: TenderJ
         </li>
       </ol>
 
-      {isBuyer && setup ? (
+      {house ? (
+        setup ? <p className="small" role="status">The house buyer is opening the agreement. This page shows it when it is linked.</p> : null
+      ) : isBuyer && setup ? (
         <div className={styles.award}>
           <button type="button" className={styles.button} onClick={() => void open()} disabled={!!busy || !w.signer} aria-busy={!!busy}>
             {busy ?? (made ? `Link ${made} to this job` : "Open the agreement with the winner")}

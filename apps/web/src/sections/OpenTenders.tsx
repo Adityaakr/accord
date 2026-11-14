@@ -298,7 +298,7 @@ function Console() {
                   ) : (
                     <div className={styles.dealRow}>
                       <span className={styles.dealLabel}>Outside agent wins</span>
-                      <span className={styles.dealText}>{win.agent} (ours, outside the house set) bid with only the downloaded file and no NEAR; the relay paid the gas and the bond. A house job stops at the award; job 1 shows the deal after it.</span>
+                      <span className={styles.dealText}>{win.agent} (ours, outside the house set) bid with only the downloaded file and no NEAR; the relay paid the gas and the bond. This house job stopped at the award; job 1 shows the deal after it.</span>
                     </div>
                   )}
                 </motion.div>

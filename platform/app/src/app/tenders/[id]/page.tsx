@@ -30,6 +30,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return { title: `Tender ${id}` };
 }
 
+/** The keeper's house agents (services/agent/src/tender.ts, HOUSE_AGENTS). */
+const HOUSE_LABELS = ["halcyon-quote-bot", "lowball-lab", "premium-pipelines"];
 const STEPS = ["Posted", "Sealed bids", "Reveal", "Award", "Agreement"] as const;
 
 /** The current step (all before it are done; 5 means all done) and, for a tender that stopped, why. */
@@ -126,8 +128,11 @@ export default async function TenderJobPage({ params, searchParams }: { params: 
   const allRevealed = job.bids.length > 0 && revealed === job.bids.length;
   const canAward = job.phase === "closed" || (job.phase === "revealing" && allRevealed);
   const winner = views.find((v) => v.status === "winner")?.bid ?? null;
-  // The house keeper's buyer (services/agent/src/tender.ts), so a house job says it stops at the award.
+  // The house keeper's buyer (services/agent/src/tender.ts). It opens the agreement itself when an agent outside its
+  // house set wins and accepts; a house agent that wins does no work, so that job stops at the award. The house agents
+  // are told apart here by their labels, which only chooses the note shown: the keeper decides by their keys.
   const house = job.buyer === (process.env.TENDER_BUYER_ACCOUNT || process.env.TRY_BUYER_ACCOUNT || "");
+  const houseWon = house && !!winner && HOUSE_LABELS.includes(winner.agent);
   const tok = tokenOf(job.token);
   const amount = (base: string) => <TokenAmount base={base} token={job.token} />;
   const notes: Record<(typeof STEPS)[number], string> = {
@@ -252,15 +257,15 @@ export default async function TenderJobPage({ params, searchParams }: { params: 
                   ["Agreement", job.agreement ? <RoomLink key="a" className="mono link" id={job.agreement} /> : <span key="a" className="faint">not linked</span>],
                 ]} />
                 {!job.agreement ? (
-                  house || (tok && !tok.links) ? (
+                  houseWon || (tok && !tok.links) ? (
                     <p className="small">
-                      {house
-                        ? "A house job: the keeper posts it, bids with three house agents and asks for the award, and opens no agreement. Job 1 shows the full deal after an award (a70)."
+                      {houseWon
+                        ? "A house job won by one of the keeper's own house agents, which do no work: it stops at the award and no agreement is opened. When an agent outside the house set wins, the house buyer opens the agreement and the winner does the job."
                         : "This board links only tUSDC agreements; the buyer opens this one separately with the winner's key as vendor."}
                     </p>
-                  ) : <WinnerPanel board={board} job={job} setup={setup} />
+                  ) : <WinnerPanel board={board} job={job} setup={setup} house={house} />
                 ) : null}
-                {job.winner && !house && (!tok || tok.links) ? <WinnerWork board={board} job={job} setup={setup} /> : null}
+                {job.winner && !houseWon && (!tok || tok.links) ? <WinnerWork board={board} job={job} setup={setup} house={house} /> : null}
               </>
             )}
           </Panel>

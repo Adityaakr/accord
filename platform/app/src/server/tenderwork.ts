@@ -93,7 +93,10 @@ export async function registerWinner(id: number, b: Record<string, unknown>): Pr
     // the agreement the buyer opened must be this winner's, with this approver
     const a = await accord().agreement(j.agreement).get();
     if (a.vendor !== bidder || a.vendor_authority !== authority) throw new RelayError(409, `${j.agreement} does not name this winner and approver`);
-    if (takeAll([{ key: `tender:winner-grants:buyer:${j.buyer}`, max: 3, windowMs: 86_400_000 }, { key: "tender:winner-grants", max: 12, windowMs: 3_600_000 }])) {
+    // The house buyer's jobs run all day (one about every 6 h, each opened by the keeper only after its winner accepts),
+    // so its daily cap is higher than a visitor's.
+    const houseBuyer = j.buyer === (process.env.TENDER_BUYER_ACCOUNT || process.env.TRY_BUYER_ACCOUNT || "");
+    if (takeAll([{ key: `tender:winner-grants:buyer:${j.buyer}`, max: houseBuyer ? 8 : 3, windowMs: 86_400_000 }, { key: "tender:winner-grants", max: 12, windowMs: 3_600_000 }])) {
       throw new RelayError(429, "the faucet has funded enough tender winners for now; fund the three accounts yourself or try later");
     }
     // claimed before sending, so two racing requests cannot both fund the same job
