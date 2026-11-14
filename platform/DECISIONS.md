@@ -980,3 +980,32 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
   by hand in the deal room is not held. Nothing is lost when a proof fails this way: the escrow and the agreement are
   unchanged. The held proposal has not yet been seen live; the unit tests cover the rule.
 
+## 37. The model check verifies the hardware evidence (14 Nov 2026)
+
+- **Before.** `make verify`'s `model` check fetched NEAR AI's attestation report with a fresh nonce and looked for the
+  nonce in it. It did not check the Intel TDX quotes or the GPU evidence, so it was `partial` and every recorded
+  agreement printed `verify: 6 checks ok · 1 partial`. `make probe-ai` ran the full checks, but needs a NEAR AI key and
+  is not tied to an agreement.
+- **The change** (`packages/sdk/src/model-node.ts` `quoteProof`, Node only, passed to `verify` as `modelProof` by the
+  CLI, the app's `/api/verify` and the MCP server). Over the report fetched with the caller's fresh nonce, for the
+  gateway and every model instance: the TDX quote verifies against Intel's collateral (`@phala/dcap-qvl` `0.7.0`, the
+  library `make probe-ai` uses), the TCB status is `UpToDate` or `SWHardeningNeeded`, the TD is not in debug mode,
+  `report_data` binds the signing address and the nonce, `MRCONFIGID` is the hash of the reported `app_compose`, and
+  the event log replays to RTMR3. For every model instance: its GPU evidence carries the nonce and NVIDIA's attestation
+  service (NRAS, `https://nras.attestation.nvidia.com/v3/attest/gpu`) accepts it. The report endpoint needs no key.
+- **Tying it to the agreement.** The report is the model as served now. The signed outcome lists the key that signed
+  each response of the negotiating run; `verify` requires every one of them to be a key of an instance verified just
+  now. When it is not (the key has changed since), `model` is `partial` and says so.
+- **When it is `ok`, `partial`, `fail`.** `ok`: all of the above passed. `partial`: Intel's or NVIDIA's service could
+  not be reached or the checks ran past their timeout (`60 s` in the CLI, `30 s` in the app), or the run's key is not
+  in today's report, or the caller passed no `modelProof` (a browser build of the SDK). `fail`: a quote or the GPU
+  evidence was checked and rejected, or the nonce is not in the report.
+- **Seen.** 14 Nov 2026, with `outlayer-verify` installed: `verify: 7 checks ok` on `a6`, `a10`, `a21`, `a48`, `a65`,
+  `a91` and `a97.accord-v2.testnet`; `6 checks ok · 1 not checked` on `a52` and `a96` (negotiated only, no recipient).
+  The report listed `3` model instances, all `UpToDate`, signing address `0x3b753b4406613c5e70ae640508632b600424fa0c`,
+  `8` GPUs each; the check adds about `9 s`.
+- **Limits.** NVIDIA's verdict is read from the token NRAS returns over TLS; the token's signature is not checked.
+  The check says the model is served from verified hardware now and that the run used the same signing key; the run's
+  own attestation (its nonce, gateway and instances) is what the Sealed Table verified inside the enclave and bound in
+  the outcome it signed, which `sealed` checks. The check depends on two outside services being reachable.
+

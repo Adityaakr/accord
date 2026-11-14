@@ -1,6 +1,7 @@
 // The real dependencies: the SDK over RPC, keys from the environment, files on disk.
 
 import { writeFile, readFile } from "node:fs/promises";
+import { quoteProof } from "@accord/sdk/node";
 import { KeyPair } from "near-api-js";
 import {
   Accord, KeySigner, TGAS, deriveDocKey, preflight, sealedCheck, verify, type Network,
@@ -47,6 +48,8 @@ export function realDeps(o: RealDepsOptions): Deps {
       factories: [o.env.ACCORD_FACTORY_USDC ?? ""],
       // the release check runs OutLayer's verifier when it is installed; otherwise it stays `not checked`
       releaseProof: realReleaseProof(o.env),
+      // the model check verifies the TDX quotes and GPU evidence in NEAR AI's report (Intel collateral, NVIDIA NRAS)
+      modelProof: quoteProof(),
     }),
     sealedCheck: async (agreement, other) => {
       const s = needSigner();

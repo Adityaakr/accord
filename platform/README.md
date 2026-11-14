@@ -63,7 +63,7 @@ A throwaway key made in the tab created the room and relayed every other buyer c
 Agent pays item 1, 16.50 tUSDC: [`5vKHipEb…`](https://testnet.nearblocks.io/txns/5vKHipEbqk9r4rxra1q9uhYNrnFGJttQYprEL3g2x3ZG);
 redirect refused, `ERR_PAYEE_MISMATCH`: [`DaRuHG2t…`](https://testnet.nearblocks.io/txns/DaRuHG2tLsA5FP4f2CHouMjgABnbenUfZcGSnDeUDDmH);
 revoke: [`BGJEcstT…`](https://testnet.nearblocks.io/txns/BGJEcstTMS3oNyWiy92y7D8QRZqne2AFaNR2gxj8yy58).
-`make verify DEAL=a21.accord-v2.testnet` (re-run 10 Nov 2026, with `outlayer-verify` installed): `verify: 6 checks ok · 1 partial`. Every step, and the RPC
+`make verify DEAL=a21.accord-v2.testnet` (re-run 14 Nov 2026, with `outlayer-verify` installed): `verify: 7 checks ok`. Every step, and the RPC
 rate limits the run hit (now handled by the SDK's `RotatingRpcProvider`), in `DECISIONS.md` section 28.
 
 </details>
@@ -84,13 +84,13 @@ accord verify · a6.accord-v2.testnet
   keys      0 keys · none · no full access · ok
   sealed    outcome signature ok · commitments match · agreement matches · ok
   release   sealed-table run 13682 = task 28492 · wasm 7c832ce9… · outlayer-verify proven · payee run 13672 = task 28478 · wasm 24071443… · outlayer-verify proven · observer run 13683 = task 28493 · wasm 8240179a… · outlayer-verify proven · ok
-  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 1a7f6315… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+  model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce b8b1d06f… · TDX quote verified for the gateway and 3 model instances (Intel collateral, TCB UpToDate, not debug, signer and nonce bound, compose and RTMR3 match) · GPU evidence accepted by NVIDIA NRAS for each · the run's responses were signed by 0x3b75…fa0c, a key verified here · the report is the model as served now; the run's own attestation is bound in the signed outcome (sealed check) · ok
   payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
   record    1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
-verify: 6 checks ok · 1 partial
+verify: 7 checks ok
 ```
 
-`model` is `partial`: the nonce is bound in the attestation report, but it attests the model as served now, not the negotiating run (the run's own attestation is bound in the signed outcome, which `sealed` checks), and the hardware quote and GPU evidence are not checked here (`make probe-ai` checks them). `release` looks each job key's pubkey run up by OutLayer request id, checks its task, wasm and caller, then runs `outlayer-verify job <task id>`, which proves the TDX quote, the approved measurement and the binding (`DECISIONS.md` 32). It proves the release's wasm made the keys in an enclave; release 4 still runs release 3's job builds. Without the tool each run reads `and caller match · quote not checked (needs outlayer-verify)`, `release` is `not checked` and the last line is `verify: 5 checks ok · 1 partial · 1 not checked`. `/app/api/verify/<agreement>` and the MCP tool `accord_verify` run the same step (cached per job run, 30 s timeout) where the server has the tool, and say `not checked` where it does not. `keys` reads `0 keys` because a6's agent was revoked.
+`model` fetches NEAR AI's attestation report with a fresh nonce, verifies the Intel TDX quote of the gateway and of every model instance against Intel's collateral, has NVIDIA's attestation service (NRAS) accept each instance's GPU evidence, and checks that every key that signed the run's responses is a key verified there (`packages/sdk/src/model-node.ts`, the checks `make probe-ai` runs; no NEAR AI key needed). Limits: the report attests the model as served now, not the negotiating run (that run's own attestation is bound in the signed outcome, which `sealed` checks); NVIDIA's verdict is read from the token its service returns over TLS, and that token's signature is not checked; if Intel's or NVIDIA's service cannot be reached, or the key that signed the run is no longer in the report, `model` reads `partial` and says why. `release` looks each job key's pubkey run up by OutLayer request id, checks its task, wasm and caller, then runs `outlayer-verify job <task id>`, which proves the TDX quote, the approved measurement and the binding (`DECISIONS.md` 32). It proves the release's wasm made the keys in an enclave; release 4 still runs release 3's job builds. Without the tool each run reads `and caller match · quote not checked (needs outlayer-verify)`, `release` is `not checked` and the last line is `verify: 6 checks ok · 1 not checked`. `/app/api/verify/<agreement>` and the MCP tool `accord_verify` run the same step (cached per job run, 30 s timeout) where the server has the tool, and say `not checked` where it does not. `keys` reads `0 keys` because a6's agent was revoked.
 
 `make sandbox`, from a real run on 3 Nov 2026 (the market-making line was then labelled `atlas`; the sandbox now prints `market`):
 
@@ -147,7 +147,7 @@ accord market-making · a56.accord-v2.testnet · rhea-dcl 17208628…|wrap.near|
   scope     venue-level liquidity, not the market maker's own orders
 ```
 
-`6.00 USDC` is `6.00 tUSDC`. `a56` agreed a spread of at most `200 bps` and depth of at least `25.00 USDC` on both sides within `300 bps`; `a57` agreed `25 bps` and `200.00 USDC` within `100 bps`, which the pool did not meet (`10.37 / 12.81 USDC` within `100 bps`). The slot 4 timeout was one HTTPS call over 30 s; the next ask observed the slot. The run watched period 1 of each agreement only. `make verify DEAL=a56.accord-v2.testnet` and `DEAL=a57.accord-v2.testnet` each print `verify: 6 checks ok · 1 partial` with `outlayer-verify` installed. Every transaction, and the earlier attempts that failed (`a50`, `a54`, `a55`): [`docs/runs.md`](../docs/runs.md#market-making-on-testnet).
+`6.00 USDC` is `6.00 tUSDC`. `a56` agreed a spread of at most `200 bps` and depth of at least `25.00 USDC` on both sides within `300 bps`; `a57` agreed `25 bps` and `200.00 USDC` within `100 bps`, which the pool did not meet (`10.37 / 12.81 USDC` within `100 bps`). The slot 4 timeout was one HTTPS call over 30 s; the next ask observed the slot. The run watched period 1 of each agreement only. `make verify DEAL=a56.accord-v2.testnet` and `DEAL=a57.accord-v2.testnet` each print `verify: 7 checks ok` with `outlayer-verify` installed. Every transaction, and the earlier attempts that failed (`a50`, `a54`, `a55`): [`docs/runs.md`](../docs/runs.md#market-making-on-testnet).
 
 ### The whole product on your machine
 
@@ -195,7 +195,7 @@ A second factory, `accord-usdc.testnet`, runs the same code as `accord-v2.testne
 | Do | See |
 | --- | --- |
 | Get Circle testnet USDC at https://faucet.circle.com, network `NEAR Testnet`, your account as the address | about `20 USDC` per address every 1 to 2 hours |
-| `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as `ACCORD_FACTORY=accord-usdc.testnet make verify`) | `code hash 8wMuMRre… = release 3 (global by hash)` · `release   sealed-table run 13909 = task 28801 · wasm 7c832ce9… · outlayer-verify proven` (and the same for payee run `13910` = task `28802` and observer run `13911` = task `28803`) · `verify: 6 checks ok · 1 partial` with `outlayer-verify` installed (without it: `5 checks ok · 1 partial · 1 not checked`) |
+| `make verify-usdc DEAL=a1.accord-usdc.testnet` (the same as `ACCORD_FACTORY=accord-usdc.testnet make verify`) | `code hash 8wMuMRre… = release 3 (global by hash)` · `release   sealed-table run 13909 = task 28801 · wasm 7c832ce9… · outlayer-verify proven` (and the same for payee run `13910` = task `28802` and observer run `13911` = task `28803`) · `verify: 7 checks ok` with `outlayer-verify` installed (without it: `6 checks ok · 1 not checked`) |
 | `make negotiate-usdc`, then `make finish-usdc DEAL=<agreement>` once the buyer holds the terms' total | the same blocks as `make negotiate` and `make finish`, with Circle USDC; the presets fit one faucet drip (buyer ceiling `18`, vendor floor `12`) |
 
 `a1.accord-usdc.testnet` (release 3) was negotiated on 9 Nov 2026 (`14.00 USDC` in 3 items, `QUOTE → COUNTER → ACCEPT`, glm-5.3-flash in OutLayer's enclave), approved, funded, paid `5.00` and refused a redirect, then revoked: [Circle USDC proof](#circle-usdc). Transactions: `DECISIONS.md` sections 24 and 26.
@@ -318,7 +318,7 @@ The reviewed agreement code (`ECgsrZwy…`, global contract `R2qxw4u5…`) is re
 | Redirect refused | `a10` | `ERR_PAYEE_MISMATCH` | [`51TQ8no9…`](https://testnet.nearblocks.io/txns/51TQ8no9kPp4P8SDyN77jNZMevLsKaTBH3SufU2SUefu) |
 | Attack | [`a11`](https://testnet.nearblocks.io/address/a11.accord-v2.testnet) | `ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY` revokes and deletes the key; `0.00` moved | [`HvwpdKDs…`](https://testnet.nearblocks.io/txns/HvwpdKDs64sA5zuj37iK8B1N1kKDadh4VoeU8n3LwMSv), [`3cTDxHzV…`](https://testnet.nearblocks.io/txns/3cTDxHzVH29Uiw6kZceFmuuUkhnBiBp5JYW65bsewLvh), [`DPpVoMX9…`](https://testnet.nearblocks.io/txns/DPpVoMX9KKYXppXvrM6HqorDYsDd9ndQy8YniKDvMsXT) |
 | Revoke | [`a13`](https://testnet.nearblocks.io/address/a13.accord-v2.testnet) | `revoke_agent` deletes the key; the next call fails with `AccessKeyDoesNotExist` at the RPC, so it has no transaction; the buyer installs a new key, which pays item 2 | revoke [`8b8FC1He…`](https://testnet.nearblocks.io/txns/8b8FC1HeiHCTJcUaga87zWuNCg6LTgYGYDzRptdHh2H3), `install_agent_key` [`DfgMURQA…`](https://testnet.nearblocks.io/txns/DfgMURQANtnBq2LziGaELXabw9tvzqhYQXq71hXjzNDT), pay item 2 [`24mdebXg…`](https://testnet.nearblocks.io/txns/24mdebXgCkMZFyekdDyxv3YQzJS1iaxckrfnN2aRY9Fe) |
-| Verify | `a10` | `code = release 4` · `6 ok · 1 partial` with `outlayer-verify` installed (10 Nov 2026; without it `5 ok · 1 partial · 1 not checked`) | `make verify DEAL=a10.accord-v2.testnet` |
+| Verify | `a10` | `code = release 4` · `7 ok` with `outlayer-verify` installed (14 Nov 2026; without it `6 ok · 1 not checked`) | `make verify DEAL=a10.accord-v2.testnet` |
 
 The first `make revoke` run (a12) stopped at its last step: the script paid item 2 at a fixed `12.00` while the negotiated amount differed, and the contract refused it with `ERR_AMOUNT_MISMATCH`. The live targets now pay each item at its negotiated amount.
 
@@ -340,7 +340,7 @@ Agreement [`a1.accord-usdc.testnet`](https://testnet.nearblocks.io/address/a1.ac
 | Pay | `5.00 USDC` to `halcyon-mm.testnet` | [`E127BGy3…`](https://testnet.nearblocks.io/txns/E127BGy3Tw6PmhE9JcoFr7vQsKTiHNevTTiAxEjJGWK2) |
 | Redirect refused | `ERR_PAYEE_MISMATCH` | [`9rgsBFA2…`](https://testnet.nearblocks.io/txns/9rgsBFA26yedWuEEJk77sKBDrDGS9mHn9BFMknCaP8BB) |
 | Revoke | the agent's next call fails with `AccessKeyDoesNotExist` | [`FTigDebs…`](https://testnet.nearblocks.io/txns/FTigDebs1kZjLpTN8nC8SZWp4dMM1ChuUyR211JZnzuW) |
-| Verify | release 3 · `6 ok · 1 partial` with `outlayer-verify` installed (10 Nov 2026; without it `5 ok · 1 partial · 1 not checked`) | `make verify-usdc DEAL=a1.accord-usdc.testnet` |
+| Verify | release 3 · `7 ok` with `outlayer-verify` installed (14 Nov 2026; without it `6 ok · 1 not checked`) | `make verify-usdc DEAL=a1.accord-usdc.testnet` |
 
 ## Security review
 

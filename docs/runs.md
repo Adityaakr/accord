@@ -2,6 +2,8 @@
 
 Every recorded run of Accord on NEAR testnet, with each transaction linked. The flagship run, agreement `a6.accord-v2.testnet`, is in the [README](../README.md#testnet-proof); this page holds the others. The design notes behind each run are in [`platform/DECISIONS.md`](../platform/DECISIONS.md) (section numbers given per run).
 
+The `make verify` lines quoted below are as each run printed them. Until 14 Nov 2026 the `model` check was `partial`, so they end `6 checks ok · 1 partial`; since then `make verify` also checks the hardware evidence in NEAR AI's report and the same agreements print `7 checks ok` (`platform/DECISIONS.md` section 37).
+
 Units: agreements of `accord-v2.testnet` settle in test USDC (`tusdc.accord-v1.testnet`, written `tUSDC`); agreements of `accord-usdc.testnet` settle in Circle's testnet USDC (written `USDC`). Both have 6 decimals.
 
 | Agreement | Date | What it shows | Section |

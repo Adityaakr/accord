@@ -8,7 +8,7 @@ Examples
 
 Agreement [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet)
 
-Verdict 6 ok · 1 partial · 7 checks, recorded for a6.accord-v2.testnet
+Verdict 7 ok · 7 checks, recorded for a6.accord-v2.testnet
 
 Quick reads from testnet 5 of 5 reads ok
 
@@ -36,10 +36,10 @@ Full check · make verify Recorded for a6.accord-v2.testnet
 
 - 04 Enclave release [The three job runs, proven by outlayer-verify](https://github.com/out-layer/outlayer-verify) ok
 
-- 05 Model attestation [The model as served now, fresh nonce bound; the run's attestation is in the sealed outcome](https://testnet-api.outlayer.ai/attestations/by-request/13596) partial
+- 05 Model attestation [TDX quotes and GPU evidence verified now, with a fresh nonce; the run was signed with a key verified there](https://testnet-api.outlayer.ai/attestations/by-request/13596) ok
 
 - 06 Recipient [Proven on the vendor's domain](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6) ok
 
 - 07 Record [Payments match the receipts](https://testnet.nearblocks.io/txns/2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ) ok
 
-6 ok · 1 partial [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet) recorded Show raw output accord verify · a6.accord-v2.testnet code code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok keys 0 keys · none · no full access · ok sealed outcome signature ok · commitments match · agreement matches · ok release sealed-table run 13682 = task 28492 · wasm 7c832ce9… · outlayer-verify proven · payee run 13672 = task 28478 · wasm 24071443… · outlayer-verify proven · observer run 13683 = task 28493 · wasm 8240179a… · outlayer-verify proven · ok model z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 1a7f6315… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial payee halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok record 1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok verify: 6 checks ok · 1 partial
+7 ok [a6.accord-v2.testnet](https://testnet.nearblocks.io/address/a6.accord-v2.testnet) recorded Show raw output accord verify · a6.accord-v2.testnet code code hash 8wMuMRre… = release 3 (global by hash) · no deploy method · ok keys 0 keys · none · no full access · ok sealed outcome signature ok · commitments match · agreement matches · ok release sealed-table run 13682 = task 28492 · wasm 7c832ce9… · outlayer-verify proven · payee run 13672 = task 28478 · wasm 24071443… · outlayer-verify proven · observer run 13683 = task 28493 · wasm 8240179a… · outlayer-verify proven · ok model z-ai/glm-5.3-flash · attestation report fetched with fresh nonce b8b1d06f… · TDX quote verified for the gateway and 3 model instances (Intel collateral, TCB UpToDate, not debug, signer and nonce bound, compose and RTMR3 match) · GPU evidence accepted by NVIDIA NRAS for each · the run's responses were signed by 0x3b75…fa0c, a key verified here · the report is the model as served now; the run's own attestation is bound in the signed outcome (sealed check) · ok payee halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok record 1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok verify: 7 checks ok

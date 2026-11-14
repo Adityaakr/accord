@@ -518,7 +518,7 @@ accord verify · <agreement>
   release   sealed-table run <request id> = task <task id> · wasm <8>… · outlayer-verify proven · payee run … · observer run … · ok
             (without outlayer-verify: sealed-table run <request id> = task <task id> · wasm <8>… and caller match · quote not checked (needs outlayer-verify) · … · not checked)
   sealed    outcome signature ok · commitments match · nonce matches · ok
-  model     <model> · attestation report fetched with fresh nonce <8>… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+  model     <model> · attestation report fetched with fresh nonce <8>… · TDX quote verified for the gateway and <n> model instances (Intel collateral, TCB <status>, not debug, signer and nonce bound, compose and RTMR3 match) · GPU evidence accepted by NVIDIA NRAS for each · the run's responses were signed by <key>, a key verified here · the report is the model as served now; the run's own attestation is bound in the signed outcome (sealed check) · ok
   payee     <recipient> · proof <domain> · authority approved · buyer accepted · active · ok
   record    <n> payments · <n> refusals · <n> exceptions · <n> set aside · <n> observation conflicts · events match state · ok
   verify: <n> checks ok[ · <n> partial][ · <n> failed][ · <n> not checked]

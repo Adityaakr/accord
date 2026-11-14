@@ -49,6 +49,11 @@ export function verifyEd25519(output: Record<string, unknown>, publicKey: string
   }
 }
 
+/** What the hardware part of the `model` check found; `signers` are the model signing keys it verified (lowercase). */
+export interface ModelProofResult { status: "ok" | "fail" | "not_checked"; detail: string; signers: string[] }
+/** Checks the TDX quotes and GPU evidence in an attestation report fetched with `nonce` (`quoteProof`, Node only). */
+export type ModelProof = (reportText: string, nonce: string) => Promise<ModelProofResult>;
+
 /** One of the release's three job keys, and the OutLayer request (on chain) whose output it came from. */
 export interface ReleaseJob {
   job: "sealed_table" | "payee" | "observer";
@@ -68,7 +73,7 @@ export type ReleaseProof = (job: ReleaseJob) => Promise<{ status: "ok" | "fail" 
 export async function verify(
   accord: Accord,
   agreement: string,
-  opts: { nonce?: string; nearAiKey?: string; factories?: string[]; releaseProof?: ReleaseProof } = {},
+  opts: { nonce?: string; nearAiKey?: string; factories?: string[]; releaseProof?: ReleaseProof; modelProof?: ModelProof } = {},
 ): Promise<VerifyReport> {
   const deal = accord.agreement(agreement);
   let a: Awaited<ReturnType<typeof deal.get>>;
@@ -158,7 +163,7 @@ export async function verify(
   // came from the deterministic local negotiator; no model ran, so there is nothing to attest.
   const local = outText ? (JSON.parse(outText) as { model?: { local?: string } }).model?.local : undefined;
   if (local) add("model", "not_checked", `no model ran: ${local} (local node)`);
-  else add(...(await modelCheck(a.model, opts.nonce ?? bytesToHex(randomBytes(32)), opts.nearAiKey)));
+  else add(...(await modelCheck(a.model, opts.nonce ?? bytesToHex(randomBytes(32)), opts.nearAiKey, opts.modelProof, runSigners(outText))));
 
   // payee: the current recipient's chain of approvals, and its proof signed by the release's Payee key.
   const versions = await deal.recipients();
@@ -205,7 +210,14 @@ export function knownFactories(accord: Accord, factories: string[] = []): string
 
 const NEAR_AI = "https://cloud-api.near.ai/v1";
 
-async function modelCheck(model: string, nonce: string, key?: string): Promise<[string, CheckStatus, string]> {
+/** The keys that signed the negotiating run's model responses, from the outcome the Sealed Table signed. */
+function runSigners(outText: string | null): string[] {
+  if (!outText) return [];
+  const responses = (JSON.parse(outText) as { responses?: { signer?: string }[] }).responses ?? [];
+  return [...new Set(responses.flatMap((r) => (typeof r.signer === "string" ? [r.signer.toLowerCase()] : [])))];
+}
+
+async function modelCheck(model: string, nonce: string, key?: string, proof?: ModelProof, ran: string[] = []): Promise<[string, CheckStatus, string]> {
   const url = `${NEAR_AI}/attestation/report?model=${encodeURIComponent(model)}&provider=near&signing_algo=ecdsa&nonce=${nonce}`;
   try {
     const headers: Record<string, string> = { "x-no-aliasing": "true" };
@@ -214,12 +226,22 @@ async function modelCheck(model: string, nonce: string, key?: string): Promise<[
     if (!res.ok) return ["model", "not_checked", `${model} · attestation report HTTP ${res.status}`];
     const text = await res.text();
     const bound = text.toLowerCase().includes(nonce.toLowerCase());
-    // Only the nonce binding is checked here; the hardware quote and the GPU evidence are not, so a pass is partial.
+    const head = `${model} · attestation report fetched with fresh nonce ${nonce.slice(0, 8)}…`;
+    if (!bound) return ["model", "fail", `${head} · nonce not found in the report`];
     // The report is for the model as served today, not the negotiating run; that run's attestation (its nonce,
     // gateway and candidates) is in the outcome the Sealed Table signed, which the sealed check verifies.
-    return bound
-      ? ["model", "partial", `${model} · attestation report fetched with fresh nonce ${nonce.slice(0, 8)}… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them)`]
-      : ["model", "fail", `${model} · attestation report fetched with fresh nonce ${nonce.slice(0, 8)}… · nonce not found in the report`];
+    const asServed = "the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check)";
+    // Without the hardware proof (the browser, or a caller that does not pass it) only the nonce binding is checked.
+    if (!proof) return ["model", "partial", `${head} · nonce bound in the report · ${asServed} · hardware quote and GPU evidence not checked here (make probe-ai checks them)`];
+    const p = await proof(text, nonce).catch((e: unknown): ModelProofResult => ({ status: "not_checked", detail: e instanceof Error ? e.message : String(e), signers: [] }));
+    if (p.status === "fail") return ["model", "fail", `${head} · ${p.detail}`];
+    if (p.status === "not_checked") return ["model", "partial", `${head} · nonce bound in the report · ${asServed} · hardware quote and GPU evidence not checked: ${p.detail}`];
+    // Tie the run to what was just verified: every key that signed the run's responses is a key verified now.
+    const short = (s: string) => `${s.slice(0, 6)}…${s.slice(-4)}`;
+    const unknown = ran.filter((s) => !p.signers.includes(s));
+    if (ran.length === 0) return ["model", "ok", `${head} · ${p.detail} · no negotiation outcome yet, so no run to tie to it`];
+    if (unknown.length) return ["model", "partial", `${head} · ${p.detail} · the run's responses were signed by ${unknown.map(short).join(", ")}, which is not a key in today's report (keys ${p.signers.map(short).join(", ") || "none"}): the hardware behind the run's key is not checked here; the run's own attestation is bound in the signed outcome (sealed check)`];
+    return ["model", "ok", `${head} · ${p.detail} · the run's responses were signed by ${ran.map(short).join(", ")}, a key verified here · the report is the model as served now; the run's own attestation is bound in the signed outcome (sealed check)`];
   } catch (e) {
     return ["model", "not_checked", `${model} · ${(e as Error).message}`];
   }

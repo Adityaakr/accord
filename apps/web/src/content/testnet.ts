@@ -12,7 +12,7 @@ export const TESTNET = {
   token: "tusdc.accord-v1.testnet",
   release: 3,
   releaseUrl: tx("7m8pj7u2D5aAXJ3RPbPWkhShKpJxwWHhPSpRrKr9nPVh"),
-  verify: { ok: ["contract code", "agent key", "sealed outcome", "enclave release (with outlayer-verify installed)", "recipient proof", "record"], partial: ["model attestation (nonce bound in the report; the hardware quote is not checked here)"], notChecked: [] as string[] },
+  verify: { ok: ["contract code", "agent key", "sealed outcome", "enclave release (with outlayer-verify installed)", "model attestation (TDX quotes and GPU evidence verified; the run signed with a key verified there)", "recipient proof", "record"], partial: [] as string[], notChecked: [] as string[] },
 }
 
 export type Step = { n: string; title: string; detail: string; href: string; refused?: boolean; mono?: string }
@@ -48,8 +48,9 @@ export const INFRA = [
   { label: "Attestations", href: "https://testnet-api.outlayer.ai/attestations/by-request/13596" },
 ]
 
-/* make verify on a6, as it printed with outlayer-verify installed (10 Nov 2026): each check with what it means in plain
-   words. Without the tool, release is not checked and the verdict reads 5 ok · 1 partial · 1 not checked. */
+/* make verify on a6, as it printed with outlayer-verify installed (14 Nov 2026): each check with what it means in plain
+   words. Without the tool, release is not checked and the verdict reads 6 ok · 1 not checked. Until 14 Nov 2026 the model
+   check was partial (6 ok · 1 partial): it did not check the hardware evidence. */
 export type CheckStatus = "ok" | "partial" | "not checked"
 export type Check = { id: string; name: string; meaning: string; status: CheckStatus; href: string }
 export const CHECKS: Check[] = [
@@ -57,11 +58,11 @@ export const CHECKS: Check[] = [
   { id: "keys", name: "Agreement keys", meaning: "No full-access key", status: "ok", href: `${acct("a6.accord-v2.testnet")}?tab=accesskeys` },
   { id: "sealed", name: "Sealed outcome", meaning: "Signed inside the enclave", status: "ok", href: tx("GfX5qKq35rvtUVkp9nBPgw3kkzDSXx6hfY2H5cb3wfHW") },
   { id: "release", name: "Enclave release", meaning: "The three job runs, proven by outlayer-verify", status: "ok", href: "https://github.com/out-layer/outlayer-verify" },
-  { id: "model", name: "Model attestation", meaning: "The model as served now, fresh nonce bound; the run's attestation is in the sealed outcome", status: "partial", href: "https://testnet-api.outlayer.ai/attestations/by-request/13596" },
+  { id: "model", name: "Model attestation", meaning: "TDX quotes and GPU evidence verified now, with a fresh nonce; the run was signed with a key verified there", status: "ok", href: "https://testnet-api.outlayer.ai/attestations/by-request/13596" },
   { id: "payee", name: "Recipient", meaning: "Proven on the vendor's domain", status: "ok", href: tx("6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6") },
   { id: "record", name: "Record", meaning: "Payments match the receipts", status: "ok", href: tx("2k57zg7iE44muCGRbcc2JTVmy5uGHHyCePXNPmcWCKEQ") },
 ]
-/** "6 ok · 1 partial": the counts make verify prints, in its order */
+/** "7 ok": the counts make verify prints, in its order */
 export const checkSummary = (checks: { status: CheckStatus }[]) => {
   const n = (s: CheckStatus) => checks.filter((c) => c.status === s).length
   return [`${n("ok")} ok`, n("partial") ? `${n("partial")} partial` : "", n("not checked") ? `${n("not checked")} not checked` : ""].filter(Boolean).join(" · ")
@@ -72,10 +73,10 @@ code      code hash 8wMuMRre… = release 3 (global by hash) · no deploy method
 keys      0 keys · none · no full access · ok
 sealed    outcome signature ok · commitments match · agreement matches · ok
 release   sealed-table run 13682 = task 28492 · wasm 7c832ce9… · outlayer-verify proven · payee run 13672 = task 28478 · wasm 24071443… · outlayer-verify proven · observer run 13683 = task 28493 · wasm 8240179a… · outlayer-verify proven · ok
-model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 1a7f6315… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+model     z-ai/glm-5.3-flash · attestation report fetched with fresh nonce b8b1d06f… · TDX quote verified for the gateway and 3 model instances (Intel collateral, TCB UpToDate, not debug, signer and nonce bound, compose and RTMR3 match) · GPU evidence accepted by NVIDIA NRAS for each · the run's responses were signed by 0x3b75…fa0c, a key verified here · the report is the model as served now; the run's own attestation is bound in the signed outcome (sealed check) · ok
 payee     halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active · ok
 record    1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
-verify: 6 checks ok · 1 partial`
+verify: 7 checks ok`
 
 /* Transactions behind agreement a6's record, so /verify's live rows link to the exact evidence for a6; any other
    agreement links to its account's transaction list instead. */
@@ -121,7 +122,7 @@ export const RELEASE4 = {
   usdcPublish: tx("GovfwhMAtB28ayEndYmtiZHEo8sq9YhKVCXj8m3WFaai"),
   usdcCurrent: tx("5D9LxPuU4phUXTgRawd97TmhZPGiPjWzSPWCYXJteoLJ"),
   verify: "make verify DEAL=a10.accord-v2.testnet",
-  verifyResult: "code = release 4 · 6 ok · 1 partial",
+  verifyResult: "code = release 4 · 7 ok",
   steps: [
     { title: "Negotiated in the enclave", agreement: "a10.accord-v2.testnet", mono: "33.00 tUSDC · 3 items", txs: [] },
     { title: "Buyer funds the escrow", agreement: "a10.accord-v2.testnet", mono: "33.00 tUSDC", txs: [tx("2mBhRNnXnitEN2gefBe7C8MWdCYS7P2nJLZyZznHFH22")] },
@@ -176,5 +177,5 @@ export const MARKET_MAKING = {
     refusal: "ERR_PERIOD_WITHHELD",
     refusalTx: tx("4W1Ud2GVRPZnJL4uJdyEjAfdB5igT3S1DGTJxxLNcS1Y"),
   },
-  verify: "6 checks ok · 1 partial",
+  verify: "7 checks ok",
 }

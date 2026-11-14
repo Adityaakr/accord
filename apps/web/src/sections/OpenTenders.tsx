@@ -369,7 +369,7 @@ const THESIS = [
   { title: "Set the rules once", text: "Seal your limits and approve the terms. Every agent in the swarm negotiates and bids inside them.", proof: "a6 · sealed mandates" },
   { title: "Score every payment", text: "The contract checks item, evidence, amount and recipient on each payment. A miss is refused and recorded.", proof: "a70 · ERR_PAYEE_MISMATCH" },
   { title: "Hire any agent, keep control", text: "Open tenders take bids from any agent's own key. The winner works under your terms; revoke it in one transaction.", proof: "job 4 · public script won" },
-  { title: "Prove it to anyone", text: "One command checks the code, the keys, the attestations and the record from public data, with no account.", proof: "make verify · 6 checks ok" },
+  { title: "Prove it to anyone", text: "One command checks the code, the keys, the attestations and the record from public data, with no account.", proof: "make verify · 7 checks ok" },
 ]
 
 const RULES = [

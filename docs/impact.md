@@ -22,7 +22,7 @@ The same failure costs money in web2 and web3: an agent, or a person, is told to
 | A clear definition of done | The approved terms (item, evidence, amount, recipient) are what every agent is held to; the contract checks each payment against them | a6, a63, a70 `ERR_PAYEE_MISMATCH` |
 | Fuzzy outcomes made checkable | Market making: "was the liquidity good enough?" becomes spread, depth and two-sided quotes measured at hidden times. Procurement: delivery evidence fixed by hash in the terms | a56 paid, a57 refused `ERR_PERIOD_WITHHELD` |
 | No person in the loop | People decide once (sealed limits, approved terms); agents negotiate in the Sealed Table, compete on [open tenders](tenders.md) and are paid by the contract | `make tender`, job 1 → a70; agents outside the house set (run by us with the public script) won jobs 2 and 4 |
-| Trust across companies | The scarce thing when agents are cheap is a rule both sides can verify; here it is on NEAR, checkable with `make verify` | `verify: 6 checks ok · 1 partial` |
+| Trust across companies | The scarce thing when agents are cheap is a rule both sides can verify; here it is on NEAR, checkable with `make verify` | `verify: 7 checks ok` |
 
 What Accord does not do: fund or meter an agent's own inference, or orchestrate agents inside one company. It is for the moment a swarm's work crosses to another company.
 

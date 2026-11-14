@@ -35,6 +35,7 @@
   "dependencies": {
     "@noble/curves": "1.9.7",
     "@noble/hashes": "1.8.0",
+    "@phala/dcap-qvl": "0.7.0",
     "canonicalize": "2.1.0",
     "eciesjs": "0.4.18",
     "near-api-js": "7.3.1",

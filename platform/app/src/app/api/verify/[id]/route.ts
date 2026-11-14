@@ -5,7 +5,7 @@
 import { verify } from "@accord/sdk";
 import { accord, factories } from "@/server/accord";
 import { readPreflight, withReadCors } from "@/server/cors";
-import { releaseProof } from "@/server/release";
+import { modelProof, releaseProof } from "@/server/release";
 import { verifyResponse } from "@/server/verifyroute";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   const nonce = new URL(req.url).searchParams.get("nonce") ?? undefined;
-  return withReadCors(await verifyResponse(id, nonce, (a, n) => verify(accord(), a, { nonce: n, nearAiKey: process.env.NEARAI_API_KEY, factories: factories(), releaseProof: releaseProof() })));
+  return withReadCors(await verifyResponse(id, nonce, (a, n) => verify(accord(), a, { nonce: n, nearAiKey: process.env.NEARAI_API_KEY, factories: factories(), releaseProof: releaseProof(), modelProof: modelProof() })));
 }
 
 export function OPTIONS() {

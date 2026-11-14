@@ -115,3 +115,5 @@ export function cachedReleaseProof(proof: ReleaseProof, o: CacheOptions = {}): R
     return entry.p;
   };
 }
+
+export { quoteProof, checkInstance, judgeInstances, type InstanceCheck } from "./model-node.js";

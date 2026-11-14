@@ -55,7 +55,7 @@ All of these produce the contract's commitment and signature byte for byte; a sh
 tender: job 1 → a70.accord-v2.testnet in 4:01
 ```
 
-`make verify DEAL=a70.accord-v2.testnet` prints `code hash ECgsrZwy… = release 5` and `verify: 6 checks ok · 1 partial`: a tender-won agreement is an ordinary agreement. Every transaction is listed in [`docs/runs.md`](runs.md#open-tenders).
+`make verify DEAL=a70.accord-v2.testnet` prints `code hash ECgsrZwy… = release 5` and `verify: 7 checks ok`: a tender-won agreement is an ordinary agreement. Every transaction is listed in [`docs/runs.md`](runs.md#open-tenders).
 
 **A market with no LLM calls.** `make tender-sim` runs 20 scripted agents (cost-plus, undercut, premium, one over the budget and one that never reveals) against 5 jobs on the board's own code:
 

@@ -109,4 +109,31 @@ describe("verify provenance", () => {
     expect((await release({ releaseProof: async (j) => ({ status: j.job === "observer" ? "not_checked" : "ok", detail: "d" }) })).status).toBe("partial");
     expect((await release({ releaseProof: async () => { throw new Error("down"); } })).status).toBe("not_checked");
   });
+  it("model: ok only when the hardware proof passes and the run's keys are keys it verified; otherwise partial or fail, never ok", async () => {
+    const nonce = "ab".repeat(32);
+    vi.stubGlobal("fetch", async () => new Response(JSON.stringify({ request_nonce: nonce }), { status: 200 }));
+    const model = async (proof: Parameters<typeof verify>[2] = {}, signers: string[] = ["0xAA"]) => {
+      const w = world(view(6, "accord-v2.testnet"), () => true);
+      (w.agreement() as { sealedOutput: () => Promise<string | null> }).sealedOutput =
+        async () => (signers.length ? JSON.stringify({ responses: signers.map((signer) => ({ signer })) }) : null);
+      return (await verify(w as never, "a6.accord-v2.testnet", { nonce, ...proof })).checks.find((c) => c.name === "model")!;
+    };
+    const ok = async () => ({ status: "ok" as const, detail: "quotes verified", signers: ["0xaa"] });
+    // no proof passed (a browser build): the nonce binding alone is partial, as before
+    expect((await model()).status).toBe("partial");
+    expect(await model({ modelProof: ok })).toMatchObject({ status: "ok" });
+    expect((await model({ modelProof: ok })).detail).toContain("a key verified here");
+    // the run was signed by a key that is not in today's verified set
+    const rotated = await model({ modelProof: ok }, ["0xaa", "0xbb"]);
+    expect(rotated.status).toBe("partial");
+    expect(rotated.detail).toContain("not a key in today's report");
+    // nothing negotiated yet: the hardware is verified, with no run to tie to it
+    expect(await model({ modelProof: ok }, [])).toMatchObject({ status: "ok" });
+    expect((await model({ modelProof: async () => ({ status: "fail", detail: "model instance 1: TDX debug mode", signers: [] }) })).status).toBe("fail");
+    expect((await model({ modelProof: async () => ({ status: "not_checked", detail: "timed out", signers: [] }) })).status).toBe("partial");
+    expect((await model({ modelProof: async () => { throw new Error("down"); } })).status).toBe("partial");
+    // a report that does not carry the nonce fails before any hardware check
+    vi.stubGlobal("fetch", async () => new Response("{}", { status: 200 }));
+    expect((await model({ modelProof: ok })).status).toBe("fail");
+  });
 });

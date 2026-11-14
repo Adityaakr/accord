@@ -1,11 +1,13 @@
 // The real dependencies: the SDK over RPC; the agent and principal signers only when their variables are set.
 
-import { Accord, KeySigner, TENDER_BOARDS, TenderBoardClient, addBidSecret, bidderKey, isBoardId, nextNonce, preflight, prepareBid, secretFor, recordReleaseProof, verify, type Network, type ReleaseProof } from "@accord/sdk";
+import { Accord, KeySigner, TENDER_BOARDS, TenderBoardClient, addBidSecret, bidderKey, isBoardId, nextNonce, preflight, prepareBid, secretFor, recordReleaseProof, verify, type Network, type ModelProof, type ReleaseProof } from "@accord/sdk";
 import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname } from "node:path";
-import { cachedReleaseProof, outlayerVerifyProof } from "@accord/sdk/node";
+import { cachedReleaseProof, outlayerVerifyProof, quoteProof } from "@accord/sdk/node";
 import type { McpDeps } from "./tools.js";
+
+export { quoteProof };
 import type { Env } from "./env.js";
 
 function signer(accountId: string, secret: string, accord: Accord, what: string): KeySigner {
@@ -28,6 +30,8 @@ export interface ReadOptions {
   approvalsUrl?: string;
   /** The release check; by default the by-request record lookup only (the quote stays not checked). */
   releaseProof?: ReleaseProof;
+  /** The hardware part of the model check (`quoteProof`); without it the model check stays partial. */
+  modelProof?: ModelProof;
   /** The tender board to read; by default the network's deployed board. */
   tenderBoard?: string;
 }
@@ -58,7 +62,7 @@ export function readDeps(accord: Accord, o: ReadOptions = {}): McpDeps {
       archivalRpc: o.archivalRpc, approvalsUrl: o.approvalsUrl,
     }),
     // the same release check as the CLI and the app's /api/verify: outlayer-verify when the caller passes it
-    verify: (agreement) => verify(accord, agreement, { nearAiKey: o.nearAiKey, factories: [second], releaseProof }),
+    verify: (agreement) => verify(accord, agreement, { nearAiKey: o.nearAiKey, factories: [second], releaseProof, modelProof: o.modelProof }),
     tokenSymbol: (token) => {
       let s = symbols.get(token);
       if (!s) {
@@ -84,6 +88,7 @@ export function realDeps(env: Env): McpDeps {
     archivalRpc: env.NEAR_ARCHIVAL_RPC_URL || undefined,
     approvalsUrl: env.ACCORD_APPROVALS_URL || undefined,
     releaseProof: releaseProofFromEnv(env),
+    modelProof: quoteProof(),
   });
   if (env.ACCORD_AGENT_KEY && env.AGENT_AGREEMENT) {
     if (network === "mainnet") throw new Error("the agent signs on testnet only");

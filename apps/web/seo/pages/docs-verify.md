@@ -18,7 +18,7 @@ On agreement a6
 
 Other agreements to check
 
-- 01 Release 4 The security-review fixes. `make verify DEAL=a10.accord-v2.testnet` prints `code = release 4 · 6 ok · 1 partial`. JSON: `/app/api/verify/a10.accord-v2.testnet`. [a10.accord-v2.testnet](/verify?agreement=a10.accord-v2.testnet)
+- 01 Release 4 The security-review fixes. `make verify DEAL=a10.accord-v2.testnet` prints `code = release 4 · 7 ok`. JSON: `/app/api/verify/a10.accord-v2.testnet`. [a10.accord-v2.testnet](/verify?agreement=a10.accord-v2.testnet)
 
 - 02 Circle USDC The second factory, on release 3. `make verify DEAL=a1.accord-usdc.testnet` (the same as `ACCORD_FACTORY=accord-usdc.testnet make verify`). JSON: `/app/api/verify/a1.accord-usdc.testnet`. [a1.accord-usdc.testnet](/verify?agreement=a1.accord-usdc.testnet)
 
@@ -32,7 +32,7 @@ Other agreements to check
 
 - 04 Enclave release Each job key's pubkey run, looked up by OutLayer request id: Sealed Table run `13682` = task `28492`, its wasm (`7c832ce9…`) and caller match the release; the same for Payee and the observer. Then [outlayer-verify](https://github.com/out-layer/outlayer-verify) proves each task's TDX quote, approved measurement and binding. Without the tool installed, this check is not checked. [ok](https://app.outlayer.ai/docs/trust-verification)
 
-- 05 Model attestation The real model (`z-ai/glm-5.3-flash`): the attestation report is fetched with a fresh nonce and the nonce is bound in it. This attests the model as served now, not the negotiating run; the run's own attestation is bound in the signed outcome, which the sealed check verifies. The hardware quote and GPU evidence are not checked by `make verify`; `make probe-ai` checks them. [partial](https://testnet-api.outlayer.ai/attestations/by-request/13596)
+- 05 Model attestation The real model (`z-ai/glm-5.3-flash`): the attestation report is fetched with a fresh nonce. The Intel TDX quote of the gateway and of every model instance is verified against Intel's collateral, each instance's GPU evidence is accepted by NVIDIA's attestation service, and every key that signed the run's responses is a key verified there. The report attests the model as served now, not the negotiating run; the run's own attestation is bound in the signed outcome, which the sealed check verifies. NVIDIA's verdict is read from the token its service returns over TLS, and that token's signature is not checked. If Intel's or NVIDIA's service cannot be reached, the check reads `partial`. [ok](https://testnet-api.outlayer.ai/attestations/by-request/13596)
 
 - 06 Recipient `halcyon-mm.testnet`, proven on the vendor's domain `accordweb-production.up.railway.app`, signed by the release's Payee key. [ok](https://testnet.nearblocks.io/txns/6koRbw5QDYTgVU52Fe1vH755QGLPwZabQhF1kTk5rup6)
 
@@ -40,7 +40,7 @@ Other agreements to check
 
 ## The result on a6
 
-make verify DEAL=a6.accord-v2.testnet · 10 Nov 2026, outlayer-verify installed
+make verify DEAL=a6.accord-v2.testnet · 14 Nov 2026, outlayer-verify installed
 
 accord verify · a6.accord-v2.testnet
 
@@ -52,21 +52,21 @@ accord verify · a6.accord-v2.testnet
 
 - release sealed-table run 13682 = task 28492 · wasm 7c832ce9… · outlayer-verify proven · payee run 13672 = task 28478 · wasm 24071443… · outlayer-verify proven · observer run 13683 = task 28493 · wasm 8240179a… · outlayer-verify proven ok
 
-- model z-ai/glm-5.3-flash · attestation report fetched with fresh nonce 1a7f6315… · nonce bound in the report · the model is attested as served now; the run's own attestation is bound in the signed outcome (sealed check) · hardware quote and GPU evidence not checked here (make probe-ai checks them) · partial
+- model z-ai/glm-5.3-flash · attestation report fetched with fresh nonce b8b1d06f… · TDX quote verified for the gateway and 3 model instances (Intel collateral, TCB UpToDate, not debug, signer and nonce bound, compose and RTMR3 match) · GPU evidence accepted by NVIDIA NRAS for each · the run's responses were signed by 0x3b75…fa0c, a key verified here · the report is the model as served now; the run's own attestation is bound in the signed outcome (sealed check) ok
 
 - payee halcyon-mm.testnet · proof accordweb-production.up.railway.app signed by the release's payee key · authority approved · buyer accepted · active ok
 
 - record 1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid ok
 
-- verify: 6 checks ok · 1 partial
+- verify: 7 checks ok
 
-6 checks ok, 1 partial: the model check binds the fresh nonce but does not check the hardware quote here. The enclave release check ran outlayer-verify on the three job runs; without the tool installed it is not checked, and the line reads `5 checks ok · 1 partial · 1 not checked`. See [OutLayer trust and verification](https://app.outlayer.ai/docs/trust-verification).
+7 checks ok. Since 14 Nov 2026 the model check verifies the Intel TDX quotes and the GPU evidence in NEAR AI's report; until then it was partial and the line read `6 checks ok · 1 partial`. The enclave release check ran outlayer-verify on the three job runs; without the tool installed it is not checked, and the line reads `6 checks ok · 1 not checked`. See [OutLayer trust and verification](https://app.outlayer.ai/docs/trust-verification).
 
 ## In the browser
 
-[/verify](/verify) headlines the full seven-check verdict that `make verify` gives (on a6, with outlayer-verify installed: `6 ok · 1 partial`), then five quick reads of any agreement id live from NEAR testnet: the agreement, the contract code, the access keys, the recipient and the record. No account, no keys.
+[/verify](/verify) headlines the full seven-check verdict that `make verify` gives (on a6, with outlayer-verify installed: `7 ok`), then five quick reads of any agreement id live from NEAR testnet: the agreement, the contract code, the access keys, the recipient and the record. No account, no keys.
 
-/verify on a6.accord-v2.testnet, captured before the release check ran outlayer-verify.
+/verify on a6.accord-v2.testnet, captured before the release check ran outlayer-verify and before the model check verified the hardware evidence; it reads 7 ok now.
 
 The sealed outcome, the model attestation and the release attestation are checked by `make verify` and in the app, not by /verify.
 
