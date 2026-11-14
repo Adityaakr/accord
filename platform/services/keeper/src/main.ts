@@ -1,7 +1,7 @@
 // The keeper (ARCHITECTURE.md section 10): liveness, not authority. Every method it calls is open to anyone, so if it
 // is down a party can call them from the app. It holds no secret that affects an outcome.
 
-import { Accord, KeySigner, type AgreementView, type AgreementClient } from "@accord/sdk";
+import { Accord, KeySigner, type AgreementView, type AgreementClient, type TableQueue } from "@accord/sdk";
 import { beat } from "@accord/store";
 import { serviceConfig } from "../../agent/src/config.js";
 import { observeAgreement, observerFor, type AskObserver } from "./observe.js";
@@ -9,11 +9,29 @@ import { observeAgreement, observerFor, type AskObserver } from "./observe.js";
 // The observer's slot windows are a minute long on demo timings; a 15 s loop asks each at least three times.
 const LOOP_MS = 15_000;
 
+// OutLayer's queue, read at most once every 20 s whatever the number of agreements waiting. null: could not be read,
+// which never holds a negotiation.
+const QUEUE_TTL_MS = 20_000;
+let lastQueue: { at: number; value: TableQueue | null } | null = null;
+async function queue(deal: AgreementClient, outlayer: string): Promise<TableQueue | null> {
+  if (lastQueue && Date.now() - lastQueue.at < QUEUE_TTL_MS) return lastQueue.value;
+  const value = await deal.tableQueue(outlayer).catch(() => null);
+  lastQueue = { at: Date.now(), value };
+  return value;
+}
+
 async function step(
   deal: AgreementClient, a: AgreementView, ask: AskObserver | undefined, log: (s: string) => void,
 ): Promise<void> {
   const now = a.now;
   if (a.state === "Sealed" && typeof a.negotiation === "object" && "Ready" in a.negotiation) {
+    // An agreement has three attempts and each must be answered inside one yield: while OutLayer's worker is behind,
+    // starting one only burns it (DECISIONS.md section 36), so the agreement waits here with its attempts intact.
+    const q = await queue(deal, a.outlayer);
+    if (q?.slow) {
+      log(`negotiate ${a.account} · held: ${q.waiting} OutLayer requests have waited over a minute (oldest ${q.oldestSecs} s)`);
+      return;
+    }
     const tx = await deal.startNegotiation();
     log(`negotiate ${a.account} · tx ${tx.txHash}`);
     return;
@@ -60,7 +78,7 @@ async function main() {
   for (;;) {
     const actions: string[] = [];
     try {
-      const records = await accord.listAgreements({ limit: 100 });
+      const records = await accord.listAgreements();
       for (const r of records) {
         const deal = accord.agreement(r.account);
         const a = await deal.get().catch(() => null);

@@ -2,6 +2,7 @@
 // section 11, over a `Chain` for views and a `Signer` for calls.
 
 import { Chain, RPC, TGAS, type Signer, type TxResult } from "./chain.js";
+import { tableQueue, type TableQueue } from "./outlayer.js";
 import { deriveDocKey, seal, type DocKey, type Mandate, type Role } from "./sealing.js";
 import type {
   ActOutcome, Action, AgreementRecord, AgreementView, Commitment, CreateArgs, DueItem, ExceptionView, FactoryConfig,
@@ -67,7 +68,15 @@ export class Accord {
 
   async listAgreements(opts: { party?: string; from?: number; limit?: number } = {}): Promise<AgreementRecord[]> {
     if (opts.party) return this.chain.view(this.factory, "agreements_for", { account: opts.party });
-    return this.chain.view(this.factory, "agreements", { from: opts.from ?? null, limit: opts.limit ?? null });
+    if (opts.from !== undefined) return this.chain.view(this.factory, "agreements", { from: opts.from, limit: opts.limit ?? null });
+    // No starting id: every agreement, read a page at a time (the factory returns at most 100 per call, from id 1).
+    const all: AgreementRecord[] = [];
+    for (let from = 1; ; ) {
+      const page = await this.chain.view<AgreementRecord[]>(this.factory, "agreements", { from, limit: 100 });
+      all.push(...page);
+      if (page.length < 100) return all;
+      from = page[page.length - 1]!.id + 1;
+    }
   }
 
   reports(account: string): Promise<{ agreement: string; seq: number; at: number }[]> {
@@ -171,6 +180,11 @@ export class AgreementClient {
     return { commitment: sealed.commitment, txHash: tx.txHash };
   }
   startNegotiation() { return this.call("start_negotiation", {}, 300n); }
+
+  /** How long OutLayer is taking to answer right now, read from its contract; see `tableQueue`. */
+  async tableQueue(outlayer?: string): Promise<TableQueue> {
+    return tableQueue(this.accord.chain, outlayer ?? (await this.get()).outlayer);
+  }
   approveTerms(termsHash: string) { return this.call("approve_terms", { terms_hash: termsHash }, 30n, ONE_YOCTO); }
   cancel() { return this.call("cancel", {}, 30n); }
   async fund(amount: string): Promise<TxResult> {

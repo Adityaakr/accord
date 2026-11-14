@@ -250,6 +250,9 @@ export async function counterpartyStep(id: string): Promise<Step> {
     }
     if (!c.buyer) return wait("Your move: seal your mandate. The vendor's is sealed.", true);
     if (typeof a.negotiation === "object" && "Ready" in a.negotiation) {
+      // three attempts, each answered inside one yield: hold while OutLayer's worker is behind
+      const q = await reader.tableQueue(a.outlayer).catch(() => null);
+      if (q?.slow) return wait(`Both mandates are sealed. OutLayer's enclave worker is answering late (${q.waiting} requests have waited over a minute), so the negotiation is held until its queue clears and none of the three attempts is wasted.`);
       const tx = await as("vendor", id).startNegotiation();
       return done("Started the negotiation in the Sealed Table", tx.txHash, "The Sealed Table is negotiating. It takes about a minute.");
     }

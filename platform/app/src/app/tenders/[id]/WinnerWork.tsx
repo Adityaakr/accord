@@ -106,7 +106,10 @@ export function WinnerWork({ board, job, setup, house = false }: { board: string
     if (!job.agreement || !keys || !setup) return null;
     const d = accord().agreement(job.agreement);
     const [a, c, recipients, items] = await Promise.all([d.get(), d.commitments(), d.recipients(), d.items()]);
-    const v: VendorView = { agreement: a, sealed: { buyer: !!c.buyer, vendor: !!c.vendor }, recipients, items, now: a.now };
+    // read OutLayer's queue only when the next move would be to start the negotiation
+    const ready = a.state === "Sealed" && typeof a.negotiation === "object" && "Ready" in a.negotiation;
+    const tableSlow = ready ? await d.tableQueue(a.outlayer).then((q) => q.slow, () => false) : false;
+    const v: VendorView = { agreement: a, sealed: { buyer: !!c.buyer, vendor: !!c.vendor }, recipients, items, now: a.now, tableSlow };
     const m = vendorMove(v, { recipient: keys.recipient.id, domain: setup.domain });
     setView(v); setMove(m);
     return m;

@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { isRpcBusy } from "@accord/sdk";
 import { formatUnits, type ItemView, type Refusal } from "@accord/sdk";
 import { room, type Room } from "@/server/data";
-import { config, symbolFor } from "@/server/accord";
+import { accord, config, symbolFor } from "@/server/accord";
 import { Account, Empty, EvidenceHash, Hash, KV, Meter, Near, Panel, Pill, Usdc, type Tone } from "@/components/ui";
 import { SourceLine } from "@/components/SourceLine";
 import { AutoRefresh } from "@/components/AutoRefresh";
@@ -95,6 +95,9 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
   const tab: Tab = (TABS.find(([k]) => k === tabParam)?.[0] ?? fallback) as Tab;
 
   const neg = a.negotiation;
+  // both sealed and not yet requested: is OutLayer's queue slow, so the keeper is holding the attempt?
+  const held = a.state === "Sealed" && typeof neg === "object" && "Ready" in neg
+    ? await accord().agreement(a.account).tableQueue(a.outlayer).then((q) => (q.slow ? q.waiting : null), () => null) : null;
   const negotiation: NegotiationProps = {
     phase: terminal === "NoDeal" ? "ended" : a.state !== "Sealed" || neg === "Done" ? "done"
       : neg === "AwaitingMandates" ? "awaiting" : typeof neg === "object" && "Requested" in neg ? "requested" : "ready",
@@ -104,7 +107,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
     buyerCommit: r.commitments.buyer?.commitment ?? null, vendorCommit: r.commitments.vendor?.commitment ?? null,
     terms: terms ? { total: usd(terms.total), items: terms.items.length, hash: a.terms_hash, label: isAtlas ? "periods" : "items", unit: sym } : null,
     verifyHref: `/verify/${a.account}`,
-    unanswered: r.unanswered,
+    unanswered: r.unanswered, held,
   };
 
   // changes whenever the chain state the page shows changes: the timeline and the transcript read again at once

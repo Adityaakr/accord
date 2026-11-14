@@ -30,6 +30,8 @@ export interface NegotiationProps {
   verifyHref: string;
   /** ended with no deal because no signed answer reached the contract on any attempt */
   unanswered?: boolean;
+  /** both sealed, and the start is held because this many OutLayer requests have waited over a minute */
+  held?: number | null;
 }
 
 /** NEAR lets a contract wait about 200 blocks for the enclave's answer; past this an attempt is very likely lost. */
@@ -102,7 +104,7 @@ export function Negotiation(p: NegotiationProps) {
   const elapsed = useElapsed(p.phase === "requested" ? p.requestedAt : null, p.now);
   const status = {
     awaiting: "Waiting for both limits",
-    ready: `Both sealed · starts next${p.attempt ? ` (attempt ${p.attempt})` : ""}`,
+    ready: p.held ? `Both sealed · held until OutLayer's queue clears${p.attempt ? ` (attempt ${p.attempt})` : ""}` : `Both sealed · starts next${p.attempt ? ` (attempt ${p.attempt})` : ""}`,
     requested: `Negotiating in the enclave${p.attempt ? ` · attempt ${p.attempt}` : ""}`,
     done: "Checked against both limits",
     ended: p.unanswered ? "No deal · the enclave did not answer in time" : "No deal · nothing was funded",
@@ -158,6 +160,13 @@ export function Negotiation(p: NegotiationProps) {
               refused on chain), <Link className="link" href="/replay" prefetch={false}>the replay</Link> of a recorded run, and{" "}
               <Link className="link" href="/verify" prefetch={false}>verify</Link> for any earlier agreement.</p>
           </div>
+        ) : p.phase === "ready" && p.held ? (
+          <p className={styles.note}>
+            Both sets of limits are sealed. The negotiation runs on OutLayer&apos;s testnet enclave worker, which is answering late right now
+            (<span className="mono">{p.held}</span> of its requests have waited over a minute). A room has <span className="mono">3</span> attempts and each must be
+            answered inside NEAR&apos;s wait of about <span className="mono">200</span> blocks, so the keeper holds the start until the queue clears instead of
+            spending an attempt. Nothing to do: it starts by itself, and this page updates.
+          </p>
         ) : late || retried ? (
           <p className={styles.note}>
             {late

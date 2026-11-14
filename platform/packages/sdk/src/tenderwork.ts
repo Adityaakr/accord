@@ -87,6 +87,8 @@ export interface VendorView {
   items: ItemView[];
   /** Seconds, the chain's clock (agreement.now when the view has it). */
   now: number;
+  /** OutLayer is answering late (`tableQueue(...).slow`): the negotiation is held so an attempt is not wasted. */
+  tableSlow?: boolean;
 }
 
 const liveVersion = (v: RecipientVersion) => !["ProofFailed", "Superseded", "Cancelled"].includes(v.status);
@@ -102,7 +104,11 @@ export function vendorMove(v: VendorView, payee: { recipient: string; domain: st
   if (a.state === "Sealed") {
     if (!v.sealed.vendor) return { kind: "seal" };
     if (!v.sealed.buyer) return wait("the buyer seals its mandate in the deal room", true);
-    if (typeof a.negotiation === "object" && "Ready" in a.negotiation) return { kind: "negotiate" };
+    if (typeof a.negotiation === "object" && "Ready" in a.negotiation) {
+      return v.tableSlow
+        ? wait("OutLayer's enclave worker is answering late; the negotiation starts when its queue clears, so none of the three attempts is wasted")
+        : { kind: "negotiate" };
+    }
     return wait("the Sealed Table is negotiating (about a minute)");
   }
   if (a.state === "Attested") {

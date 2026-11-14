@@ -939,4 +939,13 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
   under the release's Sealed Table key, `submit_sealed_result` (F1) stays compiled out for the reason in its comment,
   and open terms agreed without the enclave would be new agreement code (a release 7) that drops the private
   negotiation, which is claim 1. Not a change to make on the closing day.
+- **Holding the attempt instead of losing it.** `outlayer.testnet` keeps each unanswered request readable
+  (`get_request(id)`, with the `timestamp` it was made at) and removes it when it is answered or its yield ends;
+  `get_stats` gives the newest id. So the queue can be read with view calls: `tableQueue` looks at the newest `30` ids
+  and calls the worker slow when `3` or more requests have waited over `60 s` (one long job is not a queue). Everything
+  of ours that calls `start_negotiation` on its own (the keeper, the try-it demo vendor, the tender winner's browser
+  and CLI) reads it first and waits while it is slow; the attempts stay at three and the room says it is held. This
+  is liveness only: `start_negotiation` is still open to anyone, a read error never holds a start, and nothing about
+  what the contract accepts changed. At 14:21 UTC the queue read `2` pending, none waiting, and `make negotiate` ran
+  to `a89.accord-v2.testnet`, `Attested · 253 s`.
 

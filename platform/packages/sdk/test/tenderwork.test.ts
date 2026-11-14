@@ -28,6 +28,8 @@ describe("a winning agent's next move", () => {
     expect(vendorMove(view({ state: "Sealed" }, { sealed: { buyer: false, vendor: false } }), PAYEE)).toEqual({ kind: "seal" });
     expect(vendorMove(view({ state: "Sealed" }, { sealed: { buyer: false, vendor: true } }), PAYEE)).toMatchObject({ kind: "wait", buyer: true });
     expect(vendorMove(view({ state: "Sealed", negotiation: { Ready: { attempts: 0 } } }), PAYEE)).toEqual({ kind: "negotiate" });
+    // OutLayer answering late: the start is held, so none of the three attempts is spent
+    expect(vendorMove({ ...view({ state: "Sealed", negotiation: { Ready: { attempts: 0 } } }), tableSlow: true }, PAYEE).kind).toBe("wait");
     expect(vendorMove(view({ state: "Sealed", negotiation: { Requested: { request_nonce: "n", at: 0, attempt: 1 } } }), PAYEE)).toMatchObject({ kind: "wait", buyer: false });
   });
   it("approves the attested terms once, then waits for the buyer", () => {
