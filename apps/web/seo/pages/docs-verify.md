@@ -60,7 +60,7 @@ accord verify · a6.accord-v2.testnet
 
 - verify: 7 checks ok
 
-7 checks ok. Since 14 Nov 2026 the model check verifies the Intel TDX quotes and the GPU evidence in NEAR AI's report; until then it was partial and the line read `6 checks ok · 1 partial`. The enclave release check ran outlayer-verify on the three job runs; without the tool installed it is not checked, and the line reads `6 checks ok · 1 not checked`. See [OutLayer trust and verification](https://app.outlayer.ai/docs/trust-verification).
+7 checks ok. Since 14 Nov 2026 the model check verifies the Intel TDX quotes and the GPU evidence in NEAR AI's report; until then it was partial and the line read `6 checks ok · 1 partial`. The enclave release check ran outlayer-verify on the three job runs; without the tool installed it is not checked, and the line reads `6 checks ok · 1 not checked`. Since 22 Nov 2026 a6 prints `6 checks ok · 1 not checked` with the tool too: OutLayer took the worker build that ran its job runs off its approved list, so the release check reads `worker build no longer approved; quote valid` and names the block at which the build was approved when it ran. A release 7 agreement prints `7 checks ok` ([a106](/verify?agreement=a106.accord-v2.testnet), 23 Nov 2026). See [OutLayer trust and verification](https://app.outlayer.ai/docs/trust-verification).
 
 ## In the browser
 

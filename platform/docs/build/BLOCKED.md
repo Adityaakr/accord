@@ -56,6 +56,22 @@ observer for no slot). To have it observe them: in Railway, on the `keeper` serv
 poll of an open period, shows `record_observation` calls signed by `accord-keeper.testnet` without the make target running.
 The key spends OutLayer credit per observation (one call per open slot every `30 s` until observed).
 
+## Follow-ups from release 7 (23 Nov 2026)
+
+- **Market making's venue.** On 22 Nov 2026 Rhea's USDC/wNEAR pool (`17208628…|wrap.near|2000`) was empty
+  (`spread 12658 bps · depth 0.00 / 0.00 USDC`, reproduced by `make probe-venue` from an archival node), so a new
+  market-making demo period is withheld on real market data. The deployed terms of `a56` and `a57` are not changed. For
+  new demo agreements, pick a Rhea DCL pool that holds two-sided depth (read it with `make probe-venue` first) and set
+  it in the market-making mandates (`fixtures/companies/northwind/market-making.buyer*.json`); until then the CLI and the app
+  say the pool is empty.
+- **The approved list at the run's block, upstream.** `outlayer-verify` reads OutLayer's approved worker list as it is
+  now. `make verify` reads it again at the run's block on an archival node (`packages/sdk/src/release-node.ts`) and
+  reports a de-listed build as `not checked`. Ask OutLayer whether `outlayer-verify` can take the block itself, so a run
+  approved when it ran proves `ok` on the tool's own word.
+- **The hosted app and keeper run the code on `main`.** The contract fix (release 7) was live as soon as it was
+  published; the app's `No deal` causes, the verify panel, the de-listed `release` line in `/api/verify` and the
+  venue note reach the hosted app when this branch is merged and Railway redeploys.
+
 ## Known issue: the Sealed Table prompts are written for procurement (for a future job build, not fixed now)
 
 `jobs/sealed-table/prompts/buyer.md` and `vendor.md` describe procurement terms only (items, `due_offset_secs`, the sum of

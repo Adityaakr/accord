@@ -138,7 +138,7 @@ Refusal limit: only refusals signed by the current agent key count (not `ERR_REV
 
 Bounded storage: the refusal log is a ring buffer of the last `128` refusals (sequence, time, block, code, item, amount, recipient, signer key) plus a counter, and every refusal is also an event, so the full history stays in the chain's logs. Exceptions: at most one pending per item and `16` in total. Nothing an agent can do grows state without a bound.
 
-The vendor's claim exists so the kill switch is not a way to withhold earned money: `claim(item)` runs gates 2 to 6 with the vendor as caller, only once `claim_delay_secs` (default `72 h`, demo `120 s`) have passed since the item became eligible. An item `close` set aside (`Reserved`) stays claimable after `Settled`; until it is claimed, `withdraw_near` keeps `0.05 NEAR` above the storage stake so the claim's transfer can still run.
+The vendor's claim exists so the kill switch is not a way to withhold earned money: `claim(item)` runs gates 2 to 6 with the vendor as caller, only once `claim_delay_secs` (default `72 h`, demo `120 s`) have passed since the item became eligible. An item `close` set aside (`Reserved`) stays claimable after `Settled`; until it is claimed, `withdraw_near` keeps `RESERVED_KEEP` above the storage stake so the claim's transfer, and a recipient proposal's Payee run, can still run (`0.05 NEAR` up to release 6; from release 7 the Payee deposit plus `0.02 NEAR`).
 
 ## 7. Recipient authorisation (Payee)
 

@@ -27,13 +27,24 @@ accord verify · a6.accord-v2.testnet
 verify: 7 checks ok
 ```
 
-`make verify DEAL=a10.accord-v2.testnet` prints `code hash ECgsrZwy… = release 4`, `release   sealed-table run 13987 = task 28880 · wasm 7c832ce9… · outlayer-verify proven · payee run 13988 = task 28881 · wasm 24071443… · outlayer-verify proven · observer run 13989 = task 28882 · wasm 8240179a… · outlayer-verify proven · ok` and the same last line; `make verify-usdc DEAL=a1.accord-usdc.testnet` checks the Circle USDC deal. A release 5 agreement, `make verify DEAL=a52.accord-v2.testnet`, prints `code hash ECgsrZwy… = release 5` and `release   sealed-table run 15085 = task 30189 · wasm 64a354a0… · outlayer-verify proven · payee run 15086 = task 30191 · wasm b5a0c473… · outlayer-verify proven · observer run 15082 = task 30185 · wasm 0dcc55e8… · outlayer-verify proven · ok` (it is only negotiated, so `payee` is `not checked`: `verify: 6 checks ok · 1 not checked`). Without `outlayer-verify`, a52's last line is `verify: 4 checks ok · 1 partial · 2 not checked`. Releases 4 and 5 run the same agreement code (`ECgsrZwy…`) and differ in the enclave job builds and keys; `verify` reads the release number from the factory's record for the agreement, then checks the code hash and all three job keys against that release.
+Since 22 Nov 2026 the `release` line reads as below and the last line is `verify: 6 checks ok · 1 not checked` (exit `0`). OutLayer took the worker build that ran a6's three key runs off the approved list on `worker.outlayer.testnet`, so `outlayer-verify` fails their identity layer while the Intel quote, the binding, the input and the output still verify. The check then reads `is_measurements_approved` again at each run's own block on an archival node: approved then is `not checked`, never `ok`; a build that was not approved then either is `failed`.
+
+```
+  release   sealed-table run 13682 = task 28492 · wasm 7c832ce9… · worker build no longer approved; quote valid (approved on worker.outlayer.testnet at block 276803518, when it ran; quote, binding, input and output pass) · payee run 13672 = task 28478 · wasm 24071443… · worker build no longer approved; quote valid (approved on worker.outlayer.testnet at block 276802754, when it ran; quote, binding, input and output pass) · observer run 13683 = task 28493 · wasm 8240179a… · worker build no longer approved; quote valid (approved on worker.outlayer.testnet at block 276803588, when it ran; quote, binding, input and output pass) · not checked
+verify: 6 checks ok · 1 not checked
+```
+
+On release 7 (23 Nov 2026) the key runs ran on the current worker build, and `make verify DEAL=a106.accord-v2.testnet` (the wallet-free flow on the hosted app) or `DEAL=a107.accord-v2.testnet` (`make demo`) prints every `release` run `outlayer-verify proven` and `verify: 7 checks ok`.
+
+On 14 Nov 2026 `make verify DEAL=a10.accord-v2.testnet` printed `code hash ECgsrZwy… = release 4`, `release   sealed-table run 13987 = task 28880 · wasm 7c832ce9… · outlayer-verify proven · payee run 13988 = task 28881 · wasm 24071443… · outlayer-verify proven · observer run 13989 = task 28882 · wasm 8240179a… · outlayer-verify proven · ok` and the same last line; `make verify-usdc DEAL=a1.accord-usdc.testnet` checks the Circle USDC deal. A release 5 agreement, `make verify DEAL=a52.accord-v2.testnet`, printed `code hash ECgsrZwy… = release 5` and `release   sealed-table run 15085 = task 30189 · wasm 64a354a0… · outlayer-verify proven · payee run 15086 = task 30191 · wasm b5a0c473… · outlayer-verify proven · observer run 15082 = task 30185 · wasm 0dcc55e8… · outlayer-verify proven · ok` (it is only negotiated, so `payee` is `not checked`: `verify: 6 checks ok · 1 not checked`). Without `outlayer-verify`, a52's last line is `verify: 4 checks ok · 1 partial · 2 not checked`. Releases 4 and 5 run the same agreement code (`ECgsrZwy…`) and differ in the enclave job builds and keys; `verify` reads the release number from the factory's record for the agreement, then checks the code hash and all three job keys against that release.
 
 ## More runs
 
 | Agreement | What it shows |
 | --- | --- |
 | `a10`, `a11`, `a13.accord-v2.testnet` | Release 4 (the security-review fixes): negotiate, fund, pay, refused redirect; an attack refused three ways (`ERR_PAYEE_MISMATCH`, `ERR_AMOUNT_MISMATCH`, `ERR_CANARY`, `0.00` moved); revoke, then a new key pays |
+| `a104`, `a106`, `a107.accord-v2.testnet` | Release 7 (23 Nov 2026): `make negotiate` (`Attested` in `253 s`, held for OutLayer's queue first); the wallet-free flow on the hosted app (paid, redirect refused `ERR_PAYEE_MISMATCH`, revoked, closed); `make demo` from fresh accounts (`demo: full loop in 2:28`). `make verify`: `7 checks ok` on `a106` and `a107` |
+| `a102`, `a103.accord-v2.testnet` | Release 6 on 22 Nov 2026: every attempt refused by OutLayer with `output_storage_unpaid` (the reason for release 7), `No deal`; `a103`'s deposit withdrawn |
 | `a52.accord-v2.testnet`, `a3.accord-usdc.testnet` | Release 5 (10 Nov 2026): negotiated by the reviewed Sealed Table build `64a354a0…` (`33.00 tUSDC` and `14.00 USDC`, 3 items each, attestation ok, `ERR_SEALED` both ways) |
 | `a1.accord-usdc.testnet` | A deal in Circle's testnet USDC: `14.00 USDC` funded, `5.00` paid, redirect refused, revoked |
 | `a8`, `a15`, `a21.accord-v2.testnet` | `/app/try-it` with a fresh account, on the public URL with relayed wallet calls, and without a wallet |
@@ -42,7 +53,7 @@ verify: 7 checks ok
 
 **Flow proofs.** A dispute, a re-delivery, a payment refused while an item is disputed, and an early close that refunds the unspent escrow ran on testnet in `a48.accord-v2.testnet` (10 Nov 2026), each step linked in [`docs/runs.md`](runs.md#flow-proofs). The same flow settled in Circle's testnet USDC in `a2.accord-usdc.testnet`. Reproduce with `cd platform && make dispute-close` (Circle USDC: `make dispute-close-usdc`).
 
-Every transaction of these runs is linked in [`docs/runs.md`](runs.md); the notes behind them are in [`platform/DECISIONS.md`](../platform/DECISIONS.md) sections 21 and 24 to 28.
+Every transaction of these runs is linked in [`docs/runs.md`](runs.md); the notes behind them are in [`platform/DECISIONS.md`](../platform/DECISIONS.md) sections 21, 24 to 28 and 38.
 
 | Infrastructure | Account or link |
 | --- | --- |

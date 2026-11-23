@@ -63,7 +63,7 @@ A throwaway key made in the tab created the room and relayed every other buyer c
 Agent pays item 1, 16.50 tUSDC: [`5vKHipEb…`](https://testnet.nearblocks.io/txns/5vKHipEbqk9r4rxra1q9uhYNrnFGJttQYprEL3g2x3ZG);
 redirect refused, `ERR_PAYEE_MISMATCH`: [`DaRuHG2t…`](https://testnet.nearblocks.io/txns/DaRuHG2tLsA5FP4f2CHouMjgABnbenUfZcGSnDeUDDmH);
 revoke: [`BGJEcstT…`](https://testnet.nearblocks.io/txns/BGJEcstTMS3oNyWiy92y7D8QRZqne2AFaNR2gxj8yy58).
-`make verify DEAL=a21.accord-v2.testnet` (re-run 14 Nov 2026, with `outlayer-verify` installed): `verify: 7 checks ok`. Every step, and the RPC
+`make verify DEAL=a21.accord-v2.testnet` (re-run 14 Nov 2026, with `outlayer-verify` installed): `verify: 7 checks ok`; since OutLayer de-listed the worker build its job runs used, `verify: 6 checks ok · 1 not checked`. Every step, and the RPC
 rate limits the run hit (now handled by the SDK's `RotatingRpcProvider`), in `DECISIONS.md` section 28.
 
 </details>
@@ -74,7 +74,7 @@ Three ways, cheapest first. None needs our keys.
 
 1. **Read-only check of a live agreement** (about a minute, no account): `make verify DEAL=a6.accord-v2.testnet` after `pnpm install`. No `.env` is needed: the CLI reads the factory from the id's `a<n>.<factory>` suffix when it is a known one (`accord-v2.testnet` or `accord-usdc.testnet`); any other factory needs `ACCORD_FACTORY` or `--factory`. Output below.
 2. **Full flow on a local NEAR sandbox** (no network; the enclave jobs are replaced by a mock signer and every mocked line says `[mock]`): `make sandbox`
-3. **Full live loop on a local node (`NET=local`)**: `make demo NET=local`, from fresh accounts in about 14 s (3 Nov 2026). `make demo` has not been run on testnet yet (`docs/build/PROGRESS.md` 5.2 is blocked on funds). **On testnet**, the same flow runs as separate targets, each recorded on release 4 in `DECISIONS.md` section 26: `make negotiate`, then `make finish DEAL=<agreement>`, `make attack` and `make revoke`. Release 3's run is `a6.accord-v2.testnet` (`DECISIONS.md` section 21).
+3. **Full live loop on a local node (`NET=local`)**: `make demo NET=local`, from fresh accounts in about 14 s (3 Nov 2026). On testnet `make demo` ran the same loop from fresh accounts against the hosted app on 10 Nov 2026 (release 5, `a65.accord-v2.testnet`, `1:29`) and on 23 Nov 2026 (release 7, `a107.accord-v2.testnet`, `2:28`); it needs `APP_URL` set to the hosted app (`https://useaccord.tech/app`). The same flow also runs as separate targets, each recorded on release 4 in `DECISIONS.md` section 26: `make negotiate`, then `make finish DEAL=<agreement>`, `make attack` and `make revoke`. Release 3's run is `a6.accord-v2.testnet` (`DECISIONS.md` section 21).
 
 `make verify` on the testnet agreement, from a real run on 10 Nov 2026 with `outlayer-verify` installed (`cargo install --locked --git https://github.com/out-layer/outlayer-verify --rev 90c27d9d outlayer-verify`; the nonce is fresh on every run):
 
@@ -89,6 +89,8 @@ accord verify · a6.accord-v2.testnet
   record    1 payment · 1 refusal (1 in the log) · 0 exceptions · 0 set aside · 0 observation conflicts · receipts match paid · ok
 verify: 7 checks ok
 ```
+
+Since 22 Nov 2026 the same command prints `release   sealed-table run 13682 = task 28492 · wasm 7c832ce9… · worker build no longer approved; quote valid (approved on worker.outlayer.testnet at block 276803518, when it ran; quote, binding, input and output pass) · …` and `verify: 6 checks ok · 1 not checked`: OutLayer took the worker build that ran a6's job runs off its approved list, so `outlayer-verify` fails their identity layer, and the check reads the list again at each run's own block (archival RPC) before saying `not checked` rather than `failed`. A release 7 agreement prints `7 checks ok` (`a106`, `a107.accord-v2.testnet`, 23 Nov 2026).
 
 `model` fetches NEAR AI's attestation report with a fresh nonce, verifies the Intel TDX quote of the gateway and of every model instance against Intel's collateral, has NVIDIA's attestation service (NRAS) accept each instance's GPU evidence, and checks that every key that signed the run's responses is a key verified there (`packages/sdk/src/model-node.ts`, the checks `make probe-ai` runs; no NEAR AI key needed). Limits: the report attests the model as served now, not the negotiating run (that run's own attestation is bound in the signed outcome, which `sealed` checks); NVIDIA's verdict is read from the token its service returns over TLS, and that token's signature is not checked; if Intel's or NVIDIA's service cannot be reached, or the key that signed the run is no longer in the report, `model` reads `partial` and says why. `release` looks each job key's pubkey run up by OutLayer request id, checks its task, wasm and caller, then runs `outlayer-verify job <task id>`, which proves the TDX quote, the approved measurement and the binding (`DECISIONS.md` 32). It proves the release's wasm made the keys in an enclave; release 4 still runs release 3's job builds. Without the tool each run reads `and caller match · quote not checked (needs outlayer-verify)`, `release` is `not checked` and the last line is `verify: 6 checks ok · 1 not checked`. `/app/api/verify/<agreement>` and the MCP tool `accord_verify` run the same step (cached per job run, 30 s timeout) where the server has the tool, and say `not checked` where it does not. `keys` reads `0 keys` because a6's agent was revoked.
 
@@ -171,6 +173,8 @@ accord atlas · a14.accord.test.near · market-making · rhea-dcl 17208628…|wr
   scope     venue-level liquidity, not the market maker's own orders
 ```
 
+The pool's state is real market data and changes: on 22 Nov 2026 Rhea's USDC/wNEAR pool was empty (`spread 12658 bps · depth 0.00 / 0.00 USDC` on every slot; `make probe-venue` reproduced it from an archival node), so the same run ended `Withheld` on both agreements, and the target now prints a `venue` line saying the pool had no liquidity, the venue's state and not a fault in Accord. The examples above cannot be reproduced while the pool stays empty.
+
 `make attack NET=local`, same day:
 
 ```
@@ -190,7 +194,7 @@ accord attack · a9.accord.test.near · agent key ed25519:BPDWuq96f5k4XjZbGYkXHC
 
 ## Settle in Circle USDC (testnet)
 
-A second factory, `accord-usdc.testnet`, runs the same code as `accord-v2.testnet` (release 3 at first, release 4 since 9 Nov 2026, release 5 since 10 Nov 2026; the same job builds and keys) and settles in Circle's USDC on NEAR testnet, `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (6 decimals). Each agreement copies its factory's token at creation and keeps it for life, so `a<n>.accord-usdc.testnet` takes only Circle USDC and `a<n>.accord-v2.testnet` only test USDC. `/app/try-it` defaults to test USDC from the app's faucet; Circle USDC is offered next to it where the server sets `ACCORD_FACTORY_USDC`.
+A second factory, `accord-usdc.testnet`, runs the same code as `accord-v2.testnet` (release 3 at first, release 4 since 9 Nov 2026, release 5 since 10 Nov 2026, release 7 since 23 Nov 2026, release 6 never published there; the same job builds and keys) and settles in Circle's USDC on NEAR testnet, `3e2210e1184b45b64c8a434c0a7e7b23cc04ea7eb7a6c3c32520d03d4afcb8af` (6 decimals). Each agreement copies its factory's token at creation and keeps it for life, so `a<n>.accord-usdc.testnet` takes only Circle USDC and `a<n>.accord-v2.testnet` only test USDC. `/app/try-it` defaults to test USDC from the app's faucet; Circle USDC is offered next to it where the server sets `ACCORD_FACTORY_USDC`.
 
 | Do | See |
 | --- | --- |
