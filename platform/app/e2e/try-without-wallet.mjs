@@ -207,7 +207,7 @@ try {
   // the read API answers { busy: true } while the network is busy: ask again a few times
   const FAUCET = process.env.FAUCET ?? "faucet.accord-v2.testnet";
   const TOKEN = process.env.ACCORD_TOKEN ?? "tusdc.accord-v1.testnet";
-  const RPCS = (process.env.NEAR_RPC_URL ?? "").split(",").filter(Boolean).concat(["https://test.rpc.fastnear.com", "https://rpc.testnet.near.org"]);
+  const RPCS = (process.env.NEAR_RPC_URL ?? "").split(",").filter(Boolean).concat(["https://test.rpc.fastnear.com", "https://near-testnet.drpc.org"]);
   const rpcQuery = async (params) => {
     for (let i = 0; i < 12; i++) {
       const url = RPCS[i % RPCS.length];

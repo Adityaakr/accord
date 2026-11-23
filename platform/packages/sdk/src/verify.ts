@@ -129,7 +129,8 @@ export async function verify(
   // sealed: the Sealed Table's signed outcome, against the release's key, with the commitments on chain.
   const outText = await deal.sealedOutput();
   if (!outText) {
-    add("sealed", "not_checked", "no negotiation outcome yet");
+    // a room that ended `NoDeal` with nothing stored accepted no attempt's answer: there is no outcome, and none to come
+    add("sealed", "not_checked", a.state === "NoDeal" ? "No deal · no signed outcome was accepted on any attempt, so there is none to check" : "no negotiation outcome yet");
   } else {
     const out = JSON.parse(outText) as Record<string, unknown>;
     const sigOk = verifyEd25519(out, release.sealed_table.signing_pubkey);
