@@ -81,7 +81,7 @@ Every line passes on a fresh clone by a reader who has never spoken to us. "Prin
 | `make inbox` | The `redirect`, `amount` and `question` fixtures through the `/try` form: two refusals and one `no action`; the attempt counter increments; `paid outside the terms: 0` |
 | `make release-check` | The checks in `docs/build/SUBMISSION.md` "Release check" pass |
 | README | Follows "README requirements" below; every "see" line matches real output; the claims table, the custody table, the privacy boundary and the "What the agent's key can and cannot do" section are present; `LICENSE` (MIT) present |
-| Hosted demo | The app is deployed with one agreement in each state and one live market-making agreement; `/status` green; up through 25 Nov |
+| Hosted demo | The app is deployed with one agreement in each state and one live market-making agreement; `/status` green; up through 1 Jan 2027 |
 | Video | Follows `docs/build/DEMO.md`; posted by Adi on X with "built at NEAR HACKATHON", @NEARProtocol and #NEARHackathon |
 | Repository | Public by 14 Nov 23:59 UTC with `main` as the default branch; the build kit moved to `docs/build/` and a short evaluator `CLAUDE.md` and `AGENTS.md` at the root (PROGRESS 7.3); tag `hackathon-submission` on the submitted commit |
 | Submission | `201` from the API after Adi confirms the printed payload |

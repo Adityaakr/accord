@@ -1,0 +1,116 @@
+name: Demo health
+
+# Hourly check of the hosted demo (https://useaccord.tech), testnet only, no secrets.
+# - probe: every hour. platform/app/e2e/health-probe.mjs, no browser and no spend (site, /healthz, try-it, status
+#   heartbeats, /app/api/verify, the faucet's balance).
+# - deal: every third hour, at :47 (and on demand). platform/app/e2e/try-without-wallet.mjs runs "Try a deal" the way a
+#   visitor does, in a real browser, with the faucet's testnet NEAR and test USDC, and Finishes so they go back.
+#   One retry, so a single slow OutLayer answer does not raise an alert.
+# - report: opens an issue labelled demo-health when a check fails (or comments on the open one), and closes it
+#   when the checks pass again. See docs/railway.md#health-check.
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+    - cron: "47 */3 * * *"
+  workflow_dispatch:
+    inputs:
+      deal:
+        description: Also run the full "Try a deal" check
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: demo-health
+  cancel-in-progress: false
+
+env:
+  SITE: https://useaccord.tech
+
+# bash with pipefail, so `| tee` keeps a failing check's exit code
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  probe:
+    name: Probe (no spend)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: node platform/app/e2e/health-probe.mjs "$SITE" | tee probe.log
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: probe-log
+          path: probe.log
+          retention-days: 7
+
+  deal:
+    name: Try a deal (testnet)
+    needs: probe
+    # the second schedule (every third hour) or when asked
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '47 */3 * * *') ||
+      (github.event_name == 'workflow_dispatch' && inputs.deal)
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Playwright and Chromium
+        run: |
+          mkdir -p "$RUNNER_TEMP/pw" && cd "$RUNNER_TEMP/pw"
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund playwright@1.49.1
+          npx playwright install --with-deps chromium
+      - name: Try a deal, retried once
+        run: |
+          cd "$RUNNER_TEMP/pw"
+          for attempt in 1 2; do
+            echo "attempt $attempt"
+            if MINUTES=30 node "$GITHUB_WORKSPACE/platform/app/e2e/try-without-wallet.mjs" "$SITE/app" 2>&1 | tee -a "$GITHUB_WORKSPACE/deal.log"; then
+              exit 0
+            fi
+          done
+          exit 1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deal-log
+          path: deal.log
+          retention-days: 7
+
+  report:
+    name: Open or close the alert issue
+    needs: [probe, deal]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PROBE: ${{ needs.probe.result }}
+          DEAL: ${{ needs.deal.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create demo-health --color B60205 --description "Hosted demo health check failed" 2>/dev/null || true
+          open=$(gh issue list --label demo-health --state open --json number --jq '.[0].number // empty')
+          if [ "$PROBE" = failure ] || [ "$DEAL" = failure ]; then
+            body="The hosted demo check failed: probe \`$PROBE\`, Try a deal \`$DEAL\`. Logs: $RUN_URL"
+            if [ -n "$open" ]; then gh issue comment "$open" --body "$body"
+            else gh issue create --label demo-health --title "Hosted demo health check failing" --body "$body"; fi
+          elif [ -n "$open" ] && [ "$PROBE" = success ]; then
+            gh issue close "$open" --comment "Passing again: probe \`$PROBE\`, Try a deal \`$DEAL\`. $RUN_URL"
+          fi

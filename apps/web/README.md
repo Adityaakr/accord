@@ -44,7 +44,7 @@ All optional, build time (declared as build args in the root `Dockerfile`): `SIT
 
 ## Deployment
 
-Railway builds the root [`Dockerfile`](../../Dockerfile) (see [`railway.json`](../../railway.json)): install, typecheck, Vite build, prerender, then `node apps/web/scripts/serve.mjs` with health check `/healthz`. The app service is described in [`platform/DEPLOY.md`](../../platform/DEPLOY.md).
+Railway builds the root [`Dockerfile`](../../Dockerfile) (service `@accord/web` in [`.railway/railway.ts`](../../.railway/railway.ts)): install, typecheck, Vite build, prerender, then `node apps/web/scripts/serve.mjs`, which answers `/healthz`. The app service is described in [`platform/DEPLOY.md`](../../platform/DEPLOY.md).
 
 ## Copy rules
 

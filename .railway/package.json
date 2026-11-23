@@ -1,0 +1,8 @@
+{
+  "name": "accord-railway-iac",
+  "private": true,
+  "description": "Railway's TypeScript SDK, which `railway config plan` and `railway config apply` need to evaluate railway.ts. Install with `npm --prefix .railway ci`.",
+  "devDependencies": {
+    "railway": "3.17.0"
+  }
+}

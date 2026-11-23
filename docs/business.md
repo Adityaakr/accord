@@ -107,7 +107,7 @@ Candidates, not partners: no relationship with any of them is claimed.
 ### What keeps working, and what is left
 
 - **Agreements do not depend on Accord's servers.** Each agreement is its own NEAR account with no full-access key and code pinned by hash; its rules, ledger and refusals are on chain, and `make verify` and the MCP server read the chain directly.
-- **The hosted demo stays up and funded through 25 Nov 2026**: the site, the app, the faucet (a scheduled job checks every 2 hours and tops it up when it falls under 30 NEAR) and the pre-funded `/try` room.
+- **The hosted demo stays up and funded through 1 Jan 2027**: the site, the app, the faucet (a scheduled job checks every 2 hours and tops it up when it falls under 30 NEAR) and the pre-funded `/try` room. An hourly scheduled check runs a deal against the hosted app and opens an issue when it fails ([`docs/railway.md`](railway.md#health-check)).
 - **Open source, MIT**, with CI on every push (website checks, TypeScript typecheck and tests, the Rust money-path tests).
 - **Before mainnet, in order:** restrict the Sealed Table's seed to the agreement's own calls (S1, an OutLayer setting); remove release 3's job builds from the seeds' access; check the hardware quote in `make verify`; a third-party audit of the contracts; then the factory on mainnet with Circle USDC. Tracked in [`platform/docs/build/BLOCKED.md`](../platform/docs/build/BLOCKED.md) and [`platform/DECISIONS.md`](../platform/DECISIONS.md).
 - **Next in the product:** an organisation-wide spend limit across all its agreements, funding an agreement from other chains through NEAR Intents (priced today with dry quotes; executing them waits for mainnet), and a DAO as the buyer.

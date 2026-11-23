@@ -334,7 +334,7 @@ Most of this activity is ours: building, `make demo`, `make tender` and our own 
 
 Every live target (`negotiate`, `approve`, `fund`, `payee`, `pay`, `attack`, `revoke`, `claim`, `exception`, `payee-change`, `market-making`, `demo`, `inbox`) runs against testnet without `NET=local`, using the accounts and keys named in `platform/.env.example`. Their printed lines are in [`platform/INTERFACES.md`](platform/INTERFACES.md) section 10; recorded outputs are in [`platform/README.md`](platform/README.md).
 
-**Deployment**: two Railway services from this repository, one public address. The website builds from the root [`Dockerfile`](Dockerfile) ([`railway.json`](railway.json), health `/healthz`); the app from [`platform/Dockerfile`](platform/Dockerfile) ([`platform/railway.json`](platform/railway.json), health `/app/api/status`). The website's `APP_ORIGIN` points at the app and `serve.mjs` forwards `/app/*` to it. Variables and steps: [`platform/DEPLOY.md`](platform/DEPLOY.md). No key is built into either image.
+**Deployment**: Railway services from this repository, one public address. The website (`@accord/web`), the app (`accord`, health `/app/api/status`), the keeper and the demo agent all build from the root [`Dockerfile`](Dockerfile) (`ACCORD_NETWORK` set builds the app, otherwise the website); a cron service tops up the faucet every 2 hours. Their settings are in [`.railway/railway.ts`](.railway/railway.ts) (Railway Infrastructure as Code; how to apply and roll back: [`docs/railway.md`](docs/railway.md)). The website's `APP_ORIGIN` points at the app and `serve.mjs` forwards `/app/*` to it. Variables and steps: [`platform/DEPLOY.md`](platform/DEPLOY.md). No key is built into any image.
 
 ## How NEAR is used
 
