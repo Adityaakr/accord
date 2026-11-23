@@ -82,6 +82,15 @@ async function loadDetails(account: string, listed: ListedTx[]): Promise<RawTx[]
   return listed.map((t) => details.get(t.transaction_hash)?.raw).filter((x): x is RawTx => !!x);
 }
 
+/** The account's transactions with their receipts and logs, or null when the transactions API is unreachable.
+ * `complete` is false when some could not be read. */
+export async function accountTxs(account: string): Promise<{ txs: RawTx[]; complete: boolean } | null> {
+  const listed = await listTxs(account);
+  if (!listed) return null;
+  const txs = await loadDetails(account, listed);
+  return { txs, complete: txs.length === listed.length };
+}
+
 export interface RoomActivity { entries: ActivityEntry[]; complete: boolean; source: string }
 
 /** Every Accord event in the room, newest first. `complete` is false when some transactions could not be read. */

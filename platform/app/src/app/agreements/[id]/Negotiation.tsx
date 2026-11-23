@@ -14,6 +14,7 @@ import { Stage } from "@/components/Stage";
 import { IconTile } from "@/components/IconTile";
 import { shortAccount } from "@/components/account/short";
 import { QueueSenders } from "@/components/QueueSenders";
+import { isStorageUnpaid, type NoDealCause } from "@/lib/nodeal";
 import styles from "./negotiation.module.css";
 
 export interface NegotiationProps {
@@ -31,6 +32,10 @@ export interface NegotiationProps {
   verifyHref: string;
   /** ended with no deal because no signed answer reached the contract on any attempt */
   unanswered?: boolean;
+  /** why it ended `No deal`, read from the signed no-deal or the attempts' transactions (lib/nodeal.ts) */
+  noDeal?: NoDealCause | null;
+  /** the agreement's release (it keeps the one it was created on) */
+  release?: number;
   /**
    * OutLayer's queue reads slow right now (null when it does not): it has answered none of its newest `unanswered`
    * requests, the oldest made `sinceSecs` ago, sent by `senders`. Before the request the start is held; during an
@@ -105,6 +110,20 @@ function Enclave({ phase }: { phase: NegotiationProps["phase"] }) {
   );
 }
 
+/** The status line of an ended room: the cause the chain recorded, never a guess. */
+function endedStatus(p: NegotiationProps): string {
+  if (!p.unanswered) {
+    return { limits: "No deal · the limits did not overlap", walk_away: "No deal · a side walked away", bad_input: "No deal · a mandate could not be read" }[p.noDeal?.kind as "limits"]
+      ?? "No deal · nothing was funded";
+  }
+  switch (p.noDeal?.kind) {
+    case "outlayer_error": return isStorageUnpaid(p.noDeal) ? "No deal · OutLayer refused to hold the answer" : "No deal · OutLayer returned an error";
+    case "late": return "No deal · the enclave did not answer in time";
+    case "rejected": return "No deal · the answer did not verify";
+    default: return "No deal · no signed answer arrived";
+  }
+}
+
 export function Negotiation(p: NegotiationProps) {
   const elapsed = useElapsed(p.phase === "requested" ? p.requestedAt : null, p.now);
   const status = {
@@ -112,12 +131,13 @@ export function Negotiation(p: NegotiationProps) {
     ready: p.held ? `Both sealed · held until OutLayer's queue clears${p.attempt ? ` (attempt ${p.attempt})` : ""}` : `Both sealed · starts next${p.attempt ? ` (attempt ${p.attempt})` : ""}`,
     requested: `Negotiating in the enclave${p.attempt ? ` · attempt ${p.attempt}` : ""}`,
     done: "Checked against both limits",
-    ended: p.unanswered ? "No deal · the enclave did not answer in time" : "No deal · nothing was funded",
+    ended: endedStatus(p),
   }[p.phase];
   // why this room is waiting or ended, when the cause is the enclave's answer arriving late or not at all
   const late = p.phase === "requested" && elapsed !== null && elapsed >= LATE_AFTER_SECS;
   const retried = (p.phase === "ready" || p.phase === "requested") && (p.attempt ?? 1) > 1;
   const noAnswer = p.phase === "ended" && !!p.unanswered;
+  const cause = p.noDeal?.kind ?? "unknown";
 
   return (
     <Stage compact>
@@ -156,11 +176,30 @@ export function Negotiation(p: NegotiationProps) {
           </div>
         ) : noAnswer ? (
           <div className={styles.note}>
-            <p><strong>This room ended because the Sealed Table&apos;s answer never arrived, not because the two sides could not agree.</strong>{" "}
-              The negotiation runs in an enclave on OutLayer&apos;s testnet worker, and a NEAR contract can wait about <span className="mono">200</span> blocks
-              (2 to 3 minutes) for it. All <span className="mono">3</span> attempts passed that wait with no signed answer, so the contract closed the room
-              as <span className="mono">No deal</span>. Nothing was funded, both sets of limits stayed sealed, and the creation deposit can be withdrawn.</p>
-            <p>A room cannot be negotiated again, so <Link className="link" href="/try-it" prefetch={false}>open a new one</Link> when the worker has caught up.
+            {cause === "outlayer_error" ? (
+              <p><strong>This room ended because OutLayer returned an error for each attempt, not because the two sides could not agree.</strong>{" "}
+                The negotiation runs in an enclave on OutLayer&apos;s testnet worker. OutLayer ran it and then refused the result
+                {p.noDeal?.message ? <>: <span className="mono">{p.noDeal.message}</span></> : null}.{" "}
+                {isStorageUnpaid(p.noDeal) ? <>Since mid-November 2026 OutLayer holds NEAR for a stored answer at NEAR&apos;s storage price, and this room&apos;s release
+                  {p.release ? <> (<span className="mono">{p.release}</span>)</> : null} attaches <span className="mono">0.05</span> NEAR, which no longer holds the Sealed Table&apos;s answer.
+                  Release <span className="mono">7</span> attaches about <span className="mono">0.22</span> NEAR (the unused part is refunded); rooms opened now are on it. </> : null}
+                After <span className="mono">3</span> attempts the contract closed the room as <span className="mono">No deal</span>. Nothing was funded, both sets of limits stayed sealed, and the creation deposit can be withdrawn.</p>
+            ) : cause === "rejected" ? (
+              <p><strong>This room ended because the contract refused the Sealed Table&apos;s answer on each attempt, not because the two sides could not agree.</strong>{" "}
+                An answer arrived and did not verify{p.noDeal?.message ? <> (<span className="mono">{p.noDeal.message}</span>)</> : null}, so the contract counted the attempt as failed.
+                After <span className="mono">3</span> attempts it closed the room as <span className="mono">No deal</span>. Nothing was funded, and the creation deposit can be withdrawn.</p>
+            ) : cause === "late" ? (
+              <p><strong>This room ended because the Sealed Table&apos;s answer never arrived in time, not because the two sides could not agree.</strong>{" "}
+                The negotiation runs in an enclave on OutLayer&apos;s testnet worker, and a NEAR contract can wait about <span className="mono">200</span> blocks
+                (2 to 3 minutes) for it. All <span className="mono">3</span> attempts passed that wait with no signed answer, so the contract closed the room
+                as <span className="mono">No deal</span>. Nothing was funded, both sets of limits stayed sealed, and the creation deposit can be withdrawn.</p>
+            ) : (
+              <p><strong>This room ended because no signed answer reached the contract on any attempt, not because the two sides could not agree.</strong>{" "}
+                The negotiation runs in an enclave on OutLayer&apos;s testnet worker. Why each attempt failed could not be read here (it is in OutLayer&apos;s log in
+                each attempt&apos;s transaction, on the activity tab). After <span className="mono">3</span> attempts the contract closed the room as <span className="mono">No deal</span>.
+                Nothing was funded, and the creation deposit can be withdrawn.</p>
+            )}
+            <p>A room cannot be negotiated again, so <Link className="link" href="/try-it" prefetch={false}>open a new one</Link>.
               These need no new negotiation: <Link className="link" href="/try" prefetch={false}>the live room</Link> (already past negotiation; a redirect is
               refused on chain), <Link className="link" href="/replay" prefetch={false}>the replay</Link> of a recorded run, and{" "}
               <Link className="link" href="/verify" prefetch={false}>verify</Link> for any earlier agreement.</p>

@@ -1,11 +1,16 @@
-// Whether the Sealed Table has been answering in time, read from chain state only: the newest agreements on the
-// primary factory and how their negotiation ended. An agreement in `NoDeal` with no stored signed output ended
-// because no signed answer reached the contract inside NEAR's wait (about 200 blocks) on any of its three attempts;
-// one that reached `Attested` or later was answered. Nothing here is a guess about a run still in progress.
+// Whether the Sealed Table has been answering, read from chain state: the newest agreements on the primary factory
+// and how their negotiation ended. An agreement in `NoDeal` with no stored signed output got no signed answer the
+// contract accepts on any of its three attempts; why is read from OutLayer's own log in each attempt's transaction
+// (lib/nodeal.ts): its worker answering after NEAR's wait (about 200 blocks), or an error it returned. A room that
+// failed only because its release attached too little NEAR for OutLayer to hold the answer (`output_storage_unpaid`,
+// release 6 and earlier) says nothing about a room opened now, so it is not counted. One that reached `Attested` or
+// later was answered. Nothing here is a guess about a run still in progress.
 
 import "server-only";
 import type { AgreementRecord } from "@accord/sdk";
 import { accord } from "./accord";
+import { roomNoDeal } from "./nodeal";
+import { DEPOSIT_FIXED_IN_RELEASE, isStorageUnpaid, type NoDealCause } from "@/lib/nodeal";
 
 export interface TableHealth {
   /** true when the newest negotiation that has ended got no signed answer in time */
@@ -16,6 +21,8 @@ export interface TableHealth {
   newestUnanswered: { account: string; at: number } | null;
   /** the newest agreement whose negotiation was answered */
   lastAnswered: { account: string; at: number } | null;
+  /** why the newest unanswered one ended, from its attempts' transactions (`unknown` when they could not be read) */
+  cause: NoDealCause | null;
   factory: string;
 }
 
@@ -43,19 +50,28 @@ export async function tableHealth(): Promise<TableHealth | null> {
       // NoDeal or Cancelled: the Sealed Table's signed output is stored whenever it answered. A no-deal with none was
       // never answered; a room cancelled before any answer says nothing either way.
       const answered = (await d.sealedOutput()) !== null;
-      return answered ? true : view.state === "NoDeal" ? false : null;
+      if (answered) return true;
+      if (view.state !== "NoDeal") return null;
+      const cause = await roomNoDeal(r.account, view.outlayer).catch(() => null);
+      // fixed for every room opened on the current release: not a sign about the table now
+      if (isStorageUnpaid(cause) && r.release < DEPOSIT_FIXED_IN_RELEASE) return null;
+      return cause ?? false;
     }));
     let unanswered = 0;
     let newestUnanswered: TableHealth["newestUnanswered"] = null;
     let lastAnswered: TableHealth["lastAnswered"] = null;
+    let cause: NoDealCause | null = null;
     let run = true;
     records.forEach((r, i) => {
       const o = outcomes[i];
       if (o === null || o === undefined) return;
-      if (o) { run = false; lastAnswered ??= { account: r.account, at: r.created_at }; return; }
-      if (run) { unanswered += 1; newestUnanswered ??= { account: r.account, at: r.created_at }; }
+      if (o === true) { run = false; lastAnswered ??= { account: r.account, at: r.created_at }; return; }
+      if (run) {
+        unanswered += 1;
+        if (!newestUnanswered) { newestUnanswered = { account: r.account, at: r.created_at }; cause = o === false ? null : o; }
+      }
     });
-    const value: TableHealth = { late: unanswered > 0, unanswered, newestUnanswered, lastAnswered, factory: a.factory };
+    const value: TableHealth = { late: unanswered > 0, unanswered, newestUnanswered, lastAnswered, cause, factory: a.factory };
     cached = { at: Date.now(), value };
     return value;
   } catch {

@@ -17,6 +17,8 @@ import { accord, config } from "./accord";
 const YOCTO = 10n ** 24n;
 import { FAUCET_NEAR_TARGET, faucetEmpty, isFaucetEmptyError } from "./faucetgrant";
 import { queueReading } from "./tablequeue";
+import { roomNoDeal } from "./nodeal";
+import { noDealLine } from "@/lib/nodeal";
 import { closeMove } from "@/lib/finish";
 export { FAUCET_NEAR_TARGET };
 /** Test USDC the faucet mints (6 decimals): enough for the suggested 40 tUSDC ceiling twice over. */
@@ -238,9 +240,8 @@ export async function counterpartyStep(id: string): Promise<Step> {
 
   const circle = isCircleRoom(a);
   if (a.state === "NoDeal") {
-    return wait(circle
-      ? "The Sealed Table found no deal inside both mandates. Open a new room with a ceiling of at least 12 USDC."
-      : "The Sealed Table found no deal inside both mandates. Open a new room with a ceiling of at least 30 tUSDC.");
+    // the cause the chain recorded: the Sealed Table's signed reason, or OutLayer's own log in each attempt
+    return wait(noDealLine(await roomNoDeal(id, a.outlayer).catch(() => null), circle ? "USDC" : "tUSDC"));
   }
   if (a.state === "Cancelled") return wait("This room was cancelled. Its spare NEAR (the creation deposit) goes back to the buyer with withdraw_near: Finish on Try it does it.");
   if (a.state === "Settled") return wait("This room is settled. Nothing left to do.");
