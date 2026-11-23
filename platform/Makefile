@@ -29,7 +29,9 @@ probe-venue: ; @cargo run -q -p accord-venue --features probe --bin probe-venue
 sandbox: wasm ; @cargo run -q -p accord-sandbox --bin sandbox 2>/dev/null
 serve: wasm ; @cargo run -q -p accord-sandbox --bin serve 2>/dev/null
 dev: wasm ; @node scripts/dev.mjs
-check-deploy: wasm ; @npx tsx scripts/check-deploy.ts
+# the three enclave job builds (wasm32-wasip2); check-deploy compares them with the current release's hashes
+jobs: ; @cargo build -q --release --locked --target wasm32-wasip2 -p accord-sealed-table -p accord-payee -p accord-observer
+check-deploy: wasm jobs ; @npx tsx scripts/check-deploy.ts
 deploy-testnet: wasm ; @npx tsx scripts/deploy-testnet.ts
 deploy-tender: ; @npx tsx scripts/deploy-tender.ts
 negotiate: ; @$(LIVE) negotiate
@@ -75,4 +77,4 @@ inbox: ; @$(LIVE) inbox
 release-check: ; $(call todo,7.4 make release-check)
 submission-check: ; $(call todo,8.2 make submission-check)
 
-.PHONY: help setup-check ci test wasm check-wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate negotiate-usdc finish-usdc dispute-close dispute-close-usdc close close-usdc cancel verify-usdc approve fund payee pay attack revoke claim exception payee-change market-making atlas verify demo tender tender-sim tlock-bundle deploy-tender measure demo-reset inbox release-check submission-check
+.PHONY: help setup-check ci test wasm jobs check-wasm serve dev setup probe-ai probe-venue sandbox check-deploy deploy-testnet negotiate negotiate-usdc finish-usdc dispute-close dispute-close-usdc close close-usdc cancel verify-usdc approve fund payee pay attack revoke claim exception payee-change market-making atlas verify demo tender tender-sim tlock-bundle deploy-tender measure demo-reset inbox release-check submission-check

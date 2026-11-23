@@ -16,22 +16,25 @@ use std::time::{Duration, Instant};
 
 use crate::http::{Http, Method, Request};
 
+/// Release 7 (DECISIONS.md section 38): the `rpc.*.near.org` endpoints are deprecated and answer `-429 THIS
+/// ENDPOINT IS DEPRECATED` at times, so each list now falls back to a second provider (dRPC) instead.
 pub const TESTNET: &[&str] = &[
     "https://test.rpc.fastnear.com",
-    "https://rpc.testnet.near.org",
+    "https://near-testnet.drpc.org",
 ];
-/// Archival testnet, for the code-change signal 30 days back (heavily rate-limited, DECISIONS.md section 6).
-pub const TESTNET_ARCHIVAL: &[&str] = &["https://archival-rpc.testnet.near.org"];
-pub const MAINNET: &[&str] = &[
-    "https://free.rpc.fastnear.com",
-    "https://rpc.mainnet.near.org",
+/// Archival testnet, for the code-change signal 30 days back (DECISIONS.md section 6). FastNEAR's archival node
+/// first; dRPC's public node keeps no old blocks, so near.org's deprecated archival host stays only as the last try.
+pub const TESTNET_ARCHIVAL: &[&str] = &[
+    "https://archival-rpc.testnet.fastnear.com",
+    "https://archival-rpc.testnet.near.org",
 ];
+pub const MAINNET: &[&str] = &["https://free.rpc.fastnear.com", "https://near.drpc.org"];
 /// Mainnet with the archival endpoint first, for slot times older than the public nodes keep (DECISIONS.md 6b:
 /// the public RPC answered 12 h back, not 24 h; `archival-rpc.mainnet.fastnear.com` reproduced the probe exactly).
 pub const MAINNET_ARCHIVAL_FIRST: &[&str] = &[
     "https://archival-rpc.mainnet.fastnear.com",
     "https://free.rpc.fastnear.com",
-    "https://rpc.mainnet.near.org",
+    "https://near.drpc.org",
 ];
 
 /// Which network an endpoint URL serves; `None` for anything not compiled in.

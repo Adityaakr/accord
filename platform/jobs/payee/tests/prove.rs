@@ -99,7 +99,10 @@ fn http(w: &World) -> FixtureHttp {
         }
     });
     if w.archival_down {
-        h.on_url(TESTNET_ARCHIVAL[0], |_| Reply::Fail("rate limited".into()));
+        // every archival endpoint compiled in is down, not only the first
+        for url in TESTNET_ARCHIVAL {
+            h.on_url(url, |_| Reply::Fail("rate limited".into()));
+        }
     }
     let w = w.clone();
     h.on_rpc("testnet", move |m, p| {

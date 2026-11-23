@@ -10,8 +10,45 @@ use serde_json::{json, Value};
 /// `start_negotiation` must carry at least this much gas, so nobody can burn attempts by starving the call.
 pub const MIN_NEGOTIATION_GAS: u64 = 280;
 pub const MAX_ATTEMPTS: u8 = 3;
-/// Attached to OutLayer for a run; the unused part is refunded to the agreement.
-pub const NEGOTIATION_DEPOSIT: NearToken = NearToken::from_millinear(50);
+
+/// OutLayer's prices on `outlayer.testnet` (`get_pricing_full`, `estimate_execution_cost`; read 23 Nov 2026,
+/// DECISIONS.md section 38). A run is charged at most its compute for the limits it asks for, and an output of
+/// 1024 bytes or more is held at NEAR's storage price per byte until the request settles: a payment that cannot
+/// hold it fails the run with `output_storage_unpaid`. Both are taken from the attached NEAR, and what is not used
+/// (all of the storage part) is refunded to the agreement.
+pub mod outlayer_price {
+    /// `base_fee`: 0.001 NEAR per run.
+    pub const BASE_FEE: u128 = 1_000_000_000_000_000_000_000;
+    /// `per_million_instructions_fee`.
+    pub const PER_MILLION_INSTRUCTIONS: u128 = 100_000_000_000_000;
+    /// `per_ms_fee`: 0.0001 NEAR per second of `max_execution_seconds`.
+    pub const PER_MS: u128 = 100_000_000_000_000_000;
+    /// OutLayer's `STORAGE_PRICE_PER_BYTE` for a stored output, NEAR's storage price.
+    pub const PER_OUTPUT_BYTE: u128 = 10_000_000_000_000_000_000;
+}
+
+/// The instruction limit every run of this release asks for.
+pub const MAX_INSTRUCTIONS: u64 = 100_000_000_000;
+/// `max_execution_seconds` of a Sealed Table run and of a Payee run.
+pub const SEALED_TABLE_SECS: u64 = 100;
+pub const PAYEE_SECS: u64 = 60;
+
+/// The NEAR attached to OutLayer for one run: the most it can charge for the run's limits, plus the storage of the
+/// largest output the agreement accepts (`signed::MAX_OUTPUT`, 16 KiB), plus a quarter on top for a price rise.
+/// A run that charges more than this is refused by OutLayer, never by the agreement's own checks, and the unused
+/// part comes back, so the margin costs nothing.
+pub const fn job_deposit(max_seconds: u64) -> NearToken {
+    use outlayer_price::*;
+    let compute = BASE_FEE
+        + (MAX_INSTRUCTIONS / 1_000_000) as u128 * PER_MILLION_INSTRUCTIONS
+        + (max_seconds * 1_000) as u128 * PER_MS;
+    let output = signed::MAX_OUTPUT as u128 * PER_OUTPUT_BYTE;
+    NearToken::from_yoctonear((compute + output) / 4 * 5)
+}
+
+/// Attached to OutLayer for a Sealed Table run (about 0.219 NEAR; release 6 and earlier attached 0.05, which an
+/// output of more than about 4.5 KB no longer fits); the unused part is refunded to the agreement.
+pub const NEGOTIATION_DEPOSIT: NearToken = job_deposit(SEALED_TABLE_SECS);
 
 /// `outlayer.request_execution` for one of this release's jobs. The input names the agreement and nothing the job
 /// would believe without reading state; `resource_limits` is always explicit (without it the request is
@@ -30,7 +67,7 @@ pub(crate) fn request_job(
         // attaches none and the job reports its seed as not set
         "secrets_ref": {"account_id": job.project.split('/').next().unwrap_or_default(), "profile": "default"},
         "resource_limits": {
-            "max_instructions": 100_000_000_000u64,
+            "max_instructions": MAX_INSTRUCTIONS,
             "max_memory_mb": 256,
             "max_execution_seconds": max_seconds,
         },
@@ -140,7 +177,7 @@ impl Agreement {
             &cfg.outlayer,
             &cfg.sealed_table,
             input,
-            100,
+            SEALED_TABLE_SECS,
             NEGOTIATION_DEPOSIT,
             180,
         )
