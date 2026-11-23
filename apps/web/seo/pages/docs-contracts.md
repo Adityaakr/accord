@@ -26,7 +26,7 @@ The accounts and endpoints Accord uses on NEAR testnet, and the agreement contra
 
 - 10 Relayer Linked: a transaction it relayed. [relay.accord-v2.testnet](https://testnet.nearblocks.io/txns/DyFrt2v9sGhxnRiWVwSydXPWS48exUis56YydCMmrBhC)
 
-- 11 NEAR RPC [rpc.testnet.near.org](https://docs.near.org/api/rpc/providers)
+- 11 NEAR RPC [test.rpc.fastnear.com](https://docs.near.org/api/rpc/providers)
 
 - 12 Explorer [testnet.nearblocks.io](https://testnet.nearblocks.io)
 

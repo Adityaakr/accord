@@ -68,7 +68,8 @@ export interface ReleaseJob {
  * Proves one job key's run against OutLayer's attestation record (the CLI runs `outlayer-verify`). `not_checked`
  * when the proof could not be run here (the tool is missing, the record API is unreachable).
  */
-export type ReleaseProof = (job: ReleaseJob) => Promise<{ status: "ok" | "fail" | "not_checked"; detail: string }>;
+/** `settled`: a `not_checked` verdict that will not change on a later run (a worker build OutLayer has de-listed). */
+export type ReleaseProof = (job: ReleaseJob) => Promise<{ status: "ok" | "fail" | "not_checked"; detail: string; settled?: boolean }>;
 
 export async function verify(
   accord: Accord,
@@ -129,7 +130,8 @@ export async function verify(
   // sealed: the Sealed Table's signed outcome, against the release's key, with the commitments on chain.
   const outText = await deal.sealedOutput();
   if (!outText) {
-    add("sealed", "not_checked", "no negotiation outcome yet");
+    // a room that ended `NoDeal` with nothing stored accepted no attempt's answer: there is no outcome, and none to come
+    add("sealed", "not_checked", a.state === "NoDeal" ? "No deal · no signed outcome was accepted on any attempt, so there is none to check" : "no negotiation outcome yet");
   } else {
     const out = JSON.parse(outText) as Record<string, unknown>;
     const sigOk = verifyEd25519(out, release.sealed_table.signing_pubkey);

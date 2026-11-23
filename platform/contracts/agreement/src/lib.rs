@@ -33,8 +33,11 @@ pub const MAX_CIPHERTEXT: usize = 8 * 1024;
 pub const MAX_REASON: usize = 280;
 /// A payment lock older than this many blocks can be resolved by anyone (`resolve_stale_lock`).
 pub const STALE_LOCK_BLOCKS: u64 = 600;
-/// Kept above the storage stake after `Settled` while an item is set aside, so the vendor's claim can still run.
-pub const RESERVED_KEEP: NearToken = NearToken::from_millinear(50);
+/// Kept above the storage stake after `Settled` while an item is set aside, so the vendor's claim can still run,
+/// including a recipient proposal's Payee run: its deposit plus the 0.02 NEAR this kept on top of it before.
+pub const RESERVED_KEEP: NearToken = NearToken::from_yoctonear(
+    recipients::PAYEE_DEPOSIT.as_yoctonear() + 20_000_000_000_000_000_000_000,
+);
 /// The token's storage deposit (Circle's testnet USDC: 0.00125 NEAR).
 pub const TOKEN_STORAGE_DEPOSIT: NearToken = NearToken::from_micronear(1_250);
 

@@ -24,21 +24,22 @@ export const KNOWN_FACTORIES: Record<string, { factory: string; token: string; l
  * rate limit or a transport failure; `rpc` (the first) and `fallback` (the last) stay for callers that want one URL.
  */
 export const RPC: Record<string, { rpc: string; fallback: string; urls: string[]; explorer: string }> = {
+  // rpc.testnet.near.org and rpc.mainnet.near.org are deprecated and answer `-429 THIS ENDPOINT IS DEPRECATED` at
+  // times (DECISIONS.md section 38); dRPC is the fallback from a second provider instead.
   testnet: {
     rpc: "https://test.rpc.fastnear.com",
-    fallback: "https://rpc.testnet.near.org",
+    fallback: "https://near-testnet.drpc.org",
     urls: [
       "https://test.rpc.fastnear.com",
       "https://rpc.testnet.fastnear.com",
       "https://near-testnet.drpc.org",
-      "https://rpc.testnet.near.org", // slower; last
     ],
     explorer: "https://testnet.nearblocks.io",
   },
   mainnet: {
     rpc: "https://free.rpc.fastnear.com",
-    fallback: "https://rpc.mainnet.near.org",
-    urls: ["https://free.rpc.fastnear.com", "https://rpc.mainnet.near.org"],
+    fallback: "https://near.drpc.org",
+    urls: ["https://free.rpc.fastnear.com", "https://near.drpc.org"],
     explorer: "https://nearblocks.io",
   },
 };

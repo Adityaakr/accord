@@ -412,7 +412,7 @@ Period 1 · slot times drawn inside the enclave **6** of 6 passed · 4 required 
 
 Awaiting the period's observations Eligible · 6 of 6 slots passed, 4 required Paid to halcyon-mm.testnet [6.00 tUSDC](https://testnet.nearblocks.io/txns/42HuyHX2SPWNbnT7tKKni6WwyKKCK556vmKo3TydVPeD)
 
-Recorded on NEAR testnet, 10 Nov 2026, release 5, test USDC. [Verify a56.accord-v2.testnet](/verify?agreement=a56.accord-v2.testnet) · 7 checks ok
+Recorded on NEAR testnet, 10 Nov 2026, release 5, test USDC. [Verify a56.accord-v2.testnet](/verify?agreement=a56.accord-v2.testnet) · 7 checks ok on 14 Nov 2026
 
 Scope The demonstration proves condition-linked payment, not account-level performance attribution. Public order-book observations measure the venue's liquidity, not the hired market maker's own contribution. Verification using the market maker's authenticated account data is planned.
 

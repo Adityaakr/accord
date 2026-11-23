@@ -177,5 +177,5 @@ export const MARKET_MAKING = {
     refusal: "ERR_PERIOD_WITHHELD",
     refusalTx: tx("4W1Ud2GVRPZnJL4uJdyEjAfdB5igT3S1DGTJxxLNcS1Y"),
   },
-  verify: "7 checks ok",
+  verify: "7 checks ok on 14 Nov 2026",
 }

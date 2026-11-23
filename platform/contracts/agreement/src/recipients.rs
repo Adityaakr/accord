@@ -2,12 +2,13 @@
 //! inside an enclave, the vendor's settlement authority approves, the buyer accepts, and a change waits out the
 //! timelock. The domain is pinned by the first version.
 
-use crate::negotiation::request_job;
+use crate::negotiation::{job_deposit, request_job, PAYEE_SECS};
 use crate::signed::{self, str_field};
 use crate::*;
 use serde_json::{json, Value};
 
-pub const PAYEE_DEPOSIT: NearToken = NearToken::from_millinear(30);
+/// Attached to OutLayer for a Payee run (about 0.214 NEAR, `job_deposit`; release 6 and earlier attached 0.03).
+pub const PAYEE_DEPOSIT: NearToken = job_deposit(PAYEE_SECS);
 pub const MAX_VERSIONS: u32 = 16;
 
 #[near]

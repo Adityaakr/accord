@@ -24,7 +24,7 @@ describe("release proof", () => {
   it("verifies OutLayer's task for the request, not the request id itself", async () => {
     const { p, calls } = proof(record, { code: 0 });
     expect(await p(job)).toMatchObject({ status: "ok" });
-    expect(calls[0]).toEqual(["job", "28880", "--network", "testnet", "--api", "https://testnet-api.outlayer.ai", "--short", "--no-color"]);
+    expect(calls[0]).toEqual(["job", "28880", "--network", "testnet", "--api", "https://testnet-api.outlayer.ai", "--json", "--no-color"]);
   });
   it("is not checked without the tool, and never ok", async () => {
     expect((await proof(record, { missing: true, code: null }).p(job)).status).toBe("not_checked");

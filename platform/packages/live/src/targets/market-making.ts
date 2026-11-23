@@ -2,7 +2,7 @@
 // mainnet pool. The observer measures each hidden slot from the first final mainnet block after it; the period closes
 // on the rule; the agent can pay the passing period and cannot pay the withheld one. About seven minutes on demo timings (a six-minute period).
 
-import type { AgreementView, AtlasTerms } from "@accord/sdk";
+import { venueNote, venueState, type AgreementView, type AtlasTerms, type VenueState } from "@accord/sdk";
 import { observationOf, observerFor, slotsToAsk, type AskObserver } from "../../../../services/keeper/src/observe.js";
 import {
   approveBoth, authorise, client, create, fundTotal, header, installAgent, line, negotiate, PRESETS, sealBoth, sleep,
@@ -31,6 +31,7 @@ async function observePeriod(w: World, room: Room, ask: AskObserver, print: bool
   const keeper = client(w, "keeper", room.id);
   const seen = new Set<number>();
   const errors = new Set<string>();
+  const venueNoted = new Set<VenueState>();
   for (;;) {
     const a: AgreementView = await deal.get();
     const periods = await deal.periods();
@@ -54,6 +55,13 @@ async function observePeriod(w: World, room: Room, ask: AskObserver, print: bool
       const ob = o.observation;
       if (print) {
         line(`slot ${k + 1}`, `mainnet block ${ob.venue_block.height} · spread ${ob.spread_bps} bps · depth ${usdc(ob.depth_bid).replace(" USDC", "")} / ${usdc(ob.depth_ask)} · ${o.pass ? "pass" : "fail"}`);
+        // the pool itself unable to meet the agreed conditions: said once, so a run of failing slots is not read as Accord failing
+        const note = venueNote(ob, room.atlas, a.params.require_two_sided, "Rhea's NEAR/USDC pool");
+        const state = venueState(ob, room.atlas, a.params.require_two_sided);
+        if (note && !venueNoted.has(state)) {
+          venueNoted.add(state);
+          line("venue", note);
+        }
       }
     }
     if (p0.closable_at !== undefined && a.now >= p0.closable_at) {

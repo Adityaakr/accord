@@ -1009,3 +1009,118 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
   own attestation (its nonce, gateway and instances) is what the Sealed Table verified inside the enclave and bound in
   the outcome it signed, which `sealed` checks. The check depends on two outside services being reachable.
 
+
+## 38. Release 7: OutLayer holds a stored output, deposits that hold it, and a de-listed worker build (23 Nov 2026)
+
+- **What broke.** From some time between 16 and 22 Nov 2026 every new negotiation on release 6 ended `NoDeal`.
+  `a102.accord-v2.testnet` (the wallet-free flow on the hosted app) and `a103.accord-v2.testnet` (`make negotiate`)
+  each failed three attempts, and OutLayer answered every one in `35` to `50 s` with an error, logged in its own receipt
+  of the attempt's transaction: `Execution failed: "output_storage_unpaid: the output is 7043 bytes and needs
+  70430000000000000000000 yoctoNEAR held for its storage; the payment had 44702776900000000000000 left after the run's
+  cost. Attach more NEAR to request_execution: the rest is refunded"` (a102 attempt 3, request `115862`,
+  https://testnet.nearblocks.io/txns/4FqBXLF85jhX47wuq5phhLMtgp6Cb68jADNNcSTdaits). On 16 Nov `a100`'s run had
+  succeeded with the same `0.05` NEAR. OutLayer's contract (`github.com/out-layer/outlayer` `contract/src/lib.rs`
+  `output_storage_deposit`, `execution.rs` `output_refusal`) now holds `STORAGE_PRICE_PER_BYTE` (`10^19` yoctoNEAR,
+  NEAR's storage price) for every byte of an output of `1024` bytes or more until the request settles, taken from the
+  attached NEAR after the run's cost; a smaller output travels in the yield resume and costs nothing. On failure it
+  returns `null` to the caller, as it does for an answer after the yield, so the agreement cannot tell the two apart.
+- **What the app said.** The Sealed Table panel: `No deal · the enclave did not answer in time`; the demo counterparty
+  panel: `the buyer's ceiling was below the vendor's floor` (it assumed a limits mismatch for every `NoDeal`); the notice
+  on `/try-it` and `/tenders`: the Sealed Table answering late. None of these was what happened.
+- **The deposit** (`contracts/agreement/src/negotiation.rs` `job_deposit`). OutLayer's views on `outlayer.testnet`, read
+  23 Nov 2026: `get_pricing_full` `base_fee 10^21`, `per_million_instructions_fee 10^14`, `per_ms_fee 10^17`;
+  `estimate_execution_cost` for the Sealed Table's limits and a `7469`-byte output `85700000000000000000000`. The deposit
+  is the most OutLayer can charge for the run's limits (`100 s`, `10^11` instructions for the Sealed Table; `60 s` for
+  the Payee) plus the storage of the largest output the agreement reads (`signed::MAX_OUTPUT`, `16` KiB), plus a
+  quarter: `0.2186` NEAR (`NEGOTIATION_DEPOSIT`) and `0.2136` NEAR (`PAYEE_DEPOSIT`). The unused part, all of the storage
+  part, is refunded to the agreement, so the margin costs nothing; three attempts fit the agreement's `2` NEAR.
+  `RESERVED_KEEP` (what `withdraw_near` keeps after `Settled` while an item is reserved) is now the Payee deposit plus
+  the `0.02` NEAR it kept on top before, so a recipient proposal can still run. The pubkey run (releases contract,
+  `0.03` NEAR) answers about `350` bytes, under `1024`, so it needs no change; the observer is called over OutLayer's
+  HTTPS API with a payment key and attaches no NEAR.
+- **Why a constant and not a view.** The agreement could ask `estimate_execution_cost` itself, but a view from a contract
+  is a promise: one more hop inside `start_negotiation`'s `300 TGas` (the request takes `180`, the callback `60`) and one
+  more way for an attempt to fail. Instead the formula is in the code, unit tests pin it to the 23 Nov estimate and to
+  a102's failed run, `fixtures/outlayer-deposits.json` states the constants (a test ties them to the code), and
+  `make check-deploy` requires each still to cover OutLayer's live `estimate_execution_cost` for a `16` KiB output:
+  `deposits cover OutLayer (sealed table 0.2186 ≥ 0.1749 NEAR, payee 0.2136 ≥ 0.1709 NEAR)`. A price rise past the
+  margin fails the release check, not the next room.
+- **The source pins the layout.** The agreement wasm embeds panic locations (file, line, column), so formatting the
+  source changes the code hash: `cargo fmt` on the first version moved `recipients.rs` lines and built `85s9CwpK…`, not the
+  published `HTzLMKPJ…`. The published source passes `60` (not `PAYEE_SECS`) in `propose_recipient`'s one call so that
+  rustfmt keeps it on the lines it was built from; a test ties the literal to `PAYEE_SECS`. The committed source builds
+  `HTzLMKPJ…` again (`make check-deploy`).
+- **Job builds.** `accord-jobkit` drops the deprecated `rpc.testnet.near.org` and `rpc.mainnet.near.org` (they answered
+  `-429 THIS ENDPOINT IS DEPRECATED` on 22 Nov, and answered normally in our probes on 23 Nov) for dRPC as the second
+  provider (`near-testnet.drpc.org`, `near.drpc.org`); archival testnet tries FastNEAR's archival host first. Nothing
+  else in the jobs changed since release 6 (`17715ba`): the old source rebuilt `4312ad08…`, `b5a0c473…`, `0dcc55e8…`
+  exactly, and the new one builds Sealed Table `76f1131083458a430dc1fff9a37f809f6a0a4b1fc380d6a72857b7d5d9f2ebd5`
+  (1,495,812 bytes), Payee `12b7f0e9e81b42ab58f0cffe6d5b9779867d9a66af98a0e6c24103eea7d6a044`, observer
+  `9e54b0860b4c153ff9fb582db1b88c982b439b4944f0c04d1d09abe21213602d`. Uploaded with `outlayer upload` (Sealed Table
+  `HpH4ELQ2…`, `HMnb3bqa…`; Payee `7BKy9knc…`; the observer's first upload printed `2fL7v9Ne…`, a transaction the chain does
+  not know, as in section 33, and `F6y97YzV…` landed); each FastFS URL answered `200` with the same sha256. Added with
+  `outlayer deploy --no-activate` (`list_versions` shows them), each secret row widened with `update_access` to its old
+  leaves `or` the new build (`8Nw5nFTcE5UCevuZcNiyrLPUAeH4a1Kv84EuKfegUMU`, `EBwdZdV6BpGrp75oeaYytdvhnq4gKANvfGAnoY48VR5Q`,
+  `6n85x1Vzz4ispEsr2CYY76FU5q4Cg9WcB7VouVfNaSVc`), so every earlier room keeps its seed, and made active
+  (`set_active_version` `FBAjJL1AjV373q3jqeytKd9eXBUe4qVRydn1PR8NsegC`, `9h1BKPVrhTb5MN2EF9sVRR2WNVDzAvkp7GUFhREPHhge`,
+  `9z9NTRhUHhW6PvugQYmX725sscgZjwTNz2wWFEhHK5f6`). `make check-deploy` now builds the jobs too (`make jobs`) and requires
+  their hashes to equal the current release's.
+- **Funding.** Publishing new agreement code as a global contract burns about `50 NEAR` (`500,139` bytes);
+  `accord-v2.testnet` held `10.9`. Five testnet faucet-service accounts (`accord-r7-fund1` to `5`, `10` NEAR each) were
+  deleted into it (`43qdW7Ab…`, `Hnn311fj…`, `DyZzdpJc…`, `Akb4JA4H…`, `CBhNQCwH…`), three into the try-it faucet
+  `faucet.accord-v2.testnet` (`ETaXrsKR…`, `5X3AHtWm…`, `DLYdxXjr…`; `31.79` to `61.62` NEAR), and two into the operator
+  buyer `northwind-demo.testnet` after `make demo` (`DHHHgz1M…`, `A2F2m8L7…`). `a103`'s spare `1.93` NEAR went back to its
+  buyer with `withdraw_near` (`3vZVqzGCE1Yv4vwtYvkUCCZeu4pj1Y19WzRH94DGYBzg`).
+- **Release 7 on accord-v2.testnet** (global `HTzLMKPJAHXWzdHgBofpSRQ6bTAaSdvFrqrnrgReQC4g`): pubkey requests `116348`
+  (Sealed Table, `63ny9LJV2EAVJTq9LUZgqceN1BYsZjesJ5bTe3xbNJnz`, task `333788`), `116350` (Payee,
+  `4ScqtzjTujSvRD1pDHTSty662gUik2XhWkfdtqd81Nyc`, task `333791`), `116353` (observer,
+  `5TjWy1hYp39b1XLu6hyhX6f2LBFFC59K6LixTRXh6a9j`, task `333795`), all stored on the first round; keys equal release 6's
+  (Sealed Table `GgC8gEhK…`, Payee `FAbZHA2M…`, observer `CXZzXC5m…`, mandate key `03b5cf04…`). Global contract
+  `GtyMGvNgzDWH6NnaNGRkm2K5DKCUih6rqDYRCuTv1pjE`, publish `6SoriFNroFMcethvj4VYTWLmaKWWcyrJy4CMYf482r16`, current
+  `FgQAoWYqGtLRUpymwLHAXPM5WQdnRQHdNfd4niq1ydWR`.
+- **Release 7 on accord-usdc.testnet** (`RELEASE_FROM=accord-v2.testnet`, the same global contract and builds; release
+  6 was never published there): requests `116372`, `116374`, `116375` (`ofjxrpecH4A5iwpJy4zkbFNfRjAAorpSjRm6RNXsaFs`,
+  `piwu1zFwNtutgSQK9Re3kcwK52NUxkWcKQc3S1qVh86`, `4pQWCMrxsKsFuzRb9pJLgXCAEjZJepLueUF8ZM7tZbAD`), publish
+  `6mVXW7xuKmeRm3smd71qZzrAM2tFkNFvSFWPjoYY9ZPb`, current `5FnzmFjFWr1AudJ4GBvb7iLmUA4itZuPJhRc2MYTtBN9`.
+  `make check-deploy`: `release 7 · wasm HTzLMKPJ… · jobs match · deposits cover OutLayer (…) · no mock or F1 symbols`,
+  `107` and `3` agreements match.
+- **Proofs on release 7.** `make negotiate` → `a104.accord-v2.testnet`: held while OutLayer's queue read slow, then
+  `Attested · 253 s` on attempt 1 (`5Tq2qC5UxWMPpwn2L2acLWDyDJAaXQe6nTHpC2KoJcNK`). The wallet-free flow on
+  `https://useaccord.tech/app/try-it`, driven in a headless browser → `a106.accord-v2.testnet`: negotiated on attempt 1,
+  recipient proven by the release 7 Payee job, item 1 paid `16.50 tUSDC`, a redirect refused `ERR_PAYEE_MISMATCH`, the
+  key revoked, Finish closed the room and returned its funds to the faucet; `make verify` prints `verify: 7 checks ok`.
+  `make demo` (`APP_URL=https://useaccord.tech/app`) → `a107.accord-v2.testnet`, `demo: full loop in 2:28`,
+  `verify: 7 checks ok`. Every transaction: `docs/runs.md` (repository root), "Release 7 on testnet".
+- **The cause, in the app.** `app/src/lib/nodeal.ts` reads why a room ended `NoDeal`: the Sealed Table's signed reason
+  when it answered, else OutLayer's line in each attempt's transaction, read through FastNEAR's transactions API
+  (`Execution failed: "<error>"`, an error, quoted; `Execution promise failed`, an answer after the yield; a
+  `negotiation_failed` reason other than `no signed output`, an answer the contract refused). The room's Negotiation tab,
+  the demo panel, the demo counterparty's step and the notice on `/try-it` and the tender pages use it; when the
+  transactions cannot be read they say only that no signed answer arrived. A storage-unpaid `NoDeal` on a release before
+  7 is not counted by the notice, since rooms opened now attach enough. The verify panel's title and pill follow the
+  worst result (`Not verified · 1 failed`), and a `NoDeal` room's `sealed` row says no outcome was accepted.
+- **A de-listed worker build.** By 22 Nov 2026 `make verify` printed `6 checks ok · 1 failed` and exited `1` on every
+  agreement: `outlayer-verify` failed the identity layer of releases 3 to 6's key runs (`measurements are NOT in the
+  approved list on worker.outlayer.testnet`) while authenticity, binding, input and output passed. The worker register
+  had approved them when they ran: `is_measurements_approved` for task `106160`'s measurements (release 6's Sealed Table
+  key run) answers `true` at its block `277645106` on `archival-rpc.testnet.fastnear.com` and `false` now; `make
+  verify` does not read it, so it depends on no archival node. The release proof (`packages/sdk/src/release-node.ts`)
+  reads `outlayer-verify --json`; when identity alone failed on the approved list and every other layer passed, it
+  reports `not checked` (`worker build no longer approved; quote valid (identity failed only on OutLayer's current
+  approved list; quote, binding, input and output pass)`), never `ok`; any other failed layer is a failure. Now
+  `a91`, `a6`, `a82` print `verify: 6 checks ok · 1 not checked` (exit `0`), and release 7's key runs, on the current
+  worker build, are proven: on 23 Nov 2026 `make verify DEAL=a6.accord-v2.testnet` printed `verify: 6 checks ok · 1 not
+  checked` (exit `0`) and `make verify DEAL=a107.accord-v2.testnet` printed `verify: 7 checks ok`.
+- **Local fixes.** `make inbox` and `make demo` with `NET=local` defaulted to the app at `http://127.0.0.1:3100`, but its
+  basePath has been `/app` since 8 Nov; both defaults are now `http://127.0.0.1:3100/app`. The `/try` re-arm closes a
+  stored room that does not exist on this chain or is not the `/try` principals' room, so a restarted local node (which
+  reuses agreement ids) no longer loops on `install_agent_key: ERR_NOT_BUYER`.
+- **Market making.** Rhea's USDC/wNEAR pool read `spread 12658 bps · depth 0.00 / 0.00 USDC` on 22 Nov 2026 (`make
+  probe-venue`, reproduced from an archival node): the pool was empty, so every slot failed on real data. The SDK's
+  `venueState` judges a reading against the agreement's own conditions with the contract's rule (empty, one-sided,
+  wide, shallow or meets); `make market-making`, `/app/atlas` and a market-making room name the agreed condition the
+  pool could not meet. Pointing new demo agreements at a live pool is a follow-up
+  (`docs/build/BLOCKED.md`), not a change to deployed terms.
+- **Not done.** Rooms created before release 7 keep their release and their `0.05` NEAR deposit; one still `Sealed`
+  cannot be negotiated. The hosted app shows the new `No deal` causes, the verify panel and the de-listed `release` line
+  once this lands on `main` and Railway redeploys; the contract fix was live as soon as release 7 was current.

@@ -113,7 +113,8 @@ export function world(): World {
     return build("sandbox", f.rpc, f.factory, f.principals, {
       token: f.token, attacker: f.attacker, canaries: f.canaries, domain: f.domain, jobs: f.jobs,
       second: f.second_recipient,
-      app: { url: process.env.APP_URL ?? "http://127.0.0.1:3100", demoDomain: "demo.accord.local" },
+      // the app's basePath is /app (app/next.config.ts): its pages and /api routes live under it
+      app: { url: process.env.APP_URL ?? "http://127.0.0.1:3100/app", demoDomain: "demo.accord.local" },
       observer: { kind: "local", url: `${f.jobs}/observe` },
       fund: async (account, amount) => {
         for (let left = amount; left > 0n; ) {

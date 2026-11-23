@@ -2,7 +2,7 @@
 
 Every recorded run of Accord on NEAR testnet, with each transaction linked. The flagship run, agreement `a6.accord-v2.testnet`, is in the [README](../README.md#testnet-proof); this page holds the others. The design notes behind each run are in [`platform/DECISIONS.md`](../platform/DECISIONS.md) (section numbers given per run).
 
-The `make verify` lines quoted below are as each run printed them. Until 14 Nov 2026 the `model` check was `partial`, so they end `6 checks ok · 1 partial`; since then `make verify` also checks the hardware evidence in NEAR AI's report and the same agreements print `7 checks ok` (`platform/DECISIONS.md` section 37).
+The `make verify` lines quoted below are as each run printed them. Until 14 Nov 2026 the `model` check was `partial`, so they end `6 checks ok · 1 partial`; since then `make verify` also checks the hardware evidence in NEAR AI's report and the same agreements printed `7 checks ok` until about 22 Nov 2026, when OutLayer took the worker build that ran releases 3 to 6's key runs off its approved list; since then they print `6 checks ok · 1 not checked` (release 7 agreements print `7 checks ok`; [release 7](#release-7-on-testnet-23-nov-2026)) (`platform/DECISIONS.md` section 37).
 
 Units: agreements of `accord-v2.testnet` settle in test USDC (`tusdc.accord-v1.testnet`, written `tUSDC`); agreements of `accord-usdc.testnet` settle in Circle's testnet USDC (written `USDC`). Both have 6 decimals.
 
@@ -19,8 +19,50 @@ Units: agreements of `accord-v2.testnet` settle in test USDC (`tusdc.accord-v1.t
 | `a32.accord-v2.testnet` | 9 Nov 2026 | The run [/app/replay](https://accordweb-production.up.railway.app/app/replay) plays back, each step with its transaction; now `Settled` | the replay page |
 | `a48.accord-v2.testnet` | 10 Nov 2026 | Flow proofs: a dispute resolved by re-delivery, a dispute left open, an early mutual close that refunds the unspent escrow | [below](#flow-proofs) |
 | `a56`, `a57.accord-v2.testnet` | 10 Nov 2026 | Market making on testnet: a period observed on Rhea's mainnet pool and paid, a withheld period refused | [below](#market-making-on-testnet) |
+| `a102`, `a103.accord-v2.testnet` | 22 Nov 2026 | Release 6: every attempt refused by OutLayer with `output_storage_unpaid`, `No deal` | [below](#release-7-on-testnet-23-nov-2026), DECISIONS 38 |
+| `a104`, `a106`, `a107.accord-v2.testnet` | 23 Nov 2026 | Release 7: `make negotiate`, the wallet-free flow on the hosted app, `make demo` | [below](#release-7-on-testnet-23-nov-2026), DECISIONS 38 |
 
 Market-making agreements ran end to end on testnet on 10 Nov 2026 ([below](#market-making-on-testnet)); before that they had run on a local node only (`make market-making NET=local`, recorded in [`platform/README.md`](../platform/README.md#the-whole-product-on-your-machine)).
+
+## Release 7 on testnet (23 Nov 2026)
+
+Why: on release 6, OutLayer refused every new negotiation with `output_storage_unpaid` (it now holds NEAR for a stored
+answer, and release 6 attached `0.05` NEAR). `a102.accord-v2.testnet` (the wallet-free flow, 22 Nov 2026) and
+`a103.accord-v2.testnet` (`make negotiate`) ended `No deal` after three attempts each, for example [`4FqBXLF8…`](https://testnet.nearblocks.io/txns/4FqBXLF85jhX47wuq5phhLMtgp6Cb68jADNNcSTdaits);
+`a103`'s spare `1.93` NEAR went back to the buyer with `withdraw_near` ([`3vZVqzGC…`](https://testnet.nearblocks.io/txns/3vZVqzGCE1Yv4vwtYvkUCCZeu4pj1Y19WzRH94DGYBzg)). Release 7 attaches about `0.22`
+NEAR per run; every step of its publication is in `platform/DECISIONS.md` section 38.
+
+**`make negotiate`** → `a104.accord-v2.testnet`: held while OutLayer's queue read slow, then `Attested · 253 s` on the
+first attempt, `32.00 USDC · 3 items`, build `76f11310…`. Create [`CbkspWMN…`](https://testnet.nearblocks.io/txns/CbkspWMNtUzsGd1hQx9ZtckoDy8HEdETJA4Ctgvcythu), buyer seals [`BqHTegJu…`](https://testnet.nearblocks.io/txns/BqHTegJuqeiJpieitVwDcnBTPcKQqtU5pQMUK29P8ymo),
+vendor seals [`9LSFDJ9g…`](https://testnet.nearblocks.io/txns/9LSFDJ9g79kpymr236643XLAU9YWtMMEHU59E6jRANbz), negotiated [`5Tq2qC5U…`](https://testnet.nearblocks.io/txns/5Tq2qC5UxWMPpwn2L2acLWDyDJAaXQe6nTHpC2KoJcNK). `make verify`: `release` proven for all three key runs,
+`verify: 6 checks ok · 1 not checked` (no recipient yet).
+
+**The wallet-free flow on the hosted app** (`https://useaccord.tech/app/try-it`, "Try without a wallet", driven in a
+headless browser) → `a106.accord-v2.testnet`:
+
+| Step | Transaction |
+| --- | --- |
+| Room created by the throwaway key | [`7gajqCHK…`](https://testnet.nearblocks.io/txns/7gajqCHK3UsTq5dMzQUCFL9fNWcBtvexG4ySJBHgDjjH) |
+| Buyer seals (relayed) | [`GsBNcnBJ…`](https://testnet.nearblocks.io/txns/GsBNcnBJapyFRXj798VFaLoBWHf9hKpvaFfC1TpBsAUt) |
+| Demo vendor seals | [`DDhL51UF…`](https://testnet.nearblocks.io/txns/DDhL51UFeVLd8zu4TWS7SGe4NwUn4FjhZMr8Tiif34H6) |
+| Negotiated in the enclave, first attempt | [`J6YdHY2E…`](https://testnet.nearblocks.io/txns/J6YdHY2EtFWQpKgwQGr3tFC6NZu1tCpDAveJYkNdGvXY) |
+| Vendor approves, buyer approves (`Executing`) | [`9r3irijy…`](https://testnet.nearblocks.io/txns/9r3irijyMcMB16gUFsHCnq6ThG4gU6J8ZK58nP7Va9yf), [`BW88GBeX…`](https://testnet.nearblocks.io/txns/BW88GBeXWc7M3hQiqFeuM1eEtF6Kk6BcFHhUT7vCsHTi) |
+| Recipient proposed and proven by the release 7 Payee job | [`3Bf3ghXT…`](https://testnet.nearblocks.io/txns/3Bf3ghXTdaEBuie21ujY8BELMdTqggwF1VBTxWUAbPAi) |
+| Buyer funds `35.50 tUSDC` | [`2iw83H86…`](https://testnet.nearblocks.io/txns/2iw83H86iGe6g9FxnMApPZFWCQfN8ZtCtnXPP12pJmdB) |
+| Agent key installed | [`H7ABUuhG…`](https://testnet.nearblocks.io/txns/H7ABUuhGttFothUVuSKe6mXYCEL4JCuaNhV3rNRnrAom) |
+| Authority approves, buyer accepts `halcyon-mm.testnet` | [`BsBriZCc…`](https://testnet.nearblocks.io/txns/BsBriZCc4DMEBuvmSALP2vcpYjWqi7anbdGn7zed1MM7), [`C9wnfUgc…`](https://testnet.nearblocks.io/txns/C9wnfUgcnhymwx5hhKbMoVZGNUuJ9g8jAvvv9a6wwJCL) |
+| Delivery submitted and accepted | [`Biwf1f4r…`](https://testnet.nearblocks.io/txns/Biwf1f4rQ4WcH4YynTkqWMSTpa4Rn2xcBoPXLUoKY3NW), [`ie29ixt4…`](https://testnet.nearblocks.io/txns/ie29ixt4nMdBJkPQuW1iNCv61aag7fG6Z23ztSrbCww) |
+| Agent pays item 1, `16.50 tUSDC` to `halcyon-mm.testnet` | [`7nq7ktNn…`](https://testnet.nearblocks.io/txns/7nq7ktNnUYZoj1ofbVQ48QppvpkxDjuZncQgmtRgGwoX) |
+| Agent asked to pay a new account: `ERR_PAYEE_MISMATCH`, nothing sent | [`4WZPwbnp…`](https://testnet.nearblocks.io/txns/4WZPwbnpPV9JS53Usakr4AVeBKLjD69Sbz4Nb7EyrviN) |
+| Buyer revokes the agent | [`66TSrt6s…`](https://testnet.nearblocks.io/txns/66TSrt6s8p3Eph2mFH7aJWuww3GiJDwMyoz7jmyGxmd6) |
+| Finish: mutual close (`Settled`), deposit withdrawn | [`7FmbP4cN…`](https://testnet.nearblocks.io/txns/7FmbP4cNKLoFNhf9sxUFRjyA2Vba8SSm8hY1idvi2X4N), [`36nX7T5z…`](https://testnet.nearblocks.io/txns/36nX7T5zG76xirLsiag9WWNFZcoTJd5B1usmsQ7dzcJ3), [`3d55JuW3…`](https://testnet.nearblocks.io/txns/3d55JuW3wCT77yxQAE8TLg9Fi9Z4CCSrB9TGuSHGtcmL) |
+
+`make verify DEAL=a106.accord-v2.testnet`: `code hash HTzLMKPJ… = release 7`, every `release` run `outlayer-verify
+proven`, `payee … proof useaccord.tech signed by the release's payee key`, `verify: 7 checks ok`.
+
+**`make demo`** against the hosted app (`APP_URL=https://useaccord.tech/app`) → `a107.accord-v2.testnet`, `demo: full
+loop in 2:28`: create [`EAUhdGPh…`](https://testnet.nearblocks.io/txns/EAUhdGPh1ZLtt753B6sVXF1NWnfrfFhT41LGWLMsQEme), recipient proven [`HCBhudgp…`](https://testnet.nearblocks.io/txns/HCBhudgpypfFCyNChxvJftr2YTgqkyDun32pF3MfGVmR), negotiated [`2aMe8g8m…`](https://testnet.nearblocks.io/txns/2aMe8g8m3tG3r7sbumANy8nmT1ruQzqwUuGZYpWtBqcj),
+funded [`4T5Ac2Rn…`](https://testnet.nearblocks.io/txns/4T5Ac2RnMqJZNpJZbqbhaG8ibCL6P3gXZKRr1vbXSmW4), paid `13.00` [`DFwcZvYa…`](https://testnet.nearblocks.io/txns/DFwcZvYaELgEBwu6H8gb4ybPYBgB8dEtcQDXwWzMSgEo), `ERR_PAYEE_MISMATCH` [`EdE3eh2G…`](https://testnet.nearblocks.io/txns/EdE3eh2GojmiPYjTAQYkHfmstpJDN29tqsML3cAsap3p). `make verify`: `verify: 7 checks ok`.
 
 ## make demo on testnet (release 5)
 

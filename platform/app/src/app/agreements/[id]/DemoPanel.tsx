@@ -16,6 +16,7 @@ import { agreementClient, errorText } from "@/components/me/client";
 import { useOrg } from "@/components/org/OrgProvider";
 import { POLL_MS, isBusyStatus, nextPollDelay } from "@/components/pollbackoff";
 import { nextLine, roomFingerprint } from "@/lib/roomfingerprint";
+import { noDealLine, type NoDealCause } from "@/lib/nodeal";
 import styles from "./demo.module.css";
 
 interface Step { did: string | null; next: string; tx: string | null; yourMove: boolean; error?: string }
@@ -24,7 +25,7 @@ type SeenStep = Step & { fp: string };
 interface AgentOut { action: string; item: number; amount: string; recipient: string | null; result: { status: string; code?: string; txHash: string }; error?: string }
 
 
-export function DemoPanel({ agreement: a, items = [], explorer }: { agreement: AgreementView; items?: { id: number; status: string }[]; explorer: string | null }) {
+export function DemoPanel({ agreement: a, items = [], explorer, noDeal = null }: { agreement: AgreementView; items?: { id: number; status: string }[]; explorer: string | null; noDeal?: NoDealCause | null }) {
   const w = useWallet();
   const org = useOrg();
   const cfg = useAppConfig();
@@ -51,8 +52,9 @@ export function DemoPanel({ agreement: a, items = [], explorer }: { agreement: A
   const closed = a.state === "Settled" || a.state === "Cancelled" || a.state === "NoDeal";
   // A closed room is never polled, so the panel says why it ended instead of waiting for a step that will not come.
   const sym = tokenSymbol(cfg, a.factory);
+  // the cause the chain recorded (the signed no-deal reason, or OutLayer's own log in each attempt), never assumed
   const closedText = a.state === "NoDeal"
-    ? `No deal: the buyer's ceiling was below the vendor's floor, so the Sealed Table agreed nothing and no money moved. Open a new room with a ceiling of at least ${sym === "USDC" ? 12 : 30} ${sym}.`
+    ? noDealLine(noDeal, a.release, sym)
     : a.state === "Cancelled" ? "This room was cancelled before execution. Nothing left to do." : "This room is settled. Nothing left to do.";
   // Signed out, the panel only describes the room: it never calls the demo endpoints (the counterparty and the agent
   // act for a signed-in visitor, in practice the room's buyer).

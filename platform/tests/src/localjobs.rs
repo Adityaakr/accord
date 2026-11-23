@@ -42,7 +42,10 @@ impl LocalHttp {
         Self {
             rpc: rpc.to_string(),
             files,
-            app: std::env::var("ACCORD_APP_URL").unwrap_or_else(|_| "http://127.0.0.1:3100".into()),
+            // the app is served under `/app` (its basePath, app/next.config.ts), so the demo domain's list is at
+            // http://127.0.0.1:3100/app/.well-known/accord.json
+            app: std::env::var("ACCORD_APP_URL")
+                .unwrap_or_else(|_| "http://127.0.0.1:3100/app".into()),
             inner: UreqHttp::new(),
         }
     }

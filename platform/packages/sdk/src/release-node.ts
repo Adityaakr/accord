@@ -8,6 +8,11 @@
 // binding (https://github.com/out-layer/outlayer-verify; exit 0 proven, 1 a layer failed, 2 unproven). Without the
 // tool (OUTLAYER_VERIFY_BIN, else PATH), or when it runs past the timeout, the check stays `not checked`: nothing is
 // assumed. The CLI, the app's /api/verify and the MCP server all use this, so they print the same release line.
+//
+// A worker build OutLayer has since taken off its approved list (DECISIONS.md section 38): the tool reads the list as
+// it is now, so a run that was approved when it ran fails its identity layer once the operator moves to a new worker
+// image, while the Intel quote, the binding, the input and the output still verify. That alone is `not checked`, never
+// `fail`. Any other failed layer fails the check.
 
 import { spawn } from "node:child_process";
 import { fetchAttestationRecord, lookupReleaseRecord, recordOnlyDetail, type AttestationRecord } from "./release.js";
@@ -24,6 +29,46 @@ export interface ReleaseProofDeps {
   retryDelayMs?: number;
 }
 
+/** One layer of `outlayer-verify --json`: `pass`, `fail` or `unproven`, with a detail or the reason it failed. */
+interface Layer { verdict?: string; detail?: string; reason?: string }
+
+/** The parts of `outlayer-verify --json` read here. */
+export interface VerifyJson {
+  authenticity?: Layer;
+  identity?: Layer;
+  binding?: Layer;
+  input?: Layer;
+  output?: Layer;
+  measurements?: Record<string, string>;
+}
+
+const LAYERS = ["authenticity", "identity", "binding", "input", "output"] as const;
+
+function parseVerifyJson(text: string): VerifyJson | null {
+  try {
+    const v = JSON.parse(text) as unknown;
+    return v && typeof v === "object" && !Array.isArray(v) ? (v as VerifyJson) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The layers that failed, as `identity (reason)`, for the detail. */
+function failedLayers(v: VerifyJson): string {
+  return LAYERS.filter((l) => v[l]?.verdict === "fail").map((l) => `${l}${v[l]?.reason ? ` (${v[l]!.reason})` : ""}`).join(", ");
+}
+
+/**
+ * Every layer passed except identity, and identity failed only because the worker's measurements are not on the
+ * approved list now: the run is a genuine, bound TDX execution of a worker build the operator has since de-listed.
+ */
+export function delistedOnly(v: VerifyJson): boolean {
+  return v.identity?.verdict === "fail"
+    && /not in the approved list/i.test(v.identity.reason ?? "")
+    && LAYERS.every((l) => l === "identity" || v[l]?.verdict === "pass")
+    && !!v.measurements && Object.keys(v.measurements).length > 0;
+}
+
 /** The release proof for one job; pure over `fetchRecord` and `run` so it is tested without the tool. */
 export function releaseProof(d: ReleaseProofDeps): ReleaseProof {
   return async (j: ReleaseJob) => {
@@ -31,17 +76,26 @@ export function releaseProof(d: ReleaseProofDeps): ReleaseProof {
     if (found.status !== "match") return found;
     const { record: rec, api } = found;
     if (!Number.isSafeInteger(rec.task_id) || rec.task_id < 0) return { status: "not_checked", detail: "attestation record has no task id" };
-    const args = ["job", String(rec.task_id), "--network", j.network, "--api", api, "--short", "--no-color"];
+    const args = ["job", String(rec.task_id), "--network", j.network, "--api", api, "--json", "--no-color"];
     let r = await d.run(d.bin, args);
     // exit 2 is "unproven", often one fetch from OutLayer's API that came back incomplete: ask once more
     if (r.code === 2 && !r.missing && !r.timedOut) {
       if (d.retryDelayMs) await new Promise((ok) => setTimeout(ok, d.retryDelayMs));
       r = await d.run(d.bin, args);
     }
-    const said = (r.stdout.trim() || r.stderr.trim()).split("\n").filter(Boolean).pop() ?? "";
+    const json = parseVerifyJson(r.stdout.trim());
+    const said = (json && failedLayers(json) ? `failed: ${failedLayers(json)}` : "")
+      || ((json ? "" : r.stdout.trim()) || r.stderr.trim()).split("\n").filter(Boolean).pop() || "";
     if (r.missing) return { status: "not_checked", detail: recordOnlyDetail(rec, j) };
     if (r.timedOut) return { status: "not_checked", detail: `= task ${rec.task_id} · wasm ${j.wasmHash.slice(0, 8)}… and caller match · outlayer-verify timed out` };
     if (r.code === 0) return { status: "ok", detail: `= task ${rec.task_id} · wasm ${j.wasmHash.slice(0, 8)}… · outlayer-verify proven` };
+    if (r.code === 1 && json && delistedOnly(json)) {
+      return {
+        status: "not_checked",
+        settled: true,
+        detail: `= task ${rec.task_id} · wasm ${j.wasmHash.slice(0, 8)}… · worker build no longer approved; quote valid (identity failed only on OutLayer's current approved list; quote, binding, input and output pass)`,
+      };
+    }
     if (r.code === 1) return { status: "fail", detail: `= task ${rec.task_id} · outlayer-verify: a layer failed${said ? ` (${said})` : ""}` };
     return { status: "not_checked", detail: `= task ${rec.task_id} · outlayer-verify: unproven (exit ${r.code ?? "signal"})${said ? ` (${said})` : ""}` };
   };
@@ -109,7 +163,7 @@ export function cachedReleaseProof(proof: ReleaseProof, o: CacheOptions = {}): R
     cache.set(key, entry);
     while (cache.size > max) cache.delete(cache.keys().next().value!);
     entry.p.then(
-      (r) => { entry.at = now(); entry.keep = r.status === "not_checked" ? retry : ttl; },
+      (r) => { entry.at = now(); entry.keep = r.status === "not_checked" && !r.settled ? retry : ttl; },
       () => { if (cache.get(key) === entry) cache.delete(key); },
     );
     return entry.p;

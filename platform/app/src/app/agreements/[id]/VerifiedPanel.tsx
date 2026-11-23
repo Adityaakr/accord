@@ -40,11 +40,17 @@ export function VerifiedPanel({ agreement, model }: { agreement: string; model: 
 
   useEffect(() => { void run(); }, [run]);
 
+  // the title and the pill follow the worst result: never "Verified" while a check failed
+  const title = !report ? "Verification" : report.failed ? "Not verified" : "Verified";
+  const tally = report ? [
+    report.failed ? `${report.failed} failed` : null, `${report.ok} ok`,
+    report.partial ? `${report.partial} partial` : null, report.notChecked ? `${report.notChecked} not checked` : null,
+  ].filter(Boolean).join(" · ") : "";
   return (
     <Panel
-      title="Verified"
+      title={title}
       eyebrow={nonce ? <>fresh nonce <span className="mono">{nonce.slice(0, 8)}…</span> from this browser</> : `model ${model}`}
-      aside={report ? <Pill tone={report.failed ? "refusal" : "teal"}>{report.ok} ok</Pill> : undefined}
+      aside={report ? <Pill tone={report.failed ? "refusal" : "teal"}>{tally}</Pill> : undefined}
     >
       {error && <p className="small">Could not run the checks: <span className="mono">{error}</span></p>}
       {!report && !error && <p className="small">Running the checks…</p>}

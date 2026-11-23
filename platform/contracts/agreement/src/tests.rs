@@ -1361,3 +1361,144 @@ fn audit_sensitive_methods_need_one_yocto() {
         );
     }
 }
+
+/// Release 7 (DECISIONS.md section 38): OutLayer holds a stored output at NEAR's storage price, and release 6's
+/// 0.05 NEAR could not hold the Sealed Table's answer. These pin the deposits to the runs that failed.
+mod outlayer_deposits {
+    use crate::negotiation::{
+        job_deposit, outlayer_price, NEGOTIATION_DEPOSIT, PAYEE_SECS, SEALED_TABLE_SECS,
+    };
+    use crate::recipients::PAYEE_DEPOSIT;
+    use crate::signed::MAX_OUTPUT;
+    use crate::RESERVED_KEEP;
+
+    const NEAR: u128 = 1_000_000_000_000_000_000_000_000;
+    const MILLI: u128 = NEAR / 1_000;
+
+    /// What OutLayer's `estimate_execution_cost` returns for these limits and output, its formula.
+    fn outlayer_estimate(secs: u64, output_len: usize) -> u128 {
+        use outlayer_price::*;
+        BASE_FEE
+            + (crate::negotiation::MAX_INSTRUCTIONS / 1_000_000) as u128 * PER_MILLION_INSTRUCTIONS
+            + (secs * 1_000) as u128 * PER_MS
+            + output_len as u128 * PER_OUTPUT_BYTE
+    }
+
+    #[test]
+    fn the_estimate_formula_matches_outlayer_on_23_nov() {
+        // `estimate_execution_cost` on outlayer.testnet, 23 Nov 2026: the Sealed Table's limits and a102's
+        // 7469-byte output gave 85700000000000000000000; the Payee's limits and 3000 bytes gave 37010000000000000000000
+        assert_eq!(
+            outlayer_estimate(SEALED_TABLE_SECS, 7_469),
+            85_700_000_000_000_000_000_000
+        );
+        assert_eq!(
+            outlayer_estimate(PAYEE_SECS, 3_000),
+            37_010_000_000_000_000_000_000
+        );
+    }
+
+    #[test]
+    fn the_deposit_holds_the_largest_output_the_agreement_accepts_with_a_margin() {
+        for (deposit, secs) in [
+            (NEGOTIATION_DEPOSIT, SEALED_TABLE_SECS),
+            (PAYEE_DEPOSIT, PAYEE_SECS),
+        ] {
+            let worst = outlayer_estimate(secs, MAX_OUTPUT);
+            assert!(
+                deposit.as_yoctonear() >= worst + worst / 5,
+                "{secs} s: no margin"
+            );
+            assert_eq!(deposit, job_deposit(secs));
+        }
+        // about 0.219 and 0.214 NEAR; refunded but for the run's cost, so the agreement's 2 NEAR covers three attempts
+        assert!(NEGOTIATION_DEPOSIT.as_yoctonear() > 215 * MILLI);
+        assert!(NEGOTIATION_DEPOSIT.as_yoctonear() < 225 * MILLI);
+        assert!(PAYEE_DEPOSIT.as_yoctonear() > 210 * MILLI);
+        assert!(3 * NEGOTIATION_DEPOSIT.as_yoctonear() < NEAR);
+    }
+
+    #[test]
+    fn the_failed_runs_of_22_nov_fit_the_new_deposit() {
+        // a102's third attempt (request 115862): a 7043-byte output, 5297223100000000000000 charged for the run,
+        // refused with 50 milliNEAR attached; a103's runs answered 7.0 to 7.5 KB
+        let charged = 5_297_223_100_000_000_000_000u128;
+        for len in [7_043usize, 7_469, 7_500] {
+            let held = len as u128 * outlayer_price::PER_OUTPUT_BYTE;
+            assert!(
+                50 * MILLI - charged < held,
+                "release 6 would have held {len} bytes"
+            );
+            assert!(NEGOTIATION_DEPOSIT.as_yoctonear() - charged >= held);
+        }
+    }
+
+    #[test]
+    fn a_settled_agreement_keeps_enough_for_a_payee_run() {
+        assert!(RESERVED_KEEP > PAYEE_DEPOSIT);
+        assert_eq!(
+            RESERVED_KEEP.as_yoctonear() - PAYEE_DEPOSIT.as_yoctonear(),
+            20 * MILLI
+        );
+    }
+}
+
+/// `fixtures/outlayer-deposits.json` is what `make check-deploy` holds against OutLayer's live estimate: it must
+/// say exactly what this code attaches.
+#[test]
+fn the_deposit_fixture_matches_the_compiled_constants() {
+    use crate::negotiation::{
+        MAX_INSTRUCTIONS, NEGOTIATION_DEPOSIT, PAYEE_SECS, SEALED_TABLE_SECS,
+    };
+    let f: Value =
+        serde_json::from_str(include_str!("../../../fixtures/outlayer-deposits.json")).unwrap();
+    assert_eq!(f["max_output"], json!(crate::signed::MAX_OUTPUT));
+    for (job, deposit, secs) in [
+        ("sealed_table", NEGOTIATION_DEPOSIT, SEALED_TABLE_SECS),
+        ("payee", crate::recipients::PAYEE_DEPOSIT, PAYEE_SECS),
+    ] {
+        let j = &f["jobs"][job];
+        assert_eq!(
+            j["deposit"],
+            json!(deposit.as_yoctonear().to_string()),
+            "{job}"
+        );
+        assert_eq!(j["max_execution_seconds"], json!(secs), "{job}");
+        assert_eq!(j["max_instructions"], json!(MAX_INSTRUCTIONS), "{job}");
+    }
+}
+
+/// The Payee run OutLayer is asked for carries the execution limit and the deposit computed for that limit:
+/// `PAYEE_DEPOSIT` is `job_deposit(PAYEE_SECS)`, so a request for more seconds than `PAYEE_SECS` could cost more
+/// than it attaches.
+#[test]
+fn the_payee_run_asks_for_the_seconds_its_deposit_was_computed_for() {
+    use near_sdk::mock::MockAction;
+    use near_sdk::test_utils::get_created_receipts;
+    let mut a = executing(Kind::Procurement);
+    call(VENDOR, None, T0 + 50, vec![]);
+    a.propose_recipient(acc(RECIPIENT), "halcyon.example".into());
+    let requests: Vec<(Value, NearToken)> = get_created_receipts()
+        .into_iter()
+        .flat_map(|r| r.actions)
+        .filter_map(|act| match act {
+            MockAction::FunctionCallWeight {
+                method_name,
+                args,
+                attached_deposit,
+                ..
+            } if method_name == b"request_execution" => {
+                Some((serde_json::from_slice(&args).unwrap(), attached_deposit))
+            }
+            _ => None,
+        })
+        .collect();
+    assert_eq!(requests.len(), 1);
+    let (args, deposit) = &requests[0];
+    assert_eq!(crate::negotiation::PAYEE_SECS, 60);
+    assert_eq!(
+        args["resource_limits"]["max_execution_seconds"],
+        json!(crate::negotiation::PAYEE_SECS)
+    );
+    assert_eq!(*deposit, crate::recipients::PAYEE_DEPOSIT);
+}

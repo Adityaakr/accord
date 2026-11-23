@@ -1,0 +1,8 @@
+{
+  "note": "What release 7's agreement attaches to OutLayer per run (contracts/agreement/src/negotiation.rs job_deposit) and the limits it asks for. A unit test checks these equal the compiled constants; make check-deploy checks each still covers OutLayer's live estimate_execution_cost for the largest output the agreement accepts (DECISIONS.md section 38).",
+  "max_output": 16384,
+  "jobs": {
+    "sealed_table": { "max_instructions": 100000000000, "max_execution_seconds": 100, "deposit": "218562500000000000000000" },
+    "payee": { "max_instructions": 100000000000, "max_execution_seconds": 60, "deposit": "213562500000000000000000" }
+  }
+}

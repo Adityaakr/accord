@@ -192,12 +192,16 @@ describe("rpcEndpoints", () => {
       "https://rpc.testnet.fastnear.com",
       "https://near-testnet.drpc.org",
     ]);
-    expect(rpcEndpoints(undefined, "mainnet")).toEqual(["https://free.rpc.fastnear.com", "https://rpc.mainnet.near.org"]);
+    expect(rpcEndpoints(undefined, "mainnet")).toEqual(["https://free.rpc.fastnear.com", "https://near.drpc.org"]);
     expect(rpcEndpoints("http://127.0.0.1:3030", "sandbox")).toEqual(["http://127.0.0.1:3030"]);
   });
 
   it("Chain on testnet falls back to the public endpoints", () => {
-    expect(new Chain("https://test.rpc.fastnear.com", "testnet").rpcUrls).toHaveLength(4);
+    expect(new Chain("https://test.rpc.fastnear.com", "testnet").rpcUrls).toHaveLength(3);
+  });
+
+  it("compiles in no deprecated near.org endpoint", () => {
+    for (const net of ["testnet", "mainnet"]) expect(rpcEndpoints(undefined, net).filter((u) => u.includes("near.org"))).toEqual([]);
   });
 
   it("Chain with fallbacks off reads only from the configured URL, and Accord keeps that on every copy", () => {
@@ -207,7 +211,7 @@ describe("rpcEndpoints", () => {
     expect(a.chain.rpcUrls).toEqual([proxy]);
     expect(a.onFactory("accord-usdc.testnet").chain.rpcUrls).toEqual([proxy]);
     expect(a.withSigner({ accountId: "x.testnet", call: async () => { throw new Error("unused"); } }).chain.rpcUrls).toEqual([proxy]);
-    expect(new Accord({ network: "testnet", factory: "accord-v2.testnet", rpc: proxy }).chain.rpcUrls).toHaveLength(5);
+    expect(new Accord({ network: "testnet", factory: "accord-v2.testnet", rpc: proxy }).chain.rpcUrls).toHaveLength(4);
   });
 
   it("a busy JSON-RPC body in an HTTP 200 (what the app's read proxy answers) reads as busy", async () => {

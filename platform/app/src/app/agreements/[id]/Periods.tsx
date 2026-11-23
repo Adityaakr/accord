@@ -1,12 +1,14 @@
-import type { AtlasTerms, PeriodView, StoredObservation } from "@accord/sdk";
+import { venueNote, type AtlasTerms, type PeriodView, type StoredObservation } from "@accord/sdk";
 import { ObservationLog, PeriodGrid } from "@/components/atlas";
 import { Empty, Panel } from "@/components/ui";
 
 /** A market-making deal room: each period's slots, then every observation the contract accepted. */
 export function Periods({
-  periods, observations, atlas, now,
-}: { periods: PeriodView[]; observations: StoredObservation[][]; atlas: AtlasTerms; now: number }) {
+  periods, observations, atlas, twoSided, now,
+}: { periods: PeriodView[]; observations: StoredObservation[][]; atlas: AtlasTerms; twoSided: boolean; now: number }) {
   const all = observations.flat().sort((a, b) => b.observation.venue_block.height - a.observation.venue_block.height);
+  // the newest reading of a pool that cannot meet this agreement's conditions: the slots fail on market data, and the page says so plainly
+  const venue = all[0] ? venueNote(all[0].observation, atlas, twoSided, "the venue's pool") : null;
   return (
     <>
       <Panel
@@ -18,6 +20,7 @@ export function Periods({
           Numbers in the slots are the spread in basis points. The observer measures the venue&apos;s liquidity, not the market
           maker&apos;s own orders.
         </p>
+        {venue && <p className="small" style={{ marginTop: 8 }}><strong>Newest reading:</strong> {venue}</p>}
       </Panel>
       <Panel
         title="Observation log"

@@ -9,6 +9,8 @@ import { accord, listAllAgreements, source, symbolFor, type Source } from "./acc
 import { unitFor } from "@/lib/units";
 import { currentStep } from "@/app/agreements/[id]/pipeline";
 import { readWithin } from "./deadline";
+import { roomNoDeal } from "./nodeal";
+import type { NoDealCause } from "@/lib/nodeal";
 
 /** A page render waits this long for the chain, then shows "busy, reading again" (error.tsx) rather than hanging. */
 const PAGE_READ_MS = 12_000;
@@ -39,6 +41,8 @@ export interface Room {
   commitments: { buyer: Commitment | null; vendor: Commitment | null };
   /** `NoDeal` with no stored signed output: no signed answer reached the contract on any attempt (not a walk-away) */
   unanswered: boolean;
+  /** why a `NoDeal` room ended, from the signed no-deal or the attempts' transactions (lib/nodeal.ts); null otherwise */
+  noDeal: NoDealCause | null;
   source: Source;
 }
 
@@ -52,11 +56,12 @@ async function readRoom(id: string): Promise<Room> {
     d.get(), d.terms(), d.items(), d.refusals(undefined, 128), d.recipients(), d.exceptions(), d.periods(), d.receipts(),
     d.commitments().catch(() => ({ buyer: null, vendor: null })), source(),
   ]);
-  const [observations, unanswered] = await Promise.all([
+  const [observations, unanswered, noDeal] = await Promise.all([
     Promise.all(periods.map((p) => d.observations(p.period))),
     view.state === "NoDeal" ? d.sealedOutput().then((o) => o === null).catch(() => false) : false,
+    view.state === "NoDeal" ? roomNoDeal(id, view.outlayer).catch(() => null) : null,
   ]);
-  return { view, terms, items, refusals: refusals.reverse(), recipients, exceptions, periods, observations, receipts, commitments, unanswered, source: src };
+  return { view, terms, items, refusals: refusals.reverse(), recipients, exceptions, periods, observations, receipts, commitments, unanswered, noDeal, source: src };
 }
 
 // ---------- Home: one person's rooms, what needs them, and the numbers (docs/build/PLATFORM.md §7) ----------

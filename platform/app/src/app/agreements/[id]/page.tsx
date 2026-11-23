@@ -109,7 +109,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
     buyerCommit: r.commitments.buyer?.commitment ?? null, vendorCommit: r.commitments.vendor?.commitment ?? null,
     terms: terms ? { total: usd(terms.total), items: terms.items.length, hash: a.terms_hash, label: isAtlas ? "periods" : "items", unit: sym } : null,
     verifyHref: `/verify/${a.account}`,
-    unanswered: r.unanswered, held,
+    unanswered: r.unanswered, noDeal: r.noDeal, release: a.release, held,
   };
 
   // changes whenever the chain state the page shows changes: the timeline and the transcript read again at once
@@ -305,7 +305,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
             <>
               {itemsPanel || <Panel title="Evidence"><Empty>Nothing to check until the terms are approved.</Empty></Panel>}
               {isAtlas && r.periods.length > 0 && terms?.atlas && (
-                <Periods periods={r.periods} observations={r.observations} atlas={terms.atlas} now={now} />
+                <Periods periods={r.periods} observations={r.observations} atlas={terms.atlas} twoSided={a.params.require_two_sided} now={now} />
               )}
               {r.exceptions.length > 0 && (
                 <Panel title="Exceptions" eyebrow="a one-off change to one item, decided by the buyer; never a recipient change">
@@ -372,7 +372,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
         </div>
 
         <aside className={styles.side}>
-          {config().network === "testnet" && isDemoRoom(a) && <DemoPanel agreement={a} items={r.items.map((it) => ({ id: it.id, status: it.status }))} explorer={config().explorer} />}
+          {config().network === "testnet" && isDemoRoom(a) && <DemoPanel agreement={a} items={r.items.map((it) => ({ id: it.id, status: it.status }))} explorer={config().explorer} noDeal={r.noDeal} />}
           <Actions agreement={a} items={r.items} exceptions={r.exceptions} recipients={r.recipients} periods={r.periods} demoRoom={config().network === "testnet" && isDemoRoom(a)} />
           <Panel title="At a glance">
             <KV rows={[
