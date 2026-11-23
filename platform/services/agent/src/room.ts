@@ -29,8 +29,32 @@ export class TryRoomKeeper {
     return this.room;
   }
 
+  /**
+   * Whether a stored room is this chain's /try room: it exists and has the room's own buyer and vendor. A local node
+   * started again by `make dev` is a new chain whose agreement ids repeat (`a8.accord.test.near` can be someone else's
+   * room there), while the store file keeps the old node's rooms; acting on one would loop on `ERR_NOT_BUYER`. Null
+   * when the chain cannot be read, so a passing RPC failure never closes a real room.
+   */
+  private async ours(id: string): Promise<boolean | null> {
+    try {
+      const a = await this.w.reader.agreement(id).get();
+      return a.buyer === this.w.principals.buyer.account && a.vendor === this.w.principals.vendor.account;
+    } catch (e) {
+      return /does not exist|UNKNOWN_ACCOUNT|doesn't exist/i.test((e as Error).message ?? "") ? false : null;
+    }
+  }
+
   async step(): Promise<void> {
-    const rooms = await tryRooms(50);
+    let rooms = await tryRooms(50);
+    // rooms from an earlier chain (a restarted local node) are closed in the store, never acted on
+    for (const r of rooms.filter((x) => x.status !== "closed")) {
+      if ((await this.ours(r.agreement)) === false) {
+        await closeTryRoom(r.agreement, r.items_paid);
+        if (this.room?.agreement === r.agreement) this.room = null;
+        this.log(`try room ${r.agreement} · not on this chain (or not the /try room's) · forgotten`);
+      }
+    }
+    rooms = await tryRooms(50);
     const today = new Date().toISOString().slice(0, 10);
     const openedToday = rooms.filter((r) => r.opened_at.slice(0, 10) === today).length;
     const opening = rooms.find((r) => r.status === "opening");

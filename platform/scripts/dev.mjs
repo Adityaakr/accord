@@ -47,6 +47,6 @@ start("node", "cargo", ["run", "-q", "-p", "accord-sandbox", "--bin", "serve"], 
     start("keeper", "pnpm", ["--silent", "--filter", "@accord/keeper", "start"]);
     start("agent", "pnpm", ["--silent", "--filter", "@accord/agent", "start"]);
     start("app", "pnpm", ["--silent", "--filter", "@accord/app", "dev"]);
-    process.stdout.write("dev    │ app http://localhost:3100 · local node · make <target> NET=local in another terminal\n");
+    process.stdout.write("dev    │ app http://localhost:3100/app · local node · make <target> NET=local in another terminal\n");
   },
 });
