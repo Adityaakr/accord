@@ -1117,8 +1117,9 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
   reuses agreement ids) no longer loops on `install_agent_key: ERR_NOT_BUYER`.
 - **Market making.** Rhea's USDC/wNEAR pool read `spread 12658 bps · depth 0.00 / 0.00 USDC` on 22 Nov 2026 (`make
   probe-venue`, reproduced from an archival node): the pool was empty, so every slot failed on real data. The SDK's
-  `venueState` classifies a reading as empty, one-sided, wide or quoted; `make market-making`, `/app/atlas` and a
-  market-making room say when the pool itself is empty. Pointing new demo agreements at a live pool is a follow-up
+  `venueState` judges a reading against the agreement's own conditions with the contract's rule (empty, one-sided,
+  wide, shallow or meets); `make market-making`, `/app/atlas` and a market-making room name the agreed condition the
+  pool could not meet. Pointing new demo agreements at a live pool is a follow-up
   (`docs/build/BLOCKED.md`), not a change to deployed terms.
 - **Not done.** Rooms created before release 7 keep their release and their `0.05` NEAR deposit; one still `Sealed`
   cannot be negotiated. The hosted app shows the new `No deal` causes, the verify panel and the de-listed `release` line
