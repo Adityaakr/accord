@@ -39,14 +39,12 @@ describe("release proof with outlayer-verify", () => {
 
 // `outlayer-verify job 106160 --network testnet --json` on 23 Nov 2026 (release 6's Sealed Table pubkey run): the
 // worker register no longer lists the build that ran it; every other layer passes. Exit 1.
-const MEASUREMENTS = { mrtd: "7fe6", rtmr0: "573a", rtmr1: "e7b3", rtmr2: "7644", rtmr3: "d854" };
 const delisted: VerifyJson = {
   authenticity: { verdict: "pass", detail: "Intel signature chain valid, TCB UpToDate" },
   identity: { verdict: "fail", reason: "measurements are NOT in the approved list on worker.outlayer.testnet \u2014 the code that ran is not a build this operator has published" },
   binding: { verdict: "pass" }, input: { verdict: "pass" }, output: { verdict: "pass" },
-  measurements: MEASUREMENTS, collateral: { contract_id: "worker.outlayer.testnet" },
+  measurements: { mrtd: "7fe6", rtmr0: "573a", rtmr1: "e7b3", rtmr2: "7644", rtmr3: "d854" },
 };
-const at = { ...record, block_height: 277645106 };
 const exit1 = (v: VerifyJson) => async () => ({ code: 1, stdout: JSON.stringify(v), stderr: "warning: the chain does NOT list this build as approved", missing: false });
 
 describe("a worker build de-listed after the run", () => {
@@ -56,29 +54,21 @@ describe("a worker build de-listed after the run", () => {
     expect(delistedOnly({ ...delisted, identity: { verdict: "fail", reason: "MRTD does not match" } })).toBe(false);
     expect(delistedOnly({ ...delisted, measurements: {} })).toBe(false);
   });
-  it("is not checked, naming the block it was approved at, when the list at the run's block approves it", async () => {
-    const asked: unknown[] = [];
-    const p = releaseProof({ bin: "x", fetchRecord: async () => at, run: exit1(delisted), approvedAt: async (...a) => { asked.push(a); return true; } });
+  it("is not checked, never failed, when only the approved list rejects it", async () => {
+    const p = releaseProof({ bin: "x", fetchRecord: async () => record, run: exit1(delisted) });
     const r = await p(job);
     expect(r.status).toBe("not_checked");
-    expect(r.detail).toContain("worker build no longer approved; quote valid");
-    expect(r.detail).toContain("approved on worker.outlayer.testnet at block 277645106, when it ran");
-    expect(asked).toEqual([["testnet", "worker.outlayer.testnet", MEASUREMENTS, 277645106]]);
-  });
-  it("is not checked, and says so, when the old list cannot be read or no block is known", async () => {
-    for (const [rec, approvedAt] of [[at, async () => null], [record, async () => true], [at, undefined]] as const) {
-      const p = releaseProof({ bin: "x", fetchRecord: async () => rec, run: exit1(delisted), approvedAt });
-      expect(await p(job)).toMatchObject({ status: "not_checked", detail: expect.stringContaining("could not be read") });
-    }
-  });
-  it("fails when the build was not approved at the run's block either", async () => {
-    const p = releaseProof({ bin: "x", fetchRecord: async () => at, run: exit1(delisted), approvedAt: async () => false });
-    expect(await p(job)).toMatchObject({ status: "fail", detail: expect.stringContaining("when it ran either (block 277645106)") });
+    expect(r.detail).toContain("= task 28880 · wasm 7c832ce9… · worker build no longer approved; quote valid");
   });
   it("still fails when another layer failed, naming it", async () => {
-    const p = releaseProof({ bin: "x", fetchRecord: async () => at, run: exit1({ ...delisted, output: { verdict: "fail", reason: "hash differs" } }), approvedAt: async () => true });
-    expect(await p(job)).toMatchObject({ status: "fail", detail: expect.stringContaining("failed: identity") });
-    expect((await p(job)).detail).toContain("output (hash differs)");
+    const p = releaseProof({ bin: "x", fetchRecord: async () => record, run: exit1({ ...delisted, output: { verdict: "fail", reason: "hash differs" } }) });
+    const r = await p(job);
+    expect(r).toMatchObject({ status: "fail", detail: expect.stringContaining("failed: identity") });
+    expect(r.detail).toContain("output (hash differs)");
+  });
+  it("still fails when identity failed for another reason", async () => {
+    const p = releaseProof({ bin: "x", fetchRecord: async () => record, run: exit1({ ...delisted, identity: { verdict: "fail", reason: "MRTD does not match" } }) });
+    expect((await p(job)).status).toBe("fail");
   });
 });
 

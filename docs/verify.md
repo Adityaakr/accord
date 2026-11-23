@@ -27,10 +27,10 @@ accord verify · a6.accord-v2.testnet
 verify: 7 checks ok
 ```
 
-Since 22 Nov 2026 the `release` line reads as below and the last line is `verify: 6 checks ok · 1 not checked` (exit `0`). OutLayer took the worker build that ran a6's three key runs off the approved list on `worker.outlayer.testnet`, so `outlayer-verify` fails their identity layer while the Intel quote, the binding, the input and the output still verify. The check then reads `is_measurements_approved` again at each run's own block on an archival node: approved then is `not checked`, never `ok`; a build that was not approved then either is `failed`.
+Since 22 Nov 2026 the `release` line reads as below and the last line is `verify: 6 checks ok · 1 not checked` (exit `0`). OutLayer took the worker build that ran a6's three key runs off the approved list on `worker.outlayer.testnet`, so `outlayer-verify` fails their identity layer while the Intel quote, the binding, the input and the output still verify. When identity failed only on that list and every other layer passed, the check is `not checked`, never `ok`; any other failed layer is `failed`. It does not read the approved list at the run's block.
 
 ```
-  release   sealed-table run 13682 = task 28492 · wasm 7c832ce9… · worker build no longer approved; quote valid (approved on worker.outlayer.testnet at block 276803518, when it ran; quote, binding, input and output pass) · payee run 13672 = task 28478 · wasm 24071443… · worker build no longer approved; quote valid (approved on worker.outlayer.testnet at block 276802754, when it ran; quote, binding, input and output pass) · observer run 13683 = task 28493 · wasm 8240179a… · worker build no longer approved; quote valid (approved on worker.outlayer.testnet at block 276803588, when it ran; quote, binding, input and output pass) · not checked
+  release   sealed-table run 13682 = task 28492 · wasm 7c832ce9… · worker build no longer approved; quote valid (identity failed only on OutLayer's current approved list; quote, binding, input and output pass) · payee run 13672 = task 28478 · wasm 24071443… · worker build no longer approved; quote valid (identity failed only on OutLayer's current approved list; quote, binding, input and output pass) · observer run 13683 = task 28493 · wasm 8240179a… · worker build no longer approved; quote valid (identity failed only on OutLayer's current approved list; quote, binding, input and output pass) · not checked
 verify: 6 checks ok · 1 not checked
 ```
 

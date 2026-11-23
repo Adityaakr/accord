@@ -1468,13 +1468,37 @@ fn the_deposit_fixture_matches_the_compiled_constants() {
     }
 }
 
-/// `propose_recipient` passes the Payee run's limit as the literal `60`: the release 7 wasm embeds panic locations
-/// (file, line, column), so this file's layout is pinned by the published code hash, and `PAYEE_SECS` written there
-/// would make rustfmt split the call over more lines. This keeps the literal and the constant the deposit is
-/// computed from the same.
+/// The Payee run OutLayer is asked for carries the execution limit and the deposit computed for that limit:
+/// `PAYEE_DEPOSIT` is `job_deposit(PAYEE_SECS)`, so a request for more seconds than `PAYEE_SECS` could cost more
+/// than it attaches.
 #[test]
 fn the_payee_run_asks_for_the_seconds_its_deposit_was_computed_for() {
+    use near_sdk::mock::MockAction;
+    use near_sdk::test_utils::get_created_receipts;
+    let mut a = executing(Kind::Procurement);
+    call(VENDOR, None, T0 + 50, vec![]);
+    a.propose_recipient(acc(RECIPIENT), "halcyon.example".into());
+    let requests: Vec<(Value, NearToken)> = get_created_receipts()
+        .into_iter()
+        .flat_map(|r| r.actions)
+        .filter_map(|act| match act {
+            MockAction::FunctionCallWeight {
+                method_name,
+                args,
+                attached_deposit,
+                ..
+            } if method_name == b"request_execution" => {
+                Some((serde_json::from_slice(&args).unwrap(), attached_deposit))
+            }
+            _ => None,
+        })
+        .collect();
+    assert_eq!(requests.len(), 1);
+    let (args, deposit) = &requests[0];
     assert_eq!(crate::negotiation::PAYEE_SECS, 60);
-    assert!(include_str!("recipients.rs")
-        .contains("request_job(&cfg.outlayer, &cfg.payee_job, input, 60, PAYEE_DEPOSIT, 200)"));
+    assert_eq!(
+        args["resource_limits"]["max_execution_seconds"],
+        json!(crate::negotiation::PAYEE_SECS)
+    );
+    assert_eq!(*deposit, crate::recipients::PAYEE_DEPOSIT);
 }

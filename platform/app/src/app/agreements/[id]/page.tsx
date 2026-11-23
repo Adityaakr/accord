@@ -305,7 +305,7 @@ export default async function DealRoom({ params, searchParams }: { params: Promi
             <>
               {itemsPanel || <Panel title="Evidence"><Empty>Nothing to check until the terms are approved.</Empty></Panel>}
               {isAtlas && r.periods.length > 0 && terms?.atlas && (
-                <Periods periods={r.periods} observations={r.observations} atlas={terms.atlas} now={now} />
+                <Periods periods={r.periods} observations={r.observations} atlas={terms.atlas} twoSided={a.params.require_two_sided} now={now} />
               )}
               {r.exceptions.length > 0 && (
                 <Panel title="Exceptions" eyebrow="a one-off change to one item, decided by the buyer; never a recipient change">

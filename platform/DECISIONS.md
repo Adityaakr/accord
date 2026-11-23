@@ -1103,12 +1103,14 @@ Not fixed and stated: the relayer and the agent service each keep their own nonc
   agreement: `outlayer-verify` failed the identity layer of releases 3 to 6's key runs (`measurements are NOT in the
   approved list on worker.outlayer.testnet`) while authenticity, binding, input and output passed. The worker register
   had approved them when they ran: `is_measurements_approved` for task `106160`'s measurements (release 6's Sealed Table
-  key run) answers `true` at its block `277645106` on `archival-rpc.testnet.fastnear.com` and `false` now. The release
-  proof (`packages/sdk/src/release-node.ts`) reads `outlayer-verify --json`; when identity alone failed on the approved
-  list, it reads the list again at the run's block and reports `not checked` (`worker build no longer approved; quote
-  valid (approved on worker.outlayer.testnet at block N, when it ran; …)`), never `ok`; a build that was not approved
-  then either is a failure; an unreadable old list is `not checked` and says so. Now `a91`, `a6`, `a82` print
-  `verify: 6 checks ok · 1 not checked` (exit `0`), and release 7's key runs, on the current worker build, are proven.
+  key run) answers `true` at its block `277645106` on `archival-rpc.testnet.fastnear.com` and `false` now; `make
+  verify` does not read it, so it depends on no archival node. The release proof (`packages/sdk/src/release-node.ts`)
+  reads `outlayer-verify --json`; when identity alone failed on the approved list and every other layer passed, it
+  reports `not checked` (`worker build no longer approved; quote valid (identity failed only on OutLayer's current
+  approved list; quote, binding, input and output pass)`), never `ok`; any other failed layer is a failure. Now
+  `a91`, `a6`, `a82` print `verify: 6 checks ok · 1 not checked` (exit `0`), and release 7's key runs, on the current
+  worker build, are proven: on 23 Nov 2026 `make verify DEAL=a6.accord-v2.testnet` printed `verify: 6 checks ok · 1 not
+  checked` (exit `0`) and `make verify DEAL=a107.accord-v2.testnet` printed `verify: 7 checks ok`.
 - **Local fixes.** `make inbox` and `make demo` with `NET=local` defaulted to the app at `http://127.0.0.1:3100`, but its
   basePath has been `/app` since 8 Nov; both defaults are now `http://127.0.0.1:3100/app`. The `/try` re-arm closes a
   stored room that does not exist on this chain or is not the `/try` principals' room, so a restarted local node (which

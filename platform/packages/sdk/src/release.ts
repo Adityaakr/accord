@@ -24,8 +24,6 @@ export interface AttestationRecord {
   executed_wasm_sha256?: string;
   caller_account_id: string;
   transaction_hash?: string;
-  /** The block the run's answer landed in; the worker register's approved list is read again there. */
-  block_height?: number | string;
 }
 
 export type FetchAttestationRecord = (api: string, requestId: number) => Promise<AttestationRecord | null>;

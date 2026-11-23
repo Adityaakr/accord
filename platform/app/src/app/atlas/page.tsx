@@ -25,6 +25,8 @@ export default async function MarketMaking() {
   const c = await atlasConsole().catch(() => null);
   const latest = c?.latest ?? null;
   const pool = c?.rooms[0]?.atlas.venue.RheaDcl;
+  const latestRoom = latest ? c?.rooms.find((r) => r.record.account === latest.agreement) : undefined;
+  const latestNote = latest && latestRoom ? venueNote(latest.observation, latestRoom.atlas, latestRoom.view.params.require_two_sided, "Rhea's NEAR/USDC pool") : null;
   const age = latest && c ? Math.max(0, Math.round(c.source.at / 1000) - latest.observation.venue_block.time) : null;
 
   return (
@@ -55,9 +57,7 @@ export default async function MarketMaking() {
         ) : (
           <Empty>No observation recorded yet. The keeper asks the observer once each hidden slot time has passed.</Empty>
         )}
-        {latest && venueNote(latest.observation, "Rhea's NEAR/USDC pool") && (
-          <p className="small" style={{ marginTop: 12 }}>{venueNote(latest.observation, "Rhea's NEAR/USDC pool")}</p>
-        )}
+        {latestNote && <p className="small" style={{ marginTop: 12 }}>{latestNote}</p>}
       </section>
 
       {c && c.unread > 0 && (

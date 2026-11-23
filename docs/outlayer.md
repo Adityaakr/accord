@@ -53,7 +53,7 @@ app ran to `Settled` ([`a106.accord-v2.testnet`](https://useaccord.tech/app/veri
 
 The same week OutLayer took the worker build that had run releases 3 to 6's key runs off its approved list on
 [`worker.outlayer.testnet`](https://testnet.nearblocks.io/address/worker.outlayer.testnet), so `outlayer-verify` fails their identity layer while the Intel quote still verifies.
-`make verify` reads the approved list again at each run's own block and reports such a run as `not checked`
+`make verify` reports such a run, where only that layer failed, as `not checked`
 (`worker build no longer approved; quote valid`), not `failed`; release 7's key runs ran on the current build and are
 proven.
 

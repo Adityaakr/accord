@@ -65,8 +65,8 @@ The key spends OutLayer credit per observation (one call per open slot every `30
   it in the market-making mandates (`fixtures/companies/northwind/market-making.buyer*.json`); until then the CLI and the app
   say the pool is empty.
 - **The approved list at the run's block, upstream.** `outlayer-verify` reads OutLayer's approved worker list as it is
-  now. `make verify` reads it again at the run's block on an archival node (`packages/sdk/src/release-node.ts`) and
-  reports a de-listed build as `not checked`. Ask OutLayer whether `outlayer-verify` can take the block itself, so a run
+  now. `make verify` reports a build that fails only that list as `not checked`
+  (`packages/sdk/src/release-node.ts`); it does not read the list at the run's block. Ask OutLayer whether `outlayer-verify` can take the block itself, so a run
   approved when it ran proves `ok` on the tool's own word.
 - **The hosted app and keeper run the code on `main`.** The contract fix (release 7) was live as soon as it was
   published; the app's `No deal` causes, the verify panel, the de-listed `release` line in `/api/verify` and the

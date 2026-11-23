@@ -4,11 +4,11 @@ import { Empty, Panel } from "@/components/ui";
 
 /** A market-making deal room: each period's slots, then every observation the contract accepted. */
 export function Periods({
-  periods, observations, atlas, now,
-}: { periods: PeriodView[]; observations: StoredObservation[][]; atlas: AtlasTerms; now: number }) {
+  periods, observations, atlas, twoSided, now,
+}: { periods: PeriodView[]; observations: StoredObservation[][]; atlas: AtlasTerms; twoSided: boolean; now: number }) {
   const all = observations.flat().sort((a, b) => b.observation.venue_block.height - a.observation.venue_block.height);
-  // the newest reading of an empty or unquoted pool: the slots fail on market data, and the page says so plainly
-  const venue = all[0] ? venueNote(all[0].observation, "the venue's pool") : null;
+  // the newest reading of a pool that cannot meet this agreement's conditions: the slots fail on market data, and the page says so plainly
+  const venue = all[0] ? venueNote(all[0].observation, atlas, twoSided, "the venue's pool") : null;
   return (
     <>
       <Panel

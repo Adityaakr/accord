@@ -55,10 +55,11 @@ async function observePeriod(w: World, room: Room, ask: AskObserver, print: bool
       const ob = o.observation;
       if (print) {
         line(`slot ${k + 1}`, `mainnet block ${ob.venue_block.height} · spread ${ob.spread_bps} bps · depth ${usdc(ob.depth_bid).replace(" USDC", "")} / ${usdc(ob.depth_ask)} · ${o.pass ? "pass" : "fail"}`);
-        // the pool itself empty or unquoted: said once, so a run of failing slots is not read as Accord failing
-        const note = venueNote(ob, "Rhea's NEAR/USDC pool");
-        if (note && !venueNoted.has(venueState(ob))) {
-          venueNoted.add(venueState(ob));
+        // the pool itself unable to meet the agreed conditions: said once, so a run of failing slots is not read as Accord failing
+        const note = venueNote(ob, room.atlas, a.params.require_two_sided, "Rhea's NEAR/USDC pool");
+        const state = venueState(ob, room.atlas, a.params.require_two_sided);
+        if (note && !venueNoted.has(state)) {
+          venueNoted.add(state);
           line("venue", note);
         }
       }
