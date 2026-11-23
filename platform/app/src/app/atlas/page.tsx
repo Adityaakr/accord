@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { RoomLink } from "@/components/RoomLink";
-import { formatUnits } from "@accord/sdk";
+import { formatUnits, venueNote } from "@accord/sdk";
 import { atlasConsole } from "@/server/atlas";
 import { blockLink, Conditions, ObservationLog, PeriodGrid } from "@/components/atlas";
 import { AutoRefresh } from "@/components/AutoRefresh";
@@ -54,6 +54,9 @@ export default async function MarketMaking() {
           </div>
         ) : (
           <Empty>No observation recorded yet. The keeper asks the observer once each hidden slot time has passed.</Empty>
+        )}
+        {latest && venueNote(latest.observation, "Rhea's NEAR/USDC pool") && (
+          <p className="small" style={{ marginTop: 12 }}>{venueNote(latest.observation, "Rhea's NEAR/USDC pool")}</p>
         )}
       </section>
 

@@ -17,3 +17,4 @@ export * from "./tender.js";
 export * from "./tenderwork.js";
 export * from "./timelock.js";
 export * from "./outlayer.js";
+export * from "./venue.js";
