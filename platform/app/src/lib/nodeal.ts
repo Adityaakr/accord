@@ -106,19 +106,21 @@ export function noDealCause(sealedOutput: string | null, txs: RawTx[] | null, ag
 /** The first release whose Sealed Table and Payee deposits hold the largest output the agreement accepts. */
 export const DEPOSIT_FIXED_IN_RELEASE = 7;
 
-/** OutLayer refused to hold the run's output: the agreement's release attaches too little NEAR (release 6 and earlier). */
+/** OutLayer refused to hold the run's output: the agreement attached too little NEAR (every room of release 6 and earlier). */
 export function isStorageUnpaid(c: Pick<NoDealCause, "kind" | "message"> | null | undefined): boolean {
   return c?.kind === "outlayer_error" && !!c.message?.startsWith("output_storage_unpaid");
 }
 
-/** One short line for a status pill or a step answer. */
-export function noDealLine(c: NoDealCause | null | undefined, sym = "tUSDC"): string {
+/** One short line for a status pill or a step answer; `release` is the room's own release. */
+export function noDealLine(c: NoDealCause | null | undefined, release: number, sym = "tUSDC"): string {
   switch (c?.kind) {
     case "limits": return `No deal: the buyer's ceiling was below the vendor's floor, so the Sealed Table agreed nothing and no money moved. Open a new room with a ceiling of at least ${sym === "USDC" ? 12 : 30} ${sym}.`;
     case "walk_away": return "No deal: one side's agent walked away inside the Sealed Table, so nothing was agreed and no money moved.";
     case "bad_input": return "No deal: the Sealed Table could not read a mandate, so nothing was agreed and no money moved.";
-    case "outlayer_error": return isStorageUnpaid(c)
-      ? "No deal: OutLayer refused every attempt with output_storage_unpaid. This room's release attaches too little NEAR for OutLayer to hold the Sealed Table's answer; nothing was funded. Rooms opened now are on release 7, which attaches enough."
+    case "outlayer_error": return isStorageUnpaid(c) && release < DEPOSIT_FIXED_IN_RELEASE
+      ? `No deal: OutLayer refused every attempt with output_storage_unpaid. This room's release (${release}) attaches 0.05 NEAR, too little for OutLayer to hold the Sealed Table's answer; nothing was funded. Rooms opened now are on release ${DEPOSIT_FIXED_IN_RELEASE}, which attaches enough.`
+      : isStorageUnpaid(c)
+      ? `No deal: OutLayer refused every attempt (${c.message}): the NEAR this room attached did not cover what OutLayer asked to hold the Sealed Table's answer. Nothing was funded.`
       : `No deal: OutLayer returned an error for every attempt (${c.message ?? "no message"}), so the two sides' limits were never compared. Nothing was funded.`;
     case "late": return "No deal: OutLayer's enclave worker answered after NEAR's wait on every attempt, so the two sides' limits were never compared. Nothing was funded.";
     case "rejected": return `No deal: the contract refused the answer of every attempt (${c.message ?? "it did not verify"}). Nothing was funded.`;

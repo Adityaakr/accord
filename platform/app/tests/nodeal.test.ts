@@ -33,15 +33,25 @@ describe("no-deal cause", () => {
     expect(c.message).toBe(UNPAID);
     expect(c.attempts.map((a) => [a.attempt, a.kind])).toEqual([[1, "outlayer_error"], [2, "outlayer_error"], [3, "outlayer_error"]]);
     expect(isStorageUnpaid(c)).toBe(true);
-    const line = noDealLine(c);
+    const line = noDealLine(c, 6);
     expect(line).toContain("output_storage_unpaid");
     expect(line).not.toMatch(/ceiling|in time|late/);
+  });
+
+  it("blames the old 0.05 NEAR deposit only for a room released before the fix", () => {
+    const c = noDealCause(null, [attempt(1, failedLog, undefined, true)], ROOM, OL);
+    // a102 is a release 6 room (DECISIONS.md section 38): its 0.05 NEAR left 0.0447 NEAR for a 0.0704 NEAR hold
+    expect(noDealLine(c, 6)).toContain("release (6) attaches 0.05 NEAR");
+    expect(noDealLine(c, 6)).toContain("on release 7");
+    const now = noDealLine(c, 7);
+    expect(now).toContain(UNPAID);
+    expect(now).not.toMatch(/0\.05|release 7|release \(7\)/);
   });
 
   it("is late only when OutLayer logged that the yield ended first", () => {
     const c = noDealCause(null, [attempt(1, "Execution promise failed: Failed. Refunded 49000000000000000000000 yoctoNEAR", undefined, true)], ROOM, OL);
     expect(c.kind).toBe("late");
-    expect(noDealLine(c)).toContain("after NEAR's wait");
+    expect(noDealLine(c, 7)).toContain("after NEAR's wait");
   });
 
   it("is the contract's refusal when an answer arrived and did not verify", () => {
@@ -52,12 +62,12 @@ describe("no-deal cause", () => {
   it("says unknown, never a guess, when the transactions could not be read or carry no OutLayer line", () => {
     expect(noDealCause(null, null, ROOM, OL).kind).toBe("unknown");
     expect(noDealCause(null, [attempt(1, null)], ROOM, OL).kind).toBe("unknown");
-    expect(noDealLine(noDealCause(null, null, ROOM, OL))).not.toMatch(/ceiling|in time|late/);
+    expect(noDealLine(noDealCause(null, null, ROOM, OL), 7)).not.toMatch(/ceiling|in time|late/);
   });
 
   it("reads the Sealed Table's own signed reason when it answered with a no-deal", () => {
     expect(noDealCause(JSON.stringify({ outcome: "no_deal", no_deal_reason: "LIMIT_CHECK" }), null, ROOM, OL).kind).toBe("limits");
-    expect(noDealLine(noDealCause(JSON.stringify({ outcome: "no_deal", no_deal_reason: "LIMIT_CHECK" }), null, ROOM, OL), "USDC")).toContain("at least 12 USDC");
+    expect(noDealLine(noDealCause(JSON.stringify({ outcome: "no_deal", no_deal_reason: "LIMIT_CHECK" }), null, ROOM, OL), 7, "USDC")).toContain("at least 12 USDC");
     expect(noDealCause(JSON.stringify({ outcome: "no_deal", no_deal_reason: "WALK_AWAY" }), null, ROOM, OL).kind).toBe("walk_away");
   });
 

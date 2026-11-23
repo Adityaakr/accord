@@ -68,7 +68,8 @@ export interface ReleaseJob {
  * Proves one job key's run against OutLayer's attestation record (the CLI runs `outlayer-verify`). `not_checked`
  * when the proof could not be run here (the tool is missing, the record API is unreachable).
  */
-export type ReleaseProof = (job: ReleaseJob) => Promise<{ status: "ok" | "fail" | "not_checked"; detail: string }>;
+/** `settled`: a `not_checked` verdict that will not change on a later run (a worker build OutLayer has de-listed). */
+export type ReleaseProof = (job: ReleaseJob) => Promise<{ status: "ok" | "fail" | "not_checked"; detail: string; settled?: boolean }>;
 
 export async function verify(
   accord: Accord,

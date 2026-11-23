@@ -241,7 +241,7 @@ export async function counterpartyStep(id: string): Promise<Step> {
   const circle = isCircleRoom(a);
   if (a.state === "NoDeal") {
     // the cause the chain recorded: the Sealed Table's signed reason, or OutLayer's own log in each attempt
-    return wait(noDealLine(await roomNoDeal(id, a.outlayer).catch(() => null), circle ? "USDC" : "tUSDC"));
+    return wait(noDealLine(await roomNoDeal(id, a.outlayer).catch(() => null), a.release, circle ? "USDC" : "tUSDC"));
   }
   if (a.state === "Cancelled") return wait("This room was cancelled. Its spare NEAR (the creation deposit) goes back to the buyer with withdraw_near: Finish on Try it does it.");
   if (a.state === "Settled") return wait("This room is settled. Nothing left to do.");

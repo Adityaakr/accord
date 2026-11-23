@@ -92,6 +92,7 @@ export function releaseProof(d: ReleaseProofDeps): ReleaseProof {
     if (r.code === 1 && json && delistedOnly(json)) {
       return {
         status: "not_checked",
+        settled: true,
         detail: `= task ${rec.task_id} · wasm ${j.wasmHash.slice(0, 8)}… · worker build no longer approved; quote valid (identity failed only on OutLayer's current approved list; quote, binding, input and output pass)`,
       };
     }
@@ -162,7 +163,7 @@ export function cachedReleaseProof(proof: ReleaseProof, o: CacheOptions = {}): R
     cache.set(key, entry);
     while (cache.size > max) cache.delete(cache.keys().next().value!);
     entry.p.then(
-      (r) => { entry.at = now(); entry.keep = r.status === "not_checked" ? retry : ttl; },
+      (r) => { entry.at = now(); entry.keep = r.status === "not_checked" && !r.settled ? retry : ttl; },
       () => { if (cache.get(key) === entry) cache.delete(key); },
     );
     return entry.p;

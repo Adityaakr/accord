@@ -14,7 +14,7 @@ import { Stage } from "@/components/Stage";
 import { IconTile } from "@/components/IconTile";
 import { shortAccount } from "@/components/account/short";
 import { QueueSenders } from "@/components/QueueSenders";
-import { isStorageUnpaid, type NoDealCause } from "@/lib/nodeal";
+import { DEPOSIT_FIXED_IN_RELEASE, isStorageUnpaid, type NoDealCause } from "@/lib/nodeal";
 import styles from "./negotiation.module.css";
 
 export interface NegotiationProps {
@@ -180,9 +180,10 @@ export function Negotiation(p: NegotiationProps) {
               <p><strong>This room ended because OutLayer returned an error for each attempt, not because the two sides could not agree.</strong>{" "}
                 The negotiation runs in an enclave on OutLayer&apos;s testnet worker. OutLayer ran it and then refused the result
                 {p.noDeal?.message ? <>: <span className="mono">{p.noDeal.message}</span></> : null}.{" "}
-                {isStorageUnpaid(p.noDeal) ? <>Since mid-November 2026 OutLayer holds NEAR for a stored answer at NEAR&apos;s storage price, and this room&apos;s release
-                  {p.release ? <> (<span className="mono">{p.release}</span>)</> : null} attaches <span className="mono">0.05</span> NEAR, which no longer holds the Sealed Table&apos;s answer.
-                  Release <span className="mono">7</span> attaches about <span className="mono">0.22</span> NEAR (the unused part is refunded); rooms opened now are on it. </> : null}
+                {isStorageUnpaid(p.noDeal) && p.release !== undefined && p.release < DEPOSIT_FIXED_IN_RELEASE ? <>Since mid-November 2026 OutLayer holds NEAR for a stored answer at NEAR&apos;s storage price, and this room&apos;s release
+                  (<span className="mono">{p.release}</span>) attaches <span className="mono">0.05</span> NEAR, which no longer holds the Sealed Table&apos;s answer.
+                  Release <span className="mono">{DEPOSIT_FIXED_IN_RELEASE}</span> attaches about <span className="mono">0.22</span> NEAR (the unused part is refunded); rooms opened now are on it. </>
+                  : isStorageUnpaid(p.noDeal) ? <>The NEAR this room attached did not cover what OutLayer asked to hold the Sealed Table&apos;s answer. </> : null}
                 After <span className="mono">3</span> attempts the contract closed the room as <span className="mono">No deal</span>. Nothing was funded, both sets of limits stayed sealed, and the creation deposit can be withdrawn.</p>
             ) : cause === "rejected" ? (
               <p><strong>This room ended because the contract refused the Sealed Table&apos;s answer on each attempt, not because the two sides could not agree.</strong>{" "}

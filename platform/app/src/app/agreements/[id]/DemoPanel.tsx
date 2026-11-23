@@ -54,7 +54,7 @@ export function DemoPanel({ agreement: a, items = [], explorer, noDeal = null }:
   const sym = tokenSymbol(cfg, a.factory);
   // the cause the chain recorded (the signed no-deal reason, or OutLayer's own log in each attempt), never assumed
   const closedText = a.state === "NoDeal"
-    ? noDealLine(noDeal, sym)
+    ? noDealLine(noDeal, a.release, sym)
     : a.state === "Cancelled" ? "This room was cancelled before execution. Nothing left to do." : "This room is settled. Nothing left to do.";
   // Signed out, the panel only describes the room: it never calls the demo endpoints (the counterparty and the agent
   // act for a signed-in visitor, in practice the room's buyer).

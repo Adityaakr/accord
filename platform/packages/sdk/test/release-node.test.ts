@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ReleaseJob, ReleaseProof } from "../src/index.js";
-import { cachedReleaseProof, delistedOnly, releaseProof, runBinary, type VerifyJson } from "../src/release-node.js";
+import { cachedReleaseProof, delistedOnly, releaseProof, runBinary, type ReleaseProofDeps, type VerifyJson } from "../src/release-node.js";
 
 const WASM = "7c832ce9bbea56effda01e9ddf9c413f0d8d2c8baed837e1a524c77529f0a2e1";
 const job: ReleaseJob = { job: "sealed_table", requestId: 13987, wasmHash: WASM, factory: "accord-v2.testnet", network: "testnet" };
@@ -98,6 +98,21 @@ describe("cached release proof", () => {
     const flaky = cachedReleaseProof(async () => { n += 1; if (n === 1) throw new Error("down"); return { status: "ok", detail: "d" }; });
     await expect(flaky(job)).rejects.toThrow("down");
     expect((await flaky(job)).status).toBe("ok");
+  });
+  it("keeps a de-listed verdict for the ttl, and retries a timed-out one after retryMs", async () => {
+    let t = 0;
+    let runs = 0;
+    const proof = (run: ReleaseProofDeps["run"]) =>
+      cachedReleaseProof(releaseProof({ bin: "x", fetchRecord: async () => record, run: async (b, a) => { runs += 1; return run(b, a); } }), { ttlMs: 1e9, retryMs: 10, now: () => t });
+    const delistedProof = proof(exit1(delisted));
+    expect((await delistedProof(job)).status).toBe("not_checked");
+    t = 1000; await delistedProof(job);
+    expect(runs).toBe(1);
+    t = 0; runs = 0;
+    const slow = proof(async () => ({ code: null, stdout: "", stderr: "", missing: false, timedOut: true }));
+    expect((await slow(job)).status).toBe("not_checked");
+    t = 1000; await slow(job);
+    expect(runs).toBe(2);
   });
   it("keeps at most `max` jobs", async () => {
     const c = counting("ok");
