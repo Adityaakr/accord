@@ -5,13 +5,14 @@
 // never pays twice (lib/agenttick.ts). After a revoke the installed key is not the demo agent's, so it stops.
 
 import "server-only";
-import { AccordError, type AgreementView } from "@accord/sdk";
+import { AccordError, isRpcBusy, type AgreementView } from "@accord/sdk";
 import { demoAgent, demoAgentKey, demoConfig, isDemoRoom } from "./demo";
 import { accord, symbolFor } from "./accord";
 import { agentActions, type AgentTrigger } from "./store";
 import { readCache } from "./chainproxy";
 import { spendAgentAction } from "./agentlimit";
 import { autoInstruction, decideTick } from "@/lib/agenttick";
+import { landedOutcome, type ActIntent, type LandedOutcome } from "@/lib/agentoutcome";
 
 /** Rooms where the demo agent is acting right now. */
 export const agentBusy = new Set<string>();
@@ -29,6 +30,13 @@ export async function recordedPay(a: AgreementView, trigger: AgentTrigger, instr
     await done({ outcome: r.status, code: r.code ?? null, tx_hash: r.txHash ?? null });
     return { ...intent, result: { status: r.status, txHash: r.txHash ?? null, code: r.code ?? null, reasons: r.reasons ?? null } };
   } catch (e) {
+    // the RPC lost the answer, not necessarily the transaction: read what landed before saying "busy"
+    const landed = isRpcBusy(e) ? await readLanded(a, intent) : null;
+    if (landed) {
+      const code = landed.status === "refused" ? landed.code : null;
+      await done({ outcome: landed.status, code, tx_hash: null });
+      return { ...intent, result: { status: landed.status, txHash: null, code, reasons: null } };
+    }
     if (e instanceof AccordError) await done({ outcome: "failed", code: e.code ?? null, tx_hash: e.tx.txHash });
     else await done({ outcome: REJECTED.test(String((e as Error)?.message ?? e)) ? "rejected" : "error" });
     throw e;
@@ -36,6 +44,23 @@ export async function recordedPay(a: AgreementView, trigger: AgentTrigger, instr
     readCache.invalidate(a.account);
   }
 }
+
+/** Reads after a send that failed at the RPC, a few times (the RPC may still be busy, the payment still resolving). */
+async function readLanded(a: AgreementView, intent: ActIntent): Promise<LandedOutcome | null> {
+  const d = accord().agreement(a.account);
+  for (let i = 0; i < LANDED_READS; i++) {
+    await new Promise((r) => setTimeout(r, LANDED_WAIT_MS));
+    try {
+      const [now, items] = await Promise.all([d.get(), d.items()]);
+      const refusals = now.refusals > a.refusals ? await d.refusals(a.refusals + 1, 20) : [];
+      const out = landedOutcome(intent, a.refusals, refusals, items, now.recipient?.account ?? null);
+      if (out) return out;
+    } catch { /* the RPC is still busy: read again */ }
+  }
+  return null;
+}
+const LANDED_READS = 3;
+const LANDED_WAIT_MS = 2_000;
 
 export type TickResult = { paid: AgentCall } | { skipped: string };
 

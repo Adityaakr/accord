@@ -7,6 +7,14 @@
 // itself into it. The faucet's NEAR and its tUSDC ft_balance_of are read from the RPC before and after. Every
 // request's duration is logged at the end and any over 20 s is flagged.
 //
+// Back-off: a 429 from /api/demo-agent or /api/demo-counterparty/step holds that endpoint for its Retry-After (or an
+// exponential wait with jitter when it sends none), and a 502, 503 or 504 for a shorter bounded exponential wait. While
+// an endpoint is held, the page's own polls of it are answered here with a 503 and the remaining Retry-After (so they
+// back off too and never reach the server), and the run does not click what calls it. "Ask the agent to pay a new
+// account" is clicked again only when the chain shows no refusal of the first: a redirect answered 503 may still have
+// landed, and repeated redirects reach the contract's refusal limit, which revokes the agent's key (Demo health,
+// 28 Nov 2026). The overall deadline (MINUTES) and the Finish fallback are unchanged.
+//
 // Run with Playwright installed in the current directory (it is resolved from there, not from this file):
 //   cd <dir with node_modules/playwright> && node /path/to/platform/app/e2e/try-without-wallet.mjs [base]
 // base defaults to the public deployment, https://accordweb-production.up.railway.app/app. SHOTS=<dir> saves
@@ -48,10 +56,70 @@ const durations = [];
 const done = (r) => { const t = pending.get(r); if (t !== undefined) durations.push({ ms: Date.now() - t, what: `${r.method()} ${r.url().replace(BASE, "")}` }); pending.delete(r); };
 page.on("requestfinished", done);
 page.on("requestfailed", (r) => { done(r); if (r.url().includes("/api/")) log("request failed:", r.method(), r.url(), r.failure()?.errorText); });
-page.on("response", (r) => { if (r.url().includes("/api/") && r.status() >= 400) log("http", r.status(), r.request().method(), r.url().replace(BASE, "")); });
+page.on("response", (r) => {
+  if (r.url().includes("/api/") && r.status() >= 400) log("http", r.status(), r.request().method(), r.url().replace(BASE, ""));
+  const e = endpointOf(r.url());
+  // the answers this script made up while holding an endpoint (below) are not the server's
+  if (e && r.request().method() === "POST" && r.headers()["x-health-check-hold"] !== "1") noteAnswer(e, r.status(), r.headers()["retry-after"]);
+});
+// While an endpoint is held, the page's polls of it (the counterparty's step, the agent's tick) are answered here,
+// as the server answers a busy network, so the page backs off and the server is not asked. The agent's key read and
+// the buyer's clicks always go through: the run itself does not click while the agent endpoint is held.
+await page.route(/\/api\/(demo-counterparty\/step|demo-agent)$/, async (route) => {
+  const req = route.request();
+  const e = endpointOf(req.url());
+  const action = e === "agent" ? (() => { try { return JSON.parse(req.postData() ?? "{}").action; } catch { return null; } })() : null;
+  const wait = e ? held(e) : 0;
+  if (req.method() === "POST" && wait > 0 && (e === "step" || action === "tick")) {
+    return route.fulfill({ status: 503, headers: { "content-type": "application/json", "retry-after": String(Math.ceil(wait / 1000)), "x-health-check-hold": "1" }, body: JSON.stringify({ error: "The network is busy, retrying shortly.", busy: true }) });
+  }
+  return route.continue();
+});
 const stalls = () => { for (const [r, t] of pending) if (Date.now() - t > 30_000) log("stalled", Math.round((Date.now() - t) / 1000), "s:", r.method(), r.url().replace(BASE, "")); };
 const visible = async (loc) => (await loc.count()) > 0 && (await loc.first().isVisible().catch(() => false));
 const enabled = async (loc) => (await visible(loc)) && (await loc.first().isEnabled().catch(() => false));
+
+// chain reads straight from the RPC (the faucet's balances, the room's refusals and key), not through the app
+const FAUCET = process.env.FAUCET ?? "faucet.accord-v2.testnet";
+const TOKEN = process.env.ACCORD_TOKEN ?? "tusdc.accord-v1.testnet";
+const RPCS = (process.env.NEAR_RPC_URL ?? "").split(",").filter(Boolean).concat(["https://test.rpc.fastnear.com", "https://near-testnet.drpc.org"]);
+const rpcQuery = async (params) => {
+  for (let i = 0; i < 12; i++) {
+    const url = RPCS[i % RPCS.length];
+    try {
+      const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, signal: AbortSignal.timeout(10_000), body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "query", params: { finality: "final", ...params } }) });
+      const b = await r.json();
+      if (b.result) return b.result;
+    } catch { /* the next endpoint */ }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  throw new Error(`could not read ${JSON.stringify(params)}`);
+};
+const view = async (account, method, args = {}) => JSON.parse(Buffer.from((await rpcQuery({ request_type: "call_function", account_id: account, method_name: method, args_base64: Buffer.from(JSON.stringify(args)).toString("base64") })).result).toString());
+
+// Back-off per demo endpoint, from the answers the page gets (see the comment at the top).
+const RATE_BASE_MS = 10_000, RATE_CAP_MS = 300_000, BUSY_BASE_MS = 5_000, BUSY_CAP_MS = 60_000;
+const jitter = (ms) => Math.round(ms * (0.5 + Math.random() / 2));
+const hold = { agent: { until: 0, n: 0 }, step: { until: 0, n: 0 } };
+const endpointOf = (url) => (url.includes("/api/demo-counterparty/step") ? "step" : url.includes("/api/demo-agent") ? "agent" : null);
+const held = (e) => Math.max(0, hold[e].until - Date.now());
+function noteAnswer(e, status, retryAfter) {
+  const h = hold[e];
+  if (status === 429) {
+    const ra = Number(retryAfter);
+    const wait = Number.isFinite(ra) && ra > 0 ? Math.min(RATE_CAP_MS, ra * 1000) : jitter(Math.min(RATE_CAP_MS, RATE_BASE_MS * 2 ** h.n));
+    h.n = Math.min(h.n + 1, 8);
+    h.until = Math.max(h.until, Date.now() + wait);
+    log(`back-off: ${e} answered 429, holding it ${Math.round(wait / 1000)} s${retryAfter ? ` (Retry-After ${retryAfter})` : ""}`);
+  } else if (status === 502 || status === 503 || status === 504) {
+    const wait = jitter(Math.min(BUSY_CAP_MS, BUSY_BASE_MS * 2 ** h.n));
+    h.n = Math.min(h.n + 1, 8);
+    h.until = Math.max(h.until, Date.now() + wait);
+    log(`back-off: ${e} answered ${status}, holding it ${Math.round(wait / 1000)} s`);
+  } else if (status < 400) {
+    h.n = 0;
+  }
+}
 
 let exit = 1;
 // set once the run clicks Finish itself; a run that fails before then Finishes on its way out (finally, below)
@@ -122,6 +190,31 @@ try {
     try { await loc.first().click({ timeout: 15_000 }); } catch (e) { log("click failed:", what, e.message.split("\n")[0]); return false; }
     return true;
   };
+  // The redirect: clicked once, then again only when the agent endpoint is not held and the chain shows no refusal of
+  // the click before (a 503 may have hidden a refusal that landed). The room's record is the answer, not the page.
+  let attacks = 0, attackedAt = 0;
+  const chainRefusal = async () => {
+    const list = await view(room, "get_refusals", { from: null, limit: 50 }).catch(() => null);
+    return list?.find((r) => r.code === "ERR_PAYEE_MISMATCH" && r.via === "agent") ?? null;
+  };
+  const attackReady = async () => {
+    if (held("agent") > 0) return false;
+    if (attacks === 0) return true;
+    // give the click's own answer a moment before reading the chain
+    if (Date.now() - attackedAt < 15_000) return false;
+    const r = await chainRefusal();
+    if (r) { log(`agent: the chain recorded the redirect's refusal (seq ${r.seq}, ${r.code}, to ${r.recipient}); the page did not show it`); mark("refused", `${r.code} (read from the chain)`); return false; }
+    return true;
+  };
+  // "Start the demo agent" once. It shows again only when the agent's key was revoked without the buyer's hold: the
+  // contract's refusal limit. Starting a new key then only adds refusals, so say what happened and stop.
+  const startAgentOnce = async (btn) => {
+    if (!reached["agent started"]) return clickIf(btn, "start the demo agent");
+    if (!(await enabled(btn))) return false;
+    const v = await view(room, "get_agreement").catch(() => null);
+    if (v && !v.agent_key && v.revoked_keys > 0) throw new Error(`the contract revoked the agent's key before the buyer's revoke (${v.refusals} refusals on record, refusal limit ${v.params?.refusal_limit ?? "?"})`);
+    return clickIf(btn, "start the demo agent (its key is not installed yet)");
+  };
   let lastAgentNote = "";
   let lastNext = "";
   let startedAt = 0;
@@ -146,8 +239,8 @@ try {
     else if (await clickIf(page.getByRole("button", { name: /^Fund .* t?USDC$/ }), "fund")) { mark("fund clicked"); }
     else if (await clickIf(page.getByRole("button", { name: /^Activate recipient / }), "activate recipient")) { mark("recipient activated"); }
     else if (await clickIf(page.getByRole("button", { name: /^Accept delivery / }), "accept delivery")) { mark("delivery accepted"); }
-    else if (await clickIf(page.getByRole("button", { name: "Start the demo agent" }), "start the demo agent")) { mark("agent started"); startedAt = Date.now(); }
-    else if (reached.paid && !reached.refused && await clickIf(page.getByRole("button", { name: "Ask the agent to pay a new account" }), "agent pay a new account")) { /* result below */ }
+    else if (await startAgentOnce(page.getByRole("button", { name: "Start the demo agent" }))) { mark("agent started"); startedAt = Date.now(); }
+    else if (reached.paid && !reached.refused && await attackReady() && await clickIf(page.getByRole("button", { name: "Ask the agent to pay a new account" }), "agent pay a new account")) { attacks++; attackedAt = Date.now(); }
     else if (reached.refused) {
       const hold = page.getByRole("button", { name: /Hold to revoke/ });
       if (await enabled(hold)) {
@@ -205,23 +298,8 @@ try {
   // account with the faucet as beneficiary. The faucet's NEAR is read before and after through the app's own API.
   at("finish");
   // the read API answers { busy: true } while the network is busy: ask again a few times
-  const FAUCET = process.env.FAUCET ?? "faucet.accord-v2.testnet";
-  const TOKEN = process.env.ACCORD_TOKEN ?? "tusdc.accord-v1.testnet";
-  const RPCS = (process.env.NEAR_RPC_URL ?? "").split(",").filter(Boolean).concat(["https://test.rpc.fastnear.com", "https://near-testnet.drpc.org"]);
-  const rpcQuery = async (params) => {
-    for (let i = 0; i < 12; i++) {
-      const url = RPCS[i % RPCS.length];
-      try {
-        const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, signal: AbortSignal.timeout(10_000), body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "query", params: { finality: "final", ...params } }) });
-        const b = await r.json();
-        if (b.result) return b.result;
-      } catch { /* the next endpoint */ }
-      await new Promise((r) => setTimeout(r, 2000));
-    }
-    throw new Error(`could not read ${JSON.stringify(params)}`);
-  };
   const near = async (a) => (await rpcQuery({ request_type: "view_account", account_id: a })).amount;
-  const tusdc = async (a) => JSON.parse(Buffer.from((await rpcQuery({ request_type: "call_function", account_id: TOKEN, method_name: "ft_balance_of", args_base64: Buffer.from(JSON.stringify({ account_id: a })).toString("base64") })).result).toString());
+  const tusdc = async (a) => view(TOKEN, "ft_balance_of", { account_id: a });
   const fmtNear = (y) => (Number(BigInt(y) / 10n ** 21n) / 1000).toFixed(3);
   const fmtUsdc = (u) => (Number(BigInt(u)) / 1e6).toFixed(2);
   await page.goto(`${BASE}/try-it`, { waitUntil: "domcontentloaded" });

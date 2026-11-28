@@ -3,7 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { RpcUnavailableError } from "@accord/sdk";
 import { chainError, looksRaw, RPC_BUSY_TEXT } from "../src/server/rpcerror";
-import { MAX_MS, POLL_MS, nextPollDelay } from "../src/components/pollbackoff";
+import { MAX_MS, MAX_RETRY_AFTER_MS, POLL_MS, nextPollDelay } from "../src/components/pollbackoff";
 import { postRelay } from "../src/components/wallet/throwaway";
 
 const rateLimited = () => {
@@ -40,6 +40,11 @@ describe("nextPollDelay", () => {
     expect(seen).toEqual([16_000, 30_000, 30_000, 30_000]);
     expect(nextPollDelay(POLL_MS, true, 25)).toBe(25_000);
     expect(nextPollDelay(MAX_MS, false)).toBe(POLL_MS);
+  });
+
+  it("waits out a rate limit's longer Retry-After, up to five minutes", () => {
+    expect(nextPollDelay(POLL_MS, true, 240)).toBe(240_000);
+    expect(nextPollDelay(POLL_MS, true, 3600)).toBe(MAX_RETRY_AFTER_MS);
   });
 });
 
