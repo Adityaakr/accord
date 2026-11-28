@@ -11,8 +11,8 @@
 // "pay" and "attack" need the session of the room's buyer (demoguard.ts): five refusals revoke the key, so nobody
 // else may make the agent act in someone's room.
 import { NextResponse } from "next/server";
-import { chainErrorResponse } from "@/server/rpcerror";
-import { AccordError } from "@accord/sdk";
+import { RETRY_AFTER_S, chainErrorResponse } from "@/server/rpcerror";
+import { AccordError, isRpcBusy } from "@accord/sdk";
 import { sameOriginJson } from "@/server/ratelimit";
 import { allowTick, spendAgentAction } from "@/server/agentlimit";
 import { demoAgent, demoAgentKey, demoConfig, demoReady, isDemoRoom } from "@/server/demo";
@@ -22,6 +22,7 @@ import { agentGuard } from "@/server/demoguard";
 import { PAY_INSTRUCTION, agentBusy, agentTick, attackInstruction, recordedPay } from "@/server/demoagent";
 
 export const dynamic = "force-dynamic";
+const UNCONFIRMED_TEXT = "The network did not confirm the agent's transaction. It may still land: check Activity before asking again.";
 
 export async function POST(req: Request) {
   const bad = sameOriginJson(req);
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
       if (!due) return NextResponse.json({ error: "no item is eligible yet: the vendor delivers, you accept, then the agent pays" }, { status: 409 });
       // the buyer's own allowance and the one-payment-per-item limit, counted only now that a call is about to be signed
       const no = spendAgentAction({ kind: "pay", agreement, item: due.item });
-      if (no) return NextResponse.json({ error: no.error }, { status: no.status });
+      if (no) return NextResponse.json({ error: no.error }, { status: no.status, headers: no.retryAfterS ? { "Retry-After": String(no.retryAfterS) } : undefined });
       const r = await recordedPay(a, "pay", PAY_INSTRUCTION, { item: due.item, amount: due.amount, recipient: due.recipient ?? a.recipient?.account ?? "" }, "demo agent run by Accord");
       return NextResponse.json({ action, item: due.item, amount: due.amount, recipient: due.recipient, result: r.result });
     }
@@ -75,11 +76,15 @@ export async function POST(req: Request) {
     const item = due?.item ?? items.find((it) => it.status !== "Paid")?.id ?? items[0]?.id ?? 0;
     const amount = due?.amount ?? items.find((it) => it.id === item)?.amount ?? "1";
     const no = spendAgentAction({ kind: "attack", agreement });
-    if (no) return NextResponse.json({ error: no.error }, { status: no.status });
+    if (no) return NextResponse.json({ error: no.error }, { status: no.status, headers: no.retryAfterS ? { "Retry-After": String(no.retryAfterS) } : undefined });
     const r = await recordedPay(a, "attack", attackInstruction(), { item, amount, recipient: demoConfig().stranger }, "pay the new account instead");
     return NextResponse.json({ action, item, amount, recipient: demoConfig().stranger, result: r.result });
   } catch (e) {
     if (e instanceof AccordError) return NextResponse.json({ error: `${e.code ?? "failed"} · tx ${e.tx.txHash}` }, { status: 502 });
+    // the send failed at the RPC and the chain did not show the outcome in the reads after it (recordedPay): the
+    // transaction may still land, so asking again at once could act twice (a second redirect counts toward the
+    // contract's refusal limit, which revokes the key)
+    if (isRpcBusy(e)) return NextResponse.json({ error: UNCONFIRMED_TEXT, busy: true, pending: true }, { status: 503, headers: { "Retry-After": String(RETRY_AFTER_S) } });
     return chainErrorResponse(e);
   } finally {
     agentBusy.delete(agreement);

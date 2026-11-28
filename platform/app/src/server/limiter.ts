@@ -38,6 +38,17 @@ export function takeAll(limits: Limit[], now = Date.now()): Limit | null {
   return null;
 }
 
+/**
+ * How long until `l` has room for one more call (ms, 0 when it has room now). For a 429's Retry-After, so a caller
+ * that honours it asks again when the window has moved on, not on a fixed beat that is refused until then.
+ */
+export function waitMs(l: Limit, now = Date.now()): number {
+  const r = recent(l, now);
+  if (r.length < l.max) return 0;
+  // the call that must age out of the window for one more to fit; hits are pushed in time order
+  return Math.max(0, r[r.length - l.max]! + l.windowMs - now);
+}
+
 /** Calls left under `l` right now (nothing is counted). */
 export function remaining(l: Limit, now = Date.now()): number {
   return Math.max(0, l.max - recent(l, now).length);

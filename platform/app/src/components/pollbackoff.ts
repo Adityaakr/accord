@@ -1,12 +1,15 @@
 // The demo panel's poll timing: every POLL_MS while the server answers, doubling up to MAX_MS while it says the
-// network is busy (503 with Retry-After, 429, or no answer), never sooner than the server's Retry-After.
+// network is busy (503 with Retry-After, 429, or no answer), never sooner than the server's Retry-After. A rate limit's
+// Retry-After can be longer than MAX_MS (an hourly limit says when its window has room again); it is honoured up to
+// MAX_RETRY_AFTER_MS, so the panel waits it out instead of asking every 30 s and being refused each time.
 export const POLL_MS = 8_000;
 export const MAX_MS = 30_000;
+export const MAX_RETRY_AFTER_MS = 300_000;
 
 export function nextPollDelay(prev: number, busy: boolean, retryAfterS?: number | null): number {
   if (!busy) return POLL_MS;
   const doubled = Math.min(MAX_MS, Math.max(POLL_MS, prev) * 2);
-  const floor = retryAfterS && retryAfterS > 0 ? Math.min(MAX_MS, retryAfterS * 1000) : 0;
+  const floor = retryAfterS && retryAfterS > 0 ? Math.min(MAX_RETRY_AFTER_MS, retryAfterS * 1000) : 0;
   return Math.max(doubled, floor);
 }
 

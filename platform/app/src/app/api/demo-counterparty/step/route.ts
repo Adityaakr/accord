@@ -3,7 +3,8 @@
 // recipient, activate it after the timelock, deliver items when due. Read from chain state each time, so calling it
 // twice does nothing twice. Only rooms whose vendor is the demo vendor; testnet only.
 import { NextResponse } from "next/server";
-import { allow, clientIp, sameOriginJson } from "@/server/ratelimit";
+import { clientIp, sameOriginJson } from "@/server/ratelimit";
+import { takeStep } from "@/server/steplimit";
 import { counterpartyStep, demoReady } from "@/server/demo";
 import { accord, isConfiguredAgreement } from "@/server/accord";
 import { chainErrorResponse } from "@/server/rpcerror";
@@ -24,9 +25,10 @@ export async function POST(req: Request) {
   if (typeof agreement !== "string" || !isConfiguredAgreement(agreement)) {
     return NextResponse.json({ error: "not an agreement of this factory" }, { status: 400 });
   }
-  const ip = clientIp(req);
-  if (!allow(`cp:ip:${ip}`, 240, 3600_000) || !allow(`cp:${agreement}`, 30, 60_000)) {
-    return NextResponse.json({ error: "too many requests; wait a minute" }, { status: 429 });
+  // per room and per IP, taken together; a refusal says when to ask again (server/steplimit.ts)
+  const limited = takeStep(clientIp(req), agreement);
+  if (limited) {
+    return NextResponse.json({ error: `too many requests; ask again in ${limited.retryAfterS} s` }, { status: 429, headers: { "Retry-After": String(limited.retryAfterS) } });
   }
   if (busy.has(agreement)) return NextResponse.json({ did: null, next: "The counterparty is already acting in this room.", tx: null, yourMove: false });
   busy.add(agreement);
