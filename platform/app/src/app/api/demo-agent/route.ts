@@ -60,6 +60,7 @@ export async function POST(req: Request) {
   }
   if (agentBusy.has(agreement)) return NextResponse.json({ error: "the demo agent is already acting in this room" }, { status: 409 });
   agentBusy.add(agreement);
+  let sent = false;
   try {
     const deal = demoAgent(agreement, a.revoked_keys);
     const due = (await deal.dueItems()).find((d) => d.eligible_at !== null && d.eligible_at <= a.now) ?? null;
@@ -68,6 +69,7 @@ export async function POST(req: Request) {
       // the buyer's own allowance and the one-payment-per-item limit, counted only now that a call is about to be signed
       const no = spendAgentAction({ kind: "pay", agreement, item: due.item });
       if (no) return NextResponse.json({ error: no.error }, { status: no.status, headers: no.retryAfterS ? { "Retry-After": String(no.retryAfterS) } : undefined });
+      sent = true;
       const r = await recordedPay(a, "pay", PAY_INSTRUCTION, { item: due.item, amount: due.amount, recipient: due.recipient ?? a.recipient?.account ?? "" }, "demo agent run by Accord");
       return NextResponse.json({ action, item: due.item, amount: due.amount, recipient: due.recipient, result: r.result });
     }
@@ -77,6 +79,7 @@ export async function POST(req: Request) {
     const amount = due?.amount ?? items.find((it) => it.id === item)?.amount ?? "1";
     const no = spendAgentAction({ kind: "attack", agreement });
     if (no) return NextResponse.json({ error: no.error }, { status: no.status, headers: no.retryAfterS ? { "Retry-After": String(no.retryAfterS) } : undefined });
+    sent = true;
     const r = await recordedPay(a, "attack", attackInstruction(), { item, amount, recipient: demoConfig().stranger }, "pay the new account instead");
     return NextResponse.json({ action, item, amount, recipient: demoConfig().stranger, result: r.result });
   } catch (e) {
@@ -84,7 +87,7 @@ export async function POST(req: Request) {
     // the send failed at the RPC and the chain did not show the outcome in the reads after it (recordedPay): the
     // transaction may still land, so asking again at once could act twice (a second redirect counts toward the
     // contract's refusal limit, which revokes the key)
-    if (isRpcBusy(e)) return NextResponse.json({ error: UNCONFIRMED_TEXT, busy: true, pending: true }, { status: 503, headers: { "Retry-After": String(RETRY_AFTER_S) } });
+    if (sent && isRpcBusy(e)) return NextResponse.json({ error: UNCONFIRMED_TEXT, busy: true, pending: true }, { status: 503, headers: { "Retry-After": String(RETRY_AFTER_S) } });
     return chainErrorResponse(e);
   } finally {
     agentBusy.delete(agreement);
